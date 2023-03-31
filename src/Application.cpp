@@ -7,7 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <chrono>
-#include <format>
+#include <fmt/format.h>
 
 #include "Log.hpp"
 #include "Core.hpp"
@@ -116,11 +116,11 @@ namespace Ace
 
             std::string value{};
 
-            value += std::format("{:0>2}", minutes.count());
+            value += fmt::format("{:0>2}", minutes.count());
             value += ":";
-            value += std::format("{:0>2}", seconds.count());
+            value += fmt::format("{:0>2}", seconds.count());
             value += ".";
-            value += std::format("{:0>3}", miliseconds.count());
+            value += fmt::format("{:0>3}", miliseconds.count());
 
             return value;
         };
