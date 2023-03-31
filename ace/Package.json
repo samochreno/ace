@@ -1,0 +1,15 @@
+{
+  "name": "ace",
+  "pathMacros": [
+    {
+      "name": "ProjectPath",
+      "value": "C:/Users/samoc/Desktop/repos/Ace/Ace/ace/src"
+    }
+  ],
+  "filePaths": [
+    "$ProjectPath/**.ace"
+  ],
+  "dependencyFilePaths": [
+    "$ProjectPath/**.dll"
+  ]
+}

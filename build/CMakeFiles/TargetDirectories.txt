@@ -1,0 +1,3 @@
+/home/samo/repos/ace/build/CMakeFiles/ace.dir
+/home/samo/repos/ace/build/CMakeFiles/edit_cache.dir
+/home/samo/repos/ace/build/CMakeFiles/rebuild_cache.dir

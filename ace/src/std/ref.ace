@@ -1,0 +1,19 @@
+std: module -> pub {
+    Reference[T]: struct -> pub {
+        ptr: Pointer,
+    }
+
+    impl[T] Reference[T] {
+        get_ptr(self: Reference[T]): Pointer {
+            ret __deref_as[Pointer](__address_of(self));
+        }
+    }
+
+    #: 
+    impl Pointer {
+        operator impl[T](reference: Reference[T]): Pointer -> pub {
+            ret Reference::[T]::get_ptr(reference);
+        }
+    }
+    :#
+}

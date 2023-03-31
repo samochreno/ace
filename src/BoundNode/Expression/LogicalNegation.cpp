@@ -1,0 +1,87 @@
+#include "BoundNode/Expression//LogicalNegation.hpp"
+
+#include <memory>
+#include <vector>
+
+#include "TypeInfo.hpp"
+#include "NativeSymbol.hpp"
+#include "ValueKind.hpp"
+#include "Error.hpp"
+#include "MaybeChanged.hpp"
+#include "Emitter.hpp"
+#include "ExpressionEmitResult.hpp"
+
+namespace Ace::BoundNode::Expression
+{
+    auto LogicalNegation::GetChildren() const -> std::vector<const BoundNode::IBase*>
+    {
+        std::vector<const BoundNode::IBase*> children{};
+
+        AddChildren(children, m_Expression);
+
+        return children;
+    }
+
+    auto LogicalNegation::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::LogicalNegation>>>
+    {
+        ACE_TRY(mchConvertedAndCheckedExpression, CreateImplicitlyConvertedAndTypeChecked(
+            m_Expression,
+            TypeInfo{ NativeSymbol::Bool.GetSymbol(), ValueKind::R }
+        ));
+
+        if (mchConvertedAndCheckedExpression.IsChanged)
+            return CreateUnchanged(shared_from_this());
+
+        const auto returnValue = std::make_shared<const BoundNode::Expression::LogicalNegation>(mchConvertedAndCheckedExpression.Value);
+
+        return CreateChanged(returnValue);
+    }
+
+    auto LogicalNegation::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::LogicalNegation>>>
+    {
+        ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
+
+        if (!mchLoweredExpression.IsChanged)
+            return CreateUnchanged(shared_from_this());
+
+        const auto returnValue = std::make_shared<const BoundNode::Expression::LogicalNegation>(mchLoweredExpression.Value);
+
+        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+    }
+
+    auto LogicalNegation::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
+    {
+        std::vector<ExpressionDropData> temporaries{};
+
+        const auto expressionEmitResult = m_Expression->Emit(t_emitter);
+        temporaries.insert(end(temporaries), begin(expressionEmitResult.Temporaries), end(expressionEmitResult.Temporaries));
+
+        auto* const boolType = NativeSymbol::Bool.GetIRType(t_emitter);
+
+        auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
+            boolType,
+            expressionEmitResult.Value
+        );
+
+        auto* const negatedValue = t_emitter.GetBlockBuilder().Builder.CreateXor(
+            loadInst,
+            1
+        );
+
+        auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(
+            boolType
+        );
+
+        t_emitter.GetBlockBuilder().Builder.CreateStore(
+            negatedValue,
+            allocaInst
+        );
+
+        return { allocaInst, expressionEmitResult.Temporaries };
+    }
+
+    auto LogicalNegation::GetTypeInfo() const -> TypeInfo
+    {
+        return { NativeSymbol::Bool.GetSymbol(), ValueKind::R };
+    }
+}

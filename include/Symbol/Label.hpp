@@ -1,0 +1,33 @@
+#pragma once
+
+#include <string>
+
+#include "Symbol/Base.hpp"
+#include "Scope.hpp"
+#include "AccessModifier.hpp"
+
+namespace Ace::Symbol
+{
+    class Label : public virtual Symbol::IBase
+    {
+    public:
+        Label(
+            Scope* const t_scope,
+            const std::string& t_name
+        ) : m_Scope{ t_scope },
+            m_Name{ t_name }
+        {
+        }
+        virtual ~Label() = default;
+
+        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetName() const -> const std::string& final { return m_Name; }
+        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::Label; }
+        auto GetAccessModifier() const -> AccessModifier final { return AccessModifier::Public; }
+        auto IsInstance() const -> bool final { return false; }
+
+    private:
+        Scope* m_Scope{};
+        std::string m_Name{};
+    };
+}

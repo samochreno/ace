@@ -1,0 +1,47 @@
+#pragma once
+
+#include <vector>
+#include <string>
+#include <optional>
+
+#include "Symbol/Base.hpp"
+#include "Symbol/SelfScoped.hpp"
+#include "Symbol/Templatable.hpp"
+
+namespace Ace::Symbol
+{
+    class Function;
+}
+
+namespace Ace::Symbol::Template
+{
+    class Type;
+}
+
+namespace Ace::Symbol::Type
+{
+    class IBase : public virtual Symbol::IBase, public virtual Symbol::ISelfScoped, public virtual Symbol::ITemplatable
+    {
+    public:
+        virtual ~IBase() = default;
+
+        virtual auto SetAsNativeSized() -> void = 0;
+        virtual auto IsNativeSized() const -> bool = 0;
+
+        virtual auto CanResolveSize() const -> bool = 0;
+
+        virtual auto IsReference() const -> bool final;
+        virtual auto GetWithoutReference() -> Symbol::Type::IBase* final;
+        virtual auto GetWithoutReference() const -> const Symbol::Type::IBase* final;
+        virtual auto GetWithReference() -> Symbol::Type::IBase* final;
+        virtual auto IsStrongPointer() const -> bool final;
+        virtual auto GetWithoutStrongPointer() -> Symbol::Type::IBase* final;
+        virtual auto GetWithStrongPointer() -> Symbol::Type::IBase* final;
+        virtual auto GetUnaliased() -> Symbol::Type::IBase* final;
+        virtual auto GetUnaliased() const -> const Symbol::Type::IBase* final;
+        virtual auto GetTemplate() const -> std::optional<Symbol::Template::Type*> final;
+    };
+
+    auto GetImplicitConversionOperator(Scope* const t_scope, Symbol::Type::IBase* t_fromType, Symbol::Type::IBase* t_targetType) -> Expected<Symbol::Function*>;
+    auto GetExplicitConversionOperator(Scope* const t_scope, Symbol::Type::IBase* t_fromType, Symbol::Type::IBase* t_targetType) -> Expected<Symbol::Function*>;
+}

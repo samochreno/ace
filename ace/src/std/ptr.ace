@@ -1,0 +1,4 @@
+std: module -> pub {
+    Pointer: struct -> pub {
+    }
+}

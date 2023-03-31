@@ -1,0 +1,7 @@
+std::mem: module -> pub {
+    alloc(block_size: int): Pointer -> pub extern;
+
+    dealloc(block: Pointer): void -> pub extern;
+
+    copy(src_block: Pointer, dst_block: Pointer, block_size: int): void -> pub extern;
+}
