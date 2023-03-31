@@ -8,4 +8,8 @@ add_executable(${PROJECT_NAME} src/main.cpp)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
-target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_include_directories(
+    ${PROJECT_NAME} PUBLIC include
+    ${PROJECT_NAME} PUBLIC dep/fmt/include
+    ${PROJECT_NAME} PUBLIC dep/llvm-project/llvm/include
+)

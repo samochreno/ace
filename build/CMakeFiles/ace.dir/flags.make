@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/samo/repos/ace/include
+CXX_INCLUDES = -I/home/samo/repos/ace/include -I/home/samo/repos/ace/ace -I/home/samo/repos/ace/dep/fmt/include -I/home/samo/repos/ace/dep/llvm-project/llvm/include
 
 CXX_FLAGS = -std=gnu++20
 
