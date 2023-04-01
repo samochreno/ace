@@ -40,7 +40,7 @@ namespace Ace::Parsing
 
     namespace OperatorTokenMask
     {
-        static constexpr auto CompoundAssignment = Token::Kind::New()
+        static const Token::Kind::Set CompoundAssignment = Token::Kind::New()
             .set(Token::Kind::PlusEquals)
             .set(Token::Kind::MinusEquals)
             .set(Token::Kind::AsteriskEquals)
@@ -54,23 +54,23 @@ namespace Ace::Parsing
 
         namespace Prefix
         {
-            static constexpr Token::Kind::Set User = Token::Kind::New()
+            static const Token::Kind::Set User = Token::Kind::New()
                 .set(Token::Kind::Plus)
                 .set(Token::Kind::Minus)
                 .set(Token::Kind::Tilde);
 
-            static constexpr Token::Kind::Set All = OperatorTokenMask::Prefix::User | Token::Kind::New()
+            static const Token::Kind::Set All = OperatorTokenMask::Prefix::User | Token::Kind::New()
                 .set(Token::Kind::Exclamation)
                 .set(Token::Kind::BoxKeyword)
                 .set(Token::Kind::UnboxKeyword);
         }
 
-        static constexpr Token::Kind::Set Postfix = Token::Kind::New()
+        static const Token::Kind::Set Postfix = Token::Kind::New()
             .set(Token::Kind::OpenParen);
 
         namespace Binary
         {
-            static constexpr Token::Kind::Set User = Token::Kind::New()
+            static const Token::Kind::Set User = Token::Kind::New()
                 .set(Token::Kind::Asterisk)
                 .set(Token::Kind::Slash)
                 .set(Token::Kind::Percent)
@@ -88,12 +88,12 @@ namespace Ace::Parsing
                 .set(Token::Kind::VerticalBar)
                 .set(Token::Kind::Ampersand);
 
-            static constexpr Token::Kind::Set All = OperatorTokenMask::Binary::User | Token::Kind::New()
+            static const Token::Kind::Set All = OperatorTokenMask::Binary::User | Token::Kind::New()
                 .set(Token::Kind::VerticalBarVerticalBar)
                 .set(Token::Kind::AmpersandAmpersand);
         }
 
-        static constexpr Token::Kind::Set User = OperatorTokenMask::Prefix::User | OperatorTokenMask::Binary::User;
+        static const Token::Kind::Set User = OperatorTokenMask::Prefix::User | OperatorTokenMask::Binary::User;
     }
 
     auto Parser::ParseAST(const std::string& t_packageName, std::vector<Token>&& t_tokens) -> Expected<std::shared_ptr<const Node::Module>>
@@ -2396,7 +2396,7 @@ namespace Ace::Parsing
         {
             const auto& [tokenKind, arguments] = postfixOperators.front();
 
-            const auto collapsedExpression = [&]() -> std::shared_ptr<const Node::Expression::IBase>
+            const auto collapsedExpression = [&tokenKind=tokenKind, &expression=expression, &arguments=arguments]() -> std::shared_ptr<const Node::Expression::IBase>
             {
                 if (tokenKind == Token::Kind::New(Token::Kind::OpenParen))
                 {
@@ -2692,8 +2692,9 @@ namespace Ace::Parsing
                 optValue = value.Value;
                 it += value.Length;
             }
-
-            arguments.emplace_back(name.Value, optValue);
+            
+            // TODO: .emplace_back doesn't work here. Fix.
+            arguments.push_back(Node::Expression::StructConstruction::Argument{ name.Value, optValue });
         }
 
         ++it;

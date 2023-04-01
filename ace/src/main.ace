@@ -483,6 +483,41 @@ operator_associativity(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
 
+#:
+print_diamond_test(): int {
+    print_diamond();
+    ret 0;
+}
+
+print_diamond(n: int): void {
+    assert (n % 2) == 1;
+    n_half: int = (n - 1) / 2;
+
+    for i: int = 0; i < n; i++ {
+        for j: int = 0; j < n; j++ { 
+            width: int = do {
+                if is_in_middle: bool = i == n_half {
+                    ret n;
+                } elif is_in_first_half: bool = i <= n_half {
+                    ret i + 1;
+                } else {
+                    ret n - i;
+                }
+            }
+
+            stars_offset: int = (n - width) / 2;
+            stars_begin: int = k_offset - 1;
+            stars_end: int = width + k_offset; 
+            
+            for k: int = 0; k < n; k++ {
+                is_star: bool = (k >= stars_begin) && (k < stars_end);
+                std::io::print("{}", is_star ? "*" : " ");
+            }
+        }
+    }
+}
+:#
+
 main(): int {
     value: int = operator_associativity();
     print_int(value);
