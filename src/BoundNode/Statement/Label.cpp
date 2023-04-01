@@ -26,6 +26,5 @@ namespace Ace::BoundNode::Statement
 
     auto Label::Emit(Emitter& t_emitter) const -> void
     {
-        t_emitter.GetBlockBuilder().Builder;
     }
 }
