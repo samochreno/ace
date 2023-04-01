@@ -4,3 +4,6 @@
 [submodule "dep/llvm-project"]
 	path = dep/llvm-project
 	url = https://github.com/llvm/llvm-project/
+[submodule "dep/nlohmann/json"]
+	path = dep/nlohmann/json
+	url = https://github.com/nlohmann/json/

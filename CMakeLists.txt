@@ -11,5 +11,10 @@ target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 target_include_directories(
     ${PROJECT_NAME} PUBLIC include
     ${PROJECT_NAME} PUBLIC dep/fmt/include
+    ${PROJECT_NAME} PUBLIC dep/llvm-project/llvm/build/include
     ${PROJECT_NAME} PUBLIC dep/llvm-project/llvm/include
+    ${PROJECT_NAME} PUBLIC dep/nlohmann/json/single_include
 )
+
+add_subdirectory(dep/fmt/)
+add_subdirectory(dep/llvm-project/llvm/)
