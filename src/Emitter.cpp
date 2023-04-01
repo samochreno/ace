@@ -234,7 +234,8 @@ namespace Ace
                 auto* const variableSymbol = variableStatement->GetSymbol();
                 ACE_ASSERT(!m_LocalVariableSymbolStatementIndexMap.contains(variableSymbol));
                 m_LocalVariableSymbolStatementIndexMap[variableSymbol] = i;
-                m_LocalVariableSymbolStatementIndexPairs.emplace_back(variableSymbol, i);
+                // TODO: .emplace_back(...) doesn't work here. Fix.
+                m_LocalVariableSymbolStatementIndexPairs.push_back(LocalVariableSymbolStatementIndexPair{ variableSymbol, i });
             }
         }
 
