@@ -61,7 +61,7 @@ namespace Ace::BoundNode::Expression
                 }
                 else if (m_Kind & LiteralKind::FloatMask)
                 {
-                    const double_t value = std::stod(numberString);
+                    const double value = std::stod(numberString);
                     return llvm::ConstantFP::get(
                         type,
                         value
