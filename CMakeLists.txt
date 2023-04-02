@@ -36,5 +36,3 @@ target_link_libraries(${PROJECT_NAME}
     ${LLVM_LIBS}
     ${FMT_LIBS}
 )
-
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
