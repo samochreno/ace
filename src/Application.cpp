@@ -141,7 +141,7 @@ namespace Ace
 
     auto Main() -> void
     {
-        const std::filesystem::path packagePath{ "C:/Users/samoc/Desktop/repos/Ace/Ace/ace/Package.json" };
+        const std::filesystem::path packagePath{ "/home/samo/repos/ace/ace/Package.json" };
         const std::ifstream packageFileStream{ packagePath };
         ACE_ASSERT(packageFileStream);
 

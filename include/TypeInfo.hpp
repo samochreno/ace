@@ -21,6 +21,6 @@ namespace Ace
         }
 
         Symbol::Type::IBase* Symbol{};
-        ValueKind ValueKind{};
+        Ace::ValueKind ValueKind{};
     };
 }

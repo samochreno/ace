@@ -3,7 +3,7 @@
   "pathMacros": [
     {
       "name": "ProjectPath",
-      "value": "C:/Users/samoc/Desktop/repos/Ace/Ace/ace/src"
+      "value": "/home/samo/repos/ace/ace/src"
     }
   ],
   "filePaths": [

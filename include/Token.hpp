@@ -110,12 +110,12 @@ namespace Ace
 
             using Set = std::bitset<static_cast<size_t>(Length)>;
 
-            static inline constexpr auto New() -> Set
+            static inline auto New() -> Set
             {
                 return Set{};
             }
 
-            static inline constexpr auto New(const uint8_t& t_kind) -> Set
+            static inline auto New(const uint8_t& t_kind) -> Set
             {
                 return Set{}.set(t_kind);
             }

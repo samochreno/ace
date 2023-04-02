@@ -96,8 +96,10 @@ namespace Ace
         std::for_each(begin(functionNodes), end(functionNodes), [&]
         (const BoundNode::Function* const t_functionNode)
         {
-            if (t_functionNode->GetSymbol()->GetName() == SpecialIdentifier::Main)
+            if (t_functionNode->GetSymbol()->GetName() == SpecialIdentifier::Main) 
+            {
                 mainFunctionSymbols.push_back(t_functionNode->GetSymbol());
+            }
         });
 
         ACE_ASSERT(mainFunctionSymbols.size() == 1);
@@ -163,27 +165,27 @@ namespace Ace
         llvm::raw_string_ostream moduleOStream{ moduleString };
         moduleOStream << *m_Module;
         moduleOStream.flush();
-        std::ofstream irFileStream{ "C:/Users/samoc/Desktop/repos/Ace/Ace/ace/bin/" + m_PackageName + ".ll" };
+        std::ofstream irFileStream{ "/home/samo/repos/ace/ace/bin/" + m_PackageName + ".ll" };
         ACE_ASSERT(irFileStream);
         irFileStream << moduleString;
         moduleString.clear();
 
         std::error_code errorCode{};
-        llvm::raw_fd_ostream bitcodeFileOStream{ "C:/Users/samoc/Desktop/repos/Ace/Ace/ace/bin/" + m_PackageName + ".bc", errorCode, llvm::sys::fs::OF_None};
+        llvm::raw_fd_ostream bitcodeFileOStream{ "/home/samo/repos/ace/ace/bin/" + m_PackageName + ".bc", errorCode, llvm::sys::fs::OF_None };
         ACE_ASSERT(!errorCode);
         llvm::WriteBitcodeToFile(*m_Module, bitcodeFileOStream);
         bitcodeFileOStream.close();
         
         const auto timeLLCStart = now();
 
-        const std::string llc = "llc -O3 -opaque-pointers -filetype=obj C:/Users/samoc/Desktop/repos/Ace/Ace/ace/bin/" + m_PackageName + ".bc -o C:/Users/samoc/Desktop/repos/Ace/Ace/ace/bin/" + m_PackageName + ".obj";
+        const std::string llc = "llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj /home/samo/repos/ace/ace/bin/" + m_PackageName + ".bc -o /home/samo/repos/ace/ace/bin/" + m_PackageName + ".obj";
         system(llc.c_str());
 
         const auto timeLLCEnd = now();
 
         const auto timeClangStart = now();
 
-        const std::string clang = "clang C:/Users/samoc/Desktop/repos/Ace/Ace/ace/bin/" + m_PackageName + ".obj -o C:/Users/samoc/Desktop/repos/Ace/Ace/ace/bin/" + m_PackageName + ".exe";
+        const std::string clang = "clang /home/samo/repos/ace/ace/bin/" + m_PackageName + ".obj -lc -lm -o /home/samo/repos/ace/ace/bin/" + m_PackageName;
         system(clang.c_str());
 
         const auto timeClangEnd = now();
