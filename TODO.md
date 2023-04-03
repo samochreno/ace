@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Automatically `install ace` in `CMake`.
 - [ ] Move all header implementations into `.cpp` files.
 - [ ] Implement copy and drop glue.
 - [ ] Implement shared strings.
