@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Move all header implementations into `.cpp` files.
 - [ ] Implement copy and drop glue.
 - [ ] Implement shared strings.
 - [ ] Strings.
