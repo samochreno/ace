@@ -65,11 +65,6 @@ namespace Ace
 
     auto Emitter::Emit() -> Result
     {
-        llvm::InitializeNativeTarget();
-        llvm::InitializeNativeTargetAsmPrinter();
-
-        llvm::ExitOnError exitOnError{};
-
         m_C.Initialize(*m_Context, *m_Module);
 
         const auto symbols = Scope::GetRoot()->CollectAllDefinedSymbolsRecursive();

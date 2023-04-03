@@ -8,6 +8,7 @@
 #include <sstream>
 #include <chrono>
 #include <fmt/format.h>
+#include <llvm/Support/TargetSelect.h>
 
 #include "Log.hpp"
 #include "Core.hpp"
@@ -141,6 +142,9 @@ namespace Ace
 
     auto Main() -> void
     {
+        llvm::InitializeNativeTarget();
+        llvm::InitializeNativeTargetAsmPrinter();
+
         const std::filesystem::path packagePath{ "/home/samo/repos/ace/ace/Package.json" };
         const std::ifstream packageFileStream{ packagePath };
         ACE_ASSERT(packageFileStream);
