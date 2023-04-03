@@ -156,7 +156,6 @@ namespace Ace
         pb.crossRegisterProxies(lam, fam, cgam, mam);
         
         auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
-        // TODO: Turn on optimizations.
         mpm.run(*m_Module, mam);
 
         const auto timeAnalysesEnd = now();
