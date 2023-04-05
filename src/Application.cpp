@@ -56,7 +56,7 @@ namespace Ace
 
         const auto timeParsingEnd = now();
 
-        auto nodes = Core::GetAllNodes(begin(asts), end(asts));
+        const auto nodes = Core::GetAllNodes(begin(asts), end(asts));
 
         const auto timeSymbolCreationStart = now();
 
