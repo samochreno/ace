@@ -25,6 +25,9 @@ message(STATUS "Found fmt ${FMT_VERSION}")
 
 file(GLOB_RECURSE FMT_LIBS ${FMT_LIB_DIR})
 
+find_package(termcolor REQUIRED)
+message(STATUS "Found termcolor")
+
 add_executable(${PROJECT_NAME} src/main.cpp)
 file(GLOB_RECURSE SOURCES src/*.cpp)
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
