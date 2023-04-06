@@ -183,22 +183,14 @@ namespace Ace
 
         auto Unwrap() -> T&
         {
-            if (m_HasValue)
-            {
-                return m_Value;
-            }
-
-            ACE_UNREACHABLE();
+            ACE_ASSERT(m_HasValue);
+            return m_Value;
         }
 
         auto Unwrap() const -> const T&
         {
-            if (m_HasValue)
-            {
-                return m_Value;
-            }
-
-            ACE_UNREACHABLE();
+            ACE_ASSERT(m_HasValue);
+            return m_Value;
         }
 
         operator bool() const
