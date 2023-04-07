@@ -29,7 +29,7 @@ find_package(termcolor REQUIRED)
 message(STATUS "Found termcolor")
 
 add_executable(${PROJECT_NAME} src/main.cpp)
-file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 target_include_directories(${PROJECT_NAME}
     PUBLIC include
