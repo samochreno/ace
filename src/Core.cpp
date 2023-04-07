@@ -68,12 +68,14 @@ namespace Ace::Core
     auto DefineAssociations(const std::vector<const Node::IBase*>& t_nodes) -> Expected<void>
     {
         const auto implNodes = DynamicCastFilter<const Node::Impl*>(t_nodes);
+
         const auto didCreateAssociations = TransformExpectedVector(implNodes, []
         (const Node::Impl* const t_implNode) -> Expected<void>
         {
             ACE_TRY_VOID(t_implNode->DefineAssociations());
             return ExpectedVoid;
         });
+        ACE_TRY_ASSERT(didCreateAssociations);
 
         return ExpectedVoid;
     }
@@ -81,7 +83,8 @@ namespace Ace::Core
     auto AssertControlFlow(const std::vector<const BoundNode::IBase*>& t_nodes) -> Expected<void>
     {
         const auto functionNodes = DynamicCastFilter<const BoundNode::Function*>(t_nodes);
-        const auto didControlFlowAnalysisSucceed = std::find_if(begin(functionNodes), end(functionNodes), [&]
+
+        const bool didControlFlowAnalysisSucceed = std::find_if(begin(functionNodes), end(functionNodes), [&]
         (const BoundNode::Function* const t_functionNode)
         {
             if (t_functionNode->GetSymbol()->GetType()->GetUnaliased() == NativeSymbol::Void.GetSymbol())
@@ -93,21 +96,22 @@ namespace Ace::Core
             return t_functionNode->GetBody().value()->IsEndReachableWithoutReturn();
 
         }) == end(functionNodes);
-
         ACE_TRY_ASSERT(didControlFlowAnalysisSucceed);
+
         return ExpectedVoid;
     }
 
     auto AssertCanResolveTypeSizes() -> Expected<void>
     {
         const auto typeSymbols = Scope::GetRoot()->CollectDefinedSymbolsRecursive<Symbol::Type::IBase>();
+
         const bool canResolveSizes = std::find_if_not(begin(typeSymbols), end(typeSymbols), []
         (const Symbol::Type::IBase* const t_typeSymbol)
         {
             return t_typeSymbol->CanResolveSize();
         }) == end(typeSymbols);
-
         ACE_TRY_ASSERT(canResolveSizes);
+
         return ExpectedVoid;
     }
 
