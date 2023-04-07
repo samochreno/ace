@@ -129,7 +129,6 @@ namespace Ace
         llvm::raw_string_ostream originalModuleOStream{ originalModuleString };
         originalModuleOStream << *m_Module;
         originalModuleOStream.flush();
-        ACE_LOG_EMPTY();
         ACE_LOG_INFO(originalModuleString);
         originalModuleString.clear();
 

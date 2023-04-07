@@ -27,8 +27,7 @@ namespace Ace
 {
     static auto CompileFiles(const std::string& t_packageName, const std::vector<std::filesystem::path>& t_filePaths, const std::vector<std::filesystem::path>& t_dependencyFilePaths) -> Expected<void>
     {
-        ACE_LOG_INFO("Build started.");
-        ACE_LOG_EMPTY();
+        ACE_LOG_INFO("Build started");
 
         Emitter emitter{ t_packageName };
 
@@ -135,7 +134,6 @@ namespace Ace
         ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.Analyses)                                  << "] Backend | Analyses");
         ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.LLC)                                       << "] Backend | llc");
         ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.Clang)                                     << "] Backend | clang");
-        ACE_LOG_EMPTY();
 
         return ExpectedVoid;
     }
@@ -161,11 +159,11 @@ namespace Ace
 
         if (didCompileFiles) 
         { 
-            ACE_LOG_INFO("Build succeeded.");
+            ACE_LOG_INFO("Build succeeded");
         } 
         else 
         {
-            ACE_LOG_WARNING("Build failed."); 
+            ACE_LOG_WARNING("Build failed"); 
         }
     }
 }
