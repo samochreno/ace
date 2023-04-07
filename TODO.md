@@ -2,6 +2,7 @@
 
 ## 💥 High Priority
 
+- [ ] Remove or fix global variables.
 - [ ] Implement copy and drop glue.
 - [ ] Implement shared strings.
 - [ ] Strings.
