@@ -58,7 +58,6 @@ namespace Ace::Node::Variable::Parameter
     auto Normal::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
     {
         ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName.ToSymbolName()));
-
         return std::unique_ptr<Symbol::IBase>
         {
             std::make_unique<Symbol::Variable::Parameter::Normal>(
