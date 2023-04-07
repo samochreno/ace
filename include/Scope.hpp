@@ -37,6 +37,12 @@ namespace Ace
 {
     auto IsSymbolVisibleFromScope(Symbol::IBase* const t_symbol, const Scope* const t_scope) -> bool;
 
+    template<typename TSymbol>
+    auto IsCorrectSymbolType(const Symbol::IBase* const t_symbol) -> bool
+    {
+        return dynamic_cast<const TSymbol*>(t_symbol) != nullptr;
+    }
+
     class Scope
     {
     public:
@@ -126,6 +132,7 @@ namespace Ace
                 this,
                 t_name.Sections.begin(),
                 t_name.Sections.end(),
+                IsCorrectSymbolType<TSymbol>,
                 startScopes,
                 GetStaticSymbolResolutionImplTemplateArguments(isInTemplatedImplContext, this),
                 DoInstantiateTemplate<TSymbol>()
@@ -153,6 +160,7 @@ namespace Ace
                 this,
                 nameSections.begin(),
                 nameSections.end(),
+                IsCorrectSymbolType<TSymbol>,
                 scopes,
                 CollectInstanceSymbolImplTemplateArguments(t_selfType),
                 DoInstantiateTemplate<TSymbol>()
@@ -186,6 +194,7 @@ namespace Ace
                 this,
                 nameSections.begin(),
                 nameSections.end(),
+                IsCorrectSymbolType<TSymbol>,
                 { this },
                 t_implTemplateArguments,
                 t_templateArguments,
@@ -268,6 +277,7 @@ namespace Ace
             const Scope* const t_resolvingFromScope,
             const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin, 
             const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
+            const std::function<bool(const Symbol::IBase* const)> t_isCorrectSymbolType,
             const std::vector<const Scope*> t_scopes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
             const bool& t_doInstantiateTemplate
@@ -277,6 +287,7 @@ namespace Ace
             const Scope* const t_resolvingFromScope,
             const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
             const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
+            const std::function<bool(const Symbol::IBase* const)> t_isCorrectSymbolType,
             const std::vector<const Scope*> t_scopes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
             const std::vector<Symbol::Type::IBase*>& t_templateArguments,

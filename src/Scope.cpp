@@ -299,6 +299,7 @@ namespace Ace
         const Scope* const t_resolvingFromScope,
         const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
         const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
+        const std::function<bool(const Symbol::IBase* const)> t_isCorrectSymbolType,
         const std::vector<const Scope*> t_scopes,
         const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
         const bool& t_doInstantiateTemplate
@@ -309,6 +310,7 @@ namespace Ace
             t_resolvingFromScope,
             t_nameSectionsBegin,
             t_nameSectionsEnd,
+            t_isCorrectSymbolType,
             t_scopes,
             t_implTemplateArguments,
             templateArguments,
@@ -320,6 +322,7 @@ namespace Ace
         const Scope* const t_resolvingFromScope,
         const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
         const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
+        const std::function<bool(const Symbol::IBase* const)> t_isCorrectSymbolType,
         const std::vector<const Scope*> t_scopes,
         const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
         const std::vector<Symbol::Type::IBase*>& t_templateArguments,
@@ -366,30 +369,29 @@ namespace Ace
                 );
                 if (!expTemplate)
                     return;
-
-                if (t_doInstantiateTemplate)
-                {
-                    const auto expTemplateInstance = ResolveOrInstantiateTemplateInstance(
-                        expTemplate.Unwrap(),
-                        t_implTemplateArguments,
-                        t_templateArguments
-                    );
-                    if (!expTemplateInstance)
-                        return;
-
-                    symbols.push_back(expTemplateInstance.Unwrap());
-                }
-                else
+                
+                if (!t_doInstantiateTemplate)
                 {
                     symbols.push_back(expTemplate.Unwrap());
+                    return;
                 }
+
+                const auto expTemplateInstance = ResolveOrInstantiateTemplateInstance(
+                    expTemplate.Unwrap(),
+                    t_implTemplateArguments,
+                    t_templateArguments
+                );
+                if (!expTemplateInstance)
+                    return;
+                
+                symbols.push_back(expTemplateInstance.Unwrap());
             }
             else
             {
                 if (foundIt == end(symbolMap))
                     return;
 
-                std::transform(begin(foundIt->second), end(foundIt->second), back_inserter(symbols), []
+                std::transform(begin(foundIt->second), end(foundIt->second), back_inserter(symbols), [&]
                 (const std::unique_ptr<Symbol::IBase>& t_symbol)
                 {
                     return t_symbol.get();
@@ -397,16 +399,26 @@ namespace Ace
             }
         });
 
-        ACE_TRY_ASSERT(symbols.size() == 1);
-
         if (isLastNameSection)
         {
-            auto* const symbol = symbols.front();
+            std::vector<Symbol::IBase*> correctSymbols{};
+            std::copy_if(begin(symbols), end(symbols), back_inserter(correctSymbols), [&]
+            (Symbol::IBase* const t_symbol)
+            {
+                return t_isCorrectSymbolType(t_symbol);
+            });
+
+            ACE_TRY_ASSERT(symbols.size() > 0);
+            ACE_ASSERT(symbols.size() == 1);
+
+            auto* const symbol = correctSymbols.front();
             ACE_TRY_ASSERT(IsSymbolVisibleFromScope(symbol, t_resolvingFromScope));
             return symbol;
         }
         else
         {
+            ACE_TRY_ASSERT(symbols.size() == 1);
+
             auto* const selfScopedSymbol = dynamic_cast<Symbol::ISelfScoped*>(symbols.front());
             ACE_TRY_ASSERT(selfScopedSymbol);
 
@@ -423,6 +435,7 @@ namespace Ace
                 t_resolvingFromScope,
                 t_nameSectionsBegin + 1,
                 t_nameSectionsEnd,
+                t_isCorrectSymbolType,
                 scopes,
                 t_templateArguments,
                 t_doInstantiateTemplate
