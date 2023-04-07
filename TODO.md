@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Remove Typed/ folders from src/.
 - [ ] Implement copy and drop glue.
 - [ ] Implement shared strings.
 - [ ] Strings.
