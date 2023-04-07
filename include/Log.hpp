@@ -20,21 +20,21 @@ namespace Ace::Log
 
 #define ACE_LOG_INFO(t_message) \
     std::cout << termcolor::color<ACE_LOG_COLOR_WHITE> << termcolor::on_color<ACE_LOG_COLOR_INFORMATION> << \
-    " | INFORMATION  " << termcolor::on_color<ACE_LOG_COLOR_TIMESTAMP> << \
+    " | INFORMATION   " << termcolor::on_color<ACE_LOG_COLOR_TIMESTAMP> << \
     " " << Ace::Log::CreateTimestamp() << " " << termcolor::on_color<ACE_LOG_COLOR_INFORMATION> << \
     " " << termcolor::reset << termcolor::color<ACE_LOG_COLOR_INFORMATION> << \
     " " << t_message << "\n"
 
 #define ACE_LOG_WARNING(t_message) \
     std::cout << termcolor::color<ACE_LOG_COLOR_WHITE> << termcolor::on_color<ACE_LOG_COLOR_WARNING> << \
-    " | WARNING      " << termcolor::on_color<ACE_LOG_COLOR_TIMESTAMP> << \
+    " | WARNING       " << termcolor::on_color<ACE_LOG_COLOR_TIMESTAMP> << \
     " " << Ace::Log::CreateTimestamp() << " " << termcolor::on_color<ACE_LOG_COLOR_WARNING> << \
     " " << termcolor::reset << termcolor::color<ACE_LOG_COLOR_WARNING> << \
     " " << t_message << "\n"
 
 #define ACE_LOG_ERROR(t_message) \
     std::cout << termcolor::color<ACE_LOG_COLOR_WHITE> << termcolor::on_color<ACE_LOG_COLOR_ERROR> << \
-    " | ERROR        " << termcolor::on_color<ACE_LOG_COLOR_TIMESTAMP> << \
+    " | ERROR         " << termcolor::on_color<ACE_LOG_COLOR_TIMESTAMP> << \
     " " << Ace::Log::CreateTimestamp() << " " << termcolor::on_color<ACE_LOG_COLOR_ERROR> << \
     " " << termcolor::reset << termcolor::color<ACE_LOG_COLOR_ERROR> << \
     " " << t_message << "\n"
