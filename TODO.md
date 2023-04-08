@@ -2,6 +2,8 @@
 
 ## 💥 High Priority
 
+- [ ] Implement a templated version of `Scope::DefineSymbol` so the return value doesn't have to be casted.
+- [ ] Create `BoundNode/All.hpp` and include it in `Emitter.cpp`.
 - [ ] Remove or fix global variables.
 - [ ] Implement copy and drop glue.
 - [ ] Implement shared strings.
