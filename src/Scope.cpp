@@ -134,8 +134,9 @@ namespace Ace
     auto Scope::DefineSymbol(std::unique_ptr<Symbol::IBase>&& t_symbol) -> Expected<Symbol::IBase*>
     {
         auto* const symbol = t_symbol.get();
-        ACE_TRY_ASSERT(CanDefineSymbol(symbol));
-        m_SymbolMap[symbol->GetName()].push_back(std::move(t_symbol));
+        auto* const scope = symbol->GetScope();
+        ACE_TRY_ASSERT(scope->CanDefineSymbol(symbol));
+        scope->m_SymbolMap[symbol->GetName()].push_back(std::move(t_symbol));
         return symbol;
     }
 
@@ -153,7 +154,7 @@ namespace Ace
         }
 
         ACE_TRY(symbol, t_creatable->CreateSymbol());
-        return scope->DefineSymbol(std::move(symbol));
+        return Scope::DefineSymbol(std::move(symbol));
     }
 
     auto Scope::CollectAllDefinedSymbols() const -> std::vector<Symbol::IBase*>

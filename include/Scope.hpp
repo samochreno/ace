@@ -59,7 +59,7 @@ namespace Ace
         auto GetOrCreateChild(const std::optional<std::string>& t_optName) -> Scope*;
         auto HasChild(const Scope* const t_child) const -> bool;
 
-               auto DefineSymbol(std::unique_ptr<Symbol::IBase>&& t_symbol)   -> Expected<Symbol::IBase*>;
+        static auto DefineSymbol(std::unique_ptr<Symbol::IBase>&& t_symbol)   -> Expected<Symbol::IBase*>;
         static auto DefineSymbol(const Symbol::ICreatable* const t_creatable) -> Expected<Symbol::IBase*>;
 
         auto DefineAssociation(Scope* const t_association) -> void
