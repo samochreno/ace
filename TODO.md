@@ -16,13 +16,10 @@
   - [ ] Default template arguments.
 - Add templated conversion operators (`ref.ace` at line 16), this might require implementing template argument deduction though:
   - [ ] Change `__deref_as[T](...)` to take any expression of type convertible to `std::Pointer`.
-  - [ ] Remove `std::Reference[T]::get_ptr(...)`.
-- [ ] Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause undefined behaviour. This could maybe be fixed by zeroing struct memory, or by forcing the copy trait to also implement default trait).
+  - [ ] Remove `std::Reference[T]::ptr(...)`.
+- [ ] Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause undefined behaviour. This could maybe be fixed by forcing the copy trait to also implement default trait).
 - [ ] Try simplifying symbol resolution.
-- `LLVM`:
-  - [ ] Learn how to build LLVM correctly.
-  - [ ] Build debug and release versions.
-  - [ ] Check if there isnt any better way to not use external programs like `llc` and `clang`.
+- [ ] Check if there isnt any better way to not use external programs like `llc` and `clang`.
 
 ## 🔔 Medium Priority
 
@@ -30,7 +27,7 @@
   ```rs
   import std::build::*;
 
-  get_package(): Package 
+  package(): Package 
   {
       ret new Package {
           name: "ace",
@@ -80,7 +77,7 @@
   - [ ] Export/import symbol metadata for reflection and headers.
   - Metadata will be stored in exe/dll files this way:
     - Last 8 bytes of file will be u64 which stores value of metadata size in bytes.
-    - `[? bytes - Content of exe/dll ][ X bytes -  Metadata ][ 8 bytes - X ]`.
+    - `[ ? bytes - Content of exe/dll ][ X bytes -  Metadata ][ 8 bytes - X ]`.
 - [ ] Dll package dependencies.
 - [ ] Dll calls.
 - [ ] Reflection.
