@@ -4,7 +4,7 @@ std: module -> pub {
     }
 
     impl[T] Reference[T] {
-        get_ptr(self: Reference[T]): Pointer {
+        ptr(self: Reference[T]): Pointer {
             ret __deref_as[Pointer](__address_of(self));
         }
     }
@@ -12,7 +12,7 @@ std: module -> pub {
     #: 
     impl Pointer {
         operator impl[T](reference: Reference[T]): Pointer -> pub {
-            ret Reference::[T]::get_ptr(reference);
+            ret Reference::[T]::ptr(reference);
         }
     }
     :#

@@ -43,7 +43,7 @@ namespace Ace::BoundNode::Expression
         ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
 
         ACE_TRY(symbol, Scope::ResolveOrInstantiateTemplateInstance(
-            NativeSymbol::StrongPointer__get_value.GetSymbol(),
+            NativeSymbol::StrongPointer__value.GetSymbol(),
             { mchLoweredExpression.Value->GetTypeInfo().Symbol->GetWithoutStrongPointer() },
             {}
         ));

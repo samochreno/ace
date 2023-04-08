@@ -42,7 +42,7 @@ test_2: module {
             ret new Type { field };
         }
 
-        get_field(): int -> pub self { 
+        field(): int -> pub self { 
             ret self.field;
         }
     }
@@ -124,14 +124,14 @@ control_flow_analysis_2(): int {
 }
 
 impl[T] Template[T] {
-    get_field(): T -> pub self {
+    field(): T -> pub self {
         ret self.field;
     }
 }
 
 test_10(): int {
     obj: Template[int] = new Template[int] { field: 4 };
-    ret obj.get_field();
+    ret obj.field();
 }
 
 impl[T] Template[T] {
@@ -470,12 +470,12 @@ compound_assignment_struct(): int {
 }
 
 operator_precedence(): int {
-    i: int = -get_int_value();
+    i: int = -int_value();
     print_int(i);
     ret 0;
 }
 
-get_int_value(): int {
+int_value(): int {
     ret -15;
 }
 

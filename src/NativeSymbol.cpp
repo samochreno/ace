@@ -1579,10 +1579,10 @@ namespace Ace::NativeSymbol
         "new"
     };
 
-    AssociatedFunctionTemplate StrongPointer__get_value =
+    AssociatedFunctionTemplate StrongPointer__value =
     {
         StrongPointer,
-        "get_value"
+        "value"
     };
 
     static const std::vector<Type*> AllTypes
@@ -1953,7 +1953,7 @@ namespace Ace::NativeSymbol
     static const std::vector<AssociatedFunctionTemplate*> AllAssociatedFunctionTemplates
     {
         &StrongPointer__new,
-        &StrongPointer__get_value,
+        &StrongPointer__value,
     };
 
     static auto GetAll() -> std::vector<IBase*>
@@ -2215,7 +2215,7 @@ namespace Ace::NativeSymbol
     auto InitializeSymbols() -> Expected<void>
     {
         const auto all = GetAll();
-            
+        
         ACE_TRY_VOID(TransformExpectedVector(all, [&]
         (IBase* const t_symbol)
         {

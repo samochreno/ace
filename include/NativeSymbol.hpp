@@ -540,7 +540,7 @@ namespace Ace::NativeSymbol
     extern AssociatedFunction f64__not_equals;
 
     extern AssociatedFunctionTemplate StrongPointer__new;
-    extern AssociatedFunctionTemplate StrongPointer__get_value;
+    extern AssociatedFunctionTemplate StrongPointer__value;
 
     auto InitializeSymbols() -> Expected<void>;
 
