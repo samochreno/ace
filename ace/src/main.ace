@@ -483,8 +483,23 @@ operator_associativity(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
 
+Getter: struct {
+    field: int,
+}
+
+impl Getter {
+    field(): int -> self {
+        ret self.field;
+    }
+}
+
+getter(): int {
+    obj: Getter = new Getter { field: -12349 };
+    ret obj.field();
+}
+
 main(): int {
-    value: int = operator_associativity();
+    value: int = getter();
     print_int(value);
     ret value;
 }

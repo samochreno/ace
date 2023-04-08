@@ -408,8 +408,8 @@ namespace Ace
                 return t_isCorrectSymbolType(t_symbol);
             });
 
-            ACE_TRY_ASSERT(symbols.size() > 0);
-            ACE_ASSERT(symbols.size() == 1);
+            ACE_TRY_ASSERT(correctSymbols.size() > 0);
+            ACE_ASSERT(correctSymbols.size() == 1);
 
             auto* const symbol = correctSymbols.front();
             ACE_TRY_ASSERT(IsSymbolVisibleFromScope(symbol, t_resolvingFromScope));
