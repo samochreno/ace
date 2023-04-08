@@ -26,6 +26,7 @@ namespace Ace::Symbol
         virtual auto GetAccessModifier() const -> AccessModifier = 0;
         virtual auto IsInstance() const -> bool = 0;
 
+        virtual auto CreatePartialSignature() const -> std::string final;
         virtual auto CreateSignature() const -> std::string final;
         virtual auto GetFullyQualifiedName() const -> Name::Symbol::Full final;
     };

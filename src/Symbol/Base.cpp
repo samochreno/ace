@@ -29,6 +29,37 @@ namespace Ace::Symbol
         return symbol;
     }
 
+    auto IBase::CreatePartialSignature() const -> std::string
+    {
+        auto* const symbol = UnwrapAlias(this);
+        if (symbol != this)
+        {
+            return symbol->CreatePartialSignature();
+        }
+
+        std::string signature = GetName();
+
+        if (auto* const templatableSymbol = dynamic_cast<const Symbol::ITemplatable*>(this))
+        {
+            const auto templateArguments = templatableSymbol->CollectTemplateArguments();
+
+            if (!templateArguments.empty())
+            {
+                signature += "[";
+
+                std::for_each(begin(templateArguments), end(templateArguments), [&]
+                (const Symbol::Type::IBase* const t_templateArgument)
+                {
+                    signature += t_templateArgument->CreateSignature();
+                });
+
+                signature += "]";
+            }
+        }
+
+        return signature;
+    }
+
     auto IBase::CreateSignature() const -> std::string
     {
         auto* const symbol = UnwrapAlias(this);
@@ -73,7 +104,7 @@ namespace Ace::Symbol
             }
         }();
 
-        signature = signature + lastSeparator + GetName();
+        signature = signature + lastSeparator + CreatePartialSignature();
         return signature;
     }
 
