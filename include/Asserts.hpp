@@ -9,7 +9,7 @@
     { \
         ACE_LOG_ERROR( \
             "Assertion failed in file " << __FILE__ << \
-            " at line " << __LINE__ << ":" << #t_condition \
+            " at line " << __LINE__ << ": " << #t_condition \
         ); \
         ACE_LOG_FLUSH(); \
         std::terminate(); \
