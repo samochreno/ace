@@ -40,7 +40,6 @@ namespace Ace::Symbol::Type
         auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_SelfScope->CollectImplTemplateArguments(); }
 
         auto GetVariables() const -> std::vector<Symbol::Variable::Normal::Instance*>;
-        auto GetVariableIndex(Symbol::Variable::Normal::Instance* const t_variable) const -> size_t;
 
     private:
         Scope* m_SelfScope{};

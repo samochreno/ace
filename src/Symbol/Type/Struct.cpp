@@ -48,14 +48,4 @@ namespace Ace::Symbol::Type
     {
         return m_SelfScope->CollectDefinedSymbols<Symbol::Variable::Normal::Instance>();
     }
-
-    auto Struct::GetVariableIndex(Symbol::Variable::Normal::Instance* const t_variable) const -> size_t
-    {
-        const auto variables = GetVariables();
-
-        const auto foundIt = std::find(begin(variables), end(variables), t_variable);
-        ACE_ASSERT(foundIt != end(variables));
-
-        return (*foundIt)->GetIndex();
-    }
 }
