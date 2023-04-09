@@ -79,7 +79,6 @@ namespace Ace::Core
         const auto nodes = GetAllNodes(finalAST);
         
         ACE_TRY_VOID(AssertControlFlow(nodes));
-        SetFunctionSymbolsBodies(nodes);
 
         return finalAST;
     }
@@ -127,7 +126,6 @@ namespace Ace::Core
         const auto nodes = GetAllNodes(finalASTs.begin(), finalASTs.end());
 
         ACE_TRY_VOID(AssertControlFlow(nodes));
-        SetFunctionSymbolsBodies(nodes); // TODO: Idk if mutation is good here, it should be probably moved out.
 
         return finalASTs;
     }

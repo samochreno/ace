@@ -61,6 +61,8 @@ namespace Ace::Symbol::Template
                 [](const std::shared_ptr<const BoundNode::Function>& t_ast) { return t_ast->GetOrCreateLowered({}); },
                 [](const std::shared_ptr<const BoundNode::Function>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); }
             ).Unwrap();
+
+            Core::SetFunctionSymbolsBodies(Core::GetAllNodes(boundAST));
         });
 
         m_InstantiatedOnlySymbolsASTs.clear();
