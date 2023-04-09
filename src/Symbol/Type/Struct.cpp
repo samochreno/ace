@@ -46,6 +46,13 @@ namespace Ace::Symbol::Type
 
     auto Struct::GetVariables() const -> std::vector<Symbol::Variable::Normal::Instance*>
     {
-        return m_SelfScope->CollectDefinedSymbols<Symbol::Variable::Normal::Instance>();
+        auto variables = m_SelfScope->CollectDefinedSymbols<Symbol::Variable::Normal::Instance>();
+        std::sort(begin(variables), end(variables), []
+        (const Symbol::Variable::Normal::Instance* const t_lhs, const Symbol::Variable::Normal::Instance* const t_rhs)
+        {
+            return t_lhs->GetIndex() < t_rhs->GetIndex();
+        });
+
+        return variables;
     }
 }
