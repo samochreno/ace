@@ -68,7 +68,7 @@ namespace Ace
 
         const auto timeBindingAndVerificationStart = now();
 
-        ACE_TRY(boundASTs, Core::CreateBoundAndVerifiedASTs(
+        ACE_TRY(boundASTs, Core::CreateBoundTransformedAndVerifiedASTs(
             asts,
             [](const std::shared_ptr<const Node::Module>& t_ast) { return t_ast->CreateBound(); },
             [](const std::shared_ptr<const BoundNode::Module>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); },

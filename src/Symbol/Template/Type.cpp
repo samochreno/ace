@@ -48,7 +48,7 @@ namespace Ace::Symbol::Template
         std::for_each(begin(m_InstantiatedOnlySymbolsASTs), end(m_InstantiatedOnlySymbolsASTs), []
         (const std::shared_ptr<const Node::Type::IBase>& t_ast)
         {
-            const auto boundAST = Core::CreateBoundAndVerifiedAST(
+            const auto boundAST = Core::CreateBoundTransformedAndVerifiedAST(
                 t_ast,
                 [](const std::shared_ptr<const Node::Type::IBase>& t_ast) { return t_ast->CreateBoundType(); },
                 [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); },
