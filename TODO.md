@@ -2,6 +2,7 @@
 
 ## 💥 High Priority
 
+- [ ] Change `BoundNode::Expression::VariableReference::Instance` variable symbol to be also instance.
 - [ ] Implement a templated version of `Scope::DefineSymbol` so the return value doesn't have to be casted.
 - [ ] Create `BoundNode/All.hpp` and include it in `Emitter.cpp`.
 - [ ] Remove or fix global variables.
