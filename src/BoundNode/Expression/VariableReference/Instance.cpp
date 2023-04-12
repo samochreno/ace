@@ -99,16 +99,22 @@ namespace Ace::BoundNode::Expression::VariableReference
 
         const auto expression = getDereferenced(m_Expression);
         const auto expressionEmitResult = expression->Emit(t_emitter);
-        temporaries.insert(end(temporaries), begin(expressionEmitResult.Temporaries), end(expressionEmitResult.Temporaries));
+        temporaries.insert(
+            end  (temporaries), 
+            begin(expressionEmitResult.Temporaries), 
+            end  (expressionEmitResult.Temporaries)
+        );
 
         auto* const expressionTypeSymbol = expression->GetTypeInfo().Symbol;
         auto* const expressionType = t_emitter.GetIRType(expressionTypeSymbol);
 
         const auto variableIndex = variableSymbol->GetIndex();
 
+        auto* const int32Type = llvm::Type::getInt32Ty(t_emitter.GetContext());
+
         std::vector<llvm::Value*> indexList{};
-        indexList.push_back(llvm::ConstantInt::get(llvm::Type::getInt32Ty(t_emitter.GetContext()), 0));
-        indexList.push_back(llvm::ConstantInt::get(llvm::Type::getInt32Ty(t_emitter.GetContext()), variableIndex));
+        indexList.push_back(llvm::ConstantInt::get(int32Type, 0));
+        indexList.push_back(llvm::ConstantInt::get(int32Type, variableIndex));
 
         auto* const gepInst = t_emitter.GetBlockBuilder().Builder.CreateGEP(
             expressionType,
