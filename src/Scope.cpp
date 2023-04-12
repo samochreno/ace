@@ -62,6 +62,18 @@ namespace Ace
         ACE_UNREACHABLE();
     }
 
+#ifndef NDEBUG
+    auto Scope::GetDebugSymbolMap() const -> std::vector<std::string>
+    {
+        std::vector<std::string> vec{};
+        for (const auto& kv : m_SymbolMap)
+        {
+            vec.push_back(kv.first);
+        }
+        return vec;
+    }
+#endif
+
     auto Scope::GetRoot() -> Scope*
     {
         if (m_Root)

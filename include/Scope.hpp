@@ -46,6 +46,10 @@ namespace Ace
     class Scope
     {
     public:
+#ifndef NDEBUG
+        auto GetDebugSymbolMap() const -> std::vector<std::string>;
+#endif
+
         ~Scope() = default;
         
         static auto GetRoot() -> Scope*;
