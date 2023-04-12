@@ -32,21 +32,8 @@ return {}
 #define ACE_TRY_VOID(t_expExpression) \
 ACE_TRY_ASSERT(t_expExpression)
 
-#ifdef NDEBUG
-#define ACE_ON_ERROR()
-#else
-#define ACE_ON_ERROR() OnError()
-#endif
-
 namespace Ace
 {
-#ifndef NDEBUG
-    static inline void OnError()
-    {
-        ;
-    }
-#endif
-
     class IError
     {
     public:
@@ -65,7 +52,6 @@ namespace Ace
         Expected()
             : m_HasValue{ false }
         {
-            ACE_ON_ERROR();
         }
 
         Expected(const Expected& t_other)
@@ -130,7 +116,6 @@ namespace Ace
         Expected()
             : m_HasValue(false)
         {
-            ACE_ON_ERROR();
         }
 
         template<typename T_ = T, std::enable_if<std::is_copy_constructible_v<T>>* = nullptr>
