@@ -9,6 +9,7 @@ namespace Ace::SpecialIdentifier
 {
     auto CreateAnonymous() -> std::string;
     auto CreateTemplate(const std::string& t_templateName) -> std::string;
+    auto CreateCopyGlue(const std::string& t_typePartialSignature) -> std::string;
 
     inline constexpr const char* Self   = "self";
     inline constexpr const char* Main   = "main";
@@ -16,7 +17,7 @@ namespace Ace::SpecialIdentifier
 
     inline constexpr const char* Copy   = "copy";
     inline constexpr const char* Drop   = "drop";
-    
+
     inline constexpr const char* Global = "$global";
 
     namespace Operator

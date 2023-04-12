@@ -476,7 +476,7 @@ operator_precedence(): int {
 }
 
 int_value(): int {
-    ret -15;
+    ret -131255;
 }
 
 operator_associativity(): int {
@@ -494,8 +494,16 @@ impl Getter {
 }
 
 getter(): int {
-    obj: Getter = new Getter { field: -12349 };
+    print_int(15);
+    obj: Getter = new Getter { field: int_value_and_print() };
+    print_int(60);
     ret obj.field();
+}
+
+int_value_and_print(): int {
+    value: int = -123152;
+    print_int(value);
+    ret value;
 }
 
 main(): int {

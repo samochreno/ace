@@ -11,10 +11,12 @@
 #include "Scope.hpp"
 #include "Symbol/Label.hpp"
 #include "Symbol/Type/Base.hpp"
+#include "Symbol/Type/Struct.hpp"
 #include "Symbol/Variable/Normal/Static.hpp"
 #include "Symbol/Variable/Local.hpp"
 #include "Symbol/Function.hpp"
 #include "ExpressionDropData.hpp"
+#include "Emittable.hpp"
 
 namespace Ace::BoundNode
 {
@@ -27,6 +29,11 @@ namespace Ace::BoundNode
     }
 
     namespace Statement
+    {
+        class IBase;
+    }
+    
+    namespace Expression
     {
         class IBase;
     }
@@ -110,17 +117,32 @@ namespace Ace
         Emitter(const std::string& t_packageName);
         ~Emitter();
 
-        auto SetASTs(const std::vector<std::shared_ptr<const BoundNode::Module>>& t_asts) -> void { m_ASTs = t_asts; }
+        auto SetASTs(
+            const std::vector<std::shared_ptr<const BoundNode::Module>>& t_asts
+        ) -> void { m_ASTs = t_asts; }
 
         auto Emit() -> Result;
 
-        auto EmitFunctionBodyStatements(const std::vector<std::shared_ptr<const BoundNode::Statement::IBase>>& t_statements) -> void;
-        auto EmitLoadArgument(const size_t& t_index, llvm::Type* const t_type) -> llvm::Value*;
+        auto EmitFunctionBodyStatements(
+            const std::vector<std::shared_ptr<const BoundNode::Statement::IBase>>& t_statements
+        ) -> void;
+        auto EmitLoadArgument(
+            const size_t& t_index, 
+            llvm::Type* const t_type
+        ) const -> llvm::Value*;
         auto EmitDrop(const ExpressionDropData& t_dropData) -> void;
-        auto EmitDropTemporaries(const std::vector<ExpressionDropData>& t_temporaries) -> void;
-        auto EmitDropLocalVariablesBeforeStatement(const BoundNode::Statement::IBase* const t_statement) -> void;
+        auto EmitDropTemporaries(
+            const std::vector<ExpressionDropData>& t_temporaries
+        ) -> void;
+        auto EmitDropLocalVariablesBeforeStatement(
+            const BoundNode::Statement::IBase* const t_statement
+        ) -> void;
         auto EmitDropArguments() -> void;
-        auto EmitCopy(llvm::Value* const t_lhsValue, llvm::Value* const t_rhsValue, Symbol::Type::IBase* const t_typeSymbol) -> void;
+        auto EmitCopy(
+            llvm::Value* const t_lhsValue, 
+            llvm::Value* const t_rhsValue, 
+            Symbol::Type::IBase* const t_typeSymbol
+        ) -> void;
 
         auto GetContext() const -> llvm::LLVMContext& { return *m_Context.get(); }
         auto GetModule() const -> llvm::Module& { return *m_Module.get(); }
@@ -136,14 +158,40 @@ namespace Ace
         auto GetFunction() const -> llvm::Function* { return m_Function; }
 
         auto GetBlockBuilder() -> BlockBuilder& { return *m_BlockBuilder.get(); }
-        auto SetBlockBuilder(std::unique_ptr<BlockBuilder>&& t_value) -> void { m_BlockBuilder = std::move(t_value); }
+        auto SetBlockBuilder(
+            std::unique_ptr<BlockBuilder>&& t_value
+        ) -> void { m_BlockBuilder = std::move(t_value); }
 
     private:
-        auto EmitTypes(const std::vector<Symbol::Type::IBase*>& t_typeSymbols) -> void;
-        auto EmitNativeTypes(const std::vector<Symbol::Type::IBase*>& t_typeSymbols) -> void;
-        auto EmitStructTypes(const std::vector<Symbol::Type::IBase*>& t_typeSymbols) -> void;
-        auto EmitStaticVariables(const std::vector<Symbol::Variable::Normal::Static*>& t_variableSymbols) -> void;
-        auto EmitFunctions(const std::vector<Symbol::Function*>& t_functionSymbols) -> void;
+        auto EmitTypes(
+            const std::vector<Symbol::Type::IBase*>& t_typeSymbols
+        ) -> void;
+        auto EmitCopyGlue(
+            const std::vector<Symbol::Type::Struct*>& t_structSymbols
+        ) -> void;
+        auto EmitNativeTypes() -> void;
+        auto EmitStructTypes(
+            const std::vector<Symbol::Type::Struct*>& t_structSymbols
+        ) -> void;
+        auto EmitStaticVariables(
+            const std::vector<Symbol::Variable::Normal::Static*>& t_variableSymbols
+        ) -> void;
+        auto EmitFunctions(
+            const std::vector<Symbol::Function*>& t_functionSymbols
+        ) -> void;
+
+        auto DefineCopyGlueSymbols(
+            Symbol::Type::Struct* const t_structSymbol
+        ) const -> Symbol::Function*;
+
+        auto CreateTrivialCopyGlueBody(
+            Symbol::Function* const t_glueSymbol,
+            Symbol::Type::Struct* const t_structSymbol
+        ) const -> std::shared_ptr<const IEmittable<void>>;
+        auto CreateCopyGlueBody(
+            Symbol::Function* const t_glueSymbol,
+            Symbol::Type::Struct* const t_structSymbol
+        ) const -> std::shared_ptr<const IEmittable<void>>;
 
         std::string m_PackageName{};
 

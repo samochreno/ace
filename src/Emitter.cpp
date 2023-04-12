@@ -31,11 +31,18 @@
 #include "BoundNode/Module.hpp"
 #include "BoundNode/Function.hpp"
 #include "BoundNode/Variable/Normal/Static.hpp"
+#include "BoundNode/Variable/Parameter/Normal.hpp"
+#include "BoundNode/Statement/Block.hpp"
 #include "BoundNode/Statement/Variable.hpp"
 #include "BoundNode/Statement/Label.hpp"
 #include "BoundNode/Statement/BlockEnd.hpp"
+#include "BoundNode/Statement/Expression.hpp"
+#include "BoundNode/Expression/FunctionCall/Static.hpp"
+#include "BoundNode/Expression/VariableReference/Static.hpp"
+#include "BoundNode/Expression/VariableReference/Instance.hpp"
 #include "Log.hpp"
 #include "Symbol/Type/Base.hpp"
+#include "Symbol/Function.hpp"
 #include "Symbol/Variable/Normal/Static.hpp"
 #include "Symbol/Variable/Normal/Instance.hpp"
 #include "Symbol/Variable/Parameter/Base.hpp"
@@ -46,6 +53,7 @@
 #include "Utility.hpp"
 #include "Name.hpp"
 #include "SpecialIdentifier.hpp"
+#include "Core.hpp"
 
 namespace Ace
 {
@@ -68,9 +76,9 @@ namespace Ace
         m_C.Initialize(*m_Context, *m_Module);
 
         const auto symbols = Scope::GetRoot()->CollectAllDefinedSymbolsRecursive();
-
         const auto typeSymbols = DynamicCastFilter<Symbol::Type::IBase*>(symbols);
-        EmitTypes(typeSymbols);
+        const auto structSymbols = DynamicCastFilter<Symbol::Type::Struct*>(typeSymbols);
+        const auto variableSymbols = DynamicCastFilter<Symbol::Variable::Normal::Static*>(symbols);
 
         std::vector<const BoundNode::IBase*> nodes{}; 
         std::for_each(begin(m_ASTs), end(m_ASTs), [&]
@@ -79,12 +87,16 @@ namespace Ace
             const auto children = t_ast->GetChildren();
             nodes.insert(end(nodes), begin(children), end(children));
         });
-
-        const auto staticVariableSymbols = DynamicCastFilter<Symbol::Variable::Normal::Static*>(symbols);
-        EmitStaticVariables(staticVariableSymbols);
-
-        const auto functionSymbols = DynamicCastFilter<Symbol::Function*>(symbols);
         const auto functionNodes = DynamicCastFilter<const BoundNode::Function*>(nodes);
+       
+        EmitNativeTypes();
+        EmitStructTypes(structSymbols);
+
+        EmitCopyGlue(structSymbols);
+
+        EmitStaticVariables(variableSymbols);
+
+        const auto functionSymbols = Scope::GetRoot()->CollectDefinedSymbolsRecursive<Symbol::Function>();
         EmitFunctions(functionSymbols);
         
         std::vector<const Symbol::Function*> mainFunctionSymbols{};
@@ -122,7 +134,9 @@ namespace Ace
         );
 
         llvm::IRBuilder<> mainBuilder{ mainBlock };
-        auto* const mainValue = mainBuilder.CreateCall(m_FunctionMap.at(mainFunctionSymbols.front()));
+        auto* const mainValue = mainBuilder.CreateCall(
+            m_FunctionMap.at(mainFunctionSymbols.front())
+        );
         mainBuilder.CreateRet(mainValue);
 
         std::string originalModuleString{};
@@ -158,27 +172,39 @@ namespace Ace
         llvm::raw_string_ostream moduleOStream{ moduleString };
         moduleOStream << *m_Module;
         moduleOStream.flush();
-        std::ofstream irFileStream{ "/home/samo/repos/ace/ace/build/" + m_PackageName + ".ll" };
+        std::ofstream irFileStream
+        { 
+            "/home/samo/repos/ace/ace/build/" + m_PackageName + ".ll" 
+        };
         ACE_ASSERT(irFileStream);
         irFileStream << moduleString;
         moduleString.clear();
 
         std::error_code errorCode{};
-        llvm::raw_fd_ostream bitcodeFileOStream{ "/home/samo/repos/ace/ace/build/" + m_PackageName + ".bc", errorCode, llvm::sys::fs::OF_None };
+        llvm::raw_fd_ostream bitcodeFileOStream
+        { 
+            "/home/samo/repos/ace/ace/build/" + 
+            m_PackageName + ".bc", errorCode, llvm::sys::fs::OF_None 
+        };
         ACE_ASSERT(!errorCode);
         llvm::WriteBitcodeToFile(*m_Module, bitcodeFileOStream);
         bitcodeFileOStream.close();
         
         const auto timeLLCStart = now();
 
-        const std::string llc = "llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj /home/samo/repos/ace/ace/build/" + m_PackageName + ".bc -o /home/samo/repos/ace/ace/build/" + m_PackageName + ".obj";
+        const std::string llc = 
+            "llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj "
+            "/home/samo/repos/ace/ace/build/" + m_PackageName + 
+            ".bc -o /home/samo/repos/ace/ace/build/" + m_PackageName + ".obj";
         system(llc.c_str());
 
         const auto timeLLCEnd = now();
 
         const auto timeClangStart = now();
 
-        const std::string clang = "clang /home/samo/repos/ace/ace/build/" + m_PackageName + ".obj -lc -lm -o /home/samo/repos/ace/ace/build/" + m_PackageName;
+        const std::string clang = 
+            "clang /home/samo/repos/ace/ace/build/" + m_PackageName + 
+            ".obj -lc -lm -o /home/samo/repos/ace/ace/build/" + m_PackageName;
         system(clang.c_str());
 
         const auto timeClangEnd = now();
@@ -194,7 +220,9 @@ namespace Ace
         };
     }
 
-    auto Emitter::EmitFunctionBodyStatements(const std::vector<std::shared_ptr<const BoundNode::Statement::IBase>>& t_statements) -> void
+    auto Emitter::EmitFunctionBodyStatements(
+        const std::vector<std::shared_ptr<const BoundNode::Statement::IBase>>& t_statements
+    ) -> void
     {
         const auto parameterSymbols = m_FunctionSymbol->GetAllParameters();
         for (size_t i = 0; i < parameterSymbols.size(); i++)
@@ -206,7 +234,7 @@ namespace Ace
                 GetIRType(typeSymbol),
                 nullptr,
                 parameterSymbol->GetName()
-                );
+            );
 
             EmitCopy(
                 allocaInst,
@@ -223,47 +251,55 @@ namespace Ace
 
             ACE_ASSERT(!m_StatementIndexMap.contains(statement)); 
             m_StatementIndexMap[statement] = i;
+        
+            auto* const variableStatement = 
+                dynamic_cast<const BoundNode::Statement::Variable*>(statement);
 
-            if (auto* const variableStatement = dynamic_cast<const BoundNode::Statement::Variable*>(statement))
+            if (variableStatement)
             {
                 auto* const variableSymbol = variableStatement->GetSymbol();
-                ACE_ASSERT(!m_LocalVariableSymbolStatementIndexMap.contains(variableSymbol));
+                ACE_ASSERT(
+                    !m_LocalVariableSymbolStatementIndexMap.contains(variableSymbol)
+                );
                 m_LocalVariableSymbolStatementIndexMap[variableSymbol] = i;
                 // TODO: .emplace_back(...) doesn't work here. Fix.
-                m_LocalVariableSymbolStatementIndexPairs.push_back(LocalVariableSymbolStatementIndexPair{ variableSymbol, i });
+                m_LocalVariableSymbolStatementIndexPairs.push_back(
+                    LocalVariableSymbolStatementIndexPair{ variableSymbol, i }
+                );
             }
         }
 
-        ACE_ASSERT(
-            m_LocalVariableSymbolStatementIndexPairs.size() ==
-            m_FunctionSymbol->GetSelfScope()->CollectDefinedSymbolsRecursive<Symbol::Variable::Local>().size()
+        std::for_each(
+            begin(m_LocalVariableSymbolStatementIndexPairs), 
+            end(m_LocalVariableSymbolStatementIndexPairs), 
+            [&](const LocalVariableSymbolStatementIndexPair& t_symbolIndexPair)
+            {
+                auto* const variableSymbol = t_symbolIndexPair.LocalVariableSymbol;
+                auto* const type = GetIRType(variableSymbol->GetType());
+                ACE_ASSERT(!m_LocalVariableMap.contains(variableSymbol));
+                m_LocalVariableMap[variableSymbol] = m_BlockBuilder->Builder.CreateAlloca(
+                    type,
+                    nullptr,
+                    variableSymbol->GetName()
+                );
+            }
         );
-
-        std::for_each(begin(m_LocalVariableSymbolStatementIndexPairs), end(m_LocalVariableSymbolStatementIndexPairs), [&]
-        (const LocalVariableSymbolStatementIndexPair& t_variableSymbolStatementIndexPair)
-        {
-            auto* const variableSymbol = t_variableSymbolStatementIndexPair.LocalVariableSymbol;
-            auto* const type = GetIRType(variableSymbol->GetType());
-            ACE_ASSERT(!m_LocalVariableMap.contains(variableSymbol));
-            m_LocalVariableMap[variableSymbol] = m_BlockBuilder->Builder.CreateAlloca(
-                type,
-                nullptr,
-                variableSymbol->GetName()
-            );
-        });
 
         const auto blockStartIndicies = [&]() -> std::vector<size_t>
         {
             std::vector<size_t> indicies{};
 
-            if (t_statements.size() > 0)
+            if (!t_statements.empty())
             {
                 indicies.push_back(0);
             }
 
             for (size_t i = 0; i < t_statements.size(); i++)
             {
-                if (auto* const labelStatement = dynamic_cast<const BoundNode::Statement::Label*>(t_statements.at(i).get()))
+                auto* const labelStatement =
+                    dynamic_cast<const BoundNode::Statement::Label*>(t_statements.at(i).get());
+
+                if (labelStatement)
                 {
                     indicies.push_back(i);
                 }
@@ -286,11 +322,14 @@ namespace Ace
             {
                 if (t_statement.get() == beginStatementIt->get())
                 {
-                    if (auto labelStatement = dynamic_cast<const BoundNode::Statement::Label*>(t_statement.get()))
+                    auto* const labelStatement =
+                        dynamic_cast<const BoundNode::Statement::Label*>(t_statement.get());
+
+                    if (labelStatement)
                     {
                         auto blockBuilder = std::make_unique<BlockBuilder>(
                             GetLabelBlockMap().GetOrCreateAt(labelStatement->GetLabelSymbol())
-                            );
+                        );
 
                         if (
                             m_BlockBuilder->Block->empty() ||
@@ -304,15 +343,22 @@ namespace Ace
                     }
                 }
 
-                const bool isTerminated = !m_BlockBuilder->Block->empty() && m_BlockBuilder->Block->back().isTerminator();
+                const bool isTerminated = 
+                    !m_BlockBuilder->Block->empty() && 
+                    m_BlockBuilder->Block->back().isTerminator();
+
                 if (isTerminated)
                     return;
 
                 t_statement->Emit(*this);
+                
+                auto* const blockEndStatement = 
+                    dynamic_cast<const BoundNode::Statement::BlockEnd*>(t_statement.get());
 
-                if (auto* const blockEndStatement = dynamic_cast<const BoundNode::Statement::BlockEnd*>(t_statement.get()))
+                if (blockEndStatement)
                 {
-                    auto blockVariableSymbols = blockEndStatement->GetSelfScope()->CollectDefinedSymbols<Symbol::Variable::Local>();
+                    auto blockVariableSymbols = 
+                        blockEndStatement->GetSelfScope()->CollectDefinedSymbols<Symbol::Variable::Local>();
 
                     std::sort(begin(blockVariableSymbols), end(blockVariableSymbols), [&]
                     (const Symbol::Variable::Local* const t_lhs, const Symbol::Variable::Local* const t_rhs)
@@ -325,7 +371,10 @@ namespace Ace
                     std::for_each(begin(blockVariableSymbols), end(blockVariableSymbols), [&]
                     (Symbol::Variable::Local* const t_variableSymbol)
                     {
-                        EmitDrop({ m_LocalVariableMap.at(t_variableSymbol), t_variableSymbol->GetType() });
+                        EmitDrop({ 
+                            m_LocalVariableMap.at(t_variableSymbol), 
+                            t_variableSymbol->GetType() 
+                        });
                     });
                 }
             });
@@ -345,7 +394,10 @@ namespace Ace
         }
     }
 
-    auto Emitter::EmitLoadArgument(const size_t& t_index, llvm::Type* const t_type) -> llvm::Value*
+    auto Emitter::EmitLoadArgument(
+        const size_t& t_index, 
+        llvm::Type* const t_type
+    ) const -> llvm::Value*
     {
         return m_BlockBuilder->Builder.CreateLoad(
             t_type,
@@ -361,7 +413,8 @@ namespace Ace
         auto operatorName = t_dropData.TypeSymbol->GetFullyQualifiedName();
         operatorName.Sections.push_back(Name::Symbol::Section{ SpecialIdentifier::Operator::Drop });
 
-        const auto expOperatorSymbol = t_dropData.TypeSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(operatorName);
+        const auto expOperatorSymbol = 
+            t_dropData.TypeSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(operatorName);
 
         // TODO: Force every type to have a drop (for members).
         if (!expOperatorSymbol)
@@ -388,34 +441,39 @@ namespace Ace
         });
     }
 
-    auto Emitter::EmitDropLocalVariablesBeforeStatement(const BoundNode::Statement::IBase* const t_statement) -> void
+    auto Emitter::EmitDropLocalVariablesBeforeStatement(
+        const BoundNode::Statement::IBase* const t_statement
+    ) -> void
     {
         const auto statementIndex = m_StatementIndexMap.at(t_statement);
         auto* scope = t_statement->GetScope();
 
-        std::for_each(rbegin(m_LocalVariableSymbolStatementIndexPairs), rend(m_LocalVariableSymbolStatementIndexPairs), [&]
-        (const LocalVariableSymbolStatementIndexPair& t_variableSymbolStatementIndexPair)
-        {
-            const auto variableStatementIndex = t_variableSymbolStatementIndexPair.StatementIndex;
-
-            if (variableStatementIndex >= statementIndex)
-                return;
-
-            auto* const variableSymbol = t_variableSymbolStatementIndexPair.LocalVariableSymbol;
-
-            if (variableSymbol->GetScope() != scope)
+        std::for_each(
+            rbegin(m_LocalVariableSymbolStatementIndexPairs), 
+            rend(m_LocalVariableSymbolStatementIndexPairs), [&]
+            (const LocalVariableSymbolStatementIndexPair& t_symbolIndexPair)
             {
-                if (variableSymbol->GetScope()->GetNestLevel() >= scope->GetNestLevel())
+                const auto variableStatementIndex = t_symbolIndexPair.StatementIndex;
+
+                if (variableStatementIndex >= statementIndex)
                     return;
 
-                scope = variableSymbol->GetScope();
-            }
+                auto* const variableSymbol = t_symbolIndexPair.LocalVariableSymbol;
 
-            EmitDrop({
-                m_LocalVariableMap.at(variableSymbol),
-                variableSymbol->GetType()
+                if (variableSymbol->GetScope() != scope)
+                {
+                    if (variableSymbol->GetScope()->GetNestLevel() >= scope->GetNestLevel())
+                        return;
+
+                    scope = variableSymbol->GetScope();
+                }
+
+                EmitDrop({
+                    m_LocalVariableMap.at(variableSymbol),
+                    variableSymbol->GetType()
                 });
-        });
+            }
+        );
 
         EmitDropArguments();
     }
@@ -429,46 +487,44 @@ namespace Ace
             EmitDrop({
                 m_LocalVariableMap.at(t_parameterSymbol),
                 t_parameterSymbol->GetType()
-                });
+            });
         });
     }
 
-    auto Emitter::EmitCopy(llvm::Value* const t_lhsValue, llvm::Value* const t_rhsValue, Symbol::Type::IBase* const t_typeSymbol) -> void
+    auto Emitter::EmitCopy(
+        llvm::Value* const t_lhsValue, 
+        llvm::Value* const t_rhsValue, 
+        Symbol::Type::IBase* const t_typeSymbol
+    ) -> void
     {
+        auto [scope, partialSignature] = [&]() -> std::pair<Scope*, std::string>
+        {
+            if (t_typeSymbol->IsReference())
+            {
+                auto* const pointerTypeSymbol = NativeSymbol::Pointer.GetSymbol();
+                return { pointerTypeSymbol->GetScope(), pointerTypeSymbol->CreatePartialSignature() };
+            }
+
+            return { t_typeSymbol->GetUnaliased()->GetScope(), t_typeSymbol->CreatePartialSignature() };
+        }();
+
+        auto* const glueSymbol = scope->ExclusiveResolveSymbol<Symbol::Function>(
+            SpecialIdentifier::CreateCopyGlue(partialSignature)
+        ).Unwrap();
+
         auto* const type = GetIRType(t_typeSymbol);
+        auto* const pointerType = llvm::PointerType::get(type, 0);
 
-        auto operatorName = t_typeSymbol->GetFullyQualifiedName();
-        operatorName.Sections.push_back(Name::Symbol::Section{ SpecialIdentifier::Operator::Copy });
+        auto* const lhsAllocaInst = m_BlockBuilder->Builder.CreateAlloca(pointerType);
+        m_BlockBuilder->Builder.CreateStore(t_lhsValue, lhsAllocaInst);
 
-        const auto expOperatorSymbol = t_typeSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(operatorName);
+        auto* const rhsAllocaInst = m_BlockBuilder->Builder.CreateAlloca(pointerType);
+        m_BlockBuilder->Builder.CreateStore(t_rhsValue, rhsAllocaInst);
 
-        if (!t_typeSymbol->IsReference() && expOperatorSymbol)
-        {
-            auto* const pointerType = llvm::PointerType::get(type, 0);
-
-            auto* const lhsAllocaInst = m_BlockBuilder->Builder.CreateAlloca(pointerType);
-            m_BlockBuilder->Builder.CreateStore(t_lhsValue, lhsAllocaInst);
-
-            auto* const rhsAllocaInst = m_BlockBuilder->Builder.CreateAlloca(pointerType);
-            m_BlockBuilder->Builder.CreateStore(t_rhsValue, rhsAllocaInst);
-
-            m_BlockBuilder->Builder.CreateCall(
-                m_FunctionMap.at(expOperatorSymbol.Unwrap()),
-                { lhsAllocaInst, rhsAllocaInst }
-            );
-        }
-        else
-        {
-            auto* const loadInst = m_BlockBuilder->Builder.CreateLoad(
-                type,
-                t_rhsValue
-            );
-
-            m_BlockBuilder->Builder.CreateStore(
-                loadInst,
-                t_lhsValue
-            );
-        }
+        m_BlockBuilder->Builder.CreateCall(
+            m_FunctionMap.at(glueSymbol),
+            { lhsAllocaInst, rhsAllocaInst }
+        );
     }
 
     auto Emitter::GetIRType(const Symbol::Type::IBase* const t_typeSymbol) const -> llvm::Type*
@@ -478,7 +534,7 @@ namespace Ace
             return llvm::PointerType::get(
                 m_TypeMap.at(t_typeSymbol->GetWithoutReference()->GetUnaliased()),
                 0
-                );
+            );
         }
         else
         {
@@ -486,13 +542,46 @@ namespace Ace
         }
     }
 
-    auto Emitter::EmitTypes(const std::vector<Symbol::Type::IBase*>& t_typeSymbols) -> void
+    auto Emitter::EmitCopyGlue(const std::vector<Symbol::Type::Struct*>& t_structSymbols) -> void
     {
-        EmitNativeTypes(t_typeSymbols);
-        EmitStructTypes(t_typeSymbols);
+        struct GlueStructSymbolPair
+        {
+            Symbol::Function* GlueSymbol{};
+            Symbol::Type::Struct* StructSymbol{};
+        };
+
+        std::vector<GlueStructSymbolPair> glueStructSymbolPairs{};
+
+        std::for_each(begin(t_structSymbols), end(t_structSymbols), [&]
+        (Symbol::Type::Struct* const t_structSymbol)
+        {
+            if (t_structSymbol == NativeSymbol::Void.GetSymbol())
+                return;
+
+            if (t_structSymbol->IsReference())
+                return;
+
+            glueStructSymbolPairs.emplace_back(
+                DefineCopyGlueSymbols(t_structSymbol),
+                t_structSymbol
+            );
+        });
+
+        std::for_each(begin(glueStructSymbolPairs), end(glueStructSymbolPairs), [&]
+        (const GlueStructSymbolPair& t_glueStructSymbolPair)
+        {
+            auto* const glueSymbol = t_glueStructSymbolPair.GlueSymbol;
+            auto* const structSymbol = t_glueStructSymbolPair.StructSymbol;
+
+            const auto body = structSymbol->IsTriviallyCopyable() ? 
+                CreateTrivialCopyGlueBody(glueSymbol, structSymbol) :
+                CreateCopyGlueBody(glueSymbol, structSymbol);
+
+            glueSymbol->SetBody(body);
+        });
     }
 
-    auto Emitter::EmitNativeTypes(const std::vector<Symbol::Type::IBase*>& t_typeSymbols) -> void
+    auto Emitter::EmitNativeTypes() -> void
     {
         for (auto& typeSymbolPair : NativeSymbol::GetIRTypeSymbolMap(*this))
         {
@@ -500,31 +589,29 @@ namespace Ace
         }
     }
 
-    auto Emitter::EmitStructTypes(const std::vector<Symbol::Type::IBase*>& t_typeSymbols) -> void
+    auto Emitter::EmitStructTypes(const std::vector<Symbol::Type::Struct*>& t_structSymbols) -> void
     {
-        const auto structTypeSymbols = DynamicCastFilter<const Symbol::Type::Struct*>(t_typeSymbols);
-
-        std::for_each(begin(structTypeSymbols), end(structTypeSymbols), [&]
-        (const Symbol::Type::Struct* const t_structTypeSymbol)
+        std::for_each(begin(t_structSymbols), end(t_structSymbols), [&]
+        (const Symbol::Type::Struct* const t_structSymbol)
         {
-            if (t_structTypeSymbol->IsNativeSized())
+            if (t_structSymbol->IsNativeSized())
                 return;
 
-            m_TypeMap[t_structTypeSymbol] = llvm::StructType::create(
+            m_TypeMap[t_structSymbol] = llvm::StructType::create(
                 *m_Context,
-                t_structTypeSymbol->CreateSignature()
+                t_structSymbol->CreateSignature()
             );
         });
 
-        std::for_each(begin(structTypeSymbols), end(structTypeSymbols), [&]
-        (const Symbol::Type::Struct* const t_structTypeSymbol)
+        std::for_each(begin(t_structSymbols), end(t_structSymbols), [&]
+        (const Symbol::Type::Struct* const t_structSymbol)
         {
-            if (t_structTypeSymbol->IsNativeSized())
+            if (t_structSymbol->IsNativeSized())
                 return;
 
             std::vector<llvm::Type*> elements{};
 
-            const auto variableSymbols = t_structTypeSymbol->GetVariables();
+            const auto variableSymbols = t_structSymbol->GetVariables();
             std::for_each(begin(variableSymbols), end(variableSymbols), [&]
             (const Symbol::Variable::Normal::Instance* const t_variableSymbol)
             {
@@ -532,11 +619,13 @@ namespace Ace
                 elements.push_back(type);
             });
 
-            static_cast<llvm::StructType*>(m_TypeMap.at(t_structTypeSymbol))->setBody(elements);
+            static_cast<llvm::StructType*>(m_TypeMap.at(t_structSymbol))->setBody(elements);
         });
     }
 
-    auto Emitter::EmitStaticVariables(const std::vector<Symbol::Variable::Normal::Static*>& t_variableSymbols) -> void
+    auto Emitter::EmitStaticVariables(
+        const std::vector<Symbol::Variable::Normal::Static*>& t_variableSymbols
+    ) -> void
     {
         std::for_each(begin(t_variableSymbols), end(t_variableSymbols), [&]
         (const Symbol::Variable::Normal::Static* const t_variableSymbol)
@@ -562,40 +651,48 @@ namespace Ace
         };
 
         std::vector<FunctionSymbolBlockPair> functionsSymbolBlockPairs{};
-        std::transform(begin(t_functionSymbols), end(t_functionSymbols), back_inserter(functionsSymbolBlockPairs), [&]
-        (Symbol::Function* const t_functionSymbol)
-        {
-            std::vector<llvm::Type*> parameterTypes{};
-            const auto parameterSymbols = t_functionSymbol->GetAllParameters();
-            std::transform(begin(parameterSymbols), end(parameterSymbols), back_inserter(parameterTypes), [&]
-            (Symbol::Variable::Parameter::IBase* const t_parameterSymbol)
+        std::transform(
+            begin(t_functionSymbols), 
+            end(t_functionSymbols), 
+            back_inserter(functionsSymbolBlockPairs), 
+            [&](Symbol::Function* const t_functionSymbol)
             {
-                return llvm::PointerType::get(GetIRType(t_parameterSymbol->GetType()), 0);
-            });
+                std::vector<llvm::Type*> parameterTypes{};
+                const auto parameterSymbols = t_functionSymbol->GetAllParameters();
+                std::transform(
+                    begin(parameterSymbols), 
+                    end(parameterSymbols), 
+                    back_inserter(parameterTypes), 
+                    [&](Symbol::Variable::Parameter::IBase* const t_parameterSymbol)
+                    {
+                        return llvm::PointerType::get(GetIRType(t_parameterSymbol->GetType()), 0);
+                    }
+                );
 
-            auto* const type = llvm::FunctionType::get(
-                GetIRType(t_functionSymbol->GetType()),
-                parameterTypes,
-                false
-            );
+                auto* const type = llvm::FunctionType::get(
+                    GetIRType(t_functionSymbol->GetType()),
+                    parameterTypes,
+                    false
+                );
 
-            auto* const function = llvm::Function::Create(
-                type,
-                llvm::Function::ExternalLinkage,
-                t_functionSymbol->CreateSignature(),
-                *m_Module
-            );
+                auto* const function = llvm::Function::Create(
+                    type,
+                    llvm::Function::ExternalLinkage,
+                    t_functionSymbol->CreateSignature(),
+                    *m_Module
+                );
 
-            m_FunctionMap[t_functionSymbol] = function;
+                m_FunctionMap[t_functionSymbol] = function;
 
-            auto* const block = llvm::BasicBlock::Create(
-                *m_Context,
-                "",
-                function
-            );
+                auto* const block = llvm::BasicBlock::Create(
+                    *m_Context,
+                    "",
+                    function
+                );
 
-            return FunctionSymbolBlockPair{ function, t_functionSymbol, block };
-        });
+                return FunctionSymbolBlockPair{ function, t_functionSymbol, block };
+            }
+        );
 
         auto clearFunctionData = [&]() -> void
         {
@@ -631,5 +728,188 @@ namespace Ace
         });
 
         clearFunctionData();
+    }
+
+    auto Emitter::DefineCopyGlueSymbols(
+        Symbol::Type::Struct* const t_structSymbol
+    ) const -> Symbol::Function*
+    {
+        auto* const selfScope = t_structSymbol->GetScope()->GetOrCreateChild({});
+
+        auto ownedGlueSymbol = std::make_unique<Symbol::Function>(
+            selfScope,
+            SpecialIdentifier::CreateCopyGlue(t_structSymbol->CreatePartialSignature()),
+            AccessModifier::Public,
+            false,
+            NativeSymbol::Void.GetSymbol()
+        );
+
+        auto* const glueSymbol = dynamic_cast<Symbol::Function*>(
+            Scope::DefineSymbol(std::move(ownedGlueSymbol)).Unwrap()
+        );
+
+        Scope::DefineSymbol(std::make_unique<Symbol::Variable::Parameter::Normal>(
+            selfScope,
+            SpecialIdentifier::CreateAnonymous(),
+            t_structSymbol->GetWithReference(),
+            0
+        )).Unwrap();
+        Scope::DefineSymbol(std::make_unique<Symbol::Variable::Parameter::Normal>(
+            selfScope,
+            SpecialIdentifier::CreateAnonymous(),
+            t_structSymbol->GetWithReference(),
+            1
+        )).Unwrap();
+
+        return glueSymbol;
+    }
+
+    auto Emitter::CreateTrivialCopyGlueBody(
+        Symbol::Function* const t_glueSymbol,
+        Symbol::Type::Struct* const t_structSymbol
+    ) const -> std::shared_ptr<const IEmittable<void>>
+    {
+        class TrivialCopyGlueBodyEmitter : public virtual IEmittable<void>
+        {
+        public:
+            TrivialCopyGlueBodyEmitter(Symbol::Type::Struct* const t_structSymbol)
+                : m_StructSymbol{ t_structSymbol }
+            {
+            }
+
+            auto Emit(Emitter& t_emitter) const -> void final
+            {
+                auto* const structType = t_emitter.GetIRType(m_StructSymbol);
+                auto* const structPtrType = llvm::PointerType::get(
+                    structType,
+                    0
+                );
+                
+                auto* const selfPtr = t_emitter.EmitLoadArgument(
+                    0,
+                    structPtrType
+                );
+
+                auto* const otherPtr = t_emitter.EmitLoadArgument(
+                    1, 
+                    structPtrType
+                );
+                auto* const otherValue = t_emitter.GetBlockBuilder().Builder.CreateLoad(
+                    structType,
+                    otherPtr
+                );
+
+                t_emitter.GetBlockBuilder().Builder.CreateStore(
+                    otherValue,
+                    selfPtr
+                );
+
+                t_emitter.GetBlockBuilder().Builder.CreateRetVoid();
+            }
+
+        private:
+            Symbol::Type::Struct* m_StructSymbol{};
+        };
+
+        return std::make_shared<const TrivialCopyGlueBodyEmitter>(t_structSymbol);
+    }
+    auto Emitter::CreateCopyGlueBody(
+        Symbol::Function* const t_glueSymbol,
+        Symbol::Type::Struct* const t_structSymbol
+    ) const -> std::shared_ptr<const IEmittable<void>>
+    {
+        auto* const bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
+
+        const auto parameterSymbols = t_glueSymbol->GetParameters();
+        const auto selfParameterReferenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
+            bodyScope,
+            parameterSymbols.at(0)
+        );
+        const auto otherParameterReferenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
+            bodyScope,
+            parameterSymbols.at(1)
+        );
+
+        auto operatorName = t_structSymbol->GetFullyQualifiedName();
+        operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Copy);
+
+        std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
+        if (const auto expOperatorSymbol = Scope::GetRoot()->ResolveStaticSymbol<Symbol::Function>(operatorName))
+        {
+            std::vector<std::shared_ptr<const BoundNode::Expression::IBase>> arguments{};
+            arguments.push_back(selfParameterReferenceExpressionNode);
+            arguments.push_back(otherParameterReferenceExpressionNode);
+
+            const auto functionCallExpressionNode = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
+                bodyScope,
+                expOperatorSymbol.Unwrap(),
+                arguments
+            );
+
+            const auto expressionStatementNode = std::make_shared<const BoundNode::Statement::Expression>(
+                functionCallExpressionNode
+            );
+
+            statements.push_back(expressionStatementNode);
+        }
+        else
+        {
+            const auto variableSymbols = t_structSymbol->GetVariables();
+            std::for_each(rbegin(variableSymbols), rend(variableSymbols), [&]
+            (Symbol::Variable::Normal::Instance* const t_variableSymbol)
+            {
+                auto* const variableTypeSymbol = t_variableSymbol->GetType();
+                auto* const variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
+                auto* const variableGlueSymbol = variableTypeScope->ExclusiveResolveSymbol<Symbol::Function>(
+                    SpecialIdentifier::CreateCopyGlue(variableTypeSymbol->CreatePartialSignature())
+                ).Unwrap();
+                
+                const auto selfParameterVariableRerefenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
+                    selfParameterReferenceExpressionNode,
+                    t_variableSymbol
+                );
+                const auto otherParameterVariableRerefenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
+                    otherParameterReferenceExpressionNode,
+                    t_variableSymbol
+                );
+
+                std::vector<std::shared_ptr<const BoundNode::Expression::IBase>> arguments{};
+                arguments.push_back(selfParameterVariableRerefenceExpressionNode);
+                arguments.push_back(otherParameterVariableRerefenceExpressionNode);
+
+                const auto functionCallExpressionNode = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
+                    bodyScope,
+                    variableGlueSymbol,
+                    arguments
+                );
+
+                const auto expressionStatementNode = std::make_shared<const BoundNode::Statement::Expression>(
+                    functionCallExpressionNode
+                );
+
+                statements.push_back(expressionStatementNode);
+            });
+        }
+
+        const auto bodyNode = std::make_shared<const BoundNode::Statement::Block>(
+            bodyScope->GetParent(),
+            statements
+        );
+
+        return Core::CreateTransformedAndVerifiedAST(
+            bodyNode,
+            [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            { 
+                return t_bodyNode->GetOrCreateTypeChecked({ NativeSymbol::Void.GetSymbol() }); 
+            },
+            [](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            {
+                return t_bodyNode->GetOrCreateLowered({});
+            },
+            [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            {
+                return t_bodyNode->GetOrCreateTypeChecked({ NativeSymbol::Void.GetSymbol() });
+            }
+        ).Unwrap();
     }
 }

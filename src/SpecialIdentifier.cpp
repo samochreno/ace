@@ -19,6 +19,11 @@ namespace Ace::SpecialIdentifier
         return "$template_" + t_templateName;
     }
 
+    auto CreateCopyGlue(const std::string& t_typePartialSignature) -> std::string
+    {
+        return "$copy_glue_" + t_typePartialSignature;
+    }
+
     auto IsReference(const std::string& t_identifier) -> bool
     {
         return t_identifier.starts_with("$reference_");
