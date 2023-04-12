@@ -2,7 +2,7 @@
 
 ## 💥 High Priority
 
-- [ ] Emit IR for native types' copy glue.
+- [ ] Change `IsInstance` to an `enum { Instance, Static }`.
 - [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Change `BoundNode::Expression::VariableReference::Instance` variable symbol to be also instance.
 - [ ] Implement a templated version of `Scope::DefineSymbol` so the return value doesn't have to be casted.
