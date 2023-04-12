@@ -30,6 +30,9 @@ namespace Ace::Symbol::Type
 
         virtual auto CanResolveSize() const -> bool = 0;
 
+        virtual auto SetAsTriviallyCopyable() -> void = 0;
+        virtual auto IsTriviallyCopyable() const -> bool = 0;
+
         virtual auto IsReference() const -> bool final;
         virtual auto GetWithoutReference() -> Symbol::Type::IBase* final;
         virtual auto GetWithoutReference() const -> const Symbol::Type::IBase* final;
