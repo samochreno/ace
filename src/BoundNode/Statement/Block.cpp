@@ -71,7 +71,7 @@ namespace Ace::BoundNode::Statement
 
     auto Block::Emit(Emitter& t_emitter) const -> void
     {
-        const auto statements = this->CreateExpanded();
+        const auto statements = CreateExpanded();
         t_emitter.EmitFunctionBodyStatements(statements);
     }
 
