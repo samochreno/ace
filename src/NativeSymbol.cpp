@@ -41,7 +41,14 @@ namespace Ace::NativeSymbol
         ACE_TRY(symbol, Scope::GetRoot()->ResolveStaticSymbol<Symbol::Type::IBase>(m_Name));
 
         if (m_IRTypeGetter.has_value())
+        {
             symbol->SetAsNativeSized();
+        }
+
+        if (m_IsTriviallyCopyable)
+        {
+            symbol->SetAsTriviallyCopyable();
+        }
 
         m_Symbol = symbol;
         return ExpectedVoid;
@@ -930,7 +937,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt8Ty(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type Int16
@@ -939,7 +947,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt16Ty(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type Int32
@@ -948,7 +957,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt32Ty(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type Int64
@@ -957,7 +967,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt64Ty(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type UInt8
@@ -966,7 +977,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt8Ty(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type UInt16
@@ -975,7 +987,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt16Ty(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type UInt32
@@ -984,7 +997,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt32Ty(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type UInt64
@@ -993,7 +1007,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt64Ty(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type Int
@@ -1002,7 +1017,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt32Ty(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type Float32
@@ -1011,7 +1027,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getFloatTy(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type Float64
@@ -1020,7 +1037,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getDoubleTy(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type Bool
@@ -1029,7 +1047,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt1Ty(t_emitter.GetContext());
-        }
+        },
+        true,
     };
 
     Type Void
@@ -1038,13 +1057,15 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getVoidTy(t_emitter.GetContext());
-        }
+        },
+        false,
     };
 
     Type String
     {
         Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "String" } }, true },
-        {}
+        {},
+        false,
     };
 
     Type Pointer
@@ -1053,7 +1074,8 @@ namespace Ace::NativeSymbol
         [](Emitter& t_emitter) -> llvm::Type*
         {
             return llvm::Type::getInt8PtrTy(t_emitter.GetContext());
-        }
+        },
+        true
     };
 
     TypeTemplate Reference

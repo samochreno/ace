@@ -56,9 +56,11 @@ namespace Ace::NativeSymbol
     public:
         Type(
             Name::Symbol::Full&& t_name,
-            std::optional<std::function<llvm::Type*(Emitter&)>>&& t_irTypeGetter
+            std::optional<std::function<llvm::Type*(Emitter&)>>&& t_irTypeGetter,
+            const bool& t_isTriviallyCopyable
         ) : m_Name{ std::move(t_name) },
-            m_IRTypeGetter{ std::move(t_irTypeGetter) }
+            m_IRTypeGetter{ std::move(t_irTypeGetter) },
+            m_IsTriviallyCopyable{ t_isTriviallyCopyable }
         {
         }
         virtual ~Type() = default;
@@ -80,6 +82,7 @@ namespace Ace::NativeSymbol
         Symbol::Type::IBase* m_Symbol{};
         Name::Symbol::Full m_Name{};
         std::optional<std::function<llvm::Type*(Emitter&)>> m_IRTypeGetter{};
+        bool m_IsTriviallyCopyable{};
     };
 
     class TypeTemplate : public virtual ITypeable
