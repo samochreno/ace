@@ -94,7 +94,7 @@ namespace Ace::Symbol
 
         const std::string lastSeparator = [&]() -> std::string
         {
-            if (IsInstance())
+            if (GetSymbolCategory() == SymbolCategory::Instance)
             {
                 return ".";
             }

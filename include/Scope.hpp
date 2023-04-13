@@ -142,7 +142,7 @@ namespace Ace
                 DoInstantiateTemplate<TSymbol>()
             ));
 
-            ACE_TRY_ASSERT(!symbol->IsInstance());
+            ACE_TRY_ASSERT(symbol->GetSymbolCategory() == SymbolCategory::Static);
 
             auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
             ACE_TRY_ASSERT(castedSymbol);
@@ -170,7 +170,7 @@ namespace Ace
                 DoInstantiateTemplate<TSymbol>()
             ));
 
-            ACE_TRY_ASSERT(symbol->IsInstance());
+            ACE_TRY_ASSERT(symbol->GetSymbolCategory() == SymbolCategory::Instance);
 
             auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
             ACE_TRY_ASSERT(castedSymbol);

@@ -7,7 +7,6 @@
 #include "Node/Template/Base.hpp"
 #include "Node/Type/Base.hpp"
 #include "Scope.hpp"
-#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 
 namespace Ace::Node::Template

@@ -13,7 +13,6 @@
 #include "Node/Template/Function.hpp"
 #include "Node/Variable/Normal/Static.hpp"
 #include "BoundNode/Module.hpp"
-#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"

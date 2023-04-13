@@ -9,7 +9,6 @@
 #include "BoundNode/Impl.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
-#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 #include "Error.hpp"
 

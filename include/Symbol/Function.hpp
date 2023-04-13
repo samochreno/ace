@@ -5,7 +5,6 @@
 #include <optional>
 #include <string>
 
-#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 #include "Symbol/Typed.hpp"
 #include "Symbol/SelfScoped.hpp"
@@ -25,19 +24,23 @@ namespace Ace::Symbol::Template
 
 namespace Ace::Symbol
 {
-    class Function : public virtual Symbol::IBase, public virtual Symbol::ITyped, public virtual Symbol::ISelfScoped, public virtual Symbol::ITemplatable
+    class Function : 
+        public virtual Symbol::IBase, 
+        public virtual Symbol::ITyped, 
+        public virtual Symbol::ISelfScoped, 
+        public virtual Symbol::ITemplatable
     {
     public:
         Function(
             Scope* const t_selfScope,
             const std::string& t_name,
+            const SymbolCategory& t_symbolCategory,
             const AccessModifier& t_accessModifier,
-            const bool& t_isInstance,
             Symbol::Type::IBase* const t_type
         ) : m_SelfScope{ t_selfScope },
             m_Name{ t_name },
+            m_SymbolCategory{ t_symbolCategory },
             m_AccessModifier{ t_accessModifier },
-            m_IsInstance{ t_isInstance },
             m_Type{ t_type }
         {
         }
@@ -47,8 +50,8 @@ namespace Ace::Symbol
         auto GetSelfScope() const -> Scope* final { return m_SelfScope; }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Function; }
+        auto GetSymbolCategory() const -> SymbolCategory final { return m_SymbolCategory; }
         auto GetAccessModifier() const -> AccessModifier final { return m_AccessModifier; }
-        auto IsInstance() const -> bool final { return m_IsInstance; }
 
         auto GetType() const -> Symbol::Type::IBase* final { return m_Type; }
 
@@ -71,8 +74,8 @@ namespace Ace::Symbol
     private:
         Scope* m_SelfScope{};
         std::string m_Name{};
+        SymbolCategory m_SymbolCategory{};
         AccessModifier m_AccessModifier{};
-        bool m_IsInstance{};
         Symbol::Type::IBase* m_Type{};
 
         std::optional<std::shared_ptr<const IEmittable<void>>> m_OptBody{};

@@ -41,6 +41,7 @@
 #include "BoundNode/Expression/VariableReference/Static.hpp"
 #include "BoundNode/Expression/VariableReference/Instance.hpp"
 #include "Log.hpp"
+#include "Symbol/Base.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Function.hpp"
 #include "Symbol/Variable/Normal/Static.hpp"
@@ -125,7 +126,7 @@ namespace Ace
         ACE_ASSERT(mainFunctionSymbols.size() == 1);
         auto* const mainFunctionSymbol = mainFunctionSymbols.front();
         ACE_ASSERT(mainFunctionSymbol->GetType()->GetUnaliased() == NativeSymbol::Int.GetSymbol());
-        ACE_ASSERT(!mainFunctionSymbol->IsInstance());
+        ACE_ASSERT(mainFunctionSymbol->GetSymbolCategory() == SymbolCategory::Static);
         ACE_ASSERT(mainFunctionSymbol->GetAllParameters().empty());
 
         auto* const mainType = llvm::FunctionType::get(
@@ -755,8 +756,8 @@ namespace Ace
         auto ownedGlueSymbol = std::make_unique<Symbol::Function>(
             selfScope,
             SpecialIdentifier::CreateCopyGlue(t_structSymbol->CreatePartialSignature()),
+            SymbolCategory::Static,
             AccessModifier::Public,
-            false,
             NativeSymbol::Void.GetSymbol()
         );
 
@@ -789,8 +790,8 @@ namespace Ace
         auto ownedGlueSymbol = std::make_unique<Symbol::Function>(
             selfScope,
             SpecialIdentifier::CreateDropGlue(t_structSymbol->CreatePartialSignature()),
+            SymbolCategory::Static,
             AccessModifier::Public,
-            false,
             NativeSymbol::Void.GetSymbol()
         );
 

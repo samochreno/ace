@@ -5,7 +5,6 @@
 
 #include "Symbol/Type/Alias/TemplateArgument/Base.hpp"
 #include "Symbol/Type/Base.hpp"
-#include "SymbolKind.hpp"
 #include "Scope.hpp"
 #include "Asserts.hpp"
 
@@ -31,8 +30,8 @@ namespace Ace::Symbol::Type::Alias::TemplateArgument
         auto GetSelfScope() const -> Scope* final { return m_AliasedType->GetSelfScope(); }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TypeAlias; }
+        auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
         auto GetAccessModifier() const -> AccessModifier final { return AccessModifier::Private; }
-        auto IsInstance() const -> bool final { return false; }
 
         auto SetAsNativeSized() -> void final { ACE_UNREACHABLE(); }
         auto IsNativeSized() const -> bool final { return m_AliasedType->IsNativeSized(); }

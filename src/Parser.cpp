@@ -736,8 +736,8 @@ namespace Ace::Parsing
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
-        bool isInstance = false;
-        bool isExtern = false;
+        bool hasSelfModifier = false;
+        bool hasExternModifier = false;
 
         if (it->TokenKind == Token::Kind::New(Token::Kind::MinusGreaterThan))
         {
@@ -753,14 +753,14 @@ namespace Ace::Parsing
             if (it->TokenKind == Token::Kind::New(Token::Kind::Identifier))
             {
                 ACE_TRY_ASSERT(it->String == SpecialIdentifier::Self);
-                isInstance = true;
+                hasSelfModifier = true;
                 ++it;
             }
 
             if (it->TokenKind == Token::Kind::New(Token::Kind::ExternKeyword))
             {
-                isExtern = true;
-                ACE_TRY_ASSERT(!isInstance);
+                hasExternModifier = true;
+                ACE_TRY_ASSERT(!hasSelfModifier);
                 ++it;
             }
 
@@ -781,7 +781,7 @@ namespace Ace::Parsing
                 ));
 
                 ACE_TRY_ASSERT(accessModifier == AccessModifier::Public);
-                ACE_TRY_ASSERT(!isInstance);
+                ACE_TRY_ASSERT(!hasSelfModifier);
 
                 return std::string{ name };
             }
@@ -789,7 +789,7 @@ namespace Ace::Parsing
 
         ACE_TRY(optBody, [&]() -> Expected<std::optional<std::shared_ptr<const Node::Statement::Block>>>
         {
-            if (isExtern)
+            if (hasExternModifier)
             {
                 ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::Semicolon));
                 ++it;
@@ -807,7 +807,7 @@ namespace Ace::Parsing
 
         const auto selfParameter = [&]() -> std::optional<std::shared_ptr<const Node::Variable::Parameter::Self>>
         {
-            if (!isInstance)
+            if (!hasSelfModifier)
             {
                 return std::nullopt;
             }
@@ -825,7 +825,6 @@ namespace Ace::Parsing
                 name,
                 typeName.Value,
                 attributes.Value,
-                isInstance,
                 accessModifier,
                 selfParameter,
                 parameters.Value,
@@ -859,7 +858,7 @@ namespace Ace::Parsing
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
-        bool isInstance = false;
+        bool hasSelfModifier = false;
 
         if (it->TokenKind == Token::Kind::New(Token::Kind::MinusGreaterThan))
         {
@@ -875,7 +874,7 @@ namespace Ace::Parsing
             if (it->TokenKind == Token::Kind::New(Token::Kind::Identifier))
             {
                 ACE_TRY_ASSERT(it->String == SpecialIdentifier::Self);
-                isInstance = true;
+                hasSelfModifier = true;
                 ++it;
             }
 
@@ -887,7 +886,7 @@ namespace Ace::Parsing
 
         const auto selfParameter = [&]() -> std::optional<std::shared_ptr<const Node::Variable::Parameter::Self>>
         {
-            if (!isInstance)
+            if (!hasSelfModifier)
             {
                 return std::nullopt;
             }
@@ -903,7 +902,6 @@ namespace Ace::Parsing
             name.Value,
             typeName.Value,
             attributes.Value,
-            isInstance,
             accessModifier,
             selfParameter,
             parameters.Value,
@@ -1072,7 +1070,7 @@ namespace Ace::Parsing
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
-        bool isInstance = false;
+        bool hasSelfModifier = false;
 
         if (it->TokenKind == Token::Kind::New(Token::Kind::MinusGreaterThan))
         {
@@ -1088,7 +1086,7 @@ namespace Ace::Parsing
             if (it->TokenKind == Token::Kind::New(Token::Kind::Identifier))
             {
                 ACE_TRY_ASSERT(it->String == SpecialIdentifier::Self);
-                isInstance = true;
+                hasSelfModifier = true;
                 ++it;
             }
 
@@ -1109,7 +1107,7 @@ namespace Ace::Parsing
                 ));
 
                 ACE_TRY_ASSERT(accessModifier == AccessModifier::Public);
-                ACE_TRY_ASSERT(!isInstance);
+                ACE_TRY_ASSERT(!hasSelfModifier);
 
                 return std::string{ name };
             }
@@ -1120,7 +1118,7 @@ namespace Ace::Parsing
 
         const auto selfParameter = [&]() -> std::optional<std::shared_ptr<const Node::Variable::Parameter::Self>>
         {
-            if (!isInstance)
+            if (!hasSelfModifier)
             {
                 return std::nullopt;
             }
@@ -1136,7 +1134,6 @@ namespace Ace::Parsing
             name,
             typeName.Value,
             attributes.Value,
-            isInstance,
             accessModifier,
             selfParameter,
             parameters.Value,
@@ -1175,7 +1172,7 @@ namespace Ace::Parsing
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
-        bool isExtern = false;
+        bool hasExternModifier = false;
 
         if (it->TokenKind == Token::Kind::New(Token::Kind::MinusGreaterThan))
         {
@@ -1190,7 +1187,7 @@ namespace Ace::Parsing
 
             if (it->TokenKind == Token::Kind::New(Token::Kind::ExternKeyword))
             {
-                isExtern = true;
+                hasExternModifier = true;
                 ++it;
             }
 
@@ -1199,7 +1196,7 @@ namespace Ace::Parsing
 
         ACE_TRY(optBody, [&]() -> Expected<std::optional<std::shared_ptr<const Node::Statement::Block>>>
         {
-            if (isExtern)
+            if (hasExternModifier)
             {
                 ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::Semicolon));
                 ++it;
@@ -1222,7 +1219,6 @@ namespace Ace::Parsing
                 name.Value,
                 typeName.Value,
                 attributes.Value,
-                false,
                 accessModifier,
                 std::nullopt,
                 parameters.Value,
@@ -1289,7 +1285,6 @@ namespace Ace::Parsing
             name.Value,
             typeName.Value,
             attributes.Value,
-            false,
             accessModifier,
             std::nullopt,
             parameters.Value,

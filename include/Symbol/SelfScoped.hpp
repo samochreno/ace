@@ -2,11 +2,6 @@
 
 #include "Symbol/Base.hpp"
 
-namespace Ace
-{
-    class Scope;
-}
-
 namespace Ace::Symbol
 {
     class ISelfScoped : public virtual Symbol::IBase

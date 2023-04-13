@@ -80,7 +80,6 @@ namespace Ace::Node
             m_Name,
             m_TypeName,
             clonedAttributes,
-            m_IsInstance,
             m_AccessModifier,
             clonedOptSelf,
             clonedParameters,
@@ -140,8 +139,8 @@ namespace Ace::Node
             std::make_unique<Symbol::Function>(
                 m_SelfScope,
                 m_Name,
+                m_OptSelf.has_value() ? SymbolCategory::Instance : SymbolCategory::Static,
                 m_AccessModifier,
-                m_IsInstance,
                 typeSymbol
                 )
         };

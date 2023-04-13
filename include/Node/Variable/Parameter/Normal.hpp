@@ -11,7 +11,6 @@
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Error.hpp"
-#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 
 namespace Ace::Node::Variable::Parameter

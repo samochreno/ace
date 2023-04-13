@@ -13,7 +13,7 @@
 #include "Node/Impl.hpp"
 #include "BoundNode/Base.hpp"
 #include "BoundNode/Function.hpp"
-#include "SymbolKind.hpp"
+#include "Symbol/Base.hpp"
 #include "Log.hpp"
 #include "Utility.hpp"
 #include "Scanner.hpp"

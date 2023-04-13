@@ -15,7 +15,6 @@
 #include "AccessModifier.hpp"
 #include "Error.hpp"
 #include "Scope.hpp"
-#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 #include "SpecialIdentifier.hpp"
 
@@ -32,7 +31,6 @@ namespace Ace::Node
             const std::string& t_name,
             const Name::Type& t_typeName,
             const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
-            const bool& t_isInstance,
             const AccessModifier& t_accessModifier,
             const std::optional<std::shared_ptr<const Node::Variable::Parameter::Self>>& t_optSelf,
             const std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>>& t_parameters,
@@ -41,7 +39,6 @@ namespace Ace::Node
             m_Name{ t_name },
             m_TypeName{ t_typeName },
             m_Attributes{ t_attributes },
-            m_IsInstance{ t_isInstance },
             m_AccessModifier{ t_accessModifier },
             m_OptSelf{ t_optSelf },
             m_Parameters{ t_parameters },
@@ -63,7 +60,6 @@ namespace Ace::Node
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
         
         auto GetSelfScope() const -> Scope* const { return m_SelfScope; }
-        auto IsInstance() const -> bool { return m_IsInstance; }
         auto GetAccessModifier() const -> AccessModifier { return m_AccessModifier; }
         auto GetParameters() const -> const std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>>& { return m_Parameters; }
 
@@ -72,7 +68,7 @@ namespace Ace::Node
         std::string m_Name{};
         Name::Type m_TypeName{};
         std::vector<std::shared_ptr<const Node::Attribute>> m_Attributes{};
-        bool m_IsInstance{};
+        SymbolCategory m_SymbolCategory{};
         AccessModifier m_AccessModifier{};
         std::optional<std::shared_ptr<const Node::Variable::Parameter::Self>> m_OptSelf{};
         std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>> m_Parameters{};

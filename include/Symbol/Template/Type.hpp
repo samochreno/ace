@@ -6,7 +6,6 @@
 #include "Symbol/Template/Base.hpp"
 #include "Symbol/SelfScoped.hpp"
 #include "Symbol/Template/Type.hpp"
-#include "SymbolKind.hpp"
 #include "Node/Template/Type.hpp"
 #include "Node/Type/Base.hpp"
 #include "Scope.hpp"
@@ -30,8 +29,8 @@ namespace Ace::Symbol::Template
         auto GetSelfScope() const -> Scope* final { return m_TemplateNode->GetSelfScope(); }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TypeTemplate; }
+        auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
         auto GetAccessModifier() const -> AccessModifier final { return m_TemplateNode->GetAST()->GetAccessModifier(); }
-        auto IsInstance() const -> bool final { return false; }
 
         auto GetASTName() const -> const std::string& final { return m_TemplateNode->GetAST()->GetName(); }
         auto InstantiateSymbols(

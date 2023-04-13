@@ -8,7 +8,7 @@
 #include "BoundNode/Statement/Label.hpp"
 #include "Scope.hpp"
 #include "Error.hpp"
-#include "SymbolKind.hpp"
+#include "Symbol/Base.hpp"
 
 namespace Ace::Node::Statement
 {

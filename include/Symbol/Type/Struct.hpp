@@ -5,7 +5,6 @@
 
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Variable/Normal/Instance.hpp"
-#include "SymbolKind.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 
@@ -29,8 +28,8 @@ namespace Ace::Symbol::Type
         auto GetSelfScope() const -> Scope* final { return m_SelfScope; }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Struct; }
+        auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
         auto GetAccessModifier() const -> AccessModifier final { return m_AccessModifier; }
-        auto IsInstance() const -> bool final { return false; }
 
         auto SetAsNativeSized() -> void final { m_IsNativeSized = true; }
         auto IsNativeSized() const -> bool final { return m_IsNativeSized; }
