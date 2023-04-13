@@ -38,6 +38,8 @@ namespace Ace::Symbol::Type
 
         auto SetAsTriviallyCopyable() -> void final { m_IsTriviallyCopyable = true; }
         auto IsTriviallyCopyable() const -> bool final { return m_IsTriviallyCopyable; }
+        auto SetAsTriviallyDroppable() -> void final { m_IsTriviallyDroppable = true; }
+        auto IsTriviallyDroppable() const -> bool final { return m_IsTriviallyDroppable; }
 
         auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_SelfScope->CollectTemplateArguments(); }
         auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_SelfScope->CollectImplTemplateArguments(); }
@@ -55,5 +57,6 @@ namespace Ace::Symbol::Type
         mutable bool m_DidResolveSize = false;
         
         bool m_IsTriviallyCopyable{};
+        bool m_IsTriviallyDroppable{};
     };
 }

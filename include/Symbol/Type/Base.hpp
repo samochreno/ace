@@ -32,6 +32,8 @@ namespace Ace::Symbol::Type
 
         virtual auto SetAsTriviallyCopyable() -> void = 0;
         virtual auto IsTriviallyCopyable() const -> bool = 0;
+        virtual auto SetAsTriviallyDroppable() -> void = 0;
+        virtual auto IsTriviallyDroppable() const -> bool = 0;
 
         virtual auto IsReference() const -> bool final;
         virtual auto GetWithoutReference() -> Symbol::Type::IBase* final;

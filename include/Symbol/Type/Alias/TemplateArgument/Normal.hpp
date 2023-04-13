@@ -40,6 +40,8 @@ namespace Ace::Symbol::Type::Alias::TemplateArgument
 
         auto SetAsTriviallyCopyable() -> void final { m_AliasedType->SetAsTriviallyCopyable(); }
         auto IsTriviallyCopyable() const -> bool final { return m_AliasedType->IsTriviallyCopyable(); }
+        auto SetAsTriviallyDroppable() -> void final { m_AliasedType->SetAsTriviallyDroppable(); }
+        auto IsTriviallyDroppable() const -> bool final { return m_AliasedType->IsTriviallyDroppable(); }
 
         auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_AliasedType->CollectTemplateArguments(); }
         auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_AliasedType->CollectImplTemplateArguments(); }
