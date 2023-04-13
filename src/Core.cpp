@@ -13,6 +13,7 @@
 #include "Node/Impl.hpp"
 #include "BoundNode/Base.hpp"
 #include "BoundNode/Function.hpp"
+#include "SymbolKind.hpp"
 #include "Log.hpp"
 #include "Utility.hpp"
 #include "Scanner.hpp"
@@ -34,8 +35,8 @@ namespace Ace::Core
         std::sort(begin(symbolCreatableNodes), end(symbolCreatableNodes), []
         (const Node::ISymbolCreatable* const t_lhs, const Node::ISymbolCreatable* const t_rhs)
         {
-            const auto lhsCreationOrder = Symbol::GetCreationOrder(t_lhs->GetSymbolKind());
-            const auto rhsCreationOrder = Symbol::GetCreationOrder(t_rhs->GetSymbolKind());
+            const auto lhsCreationOrder = GetSymbolCreationOrder(t_lhs->GetSymbolKind());
+            const auto rhsCreationOrder = GetSymbolCreationOrder(t_rhs->GetSymbolKind());
 
             if (lhsCreationOrder < rhsCreationOrder)
                 return true;

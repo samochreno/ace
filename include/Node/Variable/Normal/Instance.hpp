@@ -12,7 +12,7 @@
 #include "Name.hpp"
 #include "AccessModifier.hpp"
 #include "Error.hpp"
-#include "Symbol/Kind.hpp"
+#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 
 namespace Ace::Node::Variable::Normal
@@ -49,7 +49,7 @@ namespace Ace::Node::Variable::Normal
         auto GetName() const -> const std::string& final { return m_Name; }
 
         auto GetSymbolScope() const -> Scope* final { return m_Scope; }
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::InstanceVariable; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::InstanceVariable; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
     

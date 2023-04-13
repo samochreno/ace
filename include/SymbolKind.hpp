@@ -4,9 +4,9 @@
 
 #include "Error.hpp"
 
-namespace Ace::Symbol
+namespace Ace
 {
-    enum class Kind
+    enum class SymbolKind
     {
         None,
         Module,
@@ -23,10 +23,10 @@ namespace Ace::Symbol
         TemplatedImpl,
     };
 
-    inline auto operator&(const Kind& t_lhs, const Kind& t_rhs) -> uint16_t
+    inline auto operator&(const SymbolKind& t_lhs, const SymbolKind& t_rhs) -> uint16_t
     {
         return static_cast<uint16_t>(t_lhs) & static_cast<uint16_t>(t_rhs);
     }
 
-    auto GetCreationOrder(const Symbol::Kind& t_kind) -> int8_t;
+    auto GetSymbolCreationOrder(const SymbolKind& t_kind) -> int8_t;
 }

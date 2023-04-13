@@ -9,7 +9,7 @@
 #include "BoundNode/Impl.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
-#include "Symbol/Kind.hpp"
+#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 #include "Error.hpp"
 
@@ -41,7 +41,7 @@ namespace Ace::Node
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Impl>> final;
 
         auto GetSymbolScope() const -> Scope* final { return GetScope(); }
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::TemplatedImpl; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TemplatedImpl; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
 

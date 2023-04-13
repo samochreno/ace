@@ -3,7 +3,7 @@
 #include <string>
 
 #include "Symbol/Base.hpp"
-#include "Symbol/Kind.hpp"
+#include "SymbolKind.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "SpecialIdentifier.hpp"

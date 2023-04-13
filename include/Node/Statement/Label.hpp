@@ -8,6 +8,7 @@
 #include "BoundNode/Statement/Label.hpp"
 #include "Scope.hpp"
 #include "Error.hpp"
+#include "SymbolKind.hpp"
 
 namespace Ace::Node::Statement
 {
@@ -35,7 +36,7 @@ namespace Ace::Node::Statement
         auto CreateBoundStatement() const -> Expected<std::shared_ptr<const BoundNode::Statement::IBase>> final { return CreateBound(); }
 
         auto GetSymbolScope() const -> Scope* { return m_Scope; }
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::Label; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Label; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
 

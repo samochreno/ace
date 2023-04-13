@@ -5,6 +5,7 @@
 
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Variable/Normal/Instance.hpp"
+#include "SymbolKind.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 
@@ -27,7 +28,7 @@ namespace Ace::Symbol::Type
         auto GetScope() const -> Scope* final { return m_SelfScope->GetParent(); }
         auto GetSelfScope() const -> Scope* final { return m_SelfScope; }
         auto GetName() const -> const std::string& final { return m_Name; }
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::Struct; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Struct; }
         auto GetAccessModifier() const -> AccessModifier final { return m_AccessModifier; }
         auto IsInstance() const -> bool final { return false; }
 

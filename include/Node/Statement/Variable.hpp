@@ -12,7 +12,7 @@
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Error.hpp"
-#include "Symbol/Kind.hpp"
+#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 
 namespace Ace::Node::Statement
@@ -47,7 +47,7 @@ namespace Ace::Node::Statement
         auto GetName() const -> const std::string & final { return m_Name; }
 
         auto GetSymbolScope() const -> Scope* final { return m_Scope; }
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::LocalVariable; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::LocalVariable; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
 

@@ -5,8 +5,8 @@
 
 #include "Symbol/Template/Base.hpp"
 #include "Symbol/SelfScoped.hpp"
-#include "Symbol/Kind.hpp"
 #include "Symbol/Template/Type.hpp"
+#include "SymbolKind.hpp"
 #include "Node/Template/Type.hpp"
 #include "Node/Type/Base.hpp"
 #include "Scope.hpp"
@@ -29,7 +29,7 @@ namespace Ace::Symbol::Template
         auto GetScope() const -> Scope* final { return m_TemplateNode->GetScope(); }
         auto GetSelfScope() const -> Scope* final { return m_TemplateNode->GetSelfScope(); }
         auto GetName() const -> const std::string& final { return m_Name; }
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::TypeTemplate; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TypeTemplate; }
         auto GetAccessModifier() const -> AccessModifier final { return m_TemplateNode->GetAST()->GetAccessModifier(); }
         auto IsInstance() const -> bool final { return false; }
 

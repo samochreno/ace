@@ -11,8 +11,8 @@
 #include "Error.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
+#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
-#include "Symbol/Kind.hpp"
 
 namespace Ace::Node::Type
 {
@@ -49,7 +49,7 @@ namespace Ace::Node::Type
         auto GetAccessModifier() const -> AccessModifier final { return m_AccessModifier; }
 
         auto GetSymbolScope() const -> Scope* final { return GetScope(); }
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::Struct; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Struct; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
         

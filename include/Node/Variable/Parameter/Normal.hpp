@@ -11,6 +11,7 @@
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Error.hpp"
+#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 
 namespace Ace::Node::Variable::Parameter
@@ -45,7 +46,7 @@ namespace Ace::Node::Variable::Parameter
         auto GetName() const -> const std::string& final { return m_Name; }
 
         auto GetSymbolScope() const -> Scope* final { return m_Scope; }
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::ParameterVariable; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::ParameterVariable; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
 

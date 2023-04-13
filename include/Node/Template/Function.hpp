@@ -7,7 +7,7 @@
 #include "Node/Template/Base.hpp"
 #include "Node/Function.hpp"
 #include "Scope.hpp"
-#include "Symbol/Kind.hpp"
+#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 
 namespace Ace::Node::Template
@@ -31,7 +31,7 @@ namespace Ace::Node::Template
         auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Template::Function> final;
 
         auto GetSymbolScope() const -> Scope* final { return GetScope(); }
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::FunctionTemplate; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::FunctionTemplate; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
 

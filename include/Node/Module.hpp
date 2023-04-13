@@ -13,7 +13,7 @@
 #include "Node/Template/Function.hpp"
 #include "Node/Variable/Normal/Static.hpp"
 #include "BoundNode/Module.hpp"
-#include "Symbol/Kind.hpp"
+#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
@@ -64,7 +64,7 @@ namespace Ace::Node
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Module>> final;
 
         auto GetSymbolScope() const -> Scope* final;
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::Module; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Module; }
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
         auto ContinueCreatingSymbol(Symbol::IBase* const t_symbol) const -> Expected<void> final;

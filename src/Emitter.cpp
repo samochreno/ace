@@ -75,9 +75,9 @@ namespace Ace
     {
         m_C.Initialize(*m_Context, *m_Module);
 
-        const auto symbols = Scope::GetRoot()->CollectAllDefinedSymbolsRecursive();
-        const auto typeSymbols = DynamicCastFilter<Symbol::Type::IBase*>(symbols);
-        const auto structSymbols = DynamicCastFilter<Symbol::Type::Struct*>(typeSymbols);
+        const auto symbols         = Scope::GetRoot()->CollectAllDefinedSymbolsRecursive();
+        const auto typeSymbols     = DynamicCastFilter<Symbol::Type::IBase*>(symbols);
+        const auto structSymbols   = DynamicCastFilter<Symbol::Type::Struct*>(typeSymbols);
         const auto variableSymbols = DynamicCastFilter<Symbol::Variable::Normal::Static*>(symbols);
 
         std::vector<const BoundNode::IBase*> nodes{}; 

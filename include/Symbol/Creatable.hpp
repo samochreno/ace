@@ -4,7 +4,7 @@
 #include <string>
 #include <cstdint>
 
-#include "Symbol/Kind.hpp"
+#include "SymbolKind.hpp"
 #include "Error.hpp"
 
 namespace Ace
@@ -22,7 +22,7 @@ namespace Ace::Symbol
         virtual ~ICreatable() = default;
 
         virtual auto GetSymbolScope() const -> Scope* = 0;
-        virtual auto GetSymbolKind() const -> Kind = 0;
+        virtual auto GetSymbolKind() const -> SymbolKind = 0;
         virtual auto GetSymbolCreationSuborder() const -> size_t = 0;
         virtual auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> = 0;
     };

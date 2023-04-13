@@ -4,6 +4,7 @@
 
 #include "Symbol/Variable/Parameter/Base.hpp"
 #include "Symbol/Type/Base.hpp"
+#include "SymbolKind.hpp"
 #include "Scope.hpp"
 
 namespace Ace::Symbol::Variable::Parameter
@@ -22,7 +23,7 @@ namespace Ace::Symbol::Variable::Parameter
 
         auto GetScope() const -> Scope* final { return m_Scope; }
         auto GetName() const -> const std::string & final;
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::ParameterVariable; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::ParameterVariable; }
         auto GetAccessModifier() const -> AccessModifier final { return AccessModifier::Public; }
         auto IsInstance() const -> bool final { return false; }
 

@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "Symbol/Kind.hpp"
+#include "SymbolKind.hpp"
 #include "AccessModifier.hpp"
 #include "Name.hpp"
 
@@ -22,7 +22,7 @@ namespace Ace::Symbol
 
         virtual auto GetScope() const -> Scope* = 0;
         virtual auto GetName() const -> const std::string& = 0;
-        virtual auto GetSymbolKind() const -> Symbol::Kind = 0;
+        virtual auto GetSymbolKind() const -> SymbolKind = 0;
         virtual auto GetAccessModifier() const -> AccessModifier = 0;
         virtual auto IsInstance() const -> bool = 0;
 

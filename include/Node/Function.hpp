@@ -15,7 +15,7 @@
 #include "AccessModifier.hpp"
 #include "Error.hpp"
 #include "Scope.hpp"
-#include "Symbol/Kind.hpp"
+#include "SymbolKind.hpp"
 #include "Symbol/Base.hpp"
 #include "SpecialIdentifier.hpp"
 
@@ -58,7 +58,7 @@ namespace Ace::Node
         auto GetName() const -> const std::string& final { return m_Name; }
 
         auto GetSymbolScope() const -> Scope* final { return GetScope(); }
-        auto GetSymbolKind() const -> Symbol::Kind final { return Symbol::Kind::Function; }
+        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Function; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
         
