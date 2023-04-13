@@ -23,9 +23,4 @@ namespace Ace::SpecialIdentifier
     {
         return "$copy_glue_" + t_typePartialSignature;
     }
-
-    auto IsReference(const std::string& t_identifier) -> bool
-    {
-        return t_identifier.starts_with("$reference_");
-    }
 }
