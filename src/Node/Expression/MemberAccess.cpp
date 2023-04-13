@@ -5,7 +5,7 @@
 
 #include "BoundNode/Expression/VariableReference/Instance.hpp"
 #include "Error.hpp"
-#include "Symbol/Variable/Base.hpp"
+#include "Symbol/Variable/Normal/Instance.hpp"
 #include "Symbol/Type/Base.hpp"
 
 namespace Ace::Node::Expression
@@ -32,7 +32,7 @@ namespace Ace::Node::Expression
         ACE_TRY(boundExpression, m_Expression->CreateBoundExpression());
 
         ACE_TRY_ASSERT(m_Name.TemplateArguments.empty());
-        ACE_TRY(memberSymbol, GetScope()->ResolveInstanceSymbol<Symbol::Variable::IBase>(
+        ACE_TRY(memberSymbol, GetScope()->ResolveInstanceSymbol<Symbol::Variable::Normal::Instance>(
             boundExpression->GetTypeInfo().Symbol->GetWithoutReference(),
             m_Name
             ));

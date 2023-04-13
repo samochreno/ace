@@ -3,9 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "BoundNode/Expression/VariableReference/Base.hpp"
 #include "BoundNode/Expression/Base.hpp"
-#include "Symbol/Variable/Base.hpp"
+#include "Symbol/Variable/Normal/Instance.hpp"
 #include "Scope.hpp"
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
@@ -16,14 +15,14 @@ namespace Ace::BoundNode::Expression::VariableReference
 {
     class Instance :
         public std::enable_shared_from_this<BoundNode::Expression::VariableReference::Instance>,
-        public virtual BoundNode::Expression::VariableReference::IBase,
+        public virtual BoundNode::Expression::IBase,
         public virtual BoundNode::ITypeCheckable<BoundNode::Expression::VariableReference::Instance>,
         public virtual BoundNode::ILowerable<BoundNode::Expression::VariableReference::Instance>
     {
     public:
         Instance(
             const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression,
-            Symbol::Variable::IBase* const t_variableSymbol
+            Symbol::Variable::Normal::Instance* const t_variableSymbol
         ) : m_Expression{ t_expression },
             m_VariableSymbol{ t_variableSymbol }
         {
@@ -40,12 +39,11 @@ namespace Ace::BoundNode::Expression::VariableReference
 
         auto GetTypeInfo() const -> TypeInfo final;
 
-        auto GetVariableSymbol() const -> Symbol::Variable::IBase* final { return m_VariableSymbol; }
-
         auto GetExpression() const -> std::shared_ptr<const BoundNode::Expression::IBase> { return m_Expression; }
+        auto GetVariableSymbol() const -> Symbol::Variable::Normal::Instance* { return m_VariableSymbol; }
 
     private:
         std::shared_ptr<const BoundNode::Expression::IBase> m_Expression{};
-        Symbol::Variable::IBase* m_VariableSymbol{};
+        Symbol::Variable::Normal::Instance* m_VariableSymbol{};
     };
 }

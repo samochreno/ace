@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 
-#include "BoundNode/Expression/VariableReference/Base.hpp"
 #include "BoundNode/Expression/Base.hpp"
 #include "Symbol/Variable/Base.hpp"
 #include "Scope.hpp"
@@ -16,7 +15,7 @@ namespace Ace::BoundNode::Expression::VariableReference
 {
     class Static :
         public std::enable_shared_from_this<BoundNode::Expression::VariableReference::Static>,
-        public virtual BoundNode::Expression::VariableReference::IBase,
+        public virtual BoundNode::Expression::IBase,
         public virtual BoundNode::ITypeCheckable<BoundNode::Expression::VariableReference::Static>,
         public virtual BoundNode::ILowerable<BoundNode::Expression::VariableReference::Static>
     {
@@ -40,7 +39,7 @@ namespace Ace::BoundNode::Expression::VariableReference
 
         auto GetTypeInfo() const -> TypeInfo final;
 
-        auto GetVariableSymbol() const -> Symbol::Variable::IBase* final { return m_VariableSymbol; }
+        auto GetVariableSymbol() const -> Symbol::Variable::IBase* { return m_VariableSymbol; }
 
     private:
         Scope* m_Scope{};
