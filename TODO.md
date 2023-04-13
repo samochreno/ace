@@ -2,6 +2,7 @@
 
 ## 💥 High Priority
 
+- [ ] Change `Symbol::ICreatable` to `ISymbolCreatable`.
 - [ ] Change `IsInstance` to an `enum { Instance, Static }`.
 - [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Implement a templated version of `Scope::DefineSymbol` so the return value doesn't have to be casted.
