@@ -4,11 +4,9 @@
 
 - [ ] Change `IsInstance` to an `enum { Instance, Static }`.
 - [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
-- [ ] Change `BoundNode::Expression::VariableReference::Instance` variable symbol to be also instance.
 - [ ] Implement a templated version of `Scope::DefineSymbol` so the return value doesn't have to be casted.
 - [ ] Create `BoundNode/All.hpp` and include it in `Emitter.cpp`.
 - [ ] Remove or fix global variables.
-- [ ] Implement copy and drop glue.
 - [ ] Implement shared strings.
 - [ ] Strings.
 - Traits:
