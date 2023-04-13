@@ -92,7 +92,20 @@ namespace Ace
         EmitNativeTypes();
         EmitStructTypes(structSymbols);
 
-        EmitCopyGlue(structSymbols);
+        EmitGlue(
+            structSymbols,
+            &DefineCopyGlueSymbols,
+            [](Symbol::Type::Struct* const t_structSymbol) -> bool { return t_structSymbol->IsTriviallyCopyable(); },
+            &CreateTrivialCopyGlueBody,
+            &CreateCopyGlueBody
+        );
+        EmitGlue(
+            structSymbols,
+            &DefineDropGlueSymbols,
+            [](Symbol::Type::Struct* const t_structSymbol) -> bool { return t_structSymbol->IsTriviallyDroppable(); },
+            &CreateTrivialDropGlueBody,
+            &CreateDropGlueBody
+        );
 
         EmitStaticVariables(variableSymbols);
 
@@ -405,6 +418,42 @@ namespace Ace
         );
     }
 
+    auto Emitter::EmitCopy(
+        llvm::Value* const t_lhsValue, 
+        llvm::Value* const t_rhsValue, 
+        Symbol::Type::IBase* const t_typeSymbol
+    ) -> void
+    {
+        auto [scope, partialSignature] = [&]() -> std::pair<Scope*, std::string>
+        {
+            if (t_typeSymbol->IsReference())
+            {
+                auto* const pointerTypeSymbol = NativeSymbol::Pointer.GetSymbol();
+                return { pointerTypeSymbol->GetScope(), pointerTypeSymbol->CreatePartialSignature() };
+            }
+
+            return { t_typeSymbol->GetUnaliased()->GetScope(), t_typeSymbol->CreatePartialSignature() };
+        }();
+
+        auto* const glueSymbol = scope->ExclusiveResolveSymbol<Symbol::Function>(
+            SpecialIdentifier::CreateCopyGlue(partialSignature)
+        ).Unwrap();
+
+        auto* const type = GetIRType(t_typeSymbol);
+        auto* const pointerType = llvm::PointerType::get(type, 0);
+
+        auto* const lhsAllocaInst = m_BlockBuilder->Builder.CreateAlloca(pointerType);
+        m_BlockBuilder->Builder.CreateStore(t_lhsValue, lhsAllocaInst);
+
+        auto* const rhsAllocaInst = m_BlockBuilder->Builder.CreateAlloca(pointerType);
+        m_BlockBuilder->Builder.CreateStore(t_rhsValue, rhsAllocaInst);
+
+        m_BlockBuilder->Builder.CreateCall(
+            m_FunctionMap.at(glueSymbol),
+            { lhsAllocaInst, rhsAllocaInst }
+        );
+    }
+
     auto Emitter::EmitDrop(const ExpressionDropData& t_dropData) -> void
     {
         if (t_dropData.TypeSymbol->IsReference())
@@ -413,21 +462,18 @@ namespace Ace
         auto operatorName = t_dropData.TypeSymbol->GetFullyQualifiedName();
         operatorName.Sections.push_back(Name::Symbol::Section{ SpecialIdentifier::Operator::Drop });
 
-        const auto expOperatorSymbol = 
-            t_dropData.TypeSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(operatorName);
+        const auto glueSymbol = t_dropData.TypeSymbol->GetUnaliased()->GetScope()->ExclusiveResolveSymbol<Symbol::Function>(
+            SpecialIdentifier::CreateDropGlue(t_dropData.TypeSymbol->CreatePartialSignature())
+        ).Unwrap();
 
-        // TODO: Force every type to have a drop (for members).
-        if (!expOperatorSymbol)
-            return;
-
-        auto* const typeSymbol = expOperatorSymbol.Unwrap()->GetParameters().front()->GetType();
+        auto* const typeSymbol = glueSymbol->GetParameters().front()->GetType();
         auto* const type = GetIRType(typeSymbol);
 
         auto* const allocaInst = m_BlockBuilder->Builder.CreateAlloca(type);
         m_BlockBuilder->Builder.CreateStore(t_dropData.Value, allocaInst);
 
         m_BlockBuilder->Builder.CreateCall(
-            m_FunctionMap.at(expOperatorSymbol.Unwrap()),
+            m_FunctionMap.at(glueSymbol),
             { allocaInst }
         );
     }
@@ -491,42 +537,6 @@ namespace Ace
         });
     }
 
-    auto Emitter::EmitCopy(
-        llvm::Value* const t_lhsValue, 
-        llvm::Value* const t_rhsValue, 
-        Symbol::Type::IBase* const t_typeSymbol
-    ) -> void
-    {
-        auto [scope, partialSignature] = [&]() -> std::pair<Scope*, std::string>
-        {
-            if (t_typeSymbol->IsReference())
-            {
-                auto* const pointerTypeSymbol = NativeSymbol::Pointer.GetSymbol();
-                return { pointerTypeSymbol->GetScope(), pointerTypeSymbol->CreatePartialSignature() };
-            }
-
-            return { t_typeSymbol->GetUnaliased()->GetScope(), t_typeSymbol->CreatePartialSignature() };
-        }();
-
-        auto* const glueSymbol = scope->ExclusiveResolveSymbol<Symbol::Function>(
-            SpecialIdentifier::CreateCopyGlue(partialSignature)
-        ).Unwrap();
-
-        auto* const type = GetIRType(t_typeSymbol);
-        auto* const pointerType = llvm::PointerType::get(type, 0);
-
-        auto* const lhsAllocaInst = m_BlockBuilder->Builder.CreateAlloca(pointerType);
-        m_BlockBuilder->Builder.CreateStore(t_lhsValue, lhsAllocaInst);
-
-        auto* const rhsAllocaInst = m_BlockBuilder->Builder.CreateAlloca(pointerType);
-        m_BlockBuilder->Builder.CreateStore(t_rhsValue, rhsAllocaInst);
-
-        m_BlockBuilder->Builder.CreateCall(
-            m_FunctionMap.at(glueSymbol),
-            { lhsAllocaInst, rhsAllocaInst }
-        );
-    }
-
     auto Emitter::GetIRType(const Symbol::Type::IBase* const t_typeSymbol) const -> llvm::Type*
     {
         if (t_typeSymbol->IsReference())
@@ -542,7 +552,13 @@ namespace Ace
         }
     }
 
-    auto Emitter::EmitCopyGlue(const std::vector<Symbol::Type::Struct*>& t_structSymbols) -> void
+    auto Emitter::EmitGlue(
+        const std::vector<Symbol::Type::Struct*>& t_structSymbols,
+        const std::function<Symbol::Function*(Symbol::Type::Struct* const)> t_defineSymbols,
+        const std::function<bool(Symbol::Type::Struct* const)> t_isBodyTrivial,
+        const std::function<std::shared_ptr<const IEmittable<void>>(Symbol::Function* const, Symbol::Type::Struct* const)> t_createTrivialBody,
+        const std::function<std::shared_ptr<const IEmittable<void>>(Symbol::Function* const, Symbol::Type::Struct* const)> t_createBody
+    ) -> void
     {
         struct GlueStructSymbolPair
         {
@@ -562,7 +578,7 @@ namespace Ace
                 return;
 
             glueStructSymbolPairs.push_back(GlueStructSymbolPair{
-                DefineCopyGlueSymbols(t_structSymbol),
+                t_defineSymbols(t_structSymbol),
                 t_structSymbol
             });
         });
@@ -573,9 +589,9 @@ namespace Ace
             auto* const glueSymbol = t_glueStructSymbolPair.GlueSymbol;
             auto* const structSymbol = t_glueStructSymbolPair.StructSymbol;
 
-            const auto body = structSymbol->IsTriviallyCopyable() ? 
-                CreateTrivialCopyGlueBody(glueSymbol, structSymbol) :
-                CreateCopyGlueBody(glueSymbol, structSymbol);
+            const auto body = t_isBodyTrivial(structSymbol) ? 
+                t_createTrivialBody(glueSymbol, structSymbol) :
+                t_createBody(glueSymbol, structSymbol);
 
             glueSymbol->SetBody(body);
         });
@@ -732,7 +748,7 @@ namespace Ace
 
     auto Emitter::DefineCopyGlueSymbols(
         Symbol::Type::Struct* const t_structSymbol
-    ) const -> Symbol::Function*
+    ) -> Symbol::Function*
     {
         auto* const selfScope = t_structSymbol->GetScope()->GetOrCreateChild({});
 
@@ -764,10 +780,38 @@ namespace Ace
         return glueSymbol;
     }
 
+    auto Emitter::DefineDropGlueSymbols(
+        Symbol::Type::Struct* const t_structSymbol
+    ) -> Symbol::Function*
+    {
+        auto* const selfScope = t_structSymbol->GetScope()->GetOrCreateChild({});
+
+        auto ownedGlueSymbol = std::make_unique<Symbol::Function>(
+            selfScope,
+            SpecialIdentifier::CreateDropGlue(t_structSymbol->CreatePartialSignature()),
+            AccessModifier::Public,
+            false,
+            NativeSymbol::Void.GetSymbol()
+        );
+
+        auto* const glueSymbol = dynamic_cast<Symbol::Function*>(
+            Scope::DefineSymbol(std::move(ownedGlueSymbol)).Unwrap()
+        );
+
+        Scope::DefineSymbol(std::make_unique<Symbol::Variable::Parameter::Normal>(
+            selfScope,
+            SpecialIdentifier::CreateAnonymous(),
+            t_structSymbol->GetWithReference(),
+            0
+        )).Unwrap();
+
+        return glueSymbol;
+    }
+
     auto Emitter::CreateTrivialCopyGlueBody(
         Symbol::Function* const t_glueSymbol,
         Symbol::Type::Struct* const t_structSymbol
-    ) const -> std::shared_ptr<const IEmittable<void>>
+    ) -> std::shared_ptr<const IEmittable<void>>
     {
         class TrivialCopyGlueBodyEmitter : public virtual IEmittable<void>
         {
@@ -776,6 +820,7 @@ namespace Ace
                 : m_StructSymbol{ t_structSymbol }
             {
             }
+            ~TrivialCopyGlueBodyEmitter() = default;
 
             auto Emit(Emitter& t_emitter) const -> void final
             {
@@ -816,7 +861,7 @@ namespace Ace
     auto Emitter::CreateCopyGlueBody(
         Symbol::Function* const t_glueSymbol,
         Symbol::Type::Struct* const t_structSymbol
-    ) const -> std::shared_ptr<const IEmittable<void>>
+    ) -> std::shared_ptr<const IEmittable<void>>
     {
         auto* const bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
@@ -855,7 +900,7 @@ namespace Ace
         else
         {
             const auto variableSymbols = t_structSymbol->GetVariables();
-            std::for_each(rbegin(variableSymbols), rend(variableSymbols), [&]
+            std::for_each(begin(variableSymbols), end(variableSymbols), [&]
             (Symbol::Variable::Normal::Instance* const t_variableSymbol)
             {
                 auto* const variableTypeSymbol = t_variableSymbol->GetType();
@@ -890,6 +935,114 @@ namespace Ace
                 statements.push_back(expressionStatementNode);
             });
         }
+
+        const auto bodyNode = std::make_shared<const BoundNode::Statement::Block>(
+            bodyScope->GetParent(),
+            statements
+        );
+
+        return Core::CreateTransformedAndVerifiedAST(
+            bodyNode,
+            [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            { 
+                return t_bodyNode->GetOrCreateTypeChecked({ NativeSymbol::Void.GetSymbol() }); 
+            },
+            [](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            {
+                return t_bodyNode->GetOrCreateLowered({});
+            },
+            [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            {
+                return t_bodyNode->GetOrCreateTypeChecked({ NativeSymbol::Void.GetSymbol() });
+            }
+        ).Unwrap();
+    }
+
+    auto Emitter::CreateTrivialDropGlueBody(
+        Symbol::Function* const t_glueSymbol,
+        Symbol::Type::Struct* const t_structSymbol
+    ) -> std::shared_ptr<const IEmittable<void>>
+    {
+        class TrivialDropGlueBodyEmitter : public virtual IEmittable<void>
+        {
+        public:
+            TrivialDropGlueBodyEmitter() = default;
+            ~TrivialDropGlueBodyEmitter() = default;
+
+            auto Emit(Emitter& t_emitter) const -> void final
+            {
+                t_emitter.GetBlockBuilder().Builder.CreateRetVoid();
+            }
+        };
+
+        return std::make_shared<const TrivialDropGlueBodyEmitter>();
+    }
+
+    auto Emitter::CreateDropGlueBody(
+        Symbol::Function* const t_glueSymbol,
+        Symbol::Type::Struct* const t_structSymbol
+    ) -> std::shared_ptr<const IEmittable<void>>
+    {
+        auto* const bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
+
+        const auto parameterSymbols = t_glueSymbol->GetParameters();
+        const auto selfParameterReferenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
+            bodyScope,
+            parameterSymbols.at(0)
+        );
+
+        std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
+
+        auto operatorName = t_structSymbol->GetFullyQualifiedName();
+        operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Drop);
+        if (const auto expOperatorSymbol = Scope::GetRoot()->ResolveStaticSymbol<Symbol::Function>(operatorName))
+        {
+            std::vector<std::shared_ptr<const BoundNode::Expression::IBase>> arguments{};
+            arguments.push_back(selfParameterReferenceExpressionNode);
+
+            const auto functionCallExpressionNode = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
+                bodyScope,
+                expOperatorSymbol.Unwrap(),
+                arguments
+            );
+
+            const auto expressionStatementNode = std::make_shared<const BoundNode::Statement::Expression>(
+                functionCallExpressionNode
+            );
+
+            statements.push_back(expressionStatementNode);
+        }
+
+        const auto variableSymbols = t_structSymbol->GetVariables();
+        std::for_each(rbegin(variableSymbols), rend(variableSymbols), [&]
+        (Symbol::Variable::Normal::Instance* const t_variableSymbol)
+        {
+            auto* const variableTypeSymbol = t_variableSymbol->GetType();
+            auto* const variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
+            auto* const variableGlueSymbol = variableTypeScope->ExclusiveResolveSymbol<Symbol::Function>(
+                SpecialIdentifier::CreateDropGlue(variableTypeSymbol->CreatePartialSignature())
+            ).Unwrap();
+            
+            const auto selfParameterVariableRerefenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
+                selfParameterReferenceExpressionNode,
+                t_variableSymbol
+            );
+
+            std::vector<std::shared_ptr<const BoundNode::Expression::IBase>> arguments{};
+            arguments.push_back(selfParameterVariableRerefenceExpressionNode);
+
+            const auto functionCallExpressionNode = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
+                bodyScope,
+                variableGlueSymbol,
+                arguments
+            );
+
+            const auto expressionStatementNode = std::make_shared<const BoundNode::Statement::Expression>(
+                functionCallExpressionNode
+            );
+
+            statements.push_back(expressionStatementNode);
+        });
 
         const auto bodyNode = std::make_shared<const BoundNode::Statement::Block>(
             bodyScope->GetParent(),

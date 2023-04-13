@@ -10,6 +10,7 @@ namespace Ace::SpecialIdentifier
     auto CreateAnonymous() -> std::string;
     auto CreateTemplate(const std::string& t_templateName) -> std::string;
     auto CreateCopyGlue(const std::string& t_typePartialSignature) -> std::string;
+    auto CreateDropGlue(const std::string& t_typePartialSignature) -> std::string;
 
     inline constexpr const char* Self   = "self";
     inline constexpr const char* Main   = "main";

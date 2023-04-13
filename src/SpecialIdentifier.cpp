@@ -23,4 +23,9 @@ namespace Ace::SpecialIdentifier
     {
         return "$copy_glue_" + t_typePartialSignature;
     }
+
+    auto CreateDropGlue(const std::string& t_typePartialSignature) -> std::string
+    {
+        return "$drop_glue_" + t_typePartialSignature;
+    }
 }

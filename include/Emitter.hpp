@@ -130,6 +130,11 @@ namespace Ace
             const size_t& t_index, 
             llvm::Type* const t_type
         ) const -> llvm::Value*;
+        auto EmitCopy(
+            llvm::Value* const t_lhsValue, 
+            llvm::Value* const t_rhsValue, 
+            Symbol::Type::IBase* const t_typeSymbol
+        ) -> void;
         auto EmitDrop(const ExpressionDropData& t_dropData) -> void;
         auto EmitDropTemporaries(
             const std::vector<ExpressionDropData>& t_temporaries
@@ -138,11 +143,6 @@ namespace Ace
             const BoundNode::Statement::IBase* const t_statement
         ) -> void;
         auto EmitDropArguments() -> void;
-        auto EmitCopy(
-            llvm::Value* const t_lhsValue, 
-            llvm::Value* const t_rhsValue, 
-            Symbol::Type::IBase* const t_typeSymbol
-        ) -> void;
 
         auto GetContext() const -> llvm::LLVMContext& { return *m_Context.get(); }
         auto GetModule() const -> llvm::Module& { return *m_Module.get(); }
@@ -166,8 +166,12 @@ namespace Ace
         auto EmitTypes(
             const std::vector<Symbol::Type::IBase*>& t_typeSymbols
         ) -> void;
-        auto EmitCopyGlue(
-            const std::vector<Symbol::Type::Struct*>& t_structSymbols
+        auto EmitGlue(
+            const std::vector<Symbol::Type::Struct*>& t_structSymbols,
+            const std::function<Symbol::Function*(Symbol::Type::Struct* const)> t_defineSymbols,
+            const std::function<bool(Symbol::Type::Struct* const)> t_isBodyTrivial,
+            const std::function<std::shared_ptr<const IEmittable<void>>(Symbol::Function* const, Symbol::Type::Struct* const)> t_createTrivialBody,
+            const std::function<std::shared_ptr<const IEmittable<void>>(Symbol::Function* const, Symbol::Type::Struct* const)> t_createBody
         ) -> void;
         auto EmitNativeTypes() -> void;
         auto EmitStructTypes(
@@ -180,18 +184,29 @@ namespace Ace
             const std::vector<Symbol::Function*>& t_functionSymbols
         ) -> void;
 
-        auto DefineCopyGlueSymbols(
+        static auto DefineCopyGlueSymbols(
             Symbol::Type::Struct* const t_structSymbol
-        ) const -> Symbol::Function*;
+        ) -> Symbol::Function*;
+        static auto DefineDropGlueSymbols(
+            Symbol::Type::Struct* const t_structSymbol
+        ) -> Symbol::Function*;
 
-        auto CreateTrivialCopyGlueBody(
+        static auto CreateTrivialCopyGlueBody(
             Symbol::Function* const t_glueSymbol,
             Symbol::Type::Struct* const t_structSymbol
-        ) const -> std::shared_ptr<const IEmittable<void>>;
-        auto CreateCopyGlueBody(
+        ) -> std::shared_ptr<const IEmittable<void>>;
+        static auto CreateCopyGlueBody(
             Symbol::Function* const t_glueSymbol,
             Symbol::Type::Struct* const t_structSymbol
-        ) const -> std::shared_ptr<const IEmittable<void>>;
+        ) -> std::shared_ptr<const IEmittable<void>>;
+        static auto CreateTrivialDropGlueBody(
+            Symbol::Function* const t_glueSymbol,
+            Symbol::Type::Struct* const t_structSymbol
+        ) -> std::shared_ptr<const IEmittable<void>>;
+        static auto CreateDropGlueBody(
+            Symbol::Function* const t_glueSymbol,
+            Symbol::Type::Struct* const t_structSymbol
+        ) -> std::shared_ptr<const IEmittable<void>>;
 
         std::string m_PackageName{};
 
