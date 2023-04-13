@@ -312,7 +312,7 @@ namespace Ace
         const Scope* const t_resolvingFromScope,
         const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
         const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
-        const std::function<bool(const Symbol::IBase* const)> t_isCorrectSymbolType,
+        const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
         const std::vector<const Scope*> t_scopes,
         const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
         const bool& t_doInstantiateTemplate
@@ -335,7 +335,7 @@ namespace Ace
         const Scope* const t_resolvingFromScope,
         const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
         const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
-        const std::function<bool(const Symbol::IBase* const)> t_isCorrectSymbolType,
+        const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
         const std::vector<const Scope*> t_scopes,
         const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
         const std::vector<Symbol::Type::IBase*>& t_templateArguments,
