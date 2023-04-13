@@ -561,10 +561,10 @@ namespace Ace
             if (t_structSymbol->IsReference())
                 return;
 
-            glueStructSymbolPairs.emplace_back(
+            glueStructSymbolPairs.push_back(GlueStructSymbolPair{
                 DefineCopyGlueSymbols(t_structSymbol),
                 t_structSymbol
-            );
+	    });
         });
 
         std::for_each(begin(glueStructSymbolPairs), end(glueStructSymbolPairs), [&]
