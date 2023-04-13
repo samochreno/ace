@@ -564,7 +564,7 @@ namespace Ace
             glueStructSymbolPairs.push_back(GlueStructSymbolPair{
                 DefineCopyGlueSymbols(t_structSymbol),
                 t_structSymbol
-	    });
+            });
         });
 
         std::for_each(begin(glueStructSymbolPairs), end(glueStructSymbolPairs), [&]
