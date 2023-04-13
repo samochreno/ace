@@ -2,9 +2,9 @@
 
 ## 💥 High Priority
 
-- [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
-- [ ] Implement a templated version of `Scope::DefineSymbol` so the return value doesn't have to be casted.
 - [ ] Create `BoundNode/All.hpp` and include it in `Emitter.cpp`.
+- [ ] Implement a templated version of `Scope::DefineSymbol` so the return value doesn't have to be casted.
+- [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Remove or fix global variables.
 - [ ] Implement shared strings.
 - [ ] Strings.
@@ -19,9 +19,9 @@
 - Add templated conversion operators (`ref.ace` at line 16), this might require implementing template argument deduction though:
   - [ ] Change `__deref_as[T](...)` to take any expression of type convertible to `std::Pointer`.
   - [ ] Remove `std::Reference[T]::ptr(...)`.
-- [ ] Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause undefined behaviour. This could maybe be fixed by forcing the copy trait to also implement default trait).
+- [ ] Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour. This could maybe be fixed by forcing the copy trait to also implement default trait).
 - [ ] Try simplifying symbol resolution.
-- [ ] Check if there isnt any better way to not use external programs like `llc` and `clang`.
+- [ ] Check if there is any better way to not use external programs like `llc` and `clang`.
 
 ## 🔔 Medium Priority
 
