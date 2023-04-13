@@ -15,7 +15,6 @@
 #include "SpecialIdentifier.hpp"
 #include "Symbol/Base.hpp"
 #include "Symbol/Type/Base.hpp"
-#include "Symbol/Creatable.hpp"
 #include "Symbol/Module.hpp"
 #include "Symbol/Typed.hpp"
 #include "Symbol/Templatable.hpp"
@@ -23,6 +22,7 @@
 #include "Symbol/Template/Type.hpp"
 #include "Symbol/Type/Alias/TemplateArgument/Impl.hpp"
 #include "Symbol/Type/Alias/TemplateArgument/Normal.hpp"
+#include "SymbolCreatable.hpp"
 #include "Symbol/TemplatedImpl.hpp"
 #include "BoundNode/Expression/Base.hpp"
 #include "BoundNode/Expression/ConversionPlaceholder.hpp"
@@ -152,11 +152,11 @@ namespace Ace
         return symbol;
     }
 
-    auto Scope::DefineSymbol(const Symbol::ICreatable* const t_creatable) -> Expected<Symbol::IBase*>
+    auto Scope::DefineSymbol(const ISymbolCreatable* const t_creatable) -> Expected<Symbol::IBase*>
     {
         auto* const scope = t_creatable->GetSymbolScope();
 
-        if (auto partiallyCreatable = dynamic_cast<const Symbol::IPartiallyCreatable*>(t_creatable))
+        if (auto partiallyCreatable = dynamic_cast<const IPartiallySymbolCreatable*>(t_creatable))
         {
             if (auto optDefinedSymbol = scope->GetDefinedSymbol(partiallyCreatable->GetName(), {}, {}))
             {

@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Change `Symbol::ICreatable` to `ISymbolCreatable`.
 - [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Implement a templated version of `Scope::DefineSymbol` so the return value doesn't have to be casted.
 - [ ] Create `BoundNode/All.hpp` and include it in `Emitter.cpp`.

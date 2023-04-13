@@ -12,8 +12,8 @@
 #include "Token.hpp"
 #include "Error.hpp"
 #include "Symbol/Base.hpp"
-#include "Symbol/Creatable.hpp"
 #include "Symbol/SelfScoped.hpp"
+#include "SymbolCreatable.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Name.hpp"
 
@@ -64,7 +64,7 @@ namespace Ace
         auto HasChild(const Scope* const t_child) const -> bool;
 
         static auto DefineSymbol(std::unique_ptr<Symbol::IBase>&& t_symbol)   -> Expected<Symbol::IBase*>;
-        static auto DefineSymbol(const Symbol::ICreatable* const t_creatable) -> Expected<Symbol::IBase*>;
+        static auto DefineSymbol(const ISymbolCreatable* const t_creatable) -> Expected<Symbol::IBase*>;
 
         auto DefineAssociation(Scope* const t_association) -> void
         {

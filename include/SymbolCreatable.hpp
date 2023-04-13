@@ -7,12 +7,12 @@
 #include "Symbol/Base.hpp"
 #include "Error.hpp"
 
-namespace Ace::Symbol
+namespace Ace
 {
-    class ICreatable
+    class ISymbolCreatable
     {
     public:
-        virtual ~ICreatable() = default;
+        virtual ~ISymbolCreatable() = default;
 
         virtual auto GetSymbolScope() const -> Scope* = 0;
         virtual auto GetSymbolKind() const -> SymbolKind = 0;
@@ -20,10 +20,10 @@ namespace Ace::Symbol
         virtual auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> = 0;
     };
 
-    class IPartiallyCreatable : public virtual ICreatable
+    class IPartiallySymbolCreatable : public virtual ISymbolCreatable
     {
     public:
-        virtual ~IPartiallyCreatable() = default;
+        virtual ~IPartiallySymbolCreatable() = default;
 
         virtual auto GetName() const -> const std::string& = 0;
         virtual auto ContinueCreatingSymbol(Symbol::IBase* const t_symbol) const -> Expected<void> = 0;

@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <functional>
 
-#include "Symbol/Creatable.hpp"
+#include "SymbolCreatable.hpp"
 #include "Error.hpp"
 #include "Scope.hpp"
 #include "Asserts.hpp"
@@ -40,7 +40,7 @@ namespace Ace::Node
         virtual auto CreateBound() const -> Expected<std::shared_ptr<const T>> = 0;
     };
 
-    class ISymbolCreatable : public virtual Node::IBase, public virtual Symbol::ICreatable
+    class ISymbolCreatable : public virtual Node::IBase, public virtual Ace::ISymbolCreatable
     {
     public:
         virtual ~ISymbolCreatable() = default;
@@ -48,7 +48,7 @@ namespace Ace::Node
 
     class IPartiallySymbolCreatable :
         public virtual Node::ISymbolCreatable,
-        public virtual Symbol::IPartiallyCreatable
+        public virtual Ace::IPartiallySymbolCreatable
     {
     public:
         virtual ~IPartiallySymbolCreatable() = default;
