@@ -4,11 +4,13 @@
 #include <string>
 #include <cstdint>
 
-#include "Symbol/Base.hpp"
 #include "Error.hpp"
+#include "Symbol/Base.hpp"
 
 namespace Ace
 {
+    class Scope;
+
     class ISymbolCreatable
     {
     public:
