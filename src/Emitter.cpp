@@ -28,16 +28,9 @@
 #pragma warning(pop)
 
 #include "Scope.hpp"
+#include "Symbol/All.hpp"
 #include "BoundNode/All.hpp"
 #include "Log.hpp"
-#include "Symbol/Base.hpp"
-#include "Symbol/Type/Base.hpp"
-#include "Symbol/Function.hpp"
-#include "Symbol/Variable/Normal/Static.hpp"
-#include "Symbol/Variable/Normal/Instance.hpp"
-#include "Symbol/Variable/Parameter/Base.hpp"
-#include "Symbol/Variable/Local.hpp"
-#include "Symbol/Type/Struct.hpp"
 #include "Asserts.hpp"
 #include "NativeSymbol.hpp"
 #include "Utility.hpp"
