@@ -63,8 +63,31 @@ namespace Ace
         auto GetOrCreateChild(const std::optional<std::string>& t_optName) -> Scope*;
         auto HasChild(const Scope* const t_child) const -> bool;
 
-        static auto DefineSymbol(std::unique_ptr<Symbol::IBase>&& t_symbol)   -> Expected<Symbol::IBase*>;
-        static auto DefineSymbol(const ISymbolCreatable* const t_creatable) -> Expected<Symbol::IBase*>;
+        template<typename TSymbol>
+        static auto DefineSymbol(std::unique_ptr<TSymbol>&& t_symbol) -> Expected<TSymbol*>
+        {
+            auto* const symbol = t_symbol.get();
+            auto* const scope = symbol->GetScope();
+            ACE_TRY_ASSERT(scope->CanDefineSymbol(symbol));
+            scope->m_SymbolMap[symbol->GetName()].push_back(std::move(t_symbol));
+            return symbol;
+        }
+        static auto DefineSymbol(const ISymbolCreatable* const t_creatable) -> Expected<Symbol::IBase*>
+        {
+            auto* const scope = t_creatable->GetSymbolScope();
+
+            if (auto partiallyCreatable = dynamic_cast<const IPartiallySymbolCreatable*>(t_creatable))
+            {
+                if (auto optDefinedSymbol = scope->GetDefinedSymbol(partiallyCreatable->GetName(), {}, {}))
+                {
+                    ACE_TRY_VOID(partiallyCreatable->ContinueCreatingSymbol(optDefinedSymbol.value()));
+                    return optDefinedSymbol.value();
+                }
+            }
+
+            ACE_TRY(symbol, t_creatable->CreateSymbol());
+            return DefineSymbol(std::move(symbol));
+        }
 
         auto DefineAssociation(Scope* const t_association) -> void
         {

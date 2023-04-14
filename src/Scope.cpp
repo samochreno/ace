@@ -143,32 +143,6 @@ namespace Ace
         return foundIt != end(m_Children);
     }
 
-    auto Scope::DefineSymbol(std::unique_ptr<Symbol::IBase>&& t_symbol) -> Expected<Symbol::IBase*>
-    {
-        auto* const symbol = t_symbol.get();
-        auto* const scope = symbol->GetScope();
-        ACE_TRY_ASSERT(scope->CanDefineSymbol(symbol));
-        scope->m_SymbolMap[symbol->GetName()].push_back(std::move(t_symbol));
-        return symbol;
-    }
-
-    auto Scope::DefineSymbol(const ISymbolCreatable* const t_creatable) -> Expected<Symbol::IBase*>
-    {
-        auto* const scope = t_creatable->GetSymbolScope();
-
-        if (auto partiallyCreatable = dynamic_cast<const IPartiallySymbolCreatable*>(t_creatable))
-        {
-            if (auto optDefinedSymbol = scope->GetDefinedSymbol(partiallyCreatable->GetName(), {}, {}))
-            {
-                ACE_TRY_VOID(partiallyCreatable->ContinueCreatingSymbol(optDefinedSymbol.value()));
-                return optDefinedSymbol.value();
-            }
-        }
-
-        ACE_TRY(symbol, t_creatable->CreateSymbol());
-        return Scope::DefineSymbol(std::move(symbol));
-    }
-
     auto Scope::CollectAllDefinedSymbols() const -> std::vector<Symbol::IBase*>
     {
         std::vector<Symbol::IBase*> symbols{};

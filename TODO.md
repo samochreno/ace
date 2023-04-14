@@ -3,7 +3,6 @@
 ## 💥 High Priority
 
 - [ ] Create `BoundNode/All.hpp` and include it in `Emitter.cpp`.
-- [ ] Implement a templated version of `Scope::DefineSymbol` so the return value doesn't have to be casted.
 - [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Remove or fix global variables.
 - [ ] Implement shared strings.

@@ -761,9 +761,7 @@ namespace Ace
             NativeSymbol::Void.GetSymbol()
         );
 
-        auto* const glueSymbol = dynamic_cast<Symbol::Function*>(
-            Scope::DefineSymbol(std::move(ownedGlueSymbol)).Unwrap()
-        );
+        auto* const glueSymbol = Scope::DefineSymbol(std::move(ownedGlueSymbol)).Unwrap();
 
         Scope::DefineSymbol(std::make_unique<Symbol::Variable::Parameter::Normal>(
             selfScope,
@@ -795,9 +793,7 @@ namespace Ace
             NativeSymbol::Void.GetSymbol()
         );
 
-        auto* const glueSymbol = dynamic_cast<Symbol::Function*>(
-            Scope::DefineSymbol(std::move(ownedGlueSymbol)).Unwrap()
-        );
+        auto* const glueSymbol = Scope::DefineSymbol(std::move(ownedGlueSymbol)).Unwrap();
 
         Scope::DefineSymbol(std::make_unique<Symbol::Variable::Parameter::Normal>(
             selfScope,
