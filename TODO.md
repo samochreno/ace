@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Create `BoundNode/All.hpp` and include it in `Emitter.cpp`.
 - [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Remove or fix global variables.
 - [ ] Implement shared strings.
