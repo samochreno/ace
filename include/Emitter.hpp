@@ -14,27 +14,6 @@
 #include "ExpressionDropData.hpp"
 #include "Emittable.hpp"
 
-namespace Ace::BoundNode
-{
-    class Module;
-    class Function;
-
-    namespace Variable::Normal
-    {
-        class Static;
-    }
-
-    namespace Statement
-    {
-        class IBase;
-    }
-    
-    namespace Expression
-    {
-        class IBase;
-    }
-}
-
 namespace Ace
 {
     struct BlockBuilder
