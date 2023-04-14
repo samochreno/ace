@@ -2,8 +2,8 @@
 
 ## 💥 High Priority
 
-- [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Remove or fix global variables.
+- [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Implement shared strings.
 - [ ] Strings.
 - [  ] Simplify symbol resolution and add template argument deduction.
