@@ -6,19 +6,20 @@
 - [ ] Remove or fix global variables.
 - [ ] Implement shared strings.
 - [ ] Strings.
-- Traits:
-  - [ ] Implement.
-  - [ ] ❓ Implement Rust's orphan rule.
-- Finish templates:
+- [  ] Simplify symbol resolution and add template argument deduction.
+- Add templated conversion operators (`ref.ace` at line 16):
+  - [ ] Change `__deref_as[T](...)` to take any expression of type convertible to `std::Pointer`.
+  - [ ] Remove `std::Reference[T]::ptr(...)`.
+- Templates:
   - [ ] When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first.
   - [ ] After compilation, do semantic analysis on templates that have never been instantiated.
   - [ ] ❓ Create unique signatures for template instances.
-  - [ ] Default template arguments.
-- Add templated conversion operators (`ref.ace` at line 16), this might require implementing template argument deduction though:
-  - [ ] Change `__deref_as[T](...)` to take any expression of type convertible to `std::Pointer`.
-  - [ ] Remove `std::Reference[T]::ptr(...)`.
+  - [ ] Default template arguments. 
+- Traits:
+  - [ ] Implement.
+  - [ ] ❓ Implement Rust's orphan rule.
 - [ ] Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour. This could maybe be fixed by forcing the copy trait to also implement default trait).
-- [ ] Try simplifying symbol resolution.
+- [ ] Add lifetime trait: default, copy, drop.
 - [ ] Check if there is any better way to not use external programs like `llc` and `clang`.
 
 ## 🔔 Medium Priority
