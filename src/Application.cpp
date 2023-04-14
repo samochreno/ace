@@ -17,11 +17,9 @@
 #include "NativeSymbol.hpp"
 #include "Emitter.hpp"
 #include "Package.hpp"
-#include "Node/Base.hpp"
-#include "Node/Module.hpp"
-#include "BoundNode/Base.hpp"
-#include "BoundNode/Module.hpp"
-#include "Symbol/Template/Base.hpp"
+#include "Node/All.hpp"
+#include "BoundNode/All.hpp"
+#include "Symbol/All.hpp"
 
 namespace Ace
 {
