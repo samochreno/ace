@@ -2,9 +2,10 @@
 
 ## 💥 High Priority
 
+- [ ] Benchmark what takes so long in backend.
+- [ ] Implement string interning.
 - [ ] ❓ All or none fields of struct are public.
 - [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
-- [ ] Implement shared strings.
 - [ ] Strings.
 - [  ] Simplify symbol resolution and add template argument deduction.
 - Add templated conversion operators (`ref.ace` at line 16):
