@@ -43,6 +43,7 @@ namespace Ace
         {
             struct DurationInfo
             {
+                std::chrono::nanoseconds IREmitting{};
                 std::chrono::nanoseconds Analyses{};
                 std::chrono::nanoseconds LLC{};
                 std::chrono::nanoseconds Clang{};

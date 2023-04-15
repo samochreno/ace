@@ -58,6 +58,10 @@ namespace Ace
     {
         m_C.Initialize(*m_Context, *m_Module);
 
+        const auto& now = std::chrono::steady_clock::now;
+
+        const auto timeIREmittingStart = now();
+
         const auto symbols         = Scope::GetRoot()->CollectAllDefinedSymbolsRecursive();
         const auto typeSymbols     = DynamicCastFilter<Symbol::Type::IBase*>(symbols);
         const auto structSymbols   = DynamicCastFilter<Symbol::Type::Struct*>(typeSymbols);
@@ -142,7 +146,7 @@ namespace Ace
         ACE_LOG_INFO(originalModuleString);
         originalModuleString.clear();
 
-        const auto& now = std::chrono::steady_clock::now;
+        const auto timeIREmittingEnd = now();
 
         const auto timeAnalysesStart = now();
 
@@ -209,6 +213,7 @@ namespace Ace
         {
             Result::DurationInfo
             {
+                timeIREmittingEnd - timeIREmittingStart,
                 timeAnalysesEnd - timeAnalysesStart,
                 timeLLCEnd - timeLLCStart,
                 timeClangEnd - timeClangStart

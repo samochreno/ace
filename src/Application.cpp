@@ -25,17 +25,18 @@ namespace Ace
 {
     static auto CompileFiles(const std::string& t_packageName, const std::vector<std::filesystem::path>& t_filePaths, const std::vector<std::filesystem::path>& t_dependencyFilePaths) -> Expected<void>
     {
-        ACE_LOG_INFO("Build started");
-
         Emitter emitter{ t_packageName };
 
         const auto& now = std::chrono::steady_clock::now;
 
         const auto timeStart = now();
-        
+        ACE_LOG_INFO("Build start");
+
         const auto timeFrontendStart = now();
+        ACE_LOG_INFO("Frontend start");
 
         const auto timeParsingStart = now();
+        ACE_LOG_INFO("Parsing start");
 
         ACE_TRY(asts, TransformExpectedVector(t_filePaths, [&]
         (const std::filesystem::path& t_filePath) -> Expected<std::shared_ptr<const Node::Module>>
@@ -52,10 +53,12 @@ namespace Ace
         }));
 
         const auto timeParsingEnd = now();
+        ACE_LOG_INFO("Parsing success");
 
         const auto nodes = Core::GetAllNodes(begin(asts), end(asts));
 
         const auto timeSymbolCreationStart = now();
+        ACE_LOG_INFO("Symbol creation start");
 
         ACE_TRY_VOID(Core::CreateAndDefineSymbols(nodes));
         ACE_TRY_VOID(Core::DefineAssociations(nodes));
@@ -63,8 +66,10 @@ namespace Ace
         ACE_TRY_VOID(NativeSymbol::InitializeSymbols());
 
         const auto timeSymbolCreationEnd = now();
+        ACE_LOG_INFO("Symbol creation success");
 
         const auto timeBindingAndVerificationStart = now();
+        ACE_LOG_INFO("Binding and verification start");
 
         ACE_TRY(boundASTs, Core::CreateBoundTransformedAndVerifiedASTs(
             asts,
@@ -94,19 +99,24 @@ namespace Ace
         }
 
         const auto timeBindingAndVerificationEnd = now();
+        ACE_LOG_INFO("Binding and verification success");
 
         ACE_TRY_VOID(Core::AssertCanResolveTypeSizes());
 
         const auto timeFrontendEnd = now();
+        ACE_LOG_INFO("Frontend success");
 
         const auto timeBackendStart = now();
+        ACE_LOG_INFO("Backend start");
 
         emitter.SetASTs(boundASTs);
         const auto emitterResult = emitter.Emit();
 
         const auto timeBackendEnd = now();
+        ACE_LOG_INFO("Backend success");
         
         const auto timeEnd = now();
+        ACE_LOG_INFO("Build success");
 
         const auto getFormattedDuration = [](std::chrono::nanoseconds t_duration)
         {
@@ -131,6 +141,7 @@ namespace Ace
         ACE_LOG_INFO("[" << getFormattedDuration(timeSymbolCreationEnd - timeSymbolCreationStart)                   << "] Frontend | Symbol Creation");
         ACE_LOG_INFO("[" << getFormattedDuration(timeBindingAndVerificationEnd - timeBindingAndVerificationStart)   << "] Frontend | Binding And Verification");
         ACE_LOG_INFO("[" << getFormattedDuration(timeBackendEnd - timeBackendStart)                                 << "] Backend");
+        ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.IREmitting)                                << "] Backend | IR Emitting");
         ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.Analyses)                                  << "] Backend | Analyses");
         ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.LLC)                                       << "] Backend | llc");
         ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.Clang)                                     << "] Backend | clang");
@@ -157,13 +168,10 @@ namespace Ace
             package.GetDependencyFilePaths().CreatePaths()
         );
 
-        if (didCompileFiles) 
-        { 
-            ACE_LOG_INFO("Build succeeded");
-        } 
-        else 
+        if (!didCompileFiles)
         {
-            ACE_LOG_WARNING("Build failed"); 
+            ACE_LOG_WARNING("Build fail"); 
         }
     }
 }
+
