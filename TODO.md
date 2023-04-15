@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Remove or fix global variables.
 - [ ] ❓ All or none fields of struct are public.
 - [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Implement shared strings.

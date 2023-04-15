@@ -629,12 +629,17 @@ namespace Ace
         std::for_each(begin(t_variableSymbols), end(t_variableSymbols), [&]
         (const Symbol::Variable::Normal::Static* const t_variableSymbol)
         {
+            const auto name = t_variableSymbol->CreateSignature();
             auto* const type = GetIRType(t_variableSymbol->GetType());
 
-            auto* const variable = m_Module->getOrInsertGlobal(
-                t_variableSymbol->CreateSignature(),
+            m_Module->getOrInsertGlobal(
+                name,
                 llvm::PointerType::get(type, 0)
             );
+
+            auto* const variable = m_Module->getNamedGlobal(name);
+            variable->setInitializer(llvm::Constant::getNullValue(variable->getType()));
+            variable->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
 
             m_StaticVariableMap[t_variableSymbol] = variable;
         });

@@ -506,8 +506,14 @@ int_value_and_print(): int {
     ret value;
 }
 
+global_value: int;
+global(): int {
+    global_value = -9843;
+    ret global_value;
+}
+
 main(): int {
-    value: int = getter();
+    value: int = global();
     print_int(value);
     ret value;
 }
