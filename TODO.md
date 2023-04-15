@@ -2,7 +2,8 @@
 
 ## 💥 High Priority
 
-- [ ] Benchmark what takes so long in backend.
+- [ ] Add Emitter::EmitStructDropGlue.
+- [ ] Bind drop and copy glue only once on symbol.
 - [ ] Implement string interning.
 - [ ] ❓ All or none fields of struct are public.
 - [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
