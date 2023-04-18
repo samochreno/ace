@@ -55,12 +55,17 @@ namespace Ace
             if (t_fileDirectoryPath.IsRecursive)
             {
                 for (const auto& directoryEntry : std::filesystem::recursive_directory_iterator(t_fileDirectoryPath.Path))
+                {
                     loopBody(directoryEntry);
+                }
+                    
             }
             else
             {
                 for (const auto& directoryEntry : std::filesystem::directory_iterator(t_fileDirectoryPath.Path))
+                {
                     loopBody(directoryEntry);
+                }
             }
         });
 
@@ -80,44 +85,204 @@ namespace Ace
         }
     }
 
-    static auto TransformFilePaths(const std::vector<std::string>& t_filePaths, const std::unordered_map<std::string, std::string>& t_pathMacroMap) -> Expected<Package::FileDirectoryPaths>
+    struct ExpandedLastFilePathPart
+    {
+        std::optional<std::string> OptPath{};
+        std::optional<std::string> OptExtension{};
+        bool IsRecursive{};
+    };
+
+    static auto ExpandLastFilePathPart(
+        const std::string& t_part
+    ) -> Expected<ExpandedLastFilePathPart>
+    {
+        std::string part = t_part;
+
+        TrimRight(part);
+
+        const size_t extensionDotPosition = part.find_first_of('.');
+        const auto optExtension = [&]() -> std::optional<std::string>
+        {
+            const bool hasExtension = extensionDotPosition != std::string::npos;
+            if (!hasExtension)
+                return {};
+
+            return std::string
+            {
+                begin(part) + extensionDotPosition,
+                end  (part)
+            };
+        }();
+
+        const std::string beforeExtension
+        {
+            begin(part),
+            begin(part) + extensionDotPosition
+        };
+
+        const bool isFileDirectoryPath = beforeExtension[0] == '*';
+        if (!isFileDirectoryPath )
+        {
+            return ExpandedLastFilePathPart
+            {
+                part,
+                optExtension,
+                false
+            };
+        }
+
+        ACE_TRY(isRecursive, [&]() -> Expected<bool>
+        {
+            if (beforeExtension.size() <= 1)
+                return false;
+
+            ACE_TRY_ASSERT(beforeExtension[1] == '*');
+            ACE_TRY_ASSERT(beforeExtension.size() == 2);
+            return true;
+        }());
+
+        return ExpandedLastFilePathPart
+        {
+            std::nullopt,
+            optExtension,
+            isRecursive
+        };
+    }
+
+    class FileOrDirectoryPath
+    {
+    public:
+        FileOrDirectoryPath() = default;
+        FileOrDirectoryPath(const std::filesystem::path& t_filePath)
+            : m_OptFilePath{ t_filePath }
+        {
+        }
+        FileOrDirectoryPath(const Package::FileDirectoryPath& t_directoryPath)
+            : m_OptDirectoryPath{ t_directoryPath }
+        {
+        }
+        ~FileOrDirectoryPath() = default;
+
+        auto IsFilePath()      const -> bool { return m_OptFilePath.has_value(); }
+        auto IsDirectoryPath() const -> bool { return m_OptDirectoryPath.has_value(); }
+
+        auto GetFilePath() -> std::filesystem::path& { return m_OptFilePath.value(); }
+        auto GetDirectoryPath() -> Package::FileDirectoryPath& { return m_OptDirectoryPath.value(); }
+
+    private:
+        std::optional<std::filesystem::path>      m_OptFilePath{};
+        std::optional<Package::FileDirectoryPath> m_OptDirectoryPath{};
+    };
+
+    static auto ExpandFirstFilePathPart(
+        const std::string& t_part,
+        const std::unordered_map<std::string, std::string>& t_pathMacroMap
+    ) -> Expected<std::string>
+    {
+        const bool isMacro = t_part.starts_with('$');
+        if (!isMacro)
+        {
+            return t_part;
+        }
+
+        const std::string pathMacro = t_part.substr(1);
+
+        const auto foundIt = t_pathMacroMap.find(pathMacro);
+        ACE_TRY_ASSERT(foundIt != end(t_pathMacroMap));
+
+        return foundIt->second;
+    }
+
+    static auto ExpandFilePathParts(
+        const std::vector<std::string>& t_filePathParts,
+        const std::unordered_map<std::string, std::string>& t_pathMacroMap
+    ) -> Expected<FileOrDirectoryPath>
+    {
+        ACE_TRY(firstFilePathPart, ExpandFirstFilePathPart(
+            t_filePathParts.front(),
+            t_pathMacroMap
+        ));
+
+        ACE_TRY(lastFilePathPartData, ExpandLastFilePathPart(
+            t_filePathParts.back()
+        ));
+
+        std::string path = firstFilePathPart + '/';
+        std::for_each(
+            begin(t_filePathParts) + 1,
+            end  (t_filePathParts) - 1,
+            [&](const std::string& t_part) { path += t_part + '/'; }
+        );
+
+        const bool isFilePath = lastFilePathPartData.OptPath.has_value();
+        if (isFilePath)
+        {
+            path += lastFilePathPartData.OptPath.value();
+            return FileOrDirectoryPath{ std::filesystem::path{ path } };
+        }
+
+        return FileOrDirectoryPath
+        {
+            Package::FileDirectoryPath
+            {
+                path,
+                lastFilePathPartData.OptExtension,
+                lastFilePathPartData.IsRecursive
+            }
+        };
+    }
+
+    static auto SplitFilePath(
+        const std::string& t_filePath
+    ) -> Expected<std::vector<std::string>>
+    {
+        auto isPathSeparator = [](const char& t_char) -> bool
+        {
+            return (t_char == '/') || (t_char == '\\');
+        };
+
+        std::vector<std::string> parts{};
+
+        auto itBegin = begin(t_filePath);
+        auto itEnd   = begin(t_filePath);
+
+        char character{};
+        char lastCharacter{};
+
+        for (; itEnd != end(t_filePath); [&]() { lastCharacter = character; ++itEnd; }())
+        {
+            character = *itEnd;
+
+            const bool isPathSeparatorCurrent = isPathSeparator(character);
+            const bool isPathSeparatorLast    = isPathSeparator(lastCharacter);
+
+            if (isPathSeparatorCurrent && !isPathSeparatorLast)
+            {
+                parts.emplace_back(itBegin, itEnd);
+            }
+
+            if (isPathSeparatorLast && !isPathSeparatorCurrent)
+            {
+                itBegin = itEnd;
+            }
+        }
+
+        ACE_TRY_ASSERT(!isPathSeparator(lastCharacter));
+        parts.emplace_back(itBegin, end(t_filePath));
+
+        ACE_TRY_ASSERT(parts.front().size() != 0);
+        return parts;
+    }
+
+    static auto TransformFilePaths(
+        const std::vector<std::string>& t_filePaths,
+        const std::unordered_map<std::string, std::string>& t_pathMacroMap
+    ) -> Expected<Package::FileDirectoryPaths>
     {
         ACE_TRY(filePathsParts, TransformExpectedVector(t_filePaths, [&]
         (const std::string& t_filePath) -> Expected<std::vector<std::string>>
         {
-            auto isPathSeparator = [](const char& t_char) -> bool
-            {
-                return (t_char == '/') || (t_char == '\\');
-            };
-
-            const std::string path = t_filePath;
-            std::vector<std::string> parts{};
-
-            auto itBegin = begin(path);
-            auto itEnd = begin(path);
-
-            char character{};
-            char lastCharacter{};
-
-            for (; itEnd != end(path); [&]() { lastCharacter = character; ++itEnd; }())
-            {
-                character = *itEnd;
-
-                const bool isPathSeparatorCurrent = isPathSeparator(character);
-                const bool isPathSeparatorLast = isPathSeparator(lastCharacter);
-
-                if (isPathSeparatorCurrent && !isPathSeparatorLast)
-                    parts.emplace_back(itBegin, itEnd);
-
-                if (isPathSeparatorLast && !isPathSeparatorCurrent)
-                    itBegin = itEnd;
-            }
-
-            ACE_TRY_ASSERT(!isPathSeparator(lastCharacter));
-            parts.emplace_back(itBegin, end(path));
-
-            ACE_TRY_ASSERT(parts.front().size() != 0);
-            return parts;
+            return SplitFilePath(t_filePath);
         }));
 
         std::vector<std::filesystem::path>      finalFilePaths{};
@@ -126,104 +291,19 @@ namespace Ace
         ACE_TRY_VOID(TransformExpectedVector(filePathsParts, [&]
         (const std::vector<std::string>& t_filePathParts) -> Expected<void>
         {
-            ACE_TRY(firstFilePathPart, ([&]() -> Expected<std::string>
+            ACE_TRY(fileOrDirectoryPath, ExpandFilePathParts(
+                t_filePathParts,
+                t_pathMacroMap
+            ));
+
+            if (fileOrDirectoryPath.IsFilePath())
             {
-                const auto& firstFilePathPart = t_filePathParts.front();
-
-                if (!firstFilePathPart.starts_with("$"))
-                    return firstFilePathPart;
-
-                const std::string pathMacro{ begin(firstFilePathPart) + 1, end(firstFilePathPart) };
-
-                const auto foundIt = t_pathMacroMap.find(pathMacro);
-                ACE_TRY_ASSERT(foundIt != end(t_pathMacroMap));
-
-                return foundIt->second;
-            }()));
-
-            struct LastFilePathPartData
-            {
-                std::optional<std::string> OptPath{};
-                std::optional<std::string> OptExtension{};
-                bool IsRecursive{};
-            };
-
-            ACE_TRY(lastFilePathPartData, ([&]() -> Expected<LastFilePathPartData>
-            {
-                std::string lastFilePathPart = t_filePathParts.back();
-                TrimRight(lastFilePathPart);
-
-                const size_t extensionDotPosition = lastFilePathPart.find_first_of('.');
-                const auto optExtension = [&]() -> std::optional<std::string>
-                {
-                    const bool hasExtension = extensionDotPosition != std::string::npos;
-                    if (!hasExtension)
-                        return {};
-
-                    return std::string
-                    {
-                        begin(lastFilePathPart) + extensionDotPosition,
-                        end(lastFilePathPart)
-                    };
-                }();
-
-                const std::string beforeExtension
-                {
-                    begin(lastFilePathPart),
-                    begin(lastFilePathPart) + extensionDotPosition
-                };
-
-                const bool isFileDirectoryPath = beforeExtension[0] == '*';
-                if (isFileDirectoryPath)
-                {
-                    ACE_TRY(isRecursive, [&]() -> Expected<bool>
-                    {
-                        if (beforeExtension.size() <= 1)
-                        return false;
-
-                    ACE_TRY_ASSERT(beforeExtension[1] == '*');
-                    ACE_TRY_ASSERT(beforeExtension.size() == 2);
-                    return true;
-                    }());
-
-                    return LastFilePathPartData
-                    {
-                        std::nullopt,
-                        optExtension,
-                        isRecursive
-                    };
-                }
-                else
-                {
-                    return LastFilePathPartData
-                    {
-                        lastFilePathPart,
-                        optExtension,
-                        false
-                    };
-                }
-            }()));
-
-            std::string path = firstFilePathPart + '/';
-            std::for_each(
-                begin(t_filePathParts) + 1,
-                end(t_filePathParts) - 1,
-                [&](const std::string& t_part) { path += t_part + '/'; }
-            );
-
-            const bool isFilePath = lastFilePathPartData.OptPath.has_value();
-            if (isFilePath)
-            {
-                path += lastFilePathPartData.OptPath.value();
-                finalFilePaths.push_back(path);
+                finalFilePaths.push_back(fileOrDirectoryPath.GetFilePath());
             }
-            else
+
+            if (fileOrDirectoryPath.IsDirectoryPath())
             {
-                finalFileDirectoryPaths.emplace_back(
-                    path,
-                    lastFilePathPartData.OptExtension,
-                    lastFilePathPartData.IsRecursive
-                );
+                finalFileDirectoryPaths.push_back(fileOrDirectoryPath.GetDirectoryPath());
             }
 
             return ExpectedVoid;
@@ -232,7 +312,7 @@ namespace Ace
         return Package::FileDirectoryPaths
         {
             std::move(finalFilePaths),
-            std::move(finalFileDirectoryPaths) 
+            std::move(finalFileDirectoryPaths),
         };
     }
 
@@ -265,7 +345,7 @@ namespace Ace
         std::vector<std::string> originalFilePaths{};
         std::transform(
             begin(package[Property::FilePaths]),
-            end(package[Property::FilePaths]),
+            end  (package[Property::FilePaths]),
             back_inserter(originalFilePaths),
             [](const nlohmann::json& t_filePath) { return t_filePath; }
         );
@@ -274,7 +354,7 @@ namespace Ace
         std::vector<std::string> originalDependencyFilePaths{};
         std::transform(
             begin(package[Property::DependencyFilePaths]),
-            end(package[Property::DependencyFilePaths]),
+            end  (package[Property::DependencyFilePaths]),
             back_inserter(originalDependencyFilePaths),
             [](const nlohmann::json& t_filePath) { return t_filePath; }
         );
@@ -284,7 +364,7 @@ namespace Ace
         {
             std::move(name),
             std::move(finalFilePaths),
-            std::move(finalDependencyFilePaths)
+            std::move(finalDependencyFilePaths),
         };
     }
 }
