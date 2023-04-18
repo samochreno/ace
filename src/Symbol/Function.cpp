@@ -82,7 +82,6 @@ namespace Ace::Symbol
 
     auto Function::BindBody(const std::shared_ptr<const IEmittable<void>>& t_body) -> void
     {
-        ACE_ASSERT(!m_OptBody.has_value());
         m_OptBody = t_body;
     }
 

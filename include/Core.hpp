@@ -11,6 +11,17 @@
 #include "Node/Base.hpp"
 #include "Node/Module.hpp"
 #include "BoundNode/Base.hpp"
+#include "Emittable.hpp"
+
+namespace Ace::Symbol
+{
+    class Function;
+
+    namespace Type
+    {
+        class IBase;
+    }
+}
 
 namespace Ace::Core
 {
@@ -46,9 +57,18 @@ namespace Ace::Core
     auto CreateAndDefineSymbols(const std::vector<const Node::IBase*>& t_nodes) -> Expected<void>;
     auto DefineAssociations(const std::vector<const Node::IBase*>& t_nodes) -> Expected<void>;
     auto AssertControlFlow(const std::vector<const BoundNode::IBase*>& t_nodes) -> Expected<void>;
-    auto AssertCanResolveTypeSizes() -> Expected<void>;
     auto BindFunctionSymbolsBodies(const std::vector<const BoundNode::IBase*>& t_nodes) -> void;
+    auto AssertCanResolveTypeSizes() -> Expected<void>;
+    auto GenerateAndBindGlue() -> void;
 
+    auto CreateCopyGlueBody(
+        Symbol::Type::Struct* const t_structSymbol,
+        Symbol::Function* const t_glueSymbol
+    ) -> std::shared_ptr<const IEmittable<void>>;
+    auto CreateDropGlueBody(
+        Symbol::Type::Struct* const t_structSymbol,
+        Symbol::Function* const t_glueSymbol
+    ) -> std::shared_ptr<const IEmittable<void>>;
 
 #define TTypeChecked        std::remove_reference_t<decltype(t_getOrCreateTypeCheckedFunc(TBound{}).Unwrap().Value)>
 #define TLowered            std::remove_reference_t<decltype(t_getOrCreateLoweredFunc(TTypeChecked{}).Unwrap().Value)>

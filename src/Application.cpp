@@ -63,10 +63,13 @@ namespace Ace
         ACE_TRY_VOID(Core::CreateAndDefineSymbols(nodes));
         ACE_TRY_VOID(Core::DefineAssociations(nodes));
 
-        ACE_TRY_VOID(NativeSymbol::InitializeSymbols());
-
         const auto timeSymbolCreationEnd = now();
         ACE_LOG_INFO("Symbol creation success");
+
+
+        ACE_LOG_INFO("Native symbol initialization start");
+        ACE_TRY_VOID(NativeSymbol::InitializeSymbols());
+        ACE_LOG_INFO("Native symbol initialization success");
 
         const auto timeBindingAndVerificationStart = now();
         ACE_LOG_INFO("Binding and verification start");
@@ -97,6 +100,8 @@ namespace Ace
                 }
             });
         }
+
+        Core::GenerateAndBindGlue();
 
         const auto timeBindingAndVerificationEnd = now();
         ACE_LOG_INFO("Binding and verification success");

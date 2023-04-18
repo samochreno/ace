@@ -7,6 +7,7 @@
 #include "Symbol/Base.hpp"
 #include "Symbol/SelfScoped.hpp"
 #include "Symbol/Templatable.hpp"
+#include "Emittable.hpp"
 
 namespace Ace::Symbol
 {
@@ -34,6 +35,14 @@ namespace Ace::Symbol::Type
         virtual auto IsTriviallyCopyable() const -> bool = 0;
         virtual auto SetAsTriviallyDroppable() -> void = 0;
         virtual auto IsTriviallyDroppable() const -> bool = 0;
+
+        virtual auto CreateCopyGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>> = 0;
+        virtual auto CreateDropGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>> = 0;
+
+        virtual auto BindCopyGlue(Symbol::Function* const t_glue) -> void = 0;
+        virtual auto GetCopyGlue() const -> std::optional<Symbol::Function*> = 0;
+        virtual auto BindDropGlue(Symbol::Function* const t_glue) -> void = 0;
+        virtual auto GetDropGlue() const -> std::optional<Symbol::Function*> = 0;
 
         virtual auto IsReference() const -> bool final;
         virtual auto GetWithoutReference() -> Symbol::Type::IBase* final;

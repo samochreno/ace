@@ -1,5 +1,11 @@
 #include "Symbol/Type/Struct.hpp"
 
+#include <optional>
+
+#include "Symbol/Function.hpp"
+#include "Emittable.hpp"
+#include "Core.hpp"
+
 namespace Ace::Symbol::Type
 {
     auto Struct::CanResolveSize() const -> bool 
@@ -42,6 +48,38 @@ namespace Ace::Symbol::Type
         }
 
         return value;
+    }
+
+    auto Struct::CreateCopyGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>> 
+    {
+        return Core::CreateCopyGlueBody(this, t_glueSymbol);
+    }
+
+    auto Struct::CreateDropGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>>
+    {
+        return Core::CreateDropGlueBody(this, t_glueSymbol);
+    }
+
+    auto Struct::BindCopyGlue(Symbol::Function* const t_symbol) -> void
+    {
+        ACE_ASSERT(t_symbol);
+        m_OptCopyGlue = t_symbol;
+    }
+
+    auto Struct::GetCopyGlue() const -> std::optional<Symbol::Function*>
+    {
+        return m_OptCopyGlue;
+    }
+
+    auto Struct::BindDropGlue(Symbol::Function* const t_symbol) -> void
+    {
+        ACE_ASSERT(t_symbol);
+        m_OptDropGlue = t_symbol;
+    }
+
+    auto Struct::GetDropGlue() const -> std::optional<Symbol::Function*>
+    {
+        return m_OptDropGlue;
     }
 
     auto Struct::GetVariables() const -> std::vector<Symbol::Variable::Normal::Instance*>

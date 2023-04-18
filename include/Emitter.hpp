@@ -142,13 +142,6 @@ namespace Ace
         auto EmitTypes(
             const std::vector<Symbol::Type::IBase*>& t_typeSymbols
         ) -> void;
-        auto EmitGlue(
-            const std::vector<Symbol::Type::Struct*>& t_structSymbols,
-            const std::function<Symbol::Function*(Symbol::Type::Struct* const)> t_defineSymbols,
-            const std::function<bool(Symbol::Type::Struct* const)> t_isBodyTrivial,
-            const std::function<std::shared_ptr<const IEmittable<void>>(Symbol::Function* const, Symbol::Type::Struct* const)> t_createTrivialBody,
-            const std::function<std::shared_ptr<const IEmittable<void>>(Symbol::Function* const, Symbol::Type::Struct* const)> t_createBody
-        ) -> void;
         auto EmitNativeTypes() -> void;
         auto EmitStructTypes(
             const std::vector<Symbol::Type::Struct*>& t_structSymbols
@@ -159,30 +152,6 @@ namespace Ace
         auto EmitFunctions(
             const std::vector<Symbol::Function*>& t_functionSymbols
         ) -> void;
-
-        static auto DefineCopyGlueSymbols(
-            Symbol::Type::Struct* const t_structSymbol
-        ) -> Symbol::Function*;
-        static auto DefineDropGlueSymbols(
-            Symbol::Type::Struct* const t_structSymbol
-        ) -> Symbol::Function*;
-
-        static auto CreateTrivialCopyGlueBody(
-            Symbol::Function* const t_glueSymbol,
-            Symbol::Type::Struct* const t_structSymbol
-        ) -> std::shared_ptr<const IEmittable<void>>;
-        static auto CreateCopyGlueBody(
-            Symbol::Function* const t_glueSymbol,
-            Symbol::Type::Struct* const t_structSymbol
-        ) -> std::shared_ptr<const IEmittable<void>>;
-        static auto CreateTrivialDropGlueBody(
-            Symbol::Function* const t_glueSymbol,
-            Symbol::Type::Struct* const t_structSymbol
-        ) -> std::shared_ptr<const IEmittable<void>>;
-        static auto CreateDropGlueBody(
-            Symbol::Function* const t_glueSymbol,
-            Symbol::Type::Struct* const t_structSymbol
-        ) -> std::shared_ptr<const IEmittable<void>>;
 
         std::string m_PackageName{};
 
