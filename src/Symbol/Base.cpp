@@ -108,12 +108,12 @@ namespace Ace::Symbol
         return signature;
     }
 
-    auto IBase::GetFullyQualifiedName() const -> Name::Symbol::Full
+    auto IBase::CreateFullyQualifiedName() const -> Name::Symbol::Full
     {
         auto* const symbol = UnwrapAlias(this);
         if (symbol != this)
         {
-            return symbol->GetFullyQualifiedName();
+            return symbol->CreateFullyQualifiedName();
         }
 
         std::vector<Name::Symbol::Section> nameSections{};
@@ -124,11 +124,15 @@ namespace Ace::Symbol
             scopes.push_back(scope);
         }
 
-        std::transform(rbegin(scopes) + 1, rend(scopes), back_inserter(nameSections), []
-        (Scope* const t_scope)
-        {
-            return Name::Symbol::Section{ t_scope->GetName() };
-        });
+        std::transform(
+            rbegin(scopes) + 1, 
+            rend  (scopes), 
+            back_inserter(nameSections), []
+            (Scope* const t_scope)
+            {
+                return Name::Symbol::Section{ t_scope->GetName() };
+            }
+        );
 
         nameSections.emplace_back(GetName());
 
@@ -136,21 +140,29 @@ namespace Ace::Symbol
         {
             const auto implTemplateArguments = templatableSymbol->CollectImplTemplateArguments();
             std::vector<Name::Symbol::Full> implTemplateArgumentNames{};
-            std::transform(begin(implTemplateArguments), end(implTemplateArguments), back_inserter(implTemplateArgumentNames), []
-            (Symbol::Type::IBase* const t_implTemplateArgument)
-            {
-                return t_implTemplateArgument->GetFullyQualifiedName();
-            });
+            std::transform(
+                begin(implTemplateArguments), 
+                end  (implTemplateArguments), 
+                back_inserter(implTemplateArgumentNames), []
+                (Symbol::Type::IBase* const t_implTemplateArgument)
+                {
+                    return t_implTemplateArgument->CreateFullyQualifiedName();
+                }
+            );
 
             (rbegin(nameSections) + 1)->TemplateArguments = implTemplateArgumentNames;
 
             const auto templateArguments = templatableSymbol->CollectTemplateArguments();
             std::vector<Name::Symbol::Full> templateArgumentNames{};
-            std::transform(begin(templateArguments), end(templateArguments), back_inserter(templateArgumentNames), []
-            (Symbol::Type::IBase* const t_templateArgument)
-            {
-                return t_templateArgument->GetFullyQualifiedName();
-            });
+            std::transform(
+                begin(templateArguments), 
+                end  (templateArguments), 
+                back_inserter(templateArgumentNames), []
+                (Symbol::Type::IBase* const t_templateArgument)
+                {
+                    return t_templateArgument->CreateFullyQualifiedName();
+                }
+            );
 
             rbegin(nameSections)->TemplateArguments = templateArgumentNames;
         }

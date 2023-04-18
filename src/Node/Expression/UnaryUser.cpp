@@ -38,7 +38,7 @@ namespace Ace::Node::Expression
 
         auto* const typeSymbol = boundExpresssion->GetTypeInfo().Symbol;
 
-        auto operatorFullName = typeSymbol->GetFullyQualifiedName();
+        auto operatorFullName = typeSymbol->CreateFullyQualifiedName();
         operatorFullName.Sections.emplace_back(operatorNameIt->second);
 
         ACE_TRY(operatorSymbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(operatorFullName));

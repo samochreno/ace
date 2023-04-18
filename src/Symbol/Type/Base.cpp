@@ -156,7 +156,7 @@ namespace Ace::Symbol::Type
             return optNativeOperator.value();
         }
 
-        auto name = t_toType->GetFullyQualifiedName();
+        auto name = t_toType->CreateFullyQualifiedName();
         name.Sections.emplace_back(std::string{ SpecialIdentifier::Operator::ImplicitFrom });
 
         ACE_TRY(operatorSymbol, t_scope->ResolveStaticSymbol<Symbol::Function>(name));
@@ -176,7 +176,7 @@ namespace Ace::Symbol::Type
             return optNativeExplicitOperator.value();
         }
 
-        auto name = t_toType->GetFullyQualifiedName();
+        auto name = t_toType->CreateFullyQualifiedName();
         name.Sections.emplace_back(std::string{ SpecialIdentifier::Operator::ExplicitFrom });
 
         auto expExplicitOperatorSymbol = t_scope->ResolveStaticSymbol<Symbol::Function>(name);

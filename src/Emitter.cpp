@@ -447,7 +447,7 @@ namespace Ace
         if (t_dropData.TypeSymbol->IsReference())
             return;
 
-        auto operatorName = t_dropData.TypeSymbol->GetFullyQualifiedName();
+        auto operatorName = t_dropData.TypeSymbol->CreateFullyQualifiedName();
         operatorName.Sections.push_back(Name::Symbol::Section{ SpecialIdentifier::Operator::Drop });
 
         const auto glueSymbol = t_dropData.TypeSymbol->GetUnaliased()->GetScope()->ExclusiveResolveSymbol<Symbol::Function>(
@@ -864,7 +864,7 @@ namespace Ace
             parameterSymbols.at(1)
         );
 
-        auto operatorName = t_structSymbol->GetFullyQualifiedName();
+        auto operatorName = t_structSymbol->CreateFullyQualifiedName();
         operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Copy);
 
         std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
@@ -982,7 +982,7 @@ namespace Ace
 
         std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
 
-        auto operatorName = t_structSymbol->GetFullyQualifiedName();
+        auto operatorName = t_structSymbol->CreateFullyQualifiedName();
         operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Drop);
         if (const auto expOperatorSymbol = Scope::GetRoot()->ResolveStaticSymbol<Symbol::Function>(operatorName))
         {

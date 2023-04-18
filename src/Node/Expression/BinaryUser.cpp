@@ -41,10 +41,10 @@ namespace Ace::Node::Expression
         const auto operatorNameIt = SpecialIdentifier::Operator::BinaryNameMap.find(m_Operator);
         ACE_TRY_ASSERT(operatorNameIt != end(SpecialIdentifier::Operator::BinaryNameMap));
 
-        auto lhsName = lhsTypeSymbol->GetFullyQualifiedName();
+        auto lhsName = lhsTypeSymbol->CreateFullyQualifiedName();
         lhsName.Sections.emplace_back(operatorNameIt->second);
 
-        auto rhsName = rhsTypeSymbol->GetFullyQualifiedName();
+        auto rhsName = rhsTypeSymbol->CreateFullyQualifiedName();
         rhsName.Sections.emplace_back(operatorNameIt->second);
 
         const std::vector parameterTypes{ lhsTypeSymbol, rhsTypeSymbol };

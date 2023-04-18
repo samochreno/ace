@@ -41,7 +41,7 @@ namespace Ace::Node::Statement::Assignment
         const auto operatorNameIt = SpecialIdentifier::Operator::BinaryNameMap.find(m_Operator);
         ACE_TRY_ASSERT(operatorNameIt != end(SpecialIdentifier::Operator::BinaryNameMap));
 
-        auto operatorFullName = lhsTypeSymbol->GetWithoutReference()->GetFullyQualifiedName();
+        auto operatorFullName = lhsTypeSymbol->GetWithoutReference()->CreateFullyQualifiedName();
         operatorFullName.Sections.emplace_back(operatorNameIt->second);
 
         ACE_TRY(operatorSymbol, m_Scope->ResolveStaticSymbol<Symbol::Function>(operatorFullName));

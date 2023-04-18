@@ -29,6 +29,6 @@ namespace Ace::Symbol
 
         virtual auto CreatePartialSignature() const -> std::string final;
         virtual auto CreateSignature() const -> std::string final;
-        virtual auto GetFullyQualifiedName() const -> Name::Symbol::Full final;
+        virtual auto CreateFullyQualifiedName() const -> Name::Symbol::Full final;
     };
 }
