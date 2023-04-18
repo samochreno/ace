@@ -4,11 +4,10 @@
 
 - [ ] Add Emitter::EmitStructDropGlue.
 - [ ] Bind drop and copy glue only once on symbol.
-- [ ] Implement string interning.
 - [ ] ❓ All or none fields of struct are public.
 - [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Strings.
-- [  ] Simplify symbol resolution and add template argument deduction.
+- [ ] Simplify symbol resolution and add template argument deduction.
 - Add templated conversion operators (`ref.ace` at line 16):
   - [ ] Change `__deref_as[T](...)` to take any expression of type convertible to `std::Pointer`.
   - [ ] Remove `std::Reference[T]::ptr(...)`.
