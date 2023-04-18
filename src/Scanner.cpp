@@ -618,6 +618,147 @@ namespace Ace::Scanning
         };
     }
 
+    static auto GetNumberType(
+        const std::string& t_numberString,
+        const std::string& t_typeString,
+        const std::string& t_typeSizeString,
+        const bool& t_hasDecimalPoint
+    ) -> Expected<Token::Kind::Set>
+    {
+        switch (t_typeString.front())
+        {
+            case 'i':
+            {
+                ACE_TRY_ASSERT(!t_hasDecimalPoint);
+                ACE_TRY(value, [&]() -> Expected<int64_t>
+                {
+                    try
+                    {
+                        return std::stoll(t_numberString);
+                    }
+                    catch (const std::out_of_range&)
+                    {
+                        ACE_TRY_UNREACHABLE();
+                    }
+                }());
+
+                if (t_typeSizeString == "8")
+                {
+                    ACE_TRY_ASSERT(
+                        (value >= std::numeric_limits<int8_t>::min()) &&
+                        (value <= std::numeric_limits<int8_t>::max())
+                    );
+
+                    return Token::Kind::New(Token::Kind::Int8);
+                }
+                else if (t_typeSizeString == "16")
+                {
+                    ACE_TRY_ASSERT(
+                        (value >= std::numeric_limits<int16_t>::min()) &&
+                        (value <= std::numeric_limits<int16_t>::max())
+                    );
+
+                    return Token::Kind::New(Token::Kind::Int16);
+                }
+                else if (t_typeSizeString == "32")
+                {
+                    ACE_TRY_ASSERT(
+                        (value >= std::numeric_limits<int32_t>::min()) &&
+                        (value <= std::numeric_limits<int32_t>::max())
+                    );
+
+                    return Token::Kind::New(Token::Kind::Int32);
+                }
+                else if (t_typeSizeString == "64")
+                {
+                    ACE_TRY_ASSERT(
+                        (value >= std::numeric_limits<int64_t>::min()) &&
+                        (value <= std::numeric_limits<int64_t>::max())
+                    );
+
+                    return Token::Kind::New(Token::Kind::Int64);
+                }
+            }
+
+            case 'u':
+            {
+                ACE_TRY_ASSERT(!t_hasDecimalPoint);
+                ACE_TRY(value, [&]() -> Expected<uint64_t>
+                {
+                    try
+                    {
+                        return std::stoull(t_numberString);
+                    }
+                    catch (const std::out_of_range&)
+                    {
+                        ACE_TRY_UNREACHABLE();
+                    }
+                }());
+
+                if (t_typeSizeString == "8")
+                {
+                    ACE_TRY_ASSERT(
+                        (value >= std::numeric_limits<uint8_t>::min()) &&
+                        (value <= std::numeric_limits<uint8_t>::max())
+                    );
+
+                    return Token::Kind::New(Token::Kind::UInt8);
+                }
+                else if (t_typeSizeString == "16")
+                {
+                    ACE_TRY_ASSERT(
+                        (value >= std::numeric_limits<uint16_t>::min()) &&
+                        (value <= std::numeric_limits<uint16_t>::max())
+                    );
+
+                    return Token::Kind::New(Token::Kind::UInt16);
+                }
+                else if (t_typeSizeString == "32")
+                {
+                    ACE_TRY_ASSERT(
+                        (value >= std::numeric_limits<uint32_t>::min()) &&
+                        (value <= std::numeric_limits<uint32_t>::max())
+                    );
+
+                    return Token::Kind::New(Token::Kind::UInt32);
+                }
+                else if (t_typeSizeString == "64")
+                {
+                    ACE_TRY_ASSERT(
+                        (value >= std::numeric_limits<uint64_t>::min()) &&
+                        (value <= std::numeric_limits<uint64_t>::max())
+                    );
+
+                    return Token::Kind::New(Token::Kind::UInt64);
+                }
+            }
+
+            case 'f':
+            {
+                double value{};
+                try
+                {
+                    value = std::stod(t_numberString);
+                }
+                catch (const std::out_of_range&)
+                {
+                    ACE_TRY_UNREACHABLE();
+                }
+
+                if (t_typeSizeString == "32")
+                {
+                    return Token::Kind::New(Token::Kind::Float32);
+                }
+                else if (t_typeSizeString == "64")
+                {
+                    return Token::Kind::New(Token::Kind::Float64);
+                }
+            }
+        }
+        
+        ACE_TRY_UNREACHABLE();
+    }
+
     auto Scanner::ScanNumber(Context t_context) -> Expected<ParseData<std::vector<Token>>>
     {
         auto it = t_context.Iterator;
@@ -686,138 +827,12 @@ namespace Ace::Scanning
 
         ACE_TRY(tokenKind, [&]() -> Expected<Token::Kind::Set>
         {
-            switch (typeString.front())
-            {
-                case 'i':
-                {
-                    ACE_TRY_ASSERT(!hasDecimalPoint);
-                    ACE_TRY(value, [&]() -> Expected<int64_t>
-                    {
-                        try
-                        {
-                            return std::stoll(numberString);
-                        }
-                        catch (const std::out_of_range&)
-                        {
-                            ACE_TRY_UNREACHABLE();
-                        }
-                    }());
-
-                    if (typeSizeString == "8")
-                    {
-                        ACE_TRY_ASSERT(
-                            (value >= std::numeric_limits<int8_t>::min()) &&
-                            (value <= std::numeric_limits<int8_t>::max())
-                        );
-
-                        return Token::Kind::New(Token::Kind::Int8);
-                    }
-                    else if (typeSizeString == "16")
-                    {
-                        ACE_TRY_ASSERT(
-                            (value >= std::numeric_limits<int16_t>::min()) &&
-                            (value <= std::numeric_limits<int16_t>::max())
-                        );
-
-                        return Token::Kind::New(Token::Kind::Int16);
-                    }
-                    else if (typeSizeString == "32")
-                    {
-                        ACE_TRY_ASSERT(
-                            (value >= std::numeric_limits<int32_t>::min()) &&
-                            (value <= std::numeric_limits<int32_t>::max())
-                        );
-
-                        return Token::Kind::New(Token::Kind::Int32);
-                    }
-                    else if (typeSizeString == "64")
-                    {
-                        ACE_TRY_ASSERT(
-                            (value >= std::numeric_limits<int64_t>::min()) &&
-                            (value <= std::numeric_limits<int64_t>::max())
-                        );
-
-                        return Token::Kind::New(Token::Kind::Int64);
-                    }
-                }
-
-                case 'u':
-                {
-                    ACE_TRY_ASSERT(!hasDecimalPoint);
-                    ACE_TRY(value, [&]() -> Expected<uint64_t>
-                    {
-                        try
-                        {
-                            return std::stoull(numberString);
-                        }
-                        catch (const std::out_of_range&)
-                        {
-                            ACE_TRY_UNREACHABLE();
-                        }
-                    }());
-
-                    if (typeSizeString == "8")
-                    {
-                        ACE_TRY_ASSERT(
-                            (value >= std::numeric_limits<uint8_t>::min()) &&
-                            (value <= std::numeric_limits<uint8_t>::max())
-                        );
-
-                        return Token::Kind::New(Token::Kind::UInt8);
-                    }
-                    else if (typeSizeString == "16")
-                    {
-                        ACE_TRY_ASSERT(
-                            (value >= std::numeric_limits<uint16_t>::min()) &&
-                            (value <= std::numeric_limits<uint16_t>::max())
-                        );
-
-                        return Token::Kind::New(Token::Kind::UInt16);
-                    }
-                    else if (typeSizeString == "32")
-                    {
-                        ACE_TRY_ASSERT(
-                            (value >= std::numeric_limits<uint32_t>::min()) &&
-                            (value <= std::numeric_limits<uint32_t>::max())
-                        );
-
-                        return Token::Kind::New(Token::Kind::UInt32);
-                    }
-                    else if (typeSizeString == "64")
-                    {
-                        ACE_TRY_ASSERT(
-                            (value >= std::numeric_limits<uint64_t>::min()) &&
-                            (value <= std::numeric_limits<uint64_t>::max())
-                        );
-
-                        return Token::Kind::New(Token::Kind::UInt64);
-                    }
-                }
-
-                case 'f':
-                {
-                    double value{};
-                    try
-                    {
-                        value = std::stod(numberString);
-                    }
-                    catch (const std::out_of_range&)
-                    {
-                        ACE_TRY_UNREACHABLE();
-                    }
-
-                    if (typeSizeString == "32")
-                    {
-                        return Token::Kind::New(Token::Kind::Float32);
-                    }
-                    else if (typeSizeString == "64")
-                    {
-                        return Token::Kind::New(Token::Kind::Float64);
-                    }
-                }
-            }
-            
-            ACE_TRY_UNREACHABLE();
+            return GetNumberType(
+                numberString,
+                typeString,
+                typeSizeString,
+                hasDecimalPoint
+            );
         }());
 
         return ParseData
