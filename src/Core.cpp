@@ -116,7 +116,7 @@ namespace Ace::Core
         return ExpectedVoid;
     }
 
-    auto SetFunctionSymbolsBodies(const std::vector<const BoundNode::IBase*>& t_nodes) -> void
+    auto BindFunctionSymbolsBodies(const std::vector<const BoundNode::IBase*>& t_nodes) -> void
     {
         const auto functionNodes = DynamicCastFilter<const BoundNode::Function*>(t_nodes);
         std::for_each(begin(functionNodes), end(functionNodes), [&]

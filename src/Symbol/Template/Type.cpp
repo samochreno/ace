@@ -56,7 +56,7 @@ namespace Ace::Symbol::Template
                 [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); }
             ).Unwrap();
 
-            Core::SetFunctionSymbolsBodies(Core::GetAllNodes(boundAST));
+            Core::BindFunctionSymbolsBodies(Core::GetAllNodes(boundAST));
 
             auto* const selfSymbol = boundAST->GetSymbol();
 

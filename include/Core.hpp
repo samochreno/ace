@@ -47,7 +47,7 @@ namespace Ace::Core
     auto DefineAssociations(const std::vector<const Node::IBase*>& t_nodes) -> Expected<void>;
     auto AssertControlFlow(const std::vector<const BoundNode::IBase*>& t_nodes) -> Expected<void>;
     auto AssertCanResolveTypeSizes() -> Expected<void>;
-    auto SetFunctionSymbolsBodies(const std::vector<const BoundNode::IBase*>& t_nodes) -> void;
+    auto BindFunctionSymbolsBodies(const std::vector<const BoundNode::IBase*>& t_nodes) -> void;
 
 
 #define TTypeChecked        std::remove_reference_t<decltype(t_getOrCreateTypeCheckedFunc(TBound{}).Unwrap().Value)>

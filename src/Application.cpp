@@ -79,7 +79,7 @@ namespace Ace
             [](const std::shared_ptr<const BoundNode::Module>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); }
         ));
 
-        Core::SetFunctionSymbolsBodies(Core::GetAllNodes(begin(boundASTs), end(boundASTs)));
+        Core::BindFunctionSymbolsBodies(Core::GetAllNodes(begin(boundASTs), end(boundASTs)));
 
         const auto templateSymbols = Scope::GetRoot()->CollectDefinedSymbolsRecursive<Symbol::Template::IBase>();
         bool didInstantiateSemantics = true;
