@@ -581,7 +581,7 @@ namespace Ace
                 t_createTrivialBody(glueSymbol, structSymbol) :
                 t_createBody(glueSymbol, structSymbol);
 
-            glueSymbol->SetBody(body);
+            glueSymbol->BindBody(body);
         });
     }
 

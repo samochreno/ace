@@ -60,7 +60,7 @@ namespace Ace::Symbol
 
         auto GetArgumentTypeInfos() const -> std::vector<TypeInfo>;
 
-        auto SetBody(const std::shared_ptr<const IEmittable<void>>& t_body) -> void;
+        auto BindBody(const std::shared_ptr<const IEmittable<void>>& t_body) -> void;
         auto GetBody() -> std::optional<const IEmittable<void>*>;
 
         auto SetAsNative() -> void { m_IsNative = true; }

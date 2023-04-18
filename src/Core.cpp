@@ -125,7 +125,7 @@ namespace Ace::Core
             if (!t_functionNode->GetBody().has_value())
                 return;
 
-            t_functionNode->GetSymbol()->SetBody(t_functionNode->GetBody().value());
+            t_functionNode->GetSymbol()->BindBody(t_functionNode->GetBody().value());
         });
     }
 }

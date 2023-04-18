@@ -69,7 +69,7 @@ namespace Ace::NativeSymbol
         ACE_TRY(symbol, Scope::GetRoot()->ResolveStaticSymbol<Symbol::Function>(m_Name));
 
         const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
-        symbol->SetBody(emittableBody);
+        symbol->BindBody(emittableBody);
         symbol->SetAsNative();
 
         m_Symbol = symbol;
@@ -91,7 +91,7 @@ namespace Ace::NativeSymbol
         ACE_TRY(symbol, Scope::GetRoot()->ResolveStaticSymbol<Symbol::Function>(name));
 
         const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
-        symbol->SetBody(emittableBody);
+        symbol->BindBody(emittableBody);
         symbol->SetAsNative();
 
         m_Symbol = symbol;
