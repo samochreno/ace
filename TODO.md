@@ -2,10 +2,7 @@
 
 ## 💥 High Priority
 
-- [ ] Add Emitter::EmitStructDropGlue.
-- [ ] Bind drop and copy glue only once on symbol.
 - [ ] ❓ All or none fields of struct are public.
-- [ ] Limit the use of `DynamicCastFilter` in `Emitter.cpp` in favor of dynamic dispatch.
 - [ ] Strings.
 - [ ] Simplify symbol resolution and add template argument deduction.
 - Add templated conversion operators (`ref.ace` at line 16):
