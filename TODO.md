@@ -32,15 +32,15 @@
           name: "ace",
           path_macros: [
               new PathMacro {
-                  name: "ProjectPath",
-                  value: "C:/Users/samoc/Desktop/repos/Ace/Ace/ace/src",
+                  name: "$project_path",
+                  value: "/home/samo/repos/ace/ace/src/",
               },
           ],
           file_paths: [
-              "$ProjectPath/**.ace",
+              "$project_path/**.ace",
           ],
           dependency_file_paths: [
-              "$ProjectPath/**.dll"
+              "$project_path/**.dll"
           ],
       };
   }

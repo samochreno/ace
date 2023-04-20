@@ -159,7 +159,7 @@ namespace Ace
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
 
-        const std::filesystem::path packagePath{ "/home/samo/repos/ace/ace/Package.json" };
+        const std::filesystem::path packagePath{ "/home/samo/repos/ace/ace/package.json" };
         const std::ifstream packageFileStream{ packagePath };
         ACE_ASSERT(packageFileStream);
 

@@ -15,9 +15,9 @@ namespace Ace
 {
     namespace Property
     {
-        static const std::string PathMacros             = "pathMacros";
-        static const std::string FilePaths              = "filePaths";
-        static const std::string DependencyFilePaths    = "dependencyFilePaths";
+        static const std::string PathMacros             = "path_macros";
+        static const std::string FilePaths              = "file_paths";
+        static const std::string DependencyFilePaths    = "dependency_file_paths";
         static const std::string Name                   = "name";
         static const std::string Value                  = "value";
     }
