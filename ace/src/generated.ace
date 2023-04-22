@@ -1,36 +1,45 @@
-
 id_0_0: struct {
     x: int,
     y: int,
 }
+
 id_0_1(): int {
     value: id_0_0 = new id_0_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_0_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_0_2(): int {
     i: int = -id_0_3();
     print_int(i);
     ret 0;
 }
+
 id_0_3(): int {
     ret -131255;
 }
+
 id_0_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_0_5: struct {
     field: int,
 }
+
 impl id_0_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_0_6(): int {
     print_int(15);
     obj: id_0_5 = new id_0_5 { field: id_0_3() };
@@ -42,34 +51,44 @@ id_1_0: struct {
     x: int,
     y: int,
 }
+
 id_1_1(): int {
     value: id_1_0 = new id_1_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_1_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_1_2(): int {
     i: int = -id_1_3();
     print_int(i);
     ret 0;
 }
+
 id_1_3(): int {
     ret -131255;
 }
+
 id_1_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_1_5: struct {
     field: int,
 }
+
 impl id_1_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_1_6(): int {
     print_int(15);
     obj: id_1_5 = new id_1_5 { field: id_1_3() };
@@ -81,34 +100,44 @@ id_2_0: struct {
     x: int,
     y: int,
 }
+
 id_2_1(): int {
     value: id_2_0 = new id_2_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_2_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_2_2(): int {
     i: int = -id_2_3();
     print_int(i);
     ret 0;
 }
+
 id_2_3(): int {
     ret -131255;
 }
+
 id_2_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_2_5: struct {
     field: int,
 }
+
 impl id_2_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_2_6(): int {
     print_int(15);
     obj: id_2_5 = new id_2_5 { field: id_2_3() };
@@ -120,34 +149,44 @@ id_3_0: struct {
     x: int,
     y: int,
 }
+
 id_3_1(): int {
     value: id_3_0 = new id_3_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_3_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_3_2(): int {
     i: int = -id_3_3();
     print_int(i);
     ret 0;
 }
+
 id_3_3(): int {
     ret -131255;
 }
+
 id_3_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_3_5: struct {
     field: int,
 }
+
 impl id_3_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_3_6(): int {
     print_int(15);
     obj: id_3_5 = new id_3_5 { field: id_3_3() };
@@ -159,34 +198,44 @@ id_4_0: struct {
     x: int,
     y: int,
 }
+
 id_4_1(): int {
     value: id_4_0 = new id_4_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_4_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_4_2(): int {
     i: int = -id_4_3();
     print_int(i);
     ret 0;
 }
+
 id_4_3(): int {
     ret -131255;
 }
+
 id_4_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_4_5: struct {
     field: int,
 }
+
 impl id_4_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_4_6(): int {
     print_int(15);
     obj: id_4_5 = new id_4_5 { field: id_4_3() };
@@ -198,34 +247,44 @@ id_5_0: struct {
     x: int,
     y: int,
 }
+
 id_5_1(): int {
     value: id_5_0 = new id_5_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_5_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_5_2(): int {
     i: int = -id_5_3();
     print_int(i);
     ret 0;
 }
+
 id_5_3(): int {
     ret -131255;
 }
+
 id_5_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_5_5: struct {
     field: int,
 }
+
 impl id_5_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_5_6(): int {
     print_int(15);
     obj: id_5_5 = new id_5_5 { field: id_5_3() };
@@ -237,34 +296,44 @@ id_6_0: struct {
     x: int,
     y: int,
 }
+
 id_6_1(): int {
     value: id_6_0 = new id_6_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_6_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_6_2(): int {
     i: int = -id_6_3();
     print_int(i);
     ret 0;
 }
+
 id_6_3(): int {
     ret -131255;
 }
+
 id_6_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_6_5: struct {
     field: int,
 }
+
 impl id_6_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_6_6(): int {
     print_int(15);
     obj: id_6_5 = new id_6_5 { field: id_6_3() };
@@ -276,34 +345,44 @@ id_7_0: struct {
     x: int,
     y: int,
 }
+
 id_7_1(): int {
     value: id_7_0 = new id_7_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_7_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_7_2(): int {
     i: int = -id_7_3();
     print_int(i);
     ret 0;
 }
+
 id_7_3(): int {
     ret -131255;
 }
+
 id_7_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_7_5: struct {
     field: int,
 }
+
 impl id_7_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_7_6(): int {
     print_int(15);
     obj: id_7_5 = new id_7_5 { field: id_7_3() };
@@ -315,34 +394,44 @@ id_8_0: struct {
     x: int,
     y: int,
 }
+
 id_8_1(): int {
     value: id_8_0 = new id_8_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_8_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_8_2(): int {
     i: int = -id_8_3();
     print_int(i);
     ret 0;
 }
+
 id_8_3(): int {
     ret -131255;
 }
+
 id_8_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_8_5: struct {
     field: int,
 }
+
 impl id_8_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_8_6(): int {
     print_int(15);
     obj: id_8_5 = new id_8_5 { field: id_8_3() };
@@ -354,34 +443,44 @@ id_9_0: struct {
     x: int,
     y: int,
 }
+
 id_9_1(): int {
     value: id_9_0 = new id_9_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_9_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_9_2(): int {
     i: int = -id_9_3();
     print_int(i);
     ret 0;
 }
+
 id_9_3(): int {
     ret -131255;
 }
+
 id_9_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_9_5: struct {
     field: int,
 }
+
 impl id_9_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_9_6(): int {
     print_int(15);
     obj: id_9_5 = new id_9_5 { field: id_9_3() };
@@ -393,34 +492,44 @@ id_10_0: struct {
     x: int,
     y: int,
 }
+
 id_10_1(): int {
     value: id_10_0 = new id_10_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_10_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_10_2(): int {
     i: int = -id_10_3();
     print_int(i);
     ret 0;
 }
+
 id_10_3(): int {
     ret -131255;
 }
+
 id_10_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_10_5: struct {
     field: int,
 }
+
 impl id_10_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_10_6(): int {
     print_int(15);
     obj: id_10_5 = new id_10_5 { field: id_10_3() };
@@ -432,34 +541,44 @@ id_11_0: struct {
     x: int,
     y: int,
 }
+
 id_11_1(): int {
     value: id_11_0 = new id_11_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_11_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_11_2(): int {
     i: int = -id_11_3();
     print_int(i);
     ret 0;
 }
+
 id_11_3(): int {
     ret -131255;
 }
+
 id_11_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_11_5: struct {
     field: int,
 }
+
 impl id_11_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_11_6(): int {
     print_int(15);
     obj: id_11_5 = new id_11_5 { field: id_11_3() };
@@ -471,34 +590,44 @@ id_12_0: struct {
     x: int,
     y: int,
 }
+
 id_12_1(): int {
     value: id_12_0 = new id_12_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_12_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_12_2(): int {
     i: int = -id_12_3();
     print_int(i);
     ret 0;
 }
+
 id_12_3(): int {
     ret -131255;
 }
+
 id_12_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_12_5: struct {
     field: int,
 }
+
 impl id_12_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_12_6(): int {
     print_int(15);
     obj: id_12_5 = new id_12_5 { field: id_12_3() };
@@ -510,34 +639,44 @@ id_13_0: struct {
     x: int,
     y: int,
 }
+
 id_13_1(): int {
     value: id_13_0 = new id_13_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_13_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_13_2(): int {
     i: int = -id_13_3();
     print_int(i);
     ret 0;
 }
+
 id_13_3(): int {
     ret -131255;
 }
+
 id_13_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_13_5: struct {
     field: int,
 }
+
 impl id_13_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_13_6(): int {
     print_int(15);
     obj: id_13_5 = new id_13_5 { field: id_13_3() };
@@ -549,34 +688,44 @@ id_14_0: struct {
     x: int,
     y: int,
 }
+
 id_14_1(): int {
     value: id_14_0 = new id_14_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_14_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_14_2(): int {
     i: int = -id_14_3();
     print_int(i);
     ret 0;
 }
+
 id_14_3(): int {
     ret -131255;
 }
+
 id_14_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_14_5: struct {
     field: int,
 }
+
 impl id_14_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_14_6(): int {
     print_int(15);
     obj: id_14_5 = new id_14_5 { field: id_14_3() };
@@ -588,34 +737,44 @@ id_15_0: struct {
     x: int,
     y: int,
 }
+
 id_15_1(): int {
     value: id_15_0 = new id_15_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_15_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_15_2(): int {
     i: int = -id_15_3();
     print_int(i);
     ret 0;
 }
+
 id_15_3(): int {
     ret -131255;
 }
+
 id_15_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_15_5: struct {
     field: int,
 }
+
 impl id_15_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_15_6(): int {
     print_int(15);
     obj: id_15_5 = new id_15_5 { field: id_15_3() };
@@ -627,34 +786,44 @@ id_16_0: struct {
     x: int,
     y: int,
 }
+
 id_16_1(): int {
     value: id_16_0 = new id_16_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_16_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_16_2(): int {
     i: int = -id_16_3();
     print_int(i);
     ret 0;
 }
+
 id_16_3(): int {
     ret -131255;
 }
+
 id_16_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_16_5: struct {
     field: int,
 }
+
 impl id_16_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_16_6(): int {
     print_int(15);
     obj: id_16_5 = new id_16_5 { field: id_16_3() };
@@ -666,34 +835,44 @@ id_17_0: struct {
     x: int,
     y: int,
 }
+
 id_17_1(): int {
     value: id_17_0 = new id_17_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_17_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_17_2(): int {
     i: int = -id_17_3();
     print_int(i);
     ret 0;
 }
+
 id_17_3(): int {
     ret -131255;
 }
+
 id_17_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_17_5: struct {
     field: int,
 }
+
 impl id_17_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_17_6(): int {
     print_int(15);
     obj: id_17_5 = new id_17_5 { field: id_17_3() };
@@ -705,34 +884,44 @@ id_18_0: struct {
     x: int,
     y: int,
 }
+
 id_18_1(): int {
     value: id_18_0 = new id_18_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_18_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_18_2(): int {
     i: int = -id_18_3();
     print_int(i);
     ret 0;
 }
+
 id_18_3(): int {
     ret -131255;
 }
+
 id_18_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_18_5: struct {
     field: int,
 }
+
 impl id_18_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_18_6(): int {
     print_int(15);
     obj: id_18_5 = new id_18_5 { field: id_18_3() };
@@ -744,34 +933,44 @@ id_19_0: struct {
     x: int,
     y: int,
 }
+
 id_19_1(): int {
     value: id_19_0 = new id_19_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_19_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_19_2(): int {
     i: int = -id_19_3();
     print_int(i);
     ret 0;
 }
+
 id_19_3(): int {
     ret -131255;
 }
+
 id_19_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_19_5: struct {
     field: int,
 }
+
 impl id_19_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_19_6(): int {
     print_int(15);
     obj: id_19_5 = new id_19_5 { field: id_19_3() };
@@ -783,34 +982,44 @@ id_20_0: struct {
     x: int,
     y: int,
 }
+
 id_20_1(): int {
     value: id_20_0 = new id_20_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_20_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_20_2(): int {
     i: int = -id_20_3();
     print_int(i);
     ret 0;
 }
+
 id_20_3(): int {
     ret -131255;
 }
+
 id_20_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_20_5: struct {
     field: int,
 }
+
 impl id_20_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_20_6(): int {
     print_int(15);
     obj: id_20_5 = new id_20_5 { field: id_20_3() };
@@ -822,34 +1031,44 @@ id_21_0: struct {
     x: int,
     y: int,
 }
+
 id_21_1(): int {
     value: id_21_0 = new id_21_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_21_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_21_2(): int {
     i: int = -id_21_3();
     print_int(i);
     ret 0;
 }
+
 id_21_3(): int {
     ret -131255;
 }
+
 id_21_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_21_5: struct {
     field: int,
 }
+
 impl id_21_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_21_6(): int {
     print_int(15);
     obj: id_21_5 = new id_21_5 { field: id_21_3() };
@@ -861,34 +1080,44 @@ id_22_0: struct {
     x: int,
     y: int,
 }
+
 id_22_1(): int {
     value: id_22_0 = new id_22_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_22_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_22_2(): int {
     i: int = -id_22_3();
     print_int(i);
     ret 0;
 }
+
 id_22_3(): int {
     ret -131255;
 }
+
 id_22_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_22_5: struct {
     field: int,
 }
+
 impl id_22_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_22_6(): int {
     print_int(15);
     obj: id_22_5 = new id_22_5 { field: id_22_3() };
@@ -900,34 +1129,44 @@ id_23_0: struct {
     x: int,
     y: int,
 }
+
 id_23_1(): int {
     value: id_23_0 = new id_23_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_23_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_23_2(): int {
     i: int = -id_23_3();
     print_int(i);
     ret 0;
 }
+
 id_23_3(): int {
     ret -131255;
 }
+
 id_23_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_23_5: struct {
     field: int,
 }
+
 impl id_23_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_23_6(): int {
     print_int(15);
     obj: id_23_5 = new id_23_5 { field: id_23_3() };
@@ -939,34 +1178,44 @@ id_24_0: struct {
     x: int,
     y: int,
 }
+
 id_24_1(): int {
     value: id_24_0 = new id_24_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_24_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_24_2(): int {
     i: int = -id_24_3();
     print_int(i);
     ret 0;
 }
+
 id_24_3(): int {
     ret -131255;
 }
+
 id_24_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_24_5: struct {
     field: int,
 }
+
 impl id_24_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_24_6(): int {
     print_int(15);
     obj: id_24_5 = new id_24_5 { field: id_24_3() };
@@ -978,34 +1227,44 @@ id_25_0: struct {
     x: int,
     y: int,
 }
+
 id_25_1(): int {
     value: id_25_0 = new id_25_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_25_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_25_2(): int {
     i: int = -id_25_3();
     print_int(i);
     ret 0;
 }
+
 id_25_3(): int {
     ret -131255;
 }
+
 id_25_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_25_5: struct {
     field: int,
 }
+
 impl id_25_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_25_6(): int {
     print_int(15);
     obj: id_25_5 = new id_25_5 { field: id_25_3() };
@@ -1017,34 +1276,44 @@ id_26_0: struct {
     x: int,
     y: int,
 }
+
 id_26_1(): int {
     value: id_26_0 = new id_26_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_26_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_26_2(): int {
     i: int = -id_26_3();
     print_int(i);
     ret 0;
 }
+
 id_26_3(): int {
     ret -131255;
 }
+
 id_26_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_26_5: struct {
     field: int,
 }
+
 impl id_26_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_26_6(): int {
     print_int(15);
     obj: id_26_5 = new id_26_5 { field: id_26_3() };
@@ -1056,34 +1325,44 @@ id_27_0: struct {
     x: int,
     y: int,
 }
+
 id_27_1(): int {
     value: id_27_0 = new id_27_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_27_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_27_2(): int {
     i: int = -id_27_3();
     print_int(i);
     ret 0;
 }
+
 id_27_3(): int {
     ret -131255;
 }
+
 id_27_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_27_5: struct {
     field: int,
 }
+
 impl id_27_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_27_6(): int {
     print_int(15);
     obj: id_27_5 = new id_27_5 { field: id_27_3() };
@@ -1095,34 +1374,44 @@ id_28_0: struct {
     x: int,
     y: int,
 }
+
 id_28_1(): int {
     value: id_28_0 = new id_28_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_28_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_28_2(): int {
     i: int = -id_28_3();
     print_int(i);
     ret 0;
 }
+
 id_28_3(): int {
     ret -131255;
 }
+
 id_28_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_28_5: struct {
     field: int,
 }
+
 impl id_28_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_28_6(): int {
     print_int(15);
     obj: id_28_5 = new id_28_5 { field: id_28_3() };
@@ -1134,34 +1423,44 @@ id_29_0: struct {
     x: int,
     y: int,
 }
+
 id_29_1(): int {
     value: id_29_0 = new id_29_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_29_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_29_2(): int {
     i: int = -id_29_3();
     print_int(i);
     ret 0;
 }
+
 id_29_3(): int {
     ret -131255;
 }
+
 id_29_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_29_5: struct {
     field: int,
 }
+
 impl id_29_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_29_6(): int {
     print_int(15);
     obj: id_29_5 = new id_29_5 { field: id_29_3() };
@@ -1173,34 +1472,44 @@ id_30_0: struct {
     x: int,
     y: int,
 }
+
 id_30_1(): int {
     value: id_30_0 = new id_30_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_30_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_30_2(): int {
     i: int = -id_30_3();
     print_int(i);
     ret 0;
 }
+
 id_30_3(): int {
     ret -131255;
 }
+
 id_30_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_30_5: struct {
     field: int,
 }
+
 impl id_30_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_30_6(): int {
     print_int(15);
     obj: id_30_5 = new id_30_5 { field: id_30_3() };
@@ -1212,34 +1521,44 @@ id_31_0: struct {
     x: int,
     y: int,
 }
+
 id_31_1(): int {
     value: id_31_0 = new id_31_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_31_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_31_2(): int {
     i: int = -id_31_3();
     print_int(i);
     ret 0;
 }
+
 id_31_3(): int {
     ret -131255;
 }
+
 id_31_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_31_5: struct {
     field: int,
 }
+
 impl id_31_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_31_6(): int {
     print_int(15);
     obj: id_31_5 = new id_31_5 { field: id_31_3() };
@@ -1251,34 +1570,44 @@ id_32_0: struct {
     x: int,
     y: int,
 }
+
 id_32_1(): int {
     value: id_32_0 = new id_32_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_32_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_32_2(): int {
     i: int = -id_32_3();
     print_int(i);
     ret 0;
 }
+
 id_32_3(): int {
     ret -131255;
 }
+
 id_32_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_32_5: struct {
     field: int,
 }
+
 impl id_32_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_32_6(): int {
     print_int(15);
     obj: id_32_5 = new id_32_5 { field: id_32_3() };
@@ -1290,34 +1619,44 @@ id_33_0: struct {
     x: int,
     y: int,
 }
+
 id_33_1(): int {
     value: id_33_0 = new id_33_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_33_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_33_2(): int {
     i: int = -id_33_3();
     print_int(i);
     ret 0;
 }
+
 id_33_3(): int {
     ret -131255;
 }
+
 id_33_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_33_5: struct {
     field: int,
 }
+
 impl id_33_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_33_6(): int {
     print_int(15);
     obj: id_33_5 = new id_33_5 { field: id_33_3() };
@@ -1329,34 +1668,44 @@ id_34_0: struct {
     x: int,
     y: int,
 }
+
 id_34_1(): int {
     value: id_34_0 = new id_34_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_34_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_34_2(): int {
     i: int = -id_34_3();
     print_int(i);
     ret 0;
 }
+
 id_34_3(): int {
     ret -131255;
 }
+
 id_34_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_34_5: struct {
     field: int,
 }
+
 impl id_34_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_34_6(): int {
     print_int(15);
     obj: id_34_5 = new id_34_5 { field: id_34_3() };
@@ -1368,34 +1717,44 @@ id_35_0: struct {
     x: int,
     y: int,
 }
+
 id_35_1(): int {
     value: id_35_0 = new id_35_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_35_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_35_2(): int {
     i: int = -id_35_3();
     print_int(i);
     ret 0;
 }
+
 id_35_3(): int {
     ret -131255;
 }
+
 id_35_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_35_5: struct {
     field: int,
 }
+
 impl id_35_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_35_6(): int {
     print_int(15);
     obj: id_35_5 = new id_35_5 { field: id_35_3() };
@@ -1407,34 +1766,44 @@ id_36_0: struct {
     x: int,
     y: int,
 }
+
 id_36_1(): int {
     value: id_36_0 = new id_36_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_36_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_36_2(): int {
     i: int = -id_36_3();
     print_int(i);
     ret 0;
 }
+
 id_36_3(): int {
     ret -131255;
 }
+
 id_36_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_36_5: struct {
     field: int,
 }
+
 impl id_36_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_36_6(): int {
     print_int(15);
     obj: id_36_5 = new id_36_5 { field: id_36_3() };
@@ -1446,34 +1815,44 @@ id_37_0: struct {
     x: int,
     y: int,
 }
+
 id_37_1(): int {
     value: id_37_0 = new id_37_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_37_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_37_2(): int {
     i: int = -id_37_3();
     print_int(i);
     ret 0;
 }
+
 id_37_3(): int {
     ret -131255;
 }
+
 id_37_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_37_5: struct {
     field: int,
 }
+
 impl id_37_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_37_6(): int {
     print_int(15);
     obj: id_37_5 = new id_37_5 { field: id_37_3() };
@@ -1485,34 +1864,44 @@ id_38_0: struct {
     x: int,
     y: int,
 }
+
 id_38_1(): int {
     value: id_38_0 = new id_38_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_38_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_38_2(): int {
     i: int = -id_38_3();
     print_int(i);
     ret 0;
 }
+
 id_38_3(): int {
     ret -131255;
 }
+
 id_38_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_38_5: struct {
     field: int,
 }
+
 impl id_38_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_38_6(): int {
     print_int(15);
     obj: id_38_5 = new id_38_5 { field: id_38_3() };
@@ -1524,34 +1913,44 @@ id_39_0: struct {
     x: int,
     y: int,
 }
+
 id_39_1(): int {
     value: id_39_0 = new id_39_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_39_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_39_2(): int {
     i: int = -id_39_3();
     print_int(i);
     ret 0;
 }
+
 id_39_3(): int {
     ret -131255;
 }
+
 id_39_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_39_5: struct {
     field: int,
 }
+
 impl id_39_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_39_6(): int {
     print_int(15);
     obj: id_39_5 = new id_39_5 { field: id_39_3() };
@@ -1563,34 +1962,44 @@ id_40_0: struct {
     x: int,
     y: int,
 }
+
 id_40_1(): int {
     value: id_40_0 = new id_40_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_40_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_40_2(): int {
     i: int = -id_40_3();
     print_int(i);
     ret 0;
 }
+
 id_40_3(): int {
     ret -131255;
 }
+
 id_40_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_40_5: struct {
     field: int,
 }
+
 impl id_40_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_40_6(): int {
     print_int(15);
     obj: id_40_5 = new id_40_5 { field: id_40_3() };
@@ -1602,34 +2011,44 @@ id_41_0: struct {
     x: int,
     y: int,
 }
+
 id_41_1(): int {
     value: id_41_0 = new id_41_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_41_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_41_2(): int {
     i: int = -id_41_3();
     print_int(i);
     ret 0;
 }
+
 id_41_3(): int {
     ret -131255;
 }
+
 id_41_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_41_5: struct {
     field: int,
 }
+
 impl id_41_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_41_6(): int {
     print_int(15);
     obj: id_41_5 = new id_41_5 { field: id_41_3() };
@@ -1641,34 +2060,44 @@ id_42_0: struct {
     x: int,
     y: int,
 }
+
 id_42_1(): int {
     value: id_42_0 = new id_42_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_42_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_42_2(): int {
     i: int = -id_42_3();
     print_int(i);
     ret 0;
 }
+
 id_42_3(): int {
     ret -131255;
 }
+
 id_42_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_42_5: struct {
     field: int,
 }
+
 impl id_42_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_42_6(): int {
     print_int(15);
     obj: id_42_5 = new id_42_5 { field: id_42_3() };
@@ -1680,34 +2109,44 @@ id_43_0: struct {
     x: int,
     y: int,
 }
+
 id_43_1(): int {
     value: id_43_0 = new id_43_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_43_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_43_2(): int {
     i: int = -id_43_3();
     print_int(i);
     ret 0;
 }
+
 id_43_3(): int {
     ret -131255;
 }
+
 id_43_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_43_5: struct {
     field: int,
 }
+
 impl id_43_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_43_6(): int {
     print_int(15);
     obj: id_43_5 = new id_43_5 { field: id_43_3() };
@@ -1719,34 +2158,44 @@ id_44_0: struct {
     x: int,
     y: int,
 }
+
 id_44_1(): int {
     value: id_44_0 = new id_44_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_44_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_44_2(): int {
     i: int = -id_44_3();
     print_int(i);
     ret 0;
 }
+
 id_44_3(): int {
     ret -131255;
 }
+
 id_44_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_44_5: struct {
     field: int,
 }
+
 impl id_44_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_44_6(): int {
     print_int(15);
     obj: id_44_5 = new id_44_5 { field: id_44_3() };
@@ -1758,34 +2207,44 @@ id_45_0: struct {
     x: int,
     y: int,
 }
+
 id_45_1(): int {
     value: id_45_0 = new id_45_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_45_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_45_2(): int {
     i: int = -id_45_3();
     print_int(i);
     ret 0;
 }
+
 id_45_3(): int {
     ret -131255;
 }
+
 id_45_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_45_5: struct {
     field: int,
 }
+
 impl id_45_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_45_6(): int {
     print_int(15);
     obj: id_45_5 = new id_45_5 { field: id_45_3() };
@@ -1797,34 +2256,44 @@ id_46_0: struct {
     x: int,
     y: int,
 }
+
 id_46_1(): int {
     value: id_46_0 = new id_46_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_46_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_46_2(): int {
     i: int = -id_46_3();
     print_int(i);
     ret 0;
 }
+
 id_46_3(): int {
     ret -131255;
 }
+
 id_46_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_46_5: struct {
     field: int,
 }
+
 impl id_46_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_46_6(): int {
     print_int(15);
     obj: id_46_5 = new id_46_5 { field: id_46_3() };
@@ -1836,34 +2305,44 @@ id_47_0: struct {
     x: int,
     y: int,
 }
+
 id_47_1(): int {
     value: id_47_0 = new id_47_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_47_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_47_2(): int {
     i: int = -id_47_3();
     print_int(i);
     ret 0;
 }
+
 id_47_3(): int {
     ret -131255;
 }
+
 id_47_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_47_5: struct {
     field: int,
 }
+
 impl id_47_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_47_6(): int {
     print_int(15);
     obj: id_47_5 = new id_47_5 { field: id_47_3() };
@@ -1875,34 +2354,44 @@ id_48_0: struct {
     x: int,
     y: int,
 }
+
 id_48_1(): int {
     value: id_48_0 = new id_48_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_48_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_48_2(): int {
     i: int = -id_48_3();
     print_int(i);
     ret 0;
 }
+
 id_48_3(): int {
     ret -131255;
 }
+
 id_48_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_48_5: struct {
     field: int,
 }
+
 impl id_48_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_48_6(): int {
     print_int(15);
     obj: id_48_5 = new id_48_5 { field: id_48_3() };
@@ -1914,34 +2403,44 @@ id_49_0: struct {
     x: int,
     y: int,
 }
+
 id_49_1(): int {
     value: id_49_0 = new id_49_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_49_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_49_2(): int {
     i: int = -id_49_3();
     print_int(i);
     ret 0;
 }
+
 id_49_3(): int {
     ret -131255;
 }
+
 id_49_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_49_5: struct {
     field: int,
 }
+
 impl id_49_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_49_6(): int {
     print_int(15);
     obj: id_49_5 = new id_49_5 { field: id_49_3() };
@@ -1953,34 +2452,44 @@ id_50_0: struct {
     x: int,
     y: int,
 }
+
 id_50_1(): int {
     value: id_50_0 = new id_50_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_50_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_50_2(): int {
     i: int = -id_50_3();
     print_int(i);
     ret 0;
 }
+
 id_50_3(): int {
     ret -131255;
 }
+
 id_50_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_50_5: struct {
     field: int,
 }
+
 impl id_50_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_50_6(): int {
     print_int(15);
     obj: id_50_5 = new id_50_5 { field: id_50_3() };
@@ -1992,34 +2501,44 @@ id_51_0: struct {
     x: int,
     y: int,
 }
+
 id_51_1(): int {
     value: id_51_0 = new id_51_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_51_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_51_2(): int {
     i: int = -id_51_3();
     print_int(i);
     ret 0;
 }
+
 id_51_3(): int {
     ret -131255;
 }
+
 id_51_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_51_5: struct {
     field: int,
 }
+
 impl id_51_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_51_6(): int {
     print_int(15);
     obj: id_51_5 = new id_51_5 { field: id_51_3() };
@@ -2031,34 +2550,44 @@ id_52_0: struct {
     x: int,
     y: int,
 }
+
 id_52_1(): int {
     value: id_52_0 = new id_52_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_52_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_52_2(): int {
     i: int = -id_52_3();
     print_int(i);
     ret 0;
 }
+
 id_52_3(): int {
     ret -131255;
 }
+
 id_52_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_52_5: struct {
     field: int,
 }
+
 impl id_52_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_52_6(): int {
     print_int(15);
     obj: id_52_5 = new id_52_5 { field: id_52_3() };
@@ -2070,34 +2599,44 @@ id_53_0: struct {
     x: int,
     y: int,
 }
+
 id_53_1(): int {
     value: id_53_0 = new id_53_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_53_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_53_2(): int {
     i: int = -id_53_3();
     print_int(i);
     ret 0;
 }
+
 id_53_3(): int {
     ret -131255;
 }
+
 id_53_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_53_5: struct {
     field: int,
 }
+
 impl id_53_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_53_6(): int {
     print_int(15);
     obj: id_53_5 = new id_53_5 { field: id_53_3() };
@@ -2109,34 +2648,44 @@ id_54_0: struct {
     x: int,
     y: int,
 }
+
 id_54_1(): int {
     value: id_54_0 = new id_54_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_54_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_54_2(): int {
     i: int = -id_54_3();
     print_int(i);
     ret 0;
 }
+
 id_54_3(): int {
     ret -131255;
 }
+
 id_54_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_54_5: struct {
     field: int,
 }
+
 impl id_54_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_54_6(): int {
     print_int(15);
     obj: id_54_5 = new id_54_5 { field: id_54_3() };
@@ -2148,34 +2697,44 @@ id_55_0: struct {
     x: int,
     y: int,
 }
+
 id_55_1(): int {
     value: id_55_0 = new id_55_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_55_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_55_2(): int {
     i: int = -id_55_3();
     print_int(i);
     ret 0;
 }
+
 id_55_3(): int {
     ret -131255;
 }
+
 id_55_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_55_5: struct {
     field: int,
 }
+
 impl id_55_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_55_6(): int {
     print_int(15);
     obj: id_55_5 = new id_55_5 { field: id_55_3() };
@@ -2187,34 +2746,44 @@ id_56_0: struct {
     x: int,
     y: int,
 }
+
 id_56_1(): int {
     value: id_56_0 = new id_56_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_56_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_56_2(): int {
     i: int = -id_56_3();
     print_int(i);
     ret 0;
 }
+
 id_56_3(): int {
     ret -131255;
 }
+
 id_56_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_56_5: struct {
     field: int,
 }
+
 impl id_56_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_56_6(): int {
     print_int(15);
     obj: id_56_5 = new id_56_5 { field: id_56_3() };
@@ -2226,34 +2795,44 @@ id_57_0: struct {
     x: int,
     y: int,
 }
+
 id_57_1(): int {
     value: id_57_0 = new id_57_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_57_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_57_2(): int {
     i: int = -id_57_3();
     print_int(i);
     ret 0;
 }
+
 id_57_3(): int {
     ret -131255;
 }
+
 id_57_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_57_5: struct {
     field: int,
 }
+
 impl id_57_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_57_6(): int {
     print_int(15);
     obj: id_57_5 = new id_57_5 { field: id_57_3() };
@@ -2265,34 +2844,44 @@ id_58_0: struct {
     x: int,
     y: int,
 }
+
 id_58_1(): int {
     value: id_58_0 = new id_58_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_58_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_58_2(): int {
     i: int = -id_58_3();
     print_int(i);
     ret 0;
 }
+
 id_58_3(): int {
     ret -131255;
 }
+
 id_58_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_58_5: struct {
     field: int,
 }
+
 impl id_58_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_58_6(): int {
     print_int(15);
     obj: id_58_5 = new id_58_5 { field: id_58_3() };
@@ -2304,34 +2893,44 @@ id_59_0: struct {
     x: int,
     y: int,
 }
+
 id_59_1(): int {
     value: id_59_0 = new id_59_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_59_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_59_2(): int {
     i: int = -id_59_3();
     print_int(i);
     ret 0;
 }
+
 id_59_3(): int {
     ret -131255;
 }
+
 id_59_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_59_5: struct {
     field: int,
 }
+
 impl id_59_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_59_6(): int {
     print_int(15);
     obj: id_59_5 = new id_59_5 { field: id_59_3() };
@@ -2343,34 +2942,44 @@ id_60_0: struct {
     x: int,
     y: int,
 }
+
 id_60_1(): int {
     value: id_60_0 = new id_60_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_60_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_60_2(): int {
     i: int = -id_60_3();
     print_int(i);
     ret 0;
 }
+
 id_60_3(): int {
     ret -131255;
 }
+
 id_60_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_60_5: struct {
     field: int,
 }
+
 impl id_60_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_60_6(): int {
     print_int(15);
     obj: id_60_5 = new id_60_5 { field: id_60_3() };
@@ -2382,34 +2991,44 @@ id_61_0: struct {
     x: int,
     y: int,
 }
+
 id_61_1(): int {
     value: id_61_0 = new id_61_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_61_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_61_2(): int {
     i: int = -id_61_3();
     print_int(i);
     ret 0;
 }
+
 id_61_3(): int {
     ret -131255;
 }
+
 id_61_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_61_5: struct {
     field: int,
 }
+
 impl id_61_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_61_6(): int {
     print_int(15);
     obj: id_61_5 = new id_61_5 { field: id_61_3() };
@@ -2421,34 +3040,44 @@ id_62_0: struct {
     x: int,
     y: int,
 }
+
 id_62_1(): int {
     value: id_62_0 = new id_62_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_62_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_62_2(): int {
     i: int = -id_62_3();
     print_int(i);
     ret 0;
 }
+
 id_62_3(): int {
     ret -131255;
 }
+
 id_62_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_62_5: struct {
     field: int,
 }
+
 impl id_62_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_62_6(): int {
     print_int(15);
     obj: id_62_5 = new id_62_5 { field: id_62_3() };
@@ -2460,34 +3089,44 @@ id_63_0: struct {
     x: int,
     y: int,
 }
+
 id_63_1(): int {
     value: id_63_0 = new id_63_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_63_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_63_2(): int {
     i: int = -id_63_3();
     print_int(i);
     ret 0;
 }
+
 id_63_3(): int {
     ret -131255;
 }
+
 id_63_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_63_5: struct {
     field: int,
 }
+
 impl id_63_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_63_6(): int {
     print_int(15);
     obj: id_63_5 = new id_63_5 { field: id_63_3() };
@@ -2499,34 +3138,44 @@ id_64_0: struct {
     x: int,
     y: int,
 }
+
 id_64_1(): int {
     value: id_64_0 = new id_64_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_64_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_64_2(): int {
     i: int = -id_64_3();
     print_int(i);
     ret 0;
 }
+
 id_64_3(): int {
     ret -131255;
 }
+
 id_64_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_64_5: struct {
     field: int,
 }
+
 impl id_64_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_64_6(): int {
     print_int(15);
     obj: id_64_5 = new id_64_5 { field: id_64_3() };
@@ -2538,34 +3187,44 @@ id_65_0: struct {
     x: int,
     y: int,
 }
+
 id_65_1(): int {
     value: id_65_0 = new id_65_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_65_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_65_2(): int {
     i: int = -id_65_3();
     print_int(i);
     ret 0;
 }
+
 id_65_3(): int {
     ret -131255;
 }
+
 id_65_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_65_5: struct {
     field: int,
 }
+
 impl id_65_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_65_6(): int {
     print_int(15);
     obj: id_65_5 = new id_65_5 { field: id_65_3() };
@@ -2577,34 +3236,44 @@ id_66_0: struct {
     x: int,
     y: int,
 }
+
 id_66_1(): int {
     value: id_66_0 = new id_66_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_66_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_66_2(): int {
     i: int = -id_66_3();
     print_int(i);
     ret 0;
 }
+
 id_66_3(): int {
     ret -131255;
 }
+
 id_66_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_66_5: struct {
     field: int,
 }
+
 impl id_66_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_66_6(): int {
     print_int(15);
     obj: id_66_5 = new id_66_5 { field: id_66_3() };
@@ -2616,34 +3285,44 @@ id_67_0: struct {
     x: int,
     y: int,
 }
+
 id_67_1(): int {
     value: id_67_0 = new id_67_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_67_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_67_2(): int {
     i: int = -id_67_3();
     print_int(i);
     ret 0;
 }
+
 id_67_3(): int {
     ret -131255;
 }
+
 id_67_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_67_5: struct {
     field: int,
 }
+
 impl id_67_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_67_6(): int {
     print_int(15);
     obj: id_67_5 = new id_67_5 { field: id_67_3() };
@@ -2655,34 +3334,44 @@ id_68_0: struct {
     x: int,
     y: int,
 }
+
 id_68_1(): int {
     value: id_68_0 = new id_68_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_68_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_68_2(): int {
     i: int = -id_68_3();
     print_int(i);
     ret 0;
 }
+
 id_68_3(): int {
     ret -131255;
 }
+
 id_68_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_68_5: struct {
     field: int,
 }
+
 impl id_68_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_68_6(): int {
     print_int(15);
     obj: id_68_5 = new id_68_5 { field: id_68_3() };
@@ -2694,34 +3383,44 @@ id_69_0: struct {
     x: int,
     y: int,
 }
+
 id_69_1(): int {
     value: id_69_0 = new id_69_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_69_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_69_2(): int {
     i: int = -id_69_3();
     print_int(i);
     ret 0;
 }
+
 id_69_3(): int {
     ret -131255;
 }
+
 id_69_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_69_5: struct {
     field: int,
 }
+
 impl id_69_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_69_6(): int {
     print_int(15);
     obj: id_69_5 = new id_69_5 { field: id_69_3() };
@@ -2733,34 +3432,44 @@ id_70_0: struct {
     x: int,
     y: int,
 }
+
 id_70_1(): int {
     value: id_70_0 = new id_70_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_70_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_70_2(): int {
     i: int = -id_70_3();
     print_int(i);
     ret 0;
 }
+
 id_70_3(): int {
     ret -131255;
 }
+
 id_70_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_70_5: struct {
     field: int,
 }
+
 impl id_70_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_70_6(): int {
     print_int(15);
     obj: id_70_5 = new id_70_5 { field: id_70_3() };
@@ -2772,34 +3481,44 @@ id_71_0: struct {
     x: int,
     y: int,
 }
+
 id_71_1(): int {
     value: id_71_0 = new id_71_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_71_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_71_2(): int {
     i: int = -id_71_3();
     print_int(i);
     ret 0;
 }
+
 id_71_3(): int {
     ret -131255;
 }
+
 id_71_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_71_5: struct {
     field: int,
 }
+
 impl id_71_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_71_6(): int {
     print_int(15);
     obj: id_71_5 = new id_71_5 { field: id_71_3() };
@@ -2811,34 +3530,44 @@ id_72_0: struct {
     x: int,
     y: int,
 }
+
 id_72_1(): int {
     value: id_72_0 = new id_72_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_72_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_72_2(): int {
     i: int = -id_72_3();
     print_int(i);
     ret 0;
 }
+
 id_72_3(): int {
     ret -131255;
 }
+
 id_72_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_72_5: struct {
     field: int,
 }
+
 impl id_72_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_72_6(): int {
     print_int(15);
     obj: id_72_5 = new id_72_5 { field: id_72_3() };
@@ -2850,34 +3579,44 @@ id_73_0: struct {
     x: int,
     y: int,
 }
+
 id_73_1(): int {
     value: id_73_0 = new id_73_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_73_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_73_2(): int {
     i: int = -id_73_3();
     print_int(i);
     ret 0;
 }
+
 id_73_3(): int {
     ret -131255;
 }
+
 id_73_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_73_5: struct {
     field: int,
 }
+
 impl id_73_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_73_6(): int {
     print_int(15);
     obj: id_73_5 = new id_73_5 { field: id_73_3() };
@@ -2889,34 +3628,44 @@ id_74_0: struct {
     x: int,
     y: int,
 }
+
 id_74_1(): int {
     value: id_74_0 = new id_74_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_74_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_74_2(): int {
     i: int = -id_74_3();
     print_int(i);
     ret 0;
 }
+
 id_74_3(): int {
     ret -131255;
 }
+
 id_74_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_74_5: struct {
     field: int,
 }
+
 impl id_74_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_74_6(): int {
     print_int(15);
     obj: id_74_5 = new id_74_5 { field: id_74_3() };
@@ -2928,34 +3677,44 @@ id_75_0: struct {
     x: int,
     y: int,
 }
+
 id_75_1(): int {
     value: id_75_0 = new id_75_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_75_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_75_2(): int {
     i: int = -id_75_3();
     print_int(i);
     ret 0;
 }
+
 id_75_3(): int {
     ret -131255;
 }
+
 id_75_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_75_5: struct {
     field: int,
 }
+
 impl id_75_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_75_6(): int {
     print_int(15);
     obj: id_75_5 = new id_75_5 { field: id_75_3() };
@@ -2967,34 +3726,44 @@ id_76_0: struct {
     x: int,
     y: int,
 }
+
 id_76_1(): int {
     value: id_76_0 = new id_76_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_76_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_76_2(): int {
     i: int = -id_76_3();
     print_int(i);
     ret 0;
 }
+
 id_76_3(): int {
     ret -131255;
 }
+
 id_76_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_76_5: struct {
     field: int,
 }
+
 impl id_76_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_76_6(): int {
     print_int(15);
     obj: id_76_5 = new id_76_5 { field: id_76_3() };
@@ -3006,34 +3775,44 @@ id_77_0: struct {
     x: int,
     y: int,
 }
+
 id_77_1(): int {
     value: id_77_0 = new id_77_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_77_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_77_2(): int {
     i: int = -id_77_3();
     print_int(i);
     ret 0;
 }
+
 id_77_3(): int {
     ret -131255;
 }
+
 id_77_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_77_5: struct {
     field: int,
 }
+
 impl id_77_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_77_6(): int {
     print_int(15);
     obj: id_77_5 = new id_77_5 { field: id_77_3() };
@@ -3045,34 +3824,44 @@ id_78_0: struct {
     x: int,
     y: int,
 }
+
 id_78_1(): int {
     value: id_78_0 = new id_78_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_78_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_78_2(): int {
     i: int = -id_78_3();
     print_int(i);
     ret 0;
 }
+
 id_78_3(): int {
     ret -131255;
 }
+
 id_78_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_78_5: struct {
     field: int,
 }
+
 impl id_78_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_78_6(): int {
     print_int(15);
     obj: id_78_5 = new id_78_5 { field: id_78_3() };
@@ -3084,34 +3873,44 @@ id_79_0: struct {
     x: int,
     y: int,
 }
+
 id_79_1(): int {
     value: id_79_0 = new id_79_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_79_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_79_2(): int {
     i: int = -id_79_3();
     print_int(i);
     ret 0;
 }
+
 id_79_3(): int {
     ret -131255;
 }
+
 id_79_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_79_5: struct {
     field: int,
 }
+
 impl id_79_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_79_6(): int {
     print_int(15);
     obj: id_79_5 = new id_79_5 { field: id_79_3() };
@@ -3123,34 +3922,44 @@ id_80_0: struct {
     x: int,
     y: int,
 }
+
 id_80_1(): int {
     value: id_80_0 = new id_80_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_80_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_80_2(): int {
     i: int = -id_80_3();
     print_int(i);
     ret 0;
 }
+
 id_80_3(): int {
     ret -131255;
 }
+
 id_80_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_80_5: struct {
     field: int,
 }
+
 impl id_80_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_80_6(): int {
     print_int(15);
     obj: id_80_5 = new id_80_5 { field: id_80_3() };
@@ -3162,34 +3971,44 @@ id_81_0: struct {
     x: int,
     y: int,
 }
+
 id_81_1(): int {
     value: id_81_0 = new id_81_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_81_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_81_2(): int {
     i: int = -id_81_3();
     print_int(i);
     ret 0;
 }
+
 id_81_3(): int {
     ret -131255;
 }
+
 id_81_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_81_5: struct {
     field: int,
 }
+
 impl id_81_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_81_6(): int {
     print_int(15);
     obj: id_81_5 = new id_81_5 { field: id_81_3() };
@@ -3201,34 +4020,44 @@ id_82_0: struct {
     x: int,
     y: int,
 }
+
 id_82_1(): int {
     value: id_82_0 = new id_82_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_82_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_82_2(): int {
     i: int = -id_82_3();
     print_int(i);
     ret 0;
 }
+
 id_82_3(): int {
     ret -131255;
 }
+
 id_82_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_82_5: struct {
     field: int,
 }
+
 impl id_82_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_82_6(): int {
     print_int(15);
     obj: id_82_5 = new id_82_5 { field: id_82_3() };
@@ -3240,34 +4069,44 @@ id_83_0: struct {
     x: int,
     y: int,
 }
+
 id_83_1(): int {
     value: id_83_0 = new id_83_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_83_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_83_2(): int {
     i: int = -id_83_3();
     print_int(i);
     ret 0;
 }
+
 id_83_3(): int {
     ret -131255;
 }
+
 id_83_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_83_5: struct {
     field: int,
 }
+
 impl id_83_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_83_6(): int {
     print_int(15);
     obj: id_83_5 = new id_83_5 { field: id_83_3() };
@@ -3279,34 +4118,44 @@ id_84_0: struct {
     x: int,
     y: int,
 }
+
 id_84_1(): int {
     value: id_84_0 = new id_84_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_84_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_84_2(): int {
     i: int = -id_84_3();
     print_int(i);
     ret 0;
 }
+
 id_84_3(): int {
     ret -131255;
 }
+
 id_84_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_84_5: struct {
     field: int,
 }
+
 impl id_84_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_84_6(): int {
     print_int(15);
     obj: id_84_5 = new id_84_5 { field: id_84_3() };
@@ -3318,34 +4167,44 @@ id_85_0: struct {
     x: int,
     y: int,
 }
+
 id_85_1(): int {
     value: id_85_0 = new id_85_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_85_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_85_2(): int {
     i: int = -id_85_3();
     print_int(i);
     ret 0;
 }
+
 id_85_3(): int {
     ret -131255;
 }
+
 id_85_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_85_5: struct {
     field: int,
 }
+
 impl id_85_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_85_6(): int {
     print_int(15);
     obj: id_85_5 = new id_85_5 { field: id_85_3() };
@@ -3357,34 +4216,44 @@ id_86_0: struct {
     x: int,
     y: int,
 }
+
 id_86_1(): int {
     value: id_86_0 = new id_86_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_86_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_86_2(): int {
     i: int = -id_86_3();
     print_int(i);
     ret 0;
 }
+
 id_86_3(): int {
     ret -131255;
 }
+
 id_86_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_86_5: struct {
     field: int,
 }
+
 impl id_86_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_86_6(): int {
     print_int(15);
     obj: id_86_5 = new id_86_5 { field: id_86_3() };
@@ -3396,34 +4265,44 @@ id_87_0: struct {
     x: int,
     y: int,
 }
+
 id_87_1(): int {
     value: id_87_0 = new id_87_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_87_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_87_2(): int {
     i: int = -id_87_3();
     print_int(i);
     ret 0;
 }
+
 id_87_3(): int {
     ret -131255;
 }
+
 id_87_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_87_5: struct {
     field: int,
 }
+
 impl id_87_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_87_6(): int {
     print_int(15);
     obj: id_87_5 = new id_87_5 { field: id_87_3() };
@@ -3435,34 +4314,44 @@ id_88_0: struct {
     x: int,
     y: int,
 }
+
 id_88_1(): int {
     value: id_88_0 = new id_88_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_88_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_88_2(): int {
     i: int = -id_88_3();
     print_int(i);
     ret 0;
 }
+
 id_88_3(): int {
     ret -131255;
 }
+
 id_88_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_88_5: struct {
     field: int,
 }
+
 impl id_88_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_88_6(): int {
     print_int(15);
     obj: id_88_5 = new id_88_5 { field: id_88_3() };
@@ -3474,34 +4363,44 @@ id_89_0: struct {
     x: int,
     y: int,
 }
+
 id_89_1(): int {
     value: id_89_0 = new id_89_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_89_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_89_2(): int {
     i: int = -id_89_3();
     print_int(i);
     ret 0;
 }
+
 id_89_3(): int {
     ret -131255;
 }
+
 id_89_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_89_5: struct {
     field: int,
 }
+
 impl id_89_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_89_6(): int {
     print_int(15);
     obj: id_89_5 = new id_89_5 { field: id_89_3() };
@@ -3513,34 +4412,44 @@ id_90_0: struct {
     x: int,
     y: int,
 }
+
 id_90_1(): int {
     value: id_90_0 = new id_90_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_90_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_90_2(): int {
     i: int = -id_90_3();
     print_int(i);
     ret 0;
 }
+
 id_90_3(): int {
     ret -131255;
 }
+
 id_90_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_90_5: struct {
     field: int,
 }
+
 impl id_90_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_90_6(): int {
     print_int(15);
     obj: id_90_5 = new id_90_5 { field: id_90_3() };
@@ -3552,34 +4461,44 @@ id_91_0: struct {
     x: int,
     y: int,
 }
+
 id_91_1(): int {
     value: id_91_0 = new id_91_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_91_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_91_2(): int {
     i: int = -id_91_3();
     print_int(i);
     ret 0;
 }
+
 id_91_3(): int {
     ret -131255;
 }
+
 id_91_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_91_5: struct {
     field: int,
 }
+
 impl id_91_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_91_6(): int {
     print_int(15);
     obj: id_91_5 = new id_91_5 { field: id_91_3() };
@@ -3591,34 +4510,44 @@ id_92_0: struct {
     x: int,
     y: int,
 }
+
 id_92_1(): int {
     value: id_92_0 = new id_92_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_92_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_92_2(): int {
     i: int = -id_92_3();
     print_int(i);
     ret 0;
 }
+
 id_92_3(): int {
     ret -131255;
 }
+
 id_92_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_92_5: struct {
     field: int,
 }
+
 impl id_92_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_92_6(): int {
     print_int(15);
     obj: id_92_5 = new id_92_5 { field: id_92_3() };
@@ -3630,34 +4559,44 @@ id_93_0: struct {
     x: int,
     y: int,
 }
+
 id_93_1(): int {
     value: id_93_0 = new id_93_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_93_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_93_2(): int {
     i: int = -id_93_3();
     print_int(i);
     ret 0;
 }
+
 id_93_3(): int {
     ret -131255;
 }
+
 id_93_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_93_5: struct {
     field: int,
 }
+
 impl id_93_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_93_6(): int {
     print_int(15);
     obj: id_93_5 = new id_93_5 { field: id_93_3() };
@@ -3669,34 +4608,44 @@ id_94_0: struct {
     x: int,
     y: int,
 }
+
 id_94_1(): int {
     value: id_94_0 = new id_94_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_94_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_94_2(): int {
     i: int = -id_94_3();
     print_int(i);
     ret 0;
 }
+
 id_94_3(): int {
     ret -131255;
 }
+
 id_94_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_94_5: struct {
     field: int,
 }
+
 impl id_94_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_94_6(): int {
     print_int(15);
     obj: id_94_5 = new id_94_5 { field: id_94_3() };
@@ -3708,34 +4657,44 @@ id_95_0: struct {
     x: int,
     y: int,
 }
+
 id_95_1(): int {
     value: id_95_0 = new id_95_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_95_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_95_2(): int {
     i: int = -id_95_3();
     print_int(i);
     ret 0;
 }
+
 id_95_3(): int {
     ret -131255;
 }
+
 id_95_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_95_5: struct {
     field: int,
 }
+
 impl id_95_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_95_6(): int {
     print_int(15);
     obj: id_95_5 = new id_95_5 { field: id_95_3() };
@@ -3747,34 +4706,44 @@ id_96_0: struct {
     x: int,
     y: int,
 }
+
 id_96_1(): int {
     value: id_96_0 = new id_96_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_96_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_96_2(): int {
     i: int = -id_96_3();
     print_int(i);
     ret 0;
 }
+
 id_96_3(): int {
     ret -131255;
 }
+
 id_96_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_96_5: struct {
     field: int,
 }
+
 impl id_96_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_96_6(): int {
     print_int(15);
     obj: id_96_5 = new id_96_5 { field: id_96_3() };
@@ -3786,34 +4755,44 @@ id_97_0: struct {
     x: int,
     y: int,
 }
+
 id_97_1(): int {
     value: id_97_0 = new id_97_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_97_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_97_2(): int {
     i: int = -id_97_3();
     print_int(i);
     ret 0;
 }
+
 id_97_3(): int {
     ret -131255;
 }
+
 id_97_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_97_5: struct {
     field: int,
 }
+
 impl id_97_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_97_6(): int {
     print_int(15);
     obj: id_97_5 = new id_97_5 { field: id_97_3() };
@@ -3825,34 +4804,44 @@ id_98_0: struct {
     x: int,
     y: int,
 }
+
 id_98_1(): int {
     value: id_98_0 = new id_98_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_98_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_98_2(): int {
     i: int = -id_98_3();
     print_int(i);
     ret 0;
 }
+
 id_98_3(): int {
     ret -131255;
 }
+
 id_98_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_98_5: struct {
     field: int,
 }
+
 impl id_98_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_98_6(): int {
     print_int(15);
     obj: id_98_5 = new id_98_5 { field: id_98_3() };
@@ -3864,34 +4853,44 @@ id_99_0: struct {
     x: int,
     y: int,
 }
+
 id_99_1(): int {
     value: id_99_0 = new id_99_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_99_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_99_2(): int {
     i: int = -id_99_3();
     print_int(i);
     ret 0;
 }
+
 id_99_3(): int {
     ret -131255;
 }
+
 id_99_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_99_5: struct {
     field: int,
 }
+
 impl id_99_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_99_6(): int {
     print_int(15);
     obj: id_99_5 = new id_99_5 { field: id_99_3() };
@@ -3903,34 +4902,44 @@ id_100_0: struct {
     x: int,
     y: int,
 }
+
 id_100_1(): int {
     value: id_100_0 = new id_100_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_100_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_100_2(): int {
     i: int = -id_100_3();
     print_int(i);
     ret 0;
 }
+
 id_100_3(): int {
     ret -131255;
 }
+
 id_100_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_100_5: struct {
     field: int,
 }
+
 impl id_100_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_100_6(): int {
     print_int(15);
     obj: id_100_5 = new id_100_5 { field: id_100_3() };
@@ -3942,34 +4951,44 @@ id_101_0: struct {
     x: int,
     y: int,
 }
+
 id_101_1(): int {
     value: id_101_0 = new id_101_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_101_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_101_2(): int {
     i: int = -id_101_3();
     print_int(i);
     ret 0;
 }
+
 id_101_3(): int {
     ret -131255;
 }
+
 id_101_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_101_5: struct {
     field: int,
 }
+
 impl id_101_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_101_6(): int {
     print_int(15);
     obj: id_101_5 = new id_101_5 { field: id_101_3() };
@@ -3981,34 +5000,44 @@ id_102_0: struct {
     x: int,
     y: int,
 }
+
 id_102_1(): int {
     value: id_102_0 = new id_102_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_102_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_102_2(): int {
     i: int = -id_102_3();
     print_int(i);
     ret 0;
 }
+
 id_102_3(): int {
     ret -131255;
 }
+
 id_102_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_102_5: struct {
     field: int,
 }
+
 impl id_102_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_102_6(): int {
     print_int(15);
     obj: id_102_5 = new id_102_5 { field: id_102_3() };
@@ -4020,34 +5049,44 @@ id_103_0: struct {
     x: int,
     y: int,
 }
+
 id_103_1(): int {
     value: id_103_0 = new id_103_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_103_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_103_2(): int {
     i: int = -id_103_3();
     print_int(i);
     ret 0;
 }
+
 id_103_3(): int {
     ret -131255;
 }
+
 id_103_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_103_5: struct {
     field: int,
 }
+
 impl id_103_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_103_6(): int {
     print_int(15);
     obj: id_103_5 = new id_103_5 { field: id_103_3() };
@@ -4059,34 +5098,44 @@ id_104_0: struct {
     x: int,
     y: int,
 }
+
 id_104_1(): int {
     value: id_104_0 = new id_104_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_104_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_104_2(): int {
     i: int = -id_104_3();
     print_int(i);
     ret 0;
 }
+
 id_104_3(): int {
     ret -131255;
 }
+
 id_104_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_104_5: struct {
     field: int,
 }
+
 impl id_104_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_104_6(): int {
     print_int(15);
     obj: id_104_5 = new id_104_5 { field: id_104_3() };
@@ -4098,34 +5147,44 @@ id_105_0: struct {
     x: int,
     y: int,
 }
+
 id_105_1(): int {
     value: id_105_0 = new id_105_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_105_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_105_2(): int {
     i: int = -id_105_3();
     print_int(i);
     ret 0;
 }
+
 id_105_3(): int {
     ret -131255;
 }
+
 id_105_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_105_5: struct {
     field: int,
 }
+
 impl id_105_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_105_6(): int {
     print_int(15);
     obj: id_105_5 = new id_105_5 { field: id_105_3() };
@@ -4137,34 +5196,44 @@ id_106_0: struct {
     x: int,
     y: int,
 }
+
 id_106_1(): int {
     value: id_106_0 = new id_106_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_106_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_106_2(): int {
     i: int = -id_106_3();
     print_int(i);
     ret 0;
 }
+
 id_106_3(): int {
     ret -131255;
 }
+
 id_106_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_106_5: struct {
     field: int,
 }
+
 impl id_106_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_106_6(): int {
     print_int(15);
     obj: id_106_5 = new id_106_5 { field: id_106_3() };
@@ -4176,34 +5245,44 @@ id_107_0: struct {
     x: int,
     y: int,
 }
+
 id_107_1(): int {
     value: id_107_0 = new id_107_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_107_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_107_2(): int {
     i: int = -id_107_3();
     print_int(i);
     ret 0;
 }
+
 id_107_3(): int {
     ret -131255;
 }
+
 id_107_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_107_5: struct {
     field: int,
 }
+
 impl id_107_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_107_6(): int {
     print_int(15);
     obj: id_107_5 = new id_107_5 { field: id_107_3() };
@@ -4215,34 +5294,44 @@ id_108_0: struct {
     x: int,
     y: int,
 }
+
 id_108_1(): int {
     value: id_108_0 = new id_108_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_108_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_108_2(): int {
     i: int = -id_108_3();
     print_int(i);
     ret 0;
 }
+
 id_108_3(): int {
     ret -131255;
 }
+
 id_108_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_108_5: struct {
     field: int,
 }
+
 impl id_108_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_108_6(): int {
     print_int(15);
     obj: id_108_5 = new id_108_5 { field: id_108_3() };
@@ -4254,34 +5343,44 @@ id_109_0: struct {
     x: int,
     y: int,
 }
+
 id_109_1(): int {
     value: id_109_0 = new id_109_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_109_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_109_2(): int {
     i: int = -id_109_3();
     print_int(i);
     ret 0;
 }
+
 id_109_3(): int {
     ret -131255;
 }
+
 id_109_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_109_5: struct {
     field: int,
 }
+
 impl id_109_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_109_6(): int {
     print_int(15);
     obj: id_109_5 = new id_109_5 { field: id_109_3() };
@@ -4293,34 +5392,44 @@ id_110_0: struct {
     x: int,
     y: int,
 }
+
 id_110_1(): int {
     value: id_110_0 = new id_110_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_110_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_110_2(): int {
     i: int = -id_110_3();
     print_int(i);
     ret 0;
 }
+
 id_110_3(): int {
     ret -131255;
 }
+
 id_110_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_110_5: struct {
     field: int,
 }
+
 impl id_110_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_110_6(): int {
     print_int(15);
     obj: id_110_5 = new id_110_5 { field: id_110_3() };
@@ -4332,34 +5441,44 @@ id_111_0: struct {
     x: int,
     y: int,
 }
+
 id_111_1(): int {
     value: id_111_0 = new id_111_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_111_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_111_2(): int {
     i: int = -id_111_3();
     print_int(i);
     ret 0;
 }
+
 id_111_3(): int {
     ret -131255;
 }
+
 id_111_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_111_5: struct {
     field: int,
 }
+
 impl id_111_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_111_6(): int {
     print_int(15);
     obj: id_111_5 = new id_111_5 { field: id_111_3() };
@@ -4371,34 +5490,44 @@ id_112_0: struct {
     x: int,
     y: int,
 }
+
 id_112_1(): int {
     value: id_112_0 = new id_112_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_112_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_112_2(): int {
     i: int = -id_112_3();
     print_int(i);
     ret 0;
 }
+
 id_112_3(): int {
     ret -131255;
 }
+
 id_112_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_112_5: struct {
     field: int,
 }
+
 impl id_112_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_112_6(): int {
     print_int(15);
     obj: id_112_5 = new id_112_5 { field: id_112_3() };
@@ -4410,34 +5539,44 @@ id_113_0: struct {
     x: int,
     y: int,
 }
+
 id_113_1(): int {
     value: id_113_0 = new id_113_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_113_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_113_2(): int {
     i: int = -id_113_3();
     print_int(i);
     ret 0;
 }
+
 id_113_3(): int {
     ret -131255;
 }
+
 id_113_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_113_5: struct {
     field: int,
 }
+
 impl id_113_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_113_6(): int {
     print_int(15);
     obj: id_113_5 = new id_113_5 { field: id_113_3() };
@@ -4449,34 +5588,44 @@ id_114_0: struct {
     x: int,
     y: int,
 }
+
 id_114_1(): int {
     value: id_114_0 = new id_114_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_114_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_114_2(): int {
     i: int = -id_114_3();
     print_int(i);
     ret 0;
 }
+
 id_114_3(): int {
     ret -131255;
 }
+
 id_114_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_114_5: struct {
     field: int,
 }
+
 impl id_114_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_114_6(): int {
     print_int(15);
     obj: id_114_5 = new id_114_5 { field: id_114_3() };
@@ -4488,34 +5637,44 @@ id_115_0: struct {
     x: int,
     y: int,
 }
+
 id_115_1(): int {
     value: id_115_0 = new id_115_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_115_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_115_2(): int {
     i: int = -id_115_3();
     print_int(i);
     ret 0;
 }
+
 id_115_3(): int {
     ret -131255;
 }
+
 id_115_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_115_5: struct {
     field: int,
 }
+
 impl id_115_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_115_6(): int {
     print_int(15);
     obj: id_115_5 = new id_115_5 { field: id_115_3() };
@@ -4527,34 +5686,44 @@ id_116_0: struct {
     x: int,
     y: int,
 }
+
 id_116_1(): int {
     value: id_116_0 = new id_116_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_116_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_116_2(): int {
     i: int = -id_116_3();
     print_int(i);
     ret 0;
 }
+
 id_116_3(): int {
     ret -131255;
 }
+
 id_116_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_116_5: struct {
     field: int,
 }
+
 impl id_116_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_116_6(): int {
     print_int(15);
     obj: id_116_5 = new id_116_5 { field: id_116_3() };
@@ -4566,34 +5735,44 @@ id_117_0: struct {
     x: int,
     y: int,
 }
+
 id_117_1(): int {
     value: id_117_0 = new id_117_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_117_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_117_2(): int {
     i: int = -id_117_3();
     print_int(i);
     ret 0;
 }
+
 id_117_3(): int {
     ret -131255;
 }
+
 id_117_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_117_5: struct {
     field: int,
 }
+
 impl id_117_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_117_6(): int {
     print_int(15);
     obj: id_117_5 = new id_117_5 { field: id_117_3() };
@@ -4605,34 +5784,44 @@ id_118_0: struct {
     x: int,
     y: int,
 }
+
 id_118_1(): int {
     value: id_118_0 = new id_118_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_118_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_118_2(): int {
     i: int = -id_118_3();
     print_int(i);
     ret 0;
 }
+
 id_118_3(): int {
     ret -131255;
 }
+
 id_118_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_118_5: struct {
     field: int,
 }
+
 impl id_118_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_118_6(): int {
     print_int(15);
     obj: id_118_5 = new id_118_5 { field: id_118_3() };
@@ -4644,34 +5833,44 @@ id_119_0: struct {
     x: int,
     y: int,
 }
+
 id_119_1(): int {
     value: id_119_0 = new id_119_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_119_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_119_2(): int {
     i: int = -id_119_3();
     print_int(i);
     ret 0;
 }
+
 id_119_3(): int {
     ret -131255;
 }
+
 id_119_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_119_5: struct {
     field: int,
 }
+
 impl id_119_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_119_6(): int {
     print_int(15);
     obj: id_119_5 = new id_119_5 { field: id_119_3() };
@@ -4683,34 +5882,44 @@ id_120_0: struct {
     x: int,
     y: int,
 }
+
 id_120_1(): int {
     value: id_120_0 = new id_120_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_120_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_120_2(): int {
     i: int = -id_120_3();
     print_int(i);
     ret 0;
 }
+
 id_120_3(): int {
     ret -131255;
 }
+
 id_120_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_120_5: struct {
     field: int,
 }
+
 impl id_120_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_120_6(): int {
     print_int(15);
     obj: id_120_5 = new id_120_5 { field: id_120_3() };
@@ -4722,34 +5931,44 @@ id_121_0: struct {
     x: int,
     y: int,
 }
+
 id_121_1(): int {
     value: id_121_0 = new id_121_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_121_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_121_2(): int {
     i: int = -id_121_3();
     print_int(i);
     ret 0;
 }
+
 id_121_3(): int {
     ret -131255;
 }
+
 id_121_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_121_5: struct {
     field: int,
 }
+
 impl id_121_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_121_6(): int {
     print_int(15);
     obj: id_121_5 = new id_121_5 { field: id_121_3() };
@@ -4761,34 +5980,44 @@ id_122_0: struct {
     x: int,
     y: int,
 }
+
 id_122_1(): int {
     value: id_122_0 = new id_122_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_122_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_122_2(): int {
     i: int = -id_122_3();
     print_int(i);
     ret 0;
 }
+
 id_122_3(): int {
     ret -131255;
 }
+
 id_122_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_122_5: struct {
     field: int,
 }
+
 impl id_122_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_122_6(): int {
     print_int(15);
     obj: id_122_5 = new id_122_5 { field: id_122_3() };
@@ -4800,34 +6029,44 @@ id_123_0: struct {
     x: int,
     y: int,
 }
+
 id_123_1(): int {
     value: id_123_0 = new id_123_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_123_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_123_2(): int {
     i: int = -id_123_3();
     print_int(i);
     ret 0;
 }
+
 id_123_3(): int {
     ret -131255;
 }
+
 id_123_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_123_5: struct {
     field: int,
 }
+
 impl id_123_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_123_6(): int {
     print_int(15);
     obj: id_123_5 = new id_123_5 { field: id_123_3() };
@@ -4839,34 +6078,44 @@ id_124_0: struct {
     x: int,
     y: int,
 }
+
 id_124_1(): int {
     value: id_124_0 = new id_124_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_124_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_124_2(): int {
     i: int = -id_124_3();
     print_int(i);
     ret 0;
 }
+
 id_124_3(): int {
     ret -131255;
 }
+
 id_124_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_124_5: struct {
     field: int,
 }
+
 impl id_124_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_124_6(): int {
     print_int(15);
     obj: id_124_5 = new id_124_5 { field: id_124_3() };
@@ -4878,34 +6127,44 @@ id_125_0: struct {
     x: int,
     y: int,
 }
+
 id_125_1(): int {
     value: id_125_0 = new id_125_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_125_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_125_2(): int {
     i: int = -id_125_3();
     print_int(i);
     ret 0;
 }
+
 id_125_3(): int {
     ret -131255;
 }
+
 id_125_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_125_5: struct {
     field: int,
 }
+
 impl id_125_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_125_6(): int {
     print_int(15);
     obj: id_125_5 = new id_125_5 { field: id_125_3() };
@@ -4917,34 +6176,44 @@ id_126_0: struct {
     x: int,
     y: int,
 }
+
 id_126_1(): int {
     value: id_126_0 = new id_126_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_126_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_126_2(): int {
     i: int = -id_126_3();
     print_int(i);
     ret 0;
 }
+
 id_126_3(): int {
     ret -131255;
 }
+
 id_126_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_126_5: struct {
     field: int,
 }
+
 impl id_126_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_126_6(): int {
     print_int(15);
     obj: id_126_5 = new id_126_5 { field: id_126_3() };
@@ -4956,34 +6225,44 @@ id_127_0: struct {
     x: int,
     y: int,
 }
+
 id_127_1(): int {
     value: id_127_0 = new id_127_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_127_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_127_2(): int {
     i: int = -id_127_3();
     print_int(i);
     ret 0;
 }
+
 id_127_3(): int {
     ret -131255;
 }
+
 id_127_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_127_5: struct {
     field: int,
 }
+
 impl id_127_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_127_6(): int {
     print_int(15);
     obj: id_127_5 = new id_127_5 { field: id_127_3() };
@@ -4995,34 +6274,44 @@ id_128_0: struct {
     x: int,
     y: int,
 }
+
 id_128_1(): int {
     value: id_128_0 = new id_128_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_128_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_128_2(): int {
     i: int = -id_128_3();
     print_int(i);
     ret 0;
 }
+
 id_128_3(): int {
     ret -131255;
 }
+
 id_128_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_128_5: struct {
     field: int,
 }
+
 impl id_128_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_128_6(): int {
     print_int(15);
     obj: id_128_5 = new id_128_5 { field: id_128_3() };
@@ -5034,34 +6323,44 @@ id_129_0: struct {
     x: int,
     y: int,
 }
+
 id_129_1(): int {
     value: id_129_0 = new id_129_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_129_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_129_2(): int {
     i: int = -id_129_3();
     print_int(i);
     ret 0;
 }
+
 id_129_3(): int {
     ret -131255;
 }
+
 id_129_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_129_5: struct {
     field: int,
 }
+
 impl id_129_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_129_6(): int {
     print_int(15);
     obj: id_129_5 = new id_129_5 { field: id_129_3() };
@@ -5073,34 +6372,44 @@ id_130_0: struct {
     x: int,
     y: int,
 }
+
 id_130_1(): int {
     value: id_130_0 = new id_130_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_130_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_130_2(): int {
     i: int = -id_130_3();
     print_int(i);
     ret 0;
 }
+
 id_130_3(): int {
     ret -131255;
 }
+
 id_130_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_130_5: struct {
     field: int,
 }
+
 impl id_130_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_130_6(): int {
     print_int(15);
     obj: id_130_5 = new id_130_5 { field: id_130_3() };
@@ -5112,34 +6421,44 @@ id_131_0: struct {
     x: int,
     y: int,
 }
+
 id_131_1(): int {
     value: id_131_0 = new id_131_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_131_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_131_2(): int {
     i: int = -id_131_3();
     print_int(i);
     ret 0;
 }
+
 id_131_3(): int {
     ret -131255;
 }
+
 id_131_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_131_5: struct {
     field: int,
 }
+
 impl id_131_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_131_6(): int {
     print_int(15);
     obj: id_131_5 = new id_131_5 { field: id_131_3() };
@@ -5151,34 +6470,44 @@ id_132_0: struct {
     x: int,
     y: int,
 }
+
 id_132_1(): int {
     value: id_132_0 = new id_132_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_132_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_132_2(): int {
     i: int = -id_132_3();
     print_int(i);
     ret 0;
 }
+
 id_132_3(): int {
     ret -131255;
 }
+
 id_132_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_132_5: struct {
     field: int,
 }
+
 impl id_132_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_132_6(): int {
     print_int(15);
     obj: id_132_5 = new id_132_5 { field: id_132_3() };
@@ -5190,34 +6519,44 @@ id_133_0: struct {
     x: int,
     y: int,
 }
+
 id_133_1(): int {
     value: id_133_0 = new id_133_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_133_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_133_2(): int {
     i: int = -id_133_3();
     print_int(i);
     ret 0;
 }
+
 id_133_3(): int {
     ret -131255;
 }
+
 id_133_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_133_5: struct {
     field: int,
 }
+
 impl id_133_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_133_6(): int {
     print_int(15);
     obj: id_133_5 = new id_133_5 { field: id_133_3() };
@@ -5229,34 +6568,44 @@ id_134_0: struct {
     x: int,
     y: int,
 }
+
 id_134_1(): int {
     value: id_134_0 = new id_134_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_134_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_134_2(): int {
     i: int = -id_134_3();
     print_int(i);
     ret 0;
 }
+
 id_134_3(): int {
     ret -131255;
 }
+
 id_134_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_134_5: struct {
     field: int,
 }
+
 impl id_134_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_134_6(): int {
     print_int(15);
     obj: id_134_5 = new id_134_5 { field: id_134_3() };
@@ -5268,34 +6617,44 @@ id_135_0: struct {
     x: int,
     y: int,
 }
+
 id_135_1(): int {
     value: id_135_0 = new id_135_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_135_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_135_2(): int {
     i: int = -id_135_3();
     print_int(i);
     ret 0;
 }
+
 id_135_3(): int {
     ret -131255;
 }
+
 id_135_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_135_5: struct {
     field: int,
 }
+
 impl id_135_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_135_6(): int {
     print_int(15);
     obj: id_135_5 = new id_135_5 { field: id_135_3() };
@@ -5307,34 +6666,44 @@ id_136_0: struct {
     x: int,
     y: int,
 }
+
 id_136_1(): int {
     value: id_136_0 = new id_136_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_136_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_136_2(): int {
     i: int = -id_136_3();
     print_int(i);
     ret 0;
 }
+
 id_136_3(): int {
     ret -131255;
 }
+
 id_136_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_136_5: struct {
     field: int,
 }
+
 impl id_136_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_136_6(): int {
     print_int(15);
     obj: id_136_5 = new id_136_5 { field: id_136_3() };
@@ -5346,34 +6715,44 @@ id_137_0: struct {
     x: int,
     y: int,
 }
+
 id_137_1(): int {
     value: id_137_0 = new id_137_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_137_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_137_2(): int {
     i: int = -id_137_3();
     print_int(i);
     ret 0;
 }
+
 id_137_3(): int {
     ret -131255;
 }
+
 id_137_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_137_5: struct {
     field: int,
 }
+
 impl id_137_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_137_6(): int {
     print_int(15);
     obj: id_137_5 = new id_137_5 { field: id_137_3() };
@@ -5385,34 +6764,44 @@ id_138_0: struct {
     x: int,
     y: int,
 }
+
 id_138_1(): int {
     value: id_138_0 = new id_138_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_138_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_138_2(): int {
     i: int = -id_138_3();
     print_int(i);
     ret 0;
 }
+
 id_138_3(): int {
     ret -131255;
 }
+
 id_138_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_138_5: struct {
     field: int,
 }
+
 impl id_138_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_138_6(): int {
     print_int(15);
     obj: id_138_5 = new id_138_5 { field: id_138_3() };
@@ -5424,34 +6813,44 @@ id_139_0: struct {
     x: int,
     y: int,
 }
+
 id_139_1(): int {
     value: id_139_0 = new id_139_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_139_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_139_2(): int {
     i: int = -id_139_3();
     print_int(i);
     ret 0;
 }
+
 id_139_3(): int {
     ret -131255;
 }
+
 id_139_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_139_5: struct {
     field: int,
 }
+
 impl id_139_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_139_6(): int {
     print_int(15);
     obj: id_139_5 = new id_139_5 { field: id_139_3() };
@@ -5463,34 +6862,44 @@ id_140_0: struct {
     x: int,
     y: int,
 }
+
 id_140_1(): int {
     value: id_140_0 = new id_140_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_140_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_140_2(): int {
     i: int = -id_140_3();
     print_int(i);
     ret 0;
 }
+
 id_140_3(): int {
     ret -131255;
 }
+
 id_140_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_140_5: struct {
     field: int,
 }
+
 impl id_140_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_140_6(): int {
     print_int(15);
     obj: id_140_5 = new id_140_5 { field: id_140_3() };
@@ -5502,34 +6911,44 @@ id_141_0: struct {
     x: int,
     y: int,
 }
+
 id_141_1(): int {
     value: id_141_0 = new id_141_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_141_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_141_2(): int {
     i: int = -id_141_3();
     print_int(i);
     ret 0;
 }
+
 id_141_3(): int {
     ret -131255;
 }
+
 id_141_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_141_5: struct {
     field: int,
 }
+
 impl id_141_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_141_6(): int {
     print_int(15);
     obj: id_141_5 = new id_141_5 { field: id_141_3() };
@@ -5541,34 +6960,44 @@ id_142_0: struct {
     x: int,
     y: int,
 }
+
 id_142_1(): int {
     value: id_142_0 = new id_142_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_142_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_142_2(): int {
     i: int = -id_142_3();
     print_int(i);
     ret 0;
 }
+
 id_142_3(): int {
     ret -131255;
 }
+
 id_142_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_142_5: struct {
     field: int,
 }
+
 impl id_142_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_142_6(): int {
     print_int(15);
     obj: id_142_5 = new id_142_5 { field: id_142_3() };
@@ -5580,34 +7009,44 @@ id_143_0: struct {
     x: int,
     y: int,
 }
+
 id_143_1(): int {
     value: id_143_0 = new id_143_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_143_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_143_2(): int {
     i: int = -id_143_3();
     print_int(i);
     ret 0;
 }
+
 id_143_3(): int {
     ret -131255;
 }
+
 id_143_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_143_5: struct {
     field: int,
 }
+
 impl id_143_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_143_6(): int {
     print_int(15);
     obj: id_143_5 = new id_143_5 { field: id_143_3() };
@@ -5619,34 +7058,44 @@ id_144_0: struct {
     x: int,
     y: int,
 }
+
 id_144_1(): int {
     value: id_144_0 = new id_144_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_144_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_144_2(): int {
     i: int = -id_144_3();
     print_int(i);
     ret 0;
 }
+
 id_144_3(): int {
     ret -131255;
 }
+
 id_144_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_144_5: struct {
     field: int,
 }
+
 impl id_144_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_144_6(): int {
     print_int(15);
     obj: id_144_5 = new id_144_5 { field: id_144_3() };
@@ -5658,34 +7107,44 @@ id_145_0: struct {
     x: int,
     y: int,
 }
+
 id_145_1(): int {
     value: id_145_0 = new id_145_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_145_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_145_2(): int {
     i: int = -id_145_3();
     print_int(i);
     ret 0;
 }
+
 id_145_3(): int {
     ret -131255;
 }
+
 id_145_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_145_5: struct {
     field: int,
 }
+
 impl id_145_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_145_6(): int {
     print_int(15);
     obj: id_145_5 = new id_145_5 { field: id_145_3() };
@@ -5697,34 +7156,44 @@ id_146_0: struct {
     x: int,
     y: int,
 }
+
 id_146_1(): int {
     value: id_146_0 = new id_146_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_146_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_146_2(): int {
     i: int = -id_146_3();
     print_int(i);
     ret 0;
 }
+
 id_146_3(): int {
     ret -131255;
 }
+
 id_146_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_146_5: struct {
     field: int,
 }
+
 impl id_146_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_146_6(): int {
     print_int(15);
     obj: id_146_5 = new id_146_5 { field: id_146_3() };
@@ -5736,34 +7205,44 @@ id_147_0: struct {
     x: int,
     y: int,
 }
+
 id_147_1(): int {
     value: id_147_0 = new id_147_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_147_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_147_2(): int {
     i: int = -id_147_3();
     print_int(i);
     ret 0;
 }
+
 id_147_3(): int {
     ret -131255;
 }
+
 id_147_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_147_5: struct {
     field: int,
 }
+
 impl id_147_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_147_6(): int {
     print_int(15);
     obj: id_147_5 = new id_147_5 { field: id_147_3() };
@@ -5775,34 +7254,44 @@ id_148_0: struct {
     x: int,
     y: int,
 }
+
 id_148_1(): int {
     value: id_148_0 = new id_148_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_148_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_148_2(): int {
     i: int = -id_148_3();
     print_int(i);
     ret 0;
 }
+
 id_148_3(): int {
     ret -131255;
 }
+
 id_148_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_148_5: struct {
     field: int,
 }
+
 impl id_148_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_148_6(): int {
     print_int(15);
     obj: id_148_5 = new id_148_5 { field: id_148_3() };
@@ -5814,37 +7303,48 @@ id_149_0: struct {
     x: int,
     y: int,
 }
+
 id_149_1(): int {
     value: id_149_0 = new id_149_0{ x: 3, y: -27 };
+
     value.y -= 1;
     print_int(value.y);
+
     boxed_value: *id_149_0 = box value;
     boxed_value.x *= 2;
     print_int(boxed_value.x);
+
     ret 0;
 }
+
 id_149_2(): int {
     i: int = -id_149_3();
     print_int(i);
     ret 0;
 }
+
 id_149_3(): int {
     ret -131255;
 }
+
 id_149_4(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
+
 id_149_5: struct {
     field: int,
 }
+
 impl id_149_5 {
     field(): int -> self {
         ret self.field;
     }
 }
+
 id_149_6(): int {
     print_int(15);
     obj: id_149_5 = new id_149_5 { field: id_149_3() };
     print_int(60);
     ret obj.field();
 }
+
