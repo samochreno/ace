@@ -29,6 +29,82 @@
 
 namespace Ace
 {
+    static auto AreTypesSame(
+        const std::vector<Symbol::Type::IBase*>& t_typesA,
+        const std::vector<Symbol::Type::IBase*>& t_typesB
+    ) -> bool
+    {
+        if (t_typesA.size() != t_typesB.size())
+            return false;
+
+        for (size_t i = 0; i < t_typesA.size(); i++)
+        {
+            if (
+                t_typesA.at(i)->GetUnaliased() !=
+                t_typesB.at(i)->GetUnaliased()
+                )
+                return false;
+        }
+
+        return true;
+    }
+
+    static auto FindTemplatedImplContext(
+        const Scope* const t_scope
+    ) -> std::optional<Symbol::TemplatedImpl*>
+    {
+        const auto* scope = t_scope;
+        for (
+            ; 
+            scope->GetParent().has_value(); 
+            scope = scope->GetParent().value()
+            )
+        {
+            auto* const parentScope = scope->GetParent().value();
+
+            const auto templatedImplSymbols = parentScope->CollectDefinedSymbols<Symbol::TemplatedImpl>();
+            auto foundIt = std::find_if(begin(templatedImplSymbols), end(templatedImplSymbols), [&]
+            (Symbol::TemplatedImpl* const t_templatedImpl)
+            {
+                return t_templatedImpl->GetSelfScope() == scope;
+            });
+
+            if (foundIt == end(templatedImplSymbols))
+                continue;
+
+            return *foundIt;
+        }
+
+        return nullptr;
+    }
+
+    static auto IsSameTemplatedImplContext(
+        const Scope* const t_scopeA, 
+        const Scope* const t_scopeB
+    ) -> bool
+    {
+        const auto contextA = FindTemplatedImplContext(t_scopeA).value();
+        const auto contextB = FindTemplatedImplContext(t_scopeB).value();
+
+        return
+            contextA->GetImplementedTypeTemplate() == 
+            contextB->GetImplementedTypeTemplate();
+    }
+
+    static auto ResolveTemplateArguments(
+        const Scope* const t_scope,
+        const std::vector<Name::Symbol::Full>& t_templateArgumentNames
+    ) -> Expected<std::vector<Symbol::Type::IBase*>>
+    {
+        ACE_TRY(templateArguments, TransformExpectedVector(t_templateArgumentNames, [&]
+        (const Name::Symbol::Full& t_typeName)
+        {
+            return t_scope->ResolveStaticSymbol<Symbol::Type::IBase>(t_typeName);
+        }));
+
+        return templateArguments;
+    }
+
     auto IsSymbolVisibleFromScope(Symbol::IBase* const t_symbol, const Scope* const t_scope) -> bool
     {
         switch (t_symbol->GetAccessModifier())
@@ -83,7 +159,9 @@ namespace Ace
     auto Scope::GetRoot() -> Scope*
     {
         if (m_Root)
+        {
             return m_Root.get();
+        }
 
         m_Root = std::unique_ptr<Scope>
         { 
@@ -119,7 +197,9 @@ namespace Ace
             if (foundIt->second.size() != 1)
                 continue;
 
-            auto* const moduleSymbol = dynamic_cast<Symbol::Module*>(foundIt->second.front().get());
+            auto* const moduleSymbol = dynamic_cast<Symbol::Module*>(
+                foundIt->second.front().get()
+            );
             if (!moduleSymbol)
                 continue;
 
@@ -316,210 +396,6 @@ namespace Ace
         return m_Children.back().get();
     }
 
-    auto Scope::ResolveSymbolInScopes(
-        const Scope* const t_resolvingFromScope,
-        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
-        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
-        const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
-        const std::vector<const Scope*> t_scopes,
-        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
-        const bool& t_doInstantiateTemplate
-    ) -> Expected<Symbol::IBase*>
-    {
-        ACE_TRY(templateArguments, t_resolvingFromScope->ResolveTemplateArguments(t_nameSectionsBegin->TemplateArguments));
-        return ResolveSymbolInScopes(
-            t_resolvingFromScope,
-            t_nameSectionsBegin,
-            t_nameSectionsEnd,
-            t_isCorrectSymbolType,
-            t_scopes,
-            t_implTemplateArguments,
-            templateArguments,
-            t_doInstantiateTemplate
-        );
-    }
-
-    auto Scope::ResolveSymbolInScopes(
-        const Scope* const t_resolvingFromScope,
-        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
-        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
-        const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
-        const std::vector<const Scope*> t_scopes,
-        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments,
-        const bool& t_doInstantiateTemplate
-    ) -> Expected<Symbol::IBase*>
-    {
-        const bool isLastNameSection = std::distance(t_nameSectionsBegin, t_nameSectionsEnd) == 1;
-
-        const auto& name = t_nameSectionsBegin->Name;
-        const auto templateName = SpecialIdentifier::CreateTemplate(name);
-
-        std::vector<Symbol::IBase*> symbols{};
-        std::for_each(begin(t_scopes), end(t_scopes), [&]
-        (const Scope* const t_scope)
-        {
-            auto& symbolMap = t_scope->m_SymbolMap;
-
-            const bool isTemplate = symbolMap.find(templateName) != end(symbolMap);
-            const auto foundIt = symbolMap.find(isTemplate ? templateName : name);
-
-            const bool isInstanceVariable = [&]() -> bool
-            {
-                if (foundIt == end(symbolMap))
-                    return false;
-
-                if (!isLastNameSection)
-                    return false;
-
-                if (foundIt->second.size() != 1)
-                    return false;
-                
-                if (!dynamic_cast<Symbol::Variable::Normal::Instance*>(foundIt->second.front().get()))
-                    return false;
-
-                return true;
-            }();
-
-            if (isTemplate && isLastNameSection && !isInstanceVariable)
-            {
-                const auto expTemplate = t_scope->ExclusiveResolveTemplate(
-                    templateName,
-                    t_implTemplateArguments,
-                    t_templateArguments
-                );
-                if (!expTemplate)
-                    return;
-                
-                if (!t_doInstantiateTemplate)
-                {
-                    symbols.push_back(expTemplate.Unwrap());
-                    return;
-                }
-
-                const auto expTemplateInstance = ResolveOrInstantiateTemplateInstance(
-                    expTemplate.Unwrap(),
-                    t_implTemplateArguments,
-                    t_templateArguments
-                );
-                if (!expTemplateInstance)
-                    return;
-                
-                symbols.push_back(expTemplateInstance.Unwrap());
-            }
-            else
-            {
-                if (foundIt == end(symbolMap))
-                    return;
-
-                std::transform(begin(foundIt->second), end(foundIt->second), back_inserter(symbols), [&]
-                (const std::unique_ptr<Symbol::IBase>& t_symbol)
-                {
-                    return t_symbol.get();
-                });
-            }
-        });
-
-        if (isLastNameSection)
-        {
-            std::vector<Symbol::IBase*> correctSymbols{};
-            std::copy_if(begin(symbols), end(symbols), back_inserter(correctSymbols), [&]
-            (Symbol::IBase* const t_symbol)
-            {
-                return t_isCorrectSymbolType(t_symbol);
-            });
-
-            ACE_TRY_ASSERT(correctSymbols.size() > 0);
-            ACE_ASSERT(correctSymbols.size() == 1);
-
-            auto* const symbol = correctSymbols.front();
-            ACE_TRY_ASSERT(IsSymbolVisibleFromScope(symbol, t_resolvingFromScope));
-            return symbol;
-        }
-        else
-        {
-            ACE_TRY_ASSERT(symbols.size() == 1);
-
-            auto* const selfScopedSymbol = dynamic_cast<Symbol::ISelfScoped*>(symbols.front());
-            ACE_TRY_ASSERT(selfScopedSymbol);
-
-            ACE_TRY_ASSERT(IsSymbolVisibleFromScope(selfScopedSymbol, t_resolvingFromScope));
-
-            std::vector<const Scope*> scopes{};
-
-            scopes.push_back(selfScopedSymbol->GetSelfScope());
-
-            const auto& selfScopeAssociations = selfScopedSymbol->GetSelfScope()->m_Associations;
-            scopes.insert(end(scopes), begin(selfScopeAssociations), end(selfScopeAssociations));
-
-            return ResolveSymbolInScopes(
-                t_resolvingFromScope,
-                t_nameSectionsBegin + 1,
-                t_nameSectionsEnd,
-                t_isCorrectSymbolType,
-                scopes,
-                t_templateArguments,
-                t_doInstantiateTemplate
-            );
-        }
-    }
-
-    auto Scope::ResolveTemplateInstance(
-        const Symbol::Template::IBase* const t_template,
-        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments
-    ) -> Expected<Symbol::IBase*>
-    {
-        auto* const scope = t_template->GetScope();
-
-        const auto foundIt = scope->m_SymbolMap.find(t_template->GetASTName());
-        ACE_TRY_ASSERT(foundIt != end(scope->m_SymbolMap));
-
-        auto& symbols = foundIt->second;
-
-        const auto perfectCandidateIt = std::find_if(begin(symbols), end(symbols), [&]
-        (const std::unique_ptr<Symbol::IBase>& t_symbol)
-        {
-            auto* const templatableSymbol = dynamic_cast<Symbol::ITemplatable*>(t_symbol.get());
-            ACE_ASSERT(templatableSymbol);
-
-            if (!AreTypesSame(t_templateArguments, templatableSymbol->CollectTemplateArguments()))
-                return false;
-
-            if (!AreTypesSame(t_implTemplateArguments, templatableSymbol->CollectImplTemplateArguments()))
-                return false;
-
-            return true;
-        });
-
-        ACE_TRY_ASSERT(perfectCandidateIt != end(symbols));
-        return perfectCandidateIt->get();
-    }
-
-    auto Scope::ExclusiveResolveTemplate(
-        const std::string& t_name,
-        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments
-    ) const -> Expected<Symbol::Template::IBase*>
-    {
-        auto foundIt = m_SymbolMap.find(t_name);
-        ACE_TRY_ASSERT(foundIt != end(m_SymbolMap));
-
-        std::vector<Symbol::IBase*> symbols{};
-        std::transform(begin(foundIt->second), end(foundIt->second), back_inserter(symbols), []
-        (const std::unique_ptr<Symbol::IBase>& t_symbol)
-        {
-            return t_symbol.get();
-        });
-
-        ACE_TRY_ASSERT(symbols.size() == 1);
-
-        auto* const castedSymbol = dynamic_cast<Symbol::Template::IBase*>(symbols.front());
-        ACE_ASSERT(castedSymbol);
-
-        return castedSymbol;
-    }
-
     auto Scope::CanDefineSymbol(const Symbol::IBase* const t_symbol) -> bool
     {
         // TODO: Dont allow private types to leak in public interface.
@@ -592,97 +468,321 @@ namespace Ace
         }
     }
 
-    auto Scope::GetInstanceSymbolResolutionScopes(Symbol::Type::IBase* t_selfType) -> std::vector<const Scope*>
+    auto Scope::ResolveSymbolInScopes(
+        const Scope* const t_resolvingFromScope,
+        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
+        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
+        const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
+        const std::vector<const Scope*> t_scopes,
+        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
+        const bool& t_doInstantiateTemplate
+    ) -> Expected<Symbol::IBase*>
+    {
+        ACE_TRY(templateArguments, ResolveTemplateArguments(
+            t_resolvingFromScope,
+            t_nameSectionsBegin->TemplateArguments
+        ));
+
+        return ResolveSymbolInScopes(
+            t_resolvingFromScope,
+            t_nameSectionsBegin,
+            t_nameSectionsEnd,
+            t_isCorrectSymbolType,
+            t_scopes,
+            t_implTemplateArguments,
+            templateArguments,
+            t_doInstantiateTemplate
+        );
+    }
+
+    auto Scope::ResolveSymbolInScopes(
+        const Scope* const t_resolvingFromScope,
+        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
+        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
+        const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
+        const std::vector<const Scope*> t_scopes,
+        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
+        const std::vector<Symbol::Type::IBase*>& t_templateArguments,
+        const bool& t_doInstantiateTemplate
+    ) -> Expected<Symbol::IBase*>
+    {
+        ACE_ASSERT(
+            t_nameSectionsBegin->TemplateArguments.empty() || 
+            (
+                t_templateArguments.size() == 
+                t_nameSectionsBegin->TemplateArguments.size()
+            )
+        );
+
+        const bool isLastNameSection = std::distance(t_nameSectionsBegin, t_nameSectionsEnd) == 1;
+
+        const auto& name = t_nameSectionsBegin->Name;
+        const auto templateName = SpecialIdentifier::CreateTemplate(name);
+
+        std::vector<Symbol::IBase*> symbols{};
+        std::for_each(begin(t_scopes), end(t_scopes), [&]
+        (const Scope* const t_scope)
+        {
+            auto& symbolMap = t_scope->m_SymbolMap;
+
+            const auto foundTemplateIt = symbolMap.find(templateName);
+            const bool isTemplate = foundTemplateIt != end(symbolMap);
+
+            const auto foundIt = isTemplate ? 
+                foundTemplateIt : 
+                symbolMap.find(name);
+
+            if (foundIt == end(symbolMap))
+                return;
+
+            const auto& foundItSymbols = foundIt->second;
+
+            const bool isInstanceVariable = [&]() -> bool
+            {
+                if (!isLastNameSection)
+                    return false;
+
+                if (foundItSymbols.size() != 1)
+                    return false;
+                
+                if (!dynamic_cast<Symbol::Variable::Normal::Instance*>(foundIt->second.front().get()))
+                    return false;
+
+                return true;
+            }();
+
+            if (isTemplate && isLastNameSection && !isInstanceVariable)
+            {
+                ACE_ASSERT(foundItSymbols.size() == 1);
+                auto* const tmplate = dynamic_cast<Symbol::Template::IBase*>(
+                    foundItSymbols.front().get()
+                );
+                ACE_ASSERT(tmplate);
+
+                if (!t_doInstantiateTemplate)
+                {
+                    symbols.push_back(tmplate);
+                }
+                else
+                {
+                    const auto expTemplateInstance = ResolveOrInstantiateTemplateInstance(
+                        tmplate,
+                        t_implTemplateArguments,
+                        t_templateArguments
+                    );
+                    if (!expTemplateInstance)
+                        return;
+                    
+                    symbols.push_back(expTemplateInstance.Unwrap());
+                }
+            }
+            else
+            {
+                std::transform(
+                    begin(foundItSymbols), 
+                    end  (foundItSymbols), 
+                    back_inserter(symbols), 
+                    [&](const std::unique_ptr<Symbol::IBase>& t_symbol)
+                    {
+                        return t_symbol.get();
+                    }
+                );
+            }
+        });
+
+        if (isLastNameSection)
+        {
+            std::vector<Symbol::IBase*> correctSymbols{};
+            std::copy_if(
+                begin(symbols), 
+                end  (symbols), 
+                back_inserter(correctSymbols), 
+                [&](Symbol::IBase* const t_symbol)
+                {
+                    return t_isCorrectSymbolType(t_symbol);
+                }
+            );
+
+            ACE_TRY_ASSERT(!correctSymbols.empty());
+            ACE_ASSERT(correctSymbols.size() == 1);
+
+            auto* const symbol = correctSymbols.front();
+            ACE_TRY_ASSERT(IsSymbolVisibleFromScope(symbol, t_resolvingFromScope));
+            return symbol;
+        }
+        else
+        {
+            ACE_TRY_ASSERT(symbols.size() == 1);
+
+            auto* const selfScopedSymbol = dynamic_cast<Symbol::ISelfScoped*>(symbols.front());
+            ACE_TRY_ASSERT(selfScopedSymbol);
+
+            ACE_TRY_ASSERT(IsSymbolVisibleFromScope(selfScopedSymbol, t_resolvingFromScope));
+
+            std::vector<const Scope*> scopes{};
+
+            scopes.push_back(selfScopedSymbol->GetSelfScope());
+
+            const auto& selfScopeAssociations = selfScopedSymbol->GetSelfScope()->m_Associations;
+            scopes.insert(end(scopes), begin(selfScopeAssociations), end(selfScopeAssociations));
+
+            return ResolveSymbolInScopes(
+                t_resolvingFromScope,
+                t_nameSectionsBegin + 1,
+                t_nameSectionsEnd,
+                t_isCorrectSymbolType,
+                scopes,
+                t_templateArguments,
+                t_doInstantiateTemplate
+            );
+        }
+    }
+
+    auto Scope::ResolveTemplateInstance(
+        const Symbol::Template::IBase* const t_template,
+        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
+        const std::vector<Symbol::Type::IBase*>& t_templateArguments
+    ) -> Expected<Symbol::IBase*>
+    {
+        auto* const scope = t_template->GetScope();
+
+        const auto foundIt = scope->m_SymbolMap.find(t_template->GetASTName());
+        ACE_TRY_ASSERT(foundIt != end(scope->m_SymbolMap));
+
+        auto& symbols = foundIt->second;
+
+        const auto perfectCandidateIt = std::find_if(begin(symbols), end(symbols), [&]
+        (const std::unique_ptr<Symbol::IBase>& t_symbol)
+        {
+            auto* const templatableSymbol = dynamic_cast<Symbol::ITemplatable*>(t_symbol.get());
+            ACE_ASSERT(templatableSymbol);
+
+            const auto collectedTemplateArguments = templatableSymbol->CollectTemplateArguments();
+            if (!AreTypesSame(t_templateArguments, collectedTemplateArguments))
+                return false;
+
+            const auto collectedImplTemplateArguments = templatableSymbol->CollectImplTemplateArguments();
+            if (!collectedImplTemplateArguments.empty())
+            {
+                if (!AreTypesSame(t_implTemplateArguments, collectedImplTemplateArguments))
+                    return false;
+            }
+            
+            return true;
+        });
+
+        ACE_TRY_ASSERT(perfectCandidateIt != end(symbols));
+        return perfectCandidateIt->get();
+    }
+
+    auto Scope::ExclusiveResolveTemplate(
+        const std::string& t_name
+    ) const -> Expected<Symbol::Template::IBase*>
+    {
+        auto foundIt = m_SymbolMap.find(t_name);
+        ACE_TRY_ASSERT(foundIt != end(m_SymbolMap));
+
+        std::vector<Symbol::IBase*> symbols{};
+        std::transform(begin(foundIt->second), end(foundIt->second), back_inserter(symbols), []
+        (const std::unique_ptr<Symbol::IBase>& t_symbol)
+        {
+            return t_symbol.get();
+        });
+
+        ACE_TRY_ASSERT(symbols.size() == 1);
+
+        auto* const castedSymbol = dynamic_cast<Symbol::Template::IBase*>(symbols.front());
+        ACE_ASSERT(castedSymbol);
+
+        return castedSymbol;
+    }
+
+    
+
+    auto Scope::GetInstanceSymbolResolutionScopes(
+        Symbol::Type::IBase* t_selfType
+    ) -> std::vector<const Scope*>
     {
         t_selfType = t_selfType->GetUnaliased();
 
         if (t_selfType->IsReference())
         {
-            return GetInstanceSymbolResolutionScopes(t_selfType->GetWithoutReference());
+            return GetInstanceSymbolResolutionScopes(
+                t_selfType->GetWithoutReference()
+            );
         }
 
         if (t_selfType->IsStrongPointer())
         {
-            return GetInstanceSymbolResolutionScopes(t_selfType->GetWithoutStrongPointer());
+            return GetInstanceSymbolResolutionScopes(
+                t_selfType->GetWithoutStrongPointer()
+            );
         }
+
+        auto* const typeSelfScope = t_selfType->GetSelfScope();
         
         std::vector<const Scope*> scopes{};
-        if (auto optTemplate = t_selfType->GetTemplate())
-        {
-            auto* const templateSelfScope = optTemplate.value()->GetSelfScope();
+        scopes.push_back(typeSelfScope);
 
-            scopes.push_back(t_selfType->GetSelfScope());
-            scopes.insert(end(scopes), begin(templateSelfScope->m_Associations), end(templateSelfScope->m_Associations));
-        }
-        else
-        {
-            auto* const typeSelfScope = t_selfType->GetSelfScope();
+        const auto optTemplate = t_selfType->GetTemplate();
+        auto* const associationsScope = optTemplate.has_value() ?
+            optTemplate.value()->GetSelfScope() :
+            typeSelfScope;
 
-            scopes.push_back(typeSelfScope);
-            scopes.insert(end(scopes), begin(typeSelfScope->m_Associations), end(typeSelfScope->m_Associations));
-        }
+        scopes.insert(
+            end(scopes),
+            begin(associationsScope->m_Associations),
+            end  (associationsScope->m_Associations)
+        );
 
         return scopes;
     }
 
-    auto Scope::CollectInstanceSymbolImplTemplateArguments(Symbol::Type::IBase* const t_selfType) -> std::vector<Symbol::Type::IBase*>
+    auto Scope::CollectInstanceSymbolResolutionImplTemplateArguments(
+        Symbol::Type::IBase* const t_selfType
+    ) -> std::vector<Symbol::Type::IBase*>
     {
         return t_selfType->CollectTemplateArguments();
     }
 
-    auto Scope::ResolveTemplateArguments(const std::vector<Name::Symbol::Full>& t_templateArgumentNames) const -> Expected<std::vector<Symbol::Type::IBase*>>
+    auto Scope::GetStaticSymbolResolutionStartScope(
+        const Name::Symbol::Full& t_name
+    ) const -> Expected<const Scope*>
     {
-        ACE_TRY(templateArguments, TransformExpectedVector(t_templateArgumentNames, [&]
-        (const Name::Symbol::Full& t_typeName)
+        if (t_name.IsGlobal)
         {
-            return ResolveStaticSymbol<Symbol::Type::IBase>(t_typeName);
-        }));
-
-        return templateArguments;
-    }
-
-    auto Scope::FindTemplatedImplContext() const -> std::optional<Symbol::TemplatedImpl*>
-    {
-        const auto* scope = this;
-        for (
-            ; 
-            scope->GetParent().has_value(); 
-            scope = scope->GetParent().value()
-            )
-        {
-            auto* const parentScope = scope->GetParent().value();
-
-            const auto templatedImplSymbols = parentScope->CollectDefinedSymbols<Symbol::TemplatedImpl>();
-            auto foundIt = std::find_if(begin(templatedImplSymbols), end(templatedImplSymbols), [&]
-            (Symbol::TemplatedImpl* const t_templatedImpl)
-            {
-                return t_templatedImpl->GetSelfScope() == scope;
-            });
-
-            if (foundIt == end(templatedImplSymbols))
-                continue;
-
-            return *foundIt;
+            return Scope::GetRoot();
         }
 
-        return nullptr;
+        const auto& section = t_name.Sections.front();
+
+        const auto& name = section.Name;
+        const auto templateName = SpecialIdentifier::CreateTemplate(name);
+
+        for (
+            std::optional<const Scope*> optScope = this; 
+            optScope.has_value(); 
+            optScope = optScope.value()->GetParent()
+            )
+        {
+            auto* const scope = optScope.value();
+
+            if (
+                !scope->m_SymbolMap.contains(templateName) &&
+                !scope->m_SymbolMap.contains(name)
+                )
+                continue;
+
+            return scope;
+        }
+
+        ACE_TRY_UNREACHABLE();
     }
 
-    auto Scope::IsSameTemplatedImplContext(const Scope* const t_scopeA, const Scope* const t_scopeB) -> bool
+    auto Scope::GetStaticSymbolResolutionImplTemplateArguments(
+        const Scope* const t_startScope
+    ) -> std::vector<Symbol::Type::IBase*>
     {
-        const auto contextA = t_scopeA->FindTemplatedImplContext().value();
-        const auto contextB = t_scopeA->FindTemplatedImplContext().value();
-
-        return
-            contextA->GetImplementedTypeTemplate() == 
-            contextB->GetImplementedTypeTemplate();
-    }
-
-    auto Scope::GetStaticSymbolResolutionImplTemplateArguments(const bool& t_isInTemplatedImplContext, const Scope* const t_startScope) -> std::vector<Symbol::Type::IBase*>
-    {
-        if (!t_isInTemplatedImplContext)
-            return {};
-
         for (
             std::optional<const Scope*> optScope = t_startScope;
             optScope.has_value(); 
@@ -698,26 +798,6 @@ namespace Ace
             }
         }
 
-        ACE_UNREACHABLE();
-    }
-
-    auto Scope::AreTypesSame(
-        const std::vector<Symbol::Type::IBase*>& t_typesA,
-        const std::vector<Symbol::Type::IBase*>& t_typesB
-    ) -> bool
-    {
-        if (t_typesA.size() != t_typesB.size())
-            return false;
-
-        for (size_t i = 0; i < t_typesA.size(); i++)
-        {
-            if (
-                t_typesA.at(i)->GetUnaliased() !=
-                t_typesB.at(i)->GetUnaliased()
-                )
-                return false;
-        }
-
-        return true;
+        return {};
     }
 }

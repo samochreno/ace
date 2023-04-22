@@ -18,7 +18,6 @@ namespace Ace::Symbol::Template
         const auto& parameters = m_TemplateNode->GetParameters();
 
         ACE_ASSERT(t_arguments.size() == parameters.size());
-        ACE_ASSERT(t_implArguments.empty());
 
         const auto ast = m_TemplateNode->GetAST()->CloneInScopeType(m_TemplateNode->GetScope());
 
