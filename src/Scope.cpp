@@ -641,7 +641,7 @@ namespace Ace
         return templateArguments;
     }
 
-    auto Scope::FindTemplatedImplContext() const -> Symbol::TemplatedImpl*
+    auto Scope::FindTemplatedImplContext() const -> std::optional<Symbol::TemplatedImpl*>
     {
         const auto* scope = this;
         for (
@@ -670,9 +670,12 @@ namespace Ace
 
     auto Scope::IsSameTemplatedImplContext(const Scope* const t_scopeA, const Scope* const t_scopeB) -> bool
     {
-        return 
-            t_scopeA->FindTemplatedImplContext()->GetImplementedTypeTemplate() == 
-            t_scopeB->FindTemplatedImplContext()->GetImplementedTypeTemplate();
+        const auto contextA = t_scopeA->FindTemplatedImplContext().value();
+        const auto contextB = t_scopeA->FindTemplatedImplContext().value();
+
+        return
+            contextA->GetImplementedTypeTemplate() == 
+            contextB->GetImplementedTypeTemplate();
     }
 
     auto Scope::GetStaticSymbolResolutionImplTemplateArguments(const bool& t_isInTemplatedImplContext, const Scope* const t_startScope) -> std::vector<Symbol::Type::IBase*>

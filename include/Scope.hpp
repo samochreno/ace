@@ -348,7 +348,7 @@ namespace Ace
 
         auto ResolveTemplateArguments(const std::vector<Name::Symbol::Full>& t_templateArgumentNames) const -> Expected<std::vector<Symbol::Type::IBase*>>;
 
-        auto FindTemplatedImplContext() const -> Symbol::TemplatedImpl*;
+        auto FindTemplatedImplContext() const -> std::optional<Symbol::TemplatedImpl*>;
         static auto IsSameTemplatedImplContext(const Scope* const t_scopeA, const Scope* const t_scopeB) -> bool;
 
         static auto AreTypesSame(
