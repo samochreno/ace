@@ -40,14 +40,17 @@ namespace Ace
 
             case AccessModifier::Private:
             {
-                auto* const symbolModule = t_symbol->GetScope()->FindModule();
-                if (!symbolModule) // Package root module, visible by every scope.
+                const auto optSymbolModule = t_symbol->GetScope()->FindModule();
+                if (!optSymbolModule.has_value())
                     return true; 
 
-                auto* const scopeModule = t_scope->FindModule();
-                
-                if (!scopeModule)
+                auto* const symbolModule = optSymbolModule.value();
+
+                const auto optScopeModule = t_scope->FindModule();
+                if (!optScopeModule.has_value())
                     return false;
+
+                auto* const scopeModule = optScopeModule.value();
 
                 if (symbolModule == scopeModule)
                     return true;
@@ -57,9 +60,12 @@ namespace Ace
 
                 return false;
             }
-        }
 
-        ACE_UNREACHABLE();
+            default:
+            {
+                ACE_UNREACHABLE();
+            }
+        }
     }
 
 #ifndef NDEBUG
@@ -83,7 +89,7 @@ namespace Ace
         return m_Root.get();
     }
 
-    auto Scope::FindModule() const -> Symbol::Module*
+    auto Scope::FindModule() const -> std::optional<Symbol::Module*>
     {
         for (
             const auto *parent = m_Parent, *child = this; 
@@ -106,7 +112,7 @@ namespace Ace
             return moduleSymbol;
         }
 
-        return nullptr;
+        return std::nullopt;
     }
 
     auto Scope::GetOrCreateChild(const std::optional<std::string>& t_optName) -> Scope*

@@ -58,7 +58,7 @@ namespace Ace
         auto GetParent() const -> Scope* { return m_Parent; }
         auto GetName() const -> const std::string& { return m_Name; }
         
-        auto FindModule() const -> Symbol::Module*;
+        auto FindModule() const -> std::optional<Symbol::Module*>;
 
         auto GetOrCreateChild(const std::optional<std::string>& t_optName) -> Scope*;
         auto HasChild(const Scope* const t_child) const -> bool;
