@@ -25,7 +25,7 @@ namespace Ace::Node::Statement
         }
         virtual ~Block() = default;
 
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent(); }
+        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
         auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Block> final;
         auto CloneInScopeStatement(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::IBase> final { return CloneInScope(t_scope); }

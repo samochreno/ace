@@ -34,7 +34,7 @@ namespace Ace::Node
         }
         virtual ~TemplatedImpl() = default;
 
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent(); }
+        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
         auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::TemplatedImpl> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Impl>> final;

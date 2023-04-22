@@ -483,7 +483,7 @@ namespace Ace::Core
         }
 
         const auto bodyNode = std::make_shared<const BoundNode::Statement::Block>(
-            bodyScope->GetParent(),
+            bodyScope->GetParent().value(),
             statements
         );
 
@@ -579,7 +579,7 @@ namespace Ace::Core
         });
 
         const auto bodyNode = std::make_shared<const BoundNode::Statement::Block>(
-            bodyScope->GetParent(),
+            bodyScope->GetParent().value(),
             statements
         );
 

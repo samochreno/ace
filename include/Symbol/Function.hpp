@@ -46,7 +46,7 @@ namespace Ace::Symbol
         }
         virtual ~Function() = default;
 
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent(); }
+        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
         auto GetSelfScope() const -> Scope* final { return m_SelfScope; }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Function; }

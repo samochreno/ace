@@ -167,7 +167,7 @@ namespace Ace::Node
 
     auto Module::GetSymbolScope() const -> Scope*
     {
-        return m_SelfScope->GetParent();
+        return m_SelfScope->GetParent().value();
     }
 
     auto Module::GetSymbolCreationSuborder() const -> size_t
@@ -179,13 +179,13 @@ namespace Ace::Node
     {
         if (m_Name.size() > 1)
         {
-            Scope* scope = GetSymbolScope()->GetParent();
+            Scope* scope = GetSymbolScope()->GetParent().value();
             auto nameIt = rbegin(m_Name) + 1;
 
             for (
                 ; 
                 nameIt != rend(m_Name); 
-                [&](){ scope = scope->GetParent(); nameIt++; }()
+                [&](){ scope = scope->GetParent().value(); nameIt++; }()
                 )
             {
                 ACE_TRY(symbol, scope->ExclusiveResolveSymbol<Symbol::Module>(*nameIt));

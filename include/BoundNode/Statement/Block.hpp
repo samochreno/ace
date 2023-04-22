@@ -28,7 +28,7 @@ namespace Ace::BoundNode::Statement
         }
         virtual ~Block() = default;
         
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent(); }
+        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Block>>> final;
         auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }

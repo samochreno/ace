@@ -47,7 +47,7 @@ namespace Ace::Node
         }
         virtual ~Function() = default;
 
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent(); }
+        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
         auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Function> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Function>> final;

@@ -23,7 +23,7 @@ namespace Ace::Symbol
         }
         virtual ~Module() = default;
 
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent(); }
+        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
         auto GetSelfScope() const -> Scope* final { return m_SelfScope; }
         auto GetName() const -> const std::string& { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Module; }

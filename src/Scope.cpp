@@ -85,18 +85,32 @@ namespace Ace
         if (m_Root)
             return m_Root.get();
 
-        m_Root = std::unique_ptr<Scope>{ new Scope(std::string{ SpecialIdentifier::Global }, nullptr) };
+        m_Root = std::unique_ptr<Scope>
+        { 
+            new Scope(
+                std::string{ SpecialIdentifier::Global }, 
+                std::optional<Scope*>{}
+            )
+        };
+
         return m_Root.get();
     }
 
     auto Scope::FindModule() const -> std::optional<Symbol::Module*>
     {
-        for (
-            const auto *parent = m_Parent, *child = this; 
-            parent; 
-            [&]() { child = parent; parent = parent->GetParent(); }()
-            )
+        auto* child = this;
+        auto optParent = child->GetParent();
+
+        const auto moveUp = [&]() -> void
         {
+            child = optParent.value(); 
+            optParent = optParent.value()->GetParent();
+        };
+
+        for (; optParent.has_value(); moveUp())
+        {
+            auto* const parent = optParent.value();
+
             const auto foundIt = parent->m_SymbolMap.find(child->GetName());
 
             if (foundIt == end(parent->m_SymbolMap))
@@ -280,6 +294,20 @@ namespace Ace
         }
 
         return ExpectedVoid;
+    }
+
+    Scope::Scope(
+        const std::optional<std::string>& t_optName,
+        std::optional<Scope*> const t_optParent
+    ) : m_OptParent{ t_optParent }
+    {
+        m_NestLevel = m_OptParent.has_value() ?
+            m_OptParent.value()->GetNestLevel() + 1 :
+            0;
+
+        m_Name = t_optName.has_value() ? 
+            t_optName.value() :
+            SpecialIdentifier::CreateAnonymous();
     }
 
     auto Scope::AddChild(const std::optional<std::string>& t_optName) -> Scope*
@@ -616,9 +644,15 @@ namespace Ace
     auto Scope::FindTemplatedImplContext() const -> Symbol::TemplatedImpl*
     {
         const auto* scope = this;
-        for (; scope->GetParent(); scope = scope->GetParent())
+        for (
+            ; 
+            scope->GetParent().has_value(); 
+            scope = scope->GetParent().value()
+            )
         {
-            const auto templatedImplSymbols = scope->GetParent()->CollectDefinedSymbols<Symbol::TemplatedImpl>();
+            auto* const parentScope = scope->GetParent().value();
+
+            const auto templatedImplSymbols = parentScope->CollectDefinedSymbols<Symbol::TemplatedImpl>();
             auto foundIt = std::find_if(begin(templatedImplSymbols), end(templatedImplSymbols), [&]
             (Symbol::TemplatedImpl* const t_templatedImpl)
             {
@@ -646,11 +680,16 @@ namespace Ace
         if (!t_isInTemplatedImplContext)
             return {};
 
-        auto* scope = t_startScope;
-        for (; scope; scope = scope->GetParent())
+        for (
+            std::optional<const Scope*> optScope = t_startScope;
+            optScope.has_value(); 
+            optScope = optScope.value()->GetParent()
+            )
         {
-            const auto implTemplateArguments = scope->CollectImplTemplateArguments();;
-            if (implTemplateArguments.size() != 0)
+            auto* const scope = optScope.value();
+
+            const auto implTemplateArguments = scope->CollectImplTemplateArguments();
+            if (!implTemplateArguments.empty())
             {
                 return implTemplateArguments;
             }

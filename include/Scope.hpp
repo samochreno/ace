@@ -55,7 +55,7 @@ namespace Ace
         static auto GetRoot() -> Scope*;
 
         auto GetNestLevel() const -> size_t { return m_NestLevel; }
-        auto GetParent() const -> Scope* { return m_Parent; }
+        auto GetParent() const -> std::optional<Scope*> { return m_OptParent; }
         auto GetName() const -> const std::string& { return m_Name; }
         
         auto FindModule() const -> std::optional<Symbol::Module*>;
@@ -120,9 +120,14 @@ namespace Ace
                 const auto& name = section.Name;
                 const auto templateName = SpecialIdentifier::CreateTemplate(name);
 
-                const Scope* scope = this;
-                for (; scope; scope = scope->GetParent())
+                for (
+                    std::optional<const Scope*> optScope = this; 
+                    optScope.has_value(); 
+                    optScope = optScope.value()->GetParent()
+                    )
                 {
+                    auto* const scope = optScope.value();
+
                     if (scope->m_SymbolMap.contains(templateName))
                     {
                         if (section.TemplateArguments.size() != 0)
@@ -291,12 +296,8 @@ namespace Ace
     private:
         Scope(
             const std::optional<std::string>& t_optName,
-            Scope* const t_parent
-        ) : m_NestLevel{ t_parent ? (t_parent->GetNestLevel() + 1) : 0},
-            m_Name{ t_optName ? t_optName.value() : SpecialIdentifier::CreateAnonymous() },
-            m_Parent{ t_parent }
-        {
-        }
+            std::optional<Scope*> const t_optParent
+        );
 
         auto AddChild(const std::optional<std::string>& t_optName) -> Scope*;
 
@@ -359,7 +360,7 @@ namespace Ace
 
         size_t m_NestLevel{};
         std::string m_Name{};
-        Scope* m_Parent{};
+        std::optional<Scope*> m_OptParent{};
         std::vector<std::unique_ptr<Scope>> m_Children{};
         std::set<Scope*> m_Associations{};
         std::unordered_map<std::string, std::vector<std::unique_ptr<Symbol::IBase>>> m_SymbolMap{};

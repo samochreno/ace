@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <unordered_set>
+#include <optional>
 
 #include "Asserts.hpp"
 #include "Symbol/Base.hpp"
@@ -68,12 +69,14 @@ namespace Ace::Symbol
             return symbol->CreateSignature();
         }
 
-        auto* scope = GetScope();
         std::vector<Scope*> scopes{};
-        while (scope)
+        for (
+            std::optional<Scope*> optScope = GetScope();
+            optScope.has_value();
+            optScope = optScope.value()->GetParent()
+            )
         {
-            scopes.push_back(scope);
-            scope = scope->GetParent();
+            scopes.push_back(optScope.value());
         }
 
         std::string signature{};
@@ -119,9 +122,13 @@ namespace Ace::Symbol
         std::vector<Name::Symbol::Section> nameSections{};
 
         std::vector<Scope*> scopes{};
-        for (Scope* scope = GetScope(); scope; scope = scope->GetParent())
+        for (
+            std::optional<Scope*> optScope = GetScope();
+            optScope.has_value();
+            optScope = optScope.value()->GetParent()
+            )
         {
-            scopes.push_back(scope);
+            scopes.push_back(optScope.value());
         }
 
         std::transform(
