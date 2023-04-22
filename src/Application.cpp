@@ -66,13 +66,12 @@ namespace Ace
         const auto timeSymbolCreationEnd = now();
         ACE_LOG_INFO("Symbol creation success");
 
+        const auto timeBindingAndVerificationStart = now();
+        ACE_LOG_INFO("Binding and verification start");
 
         ACE_LOG_INFO("Native symbol initialization start");
         ACE_TRY_VOID(NativeSymbol::InitializeSymbols());
         ACE_LOG_INFO("Native symbol initialization success");
-
-        const auto timeBindingAndVerificationStart = now();
-        ACE_LOG_INFO("Binding and verification start");
 
         ACE_TRY(boundASTs, Core::CreateBoundTransformedAndVerifiedASTs(
             asts,
