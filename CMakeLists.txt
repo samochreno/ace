@@ -23,8 +23,6 @@ llvm_map_components_to_libnames(LLVM_LIBS
 find_package(fmt REQUIRED)
 message(STATUS "Found fmt ${FMT_VERSION}")
 
-file(GLOB_RECURSE FMT_LIBS ${FMT_LIB_DIR})
-
 find_package(termcolor REQUIRED)
 message(STATUS "Found termcolor")
 
@@ -39,5 +37,4 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     fmt::fmt
     ${LLVM_LIBS}
-    ${FMT_LIBS}
 )
