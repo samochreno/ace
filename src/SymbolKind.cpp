@@ -1,6 +1,7 @@
 #include "SymbolKind.hpp"
 
 #include <cstdint>
+#include <unordered_map>
 
 #include "Asserts.hpp"
 #include "Error.hpp"

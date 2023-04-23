@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 #include "Symbol/Base.hpp"
 #include "Token.hpp"

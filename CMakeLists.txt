@@ -37,7 +37,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE ${FMT_INC_DIR}
 )
 target_link_libraries(${PROJECT_NAME}
-    fmt
+    fmt::fmt
     ${LLVM_LIBS}
     ${FMT_LIBS}
 )
