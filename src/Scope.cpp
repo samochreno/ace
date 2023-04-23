@@ -220,7 +220,9 @@ namespace Ace
             });
 
             if (findIt != end(m_Children))
+            {
                 return findIt->get();
+            }
         }
 
         return AddChild(t_optName);
