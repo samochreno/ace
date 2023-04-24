@@ -138,7 +138,7 @@ namespace Ace::BoundNode::Statement
                 {
                 }
 
-                static auto Create(const BoundNode::Statement::IBase* const t_statement) -> Expected<Data>
+                static auto New(const BoundNode::Statement::IBase* const t_statement) -> Expected<Data>
                 {
                     Data data{};
 
@@ -199,7 +199,7 @@ namespace Ace::BoundNode::Statement
         std::for_each(begin(statements), end(statements), [&]
         (const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
         {
-            const auto expStatementData = ControlFlowStatement::Data::Create(t_statement.get());
+            const auto expStatementData = ControlFlowStatement::Data::New(t_statement.get());
             
             if (expStatementData)
                 statementsData.push_back(expStatementData.Unwrap());
