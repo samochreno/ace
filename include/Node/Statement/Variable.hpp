@@ -26,7 +26,7 @@ namespace Ace::Node::Statement
         Variable(
             Scope* const t_scope,
             const std::string& t_name,
-            const Name::Type& t_typeName,
+            const TypeName& t_typeName,
             const std::optional<std::shared_ptr<const Node::Expression::IBase>>& t_optAssignedExpression
         ) : m_Scope{ t_scope },
             m_Name{ t_name },
@@ -53,7 +53,7 @@ namespace Ace::Node::Statement
     private:
         Scope* m_Scope{};
         std::string m_Name{};
-        Name::Type m_TypeName{};
+        TypeName m_TypeName{};
         std::optional<std::shared_ptr<const Node::Expression::IBase>> m_OptAssignedExpression{};
     };
 }

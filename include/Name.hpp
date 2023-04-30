@@ -6,47 +6,48 @@
 namespace Ace
 {
     class Compilation;
-}
 
-namespace Ace::Name
-{
-    namespace Symbol
+    struct SymbolName;
+
+    struct SymbolNameSection
     {
-        struct Full;
+        SymbolNameSection();
+        SymbolNameSection(const std::string& t_name);
+        SymbolNameSection(
+            const std::string& t_name,
+            const std::vector<SymbolName>& t_templateArguments
+        );
+        ~SymbolNameSection();
 
-        struct Section
-        {
-            Section();
-            Section(const std::string& t_name);
-            Section(
-                const std::string& t_name,
-                const std::vector<Name::Symbol::Full>& t_templateArguments
-            );
-            ~Section();
+        std::string Name;
+        std::vector<SymbolName> TemplateArguments;
+    };
 
-            std::string Name;
-            std::vector<Name::Symbol::Full> TemplateArguments;
-        };
+    enum class SymbolNameResolutionScope
+    {
+        None,
+        Local,
+        Global,
+    };
 
-        struct Full
-        {
-            Full();
-            Full(
-                const Section& t_section,
-                const bool& t_isGlobal
-            );
-            Full(
-                const std::vector<Section>& t_sections,
-                const bool& t_isGlobal
-            );
-            ~Full();
+    struct SymbolName
+    {
+        SymbolName();
+        SymbolName(
+            const SymbolNameSection& t_section,
+            const SymbolNameResolutionScope& t_resolutionScope
+        );
+        SymbolName(
+            const std::vector<SymbolNameSection>& t_sections,
+            const SymbolNameResolutionScope& t_resolutionScope
+        );
+        ~SymbolName();
 
-            std::vector<Section> Sections;
-            bool IsGlobal;
-        };
-    }
+        std::vector<SymbolNameSection> Sections;
+        bool IsGlobal;
+    };
 
-    enum class TypeModifier
+    enum class TypeNameModifier
     {
         None,
         Reference,
@@ -54,20 +55,21 @@ namespace Ace::Name
         WeakPointer,
     };
 
-    struct Type
+    struct TypeName
     {
-        Type();
-        Type(
-            const Name::Symbol::Full& t_symbolName,
-            const std::vector<TypeModifier>& t_modifiers
+        TypeName();
+        TypeName(
+            const SymbolName& t_symbolName,
+            const std::vector<TypeNameModifier>& t_modifiers
         );
-        ~Type();
+        ~TypeName();
 
         auto ToSymbolName(
             const Compilation& t_compilation
-        ) const -> Name::Symbol::Full;
+        ) const -> SymbolName;
 
-        Name::Symbol::Full SymbolName;
-        std::vector<TypeModifier> Modifiers;
+        SymbolName SymbolName;
+        std::vector<TypeNameModifier> Modifiers;
     };
 }
+

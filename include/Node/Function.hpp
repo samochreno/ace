@@ -29,7 +29,7 @@ namespace Ace::Node
         Function(
             Scope* const t_selfScope,
             const std::string& t_name,
-            const Name::Type& t_typeName,
+            const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
             const AccessModifier& t_accessModifier,
             const std::optional<std::shared_ptr<const Node::Variable::Parameter::Self>>& t_optSelf,
@@ -66,7 +66,7 @@ namespace Ace::Node
     protected:
         Scope* m_SelfScope{};
         std::string m_Name{};
-        Name::Type m_TypeName{};
+        TypeName m_TypeName{};
         std::vector<std::shared_ptr<const Node::Attribute>> m_Attributes{};
         SymbolCategory m_SymbolCategory{};
         AccessModifier m_AccessModifier{};

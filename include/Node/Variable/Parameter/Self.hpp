@@ -25,10 +25,10 @@ namespace Ace::Node::Variable::Parameter
     public:
         Self(
             Scope* const t_scope,
-            const Name::Symbol::Full& t_typeName
+            const SymbolName& t_typeName
         ) : m_Scope{ t_scope },
             m_Name{ SpecialIdentifier::Self },
-            m_TypeName{ t_typeName, std::vector{ Name::TypeModifier::Reference } }
+            m_TypeName{ t_typeName, std::vector{ TypeNameModifier::Reference } }
         {
         }
         virtual ~Self() = default;
@@ -48,6 +48,6 @@ namespace Ace::Node::Variable::Parameter
     private:
         Scope* m_Scope{};
         std::string m_Name{};
-        Name::Type m_TypeName{};
+        TypeName m_TypeName{};
     };
 }

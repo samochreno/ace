@@ -18,7 +18,7 @@ namespace Ace::Node::Expression
     {
     public:
         Cast(
-            const Name::Type& t_typeName,
+            const TypeName& t_typeName,
             const std::shared_ptr<const Node::Expression::IBase>& t_expression
         ) : m_TypeName{ t_typeName },
             m_Expression{ t_expression }
@@ -34,7 +34,7 @@ namespace Ace::Node::Expression
         auto CreateBoundExpression() const -> Expected<std::shared_ptr<const BoundNode::Expression::IBase>> final { return CreateBound(); }
 
     private:
-        Name::Type m_TypeName{};
+        TypeName m_TypeName{};
         std::shared_ptr<const Node::Expression::IBase> m_Expression{};
     };
 }

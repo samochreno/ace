@@ -26,7 +26,7 @@ namespace Ace::Node::Variable::Normal
         Static(
             Scope* const t_scope,
             const std::string& t_name,
-            const Name::Type& t_typeName,
+            const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
             const AccessModifier& t_accessModifier
         ) : m_Scope{ t_scope },
@@ -53,7 +53,7 @@ namespace Ace::Node::Variable::Normal
     private:
         Scope* m_Scope{};
         std::string m_Name{};
-        Name::Type m_TypeName{};
+        TypeName m_TypeName{};
         std::vector<std::shared_ptr<const Node::Attribute>> m_Attributes{};
         AccessModifier m_AccessModifier{};
     };

@@ -21,7 +21,7 @@ namespace Ace::Node
     public:
         Impl(
             Scope* const t_selfScope,
-            const Name::Symbol::Full& t_typeName,
+            const SymbolName& t_typeName,
             const std::vector<std::shared_ptr<const Node::Function>>& t_functions,
             const std::vector<std::shared_ptr<const Node::Template::Function>>& t_functionTemplates
         ) : m_SelfScope{ t_selfScope },
@@ -41,7 +41,7 @@ namespace Ace::Node
 
     private:
         Scope* m_SelfScope{};
-        Name::Symbol::Full m_TypeName{};
+        SymbolName m_TypeName{};
         std::vector<std::shared_ptr<const Node::Function>> m_Functions{};
         std::vector<std::shared_ptr<const Node::Template::Function>> m_FunctionTemplates{};
     };

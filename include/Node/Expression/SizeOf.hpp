@@ -19,7 +19,7 @@ namespace Ace::Node::Expression
     public:
         SizeOf(
             Scope* const t_scope,
-            const Name::Type& t_typeName
+            const TypeName& t_typeName
         ) : m_Scope{ t_scope}, 
             m_TypeName{ t_typeName }
         {
@@ -35,6 +35,6 @@ namespace Ace::Node::Expression
 
     private:
         Scope* m_Scope{};
-        Name::Type m_TypeName{};
+        TypeName m_TypeName{};
     };
 }

@@ -97,14 +97,14 @@ namespace Ace
             const std::string& t_name
         ) const -> Expected<TSymbol*>
         {
-            return ResolveStaticSymbol<TSymbol>(Name::Symbol::Full{ 
-                Name::Symbol::Section{ t_name },
-                false 
+            return ResolveStaticSymbol<TSymbol>(SymbolName{ 
+                SymbolNameSection{ t_name },
+                SymbolNameResolutionScope::Local,
             });
         }
         template<typename TSymbol>
         auto ResolveStaticSymbol(
-            const Name::Symbol::Full& t_name
+            const SymbolName& t_name
         ) const -> Expected<TSymbol*>
         {
             ACE_TRY(startScope, GetStaticSymbolResolutionStartScope(t_name));
@@ -141,7 +141,7 @@ namespace Ace
         template<typename TSymbol>
         auto ResolveInstanceSymbol(
             Symbol::Type::IBase* const t_selfType,
-            const Name::Symbol::Section& t_name
+            const SymbolNameSection& t_name
         ) const -> Expected<TSymbol*>
         {
             const auto scopes = GetInstanceSymbolResolutionScopes(t_selfType);
@@ -182,9 +182,9 @@ namespace Ace
             const std::vector<Symbol::Type::IBase*>& t_templateArguments
         ) const -> Expected<TSymbol*>
         {
-            std::vector<Name::Symbol::Section> nameSections
+            std::vector<SymbolNameSection> nameSections
             { 
-                Name::Symbol::Section { t_name }
+                SymbolNameSection { t_name }
             };
 
             ACE_TRY(symbol, ResolveSymbolInScopes(
@@ -283,8 +283,8 @@ namespace Ace
 
         static auto ResolveSymbolInScopes(
             const Scope* const t_resolvingFromScope,
-            const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
-            const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
+            const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
+            const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
             const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
             const std::vector<const Scope*> t_scopes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
@@ -292,8 +292,8 @@ namespace Ace
         ) -> Expected<Symbol::IBase*>;
         static auto ResolveSymbolInScopes(
             const Scope* const t_resolvingFromScope,
-            const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
-            const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
+            const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
+            const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
             const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
             const std::vector<const Scope*> t_scopes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
@@ -319,7 +319,7 @@ namespace Ace
         ) -> std::vector<Symbol::Type::IBase*>;
 
         auto GetStaticSymbolResolutionStartScope(
-            const Name::Symbol::Full& t_name
+            const SymbolName& t_name
         ) const -> Expected<const Scope*>;
         static auto GetStaticSymbolResolutionImplTemplateArguments(
             const Scope* const t_startScope

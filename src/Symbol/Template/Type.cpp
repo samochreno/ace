@@ -64,12 +64,12 @@ namespace Ace::Symbol::Template
             auto* const selfSymbol = boundAST->GetSymbol();
 
             auto copyOperatorName = selfSymbol->CreateFullyQualifiedName();
-            copyOperatorName.Sections.push_back(Name::Symbol::Section{ SpecialIdentifier::Operator::Copy });
+            copyOperatorName.Sections.push_back(SymbolNameSection{ SpecialIdentifier::Operator::Copy });
 
             selfSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(copyOperatorName);
 
             auto dropOperatorName = selfSymbol->CreateFullyQualifiedName();
-            dropOperatorName.Sections.push_back(Name::Symbol::Section{ SpecialIdentifier::Operator::Drop });
+            dropOperatorName.Sections.push_back(SymbolNameSection{ SpecialIdentifier::Operator::Drop });
 
             selfSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(dropOperatorName);
         });

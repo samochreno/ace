@@ -27,7 +27,7 @@ namespace Ace::Node::Expression
 
         StructConstruction(
             Scope* const t_scope,
-            const Name::Symbol::Full& t_typeName,
+            const SymbolName& t_typeName,
             std::vector<Argument>&& t_arguments
         ) : m_Scope{ t_scope },
             m_TypeName{ t_typeName },
@@ -45,7 +45,7 @@ namespace Ace::Node::Expression
 
     private:
         Scope* m_Scope{};
-        Name::Symbol::Full m_TypeName{};
+        SymbolName m_TypeName{};
         std::vector<Argument> m_Arguments{};
     };
 }

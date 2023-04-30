@@ -111,7 +111,7 @@ namespace Ace::Symbol
         return signature;
     }
 
-    auto IBase::CreateFullyQualifiedName() const -> Name::Symbol::Full
+    auto IBase::CreateFullyQualifiedName() const ->SymbolName 
     {
         auto* const symbol = UnwrapAlias(this);
         if (symbol != this)
@@ -119,7 +119,7 @@ namespace Ace::Symbol
             return symbol->CreateFullyQualifiedName();
         }
 
-        std::vector<Name::Symbol::Section> nameSections{};
+        std::vector<SymbolNameSection> nameSections{};
 
         std::vector<Scope*> scopes{};
         for (
@@ -137,7 +137,7 @@ namespace Ace::Symbol
             back_inserter(nameSections),
             [](Scope* const t_scope)
             {
-                return Name::Symbol::Section{ t_scope->GetName() };
+                return SymbolNameSection{ t_scope->GetName() };
             }
         );
 
@@ -146,7 +146,7 @@ namespace Ace::Symbol
         if (auto* const templatableSymbol = dynamic_cast<const Symbol::ITemplatable*>(this))
         {
             const auto implTemplateArguments = templatableSymbol->CollectImplTemplateArguments();
-            std::vector<Name::Symbol::Full> implTemplateArgumentNames{};
+            std::vector<SymbolName> implTemplateArgumentNames{};
             std::transform(
                 begin(implTemplateArguments), 
                 end  (implTemplateArguments), 
@@ -160,7 +160,7 @@ namespace Ace::Symbol
             (rbegin(nameSections) + 1)->TemplateArguments = implTemplateArgumentNames;
 
             const auto templateArguments = templatableSymbol->CollectTemplateArguments();
-            std::vector<Name::Symbol::Full> templateArgumentNames{};
+            std::vector<SymbolName> templateArgumentNames{};
             std::transform(
                 begin(templateArguments), 
                 end  (templateArguments), 
@@ -174,6 +174,10 @@ namespace Ace::Symbol
             rbegin(nameSections)->TemplateArguments = templateArgumentNames;
         }
 
-        return Name::Symbol::Full{ nameSections, true };
+        return SymbolName
+        {
+            nameSections,
+            SymbolNameResolutionScope::Global,
+        };
     }
 }

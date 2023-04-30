@@ -19,7 +19,7 @@ namespace Ace::Node::Expression
     public:
         MemberAccess(
             const std::shared_ptr<const Node::Expression::IBase>& t_expression,
-            const Name::Symbol::Section& t_name
+            const SymbolNameSection& t_name
         ) : m_Expression{ t_expression },
             m_Name{ t_name }
         {
@@ -34,10 +34,10 @@ namespace Ace::Node::Expression
         auto CreateBoundExpression() const -> Expected<std::shared_ptr<const BoundNode::Expression::IBase>> final { return CreateBound(); }
 
         auto GetExpression() const -> const Node::Expression::IBase* { return m_Expression.get(); }
-        auto GetName() const -> const Name::Symbol::Section& { return m_Name; }
+        auto GetName() const -> const SymbolNameSection& { return m_Name; }
 
     private:
         std::shared_ptr<const Node::Expression::IBase> m_Expression{};
-        Name::Symbol::Section m_Name{};
+        SymbolNameSection m_Name{};
     };
 }

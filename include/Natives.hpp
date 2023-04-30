@@ -49,7 +49,7 @@ namespace Ace
     public:
         virtual ~ITypeableNative() = default;
 
-        virtual auto GetFullyQualifiedName() const -> const Name::Symbol::Full& = 0;
+        virtual auto GetFullyQualifiedName() const -> const SymbolName& = 0;
     };
 
     enum class NativeCopyabilityKind
@@ -64,7 +64,7 @@ namespace Ace
     public:
         NativeType(
             const Compilation& t_compilation,
-            Name::Symbol::Full&& t_name,
+            SymbolName&& t_name,
             std::optional<std::function<llvm::Type*()>>&& t_irTypeGetter,
             const NativeCopyabilityKind& t_copyabilityKind
         ) : m_Compilation{ t_compilation },
@@ -82,7 +82,7 @@ namespace Ace
         }
         ~NativeType() = default;
 
-        auto GetFullyQualifiedName() const -> const Name::Symbol::Full& final { return m_Name; }
+        auto GetFullyQualifiedName() const -> const SymbolName& final { return m_Name; }
 
         auto GetCompilation() const -> const Compilation& { return m_Compilation; }
 
@@ -103,7 +103,7 @@ namespace Ace
 
     private:
         const Compilation& m_Compilation;
-        Name::Symbol::Full m_Name{};
+        SymbolName m_Name{};
         std::optional<std::function<llvm::Type*()>> m_IRTypeGetter{};
         bool m_IsTriviallyCopyable{};
 
@@ -115,14 +115,14 @@ namespace Ace
     public:
         NativeTypeTemplate(
             const Compilation& t_compilation,
-            Name::Symbol::Full&& t_name
+            SymbolName&& t_name
         ) : m_Compilation{ t_compilation },
             m_Name{ std::move(t_name) }
         {
         }
         ~NativeTypeTemplate() = default;
 
-        auto GetFullyQualifiedName() const -> const Name::Symbol::Full& final { return m_Name; }
+        auto GetFullyQualifiedName() const -> const SymbolName& final { return m_Name; }
 
         auto GetCompilation() const -> const Compilation& { return m_Compilation; }
 
@@ -136,7 +136,7 @@ namespace Ace
 
     private:
         const Compilation& m_Compilation;
-        Name::Symbol::Full m_Name{};
+        SymbolName m_Name{};
 
         Symbol::Template::Type* m_Symbol{};
     };
@@ -146,7 +146,7 @@ namespace Ace
     public:
         NativeFunction(
             const Compilation& t_compilation,
-            Name::Symbol::Full&& t_name,
+            SymbolName&& t_name,
             FunctionBodyEmitter&& t_bodyEmitter
         ) : m_Compilation{ t_compilation },
             m_Name{ std::move(t_name) },
@@ -167,7 +167,7 @@ namespace Ace
 
     private:
         const Compilation& m_Compilation;
-        Name::Symbol::Full m_Name{};
+        SymbolName m_Name{};
         FunctionBodyEmitter m_BodyEmitter{};
 
         Symbol::Function* m_Symbol{};
@@ -178,7 +178,7 @@ namespace Ace
     public:
         NativeFunctionTemplate(
             const Compilation& t_compilation,
-            Name::Symbol::Full&& t_name
+            SymbolName&& t_name
         ) : m_Compilation{ t_compilation },
             m_Name{ std::move(t_name) }
         {
@@ -197,7 +197,7 @@ namespace Ace
 
     private:
         const Compilation& m_Compilation;
-        Name::Symbol::Full m_Name{};
+        SymbolName m_Name{};
 
         Symbol::Template::Function* m_Symbol{};
     };

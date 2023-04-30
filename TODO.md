@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Make `Name::IsGlobal` an enum.
 - [ ] Rename `Compilation`.
 - [ ] Strings.
 - [ ] Refactor `Scope::ResolveSymbolInScopes`.

@@ -1137,7 +1137,11 @@ namespace Ace
     ) : Int8
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Int8" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int8" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt8Ty(*t_compilation.LLVMContext);
@@ -1147,7 +1151,11 @@ namespace Ace
         Int16
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Int16" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int16" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt16Ty(*t_compilation.LLVMContext);
@@ -1157,7 +1165,11 @@ namespace Ace
         Int32
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Int32" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int32" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(*t_compilation.LLVMContext);
@@ -1167,7 +1179,11 @@ namespace Ace
         Int64
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Int64" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int64" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt64Ty(*t_compilation.LLVMContext);
@@ -1178,7 +1194,11 @@ namespace Ace
         UInt8
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "UInt8" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt8" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt8Ty(*t_compilation.LLVMContext);
@@ -1188,7 +1208,11 @@ namespace Ace
         UInt16
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "UInt16" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt16" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt16Ty(*t_compilation.LLVMContext);
@@ -1198,7 +1222,11 @@ namespace Ace
         UInt32
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "UInt32" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt32" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(*t_compilation.LLVMContext);
@@ -1208,7 +1236,11 @@ namespace Ace
         UInt64
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "UInt64" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt64" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt64Ty(*t_compilation.LLVMContext);
@@ -1219,7 +1251,11 @@ namespace Ace
         Int
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Int" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(*t_compilation.LLVMContext);
@@ -1230,7 +1266,11 @@ namespace Ace
         Float32
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Float32" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Float32" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getFloatTy(*t_compilation.LLVMContext);
@@ -1240,7 +1280,11 @@ namespace Ace
         Float64
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Float64" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Float64" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getDoubleTy(*t_compilation.LLVMContext);
@@ -1251,7 +1295,11 @@ namespace Ace
         Bool
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Bool" } }, true},
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Bool" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt1Ty(*t_compilation.LLVMContext);
@@ -1261,7 +1309,11 @@ namespace Ace
         Void
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Void" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Void" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getVoidTy(*t_compilation.LLVMContext);
@@ -1271,7 +1323,11 @@ namespace Ace
         String
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "String" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "String" } },
+                SymbolNameResolutionScope::Global,
+            },
             {},
             NativeCopyabilityKind::NonTrivial,
         },
@@ -1279,7 +1335,11 @@ namespace Ace
         Pointer
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Pointer" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Pointer" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&]() -> llvm::Type*
             {
                 return llvm::Type::getInt8PtrTy(*t_compilation.LLVMContext);
@@ -1290,23 +1350,39 @@ namespace Ace
         Reference
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "Reference" } }, true }
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Reference" } },
+                SymbolNameResolutionScope::Global,
+            }
         },
         StrongPointer
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "rc" }, { "StrongPointer" } }, true }
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "rc" }, { "StrongPointer" } },
+                SymbolNameResolutionScope::Global,
+            }
         },
         WeakPointer
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "rc" }, { "WeakPointer" } }, true }
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "rc" }, { "WeakPointer" } },
+                SymbolNameResolutionScope::Global,
+            }
         },
 
         print_int
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "print_int" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "print_int" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&](Emitter& t_emitter)
             {
                 std::string string{ "%" PRId32 "\n" };
@@ -1363,7 +1439,11 @@ namespace Ace
         print_ptr
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "print_ptr" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "print_ptr" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&](Emitter& t_emitter)
             {
                 std::string string{ "0x%" PRIXPTR "\n" };
@@ -1420,7 +1500,11 @@ namespace Ace
         alloc
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "mem" }, { "alloc" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "mem" }, { "alloc" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&](Emitter& t_emitter)
             {
                 auto* const mallocFunction = t_emitter.GetC().GetFunctions().GetMalloc();
@@ -1448,7 +1532,11 @@ namespace Ace
         dealloc
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "mem" }, { "dealloc" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "mem" }, { "dealloc" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&](Emitter& t_emitter)
             {
                 auto* const freeFunction = t_emitter.GetC().GetFunctions().GetFree();
@@ -1471,7 +1559,11 @@ namespace Ace
         copy
         {
             t_compilation,
-            Name::Symbol::Full{ std::vector<Name::Symbol::Section>{ { "ace" }, { "std" }, { "mem" }, { "copy" } }, true },
+            SymbolName
+            {
+                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "mem" }, { "copy" } },
+                SymbolNameResolutionScope::Global,
+            },
             [&](Emitter& t_emitter)
             {
                 auto* const memcpyFunction = t_emitter.GetC().GetFunctions().GetMemcpy();

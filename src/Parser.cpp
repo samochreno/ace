@@ -321,18 +321,18 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseSymbolName(Context t_context) -> Expected<ParseData<Name::Symbol::Full>>
+    auto Parser::ParseSymbolName(Context t_context) -> Expected<ParseData<SymbolName>>
     {
         auto it = t_context.Iterator;
 
-        bool isGlobal = false;
+        auto resolutionScope = SymbolNameResolutionScope::Local;
         if (it->TokenKind == Token::Kind::New(Token::Kind::ColonColon))
         {
-            isGlobal = true;
+            resolutionScope = SymbolNameResolutionScope::Global;
             ++it;
         }
         
-        std::vector<Name::Symbol::Section> sections{};
+        std::vector<SymbolNameSection> sections{};
 
         ACE_TRY(section, ParseSymbolNameSection({ it, t_context.Scope }));
         sections.push_back(std::move(section.Value));
@@ -349,16 +349,16 @@ namespace Ace::Parsing
 
         return ParseData
         {
-            Name::Symbol::Full
+            SymbolName 
             { 
                 sections,
-                isGlobal
+                resolutionScope,
             },
             Distance(t_context.Iterator, it)
         };
     }
 
-    auto Parser::ParseSymbolNameSection(Context t_context) -> Expected<ParseData<Name::Symbol::Section>>
+    auto Parser::ParseSymbolNameSection(Context t_context) -> Expected<ParseData<SymbolNameSection>>
     {
         auto it = t_context.Iterator;
 
@@ -366,7 +366,7 @@ namespace Ace::Parsing
         const std::string& name = it->String;
         ++it;
 
-        auto templateArguments = [&]() -> std::vector<Name::Symbol::Full>
+        auto templateArguments = [&]() -> std::vector<SymbolName>
         {
             auto expTemplateArguments = ParseTemplateArguments({ it, t_context.Scope });
             if (!expTemplateArguments)
@@ -378,7 +378,7 @@ namespace Ace::Parsing
 
         return ParseData
         {
-            Name::Symbol::Section
+           SymbolNameSection 
             {
                 name,
                 templateArguments
@@ -387,17 +387,17 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTypeName(Context t_context, const bool& t_doAllowReferences) -> Expected<ParseData<Name::Type>>
+    auto Parser::ParseTypeName(Context t_context, const bool& t_doAllowReferences) -> Expected<ParseData<TypeName>>
     {
         auto it = t_context.Iterator;
 
-        std::vector<Name::TypeModifier> modifiers{};
+        std::vector<TypeNameModifier> modifiers{};
 
         if (t_doAllowReferences)
         {
             if (it->TokenKind == Token::Kind::New(Token::Kind::Ampersand))
             {
-                modifiers.push_back(Name::TypeModifier::Reference);
+                modifiers.push_back(TypeNameModifier::Reference);
                 ++it;
             }
         }
@@ -406,11 +406,11 @@ namespace Ace::Parsing
         {
             if (it->TokenKind == Token::Kind::New(Token::Kind::Asterisk))
             {
-                modifiers.push_back(Name::TypeModifier::StrongPointer);
+                modifiers.push_back(TypeNameModifier::StrongPointer);
             }
             else if (it->TokenKind == Token::Kind::New(Token::Kind::Tilde))
             {
-                modifiers.push_back(Name::TypeModifier::WeakPointer);
+                modifiers.push_back(TypeNameModifier::WeakPointer);
             }
             else
             {
@@ -423,7 +423,7 @@ namespace Ace::Parsing
 
         return ParseData
         {
-            Name::Type
+            TypeName
             {
                 symbolName.Value,
                 modifiers
@@ -463,14 +463,14 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTemplateArguments(Context t_context) -> Expected<ParseData<std::vector<Name::Symbol::Full>>>
+    auto Parser::ParseTemplateArguments(Context t_context) -> Expected<ParseData<std::vector<SymbolName>>>
     {
         auto it = t_context.Iterator;
 
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::OpenBracket));
         ++it;
 
-        std::vector<Name::Symbol::Full> arguments{};
+        std::vector<SymbolName> arguments{};
         while (it->TokenKind != Token::Kind::New(Token::Kind::CloseBracket))
         {
             if (arguments.size() != 0)
@@ -641,7 +641,7 @@ namespace Ace::Parsing
         // TODO: Remove this block after impl template specialization.
         {
             const bool foundTemplatedSection = std::find_if(begin(typeName.Value.Sections), end(typeName.Value.Sections),
-            [](const Name::Symbol::Section& t_section)
+            [](const SymbolNameSection& t_section)
             {
                 return t_section.TemplateArguments.empty();
             }) == end(typeName.Value.Sections);
@@ -690,7 +690,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseImplFunction(Context t_context, const Name::Symbol::Full& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Function>>>
+    auto Parser::ParseImplFunction(Context t_context, const SymbolName& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Function>>>
     {
         auto* const scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -837,7 +837,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseImplFunctionTemplate(Context t_context, const Name::Symbol::Full& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
+    auto Parser::ParseImplFunctionTemplate(Context t_context, const SymbolName& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
     {
         auto* const scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -938,7 +938,7 @@ namespace Ace::Parsing
         // TODO: Remove this block after impl template specialization.
         {
             const bool foundTemplatedSection = std::find_if(begin(typeName.Value.Sections), end(typeName.Value.Sections) - 1,
-            [](const Name::Symbol::Section& t_section)
+            [](const SymbolNameSection& t_section)
             {
                 return t_section.TemplateArguments.empty();
             }) == end(typeName.Value.Sections);
@@ -960,7 +960,7 @@ namespace Ace::Parsing
             }));
             
             ACE_TRY_VOID(TransformExpectedVector(templateArguments,
-            [&](const Name::Symbol::Full& t_argument) -> Expected<void>
+            [&](const SymbolName& t_argument) -> Expected<void>
             {
                 ACE_TRY_ASSERT(t_argument.Sections.size() == 1);
                 ACE_TRY_ASSERT(t_argument.Sections.back().TemplateArguments.empty());
@@ -1011,7 +1011,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTemplatedImplFunction(Context t_context, const Name::Symbol::Full& t_selfTypeName, const std::vector<std::string>& t_implTemplateParameters) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
+    auto Parser::ParseTemplatedImplFunction(Context t_context, const SymbolName& t_selfTypeName, const std::vector<std::string>& t_implTemplateParameters) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
     {
         auto* const scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;

@@ -71,20 +71,32 @@ namespace Ace::Node::Expression
             ACE_TRY_ASSERT(symbolFoundIt != end(variables));
             auto* const variableSymbol = *symbolFoundIt;
 
-            ACE_TRY(boundValue, [&]() -> Expected<std::shared_ptr<const BoundNode::Expression::IBase>>
+            ACE_TRY(boundValue, ([&]() -> Expected<std::shared_ptr<const BoundNode::Expression::IBase>>
             {
                 if (t_argument.OptValue.has_value())
+                {
                     return t_argument.OptValue.value()->CreateBoundExpression();
+                }
+
+                const SymbolName symbolName
+                {
+                    SymbolNameSection{ t_argument.Name },
+                    SymbolNameResolutionScope::Local,
+                };
 
                 return std::make_unique<const Node::Expression::LiteralSymbol>(
                     m_Scope,
-                    Name::Symbol::Full{ Name::Symbol::Section{ t_argument.Name }, false }
-                    )->CreateBoundExpression();
-            }());
+                    symbolName
+                )->CreateBoundExpression();
+            }()));
 
             ACE_TRY_ASSERT(IsSymbolVisibleFromScope(variableSymbol, m_Scope));
 
-            return BoundNode::Expression::StructConstruction::Argument{ variableSymbol, boundValue };
+            return BoundNode::Expression::StructConstruction::Argument
+            {
+                variableSymbol,
+                boundValue
+            };
         }));
 
         return std::make_shared<const BoundNode::Expression::StructConstruction>(

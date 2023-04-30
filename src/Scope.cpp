@@ -97,11 +97,11 @@ namespace Ace
 
     static auto ResolveTemplateArguments(
         const Scope* const t_scope,
-        const std::vector<Name::Symbol::Full>& t_templateArgumentNames
+        const std::vector<SymbolName>& t_templateArgumentNames
     ) -> Expected<std::vector<Symbol::Type::IBase*>>
     {
         ACE_TRY(templateArguments, TransformExpectedVector(t_templateArgumentNames,
-        [&](const Name::Symbol::Full& t_typeName)
+        [&](const SymbolName& t_typeName)
         {
             return t_scope->ResolveStaticSymbol<Symbol::Type::IBase>(t_typeName);
         }));
@@ -557,8 +557,8 @@ namespace Ace
 
     auto Scope::ResolveSymbolInScopes(
         const Scope* const t_resolvingFromScope,
-        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
-        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
+        const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
+        const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
         const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
         const std::vector<const Scope*> t_scopes,
         const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
@@ -584,8 +584,8 @@ namespace Ace
 
     auto Scope::ResolveSymbolInScopes(
         const Scope* const t_resolvingFromScope,
-        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsBegin,
-        const std::vector<Name::Symbol::Section>::const_iterator& t_nameSectionsEnd,
+        const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
+        const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
         const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
         const std::vector<const Scope*> t_scopes,
         const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
@@ -851,7 +851,7 @@ namespace Ace
     }
 
     auto Scope::GetStaticSymbolResolutionStartScope(
-        const Name::Symbol::Full& t_name
+        const SymbolName& t_name
     ) const -> Expected<const Scope*>
     {
         if (t_name.IsGlobal)

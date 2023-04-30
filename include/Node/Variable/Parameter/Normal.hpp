@@ -25,7 +25,7 @@ namespace Ace::Node::Variable::Parameter
         Normal(
             Scope* const t_scope,
             const std::string& t_name,
-            const Name::Type& t_typeName,
+            const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
             const size_t& t_index
         ) : m_Scope{ t_scope },
@@ -52,7 +52,7 @@ namespace Ace::Node::Variable::Parameter
     private:
         Scope* m_Scope{};
         std::string m_Name{};
-        Name::Type m_TypeName{};
+        TypeName m_TypeName{};
         std::vector<std::shared_ptr<const Node::Attribute>> m_Attributes{};
         size_t m_Index{};
     };

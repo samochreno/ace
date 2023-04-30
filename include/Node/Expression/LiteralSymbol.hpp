@@ -19,7 +19,7 @@ namespace Ace::Node::Expression
     public:
         LiteralSymbol(
             Scope* const t_scope,
-            const Name::Symbol::Full& t_name
+            const SymbolName& t_name
         ) : m_Scope{ t_scope },
             m_Name{ t_name }
         {
@@ -33,10 +33,10 @@ namespace Ace::Node::Expression
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::VariableReference::Static>> final;
         auto CreateBoundExpression() const -> Expected<std::shared_ptr<const BoundNode::Expression::IBase>> final { return CreateBound(); }
 
-        auto GetName() const -> const Name::Symbol::Full& { return m_Name; }
+        auto GetName() const -> const SymbolName& { return m_Name; }
 
     private:
         Scope* m_Scope{};
-        Name::Symbol::Full m_Name;
+        SymbolName m_Name;
     };
 }

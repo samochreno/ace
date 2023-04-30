@@ -471,7 +471,7 @@ namespace Ace
 
         auto operatorName = t_dropData.TypeSymbol->CreateFullyQualifiedName();
         operatorName.Sections.push_back(
-            Name::Symbol::Section{ SpecialIdentifier::Operator::Drop }
+            SymbolNameSection{ SpecialIdentifier::Operator::Drop }
         );
 
         const auto glueSymbol = t_dropData.TypeSymbol->GetDropGlue().value();
