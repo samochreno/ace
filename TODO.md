@@ -2,9 +2,7 @@
 
 ## 💥 High Priority
 
-- [ ] Remove unecessary scopes from `Node`s, for example `m_Scope` is redundant if `m_SelfScope` is present.
 - [ ] Make `Name::IsGlobal` an enum.
-- [ ] Make `Scope::FindModule` private.
 - [ ] Rename `Compilation`.
 - [ ] Strings.
 - [ ] Refactor `Scope::ResolveSymbolInScopes`.
