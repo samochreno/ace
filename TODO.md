@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Rename `Compilation`.
 - [ ] Strings.
 - [ ] Refactor `Scope::ResolveSymbolInScopes`.
 - [ ] Add template argument deduction.
