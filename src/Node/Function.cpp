@@ -46,8 +46,8 @@ namespace Ace::Node
         auto* const selfScope = t_scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const Node::Attribute>> clonedAttributes{};
-        std::transform(begin(m_Attributes), end(m_Attributes), back_inserter(clonedAttributes), [&]
-        (const std::shared_ptr<const Node::Attribute>& t_attribute)
+        std::transform(begin(m_Attributes), end(m_Attributes), back_inserter(clonedAttributes),
+        [&](const std::shared_ptr<const Node::Attribute>& t_attribute)
         {
             return t_attribute->CloneInScope(t_scope);
         });
@@ -61,8 +61,8 @@ namespace Ace::Node
         }();
 
         std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>> clonedParameters{};
-        std::transform(begin(m_Parameters), end(m_Parameters), back_inserter(clonedParameters), [&]
-        (const std::shared_ptr<const Node::Variable::Parameter::Normal>& t_parameter)
+        std::transform(begin(m_Parameters), end(m_Parameters), back_inserter(clonedParameters),
+        [&](const std::shared_ptr<const Node::Variable::Parameter::Normal>& t_parameter)
         {
             return t_parameter->CloneInScope(selfScope);
         });
@@ -89,31 +89,33 @@ namespace Ace::Node
 
     auto Function::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Function>>
     {
-        ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes, []
-        (const std::shared_ptr<const Node::Attribute>& t_attribute)
+        ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
+        [](const std::shared_ptr<const Node::Attribute>& t_attribute)
         {
             return t_attribute->CreateBound();
         }));
 
-        ACE_TRY(boundOptSelf, TransformExpectedOptional(m_OptSelf, []
-        (const std::shared_ptr<const Node::Variable::Parameter::Self>& t_parameter)
+        ACE_TRY(boundOptSelf, TransformExpectedOptional(m_OptSelf,
+        [](const std::shared_ptr<const Node::Variable::Parameter::Self>& t_parameter)
         {
             return t_parameter->CreateBound();
         }));
 
-        ACE_TRY(boundParameters, TransformExpectedVector(m_Parameters, []
-        (const std::shared_ptr<const Node::Variable::Parameter::Normal>& t_parameter)
+        ACE_TRY(boundParameters, TransformExpectedVector(m_Parameters,
+        [](const std::shared_ptr<const Node::Variable::Parameter::Normal>& t_parameter)
         {
             return t_parameter->CreateBound();
         }));
 
-        ACE_TRY(boundOptBody, TransformExpectedOptional(m_OptBody, []
-        (const std::shared_ptr<const Node::Statement::Block>& t_body)
+        ACE_TRY(boundOptBody, TransformExpectedOptional(m_OptBody,
+        [](const std::shared_ptr<const Node::Statement::Block>& t_body)
         {
             return t_body->CreateBound();
         }));
 
-        ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName.ToSymbolName()));
+        ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<Symbol::Type::IBase>(
+            m_TypeName.ToSymbolName(GetCompilation())
+        ));
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<Symbol::Function>(
             m_Name,
@@ -132,7 +134,9 @@ namespace Ace::Node
 
     auto Function::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
     {
-        ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName.ToSymbolName()));
+        ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<Symbol::Type::IBase>(
+            m_TypeName.ToSymbolName(GetCompilation())
+        ));
 
         return std::unique_ptr<Symbol::IBase>
         {

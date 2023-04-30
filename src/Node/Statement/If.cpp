@@ -25,15 +25,15 @@ namespace Ace::Node::Statement
     auto If::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::If>
     {
         std::vector<std::shared_ptr<const Node::Expression::IBase>> clonedConditions{};
-        std::transform(begin(m_Conditions), end(m_Conditions), back_inserter(clonedConditions), [&]
-        (const std::shared_ptr<const Node::Expression::IBase>& t_condition)
+        std::transform(begin(m_Conditions), end(m_Conditions), back_inserter(clonedConditions),
+        [&](const std::shared_ptr<const Node::Expression::IBase>& t_condition)
         {
             return t_condition->CloneInScopeExpression(t_scope);
         });
 
         std::vector<std::shared_ptr<const Node::Statement::Block>> clonedBodies{};
-        std::transform(begin(m_Bodies), end(m_Bodies), back_inserter(clonedBodies), [&]
-        (const std::shared_ptr<const Node::Statement::Block>& t_body)
+        std::transform(begin(m_Bodies), end(m_Bodies), back_inserter(clonedBodies),
+        [&](const std::shared_ptr<const Node::Statement::Block>& t_body)
         {
             return t_body->CloneInScope(t_scope);
         });
@@ -47,14 +47,14 @@ namespace Ace::Node::Statement
 
     auto If::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::If>>
     {
-        ACE_TRY(boundConditions, TransformExpectedVector(m_Conditions, []
-        (const std::shared_ptr<const Node::Expression::IBase>& t_condition)
+        ACE_TRY(boundConditions, TransformExpectedVector(m_Conditions,
+        [](const std::shared_ptr<const Node::Expression::IBase>& t_condition)
         {
             return t_condition->CreateBoundExpression();
         }));
 
-        ACE_TRY(boundBodies, TransformExpectedVector(m_Bodies, []
-        (const std::shared_ptr<const Node::Statement::Block>& t_body)
+        ACE_TRY(boundBodies, TransformExpectedVector(m_Bodies,
+        [](const std::shared_ptr<const Node::Statement::Block>& t_body)
         {
             return t_body->CreateBound();
         }));

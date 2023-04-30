@@ -11,7 +11,6 @@
 #include "Emitter.hpp"
 #include "ExpressionEmitResult.hpp"
 #include "Utility.hpp"
-#include "NativeSymbol.hpp"
 
 namespace Ace::BoundNode::Expression
 {
@@ -39,8 +38,8 @@ namespace Ace::BoundNode::Expression
             if (m_Kind & LiteralKind::NumberMask)
             {
                 std::string numberString{};
-                (void)std::find_if_not(begin(m_String), end(m_String), [&]
-                (const char& t_char)
+                (void)std::find_if_not(begin(m_String), end(m_String),
+                [&](const char& t_char)
                 {
                     if (IsInAlphabet(t_char))
                         return false;
@@ -96,25 +95,27 @@ namespace Ace::BoundNode::Expression
 
     auto Literal::GetTypeInfo() const -> TypeInfo
     {
+        auto& natives = GetCompilation().Natives;
+
         auto* const typeSymbol = [&]() -> Symbol::Type::IBase*
         {
-            if      (m_Kind == LiteralKind::Int8)       return NativeSymbol::Int8.GetSymbol();
-            else if (m_Kind == LiteralKind::Int16)      return NativeSymbol::Int16.GetSymbol();
-            else if (m_Kind == LiteralKind::Int32)      return NativeSymbol::Int32.GetSymbol();
-            else if (m_Kind == LiteralKind::Int64)      return NativeSymbol::Int64.GetSymbol();
+            if      (m_Kind == LiteralKind::Int8)       return natives->Int8.GetSymbol();
+            else if (m_Kind == LiteralKind::Int16)      return natives->Int16.GetSymbol();
+            else if (m_Kind == LiteralKind::Int32)      return natives->Int32.GetSymbol();
+            else if (m_Kind == LiteralKind::Int64)      return natives->Int64.GetSymbol();
 
-            else if (m_Kind == LiteralKind::UInt8)      return NativeSymbol::UInt8.GetSymbol();
-            else if (m_Kind == LiteralKind::UInt16)     return NativeSymbol::UInt16.GetSymbol();
-            else if (m_Kind == LiteralKind::UInt32)     return NativeSymbol::UInt32.GetSymbol();
-            else if (m_Kind == LiteralKind::UInt64)     return NativeSymbol::UInt64.GetSymbol();
+            else if (m_Kind == LiteralKind::UInt8)      return natives->UInt8.GetSymbol();
+            else if (m_Kind == LiteralKind::UInt16)     return natives->UInt16.GetSymbol();
+            else if (m_Kind == LiteralKind::UInt32)     return natives->UInt32.GetSymbol();
+            else if (m_Kind == LiteralKind::UInt64)     return natives->UInt64.GetSymbol();
 
-            else if (m_Kind == LiteralKind::Int)        return NativeSymbol::Int.GetSymbol();
+            else if (m_Kind == LiteralKind::Int)        return natives->Int.GetSymbol();
 
-            else if (m_Kind == LiteralKind::Float32)    return NativeSymbol::Float32.GetSymbol();
-            else if (m_Kind == LiteralKind::Float64)    return NativeSymbol::Float64.GetSymbol();
+            else if (m_Kind == LiteralKind::Float32)    return natives->Float32.GetSymbol();
+            else if (m_Kind == LiteralKind::Float64)    return natives->Float64.GetSymbol();
             
-            else if (m_Kind == LiteralKind::String)     return NativeSymbol::String.GetSymbol();
-            else if (m_Kind & LiteralKind::BoolMask)    return NativeSymbol::Bool.GetSymbol();
+            else if (m_Kind == LiteralKind::String)     return natives->String.GetSymbol();
+            else if (m_Kind & LiteralKind::BoolMask)    return natives->Bool.GetSymbol();
 
             ACE_UNREACHABLE();
         }();

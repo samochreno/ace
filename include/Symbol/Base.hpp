@@ -4,15 +4,12 @@
 #include <vector>
 #include <string>
 
+#include "Compilation.hpp"
+#include "Scope.hpp"
 #include "SymbolKind.hpp"
 #include "SymbolCategory.hpp"
 #include "AccessModifier.hpp"
 #include "Name.hpp"
-
-namespace Ace
-{
-    class Scope;
-}
 
 namespace Ace::Symbol
 {
@@ -21,6 +18,7 @@ namespace Ace::Symbol
     public:
         virtual ~IBase() = default;
 
+        virtual auto GetCompilation() const -> const Compilation& { return GetScope()->GetCompilation(); }
         virtual auto GetScope() const -> Scope* = 0;
         virtual auto GetName() const -> const std::string& = 0;
         virtual auto GetSymbolKind() const -> SymbolKind = 0;

@@ -9,16 +9,15 @@
 #include <unordered_map>
 #include <tuple>
 
-#include "Token.hpp"
 #include "Error.hpp"
-#include "Symbol/Base.hpp"
-#include "Symbol/SelfScoped.hpp"
-#include "SymbolCreatable.hpp"
-#include "SpecialIdentifier.hpp"
 #include "Name.hpp"
+#include "SymbolCategory.hpp"
 
 namespace Ace::Symbol
 {
+    class IBase;
+    class ISelfScoped;
+
     class Module;
     class TemplatedImpl;
 
@@ -35,12 +34,25 @@ namespace Ace::Symbol
 
 namespace Ace
 {
-    auto IsSymbolVisibleFromScope(Symbol::IBase* const t_symbol, const Scope* const t_scope) -> bool;
+    class Scope;
+    class ISymbolCreatable;
+    class Compilation;
+
+    auto IsSymbolVisibleFromScope(
+        Symbol::IBase* const t_symbol,
+        const Scope* const t_scope
+    ) -> bool;
 
     template<typename TSymbol>
     auto IsCorrectSymbolType(const Symbol::IBase* const t_symbol) -> bool
     {
         return dynamic_cast<const TSymbol*>(t_symbol) != nullptr;
+    }
+
+    template<typename TSymbol>
+    static constexpr auto IsTemplate() -> bool
+    {
+        return std::is_base_of_v<Symbol::Template::IBase, TSymbol>;
     }
 
     class Scope
@@ -49,22 +61,24 @@ namespace Ace
 #ifndef NDEBUG
         auto GetDebugSymbolMap() const -> std::vector<std::string>;
 #endif
-
-        ~Scope() = default;
+        Scope(const Compilation& t_compilation);
+        ~Scope();
         
-        static auto GetRoot() -> Scope*;
-
+        auto GetCompilation() const -> const Compilation& { return m_Compilation; }
         auto GetNestLevel() const -> size_t { return m_NestLevel; }
         auto GetParent() const -> std::optional<Scope*> { return m_OptParent; }
         auto GetName() const -> const std::string& { return m_Name; }
-        
         auto FindModule() const -> std::optional<Symbol::Module*>;
 
-        auto GetOrCreateChild(const std::optional<std::string>& t_optName) -> Scope*;
+        auto GetOrCreateChild(
+            const std::optional<std::string>& t_optName
+        ) -> Scope*;
         auto HasChild(const Scope* const t_child) const -> bool;
 
         template<typename TSymbol>
-        static auto DefineSymbol(std::unique_ptr<TSymbol>&& t_symbol) -> Expected<TSymbol*>
+        static auto DefineSymbol(
+            std::unique_ptr<TSymbol>&& t_symbol
+        ) -> Expected<TSymbol*>
         {
             auto* const symbol = t_symbol.get();
             auto* const scope = symbol->GetScope();
@@ -72,57 +86,37 @@ namespace Ace
             scope->m_SymbolMap[symbol->GetName()].push_back(std::move(t_symbol));
             return symbol;
         }
-        static auto DefineSymbol(const ISymbolCreatable* const t_creatable) -> Expected<Symbol::IBase*>
-        {
-            auto* const scope = t_creatable->GetSymbolScope();
+        static auto DefineSymbol(
+            const ISymbolCreatable* const t_creatable
+        ) -> Expected<Symbol::IBase*>;
 
-            if (auto partiallyCreatable = dynamic_cast<const IPartiallySymbolCreatable*>(t_creatable))
-            {
-                const auto optDefinedSymbol = scope->GetDefinedSymbol(
-                    partiallyCreatable->GetName(),
-                    {},
-                    {}
-                );
-
-                if (optDefinedSymbol.has_value())
-                {
-                    ACE_TRY_VOID(partiallyCreatable->ContinueCreatingSymbol(
-                        optDefinedSymbol.value()
-                    ));
-
-                    return optDefinedSymbol.value();
-                }
-            }
-
-            ACE_TRY(symbol, t_creatable->CreateSymbol());
-            return DefineSymbol(std::move(symbol));
-        }
-
-        auto DefineAssociation(Scope* const t_association) -> void
-        {
-            m_Associations.insert(t_association);
-        }
+        auto DefineAssociation(Scope* const t_association) -> void;
 
         template<typename TSymbol>
-        static auto DoInstantiateTemplate() -> bool
+        auto ResolveStaticSymbol(
+            const std::string& t_name
+        ) const -> Expected<TSymbol*>
         {
-            return !std::is_base_of_v<Symbol::Template::IBase, TSymbol>;
-        }
-
-        template<typename TSymbol>
-        auto ResolveStaticSymbol(const std::string& t_name) const -> Expected<TSymbol*>
-        {
-            return ResolveStaticSymbol<TSymbol>(Name::Symbol::Full{ Name::Symbol::Section{ t_name }, false });
+            return ResolveStaticSymbol<TSymbol>(Name::Symbol::Full{ 
+                Name::Symbol::Section{ t_name },
+                false 
+            });
         }
         template<typename TSymbol>
-        auto ResolveStaticSymbol(const Name::Symbol::Full& t_name) const -> Expected<TSymbol*>
+        auto ResolveStaticSymbol(
+            const Name::Symbol::Full& t_name
+        ) const -> Expected<TSymbol*>
         {
             ACE_TRY(startScope, GetStaticSymbolResolutionStartScope(t_name));
 
             std::vector<const Scope*> startScopes{};
 
             startScopes.push_back(startScope);
-            startScopes.insert(end(startScopes), begin(startScope->m_Associations), end(startScope->m_Associations));
+            startScopes.insert(
+                end(startScopes), 
+                begin(startScope->m_Associations), 
+                end  (startScope->m_Associations)
+            );
 
             ACE_TRY(symbol, ResolveSymbolInScopes(
                 this,
@@ -131,10 +125,12 @@ namespace Ace
                 IsCorrectSymbolType<TSymbol>,
                 startScopes,
                 GetStaticSymbolResolutionImplTemplateArguments(this),
-                DoInstantiateTemplate<TSymbol>()
+                IsTemplate<TSymbol>()
             ));
 
-            ACE_TRY_ASSERT(symbol->GetSymbolCategory() == SymbolCategory::Static);
+            ACE_TRY_ASSERT(
+                symbol->GetSymbolCategory() == SymbolCategory::Static
+            );
 
             auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
             ACE_TRY_ASSERT(castedSymbol);
@@ -159,10 +155,12 @@ namespace Ace
                 IsCorrectSymbolType<TSymbol>,
                 scopes,
                 CollectInstanceSymbolResolutionImplTemplateArguments(t_selfType),
-                DoInstantiateTemplate<TSymbol>()
+                IsTemplate<TSymbol>()
             ));
 
-            ACE_TRY_ASSERT(symbol->GetSymbolCategory() == SymbolCategory::Instance);
+            ACE_TRY_ASSERT(
+                symbol->GetSymbolCategory() == SymbolCategory::Instance
+            );
 
             auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
             ACE_TRY_ASSERT(castedSymbol);
@@ -197,7 +195,7 @@ namespace Ace
                 { this },
                 t_implTemplateArguments,
                 t_templateArguments,
-                DoInstantiateTemplate<TSymbol>()
+                IsTemplate<TSymbol>()
             ));
 
             auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
@@ -211,16 +209,19 @@ namespace Ace
         {
             std::vector<TSymbol*> symbols{};
 
-            std::for_each(begin(m_SymbolMap), end(m_SymbolMap), [&]
-            (const std::pair<const std::string&, const std::vector<std::unique_ptr<Symbol::IBase>>&>& t_pair)
+            std::for_each(begin(m_SymbolMap), end(m_SymbolMap),
+            [&](const std::pair<const std::string&, const std::vector<std::unique_ptr<Symbol::IBase>>&>& t_pair)
             {
-                std::for_each(begin(t_pair.second), end(t_pair.second), [&]
-                (const std::unique_ptr<Symbol::IBase>& t_symbol)
+                std::for_each(begin(t_pair.second), end(t_pair.second),
+                [&](const std::unique_ptr<Symbol::IBase>& t_symbol)
                 {
-                    if (auto* const symbol = dynamic_cast<TSymbol*>(t_symbol.get()))
-                    {
-                        symbols.push_back(symbol);
-                    }
+                    auto* const symbol = dynamic_cast<TSymbol*>(
+                        t_symbol.get()
+                    );
+                    if (!symbol)
+                        return;
+
+                    symbols.push_back(symbol);
                 });
             });
 
@@ -231,8 +232,8 @@ namespace Ace
         {
             auto symbols = CollectDefinedSymbols<TSymbol>();
 
-            std::for_each(begin(m_Children), end(m_Children), [&]
-            (const std::unique_ptr<Scope>& t_child)
+            std::for_each(begin(m_Children), end(m_Children),
+            [&](const std::unique_ptr<Scope>& t_child)
             {
                 auto childSymbols = t_child->CollectDefinedSymbolsRecursive<TSymbol>();
                 symbols.insert(
@@ -266,8 +267,9 @@ namespace Ace
 
     private:
         Scope(
+            const Compilation& t_compilation,
             const std::optional<std::string>& t_optName,
-            std::optional<Scope*> const t_optParent
+            const std::optional<Scope*>& t_optParent
         );
 
         auto AddChild(const std::optional<std::string>& t_optName) -> Scope*;
@@ -286,7 +288,7 @@ namespace Ace
             const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
             const std::vector<const Scope*> t_scopes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
-            const bool& t_doInstantiateTemplate
+            const bool& t_isSymbolTemplate
         ) -> Expected<Symbol::IBase*>;
         static auto ResolveSymbolInScopes(
             const Scope* const t_resolvingFromScope,
@@ -296,7 +298,7 @@ namespace Ace
             const std::vector<const Scope*> t_scopes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
             const std::vector<Symbol::Type::IBase*>& t_templateArguments,
-            const bool& t_doInstantiateTemplate
+            const bool& t_isSymbolTemplate
         ) -> Expected<Symbol::IBase*>;
 
         static auto ResolveTemplateInstance(
@@ -323,8 +325,7 @@ namespace Ace
             const Scope* const t_startScope
         ) -> std::vector<Symbol::Type::IBase*>;
 
-        inline static std::unique_ptr<Scope> m_Root{};
-
+        const Compilation& m_Compilation;
         size_t m_NestLevel{};
         std::string m_Name{};
         std::optional<Scope*> m_OptParent{};

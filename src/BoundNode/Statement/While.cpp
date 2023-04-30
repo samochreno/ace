@@ -15,7 +15,6 @@
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
-#include "NativeSymbol.hpp"
 #include "ValueKind.hpp"
 
 namespace Ace::BoundNode::Statement
@@ -32,10 +31,16 @@ namespace Ace::BoundNode::Statement
 
     auto While::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::While>>>
     {
+        const TypeInfo typeInfo
+        {
+            GetCompilation().Natives->Bool.GetSymbol(),
+            ValueKind::R,
+        };
+
         ACE_TRY(mchConvertedAndCheckedCondition, CreateImplicitlyConvertedAndTypeChecked(
             m_Condition,
-            TypeInfo{ NativeSymbol::Bool.GetSymbol(), ValueKind::R }
-            ));
+            typeInfo
+        ));
 
         ACE_TRY(mchCheckedBody, m_Body->GetOrCreateTypeChecked({ t_context.ParentFunctionTypeSymbol }));
 

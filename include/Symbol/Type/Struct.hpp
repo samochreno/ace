@@ -44,8 +44,12 @@ namespace Ace::Symbol::Type
         auto SetAsTriviallyDroppable() -> void final { m_IsTriviallyDroppable = true; }
         auto IsTriviallyDroppable() const -> bool final { return m_IsTriviallyDroppable; }
 
-        auto CreateCopyGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>> final;
-        auto CreateDropGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>> final;
+        auto CreateCopyGlueBody(
+            Symbol::Function* const t_glueSymbol
+        ) -> std::shared_ptr<const IEmittable<void>> final;
+        auto CreateDropGlueBody(
+            Symbol::Function* const t_glueSymbol
+        ) -> std::shared_ptr<const IEmittable<void>> final;
 
         auto BindCopyGlue(Symbol::Function* const t_glue) -> void final;
         auto GetCopyGlue() const -> std::optional<Symbol::Function*> final;

@@ -37,8 +37,8 @@ namespace Ace::Symbol
         }
 
         auto normalParameters = DynamicCastFilter<Symbol::Variable::Parameter::Normal*>(definedParameters);
-        std::sort(begin(normalParameters), end(normalParameters), []
-        (
+        std::sort(begin(normalParameters), end(normalParameters),
+        [](
             const Symbol::Variable::Parameter::Normal* const t_lhs,
             const Symbol::Variable::Parameter::Normal* const t_rhs
             )
@@ -54,8 +54,8 @@ namespace Ace::Symbol
     {
         auto normalParameters = m_SelfScope->CollectDefinedSymbols<Symbol::Variable::Parameter::Normal>();
 
-        std::sort(begin(normalParameters), end(normalParameters), []
-        (
+        std::sort(begin(normalParameters), end(normalParameters),
+        [](
             const Symbol::Variable::Parameter::Normal* const t_lhs, 
             const Symbol::Variable::Parameter::Normal* const t_rhs
             )
@@ -71,8 +71,8 @@ namespace Ace::Symbol
         auto parameters = GetParameters();
 
         std::vector<TypeInfo> typeInfos{};
-        std::transform(begin(parameters), end(parameters), back_inserter(typeInfos), []
-        (const Symbol::Variable::Parameter::Normal* const t_parameter)
+        std::transform(begin(parameters), end(parameters), back_inserter(typeInfos),
+        [](const Symbol::Variable::Parameter::Normal* const t_parameter)
         {
             return TypeInfo{ t_parameter->GetType(), ValueKind::R };
         });

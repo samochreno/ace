@@ -45,8 +45,8 @@ namespace Ace::Node::Statement
     {
         auto* selfSymbol = m_Scope->ExclusiveResolveSymbol<Symbol::Variable::Local>(m_Name).Unwrap();
 
-        ACE_TRY(boundOptAssignedExpression, TransformExpectedOptional(m_OptAssignedExpression, []
-        (const std::shared_ptr<const Node::Expression::IBase>& t_expression)
+        ACE_TRY(boundOptAssignedExpression, TransformExpectedOptional(m_OptAssignedExpression,
+        [](const std::shared_ptr<const Node::Expression::IBase>& t_expression)
         {
             return t_expression->CreateBoundExpression();
         }));
@@ -59,7 +59,9 @@ namespace Ace::Node::Statement
 
     auto Variable::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
     {
-        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName.ToSymbolName()));
+        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(
+            m_TypeName.ToSymbolName(GetCompilation())
+        ));
         return std::unique_ptr<Symbol::IBase>
         {
             std::make_unique<Symbol::Variable::Local>(

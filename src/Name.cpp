@@ -5,7 +5,7 @@
 
 #include "Asserts.hpp"
 #include "SpecialIdentifier.hpp"
-#include "NativeSymbol.hpp"
+#include "Compilation.hpp"
 
 namespace Ace::Name
 {
@@ -16,14 +16,18 @@ namespace Ace::Name
         {
         }
 
-        Full::Full(const Section& t_section, const bool& t_isGlobal)
-            : Sections{}, IsGlobal{ t_isGlobal }
+        Full::Full(
+            const Section& t_section,
+            const bool& t_isGlobal
+        ) : Sections{}, IsGlobal{ t_isGlobal }
         {
             Sections.push_back(t_section);
         }
 
-        Full::Full(const std::vector<Section>& t_sections, const bool& t_isGlobal)
-            : Sections{ t_sections }, IsGlobal{ t_isGlobal }
+        Full::Full(
+            const std::vector<Section>& t_sections, 
+            const bool& t_isGlobal
+        ) : Sections{ t_sections }, IsGlobal{ t_isGlobal }
         {
         }
 
@@ -41,8 +45,10 @@ namespace Ace::Name
         {
         }
 
-        Section::Section(const std::string& t_name, const std::vector<Name::Symbol::Full>& t_templateArguments)
-            : Name{ t_name }, TemplateArguments{ t_templateArguments }
+        Section::Section(
+            const std::string& t_name,
+            const std::vector<Name::Symbol::Full>& t_templateArguments
+        ) : Name{ t_name }, TemplateArguments{ t_templateArguments }
         {
         }
 
@@ -68,30 +74,40 @@ namespace Ace::Name
     {
     }
 
-    static auto GetModifierFullyQualifiedName(const TypeModifier& t_modifier) -> const Name::Symbol::Full&
+    static auto GetModifierFullyQualifiedName(
+        const Compilation& t_compilation,
+        const TypeModifier& t_modifier
+    ) -> const Name::Symbol::Full&
     {
+        const auto& natives = t_compilation.Natives;
+
         switch (t_modifier)
         {
             case TypeModifier::Reference:
             {
-                return NativeSymbol::Reference.GetFullyQualifiedName();
+                return natives->Reference.GetFullyQualifiedName();
             }
 
             case TypeModifier::StrongPointer:
             {
-                return NativeSymbol::StrongPointer.GetFullyQualifiedName();
+                return natives->StrongPointer.GetFullyQualifiedName();
             }
 
             case TypeModifier::WeakPointer:
             {
-                return NativeSymbol::WeakPointer.GetFullyQualifiedName();
+                return natives->WeakPointer.GetFullyQualifiedName();
+            }
+
+            default:
+            {
+                ACE_UNREACHABLE();
             }
         }
-
-        ACE_UNREACHABLE();
     }
 
-    auto Type::ToSymbolName() const -> Name::Symbol::Full
+    auto Type::ToSymbolName(
+        const Compilation& t_compilation
+    ) const -> Name::Symbol::Full
     {
         if (Modifiers.empty())
         {
@@ -99,10 +115,13 @@ namespace Ace::Name
         }
 
         auto name = SymbolName;
-        std::for_each(rbegin(Modifiers), rend(Modifiers), [&]
-        (const TypeModifier& t_modifier)
+        std::for_each(rbegin(Modifiers), rend(Modifiers),
+        [&](const TypeModifier& t_modifier)
         {
-            auto modifiedName = GetModifierFullyQualifiedName(t_modifier);
+            auto modifiedName = GetModifierFullyQualifiedName(
+                t_compilation,
+                t_modifier
+            );
             modifiedName.Sections.back().TemplateArguments.push_back(name);
             name = modifiedName;
         });

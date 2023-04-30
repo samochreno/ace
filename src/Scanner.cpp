@@ -9,7 +9,7 @@
 #include "Error.hpp"
 #include "Keyword.hpp"
 #include "Utility.hpp"
-#include "NativeSymbol.hpp"
+#include "Natives.hpp"
 
 namespace Ace::Scanning
 {
@@ -23,22 +23,26 @@ namespace Ace::Scanning
         static constexpr char VerticalTab       = '\v';
     };
 
-    static auto CreateNativeTypeNameTokens(const NativeSymbol::Type& t_nativeType) -> std::vector<Token>
+    static auto CreateNativeTypeNameTokens(
+        const NativeType& t_nativeType
+    ) -> std::vector<Token>
     {
         const auto name = t_nativeType.GetFullyQualifiedName();
 
         std::vector<Token> tokens{};
 
-        if (name.IsGlobal)
-        {
-            tokens.emplace_back(Token::Kind::New(Token::Kind::ColonColon));
-        }
+        ACE_ASSERT(name.IsGlobal);
+        tokens.emplace_back(
+            Token::Kind::New(Token::Kind::ColonColon)
+        );
 
         for (size_t i = 0; i < name.Sections.size(); i++)
         {
             if (i != 0)
             {
-                tokens.emplace_back(Token::Kind::New(Token::Kind::ColonColon));
+                tokens.emplace_back(
+                    Token::Kind::New(Token::Kind::ColonColon)
+                );
             }
 
             tokens.emplace_back(name.Sections.at(i).Name);
@@ -47,7 +51,11 @@ namespace Ace::Scanning
         return tokens;
     }
 
-    auto Scanner::ScanTokens(const Scanning::Kind& t_scanningKind, const std::string& t_string) -> Expected<std::vector<Token>>
+    auto Scanner::ScanTokens(
+        const Compilation& t_compilation,
+        const Scanning::Kind& t_scanningKind,
+        const std::string& t_string
+    ) -> Expected<std::vector<Token>>
     {
               auto it    = begin(t_string);
         const auto itEnd = end(t_string);
@@ -56,8 +64,19 @@ namespace Ace::Scanning
 
         while (it != end(t_string))
         {
-            ACE_TRY(newTokens, ScanToken({ t_scanningKind, it, itEnd }));
-            tokens.insert(end(tokens), begin(newTokens.Value), end(newTokens.Value));
+            ACE_TRY(newTokens, ScanToken({
+                t_compilation, 
+                t_scanningKind, 
+                it, 
+                itEnd 
+            }));
+
+            tokens.insert(
+                end(tokens),
+                begin(newTokens.Value),
+                end  (newTokens.Value)
+            );
+
             it += newTokens.Length;
         }
 
@@ -69,7 +88,9 @@ namespace Ace::Scanning
         return tokens;
     }
 
-    auto Scanner::ScanToken(Context t_context) -> Expected<ParseData<std::vector<Token>>>
+    auto Scanner::ScanToken(
+        Context t_context
+    ) -> Expected<ParseData<std::vector<Token>>>
     {
         switch (*t_context.Iterator)
         {
@@ -174,7 +195,9 @@ namespace Ace::Scanning
         }
     }
 
-    auto Scanner::ScanDefault(Context t_context) -> Expected<ParseData<std::vector<Token>>>
+    auto Scanner::ScanDefault(
+        Context t_context
+    ) -> Expected<ParseData<std::vector<Token>>>
     {
         auto it = t_context.Iterator;
         
@@ -547,7 +570,9 @@ namespace Ace::Scanning
         };
     }
 
-    auto Scanner::ScanIdentifier(Context t_context) -> Expected<ParseData<std::vector<Token>>>
+    auto Scanner::ScanIdentifier(
+        Context t_context
+    ) -> Expected<ParseData<std::vector<Token>>>
     {
         auto it = t_context.Iterator;
 
@@ -570,6 +595,7 @@ namespace Ace::Scanning
         const auto tokens = [&]() -> std::vector<Token>
         {
             const std::string value{ t_context.Iterator, it };
+            const auto& natives = t_context.Compilation.Natives;
 
             if      (value == Keyword::If)          return std::vector{ Token{ Token::Kind::New(Token::Kind::IfKeyword) } };
             else if (value == Keyword::Else)        return std::vector{ Token{ Token::Kind::New(Token::Kind::ElseKeyword) } };
@@ -594,21 +620,28 @@ namespace Ace::Scanning
             else if (value == Keyword::True)        return std::vector{ Token{ Token::Kind::New(Token::Kind::TrueKeyword) } };
             else if (value == Keyword::False)       return std::vector{ Token{ Token::Kind::New(Token::Kind::FalseKeyword) } };
 
-            else if (value == Keyword::Int8)        return CreateNativeTypeNameTokens(NativeSymbol::Int8);
-            else if (value == Keyword::Int16)       return CreateNativeTypeNameTokens(NativeSymbol::Int16);
-            else if (value == Keyword::Int32)       return CreateNativeTypeNameTokens(NativeSymbol::Int32);
-            else if (value == Keyword::Int64)       return CreateNativeTypeNameTokens(NativeSymbol::Int64);
-            else if (value == Keyword::UInt8)       return CreateNativeTypeNameTokens(NativeSymbol::UInt8);
-            else if (value == Keyword::UInt16)      return CreateNativeTypeNameTokens(NativeSymbol::UInt16);
-            else if (value == Keyword::UInt32)      return CreateNativeTypeNameTokens(NativeSymbol::UInt32);
-            else if (value == Keyword::UInt64)      return CreateNativeTypeNameTokens(NativeSymbol::UInt64);
-            else if (value == Keyword::Int)         return CreateNativeTypeNameTokens(NativeSymbol::Int);
-            else if (value == Keyword::Float32)     return CreateNativeTypeNameTokens(NativeSymbol::Float32);
-            else if (value == Keyword::Float64)     return CreateNativeTypeNameTokens(NativeSymbol::Float64);
-            else if (value == Keyword::Bool)        return CreateNativeTypeNameTokens(NativeSymbol::Bool);
-            else if (value == Keyword::Void)        return CreateNativeTypeNameTokens(NativeSymbol::Void);
+            else if (value == Keyword::Int8)        return CreateNativeTypeNameTokens(natives->Int8);
+            else if (value == Keyword::Int16)       return CreateNativeTypeNameTokens(natives->Int16);
+            else if (value == Keyword::Int32)       return CreateNativeTypeNameTokens(natives->Int32);
+            else if (value == Keyword::Int64)       return CreateNativeTypeNameTokens(natives->Int64);
+            else if (value == Keyword::UInt8)       return CreateNativeTypeNameTokens(natives->UInt8);
+            else if (value == Keyword::UInt16)      return CreateNativeTypeNameTokens(natives->UInt16);
+            else if (value == Keyword::UInt32)      return CreateNativeTypeNameTokens(natives->UInt32);
+            else if (value == Keyword::UInt64)      return CreateNativeTypeNameTokens(natives->UInt64);
+            else if (value == Keyword::Int)         return CreateNativeTypeNameTokens(natives->Int);
+            else if (value == Keyword::Float32)     return CreateNativeTypeNameTokens(natives->Float32);
+            else if (value == Keyword::Float64)     return CreateNativeTypeNameTokens(natives->Float64);
+            else if (value == Keyword::Bool)        return CreateNativeTypeNameTokens(natives->Bool);
+            else if (value == Keyword::Void)        return CreateNativeTypeNameTokens(natives->Void);
 
-            return std::vector{ Token{ Token::Kind::New(Token::Kind::Identifier), value } };
+            return std::vector
+            {
+                Token
+                {
+                    Token::Kind::New(Token::Kind::Identifier),
+                    value
+                }
+            };
         }();
 
         return ParseData
@@ -759,7 +792,9 @@ namespace Ace::Scanning
         ACE_TRY_UNREACHABLE();
     }
 
-    auto Scanner::ScanNumber(Context t_context) -> Expected<ParseData<std::vector<Token>>>
+    auto Scanner::ScanNumber(
+        Context t_context
+) -> Expected<ParseData<std::vector<Token>>>
     {
         auto it = t_context.Iterator;
 
@@ -808,7 +843,14 @@ namespace Ace::Scanning
 
             return ParseData
             {
-                std::vector{ Token{ Token::Kind::New(Token::Kind::Int), numberString } },
+                std::vector
+                {
+                    Token
+                    {
+                        Token::Kind::New(Token::Kind::Int),
+                        numberString
+                    } 
+                },
                 Distance(t_context.Iterator, it)
             };
         }
@@ -823,7 +865,11 @@ namespace Ace::Scanning
                 break;
         }
 
-        const std::string typeSizeString{ begin(typeString) + 1, end(typeString) };
+        const std::string typeSizeString
+        { 
+            begin(typeString) + 1,
+            end  (typeString)
+        };
 
         ACE_TRY(tokenKind, [&]() -> Expected<Token::Kind::Set>
         {
@@ -842,7 +888,9 @@ namespace Ace::Scanning
         };
     }
 
-    auto Scanner::ScanComment(Context t_context) -> Expected<ParseData<std::vector<Token>>>
+    auto Scanner::ScanComment(
+        Context t_context
+    ) -> Expected<ParseData<std::vector<Token>>>
     {
         auto it = t_context.Iterator;
         
@@ -867,7 +915,9 @@ namespace Ace::Scanning
         };
     }
 
-    auto Scanner::ScanMultilineComment(Context t_context) -> Expected<ParseData<std::vector<Token>>>
+    auto Scanner::ScanMultilineComment(
+        Context t_context
+    ) -> Expected<ParseData<std::vector<Token>>>
     {
         auto it = t_context.Iterator;
 

@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "TypeInfo.hpp"
-#include "NativeSymbol.hpp"
 #include "ValueKind.hpp"
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
@@ -58,7 +57,10 @@ namespace Ace::BoundNode::Expression
         auto* const type = llvm::PointerType::get(t_emitter.GetIRType(typeSymbol), 0);
 
         auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(type);
-        temporaries.emplace_back(allocaInst, NativeSymbol::Pointer.GetSymbol());
+        temporaries.emplace_back(
+            allocaInst, 
+            GetCompilation().Natives->Pointer.GetSymbol()
+        );
 
         t_emitter.GetBlockBuilder().Builder.CreateStore(
             expressionEmitResult.Value, 
@@ -70,6 +72,10 @@ namespace Ace::BoundNode::Expression
 
     auto AddressOf::GetTypeInfo() const -> TypeInfo
     {
-        return { NativeSymbol::Pointer.GetSymbol(), ValueKind::R };
+        return 
+        { 
+            GetCompilation().Natives->Pointer.GetSymbol(), 
+            ValueKind::R
+        };
     }
 }

@@ -24,8 +24,8 @@ namespace Ace::Node::Statement
         auto* const selfScope = t_scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const Node::Statement::IBase>> clonedStatements{};
-        std::transform(begin(m_Statements), end(m_Statements), back_inserter(clonedStatements), [&]
-        (const std::shared_ptr<const Node::Statement::IBase>& t_statement)
+        std::transform(begin(m_Statements), end(m_Statements), back_inserter(clonedStatements),
+        [&](const std::shared_ptr<const Node::Statement::IBase>& t_statement)
         {
             return t_statement->CloneInScopeStatement(selfScope);
         });
@@ -38,8 +38,8 @@ namespace Ace::Node::Statement
 
     auto Block::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Block>>
     {
-        ACE_TRY(boundStatements, TransformExpectedVector(m_Statements, []
-        (const std::shared_ptr<const Node::Statement::IBase>& t_statement)
+        ACE_TRY(boundStatements, TransformExpectedVector(m_Statements,
+        [](const std::shared_ptr<const Node::Statement::IBase>& t_statement)
         {
             return t_statement->CreateBoundStatement();
         }));

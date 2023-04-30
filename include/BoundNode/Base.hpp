@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <optional>
 
+#include "Compilation.hpp"
 #include "Scope.hpp"
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
@@ -32,6 +33,10 @@ namespace Ace::BoundNode
     public:
         virtual ~IBase() = default;
 
+        virtual auto GetCompilation() const -> const Compilation&
+        {
+            return GetScope()->GetCompilation();
+        }
         virtual auto GetScope() const -> Scope* = 0;
         virtual auto GetChildren() const -> std::vector<const BoundNode::IBase*> = 0;
     };

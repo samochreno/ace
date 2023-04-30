@@ -21,8 +21,8 @@ namespace Ace::BoundNode::Expression
         std::vector<std::shared_ptr<const BoundNode::Expression::IBase>> convertedExpressions{};
         convertedExpressions.reserve(t_expressions.size());
 
-        ACE_TRY_ASSERT(std::find_if_not(begin(t_expressions), end(t_expressions), [&]
-        (const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
+        ACE_TRY_ASSERT(std::find_if_not(begin(t_expressions), end(t_expressions),
+        [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
         {
             auto expMchConvertedExpression = t_func(t_expression, t_targetTypeInfo);
             if (!expMchConvertedExpression)

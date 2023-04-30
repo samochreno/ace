@@ -32,22 +32,29 @@
 #include "BoundNode/All.hpp"
 #include "Log.hpp"
 #include "Asserts.hpp"
-#include "NativeSymbol.hpp"
 #include "Utility.hpp"
 #include "Name.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Core.hpp"
+#include "Compilation.hpp"
 
 namespace Ace
 {
     Emitter::Emitter(
-        const std::string& t_packageName
-    ) : m_PackageName{ t_packageName },
-        m_Context{ std::make_unique<llvm::LLVMContext>() },
-        m_Module{ std::make_unique<llvm::Module>("module", *m_Context) },
+        const Compilation& t_compilation
+    ) : m_Compilation{ t_compilation },
+        m_Module
+        {
+            std::make_unique<llvm::Module>(
+                "module",
+                *t_compilation.LLVMContext
+            )
+        },
         m_LabelBlockMap{ *this }
     {
-        m_Module->setTargetTriple(llvm::sys::getProcessTriple());
+        m_Module->setTargetTriple(
+            llvm::sys::getProcessTriple()
+        );
     }
 
     Emitter::~Emitter()
@@ -56,20 +63,24 @@ namespace Ace
 
     auto Emitter::Emit() -> Result
     {
-        m_C.Initialize(*m_Context, *m_Module);
+        auto* const globalScope = m_Compilation.GlobalScope.get();
+        const auto& packageName = m_Compilation.Package.Name;
+        const auto& natives     = m_Compilation.Natives;
+
+        m_C.Initialize(*m_Compilation.LLVMContext, *m_Module);
 
         const auto& now = std::chrono::steady_clock::now;
 
         const auto timeIREmittingStart = now();
 
-        const auto symbols         = Scope::GetRoot()->CollectAllDefinedSymbolsRecursive();
+        const auto symbols         = globalScope->CollectAllDefinedSymbolsRecursive();
         const auto typeSymbols     = DynamicCastFilter<Symbol::Type::IBase*>(symbols);
         const auto structSymbols   = DynamicCastFilter<Symbol::Type::Struct*>(typeSymbols);
         const auto variableSymbols = DynamicCastFilter<Symbol::Variable::Normal::Static*>(symbols);
 
         std::vector<const BoundNode::IBase*> nodes{}; 
-        std::for_each(begin(m_ASTs), end(m_ASTs), [&]
-        (const std::shared_ptr<const BoundNode::Module>& t_ast)
+        std::for_each(begin(m_ASTs), end(m_ASTs),
+        [&](const std::shared_ptr<const BoundNode::Module>& t_ast)
         {
             const auto children = t_ast->GetChildren();
             nodes.insert(end(nodes), begin(children), end(children));
@@ -81,27 +92,36 @@ namespace Ace
 
         EmitStaticVariables(variableSymbols);
 
-        const auto functionSymbols = Scope::GetRoot()->CollectDefinedSymbolsRecursive<Symbol::Function>();
+        const auto functionSymbols = globalScope->CollectDefinedSymbolsRecursive<Symbol::Function>();
         EmitFunctions(functionSymbols);
         
         std::vector<const Symbol::Function*> mainFunctionSymbols{};
-        std::for_each(begin(functionNodes), end(functionNodes), [&]
-        (const BoundNode::Function* const t_functionNode)
+        std::for_each(begin(functionNodes), end(functionNodes),
+        [&](const BoundNode::Function* const t_functionNode)
         {
-            if (t_functionNode->GetSymbol()->GetName() == SpecialIdentifier::Main) 
-            {
-                mainFunctionSymbols.push_back(t_functionNode->GetSymbol());
-            }
+            if (
+                t_functionNode->GetSymbol()->GetName() != 
+                SpecialIdentifier::Main
+                ) 
+                return;
+
+            mainFunctionSymbols.push_back(t_functionNode->GetSymbol());
         });
 
         ACE_ASSERT(mainFunctionSymbols.size() == 1);
         auto* const mainFunctionSymbol = mainFunctionSymbols.front();
-        ACE_ASSERT(mainFunctionSymbol->GetType()->GetUnaliased() == NativeSymbol::Int.GetSymbol());
-        ACE_ASSERT(mainFunctionSymbol->GetSymbolCategory() == SymbolCategory::Static);
+        ACE_ASSERT(
+            mainFunctionSymbol->GetType()->GetUnaliased() == 
+            natives->Int.GetSymbol()
+        );
+        ACE_ASSERT(
+            mainFunctionSymbol->GetSymbolCategory() ==
+            SymbolCategory::Static
+        );
         ACE_ASSERT(mainFunctionSymbol->GetAllParameters().empty());
 
         auto* const mainType = llvm::FunctionType::get(
-            llvm::Type::getInt32Ty(*m_Context),
+            llvm::Type::getInt32Ty(*m_Compilation.LLVMContext),
             false
         );
 
@@ -113,7 +133,7 @@ namespace Ace
         );
 
         auto* const mainBlock = llvm::BasicBlock::Create(
-            *m_Context,
+            *m_Compilation.LLVMContext,
             "",
             mainFunction
         );
@@ -148,7 +168,9 @@ namespace Ace
         pb.registerLoopAnalyses(lam);
         pb.crossRegisterProxies(lam, fam, cgam, mam);
         
-        auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
+        auto mpm = pb.buildPerModuleDefaultPipeline(
+            llvm::OptimizationLevel::O3
+        );
         mpm.run(*m_Module, mam);
 
         const auto timeAnalysesEnd = now();
@@ -159,7 +181,7 @@ namespace Ace
         moduleOStream.flush();
         std::ofstream irFileStream
         { 
-            "/home/samo/repos/ace/ace/build/" + m_PackageName + ".ll" 
+            "/home/samo/repos/ace/ace/build/" + packageName + ".ll" 
         };
         ACE_ASSERT(irFileStream);
         irFileStream << moduleString;
@@ -168,8 +190,9 @@ namespace Ace
         std::error_code errorCode{};
         llvm::raw_fd_ostream bitcodeFileOStream
         { 
-            "/home/samo/repos/ace/ace/build/" + 
-            m_PackageName + ".bc", errorCode, llvm::sys::fs::OF_None 
+            "/home/samo/repos/ace/ace/build/" + packageName + ".bc",
+            errorCode, 
+            llvm::sys::fs::OF_None 
         };
         ACE_ASSERT(!errorCode);
         llvm::WriteBitcodeToFile(*m_Module, bitcodeFileOStream);
@@ -179,8 +202,8 @@ namespace Ace
 
         const std::string llc = 
             "llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj "
-            "/home/samo/repos/ace/ace/build/" + m_PackageName + 
-            ".bc -o /home/samo/repos/ace/ace/build/" + m_PackageName + ".obj";
+            "/home/samo/repos/ace/ace/build/" + packageName + 
+            ".bc -o /home/samo/repos/ace/ace/build/" + packageName + ".obj";
         system(llc.c_str());
 
         const auto timeLLCEnd = now();
@@ -188,8 +211,8 @@ namespace Ace
         const auto timeClangStart = now();
 
         const std::string clang = 
-            "clang /home/samo/repos/ace/ace/build/" + m_PackageName + 
-            ".obj -lc -lm -o /home/samo/repos/ace/ace/build/" + m_PackageName;
+            "clang /home/samo/repos/ace/ace/build/" + packageName + 
+            ".obj -lc -lm -o /home/samo/repos/ace/ace/build/" + packageName;
         system(clang.c_str());
 
         const auto timeClangEnd = now();
@@ -244,9 +267,9 @@ namespace Ace
             if (variableStatement)
             {
                 auto* const variableSymbol = variableStatement->GetSymbol();
-                ACE_ASSERT(
-                    !m_LocalVariableSymbolStatementIndexMap.contains(variableSymbol)
-                );
+                ACE_ASSERT(!m_LocalVariableSymbolStatementIndexMap.contains(
+                    variableSymbol
+                ));
                 m_LocalVariableSymbolStatementIndexMap[variableSymbol] = i;
                 // TODO: .emplace_back(...) doesn't work here. Fix.
                 m_LocalVariableSymbolStatementIndexPairs.push_back(
@@ -282,8 +305,9 @@ namespace Ace
 
             for (size_t i = 0; i < t_statements.size(); i++)
             {
+                auto* const statement = t_statements.at(i).get();
                 auto* const labelStatement =
-                    dynamic_cast<const BoundNode::Statement::Label*>(t_statements.at(i).get());
+                    dynamic_cast<const BoundNode::Statement::Label*>(statement);
 
                 if (labelStatement)
                 {
@@ -303,8 +327,8 @@ namespace Ace
                                           end  (t_statements) :
                                           begin(t_statements) + blockStartIndicies.at(i + 1);
 
-            std::for_each(beginStatementIt, endStatementIt, [&]
-            (const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
+            std::for_each(beginStatementIt, endStatementIt,
+            [&](const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
             {
                 if (t_statement.get() == beginStatementIt->get())
                 {
@@ -313,9 +337,11 @@ namespace Ace
 
                     if (labelStatement)
                     {
-                        auto blockBuilder = std::make_unique<BlockBuilder>(
-                            GetLabelBlockMap().GetOrCreateAt(labelStatement->GetLabelSymbol())
+                        auto* const block = GetLabelBlockMap().GetOrCreateAt(
+                            labelStatement->GetLabelSymbol()
                         );
+
+                        auto blockBuilder = std::make_unique<BlockBuilder>(block);
 
                         if (
                             m_BlockBuilder->Block->empty() ||
@@ -346,22 +372,31 @@ namespace Ace
                     auto blockVariableSymbols = 
                         blockEndStatement->GetSelfScope()->CollectDefinedSymbols<Symbol::Variable::Local>();
 
-                    std::sort(begin(blockVariableSymbols), end(blockVariableSymbols), [&]
-                    (const Symbol::Variable::Local* const t_lhs, const Symbol::Variable::Local* const t_rhs)
-                    {
-                        return
-                            m_LocalVariableSymbolStatementIndexMap.at(t_lhs) >
-                            m_LocalVariableSymbolStatementIndexMap.at(t_rhs);
-                    });
+                    std::sort(
+                        begin(blockVariableSymbols),
+                        end  (blockVariableSymbols),
+                        [&](
+                            const Symbol::Variable::Local* const t_lhs,
+                            const Symbol::Variable::Local* const t_rhs
+                            )
+                        {
+                            return
+                                m_LocalVariableSymbolStatementIndexMap.at(t_lhs) >
+                                m_LocalVariableSymbolStatementIndexMap.at(t_rhs);
+                        }
+                    );
 
-                    std::for_each(begin(blockVariableSymbols), end(blockVariableSymbols), [&]
-                    (Symbol::Variable::Local* const t_variableSymbol)
-                    {
-                        EmitDrop({ 
-                            m_LocalVariableMap.at(t_variableSymbol), 
-                            t_variableSymbol->GetType() 
-                        });
-                    });
+                    std::for_each(
+                        begin(blockVariableSymbols),
+                        end  (blockVariableSymbols),
+                        [&](Symbol::Variable::Local* const t_variableSymbol)
+                        {
+                            EmitDrop({ 
+                                m_LocalVariableMap.at(t_variableSymbol), 
+                                t_variableSymbol->GetType() 
+                            });
+                        }
+                    );
                 }
             });
         }
@@ -435,7 +470,9 @@ namespace Ace
             return;
 
         auto operatorName = t_dropData.TypeSymbol->CreateFullyQualifiedName();
-        operatorName.Sections.push_back(Name::Symbol::Section{ SpecialIdentifier::Operator::Drop });
+        operatorName.Sections.push_back(
+            Name::Symbol::Section{ SpecialIdentifier::Operator::Drop }
+        );
 
         const auto glueSymbol = t_dropData.TypeSymbol->GetDropGlue().value();
 
@@ -451,10 +488,12 @@ namespace Ace
         );
     }
 
-    auto Emitter::EmitDropTemporaries(const std::vector<ExpressionDropData>& t_temporaries) -> void
+    auto Emitter::EmitDropTemporaries(
+        const std::vector<ExpressionDropData>& t_temporaries
+    ) -> void
     {
-        std::for_each(rbegin(t_temporaries), rend(t_temporaries), [&]
-        (const ExpressionDropData& t_temporary)
+        std::for_each(rbegin(t_temporaries), rend(t_temporaries),
+        [&](const ExpressionDropData& t_temporary)
         {
             EmitDrop(t_temporary);
         });
@@ -469,8 +508,8 @@ namespace Ace
 
         std::for_each(
             rbegin(m_LocalVariableSymbolStatementIndexPairs), 
-            rend(m_LocalVariableSymbolStatementIndexPairs), [&]
-            (const LocalVariableSymbolStatementIndexPair& t_symbolIndexPair)
+            rend(m_LocalVariableSymbolStatementIndexPairs),
+            [&](const LocalVariableSymbolStatementIndexPair& t_symbolIndexPair)
             {
                 const auto variableStatementIndex = t_symbolIndexPair.StatementIndex;
 
@@ -481,7 +520,10 @@ namespace Ace
 
                 if (variableSymbol->GetScope() != scope)
                 {
-                    if (variableSymbol->GetScope()->GetNestLevel() >= scope->GetNestLevel())
+                    if (
+                        variableSymbol->GetScope()->GetNestLevel() >=
+                        scope->GetNestLevel()
+                        )
                         return;
 
                     scope = variableSymbol->GetScope();
@@ -500,8 +542,8 @@ namespace Ace
     auto Emitter::EmitDropArguments() -> void
     {
         const auto parameterSymbols = m_FunctionSymbol->GetAllParameters();
-        std::for_each(rbegin(parameterSymbols), rend(parameterSymbols), [&]
-        (Symbol::Variable::Parameter::IBase* const t_parameterSymbol)
+        std::for_each(rbegin(parameterSymbols), rend(parameterSymbols),
+        [&](Symbol::Variable::Parameter::IBase* const t_parameterSymbol)
         {
             EmitDrop({
                 m_LocalVariableMap.at(t_parameterSymbol),
@@ -512,43 +554,42 @@ namespace Ace
 
     auto Emitter::GetIRType(const Symbol::Type::IBase* const t_typeSymbol) const -> llvm::Type*
     {
-        if (t_typeSymbol->IsReference())
-        {
-            return llvm::PointerType::get(
-                m_TypeMap.at(t_typeSymbol->GetWithoutReference()->GetUnaliased()),
-                0
-            );
-        }
-        else
-        {
-            return m_TypeMap.at(t_typeSymbol->GetUnaliased());
-        }
+        auto* const pureTypeSymbol = t_typeSymbol->GetWithoutReference()->GetUnaliased();
+        auto* const pureType = m_TypeMap.at(pureTypeSymbol);
+
+        const bool isReference = t_typeSymbol->IsReference();
+        
+        return isReference ?
+            llvm::PointerType::get(pureType, 0) :
+            pureType;
     }
 
     auto Emitter::EmitNativeTypes() -> void
     {
-        for (auto& typeSymbolPair : NativeSymbol::GetIRTypeSymbolMap(*this))
+        for (auto& typeSymbolPair : m_Compilation.Natives->GetIRTypeSymbolMap())
         {
             m_TypeMap[typeSymbolPair.first] = typeSymbolPair.second;
         }
     }
 
-    auto Emitter::EmitStructTypes(const std::vector<Symbol::Type::Struct*>& t_structSymbols) -> void
+    auto Emitter::EmitStructTypes(
+        const std::vector<Symbol::Type::Struct*>& t_structSymbols
+    ) -> void
     {
-        std::for_each(begin(t_structSymbols), end(t_structSymbols), [&]
-        (const Symbol::Type::Struct* const t_structSymbol)
+        std::for_each(begin(t_structSymbols), end(t_structSymbols),
+        [&](const Symbol::Type::Struct* const t_structSymbol)
         {
             if (t_structSymbol->IsNativeSized())
                 return;
 
             m_TypeMap[t_structSymbol] = llvm::StructType::create(
-                *m_Context,
+                *m_Compilation.LLVMContext,
                 t_structSymbol->CreateSignature()
             );
         });
 
-        std::for_each(begin(t_structSymbols), end(t_structSymbols), [&]
-        (const Symbol::Type::Struct* const t_structSymbol)
+        std::for_each(begin(t_structSymbols), end(t_structSymbols),
+        [&](const Symbol::Type::Struct* const t_structSymbol)
         {
             if (t_structSymbol->IsNativeSized())
                 return;
@@ -556,14 +597,15 @@ namespace Ace
             std::vector<llvm::Type*> elements{};
 
             const auto variableSymbols = t_structSymbol->GetVariables();
-            std::for_each(begin(variableSymbols), end(variableSymbols), [&]
-            (const Symbol::Variable::Normal::Instance* const t_variableSymbol)
+            std::for_each(begin(variableSymbols), end(variableSymbols),
+            [&](const Symbol::Variable::Normal::Instance* const t_variableSymbol)
             {
                 auto* const type = GetIRType(t_variableSymbol->GetType());
                 elements.push_back(type);
             });
 
-            static_cast<llvm::StructType*>(m_TypeMap.at(t_structSymbol))->setBody(elements);
+            auto* const structType = m_TypeMap.at(t_structSymbol);
+            static_cast<llvm::StructType*>(structType)->setBody(elements);
         });
     }
 
@@ -571,8 +613,8 @@ namespace Ace
         const std::vector<Symbol::Variable::Normal::Static*>& t_variableSymbols
     ) -> void
     {
-        std::for_each(begin(t_variableSymbols), end(t_variableSymbols), [&]
-        (const Symbol::Variable::Normal::Static* const t_variableSymbol)
+        std::for_each(begin(t_variableSymbols), end(t_variableSymbols),
+        [&](const Symbol::Variable::Normal::Static* const t_variableSymbol)
         {
             const auto name = t_variableSymbol->CreateSignature();
             auto* const type = GetIRType(t_variableSymbol->GetType());
@@ -602,7 +644,7 @@ namespace Ace
         std::vector<FunctionSymbolBlockPair> functionsSymbolBlockPairs{};
         std::transform(
             begin(t_functionSymbols), 
-            end(t_functionSymbols), 
+            end  (t_functionSymbols), 
             back_inserter(functionsSymbolBlockPairs), 
             [&](Symbol::Function* const t_functionSymbol)
             {
@@ -610,11 +652,14 @@ namespace Ace
                 const auto parameterSymbols = t_functionSymbol->GetAllParameters();
                 std::transform(
                     begin(parameterSymbols), 
-                    end(parameterSymbols), 
+                    end  (parameterSymbols), 
                     back_inserter(parameterTypes), 
                     [&](Symbol::Variable::Parameter::IBase* const t_parameterSymbol)
                     {
-                        return llvm::PointerType::get(GetIRType(t_parameterSymbol->GetType()), 0);
+                        return llvm::PointerType::get(
+                            GetIRType(t_parameterSymbol->GetType()), 
+                            0
+                        );
                     }
                 );
 
@@ -634,12 +679,17 @@ namespace Ace
                 m_FunctionMap[t_functionSymbol] = function;
 
                 auto* const block = llvm::BasicBlock::Create(
-                    *m_Context,
+                    *m_Compilation.LLVMContext,
                     "",
                     function
                 );
 
-                return FunctionSymbolBlockPair{ function, t_functionSymbol, block };
+                return FunctionSymbolBlockPair
+                { 
+                    function,
+                    t_functionSymbol,
+                    block
+                };
             }
         );
 
@@ -656,25 +706,44 @@ namespace Ace
             m_LocalVariableSymbolStatementIndexPairs.clear();
         };
 
-        std::for_each(begin(functionsSymbolBlockPairs), end(functionsSymbolBlockPairs), [&]
-        (FunctionSymbolBlockPair& t_functionSymbolBlockPair)
-        {
-            clearFunctionData();
-
-            m_Function = t_functionSymbolBlockPair.Function;
-            m_FunctionSymbol = t_functionSymbolBlockPair.Symbol;
-            m_BlockBuilder = std::make_unique<BlockBuilder>(t_functionSymbolBlockPair.Block);
-
-            ACE_LOG_INFO("Emitting function: " << m_FunctionSymbol->CreateSignature());
-
-            ACE_ASSERT(m_FunctionSymbol->GetBody().has_value());
-            t_functionSymbolBlockPair.Symbol->GetBody().value()->Emit(*this);
-
-            if (!m_FunctionSymbol->IsNative() && !m_BlockBuilder->Block->back().isTerminator())
+        std::for_each(
+            begin(functionsSymbolBlockPairs),
+            end  (functionsSymbolBlockPairs),
+            [&](FunctionSymbolBlockPair& t_functionSymbolBlockPair)
             {
-                m_BlockBuilder->Builder.CreateUnreachable();
+                clearFunctionData();
+
+                m_Function = t_functionSymbolBlockPair.Function;
+                m_FunctionSymbol = t_functionSymbolBlockPair.Symbol;
+                m_BlockBuilder = std::make_unique<BlockBuilder>(
+                    t_functionSymbolBlockPair.Block
+                );
+
+                ACE_LOG_INFO(
+                    "Emitting function: " << 
+                    m_FunctionSymbol->CreateSignature()
+                );
+
+                if (
+                    m_FunctionSymbol->CreateSignature() == 
+                    "$global::ace::std::$anonymous_1::from_i16"
+                    )
+                {
+                    [](){}();
+                }
+
+                ACE_ASSERT(m_FunctionSymbol->GetBody().has_value());
+                t_functionSymbolBlockPair.Symbol->GetBody().value()->Emit(*this);
+
+                const bool isFunctionNative = m_FunctionSymbol->IsNative();
+                const bool isBodyTerminated = m_BlockBuilder->Block->back().isTerminator();
+
+                if (!isFunctionNative && !isBodyTerminated)
+                {
+                    m_BlockBuilder->Builder.CreateUnreachable();
+                }
             }
-        });
+        );
 
         clearFunctionData();
     }

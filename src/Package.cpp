@@ -27,8 +27,8 @@ namespace Ace
         std::vector<std::filesystem::path> paths{};
         paths.insert(end(paths), begin(m_FilePaths), end(m_FilePaths));
 
-        std::for_each(begin(m_FileDirectoryPaths), end(m_FileDirectoryPaths), [&]
-        (const FileDirectoryPath& t_fileDirectoryPath)
+        std::for_each(begin(m_FileDirectoryPaths), end(m_FileDirectoryPaths),
+        [&](const FileDirectoryPath& t_fileDirectoryPath)
         {
             if (!std::filesystem::exists(t_fileDirectoryPath.Path))
                 return;
@@ -70,19 +70,6 @@ namespace Ace
         });
 
         return paths;
-    }
-
-    auto Package::Parse(const std::string& t_string) -> Expected<Package>
-    {
-        try
-        {
-            ACE_TRY(package, ParseInternal(t_string));
-            return std::move(package);
-        }
-        catch (nlohmann::json::exception&)
-        {
-            ACE_TRY_UNREACHABLE();
-        }
     }
 
     struct ExpandedLastFilePathPart
@@ -279,8 +266,8 @@ namespace Ace
         const std::unordered_map<std::string, std::string>& t_pathMacroMap
     ) -> Expected<Package::FileDirectoryPaths>
     {
-        ACE_TRY(filePathsParts, TransformExpectedVector(t_filePaths, [&]
-        (const std::string& t_filePath) -> Expected<std::vector<std::string>>
+        ACE_TRY(filePathsParts, TransformExpectedVector(t_filePaths,
+        [&](const std::string& t_filePath) -> Expected<std::vector<std::string>>
         {
             return SplitFilePath(t_filePath);
         }));
@@ -288,8 +275,8 @@ namespace Ace
         std::vector<std::filesystem::path>      finalFilePaths{};
         std::vector<Package::FileDirectoryPath> finalFileDirectoryPaths{};
 
-        ACE_TRY_VOID(TransformExpectedVector(filePathsParts, [&]
-        (const std::vector<std::string>& t_filePathParts) -> Expected<void>
+        ACE_TRY_VOID(TransformExpectedVector(filePathsParts,
+        [&](const std::vector<std::string>& t_filePathParts) -> Expected<void>
         {
             ACE_TRY(fileOrDirectoryPath, ExpandFilePathParts(
                 t_filePathParts,
@@ -316,7 +303,7 @@ namespace Ace
         };
     }
 
-    auto Package::ParseInternal(const std::string& t_string) -> Expected<Package>
+    static auto ParseInternal(const std::string& t_string) -> Expected<Package>
     {
         const auto package = nlohmann::json::parse(t_string);
 
@@ -367,4 +354,19 @@ namespace Ace
             std::move(finalDependencyFilePaths),
         };
     }
+
+    auto Package::Parse(const std::string& t_string) -> Expected<Package>
+    {
+        try
+        {
+            ACE_TRY(package, ParseInternal(t_string));
+            return std::move(package);
+        }
+        catch (nlohmann::json::exception&)
+        {
+            ACE_TRY_UNREACHABLE();
+        }
+    }
+
+
 }

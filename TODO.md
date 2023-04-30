@@ -2,8 +2,12 @@
 
 ## 💥 High Priority
 
+- [ ] Remove unecessary scopes from `Node`s, for example `m_Scope` is redundant if `m_SelfScope` is present.
+- [ ] Make `Name::IsGlobal` an enum.
+- [ ] Make `Scope::FindModule` private.
+- [ ] Rename `Compilation`.
 - [ ] Strings.
-- [ ] Refactor Scope::ResolveSymbolInScopes.
+- [ ] Refactor `Scope::ResolveSymbolInScopes`.
 - [ ] Add template argument deduction.
 - Add templated conversion operators (`ref.ace` at line 16):
   - [ ] Change `__deref_as[T](...)` to take any expression of type convertible to `std::Pointer`.

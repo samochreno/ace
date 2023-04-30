@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <string>
-#include <unordered_set>
 
 #include "Asserts.hpp"
 #include "Error.hpp"
@@ -37,8 +36,8 @@ namespace Ace::Symbol::Template
 
         const auto nodes = Core::GetAllNodes(ast);
 
-        Core::CreateAndDefineSymbols(nodes).Unwrap();
-        Core::DefineAssociations(nodes).Unwrap();
+        Core::CreateAndDefineSymbols(GetCompilation(), nodes).Unwrap();
+        Core::DefineAssociations(GetCompilation(), nodes).Unwrap();
 
         m_InstantiatedOnlySymbolsASTs.push_back(ast);
 
@@ -51,10 +50,11 @@ namespace Ace::Symbol::Template
 
     auto Function::InstantiateSemanticsForSymbols() -> void
     {
-        std::for_each(begin(m_InstantiatedOnlySymbolsASTs), end(m_InstantiatedOnlySymbolsASTs), []
-        (const std::shared_ptr<const Node::Function>& t_ast)
+        std::for_each(begin(m_InstantiatedOnlySymbolsASTs), end(m_InstantiatedOnlySymbolsASTs),
+        [&](const std::shared_ptr<const Node::Function>& t_ast)
         {
             const auto boundAST = Core::CreateBoundTransformedAndVerifiedAST(
+                GetCompilation(),
                 t_ast,
                 [](const std::shared_ptr<const Node::Function>& t_ast) { return t_ast->CreateBound(); },
                 [](const std::shared_ptr<const BoundNode::Function>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); },
@@ -62,7 +62,10 @@ namespace Ace::Symbol::Template
                 [](const std::shared_ptr<const BoundNode::Function>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); }
             ).Unwrap();
 
-            Core::BindFunctionSymbolsBodies(Core::GetAllNodes(boundAST));
+            Core::BindFunctionSymbolsBodies(
+                GetCompilation(),
+                Core::GetAllNodes(boundAST)
+            );
         });
 
         m_InstantiatedOnlySymbolsASTs.clear();

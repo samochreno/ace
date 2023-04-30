@@ -8,7 +8,6 @@
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
 #include "BoundNode/Expression/FunctionCall/Static.hpp"
-#include "NativeSymbol.hpp"
 #include "Symbol/Function.hpp"
 #include "Symbol/Template/Function.hpp"
 #include "ExpressionEmitResult.hpp"
@@ -43,7 +42,7 @@ namespace Ace::BoundNode::Expression
         ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
 
         ACE_TRY(symbol, Scope::ResolveOrInstantiateTemplateInstance(
-            NativeSymbol::StrongPointer__value.GetSymbol(),
+            GetCompilation().Natives->StrongPointer__value.GetSymbol(),
             { mchLoweredExpression.Value->GetTypeInfo().Symbol->GetWithoutStrongPointer() },
             {}
         ));

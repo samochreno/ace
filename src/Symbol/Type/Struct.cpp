@@ -26,8 +26,8 @@ namespace Ace::Symbol::Type
 
             const auto members = GetVariables();
 
-            const bool canResolveSize = std::find_if_not(begin(members), end(members), []
-            (const Symbol::Variable::Normal::Instance* const t_member)
+            const bool canResolveSize = std::find_if_not(begin(members), end(members),
+            [](const Symbol::Variable::Normal::Instance* const t_member)
             {
                 return t_member->GetType()->CanResolveSize();
             }) == members.end();
@@ -50,14 +50,26 @@ namespace Ace::Symbol::Type
         return value;
     }
 
-    auto Struct::CreateCopyGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>> 
+    auto Struct::CreateCopyGlueBody(
+        Symbol::Function* const t_glueSymbol
+    ) -> std::shared_ptr<const IEmittable<void>> 
     {
-        return Core::CreateCopyGlueBody(this, t_glueSymbol);
+        return Core::CreateCopyGlueBody(
+            GetCompilation(),
+            this,
+            t_glueSymbol
+        );
     }
 
-    auto Struct::CreateDropGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>>
+    auto Struct::CreateDropGlueBody(
+        Symbol::Function* const t_glueSymbol
+    ) -> std::shared_ptr<const IEmittable<void>>
     {
-        return Core::CreateDropGlueBody(this, t_glueSymbol);
+        return Core::CreateDropGlueBody(
+            GetCompilation(),
+            this,
+            t_glueSymbol
+        );
     }
 
     auto Struct::BindCopyGlue(Symbol::Function* const t_symbol) -> void
@@ -85,8 +97,11 @@ namespace Ace::Symbol::Type
     auto Struct::GetVariables() const -> std::vector<Symbol::Variable::Normal::Instance*>
     {
         auto variables = m_SelfScope->CollectDefinedSymbols<Symbol::Variable::Normal::Instance>();
-        std::sort(begin(variables), end(variables), []
-        (const Symbol::Variable::Normal::Instance* const t_lhs, const Symbol::Variable::Normal::Instance* const t_rhs)
+        std::sort(begin(variables), end(variables),
+        [](
+            const Symbol::Variable::Normal::Instance* const t_lhs,
+            const Symbol::Variable::Normal::Instance* const t_rhs
+        )
         {
             return t_lhs->GetIndex() < t_rhs->GetIndex();
         });

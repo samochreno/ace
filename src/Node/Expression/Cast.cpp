@@ -32,7 +32,9 @@ namespace Ace::Node::Expression
     {
         ACE_TRY(boundExpression, m_Expression->CreateBoundExpression());
 
-        ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName.ToSymbolName()));
+        ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<Symbol::Type::IBase>(
+            m_TypeName.ToSymbolName(GetCompilation())
+        ));
 
         ACE_TRY(mchConvertedBoundExpression, BoundNode::Expression::CreateExplicitlyConverted(
             boundExpression, 

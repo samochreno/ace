@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "TypeInfo.hpp"
-#include "NativeSymbol.hpp"
 #include "ValueKind.hpp"
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
@@ -25,14 +24,20 @@ namespace Ace::BoundNode::Expression
 
     auto Or::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::Or>>>
     {
+        const TypeInfo typeInfo
+        {
+            GetCompilation().Natives->Bool.GetSymbol(),
+            ValueKind::R,
+        };
+
         ACE_TRY(mchConvertedAndCheckedLHSExpression, CreateImplicitlyConvertedAndTypeChecked(
             m_LHSExpression,
-            TypeInfo{ NativeSymbol::Bool.GetSymbol(), ValueKind::R }
+            typeInfo
         ));
 
         ACE_TRY(mchConvertedAndCheckedRHSExpression, CreateImplicitlyConvertedAndTypeChecked(
             m_RHSExpression,
-            TypeInfo{ NativeSymbol::Bool.GetSymbol(), ValueKind::R }
+            typeInfo
         ));
 
         if (
@@ -72,12 +77,16 @@ namespace Ace::BoundNode::Expression
     {
         std::vector<ExpressionDropData> temporaries{};
 
-        auto* const boolType = NativeSymbol::Bool.GetIRType(t_emitter);
+        auto* const boolType = GetCompilation().Natives->Bool.GetIRType();
 
         auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
 
         const auto lhsEmitResult = m_LHSExpression->Emit(t_emitter);
-        temporaries.insert(end(temporaries), begin(lhsEmitResult.Temporaries), end(lhsEmitResult.Temporaries));
+        temporaries.insert(
+            end(temporaries), 
+            begin(lhsEmitResult.Temporaries), 
+            end  (lhsEmitResult.Temporaries)
+        );
 
         auto* const lhsLoadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,
@@ -90,14 +99,14 @@ namespace Ace::BoundNode::Expression
         );
 
         auto falseBlockBuilder = std::make_unique<BlockBuilder>(
-            t_emitter.GetContext(),
+            *GetCompilation().LLVMContext,
             t_emitter.GetFunction()
-            );
+        );
 
         auto endBlockBuilder = std::make_unique<BlockBuilder>(
-            t_emitter.GetContext(),
+            *GetCompilation().LLVMContext,
             t_emitter.GetFunction()
-            );
+        );
 
         t_emitter.GetBlockBuilder().Builder.CreateCondBr(
             lhsLoadInst,
@@ -108,7 +117,11 @@ namespace Ace::BoundNode::Expression
         t_emitter.SetBlockBuilder(std::move(falseBlockBuilder));
 
         const auto rhsEmitResult = m_RHSExpression->Emit(t_emitter);
-        temporaries.insert(end(temporaries), begin(rhsEmitResult.Temporaries), end(rhsEmitResult.Temporaries));
+        temporaries.insert(
+            end(temporaries), 
+            begin(rhsEmitResult.Temporaries), 
+            end  (rhsEmitResult.Temporaries)
+        );
 
         auto* const rhsLoadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,
@@ -129,6 +142,10 @@ namespace Ace::BoundNode::Expression
 
     auto Or::GetTypeInfo() const -> TypeInfo
     {
-        return { NativeSymbol::Bool.GetSymbol(), ValueKind::R };
+        return
+        {
+            GetCompilation().Natives->Bool.GetSymbol(),
+            ValueKind::R 
+        };
     }
 }

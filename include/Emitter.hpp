@@ -13,6 +13,7 @@
 #include "BoundNode/All.hpp"
 #include "ExpressionDropData.hpp"
 #include "Emittable.hpp"
+#include "Compilation.hpp"
 
 namespace Ace
 {
@@ -65,7 +66,7 @@ namespace Ace
                     return foundIt->second;
 
                 auto block = llvm::BasicBlock::Create(
-                    m_Emitter.GetContext(),
+                    *m_Emitter.GetCompilation().LLVMContext,
                     "",
                     m_Emitter.GetFunction()
                 );
@@ -90,7 +91,7 @@ namespace Ace
             size_t StatementIndex{};
         };
 
-        Emitter(const std::string& t_packageName);
+        Emitter(const Compilation& t_compilation);
         ~Emitter();
 
         auto SetASTs(
@@ -120,7 +121,7 @@ namespace Ace
         ) -> void;
         auto EmitDropArguments() -> void;
 
-        auto GetContext() const -> llvm::LLVMContext& { return *m_Context.get(); }
+        auto GetCompilation() const -> const Compilation& { return m_Compilation; }
         auto GetModule() const -> llvm::Module& { return *m_Module.get(); }
         auto GetC() const -> const C& { return m_C; }
 
@@ -153,11 +154,10 @@ namespace Ace
             const std::vector<Symbol::Function*>& t_functionSymbols
         ) -> void;
 
-        std::string m_PackageName{};
+        const Compilation& m_Compilation{};
 
         std::vector<std::shared_ptr<const BoundNode::Module>> m_ASTs{};
 
-        std::unique_ptr<llvm::LLVMContext> m_Context{};
         std::unique_ptr<llvm::Module> m_Module{};
 
         std::unordered_map<const Symbol::Type::IBase*, llvm::Type*> m_TypeMap{};

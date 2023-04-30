@@ -12,6 +12,7 @@
 #include "SpecialIdentifier.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
+#include "Compilation.hpp"
 
 namespace Ace::Parsing
 {
@@ -43,7 +44,10 @@ namespace Ace::Parsing
     public:
         Parser() = delete;
 
-        static auto ParseAST(const std::string& t_packageName, std::vector<Token>&& t_tokens) -> Expected<std::shared_ptr<const Node::Module>>;
+        static auto ParseAST(
+            const Compilation& t_compilation, 
+            std::vector<Token>&& t_tokens
+        ) -> Expected<std::shared_ptr<const Node::Module>>;
 
         static auto CreateEmptyAttributes() -> std::vector<std::shared_ptr<const Node::Attribute>>;
 

@@ -30,8 +30,8 @@ namespace Ace::Symbol::Template
 
         const auto nodes = Core::GetAllNodes(ast);
 
-        Core::CreateAndDefineSymbols(nodes).Unwrap();
-        Core::DefineAssociations(nodes).Unwrap();
+        Core::CreateAndDefineSymbols(GetCompilation(), nodes).Unwrap();
+        Core::DefineAssociations(GetCompilation(), nodes).Unwrap();
 
         m_InstantiatedOnlySymbolsASTs.push_back(ast);
 
@@ -44,10 +44,11 @@ namespace Ace::Symbol::Template
 
     auto Type::InstantiateSemanticsForSymbols() -> void
     {
-        std::for_each(begin(m_InstantiatedOnlySymbolsASTs), end(m_InstantiatedOnlySymbolsASTs), []
-        (const std::shared_ptr<const Node::Type::IBase>& t_ast)
+        std::for_each(begin(m_InstantiatedOnlySymbolsASTs), end(m_InstantiatedOnlySymbolsASTs),
+        [&](const std::shared_ptr<const Node::Type::IBase>& t_ast)
         {
             const auto boundAST = Core::CreateBoundTransformedAndVerifiedAST(
+                GetCompilation(),
                 t_ast,
                 [](const std::shared_ptr<const Node::Type::IBase>& t_ast) { return t_ast->CreateBoundType(); },
                 [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); },
@@ -55,7 +56,10 @@ namespace Ace::Symbol::Template
                 [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); }
             ).Unwrap();
 
-            Core::BindFunctionSymbolsBodies(Core::GetAllNodes(boundAST));
+            Core::BindFunctionSymbolsBodies(
+                GetCompilation(),
+                Core::GetAllNodes(boundAST)
+            );
 
             auto* const selfSymbol = boundAST->GetSymbol();
 

@@ -204,8 +204,8 @@ namespace Ace
         std::vector<TOut> vec{};
         vec.reserve(std::distance(t_begin, t_end));
 
-        ACE_TRY_ASSERT(std::find_if_not(t_begin, t_end, [&]
-        (const TIn& t_element)
+        ACE_TRY_ASSERT(std::find_if_not(t_begin, t_end,
+        [&](const TIn& t_element)
         {
             auto expOut = t_func(t_element);
             if (!expOut)
@@ -237,8 +237,8 @@ namespace Ace
         std::vector<TOut> outVec{};
         outVec.reserve(t_inVec.size());
 
-        ACE_TRY_ASSERT(std::find_if_not(begin(t_inVec), end(t_inVec), [&]
-        (const TIn& t_element)
+        ACE_TRY_ASSERT(std::find_if_not(begin(t_inVec), end(t_inVec),
+        [&](const TIn& t_element)
         {
             auto expOut = t_func(t_element);
             if (!expOut)
@@ -266,8 +266,8 @@ namespace Ace
     template<typename TIn, typename F>
     auto TransformExpectedVector(const std::vector<TIn>& t_inVec, F&& t_func) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
     {
-        ACE_TRY_ASSERT(std::find_if_not(begin(t_inVec), end(t_inVec), [&]
-        (const TIn& t_element)
+        ACE_TRY_ASSERT(std::find_if_not(begin(t_inVec), end(t_inVec),
+        [&](const TIn& t_element)
         {
             return t_func(t_element);
         }) == end(t_inVec));
@@ -298,8 +298,8 @@ namespace Ace
         std::vector<TOut> outVec{};
         outVec.reserve(t_inVec.size());
 
-        ACE_TRY_ASSERT(std::find_if_not(begin(t_inVec), end(t_inVec), [&]
-        (const TIn& t_element)
+        ACE_TRY_ASSERT(std::find_if_not(begin(t_inVec), end(t_inVec),
+        [&](const TIn& t_element)
         {
             auto expMchElement = t_func(t_element);
             if (!expMchElement)

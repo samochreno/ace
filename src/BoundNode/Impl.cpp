@@ -21,8 +21,8 @@ namespace Ace::BoundNode
 
     auto Impl::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Impl>>>
     {
-        ACE_TRY(mchCheckedFunctions, TransformExpectedMaybeChangedVector(m_Functions, []
-        (const std::shared_ptr<const BoundNode::Function>& t_function)
+        ACE_TRY(mchCheckedFunctions, TransformExpectedMaybeChangedVector(m_Functions,
+        [](const std::shared_ptr<const BoundNode::Function>& t_function)
         {
             return t_function->GetOrCreateTypeChecked({});
         }));
@@ -40,8 +40,8 @@ namespace Ace::BoundNode
 
     auto Impl::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Impl>>>
     {
-        ACE_TRY(mchLoweredFunctions, TransformExpectedMaybeChangedVector(m_Functions, []
-        (const std::shared_ptr<const BoundNode::Function>& t_function)
+        ACE_TRY(mchLoweredFunctions, TransformExpectedMaybeChangedVector(m_Functions,
+        [](const std::shared_ptr<const BoundNode::Function>& t_function)
         {
             return t_function->GetOrCreateLowered({});
         }));

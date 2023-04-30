@@ -47,8 +47,8 @@ namespace Ace::BoundNode::Expression::FunctionCall
 
     auto Static::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>>
     {
-        ACE_TRY(mchLoweredArguments, TransformExpectedMaybeChangedVector(m_Arguments, [&]
-        (const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
+        ACE_TRY(mchLoweredArguments, TransformExpectedMaybeChangedVector(m_Arguments,
+        [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
         {
             return t_argument->GetOrCreateLoweredExpression({});
         }));
@@ -70,8 +70,8 @@ namespace Ace::BoundNode::Expression::FunctionCall
         std::vector<ExpressionDropData> temporaries{};
 
         std::vector<llvm::Value*> arguments{};
-        std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(arguments), [&]
-        (const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
+        std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(arguments),
+        [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
         {
             const auto argumentEmitResult = t_argument->Emit(t_emitter);
             temporaries.insert(end(temporaries), begin(argumentEmitResult.Temporaries), end(argumentEmitResult.Temporaries));

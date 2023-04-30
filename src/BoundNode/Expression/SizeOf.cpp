@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "TypeInfo.hpp"
-#include "NativeSymbol.hpp"
 #include "ValueKind.hpp"
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
@@ -33,7 +32,7 @@ namespace Ace::BoundNode::Expression
     {
         std::vector<ExpressionDropData> temporaries{};
 
-        auto* const intTypeSymbol = NativeSymbol::Int.GetSymbol();
+        auto* const intTypeSymbol = GetCompilation().Natives->Int.GetSymbol();
         auto* const intType = t_emitter.GetIRType(intTypeSymbol);
         auto* const type = t_emitter.GetIRType(m_TypeSymbol);
 
@@ -55,6 +54,10 @@ namespace Ace::BoundNode::Expression
 
     auto SizeOf::GetTypeInfo() const -> TypeInfo
     {
-        return { NativeSymbol::Int.GetSymbol(), ValueKind::R };
+        return
+        {
+            GetCompilation().Natives->Int.GetSymbol(),
+            ValueKind::R
+        };
     }
 }

@@ -22,14 +22,14 @@ namespace Ace::BoundNode::Type
 
     auto Struct::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Type::Struct>>>
     {
-        ACE_TRY(mchCheckedAttributes, TransformExpectedMaybeChangedVector(m_Attributes, []
-        (const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
+        ACE_TRY(mchCheckedAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
+        [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
         {
             return t_attribute->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedVariables, TransformExpectedMaybeChangedVector(m_Variables, []
-        (const std::shared_ptr<const BoundNode::Variable::Normal::Instance>& t_variable)
+        ACE_TRY(mchCheckedVariables, TransformExpectedMaybeChangedVector(m_Variables,
+        [](const std::shared_ptr<const BoundNode::Variable::Normal::Instance>& t_variable)
         {
             return t_variable->GetOrCreateTypeChecked({});
         }));
@@ -51,14 +51,14 @@ namespace Ace::BoundNode::Type
 
     auto Struct::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Type::Struct>>>
     {
-        ACE_TRY(mchLoweredAttributes, TransformExpectedMaybeChangedVector(m_Attributes, []
-        (const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
+        ACE_TRY(mchLoweredAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
+        [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
         {
             return t_attribute->GetOrCreateLowered({});
         }));
 
-        ACE_TRY(mchLoweredVariables, TransformExpectedMaybeChangedVector(m_Variables, []
-        (const std::shared_ptr<const BoundNode::Variable::Normal::Instance>& t_variable)
+        ACE_TRY(mchLoweredVariables, TransformExpectedMaybeChangedVector(m_Variables,
+        [](const std::shared_ptr<const BoundNode::Variable::Normal::Instance>& t_variable)
         {
             return t_variable->GetOrCreateLowered({});
         }));

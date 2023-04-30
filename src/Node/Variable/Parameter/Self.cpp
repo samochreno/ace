@@ -33,7 +33,9 @@ namespace Ace::Node::Variable::Parameter
 
     auto Self::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
     {
-        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName.ToSymbolName()));
+        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(
+            m_TypeName.ToSymbolName(GetCompilation())
+        ));
         return std::unique_ptr<Symbol::IBase>
         {
             std::make_unique<Symbol::Variable::Parameter::Self>(

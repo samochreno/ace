@@ -14,18 +14,20 @@
 #include "Core.hpp"
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
-#include "NativeSymbol.hpp"
 #include "Emitter.hpp"
-#include "Package.hpp"
 #include "Node/All.hpp"
 #include "BoundNode/All.hpp"
 #include "Symbol/All.hpp"
+#include "Compilation.hpp"
 
 namespace Ace
 {
-    static auto CompileFiles(const std::string& t_packageName, const std::vector<std::filesystem::path>& t_filePaths, const std::vector<std::filesystem::path>& t_dependencyFilePaths) -> Expected<void>
+    static auto Compile(const Compilation& t_compilation) -> Expected<void>
     {
-        Emitter emitter{ t_packageName };
+        const auto& packageName = t_compilation.Package.Name;
+        auto* const globalScope = t_compilation.GlobalScope.get();
+
+        Emitter emitter{ t_compilation };
 
         const auto& now = std::chrono::steady_clock::now;
 
@@ -38,8 +40,9 @@ namespace Ace
         const auto timeParsingStart = now();
         ACE_LOG_INFO("Parsing start");
 
-        ACE_TRY(asts, TransformExpectedVector(t_filePaths, [&]
-        (const std::filesystem::path& t_filePath) -> Expected<std::shared_ptr<const Node::Module>>
+        const auto filePaths = t_compilation.Package.FilePaths.CreatePaths();
+        ACE_TRY(asts, TransformExpectedVector(filePaths,
+        [&](const std::filesystem::path& t_filePath) -> Expected<std::shared_ptr<const Node::Module>>
         {
             const std::ifstream fileStream{ t_filePath };
             ACE_TRY_ASSERT(fileStream.is_open());
@@ -49,7 +52,7 @@ namespace Ace
 
             const std::string text = stringStream.str();
 
-            return Core::ParseAST(t_packageName, text);
+            return Core::ParseAST(t_compilation, text);
         }));
 
         const auto timeParsingEnd = now();
@@ -60,8 +63,8 @@ namespace Ace
         const auto timeSymbolCreationStart = now();
         ACE_LOG_INFO("Symbol creation start");
 
-        ACE_TRY_VOID(Core::CreateAndDefineSymbols(nodes));
-        ACE_TRY_VOID(Core::DefineAssociations(nodes));
+        ACE_TRY_VOID(Core::CreateAndDefineSymbols(t_compilation, nodes));
+        ACE_TRY_VOID(Core::DefineAssociations(t_compilation, nodes));
 
         const auto timeSymbolCreationEnd = now();
         ACE_LOG_INFO("Symbol creation success");
@@ -70,27 +73,43 @@ namespace Ace
         ACE_LOG_INFO("Binding and verification start");
 
         ACE_LOG_INFO("Native symbol initialization start");
-        ACE_TRY_VOID(NativeSymbol::InitializeSymbols());
+        ACE_TRY_VOID(t_compilation.Natives->Initialize());
         ACE_LOG_INFO("Native symbol initialization success");
 
         ACE_TRY(boundASTs, Core::CreateBoundTransformedAndVerifiedASTs(
+            t_compilation,
             asts,
-            [](const std::shared_ptr<const Node::Module>& t_ast) { return t_ast->CreateBound(); },
-            [](const std::shared_ptr<const BoundNode::Module>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); },
-            [](const std::shared_ptr<const BoundNode::Module>& t_ast) { return t_ast->GetOrCreateLowered({}); },
-            [](const std::shared_ptr<const BoundNode::Module>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); }
+            [](const std::shared_ptr<const Node::Module>& t_ast)
+            {
+                return t_ast->CreateBound(); 
+            },
+            [](const std::shared_ptr<const BoundNode::Module>& t_ast)
+            { 
+                return t_ast->GetOrCreateTypeChecked({});
+            },
+            [](const std::shared_ptr<const BoundNode::Module>& t_ast)
+            {
+                return t_ast->GetOrCreateLowered({});
+            },
+            [](const std::shared_ptr<const BoundNode::Module>& t_ast)
+            {
+                return t_ast->GetOrCreateTypeChecked({});
+            }
         ));
 
-        Core::BindFunctionSymbolsBodies(Core::GetAllNodes(begin(boundASTs), end(boundASTs)));
+        Core::BindFunctionSymbolsBodies(
+            t_compilation,
+            Core::GetAllNodes(begin(boundASTs), end(boundASTs))
+        );
 
-        const auto templateSymbols = Scope::GetRoot()->CollectDefinedSymbolsRecursive<Symbol::Template::IBase>();
+        const auto templateSymbols = globalScope->CollectDefinedSymbolsRecursive<Symbol::Template::IBase>();
         bool didInstantiateSemantics = true;
         while (didInstantiateSemantics)
         {
             didInstantiateSemantics = false;
 
-            std::for_each(begin(templateSymbols), end(templateSymbols), [&]
-            (Symbol::Template::IBase* const t_templateSymbol)
+            std::for_each(begin(templateSymbols), end(templateSymbols),
+            [&](Symbol::Template::IBase* const t_templateSymbol)
             {
                 if (t_templateSymbol->HasUninstantiatedSemanticsForSymbols())
                 {
@@ -100,12 +119,12 @@ namespace Ace
             });
         }
 
-        Core::GenerateAndBindGlue();
+        Core::GenerateAndBindGlue(t_compilation);
 
         const auto timeBindingAndVerificationEnd = now();
         ACE_LOG_INFO("Binding and verification success");
 
-        ACE_TRY_VOID(Core::AssertCanResolveTypeSizes());
+        ACE_TRY_VOID(Core::AssertCanResolveTypeSizes(t_compilation));
 
         const auto timeFrontendEnd = now();
         ACE_LOG_INFO("Frontend success");
@@ -153,28 +172,30 @@ namespace Ace
         return ExpectedVoid;
     }
 
-    auto Main() -> void
+    static auto Compile(
+        const std::vector<std::string>& t_args
+    ) -> Expected<void>
     {
+        ACE_TRY(compilation, Compilation::ParseAndVerify(t_args));
+        ACE_TRY_VOID(Compile(*compilation.get()));
+
+        return ExpectedVoid;
+    }
+
+    auto Main(const std::vector<std::string>& t_args) -> void
+    {
+        std::vector<std::string> args{};
+        args.push_back("-o=ace/build");
+        args.push_back("ace/package.json");
+
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
 
-        const std::filesystem::path packagePath{ "/home/samo/repos/ace/ace/package.json" };
-        const std::ifstream packageFileStream{ packagePath };
-        ACE_ASSERT(packageFileStream);
-
-        std::stringstream packageStringStream{};
-        packageStringStream << packageFileStream.rdbuf();
-
-        const auto package = Package::Parse(packageStringStream.str()).Unwrap();
-        const auto didCompileFiles = CompileFiles(
-            package.GetName(),
-            package.GetFilePaths().CreatePaths(),
-            package.GetDependencyFilePaths().CreatePaths()
-        );
-
-        if (!didCompileFiles)
+        const auto didCompile = Compile(args);
+        if (!didCompile)
         {
-            ACE_LOG_WARNING("Build fail"); 
+            ACE_LOG_WARNING("Build fail");
+            return;
         }
     }
 }

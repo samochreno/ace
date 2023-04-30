@@ -24,7 +24,7 @@ namespace Ace::Node::Expression
         return std::make_unique<const Node::Expression::MemberAccess>(
             m_Expression->CloneInScopeExpression(t_scope),
             m_Name
-            );
+        );
     }
 
     auto MemberAccess::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::VariableReference::Instance>>
@@ -35,11 +35,11 @@ namespace Ace::Node::Expression
         ACE_TRY(memberSymbol, GetScope()->ResolveInstanceSymbol<Symbol::Variable::Normal::Instance>(
             boundExpression->GetTypeInfo().Symbol->GetWithoutReference(),
             m_Name
-            ));
+        ));
 
         return std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
             boundExpression,
             memberSymbol
-            );
+        );
     }
 }

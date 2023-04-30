@@ -33,8 +33,8 @@ namespace Ace::BoundNode::Statement
 
     auto Block::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Block>>>
     {
-        ACE_TRY(mchCheckedContent, TransformExpectedMaybeChangedVector(m_Statements, [&]
-        (const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
+        ACE_TRY(mchCheckedContent, TransformExpectedMaybeChangedVector(m_Statements,
+        [&](const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
         {
             return t_statement->GetOrCreateTypeCheckedStatement({ t_context.ParentFunctionTypeSymbol });
         }));
@@ -52,8 +52,8 @@ namespace Ace::BoundNode::Statement
 
     auto Block::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Block>>>
     {
-        ACE_TRY(mchLoweredStatements, TransformExpectedMaybeChangedVector(m_Statements, []
-        (const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
+        ACE_TRY(mchLoweredStatements, TransformExpectedMaybeChangedVector(m_Statements,
+        [](const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
         {
             return t_statement->GetOrCreateLoweredStatement({});
         }));
@@ -196,8 +196,8 @@ namespace Ace::BoundNode::Statement
 
         const auto statements = this->CreateExpanded();
         std::vector<ControlFlowStatement::Data> statementsData{};
-        std::for_each(begin(statements), end(statements), [&]
-        (const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
+        std::for_each(begin(statements), end(statements),
+        [&](const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
         {
             const auto expStatementData = ControlFlowStatement::Data::New(t_statement.get());
             
@@ -210,8 +210,8 @@ namespace Ace::BoundNode::Statement
         {
             const auto findLabelStatementData = [&](const Symbol::Label* const t_labelSymbol) -> std::vector<ControlFlowStatement::Data>::iterator
             {
-                auto labelIt = std::find_if(begin(statementsData), end(statementsData), [&]
-                (ControlFlowStatement::Data& t_statementData)
+                auto labelIt = std::find_if(begin(statementsData), end(statementsData),
+                [&](ControlFlowStatement::Data& t_statementData)
                 {
                     if (t_statementData.GetKind() != ControlFlowStatement::Kind::Label)
                         return false;
@@ -230,8 +230,8 @@ namespace Ace::BoundNode::Statement
             {
                 auto& statementData = *it;
 
-                const bool isEnd = std::find_if(begin(t_ends), end(t_ends), [&]
-                (ControlFlowStatement::Data* const t_end) 
+                const bool isEnd = std::find_if(begin(t_ends), end(t_ends),
+                [&](ControlFlowStatement::Data* const t_end) 
                 {
                     return &statementData == t_end;
                 }) != end(t_ends);

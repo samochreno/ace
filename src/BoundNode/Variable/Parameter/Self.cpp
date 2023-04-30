@@ -5,7 +5,6 @@
 
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
-#include "NativeSymbol.hpp"
 
 namespace Ace::BoundNode::Variable::Parameter
 {
@@ -16,7 +15,9 @@ namespace Ace::BoundNode::Variable::Parameter
 
     auto Self::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Self>>>
     {
-        ACE_TRY_ASSERT(m_Symbol->GetType() != NativeSymbol::Void.GetSymbol());
+        ACE_TRY_ASSERT(
+            m_Symbol->GetType() != GetCompilation().Natives->Void.GetSymbol()
+        );
         return CreateUnchanged(shared_from_this());
     }
 

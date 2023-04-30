@@ -7,7 +7,6 @@
 #include "ValueKind.hpp"
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
-#include "NativeSymbol.hpp"
 #include "Emitter.hpp"
 #include "ExpressionEmitResult.hpp"
 #include "ExpressionDropData.hpp"
@@ -42,7 +41,7 @@ namespace Ace::BoundNode::Expression
     {
         auto* const typeSymbol = m_Expression->GetTypeInfo().Symbol->GetUnaliased();
         ACE_TRY_ASSERT(
-            (typeSymbol == NativeSymbol::Pointer.GetSymbol()) ||
+            (typeSymbol == GetCompilation().Natives->Pointer.GetSymbol()) ||
             (typeSymbol->IsReference())
         );
 
@@ -64,9 +63,13 @@ namespace Ace::BoundNode::Expression
         std::vector<ExpressionDropData> temporaries{};
 
         const auto expressionEmitResult = m_Expression->Emit(t_emitter);
-        temporaries.insert(end(temporaries), begin(expressionEmitResult.Temporaries), end(expressionEmitResult.Temporaries));
+        temporaries.insert(
+            end(temporaries),
+            begin(expressionEmitResult.Temporaries),
+            end  (expressionEmitResult.Temporaries)
+        );
 
-        auto* const pointerType = NativeSymbol::Pointer.GetIRType(t_emitter);
+        auto* const pointerType = GetCompilation().Natives->Pointer.GetIRType();
 
         auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
             pointerType,

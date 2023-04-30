@@ -7,7 +7,6 @@
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
-#include "NativeSymbol.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
 
@@ -24,10 +23,16 @@ namespace Ace::BoundNode::Statement::Jump
 
     auto Conditional::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Jump::Conditional>>>
     {
+        const TypeInfo typeInfo
+        {
+            GetCompilation().Natives->Bool.GetSymbol(),
+            ValueKind::R,
+        };
+
         ACE_TRY(mchConvertedAndCheckedCondition, CreateImplicitlyConvertedAndTypeChecked(
             m_Condition,
-            TypeInfo{ NativeSymbol::Bool.GetSymbol(), ValueKind::R }
-            ));
+            typeInfo
+        ));
 
         if (!mchConvertedAndCheckedCondition.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -35,7 +40,7 @@ namespace Ace::BoundNode::Statement::Jump
         const auto returnValue = std::make_shared<const BoundNode::Statement::Jump::Conditional>(
             mchConvertedAndCheckedCondition.Value,
             m_LabelSymbol
-            );
+        );
         
         return CreateChanged(returnValue);
     }
@@ -50,7 +55,7 @@ namespace Ace::BoundNode::Statement::Jump
         const auto returnValue = std::make_shared<const BoundNode::Statement::Jump::Conditional>(
             mchLoweredCondition.Value,
             m_LabelSymbol
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
     }
@@ -58,14 +63,14 @@ namespace Ace::BoundNode::Statement::Jump
     auto Conditional::Emit(Emitter& t_emitter) const -> void
     {
         auto blockBuilder = std::make_unique<BlockBuilder>(
-            t_emitter.GetContext(),
+            *GetCompilation().LLVMContext,
             t_emitter.GetFunction()
-            );
+        );
 
         const auto conditionEmitResult = m_Condition->Emit(t_emitter);
 
         auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
-            NativeSymbol::Bool.GetIRType(t_emitter),
+            GetCompilation().Natives->Bool.GetIRType(),
             conditionEmitResult.Value
         );
 

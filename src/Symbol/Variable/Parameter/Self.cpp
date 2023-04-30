@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "SpecialIdentifier.hpp"
+
 namespace Ace::Symbol::Variable::Parameter
 {
     auto Self::GetName() const -> const std::string&

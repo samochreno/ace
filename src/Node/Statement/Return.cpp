@@ -43,8 +43,8 @@ namespace Ace::Node::Statement
 
     auto Return::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Return>>
     {
-        ACE_TRY(boundOptExpression, TransformExpectedOptional(m_OptExpression, []
-        (const std::shared_ptr<const Node::Expression::IBase>& t_expression)
+        ACE_TRY(boundOptExpression, TransformExpectedOptional(m_OptExpression,
+        [](const std::shared_ptr<const Node::Expression::IBase>& t_expression)
         {
             return t_expression->CreateBoundExpression();
         }));

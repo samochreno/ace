@@ -16,6 +16,7 @@
 #include "BoundNode/Statement/Assignment/Normal.hpp"
 #include "BoundNode/Statement/Variable.hpp"
 #include "Symbol/Variable/Local.hpp"
+#include "SpecialIdentifier.hpp"
 
 namespace Ace::BoundNode::Statement::Assignment
 {
@@ -159,9 +160,12 @@ namespace Ace::BoundNode::Statement::Assignment
 
                         return std::make_shared<const BoundNode::Expression::Reference>(tmpVariableReferenceExpression);
                     }
-                }
 
-                ACE_UNREACHABLE();
+                    default:
+                    {
+                        ACE_UNREACHABLE();
+                    }
+                }
             }();
 
             auto tmpRefVariableSymbolOwned = std::make_unique<Symbol::Variable::Local>(

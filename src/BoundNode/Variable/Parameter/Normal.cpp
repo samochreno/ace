@@ -5,7 +5,6 @@
 
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
-#include "NativeSymbol.hpp"
 
 namespace Ace::BoundNode::Variable::Parameter
 {
@@ -20,10 +19,13 @@ namespace Ace::BoundNode::Variable::Parameter
 
     auto Normal::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>>>
     {
-        ACE_TRY_ASSERT(m_Symbol->GetType() != NativeSymbol::Void.GetSymbol());
+        ACE_TRY_ASSERT(
+            m_Symbol->GetType() != 
+            GetCompilation().Natives->Void.GetSymbol()
+        );
 
-        ACE_TRY(mchCheckedAttributes, TransformExpectedMaybeChangedVector(m_Attributes, []
-        (const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
+        ACE_TRY(mchCheckedAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
+        [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
         {
             return t_attribute->GetOrCreateTypeChecked({});
         }));
@@ -41,8 +43,8 @@ namespace Ace::BoundNode::Variable::Parameter
 
     auto Normal::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>>>
     {
-        ACE_TRY(mchLoweredAttributes, TransformExpectedMaybeChangedVector(m_Attributes, []
-        (const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
+        ACE_TRY(mchLoweredAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
+        [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
         {
             return t_attribute->GetOrCreateLowered({});
         }));

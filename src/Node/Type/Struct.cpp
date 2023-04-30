@@ -25,15 +25,15 @@ namespace Ace::Node::Type
         auto* const selfScope = t_scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const Node::Attribute>> clonedAttributes{};
-        std::transform(begin(m_Attributes), end(m_Attributes), back_inserter(clonedAttributes), [&]
-        (const std::shared_ptr<const Node::Attribute>& t_attribute)
+        std::transform(begin(m_Attributes), end(m_Attributes), back_inserter(clonedAttributes),
+        [&](const std::shared_ptr<const Node::Attribute>& t_attribute)
         {
             return t_attribute->CloneInScope(t_scope);
         });
 
         std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>> clonedVariables{};
-        std::transform(begin(m_Variables), end(m_Variables), back_inserter(clonedVariables), [&]
-        (const std::shared_ptr<const Node::Variable::Normal::Instance>& t_variable)
+        std::transform(begin(m_Variables), end(m_Variables), back_inserter(clonedVariables),
+        [&](const std::shared_ptr<const Node::Variable::Normal::Instance>& t_variable)
         {
             return t_variable->CloneInScope(selfScope);
         });
@@ -49,15 +49,15 @@ namespace Ace::Node::Type
 
     auto Struct::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Type::Struct>>
     {
-        ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes, []
-        (const std::shared_ptr<const Node::Attribute>& t_attribute)
+        ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
+        [](const std::shared_ptr<const Node::Attribute>& t_attribute)
         {
             return t_attribute->CreateBound();
         }));
 
 
-        ACE_TRY(boundVariables, TransformExpectedVector(m_Variables, []
-        (const std::shared_ptr<const Node::Variable::Normal::Instance>& t_variable)
+        ACE_TRY(boundVariables, TransformExpectedVector(m_Variables,
+        [](const std::shared_ptr<const Node::Variable::Normal::Instance>& t_variable)
         {
             return t_variable->CreateBound();
         }));

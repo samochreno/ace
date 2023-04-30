@@ -8,9 +8,8 @@
 
 namespace Ace
 {
-    class Package
+    struct Package
     {
-    public:
         struct FileDirectoryPath
         {
             FileDirectoryPath(
@@ -47,31 +46,10 @@ namespace Ace
             std::vector<FileDirectoryPath> m_FileDirectoryPaths{};
         };
 
-        Package() = default;
-        Package(Package&&) = default;
-        Package(const Package&) = default;
-
         static auto Parse(const std::string& t_string) -> Expected<Package>;
 
-        auto GetName()                  const -> const std::string&         { return m_Name; }
-        auto GetFilePaths()             const -> const FileDirectoryPaths&  { return m_FilePaths; }
-        auto GetDependencyFilePaths()   const -> const FileDirectoryPaths&  { return m_DependencyFilePaths; }
-
-    private:
-        Package(
-            std::string&& t_name,
-            FileDirectoryPaths&& t_filePaths,
-            FileDirectoryPaths&& t_dependencyFilePaths
-        ) : m_Name{ t_name },
-            m_FilePaths{ std::move(t_filePaths) },
-            m_DependencyFilePaths{ std::move(t_dependencyFilePaths) }
-        {
-        }
-
-        static auto ParseInternal(const std::string& t_string) -> Expected<Package>;
-
-        std::string m_Name{};
-        FileDirectoryPaths m_FilePaths{};
-        FileDirectoryPaths m_DependencyFilePaths{};
+        std::string Name{};
+        FileDirectoryPaths FilePaths{};
+        FileDirectoryPaths DependencyFilePaths{};
     };
 }

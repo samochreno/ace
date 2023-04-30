@@ -54,8 +54,8 @@ namespace Ace::BoundNode::Expression::FunctionCall
     {
         ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
 
-        ACE_TRY(mchLoweredArguments, TransformExpectedMaybeChangedVector(m_Arguments, [&]
-        (const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
+        ACE_TRY(mchLoweredArguments, TransformExpectedMaybeChangedVector(m_Arguments,
+        [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
         {
             return t_argument->GetOrCreateLoweredExpression({});
         }));
@@ -98,8 +98,8 @@ namespace Ace::BoundNode::Expression::FunctionCall
 
         arguments.push_back(selfEmitResult.Value);
 
-        std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(arguments), [&]
-        (const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
+        std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(arguments),
+        [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
         {
             const auto argumentEmitResult = t_argument->Emit(t_emitter);
             temporaries.insert(end(temporaries), begin(argumentEmitResult.Temporaries), end(argumentEmitResult.Temporaries));

@@ -26,8 +26,8 @@ namespace Ace::Node::Variable::Normal
     auto Static::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Variable::Normal::Static>
     {
         std::vector<std::shared_ptr<const Node::Attribute>> clonedAttributes{};
-        std::transform(begin(m_Attributes), end(m_Attributes), back_inserter(clonedAttributes), [&]
-        (const std::shared_ptr<const Node::Attribute>& t_attribute)
+        std::transform(begin(m_Attributes), end(m_Attributes), back_inserter(clonedAttributes),
+        [&](const std::shared_ptr<const Node::Attribute>& t_attribute)
         {
             return t_attribute->CloneInScope(t_scope);
         });
@@ -43,8 +43,8 @@ namespace Ace::Node::Variable::Normal
 
     auto Static::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Variable::Normal::Static>>
     {
-        ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes, []
-        (const std::shared_ptr<const Node::Attribute>& t_attribute)
+        ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
+        [](const std::shared_ptr<const Node::Attribute>& t_attribute)
         {
             return t_attribute->CreateBound();
         }));
@@ -59,7 +59,9 @@ namespace Ace::Node::Variable::Normal
 
     auto Static::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
     {
-        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName.ToSymbolName()));
+        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(
+            m_TypeName.ToSymbolName(GetCompilation())
+        ));
 
         return std::unique_ptr<Symbol::IBase>
         {

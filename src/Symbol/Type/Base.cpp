@@ -12,7 +12,6 @@
 #include "Asserts.hpp"
 #include "Error.hpp"
 #include "Utility.hpp"
-#include "NativeSymbol.hpp"
 
 namespace Ace::Symbol::Type
 {
@@ -20,10 +19,10 @@ namespace Ace::Symbol::Type
     {
         auto* const self = GetUnaliased();
 
-        if (self->GetScope() != NativeSymbol::Reference.GetSymbol()->GetScope())
+        if (self->GetScope() != GetCompilation().Natives->Reference.GetSymbol()->GetScope())
             return false;
 
-        if (self->GetName() != NativeSymbol::Reference.GetFullyQualifiedName().Sections.back().Name)
+        if (self->GetName() != GetCompilation().Natives->Reference.GetFullyQualifiedName().Sections.back().Name)
             return false;
 
         return true;
@@ -52,7 +51,7 @@ namespace Ace::Symbol::Type
         ACE_ASSERT(!IsReference());
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            NativeSymbol::Reference.GetSymbol(),
+            GetCompilation().Natives->Reference.GetSymbol(),
             {},
             { this->GetUnaliased() }
         ).Unwrap();
@@ -67,10 +66,10 @@ namespace Ace::Symbol::Type
     {
         auto* const self = GetUnaliased();
 
-        if (self->GetScope() != NativeSymbol::StrongPointer.GetSymbol()->GetScope())
+        if (self->GetScope() != GetCompilation().Natives->StrongPointer.GetSymbol()->GetScope())
             return false;
 
-        if (self->GetName() != NativeSymbol::StrongPointer.GetFullyQualifiedName().Sections.back().Name)
+        if (self->GetName() != GetCompilation().Natives->StrongPointer.GetFullyQualifiedName().Sections.back().Name)
             return false;
 
         return true;
@@ -88,7 +87,7 @@ namespace Ace::Symbol::Type
     auto IBase::GetWithStrongPointer() -> Symbol::Type::IBase*
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            NativeSymbol::StrongPointer.GetSymbol(),
+            GetCompilation().Natives->StrongPointer.GetSymbol(),
             {},
             { this->GetUnaliased() }
         ).Unwrap();
@@ -149,9 +148,18 @@ namespace Ace::Symbol::Type
         return foundOperatorIt->second;
     }
 
-    auto GetImplicitConversionOperator(Scope* const t_scope, Symbol::Type::IBase* t_fromType, Symbol::Type::IBase* t_toType) -> Expected<Symbol::Function*>
+    auto GetImplicitConversionOperator(
+        Scope* const t_scope,
+        Symbol::Type::IBase* t_fromType,
+        Symbol::Type::IBase* t_toType
+    ) -> Expected<Symbol::Function*>
     {
-        if (const auto optNativeOperator = GetNativeConversionOperator(t_fromType, t_toType, NativeSymbol::GetImplicitFromOperatorMap()))
+        const auto optNativeOperator = GetNativeConversionOperator(
+            t_fromType,
+            t_toType,
+            t_scope->GetCompilation().Natives->GetImplicitFromOperatorMap()
+        );
+        if (optNativeOperator.has_value())
         {
             return optNativeOperator.value();
         }
@@ -160,36 +168,46 @@ namespace Ace::Symbol::Type
         name.Sections.emplace_back(std::string{ SpecialIdentifier::Operator::ImplicitFrom });
 
         ACE_TRY(operatorSymbol, t_scope->ResolveStaticSymbol<Symbol::Function>(name));
-
         return operatorSymbol;
     }
 
-    auto GetExplicitConversionOperator(Scope* const t_scope, Symbol::Type::IBase* t_fromType, Symbol::Type::IBase* t_toType) -> Expected<Symbol::Function*>
+    auto GetExplicitConversionOperator(
+        Scope* const t_scope,
+        Symbol::Type::IBase* t_fromType,
+        Symbol::Type::IBase* t_toType
+    ) -> Expected<Symbol::Function*>
     {
-        if (const auto optNativeImplicitOperator = GetNativeConversionOperator(t_fromType, t_toType, NativeSymbol::GetImplicitFromOperatorMap()))
+        const auto optNativeImplicitOperator = GetNativeConversionOperator(
+            t_fromType,
+            t_toType,
+            t_scope->GetCompilation().Natives->GetImplicitFromOperatorMap()
+        );
+        if (optNativeImplicitOperator.has_value())
         {
             return optNativeImplicitOperator.value();
         }
 
-        if (const auto optNativeExplicitOperator = GetNativeConversionOperator(t_fromType, t_toType, NativeSymbol::GetExplicitFromOperatorMap()))
+        const auto optNativeExplicitOperator = GetNativeConversionOperator(
+            t_fromType,
+            t_toType,
+            t_scope->GetCompilation().Natives->GetExplicitFromOperatorMap()
+        );
+        if (optNativeExplicitOperator)
         {
             return optNativeExplicitOperator.value();
         }
 
         auto name = t_toType->CreateFullyQualifiedName();
+
         name.Sections.emplace_back(std::string{ SpecialIdentifier::Operator::ExplicitFrom });
-
-        auto expExplicitOperatorSymbol = t_scope->ResolveStaticSymbol<Symbol::Function>(name);
-
+        const auto expExplicitOperatorSymbol = t_scope->ResolveStaticSymbol<Symbol::Function>(name);
         if (expExplicitOperatorSymbol)
         {
             return expExplicitOperatorSymbol.Unwrap();
         }
 
         name.Sections.back().Name = SpecialIdentifier::Operator::ImplicitFrom;
-
         const auto expImplicitOperatorSymbol = t_scope->ResolveStaticSymbol<Symbol::Function>(name);
-
         if (expImplicitOperatorSymbol)
         {
             return expImplicitOperatorSymbol.Unwrap();

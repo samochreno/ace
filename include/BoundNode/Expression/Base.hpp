@@ -59,8 +59,8 @@ namespace Ace::BoundNode::Expression
     {
         ACE_TRY(mchConverted, CreateImplicitlyConvertedVector(t_expressions, t_targetTypeInfo));
 
-        ACE_TRY(mchChecked, TransformExpectedMaybeChangedVector(mchConverted.Value, []
-        (const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
+        ACE_TRY(mchChecked, TransformExpectedMaybeChangedVector(mchConverted.Value,
+        [](const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
         {
             return t_expression->GetOrCreateTypeCheckedExpression({});
         }));

@@ -29,7 +29,9 @@ namespace Ace::Node::Expression
     auto DerefAs::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::DerefAs>>
     {
         ACE_TRY(boundExpression, m_Expression->CreateBoundExpression());
-        ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName.ToSymbolName()));
+        ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<Symbol::Type::IBase>(
+            m_TypeName.ToSymbolName(GetCompilation())
+        ));
         return std::make_shared<const BoundNode::Expression::DerefAs>(
             boundExpression,
             typeSymbol

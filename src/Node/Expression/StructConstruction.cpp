@@ -16,8 +16,8 @@ namespace Ace::Node::Expression
     {
         std::vector<const Node::IBase*> children{};
 
-        std::for_each(begin(m_Arguments), end(m_Arguments), [&]
-        (const Argument& t_argument)
+        std::for_each(begin(m_Arguments), end(m_Arguments),
+        [&](const Argument& t_argument)
         {
             if (t_argument.OptValue.has_value())
             {
@@ -31,8 +31,8 @@ namespace Ace::Node::Expression
     auto StructConstruction::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::StructConstruction>
     {
         std::vector<Argument> clonedArguments{};
-        std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(clonedArguments), [&]
-        (const Argument& t_argument)
+        std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(clonedArguments),
+        [&](const Argument& t_argument)
         {
             auto clonedOptValue = [&]() -> std::optional<std::shared_ptr<const Node::Expression::IBase>>
             {
@@ -59,11 +59,11 @@ namespace Ace::Node::Expression
         const auto variables = structSymbol->GetVariables();
         ACE_TRY_ASSERT(variables.size() == m_Arguments.size());
 
-        ACE_TRY(boundArguments, TransformExpectedVector(m_Arguments, [&]
-        (const Argument& t_argument) -> Expected<BoundNode::Expression::StructConstruction::Argument>
+        ACE_TRY(boundArguments, TransformExpectedVector(m_Arguments,
+        [&](const Argument& t_argument) -> Expected<BoundNode::Expression::StructConstruction::Argument>
         {
-            const auto symbolFoundIt = std::find_if(begin(variables), end(variables), [&]
-            (const Symbol::Variable::Normal::Instance* const t_variable)
+            const auto symbolFoundIt = std::find_if(begin(variables), end(variables),
+            [&](const Symbol::Variable::Normal::Instance* const t_variable)
             {
                 return t_variable->GetName() == t_argument.Name;
             });

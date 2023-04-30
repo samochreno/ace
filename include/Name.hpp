@@ -3,6 +3,11 @@
 #include <vector>
 #include <string>
 
+namespace Ace
+{
+    class Compilation;
+}
+
 namespace Ace::Name
 {
     namespace Symbol
@@ -13,7 +18,10 @@ namespace Ace::Name
         {
             Section();
             Section(const std::string& t_name);
-            Section(const std::string& t_name, const std::vector<Name::Symbol::Full>& t_templateArguments);
+            Section(
+                const std::string& t_name,
+                const std::vector<Name::Symbol::Full>& t_templateArguments
+            );
             ~Section();
 
             std::string Name;
@@ -23,8 +31,14 @@ namespace Ace::Name
         struct Full
         {
             Full();
-            Full(const Section& t_section, const bool& t_isGlobal);
-            Full(const std::vector<Section>& t_sections, const bool& t_isGlobal);
+            Full(
+                const Section& t_section,
+                const bool& t_isGlobal
+            );
+            Full(
+                const std::vector<Section>& t_sections,
+                const bool& t_isGlobal
+            );
             ~Full();
 
             std::vector<Section> Sections;
@@ -34,6 +48,7 @@ namespace Ace::Name
 
     enum class TypeModifier
     {
+        None,
         Reference,
         StrongPointer,
         WeakPointer,
@@ -48,7 +63,9 @@ namespace Ace::Name
         );
         ~Type();
 
-        auto ToSymbolName() const -> Name::Symbol::Full;
+        auto ToSymbolName(
+            const Compilation& t_compilation
+        ) const -> Name::Symbol::Full;
 
         Name::Symbol::Full SymbolName;
         std::vector<TypeModifier> Modifiers;

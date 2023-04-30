@@ -23,7 +23,9 @@ namespace Ace::Node::Expression
 
     auto SizeOf::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::SizeOf>>
     {
-        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName.ToSymbolName()));
+        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(
+            m_TypeName.ToSymbolName(GetCompilation())
+        ));
 
         return std::make_shared<const BoundNode::Expression::SizeOf>(
             m_Scope,

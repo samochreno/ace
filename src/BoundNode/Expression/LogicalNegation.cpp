@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "TypeInfo.hpp"
-#include "NativeSymbol.hpp"
 #include "ValueKind.hpp"
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
@@ -24,9 +23,15 @@ namespace Ace::BoundNode::Expression
 
     auto LogicalNegation::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::LogicalNegation>>>
     {
+        const TypeInfo typeInfo
+        {
+            GetCompilation().Natives->Bool.GetSymbol(),
+            ValueKind::R,
+        };
+
         ACE_TRY(mchConvertedAndCheckedExpression, CreateImplicitlyConvertedAndTypeChecked(
             m_Expression,
-            TypeInfo{ NativeSymbol::Bool.GetSymbol(), ValueKind::R }
+            typeInfo
         ));
 
         if (mchConvertedAndCheckedExpression.IsChanged)
@@ -44,7 +49,9 @@ namespace Ace::BoundNode::Expression
         if (!mchLoweredExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
 
-        const auto returnValue = std::make_shared<const BoundNode::Expression::LogicalNegation>(mchLoweredExpression.Value);
+        const auto returnValue = std::make_shared<const BoundNode::Expression::LogicalNegation>(
+            mchLoweredExpression.Value
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
     }
@@ -56,7 +63,7 @@ namespace Ace::BoundNode::Expression
         const auto expressionEmitResult = m_Expression->Emit(t_emitter);
         temporaries.insert(end(temporaries), begin(expressionEmitResult.Temporaries), end(expressionEmitResult.Temporaries));
 
-        auto* const boolType = NativeSymbol::Bool.GetIRType(t_emitter);
+        auto* const boolType = GetCompilation().Natives->Bool.GetIRType();
 
         auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,
@@ -82,6 +89,6 @@ namespace Ace::BoundNode::Expression
 
     auto LogicalNegation::GetTypeInfo() const -> TypeInfo
     {
-        return { NativeSymbol::Bool.GetSymbol(), ValueKind::R };
+        return { GetCompilation().Natives->Bool.GetSymbol(), ValueKind::R };
     }
 }

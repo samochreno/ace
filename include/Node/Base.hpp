@@ -6,9 +6,10 @@
 #include <algorithm>
 #include <functional>
 
+#include "Compilation.hpp"
+#include "Scope.hpp"
 #include "SymbolCreatable.hpp"
 #include "Error.hpp"
-#include "Scope.hpp"
 #include "Asserts.hpp"
 
 namespace Ace::Node
@@ -18,6 +19,7 @@ namespace Ace::Node
     public:
         virtual ~IBase() = default;
 
+        virtual auto GetCompilation() const -> const Compilation& { return GetScope()->GetCompilation(); }
         virtual auto GetScope() const -> Scope* = 0;
         virtual auto GetChildren() const -> std::vector<const IBase*> = 0;
     };
@@ -55,7 +57,10 @@ namespace Ace::Node
     };
 
     template<typename T>
-    auto AddChildren(std::vector<const Node::IBase*>& t_vec, const T* const t_node) -> void
+    auto AddChildren(
+        std::vector<const Node::IBase*>& t_vec,
+        const T* const t_node
+    ) -> void
     {
         ACE_ASSERT(t_node);
 
@@ -65,24 +70,35 @@ namespace Ace::Node
     }
 
     template<typename T>
-    auto AddChildren(std::vector<const Node::IBase*>& t_vec, const std::shared_ptr<const T>& t_node) -> void
+    auto AddChildren(
+        std::vector<const Node::IBase*>& t_vec,
+        const std::shared_ptr<const T>& t_node
+    ) -> void
     {
         AddChildren(t_vec, t_node.get());
     }
 
     template<typename T>
-    auto AddChildren(std::vector<const Node::IBase*>& t_vec, const std::vector<const T*>& t_nodes) -> void
+    auto AddChildren(
+        std::vector<const Node::IBase*>& t_vec,
+        const std::vector<const T*>& t_nodes
+    ) -> void
     {
-        std::for_each(begin(t_nodes), end(t_nodes), [&](const T* const t_node)
+        std::for_each(begin(t_nodes), end(t_nodes), 
+        [&](const T* const t_node)
         {
             AddChildren(t_vec, t_node);
         });
     }
 
     template<typename T>
-    auto AddChildren(std::vector<const Node::IBase*>& t_vec, const std::vector<std::shared_ptr<const T>>& t_nodes) -> void
+    auto AddChildren(
+        std::vector<const Node::IBase*>& t_vec,
+        const std::vector<std::shared_ptr<const T>>& t_nodes
+    ) -> void
     {
-        std::for_each(begin(t_nodes), end(t_nodes), [&](const std::shared_ptr<const T>& t_node)
+        std::for_each(begin(t_nodes), end(t_nodes), 
+        [&](const std::shared_ptr<const T>& t_node)
         {
             AddChildren(t_vec, t_node);
         });

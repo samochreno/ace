@@ -19,8 +19,8 @@ namespace Ace::BoundNode::Statement
 
     auto Group::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>>
     {
-        ACE_TRY(mchCheckedContent, TransformExpectedMaybeChangedVector(m_Statements, [&]
-        (const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
+        ACE_TRY(mchCheckedContent, TransformExpectedMaybeChangedVector(m_Statements,
+        [&](const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
         {
             return t_statement->GetOrCreateTypeCheckedStatement({ t_context.ParentFunctionTypeSymbol });
         }));
@@ -38,8 +38,8 @@ namespace Ace::BoundNode::Statement
 
     auto Group::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>>
     {
-        ACE_TRY(mchLoweredStatements, TransformExpectedMaybeChangedVector(m_Statements, [&]
-        (const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
+        ACE_TRY(mchLoweredStatements, TransformExpectedMaybeChangedVector(m_Statements,
+        [&](const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
         {
             return t_statement->GetOrCreateLoweredStatement({});
         }));

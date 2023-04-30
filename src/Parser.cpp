@@ -96,10 +96,13 @@ namespace Ace::Parsing
         static const Token::Kind::Set User = OperatorTokenMask::Prefix::User | OperatorTokenMask::Binary::User;
     }
 
-    auto Parser::ParseAST(const std::string& t_packageName, std::vector<Token>&& t_tokens) -> Expected<std::shared_ptr<const Node::Module>>
+    auto Parser::ParseAST(
+        const Compilation& t_compilation, 
+        std::vector<Token>&& t_tokens
+    ) -> Expected<std::shared_ptr<const Node::Module>>
     {
         std::vector<Token> leadingTokens{};
-        leadingTokens.emplace_back(t_packageName);
+        leadingTokens.emplace_back(t_compilation.Package.Name);
         leadingTokens.emplace_back(Token::Kind::New(Token::Kind::Colon));
         leadingTokens.emplace_back(Token::Kind::New(Token::Kind::ModuleKeyword));
         leadingTokens.emplace_back(Token::Kind::New(Token::Kind::OpenBrace));
@@ -111,7 +114,7 @@ namespace Ace::Parsing
 
         auto it = begin(t_tokens);
 
-        ACE_TRY(module, ParseModule({ it, Scope::GetRoot() }));
+        ACE_TRY(module, ParseModule({ it, t_compilation.GlobalScope.get() }));
         it += module.Length;
 
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::End));
@@ -522,8 +525,8 @@ namespace Ace::Parsing
 
         std::vector<Scope*> scopes{};
         scopes.push_back(t_context.Scope);
-        std::transform(begin(name.Value), end(name.Value), back_inserter(scopes), [&]
-        (const Token& t_token)
+        std::transform(begin(name.Value), end(name.Value), back_inserter(scopes),
+        [&](const Token& t_token)
         {
             return scopes.back()->GetOrCreateChild(t_token.String);
         });
@@ -637,8 +640,8 @@ namespace Ace::Parsing
 
         // TODO: Remove this block after impl template specialization.
         {
-            const bool foundTemplatedSection = std::find_if(begin(typeName.Value.Sections), end(typeName.Value.Sections), []
-            (const Name::Symbol::Section& t_section)
+            const bool foundTemplatedSection = std::find_if(begin(typeName.Value.Sections), end(typeName.Value.Sections),
+            [](const Name::Symbol::Section& t_section)
             {
                 return t_section.TemplateArguments.empty();
             }) == end(typeName.Value.Sections);
@@ -934,8 +937,8 @@ namespace Ace::Parsing
 
         // TODO: Remove this block after impl template specialization.
         {
-            const bool foundTemplatedSection = std::find_if(begin(typeName.Value.Sections), end(typeName.Value.Sections) - 1, []
-            (const Name::Symbol::Section& t_section)
+            const bool foundTemplatedSection = std::find_if(begin(typeName.Value.Sections), end(typeName.Value.Sections) - 1,
+            [](const Name::Symbol::Section& t_section)
             {
                 return t_section.TemplateArguments.empty();
             }) == end(typeName.Value.Sections);
@@ -946,8 +949,8 @@ namespace Ace::Parsing
             ACE_TRY_ASSERT(templateParameters.Value.size() == templateArguments.size());
 
             std::unordered_set<std::string> templateParameterSet{};
-            ACE_TRY_VOID(TransformExpectedVector(templateParameters.Value, [&]
-            (const Token& t_templateParameter) -> Expected<void>
+            ACE_TRY_VOID(TransformExpectedVector(templateParameters.Value,
+            [&](const Token& t_templateParameter) -> Expected<void>
             {
                 const std::string& templateParameterName = t_templateParameter.String;
                 ACE_TRY_ASSERT(!templateParameterSet.contains(templateParameterName));
@@ -956,8 +959,8 @@ namespace Ace::Parsing
                 return ExpectedVoid;
             }));
             
-            ACE_TRY_VOID(TransformExpectedVector(templateArguments, [&]
-            (const Name::Symbol::Full& t_argument) -> Expected<void>
+            ACE_TRY_VOID(TransformExpectedVector(templateArguments,
+            [&](const Name::Symbol::Full& t_argument) -> Expected<void>
             {
                 ACE_TRY_ASSERT(t_argument.Sections.size() == 1);
                 ACE_TRY_ASSERT(t_argument.Sections.back().TemplateArguments.empty());

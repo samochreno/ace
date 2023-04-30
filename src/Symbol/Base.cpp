@@ -48,8 +48,8 @@ namespace Ace::Symbol
             {
                 signature += "[";
 
-                std::for_each(begin(templateArguments), end(templateArguments), [&]
-                (const Symbol::Type::IBase* const t_templateArgument)
+                std::for_each(begin(templateArguments), end(templateArguments),
+                [&](const Symbol::Type::IBase* const t_templateArgument)
                 {
                     signature += t_templateArgument->CreateSignature();
                 });
@@ -81,8 +81,8 @@ namespace Ace::Symbol
 
         std::string signature{};
         bool isFirstScope = true;
-        std::for_each(rbegin(scopes), rend(scopes), [&]
-        (Scope* const t_scope)
+        std::for_each(rbegin(scopes), rend(scopes),
+        [&](Scope* const t_scope)
         {
             if (isFirstScope)
             {
@@ -134,8 +134,8 @@ namespace Ace::Symbol
         std::transform(
             rbegin(scopes) + 1, 
             rend  (scopes), 
-            back_inserter(nameSections), []
-            (Scope* const t_scope)
+            back_inserter(nameSections),
+            [](Scope* const t_scope)
             {
                 return Name::Symbol::Section{ t_scope->GetName() };
             }
@@ -150,8 +150,8 @@ namespace Ace::Symbol
             std::transform(
                 begin(implTemplateArguments), 
                 end  (implTemplateArguments), 
-                back_inserter(implTemplateArgumentNames), []
-                (Symbol::Type::IBase* const t_implTemplateArgument)
+                back_inserter(implTemplateArgumentNames),
+                [](Symbol::Type::IBase* const t_implTemplateArgument)
                 {
                     return t_implTemplateArgument->CreateFullyQualifiedName();
                 }
@@ -164,8 +164,8 @@ namespace Ace::Symbol
             std::transform(
                 begin(templateArguments), 
                 end  (templateArguments), 
-                back_inserter(templateArgumentNames), []
-                (Symbol::Type::IBase* const t_templateArgument)
+                back_inserter(templateArgumentNames),
+                [](Symbol::Type::IBase* const t_templateArgument)
                 {
                     return t_templateArgument->CreateFullyQualifiedName();
                 }

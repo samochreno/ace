@@ -21,7 +21,10 @@ namespace Ace::Symbol::Template
 
 namespace Ace::Symbol::Type
 {
-    class IBase : public virtual Symbol::IBase, public virtual Symbol::ISelfScoped, public virtual Symbol::ITemplatable
+    class IBase :
+        public virtual Symbol::IBase,
+        public virtual Symbol::ISelfScoped,
+        public virtual Symbol::ITemplatable
     {
     public:
         virtual ~IBase() = default;
@@ -36,8 +39,12 @@ namespace Ace::Symbol::Type
         virtual auto SetAsTriviallyDroppable() -> void = 0;
         virtual auto IsTriviallyDroppable() const -> bool = 0;
 
-        virtual auto CreateCopyGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>> = 0;
-        virtual auto CreateDropGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>> = 0;
+        virtual auto CreateCopyGlueBody(
+            Symbol::Function* const t_glueSymbol
+        ) -> std::shared_ptr<const IEmittable<void>> = 0;
+        virtual auto CreateDropGlueBody(
+            Symbol::Function* const t_glueSymbol
+        ) -> std::shared_ptr<const IEmittable<void>> = 0;
 
         virtual auto BindCopyGlue(Symbol::Function* const t_glue) -> void = 0;
         virtual auto GetCopyGlue() const -> std::optional<Symbol::Function*> = 0;
@@ -56,6 +63,14 @@ namespace Ace::Symbol::Type
         virtual auto GetTemplate() const -> std::optional<Symbol::Template::Type*> final;
     };
 
-    auto GetImplicitConversionOperator(Scope* const t_scope, Symbol::Type::IBase* t_fromType, Symbol::Type::IBase* t_targetType) -> Expected<Symbol::Function*>;
-    auto GetExplicitConversionOperator(Scope* const t_scope, Symbol::Type::IBase* t_fromType, Symbol::Type::IBase* t_targetType) -> Expected<Symbol::Function*>;
+    auto GetImplicitConversionOperator(
+        Scope* const t_scope,
+        Symbol::Type::IBase* t_fromType,
+        Symbol::Type::IBase* t_targetType
+    ) -> Expected<Symbol::Function*>;
+    auto GetExplicitConversionOperator(
+        Scope* const t_scope,
+        Symbol::Type::IBase* t_fromType,
+        Symbol::Type::IBase* t_targetType
+    ) -> Expected<Symbol::Function*>;
 }

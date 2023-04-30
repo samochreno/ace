@@ -12,6 +12,7 @@
 #include "Node/Module.hpp"
 #include "BoundNode/Base.hpp"
 #include "Emittable.hpp"
+#include "Compilation.hpp"
 
 namespace Ace::Symbol
 {
@@ -40,8 +41,8 @@ namespace Ace::Core
     auto GetAllNodes(TIt t_astsBegin, TIt t_astsEnd)
     {
         std::vector<const TNodeIBase*> allNodes{};
-        std::for_each(t_astsBegin, t_astsEnd, [&]
-        (const TASTSmartPointer& t_ast)
+        std::for_each(t_astsBegin, t_astsEnd,
+        [&](const TASTSmartPointer& t_ast)
         {
             const auto nodes = GetAllNodes(t_ast);
             allNodes.insert(allNodes.end(), nodes.begin(), nodes.end());
@@ -53,19 +54,40 @@ namespace Ace::Core
 #undef TASTSmartPointer
 #undef TNodeIBase
 
-    auto ParseAST(const std::string& t_packageName, const std::string& t_text) -> Expected<std::shared_ptr<const Node::Module>>;
-    auto CreateAndDefineSymbols(const std::vector<const Node::IBase*>& t_nodes) -> Expected<void>;
-    auto DefineAssociations(const std::vector<const Node::IBase*>& t_nodes) -> Expected<void>;
-    auto AssertControlFlow(const std::vector<const BoundNode::IBase*>& t_nodes) -> Expected<void>;
-    auto BindFunctionSymbolsBodies(const std::vector<const BoundNode::IBase*>& t_nodes) -> void;
-    auto AssertCanResolveTypeSizes() -> Expected<void>;
-    auto GenerateAndBindGlue() -> void;
+    auto ParseAST(
+        const Compilation& t_compilation,
+        const std::string& t_text
+    ) -> Expected<std::shared_ptr<const Node::Module>>;
+    auto CreateAndDefineSymbols(
+        const Compilation& t_compilation,
+        const std::vector<const Node::IBase*>& t_nodes
+    ) -> Expected<void>;
+    auto DefineAssociations(
+        const Compilation& t_compilation,
+        const std::vector<const Node::IBase*>& t_nodes
+    ) -> Expected<void>;
+    auto AssertControlFlow(
+        const Compilation& t_compilation,
+        const std::vector<const BoundNode::IBase*>& t_nodes
+    ) -> Expected<void>;
+    auto BindFunctionSymbolsBodies(
+        const Compilation& t_compilation,
+        const std::vector<const BoundNode::IBase*>& t_nodes
+    ) -> void;
+    auto AssertCanResolveTypeSizes(
+        const Compilation& t_compilation
+    ) -> Expected<void>;
+    auto GenerateAndBindGlue(
+        const Compilation& t_compilation
+    ) -> void;
 
     auto CreateCopyGlueBody(
+        const Compilation& t_compilation,
         Symbol::Type::Struct* const t_structSymbol,
         Symbol::Function* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>;
     auto CreateDropGlueBody(
+        const Compilation& t_compilation,
         Symbol::Type::Struct* const t_structSymbol,
         Symbol::Function* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>;
@@ -81,6 +103,7 @@ namespace Ace::Core
         typename TGetOrCreateLoweredTypeCheckedFunc
     >
     auto CreateTransformedAndVerifiedAST(
+        const Compilation& t_compilation,
         const TBound& t_boundAST,
         TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
         TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc,
@@ -94,7 +117,7 @@ namespace Ace::Core
         auto& finalAST = mchLoweredTypeCheckedAST.Value;
         const auto nodes = GetAllNodes(finalAST);
         
-        ACE_TRY_VOID(AssertControlFlow(nodes));
+        ACE_TRY_VOID(AssertControlFlow(t_compilation, nodes));
 
         return finalAST;
     }
@@ -106,26 +129,27 @@ namespace Ace::Core
         typename TGetOrCreateLoweredTypeCheckedFunc
     >
     auto CreateTransformedAndVerifiedASTs(
+        const Compilation& t_compilation,
         const std::vector<TBound>& t_boundASTs,
         TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
         TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc,
         TGetOrCreateLoweredTypeCheckedFunc&& t_getOrCreateLoweredTypeCheckedFunc
     ) -> Expected<std::vector<TLoweredTypeChecked>>
     {
-        ACE_TRY(mchTypeCheckedASTs, TransformExpectedMaybeChangedVector(t_boundASTs, [&]
-        (const TBound& t_ast)
+        ACE_TRY(mchTypeCheckedASTs, TransformExpectedMaybeChangedVector(t_boundASTs,
+        [&](const TBound& t_ast)
         {
             return t_getOrCreateTypeCheckedFunc(t_ast);
         }));
 
-        ACE_TRY(mchLoweredASTs, TransformExpectedMaybeChangedVector(mchTypeCheckedASTs.Value, [&]
-        (const TTypeChecked& t_ast)
+        ACE_TRY(mchLoweredASTs, TransformExpectedMaybeChangedVector(mchTypeCheckedASTs.Value,
+        [&](const TTypeChecked& t_ast)
         {
             return t_getOrCreateLoweredFunc(t_ast);
         }));
 
-        ACE_TRY(mchLoweredTypeCheckedASTs, TransformExpectedMaybeChangedVector(mchLoweredASTs.Value, [&]
-        (const TLoweredTypeChecked& t_ast)
+        ACE_TRY(mchLoweredTypeCheckedASTs, TransformExpectedMaybeChangedVector(mchLoweredASTs.Value,
+        [&](const TLoweredTypeChecked& t_ast)
         {
             return t_getOrCreateLoweredTypeCheckedFunc(t_ast);
         }));
@@ -133,7 +157,7 @@ namespace Ace::Core
         auto& finalASTs = mchLoweredTypeCheckedASTs.Value;
         const auto nodes = GetAllNodes(finalASTs.begin(), finalASTs.end());
 
-        ACE_TRY_VOID(AssertControlFlow(nodes));
+        ACE_TRY_VOID(AssertControlFlow(t_compilation, nodes));
 
         return finalASTs;
     }
@@ -148,6 +172,7 @@ namespace Ace::Core
         typename TGetOrCreateLoweredTypeCheckedFunc
     >
     auto CreateBoundTransformedAndVerifiedAST(
+        const Compilation& t_compilation,
         const T& t_ast,
         TCreateBoundFunc&& t_createBoundFunc,
         TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
@@ -157,6 +182,7 @@ namespace Ace::Core
     {
         ACE_TRY(boundAST, t_createBoundFunc(t_ast));
         ACE_TRY(finalAST, CreateTransformedAndVerifiedAST(
+            t_compilation,
             boundAST,
             t_getOrCreateTypeCheckedFunc,
             t_getOrCreateLoweredFunc,
@@ -173,6 +199,7 @@ namespace Ace::Core
         typename TGetOrCreateLoweredTypeCheckedFunc
     >
     auto CreateBoundTransformedAndVerifiedASTs(
+        const Compilation& t_compilation,
         const std::vector<T>& t_asts,
         TCreateBoundFunc&& t_createBoundFunc,
         TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
@@ -180,13 +207,14 @@ namespace Ace::Core
         TGetOrCreateLoweredTypeCheckedFunc&& t_getOrCreateLoweredTypeCheckedFunc
     ) -> Expected<std::vector<TLoweredTypeChecked>>
     {
-        ACE_TRY(boundASTs, TransformExpectedVector(t_asts, [&]
-        (const T& t_ast)
+        ACE_TRY(boundASTs, TransformExpectedVector(t_asts,
+        [&](const T& t_ast)
         {
             return t_createBoundFunc(t_ast);
         }));
 
         ACE_TRY(finalASTs, CreateTransformedAndVerifiedASTs(
+            t_compilation,
             boundASTs,
             t_getOrCreateTypeCheckedFunc,
             t_getOrCreateLoweredFunc,
@@ -195,7 +223,7 @@ namespace Ace::Core
 
         const auto nodes = GetAllNodes(finalASTs.begin(), finalASTs.end());
 
-        ACE_TRY_VOID(AssertControlFlow(nodes));
+        ACE_TRY_VOID(AssertControlFlow(t_compilation, nodes));
 
         return finalASTs;
     }

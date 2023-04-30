@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "TypeInfo.hpp"
-#include "NativeSymbol.hpp"
 #include "ValueKind.hpp"
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
@@ -25,14 +24,20 @@ namespace Ace::BoundNode::Expression
 
     auto And::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::And>>>
     {
+        const TypeInfo typeInfo
+        {
+            GetCompilation().Natives->Bool.GetSymbol(),
+            ValueKind::R,
+        };
+
         ACE_TRY(mchConvertedAndCheckedLHSExpression, CreateImplicitlyConvertedAndTypeChecked(
             m_LHSExpression,
-            TypeInfo{ NativeSymbol::Bool.GetSymbol(), ValueKind::R }
+            typeInfo
         ));
 
         ACE_TRY(mchConvertedAndCheckedRHSExpression, CreateImplicitlyConvertedAndTypeChecked(
             m_RHSExpression,
-            TypeInfo{ NativeSymbol::Bool.GetSymbol(), ValueKind::R }
+            typeInfo
         ));
 
         if (
@@ -72,7 +77,7 @@ namespace Ace::BoundNode::Expression
     {
         std::vector<ExpressionDropData> temporaries{};
 
-        auto* const boolType = NativeSymbol::Bool.GetIRType(t_emitter);
+        auto* const boolType = GetCompilation().Natives->Bool.GetIRType();
 
         auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
 
@@ -90,12 +95,12 @@ namespace Ace::BoundNode::Expression
         );
 
         auto trueBlockBuilder = std::make_unique<BlockBuilder>(
-            t_emitter.GetContext(),
+            *GetCompilation().LLVMContext,
             t_emitter.GetFunction()
             );
 
         auto endBlockBuilder = std::make_unique<BlockBuilder>(
-            t_emitter.GetContext(),
+            *GetCompilation().LLVMContext,
             t_emitter.GetFunction()
             );
 
@@ -129,6 +134,10 @@ namespace Ace::BoundNode::Expression
 
     auto And::GetTypeInfo() const -> TypeInfo
     {
-        return { NativeSymbol::Bool.GetSymbol(), ValueKind::R };
+        return
+        {
+            GetCompilation().Natives->Bool.GetSymbol(),
+            ValueKind::R
+        };
     }
 }

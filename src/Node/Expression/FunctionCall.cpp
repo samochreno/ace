@@ -30,8 +30,8 @@ namespace Ace::Node::Expression
     auto FunctionCall::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::FunctionCall>
     {
         std::vector<std::shared_ptr<const Node::Expression::IBase>> clonedArguments{};
-        std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(clonedArguments), [&]
-        (const std::shared_ptr<const Node::Expression::IBase>& t_argument)
+        std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(clonedArguments),
+        [&](const std::shared_ptr<const Node::Expression::IBase>& t_argument)
         {
             return t_argument->CloneInScopeExpression(t_scope);
         });
@@ -44,15 +44,15 @@ namespace Ace::Node::Expression
 
     auto FunctionCall::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::IBase>>
     {
-        ACE_TRY(boundArguments, TransformExpectedVector(m_Arguments, []
-        (const std::shared_ptr<const Node::Expression::IBase>& t_argument)
+        ACE_TRY(boundArguments, TransformExpectedVector(m_Arguments,
+        [](const std::shared_ptr<const Node::Expression::IBase>& t_argument)
         {
             return t_argument->CreateBoundExpression();
         }));
 
         std::vector<Symbol::Type::IBase*> argumentTypeSymbols{};
-        std::transform(begin(boundArguments), end(boundArguments), back_inserter(argumentTypeSymbols), []
-        (const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
+        std::transform(begin(boundArguments), end(boundArguments), back_inserter(argumentTypeSymbols),
+        [](const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
         {
             return t_argument->GetTypeInfo().Symbol;
         });

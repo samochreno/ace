@@ -5,7 +5,6 @@
 
 #include "Error.hpp"
 #include "MaybeChanged.hpp"
-#include "NativeSymbol.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
@@ -26,7 +25,10 @@ namespace Ace::BoundNode::Statement
 
     auto Return::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Return>>>
     {
-        if (t_context.ParentFunctionTypeSymbol == NativeSymbol::Void.GetSymbol())
+        if (
+            t_context.ParentFunctionTypeSymbol == 
+            GetCompilation().Natives->Void.GetSymbol()
+            )
         {
             ACE_TRY_ASSERT(!m_OptExpression.has_value());
         }
@@ -35,14 +37,17 @@ namespace Ace::BoundNode::Statement
             ACE_TRY_ASSERT(m_OptExpression.has_value());
             ACE_TRY_ASSERT(
                 m_OptExpression.value()->GetTypeInfo().Symbol->GetUnaliased() != 
-                NativeSymbol::Void.GetSymbol()
+                GetCompilation().Natives->Void.GetSymbol()
             );
         }
 
-        ACE_TRY(mchCheckedOptExpression, TransformExpectedMaybeChangedOptional(m_OptExpression, [&]
-        (const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
+        ACE_TRY(mchCheckedOptExpression, TransformExpectedMaybeChangedOptional(m_OptExpression,
+        [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
         {
-            return CreateImplicitlyConvertedAndTypeChecked(t_expression, { t_context.ParentFunctionTypeSymbol, ValueKind::R });
+            return CreateImplicitlyConvertedAndTypeChecked(
+                t_expression,
+                { t_context.ParentFunctionTypeSymbol, ValueKind::R }
+            );
         }));
 
         if (!mchCheckedOptExpression.IsChanged)
@@ -51,15 +56,15 @@ namespace Ace::BoundNode::Statement
         const auto returnValue = std::make_shared<const BoundNode::Statement::Return>(
             m_Scope,
             mchCheckedOptExpression.Value
-            );
+        );
         
         return CreateChanged(returnValue);
     }
 
     auto Return::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Return>>>
     {
-        ACE_TRY(mchLoweredOptExpression, TransformExpectedMaybeChangedOptional(m_OptExpression, [&]
-        (const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
+        ACE_TRY(mchLoweredOptExpression, TransformExpectedMaybeChangedOptional(m_OptExpression,
+        [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
         {
             return t_expression->GetOrCreateLoweredExpression({});
         }));
