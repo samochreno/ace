@@ -9,6 +9,7 @@
 #include "Symbol/Typed.hpp"
 #include "Symbol/SelfScoped.hpp"
 #include "Symbol/Templatable.hpp"
+#include "Symbol/Parameterized.hpp"
 #include "Symbol/Variable/Parameter/Base.hpp"
 #include "Symbol/Variable/Parameter/Normal.hpp"
 #include "Symbol/Type/Base.hpp"
@@ -24,11 +25,12 @@ namespace Ace::Symbol::Template
 
 namespace Ace::Symbol
 {
-    class Function : 
-        public virtual Symbol::IBase, 
-        public virtual Symbol::ITyped, 
-        public virtual Symbol::ISelfScoped, 
-        public virtual Symbol::ITemplatable
+    class Function :
+        public virtual Symbol::IBase,
+        public virtual Symbol::ITyped,
+        public virtual Symbol::ISelfScoped,
+        public virtual Symbol::ITemplatable,
+        public virtual Symbol::IParameterized
     {
     public:
         Function(
@@ -55,10 +57,10 @@ namespace Ace::Symbol
 
         auto GetType() const -> Symbol::Type::IBase* final { return m_Type; }
 
-        auto GetAllParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>;
-        auto GetParameters() const -> std::vector<Symbol::Variable::Parameter::Normal*>;
+        auto CollectParameters()    const -> std::vector<Symbol::Variable::Parameter::IBase*> final;
+        auto CollectAllParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>;
 
-        auto GetArgumentTypeInfos() const -> std::vector<TypeInfo>;
+        auto CollectArgumentTypeInfos() const -> std::vector<TypeInfo>;
 
         auto BindBody(const std::shared_ptr<const IEmittable<void>>& t_body) -> void;
         auto GetBody() -> std::optional<const IEmittable<void>*>;
@@ -68,7 +70,7 @@ namespace Ace::Symbol
 
         auto GetTemplate() const -> std::optional<Symbol::Template::Function*>;
 
-        auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
+        auto CollectTemplateArguments()     const -> std::vector<Symbol::Type::IBase*> final;
         auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
 
     private:

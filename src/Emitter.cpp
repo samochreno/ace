@@ -118,7 +118,7 @@ namespace Ace
             mainFunctionSymbol->GetSymbolCategory() ==
             SymbolCategory::Static
         );
-        ACE_ASSERT(mainFunctionSymbol->GetAllParameters().empty());
+        ACE_ASSERT(mainFunctionSymbol->CollectAllParameters().empty());
 
         auto* const mainType = llvm::FunctionType::get(
             llvm::Type::getInt32Ty(*m_Compilation.LLVMContext),
@@ -233,10 +233,10 @@ namespace Ace
         const std::vector<std::shared_ptr<const BoundNode::Statement::IBase>>& t_statements
     ) -> void
     {
-        const auto parameterSymbols = m_FunctionSymbol->GetAllParameters();
+        const auto parameterSymbols = m_FunctionSymbol->CollectAllParameters();
         for (size_t i = 0; i < parameterSymbols.size(); i++)
         {
-            auto* const parameterSymbol = parameterSymbols[i];
+            auto* const parameterSymbol = parameterSymbols.at(i);
             auto* const typeSymbol = parameterSymbol->GetType();
 
             auto* const allocaInst = m_BlockBuilder->Builder.CreateAlloca(
@@ -476,7 +476,7 @@ namespace Ace
 
         const auto glueSymbol = t_dropData.TypeSymbol->GetDropGlue().value();
 
-        auto* const typeSymbol = glueSymbol->GetParameters().front()->GetType();
+        auto* const typeSymbol = glueSymbol->CollectParameters().front()->GetType();
         auto* const type = GetIRType(typeSymbol);
 
         auto* const allocaInst = m_BlockBuilder->Builder.CreateAlloca(type);
@@ -541,7 +541,7 @@ namespace Ace
 
     auto Emitter::EmitDropArguments() -> void
     {
-        const auto parameterSymbols = m_FunctionSymbol->GetAllParameters();
+        const auto parameterSymbols = m_FunctionSymbol->CollectAllParameters();
         std::for_each(rbegin(parameterSymbols), rend(parameterSymbols),
         [&](Symbol::Variable::Parameter::IBase* const t_parameterSymbol)
         {
@@ -649,7 +649,7 @@ namespace Ace
             [&](Symbol::Function* const t_functionSymbol)
             {
                 std::vector<llvm::Type*> parameterTypes{};
-                const auto parameterSymbols = t_functionSymbol->GetAllParameters();
+                const auto parameterSymbols = t_functionSymbol->CollectAllParameters();
                 std::transform(
                     begin(parameterSymbols), 
                     end  (parameterSymbols), 

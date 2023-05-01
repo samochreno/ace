@@ -23,37 +23,9 @@
 
 namespace Ace::Symbol
 {
-    auto Function::GetAllParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>
-    {
-        std::vector<Symbol::Variable::Parameter::IBase*> parameters{};
-
-        const auto definedParameters = m_SelfScope->CollectDefinedSymbols<Symbol::Variable::Parameter::IBase>();
-
-        const auto selfParameters = DynamicCastFilter<Symbol::Variable::Parameter::Self*>(definedParameters);
-        if (selfParameters.size() > 0)
-        {
-            ACE_ASSERT(selfParameters.size() == 1);
-            parameters.push_back(selfParameters.front());
-        }
-
-        auto normalParameters = DynamicCastFilter<Symbol::Variable::Parameter::Normal*>(definedParameters);
-        std::sort(begin(normalParameters), end(normalParameters),
-        [](
-            const Symbol::Variable::Parameter::Normal* const t_lhs,
-            const Symbol::Variable::Parameter::Normal* const t_rhs
-            )
-        {
-            return t_lhs->GetIndex() < t_rhs->GetIndex();
-        });
-
-        parameters.insert(end(parameters), begin(normalParameters), end(normalParameters));
-        return parameters;
-    }
-
-    auto Function::GetParameters() const -> std::vector<Symbol::Variable::Parameter::Normal*>
+    auto Function::CollectParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>
     {
         auto normalParameters = m_SelfScope->CollectDefinedSymbols<Symbol::Variable::Parameter::Normal>();
-
         std::sort(begin(normalParameters), end(normalParameters),
         [](
             const Symbol::Variable::Parameter::Normal* const t_lhs, 
@@ -63,19 +35,86 @@ namespace Ace::Symbol
             return t_lhs->GetIndex() < t_rhs->GetIndex();
         });
 
-        return normalParameters;
+        std::vector<Symbol::Variable::Parameter::IBase*> parameters{};
+        parameters.insert(
+            end(parameters),
+            begin(normalParameters),
+            end  (normalParameters)
+        );
+
+        return parameters;
     }
 
-    auto Function::GetArgumentTypeInfos() const -> std::vector<TypeInfo>
+    auto Function::CollectAllParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>
     {
-        auto parameters = GetParameters();
+        const auto definedParameters = m_SelfScope->CollectDefinedSymbols<Symbol::Variable::Parameter::IBase>();
+
+        std::vector<Symbol::Variable::Parameter::Self*> selfParameters{};
+        std::vector<Symbol::Variable::Parameter::Normal*> normalParameters{};
+        std::for_each(
+            begin(definedParameters),
+            end  (definedParameters),
+            [&](Symbol::Variable::Parameter::IBase* const t_parameter)
+            {
+                auto* const normalParameter =
+                    dynamic_cast<Symbol::Variable::Parameter::Normal*>(t_parameter);
+
+                if (normalParameter)
+                {
+                    normalParameters.push_back(normalParameter);
+                    return;
+                }
+
+                auto* const selfParameter =
+                    dynamic_cast<Symbol::Variable::Parameter::Self*>(t_parameter);
+
+                if (selfParameter)
+                {
+                    selfParameters.push_back(selfParameter);
+                    return;
+                }
+            }
+        );
+
+        std::vector<Symbol::Variable::Parameter::IBase*> parameters{};
+
+        if (!selfParameters.empty())
+        {
+            ACE_ASSERT(selfParameters.size() == 1);
+            parameters.push_back(selfParameters.front());
+        }
+
+        std::sort(begin(normalParameters), end(normalParameters),
+        [](
+            const Symbol::Variable::Parameter::Normal* const t_lhs,
+            const Symbol::Variable::Parameter::Normal* const t_rhs
+            )
+        {
+            return t_lhs->GetIndex() < t_rhs->GetIndex();
+        });
+        parameters.insert(
+            end(parameters),
+            begin(normalParameters), 
+            end  (normalParameters)
+        );
+
+        return parameters;
+    }
+
+    auto Function::CollectArgumentTypeInfos() const -> std::vector<TypeInfo>
+    {
+        auto parameters = CollectParameters();
 
         std::vector<TypeInfo> typeInfos{};
-        std::transform(begin(parameters), end(parameters), back_inserter(typeInfos),
-        [](const Symbol::Variable::Parameter::Normal* const t_parameter)
-        {
-            return TypeInfo{ t_parameter->GetType(), ValueKind::R };
-        });
+        std::transform(
+            begin(parameters),
+            end  (parameters),
+            back_inserter(typeInfos),
+            [](const Symbol::Variable::Parameter::IBase* const t_parameter)
+            {
+                return TypeInfo{ t_parameter->GetType(), ValueKind::R };
+            }
+        );
 
         return typeInfos;
     }
@@ -97,7 +136,7 @@ namespace Ace::Symbol
     {
         auto expTemplate = GetScope()->ResolveStaticSymbol<Symbol::Template::Function>(
             SpecialIdentifier::CreateTemplate(m_Name)
-            );
+        );
 
         return expTemplate ? expTemplate.Unwrap() : std::optional<Symbol::Template::Function*>{};
     }

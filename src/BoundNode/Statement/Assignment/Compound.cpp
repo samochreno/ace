@@ -32,7 +32,7 @@ namespace Ace::BoundNode::Statement::Assignment
 
     auto Compound::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assignment::Compound>>>
     {
-        const auto argumentTypeInfos = m_OperatorSymbol->GetArgumentTypeInfos();
+        const auto argumentTypeInfos = m_OperatorSymbol->CollectArgumentTypeInfos();
         ACE_ASSERT(argumentTypeInfos.size() == 2);
 
         ACE_TRY(mchConvertedAndCheckedLHSExpression, CreateImplicitlyConvertedAndTypeChecked(

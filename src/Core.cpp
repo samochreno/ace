@@ -463,7 +463,7 @@ namespace Ace::Core
 
         auto* const bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
-        const auto parameterSymbols = t_glueSymbol->GetParameters();
+        const auto parameterSymbols = t_glueSymbol->CollectParameters();
         const auto selfParameterReferenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
             bodyScope,
             parameterSymbols.at(0)
@@ -580,7 +580,7 @@ namespace Ace::Core
 
         auto* const bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
-        const auto parameterSymbols = t_glueSymbol->GetParameters();
+        const auto parameterSymbols = t_glueSymbol->CollectParameters();
         const auto selfParameterReferenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
             bodyScope,
             parameterSymbols.at(0)

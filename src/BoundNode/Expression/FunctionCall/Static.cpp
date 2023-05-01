@@ -24,9 +24,9 @@ namespace Ace::BoundNode::Expression::FunctionCall
 
     auto Static::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>>
     {
-        ACE_TRY_ASSERT(m_Arguments.size() == m_FunctionSymbol->GetParameters().size());
 
-        const auto argumentTypeInfos = m_FunctionSymbol->GetArgumentTypeInfos();
+        const auto argumentTypeInfos = m_FunctionSymbol->CollectArgumentTypeInfos();
+        ACE_TRY_ASSERT(m_Arguments.size() == argumentTypeInfos.size());
 
         ACE_TRY(mchConvertedAndCheckedArguments, CreateImplicitlyConvertedAndTypeCheckedVector(
             m_Arguments,
@@ -40,7 +40,7 @@ namespace Ace::BoundNode::Expression::FunctionCall
             m_Scope,
             m_FunctionSymbol,
             mchConvertedAndCheckedArguments.Value
-            );
+        );
 
         return CreateChanged(returnValue);
     }
@@ -60,7 +60,7 @@ namespace Ace::BoundNode::Expression::FunctionCall
             m_Scope,
             m_FunctionSymbol,
             mchLoweredArguments.Value
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
     }

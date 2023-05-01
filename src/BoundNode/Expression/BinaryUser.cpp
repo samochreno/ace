@@ -23,7 +23,7 @@ namespace Ace::BoundNode::Expression
 
     auto BinaryUser::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::BinaryUser>>>
     {
-        const auto argumentTypeInfos = m_OperatorSymbol->GetArgumentTypeInfos();
+        const auto argumentTypeInfos = m_OperatorSymbol->CollectArgumentTypeInfos();
 
         ACE_TRY(mchConvertedAndCheckedLHSExpression, CreateImplicitlyConvertedAndTypeChecked(
             m_LHSExpression,
@@ -58,7 +58,11 @@ namespace Ace::BoundNode::Expression
         const auto returnValue = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
             GetScope(),
             m_OperatorSymbol,
-            std::vector{ mchLoweredLHSExpression.Value, mchLoweredRHSExpression.Value }
+            std::vector
+            {
+                mchLoweredLHSExpression.Value,
+                mchLoweredRHSExpression.Value
+            }
         );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
