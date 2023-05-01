@@ -159,16 +159,16 @@ namespace Ace
             return value;
         };
 
-        ACE_LOG_INFO("[" << getFormattedDuration(timeEnd - timeStart)                                               << "] Total");
-        ACE_LOG_INFO("[" << getFormattedDuration(timeFrontendEnd - timeFrontendStart)                               << "] Frontend");
-        ACE_LOG_INFO("[" << getFormattedDuration(timeParsingEnd - timeParsingStart)                                 << "] Frontend | Parsing");
-        ACE_LOG_INFO("[" << getFormattedDuration(timeSymbolCreationEnd - timeSymbolCreationStart)                   << "] Frontend | Symbol Creation");
-        ACE_LOG_INFO("[" << getFormattedDuration(timeBindingAndVerificationEnd - timeBindingAndVerificationStart)   << "] Frontend | Binding And Verification");
-        ACE_LOG_INFO("[" << getFormattedDuration(timeBackendEnd - timeBackendStart)                                 << "] Backend");
-        ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.IREmitting)                                << "] Backend | IR Emitting");
-        ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.Analyses)                                  << "] Backend | Analyses");
-        ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.LLC)                                       << "] Backend | llc");
-        ACE_LOG_INFO("[" << getFormattedDuration(emitterResult.Durations.Clang)                                     << "] Backend | clang");
+        ACE_LOG_INFO(getFormattedDuration(timeEnd - timeStart)                                               << " - Total");
+        ACE_LOG_INFO(getFormattedDuration(timeFrontendEnd - timeFrontendStart)                               << " - Frontend");
+        ACE_LOG_INFO(getFormattedDuration(timeParsingEnd - timeParsingStart)                                 << " - Frontend | Parsing");
+        ACE_LOG_INFO(getFormattedDuration(timeSymbolCreationEnd - timeSymbolCreationStart)                   << " - Frontend | Symbol Creation");
+        ACE_LOG_INFO(getFormattedDuration(timeBindingAndVerificationEnd - timeBindingAndVerificationStart)   << " - Frontend | Binding And Verification");
+        ACE_LOG_INFO(getFormattedDuration(timeBackendEnd - timeBackendStart)                                 << " - Backend");
+        ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.IREmitting)                                << " - Backend | IR Emitting");
+        ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.Analyses)                                  << " - Backend | Analyses");
+        ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.LLC)                                       << " - Backend | llc");
+        ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.Clang)                                     << " - Backend | clang");
 
         return ExpectedVoid;
     }
