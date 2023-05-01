@@ -2,14 +2,18 @@
   "name": "ace",
   "path_macros": [
     {
-      "name": "project_path",
-      "value": "/home/samo/repos/ace/ace/src"
+      "name": "sources",
+      "value": "src"
+    },
+    {
+      "name": "dependencies",
+      "value": "lib"
     }
   ],
   "file_paths": [
-    "$project_path/**.ace"
+    "$sources/**.ace"
   ],
   "dependency_file_paths": [
-    "$project_path/**.dll"
+    "$dependencies/**.dll"
   ]
 }

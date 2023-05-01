@@ -161,15 +161,7 @@ namespace Ace
     ) -> Expected<std::unique_ptr<const Compilation>>
     {
         ACE_TRY(options, ParseOptions(t_args));
-
-        const auto& packagePath = options.PackagePath;
-        std::ifstream packageFileStream{ packagePath };
-        ACE_TRY_ASSERT(packageFileStream.is_open());
-
-        std::stringstream packageStringStream{};
-        packageStringStream << packageFileStream.rdbuf();
-
-        ACE_TRY(package, Package::Parse(packageStringStream.str()));
+        ACE_TRY(package, Package::New(options.PackagePath));
 
         const auto& outputPath = options.OutputPath;
         ACE_TRY_ASSERT(std::filesystem::exists(outputPath));

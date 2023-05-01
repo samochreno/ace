@@ -40,9 +40,10 @@ namespace Ace
         const auto timeParsingStart = now();
         ACE_LOG_INFO("Parsing start");
 
-        const auto filePaths = t_compilation.Package.FilePaths.CreatePaths();
-        ACE_TRY(asts, TransformExpectedVector(filePaths,
-        [&](const std::filesystem::path& t_filePath) -> Expected<std::shared_ptr<const Node::Module>>
+        ACE_TRY(asts, TransformExpectedVector(t_compilation.Package.FilePaths,
+        [&](
+            const std::filesystem::path& t_filePath
+        ) -> Expected<std::shared_ptr<const Node::Module>>
         {
             const std::ifstream fileStream{ t_filePath };
             ACE_TRY_ASSERT(fileStream.is_open());

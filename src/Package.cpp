@@ -22,54 +22,91 @@ namespace Ace
         static const std::string Value                  = "value";
     }
 
-    auto Package::FileDirectoryPaths::CreatePaths() const -> std::vector<std::filesystem::path>
+    struct FilteredDirectory
     {
-        std::vector<std::filesystem::path> paths{};
-        paths.insert(end(paths), begin(m_FilePaths), end(m_FilePaths));
-
-        std::for_each(begin(m_FileDirectoryPaths), end(m_FileDirectoryPaths),
-        [&](const FileDirectoryPath& t_fileDirectoryPath)
+        FilteredDirectory(
+            const std::filesystem::path& t_path, 
+            const std::optional<std::string>& t_optExtensionFilter, 
+            const bool& t_isRecursive
+        ) : Path{ t_path }, 
+            OptExtensionFilter{ t_optExtensionFilter }, 
+            IsRecursive{ t_isRecursive }
         {
-            if (!std::filesystem::exists(t_fileDirectoryPath.Path))
-                return;
+        }
 
-            const auto loopBody = [&](const std::filesystem::directory_entry& t_directoryEntry) -> void
+        std::filesystem::path Path{};
+        std::optional<std::string> OptExtensionFilter{};
+        bool IsRecursive{};
+    };
+
+    static auto DoesDirectoryEntryMatchFilter(
+        const std::filesystem::directory_entry& t_directoryEntry,
+        std::optional<std::string> t_optExtensionFilter
+    ) -> bool
+    {
+        if (!t_directoryEntry.is_regular_file())
+            return false;
+
+        if (!t_optExtensionFilter.has_value())
+            return true;
+
+        const auto& path = t_directoryEntry.path();
+        if (!path.has_extension())
+            return false;
+
+        if (path.extension() != t_optExtensionFilter.value())
+            return false;
+
+        return true;
+    }
+
+    static auto CollectFilteredDirectoryFilePaths(
+        const FilteredDirectory& t_directory
+    ) -> std::vector<std::filesystem::path>
+    {
+        if (!std::filesystem::exists(t_directory.Path))
+        {
+            return {};
+        }
+
+        std::vector<std::filesystem::path> filePaths{};
+
+        if (t_directory.IsRecursive)
+        {
+            for (
+                const auto& directoryEntry :
+                std::filesystem::recursive_directory_iterator(t_directory.Path)
+                )
             {
-                if (!t_directoryEntry.is_regular_file())
-                    return;
+                const bool doesMatch = DoesDirectoryEntryMatchFilter(
+                    directoryEntry,
+                    t_directory.OptExtensionFilter
+                );
+                if (!doesMatch)
+                    continue;
 
-                const auto& path = t_directoryEntry.path();
-
-                if (t_fileDirectoryPath.OptExtensionFilter.has_value())
-                {
-                    if (!path.has_extension())
-                        return;
-
-                    if (path.extension() != t_fileDirectoryPath.OptExtensionFilter.value())
-                        return;
-                }
-
-                paths.push_back(path.string());
-            };
-
-            if (t_fileDirectoryPath.IsRecursive)
-            {
-                for (const auto& directoryEntry : std::filesystem::recursive_directory_iterator(t_fileDirectoryPath.Path))
-                {
-                    loopBody(directoryEntry);
-                }
-                    
+                filePaths.push_back(directoryEntry.path());
             }
-            else
+        }
+        else
+        {
+            for (
+                const auto& directoryEntry :
+                std::filesystem::directory_iterator(t_directory.Path)
+                )
             {
-                for (const auto& directoryEntry : std::filesystem::directory_iterator(t_fileDirectoryPath.Path))
-                {
-                    loopBody(directoryEntry);
-                }
-            }
-        });
+                const bool doesMatch = DoesDirectoryEntryMatchFilter(
+                    directoryEntry,
+                    t_directory.OptExtensionFilter
+                );
+                if (!doesMatch)
+                    continue;
 
-        return paths;
+                filePaths.push_back(directoryEntry.path());
+            }
+        }
+
+        return filePaths;
     }
 
     struct ExpandedLastFilePathPart
@@ -92,7 +129,9 @@ namespace Ace
         {
             const bool hasExtension = extensionDotPosition != std::string::npos;
             if (!hasExtension)
-                return {};
+            {
+                return std::nullopt;
+            }
 
             return std::string
             {
@@ -108,7 +147,7 @@ namespace Ace
         };
 
         const bool isFileDirectoryPath = beforeExtension[0] == '*';
-        if (!isFileDirectoryPath )
+        if (!isFileDirectoryPath)
         {
             return ExpandedLastFilePathPart
             {
@@ -136,29 +175,29 @@ namespace Ace
         };
     }
 
-    class FileOrDirectoryPath
+    class FilePathOrFilteredDirectory
     {
     public:
-        FileOrDirectoryPath() = default;
-        FileOrDirectoryPath(const std::filesystem::path& t_filePath)
+        FilePathOrFilteredDirectory() = default;
+        FilePathOrFilteredDirectory(const std::filesystem::path& t_filePath)
             : m_OptFilePath{ t_filePath }
         {
         }
-        FileOrDirectoryPath(const Package::FileDirectoryPath& t_directoryPath)
-            : m_OptDirectoryPath{ t_directoryPath }
+        FilePathOrFilteredDirectory(const FilteredDirectory& t_directoryPath)
+            : m_OptFilteredDirectory{ t_directoryPath }
         {
         }
-        ~FileOrDirectoryPath() = default;
+        ~FilePathOrFilteredDirectory() = default;
 
         auto IsFilePath()      const -> bool { return m_OptFilePath.has_value(); }
-        auto IsDirectoryPath() const -> bool { return m_OptDirectoryPath.has_value(); }
+        auto IsDirectoryPath() const -> bool { return m_OptFilteredDirectory.has_value(); }
 
-        auto GetFilePath() -> std::filesystem::path& { return m_OptFilePath.value(); }
-        auto GetDirectoryPath() -> Package::FileDirectoryPath& { return m_OptDirectoryPath.value(); }
+        auto GetFilePath()          -> std::filesystem::path& { return m_OptFilePath.value(); }
+        auto GetFilteredDirectory() -> FilteredDirectory&     { return m_OptFilteredDirectory.value(); }
 
     private:
-        std::optional<std::filesystem::path>      m_OptFilePath{};
-        std::optional<Package::FileDirectoryPath> m_OptDirectoryPath{};
+        std::optional<std::filesystem::path> m_OptFilePath{};
+        std::optional<FilteredDirectory>     m_OptFilteredDirectory{};
     };
 
     static auto ExpandFirstFilePathPart(
@@ -183,7 +222,7 @@ namespace Ace
     static auto ExpandFilePathParts(
         const std::vector<std::string>& t_filePathParts,
         const std::unordered_map<std::string, std::string>& t_pathMacroMap
-    ) -> Expected<FileOrDirectoryPath>
+    ) -> Expected<FilePathOrFilteredDirectory>
     {
         ACE_TRY(firstFilePathPart, ExpandFirstFilePathPart(
             t_filePathParts.front(),
@@ -205,12 +244,15 @@ namespace Ace
         if (isFilePath)
         {
             path += lastFilePathPartData.OptPath.value();
-            return FileOrDirectoryPath{ std::filesystem::path{ path } };
+            return FilePathOrFilteredDirectory
+            {
+                std::filesystem::path{ path }
+            };
         }
 
-        return FileOrDirectoryPath
+        return FilePathOrFilteredDirectory
         {
-            Package::FileDirectoryPath
+            FilteredDirectory
             {
                 path,
                 lastFilePathPartData.OptExtension,
@@ -257,14 +299,15 @@ namespace Ace
         ACE_TRY_ASSERT(!isPathSeparator(lastCharacter));
         parts.emplace_back(itBegin, end(t_filePath));
 
-        ACE_TRY_ASSERT(parts.front().size() != 0);
+        ACE_TRY_ASSERT(!parts.front().empty());
         return parts;
     }
 
     static auto TransformFilePaths(
+        const std::filesystem::path& t_packageFilePath,
         const std::vector<std::string>& t_filePaths,
         const std::unordered_map<std::string, std::string>& t_pathMacroMap
-    ) -> Expected<Package::FileDirectoryPaths>
+    ) -> Expected<std::vector<std::filesystem::path>>
     {
         ACE_TRY(filePathsParts, TransformExpectedVector(t_filePaths,
         [&](const std::string& t_filePath) -> Expected<std::vector<std::string>>
@@ -272,40 +315,61 @@ namespace Ace
             return SplitFilePath(t_filePath);
         }));
 
-        std::vector<std::filesystem::path>      finalFilePaths{};
-        std::vector<Package::FileDirectoryPath> finalFileDirectoryPaths{};
+        const auto packageDirectoryPath = t_packageFilePath.parent_path();
 
+        std::vector<std::filesystem::path> finalFilePaths{};
         ACE_TRY_VOID(TransformExpectedVector(filePathsParts,
         [&](const std::vector<std::string>& t_filePathParts) -> Expected<void>
         {
-            ACE_TRY(fileOrDirectoryPath, ExpandFilePathParts(
+            ACE_TRY(filePathOrFilteredDirectory, ExpandFilePathParts(
                 t_filePathParts,
                 t_pathMacroMap
             ));
 
-            if (fileOrDirectoryPath.IsFilePath())
+            if (filePathOrFilteredDirectory.IsFilePath())
             {
-                finalFilePaths.push_back(fileOrDirectoryPath.GetFilePath());
+                const auto expandedFilePath = filePathOrFilteredDirectory.GetFilePath();
+                const auto filePath = expandedFilePath.is_absolute() ?
+                    expandedFilePath :
+                    (packageDirectoryPath / expandedFilePath);
+
+                finalFilePaths.push_back(filePath);
             }
 
-            if (fileOrDirectoryPath.IsDirectoryPath())
+            if (filePathOrFilteredDirectory.IsDirectoryPath())
             {
-                finalFileDirectoryPaths.push_back(fileOrDirectoryPath.GetDirectoryPath());
+                auto directory = filePathOrFilteredDirectory.GetFilteredDirectory();
+                directory.Path = directory.Path.is_absolute() ? 
+                    directory.Path :
+                    (packageDirectoryPath / directory.Path);
+
+                const auto directoryFilePaths =
+                    CollectFilteredDirectoryFilePaths(directory);
+
+                finalFilePaths.insert(
+                    end(finalFilePaths),
+                    begin(directoryFilePaths),
+                    end  (directoryFilePaths)
+                );
             }
 
             return ExpectedVoid;
         }));
 
-        return Package::FileDirectoryPaths
-        {
-            std::move(finalFilePaths),
-            std::move(finalFileDirectoryPaths),
-        };
+        return finalFilePaths;
     }
 
-    static auto ParseInternal(const std::string& t_string) -> Expected<Package>
+    static auto NewInternal(
+        const std::filesystem::path& t_filePath
+    ) -> Expected<Package>
     {
-        const auto package = nlohmann::json::parse(t_string);
+        std::ifstream fileStream{ t_filePath };
+        ACE_TRY_ASSERT(fileStream.is_open());
+
+        std::stringstream packageStringStream{};
+        packageStringStream << fileStream.rdbuf();
+
+        const auto package = nlohmann::json::parse(packageStringStream.str());
 
         ACE_TRY_ASSERT(package.contains(Property::Name));
         ACE_TRY_ASSERT(package.contains(Property::PathMacros));
@@ -323,7 +387,7 @@ namespace Ace
             ACE_TRY_ASSERT(pathMacro.size() == 2);
 
             const std::string value = pathMacro[Property::Name];
-            ACE_TRY_ASSERT(value.size() > 0);
+            ACE_TRY_ASSERT(!value.empty());
 
             std::string path = pathMacro[Property::Value];
             pathMacroMap[pathMacro[Property::Name]] = std::move(Trim(path));
@@ -336,7 +400,11 @@ namespace Ace
             back_inserter(originalFilePaths),
             [](const nlohmann::json& t_filePath) { return t_filePath; }
         );
-        ACE_TRY(finalFilePaths, TransformFilePaths(originalFilePaths, pathMacroMap));
+        ACE_TRY(finalFilePaths, TransformFilePaths(
+            t_filePath,
+            originalFilePaths,
+            pathMacroMap
+        ));
 
         std::vector<std::string> originalDependencyFilePaths{};
         std::transform(
@@ -345,7 +413,11 @@ namespace Ace
             back_inserter(originalDependencyFilePaths),
             [](const nlohmann::json& t_filePath) { return t_filePath; }
         );
-        ACE_TRY(finalDependencyFilePaths, TransformFilePaths(originalDependencyFilePaths, pathMacroMap));
+        ACE_TRY(finalDependencyFilePaths, TransformFilePaths(
+            t_filePath,
+            originalDependencyFilePaths,
+            pathMacroMap
+        ));
 
         return Package
         {
@@ -355,11 +427,13 @@ namespace Ace
         };
     }
 
-    auto Package::Parse(const std::string& t_string) -> Expected<Package>
+    auto Package::New(
+        const std::filesystem::path& t_filePath
+    ) -> Expected<Package>
     {
         try
         {
-            ACE_TRY(package, ParseInternal(t_string));
+            ACE_TRY(package, NewInternal(t_filePath));
             return std::move(package);
         }
         catch (nlohmann::json::exception&)
@@ -367,6 +441,4 @@ namespace Ace
             ACE_TRY_UNREACHABLE();
         }
     }
-
-
 }
