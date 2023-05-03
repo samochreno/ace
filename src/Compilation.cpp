@@ -164,8 +164,14 @@ namespace Ace
         ACE_TRY(package, Package::New(options.PackagePath));
 
         const auto& outputPath = options.OutputPath;
-        ACE_TRY_ASSERT(std::filesystem::exists(outputPath));
-        ACE_TRY_ASSERT(std::filesystem::is_directory(outputPath));
+
+        if (
+            !std::filesystem::exists(outputPath) ||
+            !std::filesystem::is_directory(outputPath)
+            )
+        {
+            std::filesystem::create_directories(outputPath);
+        }
 
         auto self = std::make_unique<Compilation>();
         auto& selfRef = *self.get();
