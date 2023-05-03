@@ -181,7 +181,7 @@ namespace Ace
         moduleOStream.flush();
         std::ofstream irFileStream
         { 
-            "/home/samo/repos/ace/ace/build/" + packageName + ".ll" 
+            m_Compilation.OutputPath / (packageName + ".ll") 
         };
         ACE_ASSERT(irFileStream);
         irFileStream << moduleString;
@@ -190,7 +190,7 @@ namespace Ace
         std::error_code errorCode{};
         llvm::raw_fd_ostream bitcodeFileOStream
         { 
-            "/home/samo/repos/ace/ace/build/" + packageName + ".bc",
+            (m_Compilation.OutputPath / (packageName + ".bc")).string(),
             errorCode, 
             llvm::sys::fs::OF_None 
         };
@@ -202,8 +202,8 @@ namespace Ace
 
         const std::string llc = 
             "llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj "
-            "/home/samo/repos/ace/ace/build/" + packageName + 
-            ".bc -o /home/samo/repos/ace/ace/build/" + packageName + ".obj";
+            "-o " + (m_Compilation.OutputPath / (packageName + ".obj")).string() + " " +
+            (m_Compilation.OutputPath / (packageName + ".bc")).string();
         system(llc.c_str());
 
         const auto timeLLCEnd = now();
@@ -211,8 +211,9 @@ namespace Ace
         const auto timeClangStart = now();
 
         const std::string clang = 
-            "clang /home/samo/repos/ace/ace/build/" + packageName + 
-            ".obj -lc -lm -o /home/samo/repos/ace/ace/build/" + packageName;
+            "clang -lc -lm "
+            "-o " + (m_Compilation.OutputPath / packageName).string() + " " +
+            (m_Compilation.OutputPath / (packageName + ".obj")).string();
         system(clang.c_str());
 
         const auto timeClangEnd = now();
