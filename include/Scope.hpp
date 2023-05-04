@@ -92,19 +92,48 @@ namespace Ace
 
         auto DefineAssociation(Scope* const t_association) -> void;
 
+        static auto CreateArgumentTypes(
+            Symbol::Type::IBase* const t_argumentType
+        ) -> std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>;
+        static auto CreateArgumentTypes(
+            const std::vector<Symbol::Type::IBase*>& t_argumentTypes
+        ) -> std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>;
+
         template<typename TSymbol>
         auto ResolveStaticSymbol(
             const std::string& t_name
         ) const -> Expected<TSymbol*>
         {
-            return ResolveStaticSymbol<TSymbol>(SymbolName{ 
+            return ResolveStaticSymbol<TSymbol>(t_name, {});
+        }
+        template<typename TSymbol>
+        auto ResolveStaticSymbol(
+            const std::string& t_name,
+            const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes
+        ) const -> Expected<TSymbol*>
+        {
+            const SymbolName symbolName
+            {
                 SymbolNameSection{ t_name },
                 SymbolNameResolutionScope::Local,
-            });
+            };
+
+            return ResolveStaticSymbol<TSymbol>(
+                symbolName,
+                t_optArgumentTypes
+            );
         }
         template<typename TSymbol>
         auto ResolveStaticSymbol(
             const SymbolName& t_name
+        ) const -> Expected<TSymbol*>
+        {
+            return ResolveStaticSymbol<TSymbol>(t_name, {});
+        }
+        template<typename TSymbol>
+        auto ResolveStaticSymbol(
+            const SymbolName& t_name,
+            const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes
         ) const -> Expected<TSymbol*>
         {
             ACE_TRY(startScope, GetStaticSymbolResolutionStartScope(t_name));
@@ -122,6 +151,7 @@ namespace Ace
                 this,
                 t_name.Sections.begin(),
                 t_name.Sections.end(),
+                t_optArgumentTypes,
                 IsCorrectSymbolType<TSymbol>,
                 startScopes,
                 GetStaticSymbolResolutionImplTemplateArguments(this),
@@ -137,11 +167,24 @@ namespace Ace
 
             return castedSymbol;
         }
-        
+
         template<typename TSymbol>
         auto ResolveInstanceSymbol(
             Symbol::Type::IBase* const t_selfType,
             const SymbolNameSection& t_name
+        ) const -> Expected<TSymbol*>
+        {
+            return ResolveInstanceSymbol<TSymbol>(
+                t_selfType,
+                t_name,
+                {}
+            );
+        }
+        template<typename TSymbol>
+        auto ResolveInstanceSymbol(
+            Symbol::Type::IBase* const t_selfType,
+            const SymbolNameSection& t_name,
+            const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes
         ) const -> Expected<TSymbol*>
         {
             const auto scopes = GetInstanceSymbolResolutionScopes(t_selfType);
@@ -152,6 +195,7 @@ namespace Ace
                 this,
                 nameSections.begin(),
                 nameSections.end(),
+                t_optArgumentTypes,
                 IsCorrectSymbolType<TSymbol>,
                 scopes,
                 CollectInstanceSymbolResolutionImplTemplateArguments(t_selfType),
@@ -173,11 +217,39 @@ namespace Ace
             const std::string& t_name
         ) const -> Expected<TSymbol*>
         {
-            return ExclusiveResolveSymbol<TSymbol>(t_name, {}, {});
+            return ExclusiveResolveSymbol<TSymbol>(t_name, {});
         }
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
             const std::string& t_name,
+            const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes
+        ) const -> Expected<TSymbol*>
+        {
+            return ExclusiveResolveSymbol<TSymbol>(
+                t_name,
+                t_optArgumentTypes,
+                {},
+                {}
+            );
+        }
+        template<typename TSymbol>
+        auto ExclusiveResolveSymbol(
+            const std::string& t_name,
+            const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
+            const std::vector<Symbol::Type::IBase*>& t_templateArguments
+        ) const -> Expected<TSymbol*>
+        {
+            return ExclusiveResolveSymbol<TSymbol>(
+                t_name,
+                {},
+                t_implTemplateArguments,
+                t_templateArguments
+            );
+        }
+        template<typename TSymbol>
+        auto ExclusiveResolveSymbol(
+            const std::string& t_name,
+            const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
             const std::vector<Symbol::Type::IBase*>& t_templateArguments
         ) const -> Expected<TSymbol*>
@@ -191,6 +263,7 @@ namespace Ace
                 this,
                 nameSections.begin(),
                 nameSections.end(),
+                t_optArgumentTypes,
                 IsCorrectSymbolType<TSymbol>,
                 { this },
                 t_implTemplateArguments,
@@ -285,6 +358,7 @@ namespace Ace
             const Scope* const t_resolvingFromScope,
             const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
             const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
+            const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes,
             const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
             const std::vector<const Scope*> t_scopes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
@@ -294,6 +368,7 @@ namespace Ace
             const Scope* const t_resolvingFromScope,
             const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
             const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
+            const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes,
             const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
             const std::vector<const Scope*> t_scopes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
@@ -331,6 +406,6 @@ namespace Ace
         std::optional<Scope*> m_OptParent{};
         std::vector<std::unique_ptr<Scope>> m_Children{};
         std::set<Scope*> m_Associations{};
-        std::unordered_map<std::string, std::vector<std::unique_ptr<Symbol::IBase>>> m_SymbolMap{};
+        std::unordered_map<std::string, std::vector<std::unique_ptr<Symbol::IBase>>> m_SymbolMap;
     };
 }

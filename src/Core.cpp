@@ -505,7 +505,7 @@ namespace Ace::Core
             {
                 auto* const variableTypeSymbol = t_variableSymbol->GetType();
                 auto* const variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
-                auto* const variableGlueSymbol = variableTypeScope->ExclusiveResolveSymbol<Symbol::Function>(
+                auto* const variableTypeGlueSymbol = variableTypeScope->ExclusiveResolveSymbol<Symbol::Function>(
                     SpecialIdentifier::CreateCopyGlue(variableTypeSymbol->CreatePartialSignature())
                 ).Unwrap();
                 
@@ -524,7 +524,7 @@ namespace Ace::Core
 
                 const auto functionCallExpressionNode = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
                     bodyScope,
-                    variableGlueSymbol,
+                    variableTypeGlueSymbol,
                     arguments
                 );
 
@@ -617,7 +617,7 @@ namespace Ace::Core
         {
             auto* const variableTypeSymbol = t_variableSymbol->GetType();
             auto* const variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
-            auto* const variableGlueSymbol = variableTypeScope->ExclusiveResolveSymbol<Symbol::Function>(
+            auto* const variableTypeGlueSymbol = variableTypeScope->ExclusiveResolveSymbol<Symbol::Function>(
                 SpecialIdentifier::CreateDropGlue(variableTypeSymbol->CreatePartialSignature())
             ).Unwrap();
             
@@ -631,7 +631,7 @@ namespace Ace::Core
 
             const auto functionCallExpressionNode = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
                 bodyScope,
-                variableGlueSymbol,
+                variableTypeGlueSymbol,
                 arguments
             );
 

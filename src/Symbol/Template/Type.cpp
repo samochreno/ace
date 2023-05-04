@@ -65,12 +65,10 @@ namespace Ace::Symbol::Template
 
             auto copyOperatorName = selfSymbol->CreateFullyQualifiedName();
             copyOperatorName.Sections.push_back(SymbolNameSection{ SpecialIdentifier::Operator::Copy });
-
             selfSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(copyOperatorName);
 
             auto dropOperatorName = selfSymbol->CreateFullyQualifiedName();
             dropOperatorName.Sections.push_back(SymbolNameSection{ SpecialIdentifier::Operator::Drop });
-
             selfSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(dropOperatorName);
         });
 

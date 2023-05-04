@@ -41,7 +41,10 @@ namespace Ace::Node::Expression
         auto operatorFullName = typeSymbol->CreateFullyQualifiedName();
         operatorFullName.Sections.emplace_back(operatorNameIt->second);
 
-        ACE_TRY(operatorSymbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(operatorFullName));
+        ACE_TRY(operatorSymbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(
+            operatorFullName,
+            Scope::CreateArgumentTypes(typeSymbol)
+        ));
 
         return std::make_shared<const BoundNode::Expression::UnaryUser>(
             boundExpresssion,

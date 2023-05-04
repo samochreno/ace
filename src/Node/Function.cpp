@@ -121,7 +121,7 @@ namespace Ace::Node
             m_Name,
             m_SelfScope->CollectImplTemplateArguments(),
             m_SelfScope->CollectTemplateArguments()
-            ).Unwrap();
+        ).Unwrap();
 
         return std::make_shared<const BoundNode::Function>(
             selfSymbol,
@@ -129,7 +129,7 @@ namespace Ace::Node
             boundOptSelf,
             boundParameters,
             boundOptBody
-            );
+        );
     }
 
     auto Function::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>

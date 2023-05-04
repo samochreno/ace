@@ -44,7 +44,10 @@ namespace Ace::Node::Statement::Assignment
         auto operatorFullName = lhsTypeSymbol->GetWithoutReference()->CreateFullyQualifiedName();
         operatorFullName.Sections.emplace_back(operatorNameIt->second);
 
-        ACE_TRY(operatorSymbol, m_Scope->ResolveStaticSymbol<Symbol::Function>(operatorFullName));
+        ACE_TRY(operatorSymbol, m_Scope->ResolveStaticSymbol<Symbol::Function>(
+            operatorFullName,
+            Scope::CreateArgumentTypes({ lhsTypeSymbol, rhsTypeSymbol })
+        ));
 
         return std::make_shared<const BoundNode::Statement::Assignment::Compound>(
             boundLHSExpression,

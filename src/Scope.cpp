@@ -297,6 +297,22 @@ namespace Ace
         m_Associations.insert(t_association);
     }
 
+    auto Scope::CreateArgumentTypes(
+        Symbol::Type::IBase* const t_argumentType
+    ) -> std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>
+    {
+        std::vector<Symbol::Type::IBase*> argumentTypes{ t_argumentType };
+        std::reference_wrapper<const std::vector<Symbol::Type::IBase*>> argumentTypesRef{ argumentTypes };
+        return argumentTypesRef;
+    }
+    auto Scope::CreateArgumentTypes(
+        const std::vector<Symbol::Type::IBase*>& t_argumentTypes
+    ) -> std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>
+    {
+        std::reference_wrapper<const std::vector<Symbol::Type::IBase*>> argumentTypesRef{ t_argumentTypes };
+        return argumentTypesRef;
+    }
+
     auto Scope::CollectAllDefinedSymbols() const -> std::vector<Symbol::IBase*>
     {
         std::vector<Symbol::IBase*> symbols{};
@@ -447,7 +463,8 @@ namespace Ace
         const std::optional<std::string>& t_optName,
         const std::optional<Scope*>& t_optParent
     ) : m_Compilation{ t_compilation },
-        m_OptParent{ t_optParent }
+        m_OptParent{ t_optParent },
+        m_SymbolMap{}
     {
         m_NestLevel = t_optParent.has_value() ?
             (t_optParent.value()->GetNestLevel() + 1) :
@@ -559,6 +576,7 @@ namespace Ace
         const Scope* const t_resolvingFromScope,
         const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
         const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
+        const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes,
         const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
         const std::vector<const Scope*> t_scopes,
         const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
@@ -574,6 +592,7 @@ namespace Ace
             t_resolvingFromScope,
             t_nameSectionsBegin,
             t_nameSectionsEnd,
+            t_optArgumentTypes,
             t_isCorrectSymbolType,
             t_scopes,
             t_implTemplateArguments,
@@ -586,6 +605,7 @@ namespace Ace
         const Scope* const t_resolvingFromScope,
         const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
         const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
+        const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes,
         const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
         const std::vector<const Scope*> t_scopes,
         const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
@@ -620,7 +640,7 @@ namespace Ace
             const bool isTemplate = foundTemplateIt != end(symbolMap);
 
             const auto foundIt = isTemplate ? 
-                foundTemplateIt : 
+                foundTemplateIt :
                 symbolMap.find(name);
 
             if (foundIt == end(symbolMap))
@@ -636,10 +656,7 @@ namespace Ace
                 if (foundItSymbols.size() != 1)
                     return false;
 
-                auto* const instanceVariableSymbol = dynamic_cast<Symbol::Variable::Normal::Instance*>(
-                    foundIt->second.front().get()
-                );
-                if (!instanceVariableSymbol)
+                if (!dynamic_cast<Symbol::Variable::Normal::Instance*>(foundIt->second.front().get()))
                     return false;
 
                 return true;
@@ -735,6 +752,7 @@ namespace Ace
                 t_resolvingFromScope,
                 t_nameSectionsBegin + 1,
                 t_nameSectionsEnd,
+                t_optArgumentTypes,
                 t_isCorrectSymbolType,
                 scopes,
                 t_templateArguments,
@@ -796,7 +814,9 @@ namespace Ace
 
         ACE_TRY_ASSERT(symbols.size() == 1);
 
-        auto* const castedSymbol = dynamic_cast<Symbol::Template::IBase*>(symbols.front());
+        auto* const castedSymbol = dynamic_cast<Symbol::Template::IBase*>(
+            symbols.front()
+        );
         ACE_ASSERT(castedSymbol);
 
         return castedSymbol;

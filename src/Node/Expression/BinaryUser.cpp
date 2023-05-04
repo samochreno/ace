@@ -47,11 +47,16 @@ namespace Ace::Node::Expression
         auto rhsName = rhsTypeSymbol->CreateFullyQualifiedName();
         rhsName.Sections.emplace_back(operatorNameIt->second);
 
-        const std::vector parameterTypes{ lhsTypeSymbol, rhsTypeSymbol };
+        const std::vector argumentTypeSymbols{ lhsTypeSymbol, rhsTypeSymbol };
 
-        const auto expLHSOperatorSymbol = GetScope()->ResolveStaticSymbol<Symbol::Function>(lhsName);
-
-        const auto expRHSOperatorSymbol = GetScope()->ResolveStaticSymbol<Symbol::Function>(rhsName);
+        const auto expLHSOperatorSymbol = GetScope()->ResolveStaticSymbol<Symbol::Function>(
+            lhsName,
+            Scope::CreateArgumentTypes(argumentTypeSymbols)
+        );
+        const auto expRHSOperatorSymbol = GetScope()->ResolveStaticSymbol<Symbol::Function>(
+            rhsName,
+            Scope::CreateArgumentTypes(argumentTypeSymbols)
+        );
 
         ACE_TRY_ASSERT(expLHSOperatorSymbol || expRHSOperatorSymbol);
 

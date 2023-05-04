@@ -59,7 +59,10 @@ namespace Ace::Node::Expression
 
         if (auto literalSymbol = dynamic_cast<const Node::Expression::LiteralSymbol*>(m_Expression.get()))
         {
-            ACE_TRY(functionSymbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(literalSymbol->GetName()));
+            ACE_TRY(functionSymbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(
+                literalSymbol->GetName(),
+                Scope::CreateArgumentTypes(argumentTypeSymbols)
+            ));
 
             return std::shared_ptr<const BoundNode::Expression::IBase>
             {
@@ -67,17 +70,18 @@ namespace Ace::Node::Expression
                     GetScope(),
                     functionSymbol,
                     boundArguments
-                    )
+                )
             };
         }
-        else if (auto memberAccess = dynamic_cast<const Node::Expression::MemberAccess*>(m_Expression.get()))
+        else if (const auto* const memberAccess = dynamic_cast<const Node::Expression::MemberAccess*>(m_Expression.get()))
         {
             ACE_TRY(boundExpression, memberAccess->GetExpression()->CreateBoundExpression());
 
             ACE_TRY(functionSymbol, GetScope()->ResolveInstanceSymbol<Symbol::Function>(
                 boundExpression->GetTypeInfo().Symbol->GetWithoutReference(),
-                memberAccess->GetName()
-                ));
+                memberAccess->GetName(),
+                Scope::CreateArgumentTypes(argumentTypeSymbols)
+            ));
 
             return std::shared_ptr<const BoundNode::Expression::IBase>
             {
@@ -85,7 +89,7 @@ namespace Ace::Node::Expression
                     boundExpression,
                     functionSymbol,
                     boundArguments
-                    )
+                )
             };
         }
 
