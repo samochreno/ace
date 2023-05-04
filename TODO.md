@@ -2,9 +2,11 @@
 
 ## 💥 High Priority
 
+- Add template argument deduction:
+  - Add template parameter placeholder symbols.
+  - Deduce template arguments in `Scope::ResolveSymbolInScopes`.
 - [ ] Strings.
 - [ ] Refactor `Scope::ResolveSymbolInScopes`.
-- [ ] Add template argument deduction.
 - Add templated conversion operators (`ref.ace` at line 16):
   - [ ] Change `__deref_as[T](...)` to take any expression of type convertible to `std::Pointer`.
   - [ ] Remove `std::Reference[T]::ptr(...)`.
