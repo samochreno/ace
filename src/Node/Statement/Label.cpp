@@ -18,10 +18,10 @@ namespace Ace::Node::Statement
 
     auto Label::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Label>
     {
-        return std::make_unique<const Node::Statement::Label>(
+        return std::make_shared<const Node::Statement::Label>(
             t_scope,
             m_Name
-            );
+        );
     }
 
     auto Label::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Label>>

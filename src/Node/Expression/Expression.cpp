@@ -20,7 +20,9 @@ namespace Ace::Node::Expression
 
     auto Expression::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::Expression>
     {
-        return std::make_unique<const Node::Expression::Expression>(m_Expression->CloneInScopeExpression(t_scope));
+        return std::make_shared<const Node::Expression::Expression>(
+            m_Expression->CloneInScopeExpression(t_scope)
+        );
     }
 
     auto Expression::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::Expression>>

@@ -38,7 +38,7 @@ namespace Ace::Node::Type
             return t_variable->CloneInScope(selfScope);
         });
 
-        return std::make_unique<const Node::Type::Struct>(
+        return std::make_shared<const Node::Type::Struct>(
             selfScope,
             m_Name,
             clonedAttributes,

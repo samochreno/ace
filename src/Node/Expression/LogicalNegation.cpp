@@ -20,7 +20,9 @@ namespace Ace::Node::Expression
 
     auto LogicalNegation::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::LogicalNegation>
     {
-        return std::make_unique<const Node::Expression::LogicalNegation>(m_Expression->CloneInScopeExpression(t_scope));
+        return std::make_shared<const Node::Expression::LogicalNegation>(
+            m_Expression->CloneInScopeExpression(t_scope)
+        );
     }
 
     auto LogicalNegation::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::LogicalNegation>>

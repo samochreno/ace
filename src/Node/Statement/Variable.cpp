@@ -33,12 +33,12 @@ namespace Ace::Node::Statement
             return m_OptAssignedExpression.value()->CloneInScopeExpression(t_scope);
         }();
 
-        return std::make_unique<const Node::Statement::Variable>(
+        return std::make_shared<const Node::Statement::Variable>(
             t_scope,
             m_Name,
             m_TypeName,
             optAssignedExpression
-            );
+        );
     }
 
     auto Variable::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Variable>>

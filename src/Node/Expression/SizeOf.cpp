@@ -15,7 +15,7 @@ namespace Ace::Node::Expression
 
     auto SizeOf::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::SizeOf>
     {
-        return std::make_unique<const Node::Expression::SizeOf>(
+        return std::make_shared<const Node::Expression::SizeOf>(
             t_scope,
             m_TypeName
         );

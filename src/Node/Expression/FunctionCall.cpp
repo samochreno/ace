@@ -36,7 +36,7 @@ namespace Ace::Node::Expression
             return t_argument->CloneInScopeExpression(t_scope);
         });
 
-        return std::make_unique<const Node::Expression::FunctionCall>(
+        return std::make_shared<const Node::Expression::FunctionCall>(
             m_Expression->CloneInScopeExpression(t_scope),
             clonedArguments
         );

@@ -16,7 +16,7 @@ namespace Ace::Node::Statement
 
     auto Exit::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Exit>
     {
-        return std::make_unique<const Node::Statement::Exit>(t_scope);
+        return std::make_shared<const Node::Statement::Exit>(t_scope);
     }
 
     auto Exit::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Exit>>

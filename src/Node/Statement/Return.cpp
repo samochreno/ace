@@ -35,10 +35,10 @@ namespace Ace::Node::Statement
             return m_OptExpression.value()->CloneInScopeExpression(t_scope);
         }();
 
-        return std::make_unique<const Node::Statement::Return>(
+        return std::make_shared<const Node::Statement::Return>(
             t_scope,
             clonedOptExpression
-            );
+        );
     }
 
     auto Return::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Return>>

@@ -22,10 +22,10 @@ namespace Ace::Node::Expression
 
     auto Cast::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::Cast>
     {
-        return std::make_unique<const Node::Expression::Cast>(
+        return std::make_shared<const Node::Expression::Cast>(
             m_TypeName,
             m_Expression->CloneInScopeExpression(t_scope)
-            );
+        );
     }
 
     auto Cast::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::IBase>>

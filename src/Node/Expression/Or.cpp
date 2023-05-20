@@ -21,10 +21,10 @@ namespace Ace::Node::Expression
 
     auto Or::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::Or>
     {
-        return std::make_unique<const Node::Expression::Or>(
+        return std::make_shared<const Node::Expression::Or>(
             m_LHSExpression->CloneInScopeExpression(t_scope),
             m_RHSExpression->CloneInScopeExpression(t_scope)
-            );
+        );
     }
 
     auto Or::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::Or>>

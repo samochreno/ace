@@ -24,11 +24,11 @@ namespace Ace::Node::Statement
 
     auto While::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::While>
     {
-        return std::make_unique<const Node::Statement::While>(
+        return std::make_shared<const Node::Statement::While>(
             t_scope,
             m_Condition->CloneInScopeExpression(t_scope),
             m_Body->CloneInScope(t_scope)
-            );
+        );
     }
 
     auto While::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::While>>

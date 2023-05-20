@@ -19,10 +19,10 @@ namespace Ace::Node::Variable::Parameter
 
     auto Self::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Variable::Parameter::Self>
     {
-        return std::make_unique<const Node::Variable::Parameter::Self>(
+        return std::make_shared<const Node::Variable::Parameter::Self>(
             t_scope,
             m_TypeName.SymbolName
-            );
+        );
     }
 
     auto Self::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Variable::Parameter::Self>>

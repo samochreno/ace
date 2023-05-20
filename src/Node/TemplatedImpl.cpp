@@ -44,12 +44,12 @@ namespace Ace::Node
             return t_functionTemplate->CloneInScope(selfScope);
         });
 
-        return std::make_unique<const Node::TemplatedImpl>(
+        return std::make_shared<const Node::TemplatedImpl>(
             selfScope,
             m_TypeTemplateName,
             clonedFunctions,
             clonedFunctionTemplates
-            );
+        );
     }
 
     auto TemplatedImpl::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Impl>>

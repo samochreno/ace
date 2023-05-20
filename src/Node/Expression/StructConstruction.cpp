@@ -45,11 +45,11 @@ namespace Ace::Node::Expression
             return Argument{ t_argument.Name, clonedOptValue };
         });
 
-        return std::make_unique<const Node::Expression::StructConstruction>(
+        return std::make_shared<const Node::Expression::StructConstruction>(
             t_scope,
             m_TypeName,
             std::move(clonedArguments)
-            );
+        );
     }
 
     auto StructConstruction::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::StructConstruction>>
@@ -84,7 +84,7 @@ namespace Ace::Node::Expression
                     SymbolNameResolutionScope::Local,
                 };
 
-                return std::make_unique<const Node::Expression::LiteralSymbol>(
+                return std::make_shared<const Node::Expression::LiteralSymbol>(
                     m_Scope,
                     symbolName
                 )->CreateBoundExpression();

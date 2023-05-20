@@ -95,7 +95,7 @@ namespace Ace::Node
             return t_variable->CloneInScope(selfScope);
         });
 
-        return std::make_unique<const Node::Module>(
+        return std::make_shared<const Node::Module>(
             t_scope,
             selfScope,
             m_Name,
@@ -108,7 +108,7 @@ namespace Ace::Node
             clonedFunctions,
             clonedFunctionTemplates,
             clonedVariables
-            );
+        );
     }
 
     auto Module::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Module>>

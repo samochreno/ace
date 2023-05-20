@@ -19,7 +19,9 @@ namespace Ace::Node::Expression
 
     auto AddressOf::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::AddressOf>
     {
-        return std::make_unique<const Node::Expression::AddressOf>(m_Expression->CloneInScopeExpression(t_scope));
+        return std::make_shared<const Node::Expression::AddressOf>(
+            m_Expression->CloneInScopeExpression(t_scope)
+        );
     }
 
     auto AddressOf::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::AddressOf>>

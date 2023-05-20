@@ -20,10 +20,10 @@ namespace Ace::Node::Statement
 
     auto Assert::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Assert>
     {
-        return std::make_unique<const Node::Statement::Assert>(
+        return std::make_shared<const Node::Statement::Assert>(
             t_scope,
             m_Condition->CloneInScopeExpression(t_scope)
-            );
+        );
     }
 
     auto Assert::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Assert>>

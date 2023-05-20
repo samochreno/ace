@@ -20,7 +20,9 @@ namespace Ace::Node::Expression
 
     auto Unbox::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::Unbox>
     {
-        return std::make_unique<const Node::Expression::Unbox>(m_Expression->CloneInScopeExpression(t_scope));
+        return std::make_shared<const Node::Expression::Unbox>(
+            m_Expression->CloneInScopeExpression(t_scope)
+        );
     }
 
     auto Unbox::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::Unbox>>

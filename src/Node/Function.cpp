@@ -75,7 +75,7 @@ namespace Ace::Node
             return m_OptBody.value()->CloneInScope(selfScope);
         }();
 
-        return std::make_unique<const Node::Function>(
+        return std::make_shared<const Node::Function>(
             selfScope,
             m_Name,
             m_TypeName,
@@ -84,7 +84,7 @@ namespace Ace::Node
             clonedOptSelf,
             clonedParameters,
             clonedOptBody
-            );
+        );
     }
 
     auto Function::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Function>>

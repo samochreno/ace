@@ -38,11 +38,11 @@ namespace Ace::Node::Statement
             return t_body->CloneInScope(t_scope);
         });
 
-        return std::make_unique<const Node::Statement::If>(
+        return std::make_shared<const Node::Statement::If>(
             t_scope,
             clonedConditions,
             clonedBodies
-            );
+        );
     }
 
     auto If::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::If>>

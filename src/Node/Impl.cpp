@@ -51,7 +51,7 @@ namespace Ace::Node
             }
         );
 
-        return std::make_unique<const Node::Impl>(
+        return std::make_shared<const Node::Impl>(
             selfScope,
             m_TypeName,
             clonedFunctions,

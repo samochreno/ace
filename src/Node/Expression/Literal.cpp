@@ -16,11 +16,11 @@ namespace Ace::Node::Expression
 
     auto Literal::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::Literal>
     {
-        return std::make_unique<const Node::Expression::Literal>(
+        return std::make_shared<const Node::Expression::Literal>(
             t_scope,
             m_Kind,
             m_String
-            );
+        );
     }
 
     auto Literal::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::Literal>>

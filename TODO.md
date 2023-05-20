@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Change all `std::make_unique<const Node::` to `std::make_shared<const Node::`.
 - [ ] Implement shared ownership of `Scope`, `Scope::~Scope()` will clean up itself from the parent's children list.
 - [ ] Fix float literal parsing.
 - [ ] Strings.

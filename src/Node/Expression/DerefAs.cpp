@@ -20,7 +20,7 @@ namespace Ace::Node::Expression
 
     auto DerefAs::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::DerefAs>
     {
-        return std::make_unique<const Node::Expression::DerefAs>(
+        return std::make_shared<const Node::Expression::DerefAs>(
             m_TypeName,
             m_Expression->CloneInScopeExpression(t_scope)
         );

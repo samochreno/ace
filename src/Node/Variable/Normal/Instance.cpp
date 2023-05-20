@@ -31,14 +31,14 @@ namespace Ace::Node::Variable::Normal
             return t_attribute->CloneInScope(t_scope);
         });
 
-        return std::make_unique<const Node::Variable::Normal::Instance>(
+        return std::make_shared<const Node::Variable::Normal::Instance>(
             t_scope,
             m_Name,
             m_TypeName,
             clonedAttributes,
             m_AccessModifier,
             m_Index
-            );
+        );
     }
 
     auto Instance::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Variable::Normal::Instance>>

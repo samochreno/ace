@@ -21,10 +21,10 @@ namespace Ace::Node::Expression
 
     auto And::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::And>
     {
-        return std::make_unique<const Node::Expression::And>(
+        return std::make_shared<const Node::Expression::And>(
             m_LHSExpression->CloneInScopeExpression(t_scope),
             m_RHSExpression->CloneInScopeExpression(t_scope)
-            );
+        );
     }
 
     auto And::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::And>>

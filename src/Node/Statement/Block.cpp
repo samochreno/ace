@@ -30,10 +30,10 @@ namespace Ace::Node::Statement
             return t_statement->CloneInScopeStatement(selfScope);
         });
 
-        return std::make_unique<const Node::Statement::Block>(
+        return std::make_shared<const Node::Statement::Block>(
             selfScope,
             clonedStatements
-            );
+        );
     }
 
     auto Block::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Block>>
