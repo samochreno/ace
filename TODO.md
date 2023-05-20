@@ -3,7 +3,6 @@
 ## 💥 High Priority
 
 - [ ] Implement shared ownership of `Scope`, `Scope::~Scope()` will clean up itself from the parent's children list.
-- [ ] Fix float literal parsing.
 - [ ] Strings.
 - Add templated conversion operators (`ref.ace` at line 16):
   - [ ] Change `__deref_as[T](...)` to take any expression of type convertible to `std::Pointer`.

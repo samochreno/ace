@@ -2685,6 +2685,8 @@ namespace Ace::Parsing
             if (tokenKind == Token::Kind::New(Token::Kind::UInt32))         return LiteralKind::UInt32;
             if (tokenKind == Token::Kind::New(Token::Kind::UInt64))         return LiteralKind::UInt64;
             if (tokenKind == Token::Kind::New(Token::Kind::Int))            return LiteralKind::Int;
+            if (tokenKind == Token::Kind::New(Token::Kind::Float32))        return LiteralKind::Float32;
+            if (tokenKind == Token::Kind::New(Token::Kind::Float64))        return LiteralKind::Float64;
             if (tokenKind == Token::Kind::New(Token::Kind::String))         return LiteralKind::String;
             if (tokenKind == Token::Kind::New(Token::Kind::TrueKeyword))    return LiteralKind::True;
             if (tokenKind == Token::Kind::New(Token::Kind::FalseKeyword))   return LiteralKind::False;
@@ -2698,7 +2700,7 @@ namespace Ace::Parsing
                 t_context.Scope,
                 literalKind,
                 t_context.Iterator->String
-                ),
+            ),
             1
         };
     }
@@ -2712,7 +2714,7 @@ namespace Ace::Parsing
             std::make_shared<const Node::Expression::LiteralSymbol>(
                 t_context.Scope,
                 name.Value
-                ),
+            ),
             name.Length
         };
     }

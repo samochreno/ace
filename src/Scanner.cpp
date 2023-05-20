@@ -794,7 +794,7 @@ namespace Ace::Scanning
 
     auto Scanner::ScanNumber(
         Context t_context
-) -> Expected<ParseData<std::vector<Token>>>
+    ) -> Expected<ParseData<std::vector<Token>>>
     {
         auto it = t_context.Iterator;
 
