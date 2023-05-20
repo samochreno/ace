@@ -432,34 +432,84 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTemplateParameters(Context t_context) -> Expected<ParseData<std::vector<std::string>>>
+    auto Parser::ParseTemplateParameterNames(Context t_context) -> Expected<ParseData<std::vector<std::string>>>
     {
         auto it = t_context.Iterator;
 
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::OpenBracket));
         ++it;
 
-        std::vector<std::string> parameters{};
+        std::vector<std::string> names{};
         while (it->TokenKind != Token::Kind::New(Token::Kind::CloseBracket))
         {
-            if (parameters.size() != 0)
+            if (names.size() != 0)
             {
                 ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::Comma));
                 ++it;
             }
 
             ACE_TRY(name, ParseName({ it, t_context.Scope }));
-            parameters.push_back(std::move(name.Value));
+            names.push_back(std::move(name.Value));
             it += name.Length;
         }
 
-        ACE_TRY_ASSERT(parameters.size() != 0);
+        ACE_TRY_ASSERT(names.size() != 0);
         ++it;
 
         return ParseData
         {
-            std::move(parameters),
+            std::move(names),
             Distance(t_context.Iterator, it)
+        };
+    }
+
+    auto Parser::ParseImplTemplateParameters(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>>>
+    {
+        ACE_TRY(names, ParseTemplateParameterNames(t_context));
+        
+        std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>> parameters{};
+        std::transform(
+            begin(names.Value),
+            end  (names.Value),
+            back_inserter(parameters),
+            [&](const std::string& t_name)
+            {
+                return std::make_shared<const Node::TemplateParameter::Impl>(
+                    t_context.Scope,
+                    t_name
+                );
+            }
+        );
+
+        return ParseData
+        {
+             parameters,
+             names.Length
+        };
+    }
+
+    auto Parser::ParseTemplateParameters(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>>>
+    {
+        ACE_TRY(names, ParseTemplateParameterNames(t_context));
+        
+        std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>> parameters{};
+        std::transform(
+            begin(names.Value),
+            end  (names.Value),
+            back_inserter(parameters),
+            [&](const std::string& t_name)
+            {
+                return std::make_shared<const Node::TemplateParameter::Normal>(
+                    t_context.Scope,
+                    t_name
+                );
+            }
+        );
+
+        return ParseData
+        {
+             parameters,
+             names.Length
         };
     }
 
@@ -848,7 +898,7 @@ namespace Ace::Parsing
         ACE_TRY(name, ParseName({ it, t_context.Scope }));
         it += name.Length;
 
-        ACE_TRY(templateParameters, ParseTemplateParameters({ it, t_context.Scope }));
+        ACE_TRY(templateParameters, ParseTemplateParameters({ it, scope }));
         it += templateParameters.Length;
 
         ACE_TRY(parameters, ParseParameters({ it, scope }));
@@ -914,7 +964,7 @@ namespace Ace::Parsing
         return ParseData
         {
             std::make_shared<const Node::Template::Function>(
-                std::vector<std::string>{},
+                std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>{},
                 templateParameters.Value,
                 function
                 ),
@@ -930,7 +980,7 @@ namespace Ace::Parsing
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::ImplKeyword));
         ++it;
 
-        ACE_TRY(templateParameters, ParseTemplateParameters({ it, t_context.Scope }));
+        ACE_TRY(templateParameters, ParseImplTemplateParameters({ it, scope }));
         it += templateParameters.Length;
 
         ACE_TRY(typeName, ParseSymbolName({ it, t_context.Scope }));
@@ -950,9 +1000,9 @@ namespace Ace::Parsing
 
             std::unordered_set<std::string> templateParameterSet{};
             ACE_TRY_VOID(TransformExpectedVector(templateParameters.Value,
-            [&](const Token& t_templateParameter) -> Expected<void>
+            [&](const std::shared_ptr<const Node::TemplateParameter::Impl>& t_templateParameter) -> Expected<void>
             {
-                const std::string& templateParameterName = t_templateParameter.String;
+                const std::string& templateParameterName = t_templateParameter->GetName();
                 ACE_TRY_ASSERT(!templateParameterSet.contains(templateParameterName));
                 templateParameterSet.insert(templateParameterName);
 
@@ -982,7 +1032,12 @@ namespace Ace::Parsing
 
         while (it->TokenKind != Token::Kind::New(Token::Kind::CloseBrace))
         {
-            if (auto expFunctionTemplate = ParseTemplatedImplFunction({ it, scope }, typeName.Value, templateParameters.Value))
+            auto expFunctionTemplate = ParseTemplatedImplFunction(
+                { it, scope },
+                typeName.Value,
+                templateParameters.Value
+            );
+            if (expFunctionTemplate)
             {
                 functionTemplates.push_back(expFunctionTemplate.Unwrap().Value);
                 it += expFunctionTemplate.Unwrap().Length;
@@ -1011,7 +1066,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTemplatedImplFunction(Context t_context, const SymbolName& t_selfTypeName, const std::vector<std::string>& t_implTemplateParameters) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
+    auto Parser::ParseTemplatedImplFunction(Context t_context, const SymbolName& t_selfTypeName, const std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>& t_implTemplateParameters) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
     {
         auto* const scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -1050,16 +1105,16 @@ namespace Ace::Parsing
             }
         }());
 
-        ACE_TRY(templateParameters, [&]() -> Expected<std::vector<std::string>>
+        ACE_TRY(templateParameters, [&]() -> Expected<std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>>
         {
-            if (auto expTemplateParameters = ParseTemplateParameters({ it, t_context.Scope }))
+            if (auto expTemplateParameters = ParseTemplateParameters({ it, scope }))
             {
                 it += expTemplateParameters.Unwrap().Length;
                 return expTemplateParameters.Unwrap().Value;
             }
             else
             {
-                return std::vector<std::string>{};
+                return std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>{};
             }
         }());
 
@@ -1143,10 +1198,22 @@ namespace Ace::Parsing
             body.Value
             );
 
+        std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>> clonedImplTemplateParameters{};
+        std::transform(
+            begin(t_implTemplateParameters),
+            end  (t_implTemplateParameters),
+            back_inserter(clonedImplTemplateParameters),
+            [&](const std::shared_ptr<const Node::TemplateParameter::Impl>& t_implTemplateParameter)
+            {
+                return t_implTemplateParameter->CloneInScope(scope);
+            }
+        );
+
+
         return ParseData
         {
             std::make_shared<const Node::Template::Function>(
-                t_implTemplateParameters,
+                clonedImplTemplateParameters,
                 templateParameters,
                 function
                 ),
@@ -1242,16 +1309,16 @@ namespace Ace::Parsing
         ACE_TRY(name, ParseName({ it, t_context.Scope }));
         it += name.Length;
 
-        ACE_TRY(templateParameters, [&]() -> Expected<std::vector<std::string>>
+        ACE_TRY(templateParameters, [&]() -> Expected<std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>>
         {
-            if (auto expTemplateParameters = ParseTemplateParameters({ it, t_context.Scope }))
+            if (auto expTemplateParameters = ParseTemplateParameters({ it, scope }))
             {
                 it += expTemplateParameters.Unwrap().Length;
                 return expTemplateParameters.Unwrap().Value;
             }
             else
             {
-                return std::vector<std::string>{};
+                return std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>{};
             }
         }());
 
@@ -1297,7 +1364,7 @@ namespace Ace::Parsing
         return ParseData
         {
             std::make_shared<const Node::Template::Function>(
-                std::vector<std::string>{},
+                std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>{},
                 templateParameters,
                 function
                 ),
@@ -1476,6 +1543,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseStruct(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Type::Struct>>>
     {
+        auto* const scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
@@ -1506,25 +1574,24 @@ namespace Ace::Parsing
             ACE_TRY_ASSERT(it != startIt);
         }
 
-        ACE_TRY(body, ParseStructBody({ it, t_context.Scope }));
+        ACE_TRY(body, ParseStructBody({ it, scope }));
         it += body.Length;
 
         return ParseData
         {
             std::make_shared<const Node::Type::Struct>(
-                body.Value.first,
+                scope,
                 name.Value,
                 attributes.Value,
                 accessModifier,
-                body.Value.second
+                body.Value
                 ),
             Distance(t_context.Iterator, it)
         };
     }
 
-    auto Parser::ParseStructBody(Context t_context) -> Expected<ParseData<std::pair<Scope*, std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>>>>
+    auto Parser::ParseStructBody(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::OpenBrace));
@@ -1542,25 +1609,23 @@ namespace Ace::Parsing
                     break;
             }
 
-            ACE_TRY(variable, ParseMemberVariable({ it, scope }, variables.size()));
+            ACE_TRY(variable, ParseMemberVariable({ it, t_context.Scope }, variables.size()));
             variables.push_back(variable.Value);
             it += variable.Length;
         }
 
         ++it;
 
-        return ParseData<std::pair<Scope*, std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>>>
+        return ParseData<std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>>
         {
-            {
-                scope,
-                variables
-            },
+            variables,
             Distance(t_context.Iterator, it)
         };
     }
 
     auto Parser::ParseStructTemplate(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Type>>>
     {
+        auto* const scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
@@ -1569,7 +1634,7 @@ namespace Ace::Parsing
         ACE_TRY(name, ParseName({ it, t_context.Scope }));
         it += name.Length;
 
-        ACE_TRY(templateParameters, ParseTemplateParameters({ it, t_context.Scope }));
+        ACE_TRY(templateParameters, ParseTemplateParameters({ it, scope }));
         it += templateParameters.Length;
 
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::Colon));
@@ -1594,23 +1659,23 @@ namespace Ace::Parsing
             ACE_TRY_ASSERT(it != startIt);
         }
 
-        ACE_TRY(body, ParseStructBody({ it, t_context.Scope }));
+        ACE_TRY(body, ParseStructBody({ it, scope }));
         it += body.Length;
 
         const auto type = std::make_shared<const Node::Type::Struct>(
-            body.Value.first,
+            scope,
             name.Value,
             attributes.Value,
             accessModifier,
-            body.Value.second
-            );
+            body.Value
+        );
 
         return ParseData
         {
             std::make_shared<const Node::Template::Type>(
                 templateParameters.Value,
                 type
-                ),
+            ),
             Distance(t_context.Iterator, it)
         };
     }

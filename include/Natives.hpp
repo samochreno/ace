@@ -59,6 +59,13 @@ namespace Ace
         NonTrivial,
     };
 
+    enum class NativeSizeKind
+    {
+        None,
+        Sized,
+        Unsized,
+    };
+
     class NativeType : public virtual ITypeableNative
     {
     public:
@@ -66,15 +73,19 @@ namespace Ace
             const Compilation& t_compilation,
             SymbolName&& t_name,
             std::optional<std::function<llvm::Type*()>>&& t_irTypeGetter,
+            const NativeSizeKind& t_sizeKind,
             const NativeCopyabilityKind& t_copyabilityKind
         ) : m_Compilation{ t_compilation },
             m_Name{ std::move(t_name) },
             m_IRTypeGetter{ std::move(t_irTypeGetter) },
-            m_IsTriviallyCopyable
-            { 
-                t_copyabilityKind == NativeCopyabilityKind::Trivial 
-            }
+            m_IsSized{ t_sizeKind == NativeSizeKind::Sized },
+            m_IsTriviallyCopyable{ t_copyabilityKind == NativeCopyabilityKind::Trivial }
         {
+            ACE_ASSERT(
+                (t_sizeKind == NativeSizeKind::Sized) ||
+                (t_sizeKind == NativeSizeKind::Unsized)
+            );
+
             ACE_ASSERT(
                 (t_copyabilityKind == NativeCopyabilityKind::Trivial) ||
                 (t_copyabilityKind == NativeCopyabilityKind::NonTrivial)
@@ -105,6 +116,7 @@ namespace Ace
         const Compilation& m_Compilation;
         SymbolName m_Name{};
         std::optional<std::function<llvm::Type*()>> m_IRTypeGetter{};
+        bool m_IsSized{};
         bool m_IsTriviallyCopyable{};
 
         Symbol::Type::IBase* m_Symbol{};

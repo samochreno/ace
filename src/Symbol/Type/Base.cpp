@@ -19,10 +19,16 @@ namespace Ace::Symbol::Type
     {
         auto* const self = GetUnaliased();
 
-        if (self->GetScope() != GetCompilation().Natives->Reference.GetSymbol()->GetScope())
+        if (
+            self->GetScope() !=
+            GetCompilation().Natives->Reference.GetSymbol()->GetScope()
+            )
             return false;
 
-        if (self->GetName() != GetCompilation().Natives->Reference.GetFullyQualifiedName().Sections.back().Name)
+        if (
+            self->GetName() !=
+            GetCompilation().Natives->Reference.GetFullyQualifiedName().Sections.back().Name
+            )
             return false;
 
         return true;
@@ -51,7 +57,9 @@ namespace Ace::Symbol::Type
         ACE_ASSERT(!IsReference());
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
+            GetCompilation(),
             GetCompilation().Natives->Reference.GetSymbol(),
+            std::nullopt,
             {},
             { this->GetUnaliased() }
         ).Unwrap();
@@ -66,10 +74,15 @@ namespace Ace::Symbol::Type
     {
         auto* const self = GetUnaliased();
 
-        if (self->GetScope() != GetCompilation().Natives->StrongPointer.GetSymbol()->GetScope())
+        if (
+            self->GetScope() !=
+            GetCompilation().Natives->StrongPointer.GetSymbol()->GetScope())
             return false;
 
-        if (self->GetName() != GetCompilation().Natives->StrongPointer.GetFullyQualifiedName().Sections.back().Name)
+        if (
+            self->GetName() !=
+            GetCompilation().Natives->StrongPointer.GetFullyQualifiedName().Sections.back().Name
+            )
             return false;
 
         return true;
@@ -87,7 +100,9 @@ namespace Ace::Symbol::Type
     auto IBase::GetWithStrongPointer() -> Symbol::Type::IBase*
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
+            GetCompilation(),
             GetCompilation().Natives->StrongPointer.GetSymbol(),
+            std::nullopt,
             {},
             { this->GetUnaliased() }
         ).Unwrap();
@@ -126,7 +141,7 @@ namespace Ace::Symbol::Type
 
         auto expTemplate = GetScope()->ResolveStaticSymbol<Symbol::Template::Type>(
             SpecialIdentifier::CreateTemplate(self->GetName())
-            );
+        );
         
         return expTemplate ? expTemplate.Unwrap() : std::optional<Symbol::Template::Type*>{};
     }

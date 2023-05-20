@@ -16,7 +16,9 @@ namespace Ace::Symbol
     public:
         virtual ~ITemplatable() = default;
 
-        virtual auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> = 0;
+        virtual auto CollectTemplateArguments()     const -> std::vector<Symbol::Type::IBase*> = 0;
         virtual auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> = 0;
+
+        virtual auto IsTemplatePlaceholder() const -> bool final;
     };
 }

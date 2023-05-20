@@ -6,6 +6,8 @@
 #include "Symbol/Template/Base.hpp"
 #include "Symbol/SelfScoped.hpp"
 #include "Symbol/Template/Type.hpp"
+#include "Symbol/Type/TemplateParameter/Impl.hpp"
+#include "Symbol/Type/TemplateParameter/Normal.hpp"
 #include "Node/Template/Type.hpp"
 #include "Node/Type/Base.hpp"
 #include "Scope.hpp"
@@ -14,7 +16,9 @@
 
 namespace Ace::Symbol::Template
 {
-    class Type : public virtual Symbol::Template::IBase, public virtual Symbol::ISelfScoped
+    class Type :
+        public virtual Symbol::Template::IBase,
+        public virtual Symbol::ISelfScoped
     {
     public:
         Type(
@@ -32,18 +36,29 @@ namespace Ace::Symbol::Template
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
         auto GetAccessModifier() const -> AccessModifier final { return m_TemplateNode->GetAST()->GetAccessModifier(); }
 
+        auto CollectImplParameters() const -> std::vector<Symbol::Type::TemplateParameter::Impl*>   final;
+        auto CollectParameters()     const -> std::vector<Symbol::Type::TemplateParameter::Normal*> final;
+
         auto GetASTName() const -> const std::string& final { return m_TemplateNode->GetAST()->GetName(); }
+  
+        auto SetPlaceholderSymbol(
+            Symbol::IBase* const t_symbol
+        ) -> void final { m_PlaceholderSymbol = t_symbol; }
+        auto GetPlaceholderSymbol() const -> Symbol::IBase* final { return m_PlaceholderSymbol; }
+
         auto InstantiateSymbols(
             const std::vector<Symbol::Type::IBase*>& t_implArguments,
             const std::vector<Symbol::Type::IBase*>& t_arguments
-        ) -> Symbol::IBase* final;
-        auto HasUninstantiatedSemanticsForSymbols() const -> bool final { return m_InstantiatedOnlySymbolsASTs.size() > 0; }
-        auto InstantiateSemanticsForSymbols() -> void final;
+        ) -> Expected<TemplateSymbolsInstantationResult> final;
+        auto InstantiateSemanticsForSymbols(
+            const std::shared_ptr<const Node::IBase>& t_ast
+        ) -> void final;
 
-    private:
+
+private:
         std::string m_Name{};
         AccessModifier m_AccessModifier{};
         const Node::Template::Type* m_TemplateNode{};
-        std::vector<std::shared_ptr<const Node::Type::IBase>> m_InstantiatedOnlySymbolsASTs{};
+        Symbol::IBase* m_PlaceholderSymbol{};
     };
 }

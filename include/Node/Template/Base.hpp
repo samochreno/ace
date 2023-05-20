@@ -14,7 +14,7 @@ namespace Ace::Node::Template
     public:
         virtual ~IBase() = default;
 
-        virtual auto GetImplParameters() const -> const std::vector<std::string>& = 0;
-        virtual auto GetParameters() const -> const std::vector<std::string>& = 0;
+        virtual auto CollectImplParameterNames() const -> std::vector<std::string> = 0;
+        virtual auto CollectParameterNames()     const -> std::vector<std::string> = 0;
     };
 }

@@ -9,6 +9,7 @@
 #include "Package.hpp"
 #include "Natives.hpp"
 #include "Scope.hpp"
+#include "TemplateInstantiator.hpp"
 
 namespace llvm
 {
@@ -27,6 +28,7 @@ namespace Ace
         std::filesystem::path OutputPath{};
         std::unique_ptr<Natives> Natives{};
         std::unique_ptr<Scope> GlobalScope{};
+        std::unique_ptr<TemplateInstantiator> TemplateInstantiator{};
         std::unique_ptr<llvm::LLVMContext> LLVMContext{};
     };
 }

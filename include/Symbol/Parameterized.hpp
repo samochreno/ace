@@ -11,7 +11,8 @@ namespace Ace::Symbol
     public:
         virtual ~IParameterized() = default;
 
-        virtual auto CollectParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*> = 0;
+        virtual auto CollectParameters()     const -> std::vector<Symbol::Variable::Parameter::IBase*> = 0;
+        virtual auto CollectParameterTypes() const -> std::vector<Symbol::Type::IBase*> final;
     };
 }
 

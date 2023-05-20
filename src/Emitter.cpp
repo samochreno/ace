@@ -73,8 +73,20 @@ namespace Ace
 
         const auto timeIREmittingStart = now();
 
-        const auto symbols         = globalScope->CollectAllDefinedSymbolsRecursive();
-        const auto typeSymbols     = DynamicCastFilter<Symbol::Type::IBase*>(symbols);
+        const auto symbols = globalScope->CollectAllDefinedSymbolsRecursive();
+
+        const auto allTypeSymbols = DynamicCastFilter<Symbol::Type::IBase*>(symbols);
+        std::vector<Symbol::Type::IBase*> typeSymbols{};
+        std::copy_if(
+            begin(allTypeSymbols),
+            end  (allTypeSymbols),
+            back_inserter(typeSymbols),
+            [](Symbol::Type::IBase* const t_typeSymbol)
+            {
+                return !t_typeSymbol->IsTemplatePlaceholder();
+            }
+        );
+
         const auto structSymbols   = DynamicCastFilter<Symbol::Type::Struct*>(typeSymbols);
         const auto variableSymbols = DynamicCastFilter<Symbol::Variable::Normal::Static*>(symbols);
 
@@ -92,7 +104,17 @@ namespace Ace
 
         EmitStaticVariables(variableSymbols);
 
-        const auto functionSymbols = globalScope->CollectDefinedSymbolsRecursive<Symbol::Function>();
+        const auto allFunctionSymbols = globalScope->CollectDefinedSymbolsRecursive<Symbol::Function>();
+        std::vector<Symbol::Function*> functionSymbols{};
+        std::copy_if(
+            begin(allFunctionSymbols),
+            end  (allFunctionSymbols),
+            back_inserter(functionSymbols),
+            [](Symbol::Function* const t_functionSymbol)
+            {
+                return !t_functionSymbol->IsTemplatePlaceholder();
+            }
+        );
         EmitFunctions(functionSymbols);
         
         std::vector<const Symbol::Function*> mainFunctionSymbols{};
@@ -724,14 +746,6 @@ namespace Ace
                     "Emitting function: " << 
                     m_FunctionSymbol->CreateSignature()
                 );
-
-                if (
-                    m_FunctionSymbol->CreateSignature() == 
-                    "$global::ace::std::$anonymous_1::from_i16"
-                    )
-                {
-                    [](){}();
-                }
 
                 ACE_ASSERT(m_FunctionSymbol->GetBody().has_value());
                 t_functionSymbolBlockPair.Symbol->GetBody().value()->Emit(*this);

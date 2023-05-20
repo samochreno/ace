@@ -30,18 +30,26 @@ namespace Ace::Node
         auto* const selfScope = t_scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const Node::Function>> clonedFunctions{};
-        std::transform(begin(m_Functions), end(m_Functions), back_inserter(clonedFunctions),
-        [&](const std::shared_ptr<const Node::Function>& t_function)
-        {
-            return t_function->CloneInScope(selfScope);
-        });
+        std::transform(
+            begin(m_Functions),
+            end  (m_Functions),
+            back_inserter(clonedFunctions),
+            [&](const std::shared_ptr<const Node::Function>& t_function)
+            {
+                return t_function->CloneInScope(selfScope);
+            }
+        );
 
         std::vector<std::shared_ptr<const Node::Template::Function>> clonedFunctionTemplates{};
-        std::transform(begin(m_FunctionTemplates), end(m_FunctionTemplates), back_inserter(clonedFunctionTemplates),
-        [&](const std::shared_ptr<const Node::Template::Function>& t_functionTemplate)
-        {
-            return t_functionTemplate->CloneInScope(selfScope);
-        });
+        std::transform(
+            begin(m_FunctionTemplates),
+            end  (m_FunctionTemplates),
+            back_inserter(clonedFunctionTemplates),
+            [&](const std::shared_ptr<const Node::Template::Function>& t_functionTemplate)
+            {
+                return t_functionTemplate->CloneInScope(selfScope);
+            }
+        );
 
         return std::make_unique<const Node::Impl>(
             selfScope,

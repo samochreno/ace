@@ -8,20 +8,36 @@
 #include "Error.hpp"
 #include "Symbol/Base.hpp"
 #include "Symbol/Template/Type.hpp"
+#include "Node/TemplateParameter/Normal.hpp"
 
 namespace Ace::Node::Template
 {
     auto Type::GetChildren() const -> std::vector<const Node::IBase*>
     {
-        return {};
+        std::vector<const Node::IBase*> children{};
+
+        AddChildren(children, m_Parameters);
+
+        return children;
     }
 
     auto Type::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Template::Type>
     {
-        return std::make_unique<const Node::Template::Type>(
-            m_Parameters,
+        std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>> clonedParameters{};
+        std::transform(
+            begin(m_Parameters),
+            end  (m_Parameters),
+            back_inserter(clonedParameters),
+            [&](const std::shared_ptr<const Node::TemplateParameter::Normal>& t_parameter)
+            {
+                return t_parameter->CloneInScope(m_AST->GetSelfScope());
+            }
+        );
+
+        return std::make_shared<const Node::Template::Type>(
+            clonedParameters,
             m_AST->CloneInScopeType(t_scope)
-            );
+        );
     }
 
     auto Type::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
@@ -32,9 +48,24 @@ namespace Ace::Node::Template
         };
     }
 
-    auto Type::GetImplParameters() const -> const std::vector<std::string>& 
+    auto Type::CollectImplParameterNames() const -> std::vector<std::string>
     {
-        static std::vector<std::string> implParameters{};
-        return implParameters;
+        return {};
+    }
+
+    auto Type::CollectParameterNames() const -> std::vector<std::string>
+    {
+        std::vector<std::string> names{};
+        std::transform(
+            begin(m_Parameters),
+            end  (m_Parameters),
+            back_inserter(names),
+            [](const std::shared_ptr<const Node::TemplateParameter::Normal>& t_parameter)
+            {
+                return t_parameter->GetName();
+            }
+        );
+
+        return names;
     }
 }

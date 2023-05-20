@@ -10,68 +10,78 @@
 
 namespace Ace::Symbol::Template
 {
+    auto Type::CollectImplParameters() const -> std::vector<Symbol::Type::TemplateParameter::Impl*>
+    {
+        return {};
+    }
+
+    auto Type::CollectParameters() const -> std::vector<Symbol::Type::TemplateParameter::Normal*>
+    {
+        return m_TemplateNode->GetAST()->GetSelfScope()->CollectDefinedSymbols<Symbol::Type::TemplateParameter::Normal>();
+    }
+
     auto Type::InstantiateSymbols(
         const std::vector<Symbol::Type::IBase*>& t_implArguments,
         const std::vector<Symbol::Type::IBase*>& t_arguments
-    ) -> Symbol::IBase*
+    ) -> Expected<TemplateSymbolsInstantationResult>
     {
-        const auto& parameters = m_TemplateNode->GetParameters();
+        const auto parameterNames = m_TemplateNode->CollectParameterNames();
 
-        ACE_ASSERT(t_arguments.size() == parameters.size());
+        ACE_TRY_ASSERT(t_arguments.size() == parameterNames.size());
 
         const auto ast = m_TemplateNode->GetAST()->CloneInScopeType(m_TemplateNode->GetScope());
 
-        ast->GetSelfScope()->DefineTemplateArgumentAliases(
+        ACE_TRY_VOID(ast->GetSelfScope()->DefineTemplateArgumentAliases(
             {},
             {},
-            parameters,
+            parameterNames,
             t_arguments
-        );
+        ));
 
         const auto nodes = Core::GetAllNodes(ast);
 
-        Core::CreateAndDefineSymbols(GetCompilation(), nodes).Unwrap();
-        Core::DefineAssociations(GetCompilation(), nodes).Unwrap();
+        ACE_TRY_VOID(Core::CreateAndDefineSymbols(GetCompilation(), nodes));
+        ACE_TRY_VOID(Core::DefineAssociations(GetCompilation(), nodes));
 
-        m_InstantiatedOnlySymbolsASTs.push_back(ast);
-
-        return Scope::ResolveOrInstantiateTemplateInstance(
+        auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
+            GetCompilation(),
             this,
+            std::nullopt,
             t_implArguments,
             t_arguments
         ).Unwrap();
+
+        return TemplateSymbolsInstantationResult{ symbol, ast };
     }
 
-    auto Type::InstantiateSemanticsForSymbols() -> void
+    auto Type::InstantiateSemanticsForSymbols(
+        const std::shared_ptr<const Node::IBase>& t_ast
+    ) -> void
     {
-        std::for_each(begin(m_InstantiatedOnlySymbolsASTs), end(m_InstantiatedOnlySymbolsASTs),
-        [&](const std::shared_ptr<const Node::Type::IBase>& t_ast)
-        {
-            const auto boundAST = Core::CreateBoundTransformedAndVerifiedAST(
-                GetCompilation(),
-                t_ast,
-                [](const std::shared_ptr<const Node::Type::IBase>& t_ast) { return t_ast->CreateBoundType(); },
-                [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); },
-                [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateLoweredType({}); },
-                [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); }
-            ).Unwrap();
+        const auto ast = std::dynamic_pointer_cast<const Node::Type::IBase>(t_ast);
 
-            Core::BindFunctionSymbolsBodies(
-                GetCompilation(),
-                Core::GetAllNodes(boundAST)
-            );
+        const auto boundAST = Core::CreateBoundTransformedAndVerifiedAST(
+            GetCompilation(),
+            ast,
+            [](const std::shared_ptr<const Node::Type::IBase>& t_ast) { return t_ast->CreateBoundType(); },
+            [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); },
+            [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateLoweredType({}); },
+            [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); }
+        ).Unwrap();
 
-            auto* const selfSymbol = boundAST->GetSymbol();
+        Core::BindFunctionSymbolsBodies(
+            GetCompilation(),
+            Core::GetAllNodes(boundAST)
+        );
 
-            auto copyOperatorName = selfSymbol->CreateFullyQualifiedName();
-            copyOperatorName.Sections.push_back(SymbolNameSection{ SpecialIdentifier::Operator::Copy });
-            selfSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(copyOperatorName);
+        auto* const selfSymbol = boundAST->GetSymbol();
 
-            auto dropOperatorName = selfSymbol->CreateFullyQualifiedName();
-            dropOperatorName.Sections.push_back(SymbolNameSection{ SpecialIdentifier::Operator::Drop });
-            selfSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(dropOperatorName);
-        });
+        auto copyOperatorName = selfSymbol->CreateFullyQualifiedName();
+        copyOperatorName.Sections.push_back(SymbolNameSection{ SpecialIdentifier::Operator::Copy });
+        selfSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(copyOperatorName);
 
-        m_InstantiatedOnlySymbolsASTs.clear();
+        auto dropOperatorName = selfSymbol->CreateFullyQualifiedName();
+        dropOperatorName.Sections.push_back(SymbolNameSection{ SpecialIdentifier::Operator::Drop });
+        selfSymbol->GetScope()->ResolveStaticSymbol<Symbol::Function>(dropOperatorName);
     }
 }

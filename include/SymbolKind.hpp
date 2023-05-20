@@ -21,6 +21,8 @@ namespace Ace
         TypeTemplate,
         TypeAlias,
         TemplatedImpl,
+        ImplTemplateParameter,
+        TemplateParameter,
     };
 
     inline auto operator&(const SymbolKind& t_lhs, const SymbolKind& t_rhs) -> uint16_t

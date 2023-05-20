@@ -42,7 +42,9 @@ namespace Ace::BoundNode::Expression
         ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
 
         ACE_TRY(symbol, Scope::ResolveOrInstantiateTemplateInstance(
+            GetCompilation(),
             GetCompilation().Natives->StrongPointer__value.GetSymbol(),
+            std::nullopt,
             { mchLoweredExpression.Value->GetTypeInfo().Symbol->GetWithoutStrongPointer() },
             {}
         ));

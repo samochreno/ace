@@ -58,14 +58,16 @@ namespace Ace::Parsing
         static auto ParseSymbolName(Context t_context) -> Expected<ParseData<SymbolName>>;
         static auto ParseSymbolNameSection(Context t_context) -> Expected<ParseData<SymbolNameSection>>;
         static auto ParseTypeName(Context t_context, const bool& t_doAllowReferences) -> Expected<ParseData<TypeName>>;
-        static auto ParseTemplateParameters(Context t_context) -> Expected<ParseData<std::vector<std::string>>>;
+        static auto ParseTemplateParameterNames(Context t_context) -> Expected<ParseData<std::vector<std::string>>>;
+        static auto ParseImplTemplateParameters(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>>>;
+        static auto ParseTemplateParameters(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>>>;
         static auto ParseTemplateArguments(Context t_context) -> Expected<ParseData<std::vector<SymbolName>>>;
         static auto ParseModule(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Module>>>;
         static auto ParseImpl(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Impl>>>;
         static auto ParseImplFunction(Context t_context, const SymbolName& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Function>>>;
         static auto ParseImplFunctionTemplate(Context t_context, const SymbolName& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>;
         static auto ParseTemplatedImpl(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::TemplatedImpl>>>;
-        static auto ParseTemplatedImplFunction(Context t_context, const SymbolName& t_selfTypeName, const std::vector<std::string>& t_implTemplateParameterss) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>;
+        static auto ParseTemplatedImplFunction(Context t_context, const SymbolName& t_selfTypeName, const std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>& t_implTemplateParameters) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>;
         static auto ParseFunction(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Function>>>;
         static auto ParseFunctionTemplate(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>;
         static auto ParseParameters(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>>>>;
@@ -74,7 +76,7 @@ namespace Ace::Parsing
         static auto ParseType(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Type::IBase>>>;
         static auto ParseTypeTemplate(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Type>>>;
         static auto ParseStruct(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Type::Struct>>>;
-        static auto ParseStructBody(Context t_context) -> Expected<ParseData<std::pair<Scope*, std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>>>>;
+        static auto ParseStructBody(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>>>;
         static auto ParseStructTemplate(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Type>>>;
         static auto ParseStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::IBase>>>;
         static auto ParseExpressionStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Expression>>>;

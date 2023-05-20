@@ -15,8 +15,11 @@
 
 #pragma warning(pop)
 
-#include "Scope.hpp"
+#include "Error.hpp"
+#include "Package.hpp"
 #include "Natives.hpp"
+#include "Scope.hpp"
+#include "TemplateInstantiator.hpp"
 
 namespace Ace
 {
@@ -176,11 +179,12 @@ namespace Ace
         auto self = std::make_unique<Compilation>();
         auto& selfRef = *self.get();
 
-        self->Package     = std::move(package);
-        self->OutputPath  = std::move(options.OutputPath);
-        self->Natives     = std::make_unique<Ace::Natives>(selfRef);
-        self->GlobalScope = std::make_unique<Scope>(selfRef);
-        self->LLVMContext = std::make_unique<llvm::LLVMContext>();
+        self->Package              = std::move(package);
+        self->OutputPath           = std::move(options.OutputPath);
+        self->Natives              = std::make_unique<Ace::Natives>(selfRef);
+        self->GlobalScope          = std::make_unique<Scope>(selfRef);
+        self->TemplateInstantiator = std::make_unique<Ace::TemplateInstantiator>();
+        self->LLVMContext          = std::make_unique<llvm::LLVMContext>();
 
         return Expected<std::unique_ptr<const Compilation>>
         {

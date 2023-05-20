@@ -15,8 +15,8 @@ namespace Ace::Log
 #define ACE_LOG_COLOR_WARNING     243, 156,  18
 #define ACE_LOG_COLOR_ERROR       192,  57,  43
 
-#define ACE_LOG_EMPTY()          std::cout << "\n"
-#define ACE_LOG_FLUSH(t_message) std::cout << std::flush
+#define ACE_LOG_EMPTY() std::cout << "\n"
+#define ACE_LOG_FLUSH() std::cout << std::flush
 
 #define ACE_LOG_INFO(t_message) \
     std::cout << termcolor::color<ACE_LOG_COLOR_WHITE> << termcolor::on_color<ACE_LOG_COLOR_INFORMATION> << \

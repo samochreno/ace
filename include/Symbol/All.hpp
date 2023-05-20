@@ -16,6 +16,8 @@
 #include "Symbol/Type/Alias/TemplateArgument/Normal.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Type/Struct.hpp"
+#include "Symbol/Type/TemplateParameter/Impl.hpp"
+#include "Symbol/Type/TemplateParameter/Normal.hpp"
 #include "Symbol/Typed.hpp"
 #include "Symbol/Variable/Base.hpp"
 #include "Symbol/Variable/Local.hpp"

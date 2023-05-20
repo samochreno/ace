@@ -27,8 +27,6 @@ namespace Ace
         const auto& packageName = t_compilation.Package.Name;
         auto* const globalScope = t_compilation.GlobalScope.get();
 
-        Emitter emitter{ t_compilation };
-
         const auto& now = std::chrono::steady_clock::now;
 
         const auto timeStart = now();
@@ -41,9 +39,7 @@ namespace Ace
         ACE_LOG_INFO("Parsing start");
 
         ACE_TRY(asts, TransformExpectedVector(t_compilation.Package.FilePaths,
-        [&](
-            const std::filesystem::path& t_filePath
-        ) -> Expected<std::shared_ptr<const Node::Module>>
+        [&](const std::filesystem::path& t_filePath) -> Expected<std::shared_ptr<const Node::Module>>
         {
             const std::ifstream fileStream{ t_filePath };
             ACE_TRY_ASSERT(fileStream.is_open());
@@ -70,6 +66,12 @@ namespace Ace
         const auto timeSymbolCreationEnd = now();
         ACE_LOG_INFO("Symbol creation success");
 
+        ACE_LOG_INFO("Template placeholder symbols instantiation start");
+        const auto templateSymbols = globalScope->CollectDefinedSymbolsRecursive<Symbol::Template::IBase>();
+        t_compilation.TemplateInstantiator->SetSymbols(templateSymbols);
+        ACE_TRY_VOID(t_compilation.TemplateInstantiator->InstantiatePlaceholderSymbols());
+        ACE_LOG_INFO("Template placeholder symbols instantiation success");
+
         const auto timeBindingAndVerificationStart = now();
         ACE_LOG_INFO("Binding and verification start");
 
@@ -77,6 +79,7 @@ namespace Ace
         ACE_TRY_VOID(t_compilation.Natives->Initialize());
         ACE_LOG_INFO("Native symbol initialization success");
 
+        ACE_LOG_INFO("AST binding and verification start");
         ACE_TRY(boundASTs, Core::CreateBoundTransformedAndVerifiedASTs(
             t_compilation,
             asts,
@@ -97,30 +100,22 @@ namespace Ace
                 return t_ast->GetOrCreateTypeChecked({});
             }
         ));
+        ACE_LOG_INFO("AST binding and verification success");
 
+        ACE_LOG_INFO("Function symbol body binding start");
         Core::BindFunctionSymbolsBodies(
             t_compilation,
             Core::GetAllNodes(begin(boundASTs), end(boundASTs))
         );
+        ACE_LOG_INFO("Function symbol body binding success");
 
-        const auto templateSymbols = globalScope->CollectDefinedSymbolsRecursive<Symbol::Template::IBase>();
-        bool didInstantiateSemantics = true;
-        while (didInstantiateSemantics)
-        {
-            didInstantiateSemantics = false;
+        ACE_LOG_INFO("Template semantics instantiation start");
+        t_compilation.TemplateInstantiator->InstantiateSemanticsForSymbols();
+        ACE_LOG_INFO("Template semantics instantiation success");
 
-            std::for_each(begin(templateSymbols), end(templateSymbols),
-            [&](Symbol::Template::IBase* const t_templateSymbol)
-            {
-                if (t_templateSymbol->HasUninstantiatedSemanticsForSymbols())
-                {
-                    didInstantiateSemantics = true;
-                    t_templateSymbol->InstantiateSemanticsForSymbols();
-                }
-            });
-        }
-
+        ACE_LOG_INFO("Glue generation start");
         Core::GenerateAndBindGlue(t_compilation);
+        ACE_LOG_INFO("Glue generation success");
 
         const auto timeBindingAndVerificationEnd = now();
         ACE_LOG_INFO("Binding and verification success");
@@ -133,6 +128,7 @@ namespace Ace
         const auto timeBackendStart = now();
         ACE_LOG_INFO("Backend start");
 
+        Emitter emitter{ t_compilation };
         emitter.SetASTs(boundASTs);
         const auto emitterResult = emitter.Emit();
 
@@ -162,10 +158,10 @@ namespace Ace
         ACE_LOG_INFO(getFormattedDuration(timeEnd - timeStart)                                               << " - Total");
         ACE_LOG_INFO(getFormattedDuration(timeFrontendEnd - timeFrontendStart)                               << " - Frontend");
         ACE_LOG_INFO(getFormattedDuration(timeParsingEnd - timeParsingStart)                                 << " - Frontend | Parsing");
-        ACE_LOG_INFO(getFormattedDuration(timeSymbolCreationEnd - timeSymbolCreationStart)                   << " - Frontend | Symbol Creation");
-        ACE_LOG_INFO(getFormattedDuration(timeBindingAndVerificationEnd - timeBindingAndVerificationStart)   << " - Frontend | Binding And Verification");
+        ACE_LOG_INFO(getFormattedDuration(timeSymbolCreationEnd - timeSymbolCreationStart)                   << " - Frontend | Symbol creation");
+        ACE_LOG_INFO(getFormattedDuration(timeBindingAndVerificationEnd - timeBindingAndVerificationStart)   << " - Frontend | Binding and verification");
         ACE_LOG_INFO(getFormattedDuration(timeBackendEnd - timeBackendStart)                                 << " - Backend");
-        ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.IREmitting)                                << " - Backend | IR Emitting");
+        ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.IREmitting)                                << " - Backend | IR emitting");
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.Analyses)                                  << " - Backend | Analyses");
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.LLC)                                       << " - Backend | llc");
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.Clang)                                     << " - Backend | clang");

@@ -103,7 +103,7 @@ namespace Ace::Symbol
 
     auto Function::CollectArgumentTypeInfos() const -> std::vector<TypeInfo>
     {
-        auto parameters = CollectParameters();
+        const auto parameters = CollectParameters();
 
         std::vector<TypeInfo> typeInfos{};
         std::transform(

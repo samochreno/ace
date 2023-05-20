@@ -29,6 +29,9 @@ namespace Ace::Symbol::Type
     public:
         virtual ~IBase() = default;
 
+        virtual auto SetAsUnsized() -> void = 0;
+        virtual auto IsSized() const -> bool = 0;
+
         virtual auto SetAsNativeSized() -> void = 0;
         virtual auto IsNativeSized() const -> bool = 0;
 

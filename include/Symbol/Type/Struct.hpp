@@ -34,6 +34,9 @@ namespace Ace::Symbol::Type
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
         auto GetAccessModifier() const -> AccessModifier final { return m_AccessModifier; }
 
+        auto SetAsUnsized() -> void final { m_IsSized = false; }
+        auto IsSized() const -> bool final { return m_IsSized; }
+
         auto SetAsNativeSized() -> void final { m_IsNativeSized = true; }
         auto IsNativeSized() const -> bool final { return m_IsNativeSized; }
 
@@ -65,6 +68,8 @@ namespace Ace::Symbol::Type
         Scope* m_SelfScope{};
         std::string m_Name{};
         AccessModifier m_AccessModifier{};
+
+        bool m_IsSized = true;
 
         bool m_IsNativeSized{};
         

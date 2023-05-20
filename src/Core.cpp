@@ -51,7 +51,10 @@ namespace Ace::Core
     {
         auto symbolCreatableNodes = DynamicCastFilter<const Node::ISymbolCreatable*>(t_nodes);
         std::sort(begin(symbolCreatableNodes), end(symbolCreatableNodes),
-        [](const Node::ISymbolCreatable* const t_lhs, const Node::ISymbolCreatable* const t_rhs)
+        [](
+            const Node::ISymbolCreatable* const t_lhs,
+            const Node::ISymbolCreatable* const t_rhs
+        )
         {
             const auto lhsCreationOrder = GetSymbolCreationOrder(t_lhs->GetSymbolKind());
             const auto rhsCreationOrder = GetSymbolCreationOrder(t_rhs->GetSymbolKind());
@@ -258,13 +261,16 @@ namespace Ace::Core
         const std::function<Symbol::Function*(const Compilation&, Symbol::Type::IBase* const)>& t_getOrDefineGlueSymbols
     ) -> std::optional<Symbol::Function*>
     {
-        if (
-            t_typeSymbol->GetUnaliased() ==
-            t_compilation.Natives->Void.GetSymbol()
-            )
+        if (!t_typeSymbol->IsSized())
             return std::nullopt;
 
         if (t_typeSymbol->IsReference())
+            return std::nullopt;
+
+        auto* const templatableSymbol = dynamic_cast<Symbol::ITemplatable*>(
+            t_typeSymbol
+        );
+        if (templatableSymbol && templatableSymbol->IsTemplatePlaceholder())
             return std::nullopt;
 
         return t_getOrDefineGlueSymbols(t_compilation, t_typeSymbol);
@@ -306,7 +312,6 @@ namespace Ace::Core
                 t_typeSymbol, 
                 t_getOrDefineGlueSymbols
             );
-
             if (!optGlueSymbol.has_value())
                 return;
 

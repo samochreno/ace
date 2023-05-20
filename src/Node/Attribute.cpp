@@ -20,7 +20,9 @@ namespace Ace::Node
 
     auto Attribute::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Attribute>
     {
-        return std::make_unique<const Node::Attribute>(m_StructConstructionExpression->CloneInScope(t_scope));
+        return std::make_shared<const Node::Attribute>(
+            m_StructConstructionExpression->CloneInScope(t_scope)
+        );
     }
 
     auto Attribute::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Attribute>>

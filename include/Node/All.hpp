@@ -39,6 +39,8 @@
 #include "Node/Template/Function.hpp"
 #include "Node/Template/Type.hpp"
 #include "Node/TemplatedImpl.hpp"
+#include "Node/TemplateParameter/Impl.hpp"
+#include "Node/TemplateParameter/Normal.hpp"
 #include "Node/Type/Base.hpp"
 #include "Node/Type/Struct.hpp"
 #include "Node/Typed.hpp"

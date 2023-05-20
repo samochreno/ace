@@ -104,7 +104,7 @@ fizz_buzz(n: int): int { # FizzBuzz -> Fizz = 8888, Buzz = 1111, FizzBuzz = 8888
         i += 1;
     }
 
-    ret 999999;
+    ret 0;
 }
 
 control_flow_analysis_1(): int {
@@ -512,8 +512,32 @@ global(): int {
     ret global_value;
 }
 
+NewTemplate[T]: struct { }
+
+deducable[T, U](lhs: T, rhs: U): T {
+    new NewTemplate[U] { };
+    ret lhs;
+}
+
+deducer(): int {
+    ret deducable(2, 5i8);
+}
+
+Wrapper[T]: struct {
+    value: T
+}
+
+unwrap[T](wrapped: Wrapper[T]): T {
+    ret wrapped.value;
+}
+
+unwrapper(): int {
+    wrapped: Wrapper[int] = new Wrapper[int] { value: -87783 };
+    ret unwrap(wrapped);
+}
+
 main(): int {
-    value: int = global();
+    value: int = unwrapper();
     print_int(value);
     ret value;
 }

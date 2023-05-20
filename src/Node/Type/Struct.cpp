@@ -44,7 +44,7 @@ namespace Ace::Node::Type
             clonedAttributes,
             m_AccessModifier,
             clonedVariables
-            );
+        );
     }
 
     auto Struct::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Type::Struct>>
@@ -66,13 +66,13 @@ namespace Ace::Node::Type
             m_Name,
             m_SelfScope->CollectImplTemplateArguments(),
             m_SelfScope->CollectTemplateArguments()
-            ).Unwrap();
+        ).Unwrap();
 
         return std::make_shared<const BoundNode::Type::Struct>(
             selfSymbol,
             boundAttributes,
             boundVariables
-            );
+        );
     }
 
     auto Struct::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
@@ -83,7 +83,7 @@ namespace Ace::Node::Type
                 m_SelfScope,
                 m_Name,
                 m_AccessModifier
-                )
+            )
         };
     }
 }

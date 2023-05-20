@@ -39,7 +39,7 @@ namespace Ace::Node::Expression
         return std::make_unique<const Node::Expression::FunctionCall>(
             m_Expression->CloneInScopeExpression(t_scope),
             clonedArguments
-            );
+        );
     }
 
     auto FunctionCall::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::IBase>>
@@ -57,7 +57,7 @@ namespace Ace::Node::Expression
             return t_argument->GetTypeInfo().Symbol;
         });
 
-        if (auto literalSymbol = dynamic_cast<const Node::Expression::LiteralSymbol*>(m_Expression.get()))
+        if (const auto* const literalSymbol = dynamic_cast<const Node::Expression::LiteralSymbol*>(m_Expression.get()))
         {
             ACE_TRY(functionSymbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(
                 literalSymbol->GetName(),

@@ -30,10 +30,16 @@ namespace Ace::Symbol::Type::Alias::TemplateArgument
 
         auto GetScope() const -> Scope* final { return m_Scope; }
         auto GetSelfScope() const -> Scope* final { return m_AliasedType->GetSelfScope(); }
-        auto GetName() const -> const std::string & final { return m_Name; }
+        auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TypeAlias; }
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
         auto GetAccessModifier() const -> AccessModifier final { return AccessModifier::Private; }
+
+        auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_AliasedType->CollectTemplateArguments(); }
+        auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_AliasedType->CollectImplTemplateArguments(); }
+
+        auto SetAsUnsized() -> void final { m_AliasedType->SetAsUnsized(); }
+        auto IsSized() const -> bool final { return m_AliasedType->IsSized(); }
 
         auto SetAsNativeSized() -> void final { ACE_UNREACHABLE(); }
         auto IsNativeSized() const -> bool final { return m_AliasedType->IsNativeSized(); }
@@ -52,9 +58,6 @@ namespace Ace::Symbol::Type::Alias::TemplateArgument
         auto GetCopyGlue() const -> std::optional<Symbol::Function*> final { return m_AliasedType->GetCopyGlue(); }
         auto BindDropGlue(Symbol::Function* const t_glue) -> void final { m_AliasedType->BindDropGlue(t_glue); }
         auto GetDropGlue() const -> std::optional<Symbol::Function*> final { return m_AliasedType->GetDropGlue(); }
-
-        auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_AliasedType->CollectTemplateArguments(); }
-        auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_AliasedType->CollectImplTemplateArguments(); }
 
         auto GetAliasedType() const -> Symbol::Type::IBase* final { return m_AliasedType; }
 
