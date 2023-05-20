@@ -18,12 +18,12 @@ namespace Ace::Symbol::Template
 {
     auto Function::CollectImplParameters() const -> std::vector<Symbol::Type::TemplateParameter::Impl*>
     {
-        return m_TemplateNode->GetAST()->GetSelfScope()->CollectDefinedSymbols<Symbol::Type::TemplateParameter::Impl>();
+        return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<Symbol::Type::TemplateParameter::Impl>();
     }
 
     auto Function::CollectParameters() const -> std::vector<Symbol::Type::TemplateParameter::Normal*>
     {
-        return m_TemplateNode->GetAST()->GetSelfScope()->CollectDefinedSymbols<Symbol::Type::TemplateParameter::Normal>();
+        return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<Symbol::Type::TemplateParameter::Normal>();
     }
 
     auto Function::InstantiateSymbols(

@@ -25,7 +25,7 @@ namespace Ace::Symbol
 {
     auto Function::CollectParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>
     {
-        auto normalParameters = m_SelfScope->CollectDefinedSymbols<Symbol::Variable::Parameter::Normal>();
+        auto normalParameters = m_SelfScope->CollectSymbols<Symbol::Variable::Parameter::Normal>();
         std::sort(begin(normalParameters), end(normalParameters),
         [](
             const Symbol::Variable::Parameter::Normal* const t_lhs, 
@@ -47,7 +47,7 @@ namespace Ace::Symbol
 
     auto Function::CollectAllParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>
     {
-        const auto definedParameters = m_SelfScope->CollectDefinedSymbols<Symbol::Variable::Parameter::IBase>();
+        const auto definedParameters = m_SelfScope->CollectSymbols<Symbol::Variable::Parameter::IBase>();
 
         std::vector<Symbol::Variable::Parameter::Self*> selfParameters{};
         std::vector<Symbol::Variable::Parameter::Normal*> normalParameters{};

@@ -156,7 +156,7 @@ namespace Ace::Core
         const Compilation& t_compilation
     ) -> Expected<void>
     {
-        const auto typeSymbols = t_compilation.GlobalScope->CollectDefinedSymbolsRecursive<Symbol::Type::IBase>();
+        const auto typeSymbols = t_compilation.GlobalScope->CollectSymbolsRecursive<Symbol::Type::IBase>();
 
         const bool canResolveSizes = std::find_if_not(
             begin(typeSymbols), 
@@ -294,7 +294,7 @@ namespace Ace::Core
         const std::function<void(Symbol::Type::IBase* const, Symbol::Function* const)>& t_bindGlue
     ) -> void
     {
-        const auto typeSymbols = t_compilation.GlobalScope->CollectDefinedSymbolsRecursive<Symbol::Type::IBase>();
+        const auto typeSymbols = t_compilation.GlobalScope->CollectSymbolsRecursive<Symbol::Type::IBase>();
 
         struct TypeGlueSymbolPair
         {

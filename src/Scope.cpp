@@ -55,7 +55,7 @@ namespace Ace
         {
             auto* const parentScope = scope->GetParent().value();
 
-            const auto templatedImplSymbols = parentScope->CollectDefinedSymbols<Symbol::TemplatedImpl>();
+            const auto templatedImplSymbols = parentScope->CollectSymbols<Symbol::TemplatedImpl>();
             const auto foundIt = std::find_if(
                 begin(templatedImplSymbols),
                 end  (templatedImplSymbols),
@@ -591,7 +591,7 @@ namespace Ace
 
     auto Scope::CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
     {
-        auto aliases = CollectDefinedSymbols<Symbol::Type::Alias::TemplateArgument::Normal>();
+        auto aliases = CollectSymbols<Symbol::Type::Alias::TemplateArgument::Normal>();
         std::sort(begin(aliases), end(aliases),
         [](
             const Symbol::Type::Alias::TemplateArgument::Normal* const t_lhs,
@@ -617,7 +617,7 @@ namespace Ace
 
     auto Scope::CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
     {
-        auto aliases = CollectDefinedSymbols<Symbol::Type::Alias::TemplateArgument::Impl>();
+        auto aliases = CollectSymbols<Symbol::Type::Alias::TemplateArgument::Impl>();
         std::sort(begin(aliases), end(aliases),
         [](
             const Symbol::Type::Alias::TemplateArgument::Impl* const t_lhs,

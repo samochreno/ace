@@ -104,7 +104,7 @@ namespace Ace
 
         EmitStaticVariables(variableSymbols);
 
-        const auto allFunctionSymbols = globalScope->CollectDefinedSymbolsRecursive<Symbol::Function>();
+        const auto allFunctionSymbols = globalScope->CollectSymbolsRecursive<Symbol::Function>();
         std::vector<Symbol::Function*> functionSymbols{};
         std::copy_if(
             begin(allFunctionSymbols),
@@ -393,7 +393,7 @@ namespace Ace
                 if (blockEndStatement)
                 {
                     auto blockVariableSymbols = 
-                        blockEndStatement->GetSelfScope()->CollectDefinedSymbols<Symbol::Variable::Local>();
+                        blockEndStatement->GetSelfScope()->CollectSymbols<Symbol::Variable::Local>();
 
                     std::sort(
                         begin(blockVariableSymbols),

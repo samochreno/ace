@@ -67,7 +67,7 @@ namespace Ace
         ACE_LOG_INFO("Symbol creation success");
 
         ACE_LOG_INFO("Template placeholder symbols instantiation start");
-        const auto templateSymbols = globalScope->CollectDefinedSymbolsRecursive<Symbol::Template::IBase>();
+        const auto templateSymbols = globalScope->CollectSymbolsRecursive<Symbol::Template::IBase>();
         t_compilation.TemplateInstantiator->SetSymbols(templateSymbols);
         ACE_TRY_VOID(t_compilation.TemplateInstantiator->InstantiatePlaceholderSymbols());
         ACE_LOG_INFO("Template placeholder symbols instantiation success");

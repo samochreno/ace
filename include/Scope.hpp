@@ -310,7 +310,7 @@ namespace Ace
         }
 
         template<typename TSymbol>
-        auto CollectDefinedSymbols() const -> std::vector<TSymbol*>
+        auto CollectSymbols() const -> std::vector<TSymbol*>
         {
             std::vector<TSymbol*> symbols{};
 
@@ -333,14 +333,14 @@ namespace Ace
             return symbols;
         }
         template<typename TSymbol>
-        auto CollectDefinedSymbolsRecursive() const -> std::vector<TSymbol*>
+        auto CollectSymbolsRecursive() const -> std::vector<TSymbol*>
         {
-            auto symbols = CollectDefinedSymbols<TSymbol>();
+            auto symbols = CollectSymbols<TSymbol>();
 
             std::for_each(begin(m_Children), end(m_Children),
             [&](const std::unique_ptr<Scope>& t_child)
             {
-                const auto childSymbols = t_child->CollectDefinedSymbolsRecursive<TSymbol>();
+                const auto childSymbols = t_child->CollectSymbolsRecursive<TSymbol>();
                 symbols.insert(
                     end(symbols), 
                     begin(childSymbols), 

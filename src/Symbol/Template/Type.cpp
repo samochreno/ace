@@ -17,7 +17,7 @@ namespace Ace::Symbol::Template
 
     auto Type::CollectParameters() const -> std::vector<Symbol::Type::TemplateParameter::Normal*>
     {
-        return m_TemplateNode->GetAST()->GetSelfScope()->CollectDefinedSymbols<Symbol::Type::TemplateParameter::Normal>();
+        return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<Symbol::Type::TemplateParameter::Normal>();
     }
 
     auto Type::InstantiateSymbols(
