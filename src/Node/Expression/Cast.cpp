@@ -20,7 +20,7 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto Cast::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::Cast>
+    auto Cast::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::Cast>
     {
         return std::make_shared<const Node::Expression::Cast>(
             m_TypeName,

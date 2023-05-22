@@ -40,7 +40,7 @@ namespace Ace
 
     auto IsSymbolVisibleFromScope(
         Symbol::IBase* const t_symbol,
-        const Scope* const t_scope
+        const std::shared_ptr<const Scope>& t_scope
     ) -> bool;
 
     template<typename TSymbol>
@@ -60,22 +60,22 @@ namespace Ace
     struct SymbolResolutionData
     {
         SymbolResolutionData(
-            const Scope* const t_resolvingFromScope,
+            const std::shared_ptr<const Scope>& t_resolvingFromScope,
             const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
             const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
             const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes,
             const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
-            const std::vector<const Scope*>& t_scopes,
+            const std::vector<std::shared_ptr<const Scope>>& t_scopes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
             const bool t_isSymbolTemplate
         );
 
-        const Scope* const ResolvingFromScope{};
+        const std::shared_ptr<const Scope>& ResolvingFromScope{};
         const std::vector<SymbolNameSection>::const_iterator& NameSectionsBegin{};
         const std::vector<SymbolNameSection>::const_iterator& NameSectionsEnd{};
         const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& OptArgumentTypes{};
         const std::function<bool(const Symbol::IBase* const)>& IsCorrectSymbolType{};
-        const std::vector<const Scope*>& Scopes{};
+        const std::vector<std::shared_ptr<const Scope>>& Scopes{};
         const std::vector<Symbol::Type::IBase*>& ImplTemplateArguments{};
         const bool IsSymbolTemplate{};
         const bool IsLastNameSection{};
@@ -83,23 +83,24 @@ namespace Ace
         const std::string TemplateName{};
     };
 
-    class Scope
+    class Scope : public std::enable_shared_from_this<Scope>
     {
     public:
+        int ChildCount = 0;
+
         Scope(const Compilation& t_compilation);
         ~Scope();
         
         auto GetCompilation() const -> const Compilation& { return m_Compilation; }
         auto GetNestLevel() const -> size_t { return m_NestLevel; }
-        auto GetParent() const -> std::optional<Scope*> { return m_OptParent; }
+        auto GetParent() const -> const std::optional<std::shared_ptr<Scope>>& { return m_OptParent; }
         auto GetName() const -> const std::string& { return m_Name; }
         auto FindModule() const -> std::optional<Symbol::Module*>;
 
         auto GetOrCreateChild(
             const std::optional<std::string>& t_optName
-        ) -> Scope*;
-        auto HasChild(const Scope* const t_child) const -> bool;
-        auto RemoveChild(const Scope* const t_child) -> void;
+        ) -> std::shared_ptr<Scope>;
+        auto HasChild(const std::shared_ptr<const Scope>& t_scope) const -> bool;
 
         template<typename TSymbol>
         static auto DefineSymbol(
@@ -107,7 +108,7 @@ namespace Ace
         ) -> Expected<TSymbol*>
         {
             auto* const symbol = t_symbol.get();
-            auto* const scope = symbol->GetScope();
+            const auto scope = symbol->GetScope();
             ACE_TRY_ASSERT(scope->CanDefineSymbol(symbol));
             scope->m_SymbolMap[symbol->GetName()].push_back(std::move(t_symbol));
             return symbol;
@@ -119,7 +120,7 @@ namespace Ace
             Symbol::IBase* const t_symbol
         ) -> void;
 
-        auto DefineAssociation(Scope* const t_association) -> void;
+        auto DefineAssociation(const std::shared_ptr<Scope>& t_association) -> void;
 
         static auto CreateArgumentTypes(
             Symbol::Type::IBase* const t_argumentType
@@ -167,7 +168,7 @@ namespace Ace
         {
             ACE_TRY(startScope, GetStaticSymbolResolutionStartScope(t_name));
 
-            std::vector<const Scope*> startScopes{};
+            std::vector<std::shared_ptr<const Scope>> startScopes{};
             startScopes.push_back(startScope);
             startScopes.insert(
                 end(startScopes), 
@@ -176,13 +177,13 @@ namespace Ace
             );
 
             ACE_TRY(symbol, ResolveSymbolInScopes(SymbolResolutionData{
-                this,
+                shared_from_this(),
                 t_name.Sections.begin(),
                 t_name.Sections.end(),
                 t_optArgumentTypes,
                 IsCorrectSymbolType<TSymbol>,
                 startScopes,
-                GetStaticSymbolResolutionImplTemplateArguments(this),
+                GetStaticSymbolResolutionImplTemplateArguments(shared_from_this()),
                 IsTemplate<TSymbol>()
             }));
 
@@ -219,8 +220,8 @@ namespace Ace
 
             const auto scopes = GetInstanceSymbolResolutionScopes(t_selfType);
 
-            ACE_TRY(symbol, ResolveSymbolInScopes(SymbolResolutionData{
-                this,
+            ACE_TRY(symbol, ResolveSymbolInScopes({
+                shared_from_this(),
                 nameSections.begin(),
                 nameSections.end(),
                 t_optArgumentTypes,
@@ -287,11 +288,14 @@ namespace Ace
                 SymbolNameSection { t_name }
             };
 
-            const std::vector<const Scope*> scopes{ this };
+            const std::vector<std::shared_ptr<const Scope>> scopes
+            {
+                shared_from_this()
+            };
 
             const SymbolResolutionData data
             {
-                this,
+                shared_from_this(),
                 nameSections.begin(),
                 nameSections.end(),
                 t_optArgumentTypes,
@@ -338,9 +342,9 @@ namespace Ace
             auto symbols = CollectSymbols<TSymbol>();
 
             std::for_each(begin(m_Children), end(m_Children),
-            [&](const std::unique_ptr<Scope>& t_child)
+            [&](const std::weak_ptr<Scope>& t_child)
             {
-                const auto childSymbols = t_child->CollectSymbolsRecursive<TSymbol>();
+                const auto childSymbols = t_child.lock()->CollectSymbolsRecursive<TSymbol>();
                 symbols.insert(
                     end(symbols), 
                     begin(childSymbols), 
@@ -376,10 +380,10 @@ namespace Ace
         Scope(
             const Compilation& t_compilation,
             const std::optional<std::string>& t_optName,
-            const std::optional<Scope*>& t_optParent
+            const std::optional<std::shared_ptr<Scope>>& t_optParent
         );
 
-        auto AddChild(const std::optional<std::string>& t_optName) -> Scope*;
+        auto AddChild(const std::optional<std::string>& t_optName) -> std::shared_ptr<Scope>;
 
         auto CanDefineSymbol(const Symbol::IBase* const t_symbol) -> bool;
         auto GetDefinedSymbol(
@@ -423,24 +427,24 @@ namespace Ace
 
         static auto GetInstanceSymbolResolutionScopes(
             Symbol::Type::IBase* t_selfType
-        ) -> std::vector<const Scope*>;
+        ) -> std::vector<std::shared_ptr<const Scope>>;
         static auto CollectInstanceSymbolResolutionImplTemplateArguments(
             Symbol::Type::IBase* const t_selfType
         ) -> std::vector<Symbol::Type::IBase*>;
 
         auto GetStaticSymbolResolutionStartScope(
             const SymbolName& t_name
-        ) const -> Expected<const Scope*>;
+        ) const -> Expected<std::shared_ptr<const Scope>>;
         static auto GetStaticSymbolResolutionImplTemplateArguments(
-            const Scope* const t_startScope
+            const std::shared_ptr<const Scope>& t_startScope
         ) -> std::vector<Symbol::Type::IBase*>;
 
         const Compilation& m_Compilation;
         size_t m_NestLevel{};
         std::string m_Name{};
-        std::optional<Scope*> m_OptParent{};
-        std::vector<std::unique_ptr<Scope>> m_Children{};
-        std::set<Scope*> m_Associations{};
+        std::optional<std::shared_ptr<Scope>> m_OptParent{};
+        std::vector<std::weak_ptr<Scope>> m_Children{};
+        std::set<std::shared_ptr<Scope>> m_Associations{};
         std::unordered_map<std::string, std::vector<std::unique_ptr<Symbol::IBase>>> m_SymbolMap;
     };
 }

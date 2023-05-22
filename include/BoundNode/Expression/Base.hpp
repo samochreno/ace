@@ -28,7 +28,7 @@ namespace Ace::BoundNode::Expression
         virtual auto GetTypeInfo() const -> TypeInfo = 0;
     };
 
-    typedef Expected<Symbol::Function*>(*ConversionOperatorGetterFunction)(Scope* const, Symbol::Type::IBase*, Symbol::Type::IBase*);
+    typedef Expected<Symbol::Function*>(*ConversionOperatorGetterFunction)(const std::shared_ptr<Scope>&, Symbol::Type::IBase*, Symbol::Type::IBase*);
     auto CreateConverted(std::shared_ptr<const BoundNode::Expression::IBase> t_expression, TypeInfo t_targetTypeInfo, ConversionOperatorGetterFunction t_func) -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>;
     inline auto CreateImplicitlyConverted(const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression, const TypeInfo& t_targetTypeInfo)
     {

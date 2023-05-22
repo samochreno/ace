@@ -15,7 +15,7 @@ namespace Ace::Node::Statement
     public:
         virtual ~IBase() = default;
 
-        virtual auto CloneInScopeStatement(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::IBase> = 0;
+        virtual auto CloneInScopeStatement(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::IBase> = 0;
         
         virtual auto CreateBoundStatement() const -> Expected<std::shared_ptr<const BoundNode::Statement::IBase>> = 0;
     };

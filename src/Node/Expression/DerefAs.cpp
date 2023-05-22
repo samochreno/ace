@@ -18,7 +18,7 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto DerefAs::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::DerefAs>
+    auto DerefAs::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::DerefAs>
     {
         return std::make_shared<const Node::Expression::DerefAs>(
             m_TypeName,

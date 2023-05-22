@@ -9,6 +9,6 @@ namespace Ace::Symbol
     public:
         virtual ~ISelfScoped() = default;
 
-        virtual auto GetSelfScope() const -> Scope* = 0;
+        virtual auto GetSelfScope() const -> std::shared_ptr<Scope> = 0;
     };
 }

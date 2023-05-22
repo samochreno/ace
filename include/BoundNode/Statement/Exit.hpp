@@ -17,13 +17,13 @@ namespace Ace::BoundNode::Statement
         public virtual BoundNode::ILowerable<BoundNode::Statement::Exit>
     {
     public:
-        Exit(Scope* const t_scope)
+        Exit(const std::shared_ptr<Scope>& t_scope)
             : m_Scope{ t_scope }
         {
         }
         virtual ~Exit() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Exit>>> final;
         auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
@@ -32,6 +32,6 @@ namespace Ace::BoundNode::Statement
         auto Emit(Emitter& t_emitter) const -> void final;
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
     };
 }

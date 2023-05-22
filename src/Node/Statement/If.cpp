@@ -22,7 +22,7 @@ namespace Ace::Node::Statement
         return children;
     }
 
-    auto If::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::If>
+    auto If::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::If>
     {
         std::vector<std::shared_ptr<const Node::Expression::IBase>> clonedConditions{};
         std::transform(begin(m_Conditions), end(m_Conditions), back_inserter(clonedConditions),

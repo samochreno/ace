@@ -18,7 +18,7 @@ namespace Ace::Node::Statement
         return children;
     }
 
-    auto Assert::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Assert>
+    auto Assert::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::Assert>
     {
         return std::make_shared<const Node::Statement::Assert>(
             t_scope,

@@ -26,10 +26,10 @@ namespace Ace::Node::Expression
         }
         virtual ~UnaryUser() = default;
 
-        auto GetScope() const -> Scope* final { return m_Expression->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Expression->GetScope(); }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::UnaryUser> final;
-        auto CloneInScopeExpression(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::UnaryUser> final;
+        auto CloneInScopeExpression(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::IBase> final { return CloneInScope(t_scope); }
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::UnaryUser>> final;
         auto CreateBoundExpression() const -> Expected<std::shared_ptr<const BoundNode::Expression::IBase>> final { return CreateBound(); }
             

@@ -37,7 +37,7 @@ namespace Ace::BoundNode
         {
             return GetScope()->GetCompilation();
         }
-        virtual auto GetScope() const -> Scope* = 0;
+        virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetChildren() const -> std::vector<const BoundNode::IBase*> = 0;
     };
 

@@ -18,7 +18,7 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto LogicalNegation::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::LogicalNegation>
+    auto LogicalNegation::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::LogicalNegation>
     {
         return std::make_shared<const Node::Expression::LogicalNegation>(
             m_Expression->CloneInScopeExpression(t_scope)

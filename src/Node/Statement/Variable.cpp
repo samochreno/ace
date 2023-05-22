@@ -23,7 +23,7 @@ namespace Ace::Node::Statement
         return children;
     }
 
-    auto Variable::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Variable>
+    auto Variable::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::Variable>
     {
         const auto optAssignedExpression = [&]() -> std::optional<std::shared_ptr<const Node::Expression::IBase>>
         {

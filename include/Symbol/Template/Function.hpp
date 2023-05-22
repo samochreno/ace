@@ -28,7 +28,7 @@ namespace Ace::Symbol::Template
         }
         virtual ~Function() = default;
 
-        auto GetScope() const -> Scope* final { return m_TemplateNode->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_TemplateNode->GetScope(); }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::FunctionTemplate; }
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
@@ -53,7 +53,7 @@ namespace Ace::Symbol::Template
         ) -> void final;
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::string m_Name{};
         const Node::Template::Function* m_TemplateNode{};
         Symbol::IBase* m_PlaceholderSymbol{};

@@ -26,7 +26,7 @@ namespace Ace::BoundNode::Expression
         }
         virtual ~ConversionPlaceholder() = default;
 
-        auto GetScope() const -> Scope* final { ACE_UNREACHABLE(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { ACE_UNREACHABLE(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final { ACE_UNREACHABLE(); }
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::ConversionPlaceholder>>> final { ACE_UNREACHABLE(); }
         auto GetOrCreateTypeCheckedExpression(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final { ACE_UNREACHABLE(); }

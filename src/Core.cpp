@@ -176,8 +176,8 @@ namespace Ace::Core
         Symbol::Type::IBase* const t_typeSymbol
     ) -> Symbol::Function*
     {
-        auto* const scope     = t_typeSymbol->GetUnaliased()->GetScope();
-        auto* const selfScope = scope->GetOrCreateChild({});
+        const auto scope     = t_typeSymbol->GetUnaliased()->GetScope();
+        const auto selfScope = scope->GetOrCreateChild({});
 
         const auto name = SpecialIdentifier::CreateCopyGlue(
             t_typeSymbol->CreatePartialSignature()
@@ -221,8 +221,8 @@ namespace Ace::Core
         Symbol::Type::IBase* const t_typeSymbol
     ) -> Symbol::Function*
     {
-        auto* const scope     = t_typeSymbol->GetUnaliased()->GetScope();
-        auto* const selfScope = scope->GetOrCreateChild({});
+        const auto scope     = t_typeSymbol->GetUnaliased()->GetScope();
+        const auto selfScope = scope->GetOrCreateChild({});
 
         const auto name = SpecialIdentifier::CreateDropGlue(
             t_typeSymbol->CreatePartialSignature()
@@ -466,7 +466,7 @@ namespace Ace::Core
             );
         }
 
-        auto* const bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
+        const auto bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
         const auto parameterSymbols = t_glueSymbol->CollectParameters();
         const auto selfParameterReferenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
@@ -509,7 +509,7 @@ namespace Ace::Core
             [&](Symbol::Variable::Normal::Instance* const t_variableSymbol)
             {
                 auto* const variableTypeSymbol = t_variableSymbol->GetType();
-                auto* const variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
+                const auto variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
                 auto* const variableTypeGlueSymbol = variableTypeScope->ExclusiveResolveSymbol<Symbol::Function>(
                     SpecialIdentifier::CreateCopyGlue(variableTypeSymbol->CreatePartialSignature())
                 ).Unwrap();
@@ -583,7 +583,7 @@ namespace Ace::Core
             );
         }
 
-        auto* const bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
+        const auto bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
         const auto parameterSymbols = t_glueSymbol->CollectParameters();
         const auto selfParameterReferenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
@@ -621,7 +621,7 @@ namespace Ace::Core
         [&](Symbol::Variable::Normal::Instance* const t_variableSymbol)
         {
             auto* const variableTypeSymbol = t_variableSymbol->GetType();
-            auto* const variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
+            const auto variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
             auto* const variableTypeGlueSymbol = variableTypeScope->ExclusiveResolveSymbol<Symbol::Function>(
                 SpecialIdentifier::CreateDropGlue(variableTypeSymbol->CreatePartialSignature())
             ).Unwrap();

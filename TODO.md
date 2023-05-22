@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Implement shared ownership of `Scope`, `Scope::~Scope()` will clean up itself from the parent's children list.
 - [ ] Strings.
 - Add templated conversion operators (`ref.ace` at line 16):
   - [ ] Change `__deref_as[T](...)` to take any expression of type convertible to `std::Pointer`.
@@ -15,6 +14,7 @@
 - Traits:
   - [ ] Implement.
   - [ ] ❓ Implement Rust's orphan rule.
+- [ ] Change how methods are defined, because sometimes you need something like `shared_from_this()`.
 - [ ] Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour. This could maybe be fixed by forcing the copy trait to also implement default trait).
 - [ ] Add lifetime trait: default, copy, drop.
 - [ ] Check if there is any better way to not use external programs like `llc` and `clang`.

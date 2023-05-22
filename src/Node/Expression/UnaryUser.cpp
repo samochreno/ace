@@ -21,7 +21,7 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto UnaryUser::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::UnaryUser>
+    auto UnaryUser::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::UnaryUser>
     {
         return std::make_unique<Node::Expression::UnaryUser>(
             m_Expression->CloneInScopeExpression(t_scope),

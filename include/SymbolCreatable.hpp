@@ -16,7 +16,7 @@ namespace Ace
     public:
         virtual ~ISymbolCreatable() = default;
 
-        virtual auto GetSymbolScope() const -> Scope* = 0;
+        virtual auto GetSymbolScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetSymbolKind() const -> SymbolKind = 0;
         virtual auto GetSymbolCreationSuborder() const -> size_t = 0;
         virtual auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> = 0;

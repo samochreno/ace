@@ -67,7 +67,7 @@ namespace Ace::BoundNode::Expression
     auto Reference::GetTypeInfo() const -> TypeInfo
     {
         auto* const typeSymbol = m_Expression->GetTypeInfo().Symbol;
-        auto* const scope = typeSymbol->GetScope();
+        const auto scope = typeSymbol->GetScope();
 
         return { typeSymbol->GetWithReference(), ValueKind::R };
     }

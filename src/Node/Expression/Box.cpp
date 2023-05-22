@@ -18,7 +18,7 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto Box::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::Box>
+    auto Box::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::Box>
     {
         return std::make_shared<const Node::Expression::Box>(
             m_Expression->CloneInScopeExpression(t_scope)

@@ -29,11 +29,11 @@ namespace Ace::Node::Template
         }
         virtual ~Function() = default;
 
-        auto GetScope() const -> Scope* final { return m_AST->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_AST->GetScope(); }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Template::Function> final;
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Template::Function> final;
 
-        auto GetSymbolScope() const -> Scope* final { return GetScope(); }
+        auto GetSymbolScope() const -> std::shared_ptr<Scope> final { return GetScope(); }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::FunctionTemplate; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;

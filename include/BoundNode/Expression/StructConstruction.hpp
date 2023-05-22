@@ -28,7 +28,7 @@ namespace Ace::BoundNode::Expression
         };
 
         StructConstruction(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             Symbol::Type::Struct* const t_structSymbol,
             const std::vector<Argument>& t_arguments
         ) : m_Scope{ t_scope },
@@ -38,7 +38,7 @@ namespace Ace::BoundNode::Expression
         }
         virtual ~StructConstruction() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::StructConstruction>>> final;
         auto GetOrCreateTypeCheckedExpression(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
@@ -49,7 +49,7 @@ namespace Ace::BoundNode::Expression
         auto GetTypeInfo() const -> TypeInfo final;
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         Symbol::Type::Struct* m_StructSymbol{};
         std::vector<Argument> m_Arguments{};
     };

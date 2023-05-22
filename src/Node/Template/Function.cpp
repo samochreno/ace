@@ -23,7 +23,7 @@ namespace Ace::Node::Template
         return children;
     }
 
-    auto Function::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Template::Function>
+    auto Function::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Template::Function>
     {
         std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>> clonedImplParameters{};
         std::transform(

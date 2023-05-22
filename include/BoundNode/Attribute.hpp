@@ -24,7 +24,7 @@ namespace Ace::BoundNode
         }
         virtual ~Attribute() = default;
 
-        auto GetScope() const -> Scope* final { return m_StructConstructionExpression->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_StructConstructionExpression->GetScope(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Attribute>>> final;
         auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Attribute>>> final;

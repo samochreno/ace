@@ -16,8 +16,8 @@ namespace Ace::Symbol
     {
     public:
         TemplatedImpl(
-            Scope* const t_scope,
-            Scope* const t_selfScope,
+            const std::shared_ptr<Scope>& t_scope,
+            const std::shared_ptr<Scope>& t_selfScope,
             Symbol::Template::Type* const t_implementedTypeTemplate
         ) : m_Scope{ t_scope },
             m_SelfScope{ t_selfScope },
@@ -27,8 +27,8 @@ namespace Ace::Symbol
         }
         virtual ~TemplatedImpl() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
-        auto GetSelfScope() const -> Scope* final { return m_SelfScope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetSelfScope() const -> std::shared_ptr<Scope> final { return m_SelfScope; }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TemplatedImpl; }
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
@@ -37,8 +37,8 @@ namespace Ace::Symbol
         auto GetImplementedTypeTemplate() const -> Symbol::Template::Type* { return m_ImplementedTypeTemplate; }
 
     private:
-        Scope* m_Scope{};
-        Scope* m_SelfScope{};
+        std::shared_ptr<Scope> m_Scope{};
+        std::shared_ptr<Scope> m_SelfScope{};
         std::string m_Name{};
         Symbol::Template::Type* m_ImplementedTypeTemplate{};
     };

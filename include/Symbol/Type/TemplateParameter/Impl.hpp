@@ -10,7 +10,7 @@ namespace Ace::Symbol::Type::TemplateParameter
     {
     public:
         Impl(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::string& t_name
         ) : m_Scope{ t_scope },
             m_Name{ t_name }
@@ -18,8 +18,8 @@ namespace Ace::Symbol::Type::TemplateParameter
         }
         virtual ~Impl() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
-        auto GetSelfScope() const -> Scope* final { ACE_UNREACHABLE(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetSelfScope() const -> std::shared_ptr<Scope> final { ACE_UNREACHABLE(); }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::ImplTemplateParameter; }
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
@@ -54,7 +54,7 @@ namespace Ace::Symbol::Type::TemplateParameter
         auto GetDropGlue() const -> std::optional<Symbol::Function*> { ACE_UNREACHABLE(); }
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::string m_Name{};
     };
 }

@@ -27,7 +27,7 @@ namespace Ace
         Package Package{};
         std::filesystem::path OutputPath{};
         std::unique_ptr<Natives> Natives{};
-        std::unique_ptr<Scope> GlobalScope{};
+        std::shared_ptr<Scope> GlobalScope{};
         std::unique_ptr<TemplateInstantiator> TemplateInstantiator{};
         std::unique_ptr<llvm::LLVMContext> LLVMContext{};
     };

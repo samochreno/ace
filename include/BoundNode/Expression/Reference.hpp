@@ -25,7 +25,7 @@ namespace Ace::BoundNode::Expression
         }
         virtual ~Reference() = default;
 
-        auto GetScope() const -> Scope* final { return m_Expression->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Expression->GetScope(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::Reference>>> final;
         auto GetOrCreateTypeCheckedExpression(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final { return GetOrCreateTypeChecked(t_context); }

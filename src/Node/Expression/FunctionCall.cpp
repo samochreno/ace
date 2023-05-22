@@ -27,7 +27,7 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto FunctionCall::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::FunctionCall>
+    auto FunctionCall::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::FunctionCall>
     {
         std::vector<std::shared_ptr<const Node::Expression::IBase>> clonedArguments{};
         std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(clonedArguments),

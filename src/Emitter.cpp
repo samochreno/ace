@@ -294,7 +294,6 @@ namespace Ace
                     variableSymbol
                 ));
                 m_LocalVariableSymbolStatementIndexMap[variableSymbol] = i;
-                // TODO: .emplace_back(...) doesn't work here. Fix.
                 m_LocalVariableSymbolStatementIndexPairs.push_back(
                     LocalVariableSymbolStatementIndexPair{ variableSymbol, i }
                 );
@@ -392,8 +391,9 @@ namespace Ace
 
                 if (blockEndStatement)
                 {
+                    const auto blockScope = blockEndStatement->GetSelfScope();
                     auto blockVariableSymbols = 
-                        blockEndStatement->GetSelfScope()->CollectSymbols<Symbol::Variable::Local>();
+                        blockScope->CollectSymbols<Symbol::Variable::Local>();
 
                     std::sort(
                         begin(blockVariableSymbols),
@@ -527,7 +527,7 @@ namespace Ace
     ) -> void
     {
         const auto statementIndex = m_StatementIndexMap.at(t_statement);
-        auto* scope = t_statement->GetScope();
+        auto scope = t_statement->GetScope();
 
         std::for_each(
             rbegin(m_LocalVariableSymbolStatementIndexPairs), 

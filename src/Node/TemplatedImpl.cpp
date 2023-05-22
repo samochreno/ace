@@ -26,9 +26,9 @@ namespace Ace::Node
         return children;
     }
 
-    auto TemplatedImpl::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::TemplatedImpl>
+    auto TemplatedImpl::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::TemplatedImpl>
     {
-        auto* const selfScope = t_scope->GetOrCreateChild({});
+        const auto selfScope = t_scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const Node::Function>> clonedFunctions{};
         std::transform(begin(m_Functions), end(m_Functions), back_inserter(clonedFunctions),

@@ -16,7 +16,7 @@ namespace Ace::Node::TemplateParameter
     {
     public:
         Impl(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::string& t_name
         ) : m_Scope{ t_scope },
             m_Name{ t_name }
@@ -24,11 +24,11 @@ namespace Ace::Node::TemplateParameter
         }
         virtual ~Impl() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::TemplateParameter::Impl> final;
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::TemplateParameter::Impl> final;
 
-        auto GetSymbolScope() const -> Scope* final { return m_Scope; }
+        auto GetSymbolScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::ImplTemplateParameter; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
@@ -36,7 +36,7 @@ namespace Ace::Node::TemplateParameter
         auto GetName() const -> const std::string& { return m_Name; }
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::string m_Name{};
     };
 }

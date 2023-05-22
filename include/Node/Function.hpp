@@ -27,7 +27,7 @@ namespace Ace::Node
     {
     public:
         Function(
-            Scope* const t_selfScope,
+            const std::shared_ptr<Scope>& t_selfScope,
             const std::string& t_name,
             const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
@@ -47,24 +47,24 @@ namespace Ace::Node
         }
         virtual ~Function() = default;
 
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_SelfScope->GetParent().value(); }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Function> final;
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Function> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Function>> final;
 
         auto GetName() const -> const std::string& final { return m_Name; }
 
-        auto GetSymbolScope() const -> Scope* final { return GetScope(); }
+        auto GetSymbolScope() const -> std::shared_ptr<Scope> final { return GetScope(); }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Function; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
         
-        auto GetSelfScope() const -> Scope* const { return m_SelfScope; }
+        auto GetSelfScope() const -> std::shared_ptr<Scope> const { return m_SelfScope; }
         auto GetAccessModifier() const -> AccessModifier { return m_AccessModifier; }
         auto GetParameters() const -> const std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>>& { return m_Parameters; }
 
     protected:
-        Scope* m_SelfScope{};
+        std::shared_ptr<Scope> m_SelfScope{};
         std::string m_Name{};
         TypeName m_TypeName{};
         std::vector<std::shared_ptr<const Node::Attribute>> m_Attributes{};

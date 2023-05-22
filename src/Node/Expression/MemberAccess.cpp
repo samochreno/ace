@@ -19,7 +19,7 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto MemberAccess::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::MemberAccess>
+    auto MemberAccess::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::MemberAccess>
     {
         return std::make_shared<const Node::Expression::MemberAccess>(
             m_Expression->CloneInScopeExpression(t_scope),

@@ -29,8 +29,8 @@ namespace Ace::Node
     public:
         
         Module(
-            Scope* const t_scope,
-            Scope* const t_selfScope,
+            const std::shared_ptr<Scope>& t_scope,
+            const std::shared_ptr<Scope>& t_selfScope,
             const std::vector<std::string>& t_name,
             const AccessModifier& t_accessModifier,
             const std::vector<std::shared_ptr<const Node::Module>>& t_modules,
@@ -57,12 +57,12 @@ namespace Ace::Node
         }
         virtual ~Module() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Module> final;
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Module> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Module>> final;
 
-        auto GetSymbolScope() const -> Scope* final;
+        auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Module; }
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
@@ -70,8 +70,8 @@ namespace Ace::Node
         auto GetName() const -> const std::string& final;
 
     private:
-        Scope* m_Scope{};
-        Scope* m_SelfScope{};
+        std::shared_ptr<Scope> m_Scope{};
+        std::shared_ptr<Scope> m_SelfScope{};
         std::vector<std::string> m_Name{};
         AccessModifier m_AccessModifier{};
         std::vector<std::shared_ptr<const Node::Module>> m_Modules{};

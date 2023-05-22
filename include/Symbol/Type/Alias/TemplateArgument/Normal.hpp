@@ -16,7 +16,7 @@ namespace Ace::Symbol::Type::Alias::TemplateArgument
     {
     public:
         Normal(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::string& t_name,
             Symbol::Type::IBase* const t_aliasedType,
             const size_t& t_index
@@ -28,8 +28,8 @@ namespace Ace::Symbol::Type::Alias::TemplateArgument
         }
         virtual ~Normal() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
-        auto GetSelfScope() const -> Scope* final { return m_AliasedType->GetSelfScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetSelfScope() const -> std::shared_ptr<Scope> final { return m_AliasedType->GetSelfScope(); }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TypeAlias; }
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
@@ -64,7 +64,7 @@ namespace Ace::Symbol::Type::Alias::TemplateArgument
         auto GetIndex() const -> size_t final { return m_Index; }
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::string m_Name{};
         Symbol::Type::IBase* m_AliasedType{};
         size_t m_Index{};

@@ -14,7 +14,7 @@ namespace Ace::Node::TemplateParameter
         return {};
     }
 
-    auto Impl::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::TemplateParameter::Impl>
+    auto Impl::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::TemplateParameter::Impl>
     {
         return std::make_shared<const Node::TemplateParameter::Impl>(
             t_scope,

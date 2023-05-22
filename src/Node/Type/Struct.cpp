@@ -20,9 +20,9 @@ namespace Ace::Node::Type
         return children;
     }
 
-    auto Struct::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Type::Struct>
+    auto Struct::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Type::Struct>
     {
-        auto* const selfScope = t_scope->GetOrCreateChild({});
+        const auto selfScope = t_scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const Node::Attribute>> clonedAttributes{};
         std::transform(begin(m_Attributes), end(m_Attributes), back_inserter(clonedAttributes),

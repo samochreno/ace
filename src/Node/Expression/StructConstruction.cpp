@@ -28,7 +28,7 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto StructConstruction::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::StructConstruction>
+    auto StructConstruction::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::StructConstruction>
     {
         std::vector<Argument> clonedArguments{};
         std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(clonedArguments),

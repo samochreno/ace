@@ -21,7 +21,7 @@ namespace Ace::Node::Template
         return children;
     }
 
-    auto Type::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Template::Type>
+    auto Type::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Template::Type>
     {
         std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>> clonedParameters{};
         std::transform(

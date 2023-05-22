@@ -18,7 +18,7 @@ namespace Ace::Node
         return children;
     }
 
-    auto Attribute::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Attribute>
+    auto Attribute::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Attribute>
     {
         return std::make_shared<const Node::Attribute>(
             m_StructConstructionExpression->CloneInScope(t_scope)

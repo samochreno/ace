@@ -14,7 +14,7 @@ namespace Ace::Node::Expression
         return {};
     }
 
-    auto Literal::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::Literal>
+    auto Literal::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::Literal>
     {
         return std::make_shared<const Node::Expression::Literal>(
             t_scope,

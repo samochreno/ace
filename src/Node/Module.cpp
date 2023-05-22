@@ -35,9 +35,9 @@ namespace Ace::Node
         return children;
     }
 
-    auto Module::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Module>
+    auto Module::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Module>
     {
-        auto* const selfScope = t_scope->GetOrCreateChild({});
+        const auto selfScope = t_scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const Node::Module>> clonedModules{};
         std::transform(begin(m_Modules), end(m_Modules), back_inserter(clonedModules),
@@ -173,7 +173,7 @@ namespace Ace::Node
             );
     }
 
-    auto Module::GetSymbolScope() const -> Scope*
+    auto Module::GetSymbolScope() const -> std::shared_ptr<Scope>
     {
         return m_SelfScope->GetParent().value();
     }
@@ -187,7 +187,7 @@ namespace Ace::Node
     {
         if (m_Name.size() > 1)
         {
-            Scope* scope = GetSymbolScope()->GetParent().value();
+            std::shared_ptr<Scope> scope = GetSymbolScope()->GetParent().value();
             auto nameIt = rbegin(m_Name) + 1;
 
             for (

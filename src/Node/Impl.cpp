@@ -25,9 +25,9 @@ namespace Ace::Node
         return children;
     }
 
-    auto Impl::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Impl>
+    auto Impl::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Impl>
     {
-        auto* const selfScope = t_scope->GetOrCreateChild({});
+        const auto selfScope = t_scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const Node::Function>> clonedFunctions{};
         std::transform(
@@ -75,7 +75,7 @@ namespace Ace::Node
 
     auto Impl::DefineAssociations() const -> Expected<void>
     {
-        ACE_TRY(scope, [&]() -> Expected<Scope*>
+        ACE_TRY(scope, [&]() -> Expected<std::shared_ptr<Scope>>
         {
             if (m_TypeName.Sections.back().TemplateArguments.empty())
             {

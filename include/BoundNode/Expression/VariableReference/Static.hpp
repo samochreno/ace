@@ -21,7 +21,7 @@ namespace Ace::BoundNode::Expression::VariableReference
     {
     public:
         Static(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             Symbol::Variable::IBase* const t_variableSymbol
         ) : m_Scope{ t_scope },
             m_VariableSymbol{ t_variableSymbol }
@@ -29,7 +29,7 @@ namespace Ace::BoundNode::Expression::VariableReference
         }
         virtual ~Static() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::VariableReference::Static>>> final;
         auto GetOrCreateTypeCheckedExpression(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
@@ -42,7 +42,7 @@ namespace Ace::BoundNode::Expression::VariableReference
         auto GetVariableSymbol() const -> Symbol::Variable::IBase* { return m_VariableSymbol; }
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         Symbol::Variable::IBase* m_VariableSymbol{};
     };
 }

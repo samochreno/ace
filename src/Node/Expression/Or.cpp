@@ -19,7 +19,7 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto Or::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::Or>
+    auto Or::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::Or>
     {
         return std::make_shared<const Node::Expression::Or>(
             m_LHSExpression->CloneInScopeExpression(t_scope),

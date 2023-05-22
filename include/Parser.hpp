@@ -20,15 +20,7 @@ namespace Ace::Parsing
     {
         Context(
             const std::vector<Token>::const_iterator& t_iterator,
-            Scope* const t_scope
-        ) : Iterator{ t_iterator },
-            Scope{ t_scope }
-        {
-        }
-        Context(
-            const std::vector<Token>::const_iterator& t_iterator,
-            Scope* const t_scope,
-            Scope* const t_globalScope
+            const std::shared_ptr<Scope>& t_scope
         ) : Iterator{ t_iterator },
             Scope{ t_scope }
         {
@@ -36,7 +28,7 @@ namespace Ace::Parsing
         ~Context() = default;
 
         const std::vector<Token>::const_iterator Iterator{};
-        Ace::Scope* const Scope{};
+        std::shared_ptr<Ace::Scope> Scope{};
     };
 
     class Parser

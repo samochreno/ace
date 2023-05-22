@@ -18,7 +18,7 @@ namespace Ace::Node::Statement::Assignment
     {
     public:
         Normal(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::shared_ptr<const Node::Expression::IBase>& t_lhsExpression,
             const std::shared_ptr<const Node::Expression::IBase>& t_rhsExpression
         ) : m_Scope{ t_scope },
@@ -28,15 +28,15 @@ namespace Ace::Node::Statement::Assignment
         }
         virtual ~Normal() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Assignment::Normal> final;
-        auto CloneInScopeStatement(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::Assignment::Normal> final;
+        auto CloneInScopeStatement(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::IBase> final { return CloneInScope(t_scope); }
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Assignment::Normal>> final;
         auto CreateBoundStatement() const -> Expected<std::shared_ptr<const BoundNode::Statement::IBase>> final { return CreateBound(); }
         
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::shared_ptr<const Node::Expression::IBase> m_LHSExpression{};
         std::shared_ptr<const Node::Expression::IBase> m_RHSExpression{};
     };

@@ -52,7 +52,7 @@ namespace Ace::BoundNode::Statement
 
         const auto condition = std::make_shared<const BoundNode::Expression::LogicalNegation>(mchLoweredCondition.Value);
 
-        auto* const bodyScope = GetScope()->GetOrCreateChild({});
+        const auto bodyScope = GetScope()->GetOrCreateChild({});
 
         const auto exitStatement = std::make_shared<const BoundNode::Statement::Exit>(bodyScope);
 

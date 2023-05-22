@@ -21,7 +21,7 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto BinaryUser::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::BinaryUser>
+    auto BinaryUser::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::BinaryUser>
     {
         return std::make_shared<const Node::Expression::BinaryUser>(
             m_LHSExpression->CloneInScopeExpression(t_scope),

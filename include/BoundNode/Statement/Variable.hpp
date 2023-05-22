@@ -31,7 +31,7 @@ namespace Ace::BoundNode::Statement
         }
         virtual ~Variable() = default;
 
-        auto GetScope() const -> Scope* final { return m_Symbol->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Symbol->GetScope(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>>> final;
         auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }

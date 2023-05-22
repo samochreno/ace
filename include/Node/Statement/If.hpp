@@ -20,7 +20,7 @@ namespace Ace::Node::Statement
     {
     public:
         If(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::vector<std::shared_ptr<const Node::Expression::IBase>>& t_conditions,
             const std::vector<std::shared_ptr<const Node::Statement::Block>>& t_bodies
         ) : m_Scope{ t_scope },
@@ -31,15 +31,15 @@ namespace Ace::Node::Statement
         }
         virtual ~If() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::If> final;
-        auto CloneInScopeStatement(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::If> final;
+        auto CloneInScopeStatement(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::IBase> final { return CloneInScope(t_scope); }
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::If>> final;
         auto CreateBoundStatement() const -> Expected<std::shared_ptr<const BoundNode::Statement::IBase>> final { return CreateBound(); }
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::vector<std::shared_ptr<const Node::Expression::IBase>> m_Conditions{};
         std::vector<std::shared_ptr<const Node::Statement::Block>> m_Bodies{};
     };

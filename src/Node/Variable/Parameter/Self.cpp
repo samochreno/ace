@@ -17,7 +17,7 @@ namespace Ace::Node::Variable::Parameter
         return {};
     }
 
-    auto Self::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Variable::Parameter::Self>
+    auto Self::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Variable::Parameter::Self>
     {
         return std::make_shared<const Node::Variable::Parameter::Self>(
             t_scope,

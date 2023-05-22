@@ -114,7 +114,7 @@ namespace Ace::Parsing
 
         auto it = begin(t_tokens);
 
-        ACE_TRY(module, ParseModule({ it, t_compilation.GlobalScope.get() }));
+        ACE_TRY(module, ParseModule({ it, t_compilation.GlobalScope }));
         it += module.Length;
 
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::End));
@@ -573,13 +573,17 @@ namespace Ace::Parsing
             ACE_TRY_ASSERT(it != startIt);
         }
 
-        std::vector<Scope*> scopes{};
+        std::vector<std::shared_ptr<Scope>> scopes{};
         scopes.push_back(t_context.Scope);
-        std::transform(begin(name.Value), end(name.Value), back_inserter(scopes),
-        [&](const Token& t_token)
-        {
-            return scopes.back()->GetOrCreateChild(t_token.String);
-        });
+        std::transform(
+            begin(name.Value),
+            end  (name.Value),
+            back_inserter(scopes),
+            [&](const Token& t_token)
+            {
+                return scopes.back()->GetOrCreateChild(t_token.String);
+            }
+        );
 
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::OpenBrace));
         ++it;
@@ -595,7 +599,7 @@ namespace Ace::Parsing
 
         while (it->TokenKind != Token::Kind::New(Token::Kind::CloseBrace))
         {
-            auto* const selfScope = scopes.back();
+            const auto selfScope = scopes.back();
 
             if (auto expModule = Parser::ParseModule({ it, selfScope }))
             {
@@ -680,7 +684,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseImpl(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Impl>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
+        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::ImplKeyword));
@@ -742,7 +746,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseImplFunction(Context t_context, const SymbolName& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Function>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
+        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
@@ -889,7 +893,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseImplFunctionTemplate(Context t_context, const SymbolName& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
+        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
@@ -974,7 +978,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseTemplatedImpl(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::TemplatedImpl>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
+        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::ImplKeyword));
@@ -1068,7 +1072,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseTemplatedImplFunction(Context t_context, const SymbolName& t_selfTypeName, const std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>& t_implTemplateParameters) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
+        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
@@ -1223,7 +1227,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseFunction(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Function>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
+        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
@@ -1300,7 +1304,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseFunctionTemplate(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
+        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
@@ -1543,7 +1547,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseStruct(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Type::Struct>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
+        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
@@ -1625,7 +1629,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseStructTemplate(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Type>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
+        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
@@ -2114,7 +2118,7 @@ namespace Ace::Parsing
 
     auto Parser::ParseBlockStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Block>>>
     {
-        auto* const scope = t_context.Scope->GetOrCreateChild({});
+        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
         ACE_TRY_ASSERT(it->TokenKind == Token::Kind::New(Token::Kind::OpenBrace));
@@ -2758,8 +2762,10 @@ namespace Ace::Parsing
                 it += value.Length;
             }
             
-            // TODO: .emplace_back doesn't work here. Fix.
-            arguments.push_back(Node::Expression::StructConstruction::Argument{ name.Value, optValue });
+            arguments.push_back(Node::Expression::StructConstruction::Argument{
+                name.Value,
+                optValue
+            });
         }
 
         ++it;

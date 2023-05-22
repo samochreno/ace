@@ -22,7 +22,7 @@ namespace Ace::Node::Statement
         return children;
     }
 
-    auto While::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::While>
+    auto While::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::While>
     {
         return std::make_shared<const Node::Statement::While>(
             t_scope,

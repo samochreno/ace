@@ -23,9 +23,9 @@ namespace Ace::Node
         }
         virtual ~Attribute() = default;
 
-        auto GetScope() const -> Scope* final { return m_StructConstructionExpression->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_StructConstructionExpression->GetScope(); }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Attribute> final;
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Attribute> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Attribute>> final;
 
     private:

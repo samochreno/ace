@@ -22,7 +22,7 @@ namespace Ace::Node
     {
     public:
         TemplatedImpl(
-            Scope* const t_selfScope,
+            const std::shared_ptr<Scope>& t_selfScope,
             const SymbolName& t_typeTemplateName,
             const std::vector<std::shared_ptr<const Node::Function>>& t_functions,
             const std::vector<std::shared_ptr<const Node::Template::Function>>& t_functionTemplates
@@ -34,12 +34,12 @@ namespace Ace::Node
         }
         virtual ~TemplatedImpl() = default;
 
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_SelfScope->GetParent().value(); }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::TemplatedImpl> final;
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::TemplatedImpl> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Impl>> final;
 
-        auto GetSymbolScope() const -> Scope* final { return GetScope(); }
+        auto GetSymbolScope() const -> std::shared_ptr<Scope> final { return GetScope(); }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TemplatedImpl; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
@@ -47,7 +47,7 @@ namespace Ace::Node
         auto DefineAssociations() const -> Expected<void>;
 
     private:
-        Scope* m_SelfScope{};
+        std::shared_ptr<Scope> m_SelfScope{};
         SymbolName m_TypeTemplateName{};
         std::vector<std::shared_ptr<const Node::Function>> m_Functions{};
         std::vector<std::shared_ptr<const Node::Template::Function>> m_FunctionTemplates{};

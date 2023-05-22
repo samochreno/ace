@@ -20,7 +20,7 @@ namespace Ace::Node
     {
     public:
         Impl(
-            Scope* const t_selfScope,
+            const std::shared_ptr<Scope>& t_selfScope,
             const SymbolName& t_typeName,
             const std::vector<std::shared_ptr<const Node::Function>>& t_functions,
             const std::vector<std::shared_ptr<const Node::Template::Function>>& t_functionTemplates
@@ -32,15 +32,15 @@ namespace Ace::Node
         }
         virtual ~Impl() = default;
 
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_SelfScope->GetParent().value(); }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Impl> final;
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Impl> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Impl>> final;
 
         auto DefineAssociations() const -> Expected<void>;
 
     private:
-        Scope* m_SelfScope{};
+        std::shared_ptr<Scope> m_SelfScope{};
         SymbolName m_TypeName{};
         std::vector<std::shared_ptr<const Node::Function>> m_Functions{};
         std::vector<std::shared_ptr<const Node::Template::Function>> m_FunctionTemplates{};

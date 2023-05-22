@@ -114,7 +114,7 @@ namespace Ace::BoundNode::Statement::Assignment
             // }
 
             std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> blockStatements{};
-            Scope* const blockScope = GetScope()->GetOrCreateChild({});
+            const std::shared_ptr<Scope> blockScope = GetScope()->GetOrCreateChild({});
 
             const auto tmpRefExpression = [&]() -> std::shared_ptr<const BoundNode::Expression::IBase>
             {

@@ -12,7 +12,7 @@ namespace Ace::Symbol::Variable::Parameter
     {
     public:
         Self(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             Symbol::Type::IBase* const t_type
         ) : m_Scope{ t_scope },
             m_Type{ t_type }
@@ -20,7 +20,7 @@ namespace Ace::Symbol::Variable::Parameter
         }
         virtual ~Self() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetName() const -> const std::string & final;
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::ParameterVariable; }
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
@@ -29,7 +29,7 @@ namespace Ace::Symbol::Variable::Parameter
         auto GetType() const -> Symbol::Type::IBase* final { return m_Type; }
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         Symbol::Type::IBase* m_Type{};
     };
 }

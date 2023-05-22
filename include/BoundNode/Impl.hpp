@@ -19,7 +19,7 @@ namespace Ace::BoundNode
     {
     public:
         Impl(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::vector<std::shared_ptr<const BoundNode::Function>>& t_functions
         ) : m_Scope{ t_scope },
             m_Functions{ t_functions }
@@ -27,13 +27,13 @@ namespace Ace::BoundNode
         }
         virtual ~Impl() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Impl>>> final;
         auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Impl>>> final;
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::vector<std::shared_ptr<const BoundNode::Function>> m_Functions{};
     };
 }

@@ -15,7 +15,7 @@ namespace Ace::Node::TemplateParameter
         return {};
     }
 
-    auto Normal::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::TemplateParameter::Normal>
+    auto Normal::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::TemplateParameter::Normal>
     {
         return std::make_shared<const Node::TemplateParameter::Normal>(
             t_scope,

@@ -29,8 +29,8 @@ namespace Ace::Symbol::Template
         }
         virtual ~Type() = default;
 
-        auto GetScope() const -> Scope* final { return m_TemplateNode->GetScope(); }
-        auto GetSelfScope() const -> Scope* final { return m_TemplateNode->GetSelfScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_TemplateNode->GetScope(); }
+        auto GetSelfScope() const -> std::shared_ptr<Scope> final { return m_TemplateNode->GetSelfScope(); }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TypeTemplate; }
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }

@@ -20,7 +20,7 @@ namespace Ace::Node::Statement::Assignment
         return children;
     }
 
-    auto Compound::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Assignment::Compound>
+    auto Compound::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::Assignment::Compound>
     {
         return std::make_shared<const Node::Statement::Assignment::Compound>(
             m_Scope,

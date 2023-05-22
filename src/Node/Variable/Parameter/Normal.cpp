@@ -21,7 +21,7 @@ namespace Ace::Node::Variable::Parameter
         return children;
     }
 
-    auto Normal::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Variable::Parameter::Normal>
+    auto Normal::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Variable::Parameter::Normal>
     {
         std::vector<std::shared_ptr<const Node::Attribute>> clonedAttributes{};
         std::transform(begin(m_Attributes), end(m_Attributes), back_inserter(clonedAttributes),

@@ -30,7 +30,7 @@ namespace Ace::BoundNode::Variable::Normal
         }
         virtual ~Static() = default;
 
-        auto GetScope() const -> Scope* final { return m_Symbol->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Symbol->GetScope(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Static>>> final;
         auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Static>>> final;

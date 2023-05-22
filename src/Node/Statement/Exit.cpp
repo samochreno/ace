@@ -14,7 +14,7 @@ namespace Ace::Node::Statement
         return {};
     }
 
-    auto Exit::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Exit>
+    auto Exit::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::Exit>
     {
         return std::make_shared<const Node::Statement::Exit>(t_scope);
     }

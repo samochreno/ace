@@ -20,7 +20,7 @@ namespace Ace::Node
         virtual ~IBase() = default;
 
         virtual auto GetCompilation() const -> const Compilation& { return GetScope()->GetCompilation(); }
-        virtual auto GetScope() const -> Scope* = 0;
+        virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetChildren() const -> std::vector<const IBase*> = 0;
     };
 
@@ -30,7 +30,7 @@ namespace Ace::Node
     public:
         virtual ~ICloneable() = default;
 
-        virtual auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const T> = 0;
+        virtual auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const T> = 0;
     };
 
     template<typename T>
@@ -42,7 +42,9 @@ namespace Ace::Node
         virtual auto CreateBound() const -> Expected<std::shared_ptr<const T>> = 0;
     };
 
-    class ISymbolCreatable : public virtual Node::IBase, public virtual Ace::ISymbolCreatable
+    class ISymbolCreatable :
+        public virtual Node::IBase,
+        public virtual Ace::ISymbolCreatable
     {
     public:
         virtual ~ISymbolCreatable() = default;

@@ -16,7 +16,7 @@ namespace Ace::Node::Statement
         return {};
     }
 
-    auto Label::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Label>
+    auto Label::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::Label>
     {
         return std::make_shared<const Node::Statement::Label>(
             t_scope,

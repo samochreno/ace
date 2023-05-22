@@ -19,9 +19,9 @@ namespace Ace::Node::Statement
         return children;
     }
 
-    auto Block::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Block>
+    auto Block::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::Block>
     {
-        auto* const selfScope = t_scope->GetOrCreateChild({});
+        const auto selfScope = t_scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const Node::Statement::IBase>> clonedStatements{};
         std::transform(begin(m_Statements), end(m_Statements), back_inserter(clonedStatements),

@@ -23,7 +23,7 @@ namespace Ace::Node::Variable::Parameter
     {
     public:
         Normal(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::string& t_name,
             const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
@@ -37,20 +37,20 @@ namespace Ace::Node::Variable::Parameter
         }
         virtual ~Normal() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Variable::Parameter::Normal> final;
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Variable::Parameter::Normal> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>> final;
 
         auto GetName() const -> const std::string& final { return m_Name; }
 
-        auto GetSymbolScope() const -> Scope* final { return m_Scope; }
+        auto GetSymbolScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::ParameterVariable; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::string m_Name{};
         TypeName m_TypeName{};
         std::vector<std::shared_ptr<const Node::Attribute>> m_Attributes{};

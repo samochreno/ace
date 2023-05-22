@@ -12,7 +12,7 @@ namespace Ace::Symbol
     {
     public:
         Label(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::string& t_name
         ) : m_Scope{ t_scope },
             m_Name{ t_name }
@@ -20,14 +20,14 @@ namespace Ace::Symbol
         }
         virtual ~Label() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Label; }
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
         auto GetAccessModifier() const -> AccessModifier final { return AccessModifier::Public; }
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::string m_Name{};
     };
 }

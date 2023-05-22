@@ -19,7 +19,7 @@ namespace Ace::Node::Statement::Assignment
         return children;
     }
 
-    auto Normal::CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Assignment::Normal>
+    auto Normal::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::Assignment::Normal>
     {
         return std::make_shared<const Node::Statement::Assignment::Normal>(
             m_Scope,

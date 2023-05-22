@@ -20,7 +20,7 @@ namespace Ace::BoundNode::Expression::FunctionCall
     {
     public:
         Static(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             Symbol::Function* const t_functionSymbol,
             const std::vector<std::shared_ptr<const BoundNode::Expression::IBase>>& t_arguments
         ) : m_Scope{ t_scope },
@@ -30,7 +30,7 @@ namespace Ace::BoundNode::Expression::FunctionCall
         }
         virtual ~Static() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>> final;
         auto GetOrCreateTypeCheckedExpression(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
@@ -41,7 +41,7 @@ namespace Ace::BoundNode::Expression::FunctionCall
         auto GetTypeInfo() const -> TypeInfo final;
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         Symbol::Function* m_FunctionSymbol{};
         std::vector<std::shared_ptr<const BoundNode::Expression::IBase>> m_Arguments{};
     };

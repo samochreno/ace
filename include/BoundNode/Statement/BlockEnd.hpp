@@ -16,13 +16,14 @@ namespace Ace::BoundNode::Statement
         public virtual BoundNode::ILowerable<BoundNode::Statement::BlockEnd>
     {
     public:
-        BlockEnd(Scope* const t_selfScope) 
+        BlockEnd(const std::shared_ptr<Scope>& t_selfScope) 
             : m_SelfScope{ t_selfScope }
         {
         }
         virtual ~BlockEnd() = default;
 
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_SelfScope->GetParent().value(); }
+        auto GetSelfScope() const -> std::shared_ptr<Scope> { return m_SelfScope; }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::BlockEnd>>> final;
         auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
@@ -30,9 +31,7 @@ namespace Ace::BoundNode::Statement
         auto GetOrCreateLoweredStatement(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateLowered(t_context); }
         auto Emit(Emitter& t_emitter) const -> void final;
 
-        auto GetSelfScope() const -> Scope* { return m_SelfScope; }
-
     private:
-        Scope* m_SelfScope{};
+        std::shared_ptr<Scope> m_SelfScope{};
     };
 }

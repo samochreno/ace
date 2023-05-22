@@ -23,10 +23,10 @@ namespace Ace::Node::Statement
         }
         virtual ~Expression() = default;
 
-        auto GetScope() const -> Scope* final { return m_Expression->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Expression->GetScope(); }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Expression> final;
-        auto CloneInScopeStatement(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::Expression> final;
+        auto CloneInScopeStatement(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::IBase> final { return CloneInScope(t_scope); }
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Expression>> final;
         auto CreateBoundStatement() const -> Expected<std::shared_ptr<const BoundNode::Statement::IBase>> final { return CreateBound(); }
 

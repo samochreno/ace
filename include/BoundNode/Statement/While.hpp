@@ -22,7 +22,7 @@ namespace Ace::BoundNode::Statement
     {
     public:
         While(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::shared_ptr<const BoundNode::Expression::IBase>& t_condition,
             const std::shared_ptr<const BoundNode::Statement::Block>& t_body
         ) : m_Scope{ t_scope },
@@ -32,7 +32,7 @@ namespace Ace::BoundNode::Statement
         }
         virtual ~While() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::While>>> final;
         auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
@@ -41,7 +41,7 @@ namespace Ace::BoundNode::Statement
         auto Emit(Emitter& t_emitter) const -> void final { ACE_UNREACHABLE(); }
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::shared_ptr<const BoundNode::Expression::IBase> m_Condition{};
         std::shared_ptr<const BoundNode::Statement::Block> m_Body{};
     };

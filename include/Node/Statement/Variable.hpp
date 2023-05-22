@@ -24,7 +24,7 @@ namespace Ace::Node::Statement
     {
     public:
         Variable(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::string& t_name,
             const TypeName& t_typeName,
             const std::optional<std::shared_ptr<const Node::Expression::IBase>>& t_optAssignedExpression
@@ -36,22 +36,22 @@ namespace Ace::Node::Statement
         }
         virtual ~Variable() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::Variable> final;
-        auto CloneInScopeStatement(Scope* const t_scope) const -> std::shared_ptr<const Node::Statement::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::Variable> final;
+        auto CloneInScopeStatement(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Statement::IBase> final { return CloneInScope(t_scope); }
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Statement::Variable>> final;
         auto CreateBoundStatement() const -> Expected<std::shared_ptr<const BoundNode::Statement::IBase>> final { return CreateBound(); }
 
         auto GetName() const -> const std::string & final { return m_Name; }
 
-        auto GetSymbolScope() const -> Scope* final { return m_Scope; }
+        auto GetSymbolScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::LocalVariable; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::string m_Name{};
         TypeName m_TypeName{};
         std::optional<std::shared_ptr<const Node::Expression::IBase>> m_OptAssignedExpression{};

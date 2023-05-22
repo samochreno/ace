@@ -14,7 +14,7 @@ namespace Ace::Node::Expression
     public:
         virtual ~IBase() = default;
         
-        virtual auto CloneInScopeExpression(Scope* const t_scope) const -> std::shared_ptr<const Node::Expression::IBase> = 0;
+        virtual auto CloneInScopeExpression(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::IBase> = 0;
 
         virtual auto CreateBoundExpression() const -> Expected<std::shared_ptr<const BoundNode::Expression::IBase>> = 0;
     };

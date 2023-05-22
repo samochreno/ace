@@ -13,7 +13,7 @@ namespace Ace::Symbol::Variable::Normal
     {
     public:
         Static(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             const std::string& t_name,
             const AccessModifier& t_accessModifier,
             Symbol::Type::IBase* const t_type
@@ -25,7 +25,7 @@ namespace Ace::Symbol::Variable::Normal
         }
         virtual ~Static() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetName() const -> const std::string& final { return m_Name; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::StaticVariable; }
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
@@ -34,7 +34,7 @@ namespace Ace::Symbol::Variable::Normal
         auto GetType() const -> Symbol::Type::IBase* final { return m_Type; }
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         std::string m_Name{};
         AccessModifier m_AccessModifier{};
         Symbol::Type::IBase* m_Type{};

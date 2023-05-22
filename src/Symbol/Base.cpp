@@ -69,9 +69,9 @@ namespace Ace::Symbol
             return symbol->CreateSignature();
         }
 
-        std::vector<Scope*> scopes{};
+        std::vector<std::shared_ptr<Scope>> scopes{};
         for (
-            std::optional<Scope*> optScope = GetScope();
+            auto optScope = std::optional{ GetScope() };
             optScope.has_value();
             optScope = optScope.value()->GetParent()
             )
@@ -82,7 +82,7 @@ namespace Ace::Symbol
         std::string signature{};
         bool isFirstScope = true;
         std::for_each(rbegin(scopes), rend(scopes),
-        [&](Scope* const t_scope)
+        [&](const std::shared_ptr<Scope>& t_scope)
         {
             if (isFirstScope)
             {
@@ -121,9 +121,9 @@ namespace Ace::Symbol
 
         std::vector<SymbolNameSection> nameSections{};
 
-        std::vector<Scope*> scopes{};
+        std::vector<std::shared_ptr<Scope>> scopes{};
         for (
-            std::optional<Scope*> optScope = GetScope();
+            auto optScope = std::optional{ GetScope() };
             optScope.has_value();
             optScope = optScope.value()->GetParent()
             )
@@ -135,7 +135,7 @@ namespace Ace::Symbol
             rbegin(scopes) + 1, 
             rend  (scopes), 
             back_inserter(nameSections),
-            [](Scope* const t_scope)
+            [](const std::shared_ptr<Scope>& t_scope)
             {
                 return SymbolNameSection{ t_scope->GetName() };
             }

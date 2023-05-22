@@ -164,7 +164,7 @@ namespace Ace::Symbol::Type
     }
 
     auto GetImplicitConversionOperator(
-        Scope* const t_scope,
+        const std::shared_ptr<Scope>& t_scope,
         Symbol::Type::IBase* t_fromType,
         Symbol::Type::IBase* t_toType
     ) -> Expected<Symbol::Function*>
@@ -187,7 +187,7 @@ namespace Ace::Symbol::Type
     }
 
     auto GetExplicitConversionOperator(
-        Scope* const t_scope,
+        const std::shared_ptr<Scope>& t_scope,
         Symbol::Type::IBase* t_fromType,
         Symbol::Type::IBase* t_toType
     ) -> Expected<Symbol::Function*>

@@ -19,7 +19,7 @@ namespace Ace::BoundNode::Statement::Jump
     {
     public:
         Normal(
-            Scope* const t_scope,
+            const std::shared_ptr<Scope>& t_scope,
             Symbol::Label* const t_labelSymbol
         ) : m_Scope{ t_scope },
             m_LabelSymbol{ t_labelSymbol }
@@ -27,7 +27,7 @@ namespace Ace::BoundNode::Statement::Jump
         }
         virtual ~Normal() = default;
 
-        auto GetScope() const -> Scope* final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Jump::Normal>>> final;
         auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
@@ -38,7 +38,7 @@ namespace Ace::BoundNode::Statement::Jump
         auto GetLabelSymbol() const -> Symbol::Label* final { return m_LabelSymbol; }
 
     private:
-        Scope* m_Scope{};
+        std::shared_ptr<Scope> m_Scope{};
         Symbol::Label* m_LabelSymbol{};
     };
 }

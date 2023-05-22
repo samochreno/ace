@@ -20,7 +20,7 @@ namespace Ace::BoundNode::Statement
     {
     public:
         Block(
-            Scope* const t_selfScope,
+            const std::shared_ptr<Scope>& t_selfScope,
             const std::vector<std::shared_ptr<const BoundNode::Statement::IBase>>& t_statements
         ) : m_SelfScope{ t_selfScope },
             m_Statements{ t_statements }
@@ -28,7 +28,7 @@ namespace Ace::BoundNode::Statement
         }
         virtual ~Block() = default;
         
-        auto GetScope() const -> Scope* final { return m_SelfScope->GetParent().value(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final { return m_SelfScope->GetParent().value(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Block>>> final;
         auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
@@ -41,7 +41,7 @@ namespace Ace::BoundNode::Statement
         auto IsEndReachableWithoutReturn() const -> bool;
 
     private:
-        Scope* m_SelfScope{};
+        std::shared_ptr<Scope> m_SelfScope{};
         std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> m_Statements{};
     };
 }
