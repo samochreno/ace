@@ -66,7 +66,7 @@ namespace Ace::Core
         const Compilation& t_compilation,
         const std::vector<const Node::IBase*>& t_nodes
     ) -> Expected<void>;
-    auto AssertControlFlow(
+    auto ValidateControlFlow(
         const Compilation& t_compilation,
         const std::vector<const BoundNode::IBase*>& t_nodes
     ) -> Expected<void>;
@@ -117,7 +117,7 @@ namespace Ace::Core
         auto& finalAST = mchLoweredTypeCheckedAST.Value;
         const auto nodes = GetAllNodes(finalAST);
         
-        ACE_TRY_VOID(AssertControlFlow(t_compilation, nodes));
+        ACE_TRY_VOID(ValidateControlFlow(t_compilation, nodes));
 
         return finalAST;
     }
@@ -157,7 +157,7 @@ namespace Ace::Core
         auto& finalASTs = mchLoweredTypeCheckedASTs.Value;
         const auto nodes = GetAllNodes(finalASTs.begin(), finalASTs.end());
 
-        ACE_TRY_VOID(AssertControlFlow(t_compilation, nodes));
+        ACE_TRY_VOID(ValidateControlFlow(t_compilation, nodes));
 
         return finalASTs;
     }
@@ -223,7 +223,7 @@ namespace Ace::Core
 
         const auto nodes = GetAllNodes(finalASTs.begin(), finalASTs.end());
 
-        ACE_TRY_VOID(AssertControlFlow(t_compilation, nodes));
+        ACE_TRY_VOID(ValidateControlFlow(t_compilation, nodes));
 
         return finalASTs;
     }

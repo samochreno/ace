@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] `Core::AssertControlFlow` &rarr; `Core::ValidateControlFlow`
 - [ ] Add strong pointer self
 - Templates:
   - [ ] When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first
@@ -66,7 +65,7 @@
   - [ ] First parameter of `drop` has to be of type `&Self`
   - [ ] First and second parameters of `copy` have to be of type `&Self`
   - [ ] `==` reqiures a matching `!=` &larr;
-  - [ ] `<=` requires a matching `>=` &larr; These will be handled by traits, eg.: `Equatable` -> `operator ==(...)` and `operator !=(...)`
+  - [ ] `<=` requires a matching `>=` &larr; These will be handled by traits, eg.: `Equatable` &rarr; `operator ==(...)` and `operator !=(...)`
   - [ ] `<` requires matching `>`     &larr;
 
 ## 🥶 Low Priority

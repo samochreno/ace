@@ -105,7 +105,7 @@ namespace Ace::Core
         return ExpectedVoid;
     }
 
-    auto AssertControlFlow(
+    auto ValidateControlFlow(
         const Compilation& t_compilation,
         const std::vector<const BoundNode::IBase*>& t_nodes
     ) -> Expected<void>
