@@ -152,21 +152,27 @@ namespace Ace::Core
         });
     }
 
-    auto AssertCanResolveTypeSizes(
+    auto ValidateTypeSizes(
         const Compilation& t_compilation
     ) -> Expected<void>
     {
         const auto typeSymbols = t_compilation.GlobalScope->CollectSymbolsRecursive<Symbol::Type::IBase>();
 
-        const bool canResolveSizes = std::find_if_not(
+        const bool didValidateTypeSizes = std::find_if_not(
             begin(typeSymbols), 
             end  (typeSymbols),
-            [](const Symbol::Type::IBase* const t_typeSymbol)
+            [](const Symbol::Type::IBase* const t_typeSymbol) -> bool
             {
-                return t_typeSymbol->CanResolveSize();
+                auto* const templatableSymbol = dynamic_cast<const Symbol::ITemplatable*>(
+                    t_typeSymbol
+                );
+                if (templatableSymbol && templatableSymbol->IsTemplatePlaceholder())
+                    return true;
+
+                return t_typeSymbol->GetSizeKind();
             }
         ) == end(typeSymbols);
-        ACE_TRY_ASSERT(canResolveSizes);
+        ACE_TRY_ASSERT(didValidateTypeSizes);
 
         return ExpectedVoid;
     }
@@ -261,16 +267,16 @@ namespace Ace::Core
         const std::function<Symbol::Function*(const Compilation&, Symbol::Type::IBase* const)>& t_getOrDefineGlueSymbols
     ) -> std::optional<Symbol::Function*>
     {
-        if (!t_typeSymbol->IsSized())
-            return std::nullopt;
-
-        if (t_typeSymbol->IsReference())
-            return std::nullopt;
-
         auto* const templatableSymbol = dynamic_cast<Symbol::ITemplatable*>(
             t_typeSymbol
         );
         if (templatableSymbol && templatableSymbol->IsTemplatePlaceholder())
+            return std::nullopt;
+
+        if (t_typeSymbol->GetSizeKind().Unwrap() == TypeSizeKind::Unsized)
+            return std::nullopt;
+
+        if (t_typeSymbol->IsReference())
             return std::nullopt;
 
         return t_getOrDefineGlueSymbols(t_compilation, t_typeSymbol);

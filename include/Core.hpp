@@ -74,7 +74,7 @@ namespace Ace::Core
         const Compilation& t_compilation,
         const std::vector<const BoundNode::IBase*>& t_nodes
     ) -> void;
-    auto AssertCanResolveTypeSizes(
+    auto ValidateTypeSizes(
         const Compilation& t_compilation
     ) -> Expected<void>;
     auto GenerateAndBindGlue(

@@ -9,6 +9,7 @@
 #include "Symbol/Variable/Normal/Instance.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
+#include "Error.hpp"
 #include "Emittable.hpp"
 
 namespace Ace::Symbol::Type
@@ -34,13 +35,10 @@ namespace Ace::Symbol::Type
         auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
         auto GetAccessModifier() const -> AccessModifier final { return m_AccessModifier; }
 
-        auto SetAsUnsized() -> void final { m_IsSized = false; }
-        auto IsSized() const -> bool final { return m_IsSized; }
-
-        auto SetAsNativeSized() -> void final { m_IsNativeSized = true; }
-        auto IsNativeSized() const -> bool final { return m_IsNativeSized; }
-
-        auto CanResolveSize() const -> bool final;
+        auto GetSizeKind() const -> Expected<TypeSizeKind> final;
+        auto SetAsUnsized() -> void final;
+        auto SetAsPrimitivelyEmittable() -> void final;
+        auto IsPrimitivelyEmittable() const -> bool final;
 
         auto SetAsTriviallyCopyable() -> void final { m_IsTriviallyCopyable = true; }
         auto IsTriviallyCopyable() const -> bool final { return m_IsTriviallyCopyable; }
@@ -69,12 +67,10 @@ namespace Ace::Symbol::Type
         std::string m_Name{};
         AccessModifier m_AccessModifier{};
 
-        bool m_IsSized = true;
-
-        bool m_IsNativeSized{};
-        
-        mutable bool m_IsResolvingSize = false;
-        mutable bool m_DidResolveSize = false;
+        mutable bool m_IsResolvingSize{};
+        mutable std::optional<Expected<TypeSizeKind>> m_OptSizeKindCache{};
+        bool m_IsUnsized{};
+        bool m_IsPrimitivelyEmittable{};
         
         bool m_IsTriviallyCopyable{};
         bool m_IsTriviallyDroppable{};

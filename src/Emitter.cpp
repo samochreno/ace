@@ -602,7 +602,7 @@ namespace Ace
         std::for_each(begin(t_structSymbols), end(t_structSymbols),
         [&](const Symbol::Type::Struct* const t_structSymbol)
         {
-            if (t_structSymbol->IsNativeSized())
+            if (t_structSymbol->IsPrimitivelyEmittable())
                 return;
 
             m_TypeMap[t_structSymbol] = llvm::StructType::create(
@@ -614,7 +614,7 @@ namespace Ace
         std::for_each(begin(t_structSymbols), end(t_structSymbols),
         [&](const Symbol::Type::Struct* const t_structSymbol)
         {
-            if (t_structSymbol->IsNativeSized())
+            if (t_structSymbol->IsPrimitivelyEmittable())
                 return;
 
             std::vector<llvm::Type*> elements{};

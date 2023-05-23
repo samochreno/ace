@@ -2,22 +2,24 @@
 
 ## 💥 High Priority
 
-- [ ] Strings.
-- Add templated conversion operators (`ref.ace` at line 16):
-  - [ ] Change `__deref_as[T](...)` to take any expression of type convertible to `std::Pointer`.
-  - [ ] Remove `std::Reference[T]::ptr(...)`.
+- [ ] What is `Symbol::Function::IsNative()`?
+- [ ] `Core::AssertControlFlow` &rarr; `Core::ValidateControlFlow`
+- [ ] Add strong pointer self
 - Templates:
-  - [ ] When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first.
-  - [ ] After compilation, do semantic analysis on templates that have never been instantiated.
-  - [ ] ❓ Create unique signatures for template instances.
-  - [ ] Default template arguments. 
+  - [ ] When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first
+  - [ ] After compilation, do semantic analysis on templates that have never been instantiated
+  - [ ] ❓ Create unique signatures for template instances
+  - [ ] Default template arguments
 - Traits:
-  - [ ] Implement.
-  - [ ] ❓ Implement Rust's orphan rule.
-- [ ] Change how methods are defined, because sometimes you need something like `shared_from_this()`.
-- [ ] Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour. This could maybe be fixed by forcing the copy trait to also implement default trait).
-- [ ] Add lifetime trait: default, copy, drop.
-- [ ] Check if there is any better way to not use external programs like `llc` and `clang`.
+  - [ ] Implement
+  - [ ] ❓ Implement Rust's orphan rule
+- Conversion operators with traits
+  - [ ] Implement
+  - [ ] Change `__deref_as[T](...)` to take any type convertible to `std::Pointer` and remove `std::Reference[T]::ptr(...)`
+- [ ] Strings
+- [ ] Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; This could maybe be fixed by forcing the copy trait to also implement default trait)
+- [ ] Add lifetime trait: default, copy, drop
+- [ ] Check if there is any better way to not use external programs like `llc` and `clang`
 
 ## 🔔 Medium Priority
 
@@ -44,52 +46,52 @@
       };
   }
   ```
-- [ ] Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy).
-- [ ] Error messages.
-- [ ] Check out LLVM attributes.
-- [ ] Struct update constructor syntax.
+- [ ] Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
+- [ ] Error messages
+- [ ] Check out LLVM attributes
+- [ ] Struct update constructor syntax
 - Mutability/Immutability:
-  - [ ] Implement.
-  - [ ] Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`.
-- [ ] Dont allow private types to leak in public interface.
+  - [ ] Implement
+  - [ ] Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`
+- [ ] Dont allow private types to leak in public interface
 - Struct construction syntax:
-  - [ ] New syntax for struct construction. The current `new Struct { ... }` and `Struct::new(...)` are too similiar.
-  - [ ] Add struct update constructor syntax.
-- [ ] Full and partial template specialization.
-- [ ] Add associated variables.
+  - [ ] New syntax for struct construction. The current `new Struct { ... }` and `Struct::new(...)` are too similiar
+  - [ ] Add struct update constructor syntax
+- [ ] Full and partial template specialization
+- [ ] Add associated variables
 - [ ] Remove duplicate module filepaths: `./dawg/../dawg/` is the same as `./dawg/`
 - Operator verification:
-  - [ ] Operators must be public and static (this can be implemented in the parser).
-  - [ ] A conversion operator must convert to the enclosing type, from a type other than the enclosing type. 
-  - [ ] You can have a `impl` or an `expl` operator to a type, not both.
-  - [ ] First parameter of `drop` has to be of type `&Self`.
-  - [ ] First and second parameters of `copy` have to be of type `&Self`.
-  - [ ] `==` reqiures a matching `!=`. <-
-  - [ ] `<=` requires a matching `>=`. <- These will be handled by traits, eg.: `Equatable` -> `operator ==(...)` and `operator !=(...)`.
-  - [ ] `<` requires matching `>`.     <-
+  - [ ] Operators must be public and static (this can be implemented in the parser)
+  - [ ] A conversion operator must convert to the enclosing type, from a type other than the enclosing type.
+  - [ ] You can have a `impl` or an `expl` operator to a type, not both
+  - [ ] First parameter of `drop` has to be of type `&Self`
+  - [ ] First and second parameters of `copy` have to be of type `&Self`
+  - [ ] `==` reqiures a matching `!=` &larr;
+  - [ ] `<=` requires a matching `>=` &larr; These will be handled by traits, eg.: `Equatable` -> `operator ==(...)` and `operator !=(...)`
+  - [ ] `<` requires matching `>`     &larr;
 
 ## 🥶 Low Priority
 
-- [ ] Local variable assignment analysis (data flow analysis), control flow graph.
+- [ ] Local variable assignment analysis (data flow analysis), control flow graph
 - Metadata:
-  - [ ] Export/import symbol metadata for reflection and headers.
+  - [ ] Export/import symbol metadata for reflection and headers
   - Metadata will be stored in exe/dll files this way:
-    - Last 8 bytes of file will be u64 which stores value of metadata size in bytes.
-    - `[ ? bytes - Content of exe/dll ][ X bytes -  Metadata ][ 8 bytes - X ]`.
-- [ ] Dll package dependencies.
-- [ ] Dll calls.
-- [ ] Reflection.
-- [ ] Enums.
-- [ ] Figure out how to share globals between dlls.
-- [ ] ❓ Remove local variable shadowing, it causes more mistakes than usefulness.
+    - Last 8 bytes of file will be u64 which stores value of metadata size in bytes
+    - `[ ? bytes - Content of exe/dll ][ X bytes -  Metadata ][ 8 bytes - X ]`
+- [ ] Dll package dependencies
+- [ ] Dll calls
+- [ ] Reflection
+- [ ] Enums
+- [ ] Figure out how to share globals between dlls
+- [ ] ❓ Remove local variable shadowing, it causes more mistakes than usefulness
 
 ## 🛠️ Bootstrapping
 
-- Maybe dont make global scope a global variable.
+- Maybe dont make global scope a global variable
 
 ## 💡 Ideas
 
-- Memory safe temporary references for things like Rc::...::unwrap().
+- Memory safe temporary references for things like Rc::...::unwrap()
 - Binary operators on enums return `int`, so you cant have an arbitrary enum + safe switch:
   ```rs
   node_type: auto = NodeType::Expression;

@@ -139,6 +139,11 @@ namespace Ace
             t_other.m_HasValue = false;
         }
 
+        Expected(const Expected& t_other) noexcept
+            : m_HasValue{ t_other.m_HasValue }, m_Value{ t_other.m_Value }
+        {
+        }
+
         auto operator=(Expected&& t_other) noexcept -> Expected&
         {
             m_HasValue = t_other.m_HasValue;
@@ -149,6 +154,18 @@ namespace Ace
             }
 
             t_other.m_HasValue = false;
+
+            return *this;
+        }
+
+        auto operator=(const Expected& t_other) noexcept -> Expected&
+        {
+            m_HasValue = t_other.m_HasValue;
+
+            if (m_HasValue)
+            {
+                m_Value = t_other.m_Value;
+            }
 
             return *this;
         }

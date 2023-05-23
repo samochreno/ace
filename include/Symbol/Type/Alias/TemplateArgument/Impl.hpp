@@ -38,13 +38,10 @@ namespace Ace::Symbol::Type::Alias::TemplateArgument
         auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_AliasedType->CollectTemplateArguments(); }
         auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_AliasedType->CollectImplTemplateArguments(); }
 
-        auto SetAsUnsized() -> void final { m_AliasedType->SetAsUnsized(); }
-        auto IsSized() const -> bool final { return m_AliasedType->IsSized(); }
-
-        auto SetAsNativeSized() -> void final { ACE_UNREACHABLE(); }
-        auto IsNativeSized() const -> bool final { return m_AliasedType->IsNativeSized(); }
-
-        auto CanResolveSize() const -> bool final { return m_AliasedType->CanResolveSize(); }
+        auto GetSizeKind() const -> Expected<TypeSizeKind> final { return m_AliasedType->GetSizeKind(); }
+        auto SetAsUnsized() -> void final { return m_AliasedType->SetAsUnsized(); }
+        auto SetAsPrimitivelyEmittable() -> void final { m_AliasedType->SetAsPrimitivelyEmittable(); }
+        auto IsPrimitivelyEmittable() const -> bool final { return m_AliasedType->IsPrimitivelyEmittable(); }
 
         auto SetAsTriviallyCopyable() -> void final { m_AliasedType->SetAsTriviallyCopyable(); }
         auto IsTriviallyCopyable() const -> bool final { return m_AliasedType->IsTriviallyCopyable(); }

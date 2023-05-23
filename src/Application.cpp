@@ -120,7 +120,7 @@ namespace Ace
         const auto timeBindingAndVerificationEnd = now();
         ACE_LOG_INFO("Binding and verification success");
 
-        ACE_TRY_VOID(Core::AssertCanResolveTypeSizes(t_compilation));
+        ACE_TRY_VOID(Core::ValidateTypeSizes(t_compilation));
 
         const auto timeFrontendEnd = now();
         ACE_LOG_INFO("Frontend success");

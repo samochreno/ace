@@ -29,13 +29,10 @@ namespace Ace::Symbol::Type::TemplateParameter
         auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
         auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
 
-        auto SetAsUnsized() -> void final { }
-        auto IsSized() const -> bool final { return false; }
-
-        auto SetAsNativeSized() -> void final { ACE_UNREACHABLE(); }
-        auto IsNativeSized() const -> bool final { ACE_UNREACHABLE(); }
-
-        auto CanResolveSize() const -> bool final { return true; }
+        auto GetSizeKind() const -> Expected<TypeSizeKind> final { return TypeSizeKind::Unsized; }
+        auto SetAsUnsized() -> void final {  }
+        auto SetAsPrimitivelyEmittable() -> void final { ACE_UNREACHABLE(); }
+        auto IsPrimitivelyEmittable() const -> bool final { ACE_UNREACHABLE(); }
 
         auto SetAsTriviallyCopyable() -> void final { ACE_UNREACHABLE(); }
         auto IsTriviallyCopyable() const -> bool final { ACE_UNREACHABLE(); }

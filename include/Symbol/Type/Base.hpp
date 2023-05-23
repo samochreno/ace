@@ -7,6 +7,7 @@
 #include "Symbol/Base.hpp"
 #include "Symbol/SelfScoped.hpp"
 #include "Symbol/Templatable.hpp"
+#include "TypeSizeKind.hpp"
 #include "Emittable.hpp"
 
 namespace Ace::Symbol
@@ -29,13 +30,10 @@ namespace Ace::Symbol::Type
     public:
         virtual ~IBase() = default;
 
+        virtual auto GetSizeKind() const -> Expected<TypeSizeKind> = 0;
         virtual auto SetAsUnsized() -> void = 0;
-        virtual auto IsSized() const -> bool = 0;
-
-        virtual auto SetAsNativeSized() -> void = 0;
-        virtual auto IsNativeSized() const -> bool = 0;
-
-        virtual auto CanResolveSize() const -> bool = 0;
+        virtual auto SetAsPrimitivelyEmittable() -> void = 0;
+        virtual auto IsPrimitivelyEmittable() const -> bool = 0;
 
         virtual auto SetAsTriviallyCopyable() -> void = 0;
         virtual auto IsTriviallyCopyable() const -> bool = 0;

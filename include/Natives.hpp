@@ -11,6 +11,7 @@
 #include "Token.hpp"
 #include "Scope.hpp"
 #include "Error.hpp"
+#include "TypeSizeKind.hpp"
 
 namespace Ace::Symbol
 {
@@ -59,13 +60,6 @@ namespace Ace
         NonTrivial,
     };
 
-    enum class NativeSizeKind
-    {
-        None,
-        Sized,
-        Unsized,
-    };
-
     class NativeType : public virtual ITypeableNative
     {
     public:
@@ -73,17 +67,17 @@ namespace Ace
             const Compilation& t_compilation,
             SymbolName&& t_name,
             std::optional<std::function<llvm::Type*()>>&& t_irTypeGetter,
-            const NativeSizeKind& t_sizeKind,
+            const TypeSizeKind& t_sizeKind,
             const NativeCopyabilityKind& t_copyabilityKind
         ) : m_Compilation{ t_compilation },
             m_Name{ std::move(t_name) },
             m_IRTypeGetter{ std::move(t_irTypeGetter) },
-            m_IsSized{ t_sizeKind == NativeSizeKind::Sized },
+            m_IsSized{ t_sizeKind == TypeSizeKind::Sized },
             m_IsTriviallyCopyable{ t_copyabilityKind == NativeCopyabilityKind::Trivial }
         {
             ACE_ASSERT(
-                (t_sizeKind == NativeSizeKind::Sized) ||
-                (t_sizeKind == NativeSizeKind::Unsized)
+                (t_sizeKind == TypeSizeKind::Sized) ||
+                (t_sizeKind == TypeSizeKind::Unsized)
             );
 
             ACE_ASSERT(

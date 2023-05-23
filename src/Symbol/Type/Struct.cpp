@@ -3,51 +3,68 @@
 #include <optional>
 
 #include "Symbol/Function.hpp"
+#include "Error.hpp"
 #include "Emittable.hpp"
 #include "Core.hpp"
 
 namespace Ace::Symbol::Type
 {
-    auto Struct::CanResolveSize() const -> bool 
+    auto Struct::GetSizeKind() const -> Expected<TypeSizeKind>
     {
-        if (m_DidResolveSize)
-            return true;
-
-        const bool value = [&]()
+        if (m_OptSizeKindCache.has_value())
         {
-            if (m_IsNativeSized)
-                return true;
-
-            // If size resolution is already in progress, we have detected a circular dependency.
-            if (m_IsResolvingSize)
-                return false;
-
-            m_IsResolvingSize = true;
-
-            const auto members = GetVariables();
-
-            const bool canResolveSize = std::find_if_not(begin(members), end(members),
-            [](const Symbol::Variable::Normal::Instance* const t_member)
-            {
-                return t_member->GetType()->CanResolveSize();
-            }) == members.end();
-
-            if (canResolveSize)
-            {
-                m_IsResolvingSize = false;
-                return true;
-            }
-
-            m_IsResolvingSize = false;
-            return false;
-        }();
-
-        if (value)
-        {
-            m_DidResolveSize = true;
+            return m_OptSizeKindCache.value();
         }
 
-        return value;
+        const auto expSizeKind = [&]() -> Expected<TypeSizeKind>
+        {
+            // If size resolution is already in progress, we have detected a circular dependency.
+            ACE_TRY_ASSERT(!m_IsResolvingSize);
+            m_IsResolvingSize = true;
+
+            if (m_IsPrimitivelyEmittable)
+            {
+                return TypeSizeKind::Sized;
+            }
+
+            if (m_IsUnsized)
+            {
+                return TypeSizeKind::Unsized;
+            }
+
+            const auto variables = GetVariables();
+
+            const auto canResolveSize = TransformExpectedVector(GetVariables(),
+            [](const Symbol::Variable::Normal::Instance* const t_variable) -> Expected<void>
+            {
+                ACE_TRY(sizeKind, t_variable->GetType()->GetSizeKind());
+                ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
+                return ExpectedVoid;
+            });
+            
+            m_IsResolvingSize = false;
+
+            ACE_TRY_ASSERT(canResolveSize);
+            return TypeSizeKind::Sized;
+        }();
+
+        m_OptSizeKindCache = expSizeKind;
+        return expSizeKind;
+    }
+
+    auto Struct::SetAsUnsized() -> void
+    {
+        m_IsUnsized = true;
+    }
+
+    auto Struct::SetAsPrimitivelyEmittable() -> void
+    {
+        m_IsPrimitivelyEmittable = true;
+    }
+
+    auto Struct::IsPrimitivelyEmittable() const -> bool
+    {
+        return m_IsPrimitivelyEmittable;
     }
 
     auto Struct::CreateCopyGlueBody(
