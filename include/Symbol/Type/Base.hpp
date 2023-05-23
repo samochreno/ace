@@ -77,3 +77,4 @@ namespace Ace::Symbol::Type
         Symbol::Type::IBase* t_targetType
     ) -> Expected<Symbol::Function*>;
 }
+
