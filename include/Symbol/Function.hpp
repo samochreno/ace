@@ -65,9 +65,6 @@ namespace Ace::Symbol
         auto BindBody(const std::shared_ptr<const IEmittable<void>>& t_body) -> void;
         auto GetBody() -> std::optional<const IEmittable<void>*>;
 
-        auto SetAsNative() -> void { m_IsNative = true; }
-        auto IsNative() const -> bool { return m_IsNative; }
-
         auto GetTemplate() const -> std::optional<Symbol::Template::Function*>;
 
         auto CollectTemplateArguments()     const -> std::vector<Symbol::Type::IBase*> final;
@@ -81,6 +78,5 @@ namespace Ace::Symbol
         Symbol::Type::IBase* m_Type{};
 
         std::optional<std::shared_ptr<const IEmittable<void>>> m_OptBody{};
-        bool m_IsNative{};
     };
 }

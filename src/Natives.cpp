@@ -74,7 +74,6 @@ namespace Ace
 
         const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
         symbol->BindBody(emittableBody);
-        symbol->SetAsNative();
 
         m_Symbol = symbol;
         return ExpectedVoid;
@@ -96,7 +95,6 @@ namespace Ace
 
         const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
         symbol->BindBody(emittableBody);
-        symbol->SetAsNative();
 
         m_Symbol = symbol;
         return ExpectedVoid;

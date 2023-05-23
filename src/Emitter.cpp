@@ -750,10 +750,8 @@ namespace Ace
                 ACE_ASSERT(m_FunctionSymbol->GetBody().has_value());
                 t_functionSymbolBlockPair.Symbol->GetBody().value()->Emit(*this);
 
-                const bool isFunctionNative = m_FunctionSymbol->IsNative();
                 const bool isBodyTerminated = m_BlockBuilder->Block->back().isTerminator();
-
-                if (!isFunctionNative && !isBodyTerminated)
+                if (!isBodyTerminated)
                 {
                     m_BlockBuilder->Builder.CreateUnreachable();
                 }

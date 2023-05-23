@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] What is `Symbol::Function::IsNative()`?
 - [ ] `Core::AssertControlFlow` &rarr; `Core::ValidateControlFlow`
 - [ ] Add strong pointer self
 - Templates:
