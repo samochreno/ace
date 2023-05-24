@@ -7,6 +7,7 @@
 #include "Symbol/Base.hpp"
 #include "Symbol/SelfScoped.hpp"
 #include "Symbol/Templatable.hpp"
+#include "Error.hpp"
 #include "TypeSizeKind.hpp"
 #include "Emittable.hpp"
 
