@@ -2,6 +2,9 @@
 
 #include "Symbol/Template/Base.hpp"
 #include "Symbol/Type/Base.hpp"
+#include "Symbol/Type/TemplateParameter/Impl.hpp"
+#include "Symbol/Type/TemplateParameter/Normal.hpp"
+#include "Symbol/Templatable.hpp"
 #include "Error.hpp"
 
 namespace Ace
@@ -15,10 +18,10 @@ namespace Ace
     {
     }
 
-    auto TemplateInstantiator::InstantiatePlaceholderSymbols() const -> Expected<void>
+    auto TemplateInstantiator::InstantiatePlaceholderSymbols() -> Expected<void>
     {
         return TransformExpectedVector(m_Symbols,
-        [](Symbol::Template::IBase* const t_symbol) -> Expected<void>
+        [&](Symbol::Template::IBase* const t_symbol) -> Expected<void>
         {
             const auto implParameters = t_symbol->CollectImplParameters();
             std::vector<Symbol::Type::IBase*> upcastedImplParameters
@@ -34,14 +37,71 @@ namespace Ace
                 end  (parameters),
             };
 
-            ACE_TRY(symbolsInstantiationResult, t_symbol->InstantiateSymbols(
+            ACE_TRY(placeholderSymbol, InstantiateSymbols(
+                t_symbol,
                 upcastedImplParameters,
                 upcastedParameters
             ));
-            t_symbol->SetPlaceholderSymbol(symbolsInstantiationResult.Symbol);
+            t_symbol->SetPlaceholderSymbol(placeholderSymbol);
 
             return ExpectedVoid;
         });
+    }
+
+    static auto IsArgumentPlaceholder(
+        Symbol::Type::IBase* const t_argument
+    ) -> bool;
+
+    static auto AreArgumentsPlaceholders(
+        const std::vector<Symbol::Type::IBase*>& t_implArguments,
+        const std::vector<Symbol::Type::IBase*>& t_arguments
+    ) -> bool
+    {
+        const auto foundImplIt = std::find_if(
+            begin(t_implArguments),
+            end  (t_implArguments),
+            [](Symbol::Type::IBase* const t_implArgument)
+            {
+                return IsArgumentPlaceholder(t_implArgument);
+            }
+        );
+        if (foundImplIt != end(t_implArguments))
+            return true;
+
+        const auto foundIt = std::find_if(
+            begin(t_arguments),
+            end  (t_arguments),
+            [](Symbol::Type::IBase* const t_argument)
+            {
+                return IsArgumentPlaceholder(t_argument);
+            }
+        );
+        if (foundIt != end(t_arguments))
+            return true;
+
+        return false;
+    }
+
+    static auto IsArgumentPlaceholder(
+        Symbol::Type::IBase* t_argument
+    ) -> bool
+    {
+        t_argument = t_argument->GetUnaliased();
+
+        if (dynamic_cast<Symbol::Type::TemplateParameter::Impl*>(t_argument))
+            return true;
+
+        if (dynamic_cast<Symbol::Type::TemplateParameter::Normal*>(t_argument))
+            return true;
+
+        auto* const templatable = dynamic_cast<Symbol::ITemplatable*>(t_argument);
+        if (!templatable)
+            return false;
+
+        return AreArgumentsPlaceholders(
+            templatable->CollectImplTemplateArguments(),
+            templatable->CollectTemplateArguments()
+        );
     }
 
     auto TemplateInstantiator::InstantiateSymbols(
@@ -54,9 +114,18 @@ namespace Ace
             t_implArguments,
             t_arguments
         ));
-        m_SymbolOnlyInstantiatedASTsMap[t_template].push_back(
-            symbolsInstantiationResult.AST
+
+        const bool areArgumentsPlaceholders = AreArgumentsPlaceholders(
+            t_implArguments,
+            t_arguments
         );
+        if (!areArgumentsPlaceholders)
+        {
+            m_SymbolOnlyInstantiatedASTsMap[t_template].push_back(
+                symbolsInstantiationResult.AST
+            );
+        }
+        
         return symbolsInstantiationResult.Symbol;
     }
 

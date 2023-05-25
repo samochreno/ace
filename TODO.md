@@ -2,15 +2,19 @@
 
 ## 💥 High Priority
 
+- [ ] Add error messages to make debugging easier
 - [ ] Add strong pointer self
+- Traits:
+  - [ ] Implement parsing
+  - [ ] Implement symbols
+  - [ ] Implement binding
+  - [ ] ❓ Implement Rust's orphan rule
 - Templates:
+  - [ ] Implement constraints
   - [ ] When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first
   - [ ] After compilation, do semantic analysis on templates that have never been instantiated
   - [ ] ❓ Create unique signatures for template instances
   - [ ] Default template arguments
-- Traits:
-  - [ ] Implement
-  - [ ] ❓ Implement Rust's orphan rule
 - Conversion operators with traits
   - [ ] Implement
   - [ ] Change `__deref_as[T](...)` to take any type convertible to `std::Pointer` and remove `std::Reference[T]::ptr(...)`

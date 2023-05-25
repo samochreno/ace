@@ -37,7 +37,7 @@ namespace Ace
             const std::vector<Symbol::Template::IBase*>& t_symbols
         ) -> void { m_Symbols = t_symbols; }
 
-        auto InstantiatePlaceholderSymbols() const -> Expected<void>;
+        auto InstantiatePlaceholderSymbols() -> Expected<void>;
 
         auto InstantiateSymbols(
             Symbol::Template::IBase* const t_templateSymbol,

@@ -15,9 +15,9 @@ namespace Ace::BoundNode::Variable::Parameter
 
     auto Self::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Self>>>
     {
-        ACE_TRY_ASSERT(
-            m_Symbol->GetType() != GetCompilation().Natives->Void.GetSymbol()
-        );
+        ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
+        ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
+
         return CreateUnchanged(shared_from_this());
     }
 

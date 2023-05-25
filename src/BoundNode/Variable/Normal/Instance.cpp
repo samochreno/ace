@@ -20,10 +20,8 @@ namespace Ace::BoundNode::Variable::Normal
 
     auto Instance::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Instance>>>
     {
-        ACE_TRY_ASSERT(
-            m_Symbol->GetType() != 
-            GetCompilation().Natives->Void.GetSymbol()
-        );
+        ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
+        ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
 
         ACE_TRY(mchCheckedAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
         [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)

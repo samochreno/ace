@@ -25,20 +25,22 @@ namespace Ace::BoundNode::Statement
 
     auto Return::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Return>>>
     {
-        if (
+        const bool isFunctionTypeVoid = 
             t_context.ParentFunctionTypeSymbol == 
-            GetCompilation().Natives->Void.GetSymbol()
-            )
+            GetCompilation().Natives->Void.GetSymbol();
+
+        ACE_TRY_ASSERT(m_OptExpression.has_value() != isFunctionTypeVoid);
+
+        if (m_OptExpression.has_value())
         {
-            ACE_TRY_ASSERT(!m_OptExpression.has_value());
-        }
-        else
-        {
-            ACE_TRY_ASSERT(m_OptExpression.has_value());
-            ACE_TRY_ASSERT(
-                m_OptExpression.value()->GetTypeInfo().Symbol->GetUnaliased() != 
-                GetCompilation().Natives->Void.GetSymbol()
-            );
+            auto* const expressionTypeSymbol = 
+                m_OptExpression.value()->GetTypeInfo().Symbol->GetUnaliased();
+
+            const bool isExpressionTypeVoid = 
+                expressionTypeSymbol ==
+                GetCompilation().Natives->Void.GetSymbol();
+
+            ACE_TRY_ASSERT(!isExpressionTypeVoid);
         }
 
         ACE_TRY(mchCheckedOptExpression, TransformExpectedMaybeChangedOptional(m_OptExpression,
@@ -75,7 +77,7 @@ namespace Ace::BoundNode::Statement
         const auto returnValue = std::make_shared<const BoundNode::Statement::Return>(
             m_Scope,
             mchLoweredOptExpression.Value
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
     }
