@@ -7,7 +7,7 @@
 #define ACE_ASSERT(t_condition) \
     if (!(t_condition)) \
     { \
-        ACE_LOG_ERROR( \
+        ACE_LOG_DEBUG( \
             "Assertion failed in file " << __FILE__ << \
             " at line " << __LINE__ << ": " << #t_condition \
         ); \
@@ -16,7 +16,7 @@
     } static_assert(true, "Semicolon required.")
 
 #define ACE_UNREACHABLE() \
-    ACE_LOG_ERROR( \
+    ACE_LOG_DEBUG( \
         "Reached unreachable location in file " << __FILE__ << \
         " at line " << __LINE__ \
     ); \

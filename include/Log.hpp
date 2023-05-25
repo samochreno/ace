@@ -14,6 +14,7 @@ namespace Ace::Log
 #define ACE_LOG_COLOR_INFORMATION  38, 162, 105
 #define ACE_LOG_COLOR_WARNING     243, 156,  18
 #define ACE_LOG_COLOR_ERROR       192,  57,  43
+#define ACE_LOG_COLOR_DEBUG       235, 108, 240
 
 #define ACE_LOG_EMPTY() std::cout << "\n"
 #define ACE_LOG_FLUSH() std::cout << std::flush
@@ -37,4 +38,11 @@ namespace Ace::Log
     " | ERROR         " << termcolor::on_color<ACE_LOG_COLOR_TIMESTAMP> << \
     " " << Ace::Log::CreateTimestamp() << " " << termcolor::on_color<ACE_LOG_COLOR_ERROR> << \
     " " << termcolor::reset << termcolor::color<ACE_LOG_COLOR_ERROR> << \
+    " " << t_message << "\n"
+
+#define ACE_LOG_DEBUG(t_message) \
+    std::cout << termcolor::color<ACE_LOG_COLOR_WHITE> << termcolor::on_color<ACE_LOG_COLOR_DEBUG> << \
+    " | DEBUG         " << termcolor::on_color<ACE_LOG_COLOR_TIMESTAMP> << \
+    " " << Ace::Log::CreateTimestamp() << " " << termcolor::on_color<ACE_LOG_COLOR_DEBUG> << \
+    " " << termcolor::reset << termcolor::color<ACE_LOG_COLOR_DEBUG> << \
     " " << t_message << "\n"

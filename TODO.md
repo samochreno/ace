@@ -3,6 +3,7 @@
 ## 💥 High Priority
 
 - [ ] Add error messages to make debugging easier
+- [ ] Check why lowering can fail, potentially remove the option for lowering to fail
 - [ ] Add strong pointer self
 - Traits:
   - [ ] Implement parsing

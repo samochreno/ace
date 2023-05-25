@@ -191,7 +191,7 @@ namespace Ace
         const auto didCompile = Compile(args);
         if (!didCompile)
         {
-            ACE_LOG_WARNING("Build fail");
+            ACE_LOG_ERROR("Build fail");
             return;
         }
     }
