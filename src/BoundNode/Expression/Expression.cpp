@@ -39,7 +39,9 @@ namespace Ace::BoundNode::Expression
         if (!mchLoweredExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
 
-        const auto returnValue = std::make_shared<const BoundNode::Expression::Expression>(mchLoweredExpression.Value);
+        const auto returnValue = std::make_shared<const BoundNode::Expression::Expression>(
+            mchLoweredExpression.Value
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
     }

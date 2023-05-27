@@ -50,11 +50,15 @@ namespace Ace::BoundNode::Statement
     {
         ACE_TRY(mchLoweredCondition, m_Condition->GetOrCreateLoweredExpression({}));
 
-        const auto condition = std::make_shared<const BoundNode::Expression::LogicalNegation>(mchLoweredCondition.Value);
+        const auto condition = std::make_shared<const BoundNode::Expression::LogicalNegation>(
+            mchLoweredCondition.Value
+        );
 
         const auto bodyScope = GetScope()->GetOrCreateChild({});
 
-        const auto exitStatement = std::make_shared<const BoundNode::Statement::Exit>(bodyScope);
+        const auto exitStatement = std::make_shared<const BoundNode::Statement::Exit>(
+            bodyScope
+        );
 
         const auto bodyStatement = std::make_shared<const BoundNode::Statement::Block>(
             bodyScope,

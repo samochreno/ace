@@ -25,7 +25,9 @@ namespace Ace::BoundNode::Statement
         if (!mchCheckedExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
 
-        const auto returnValue = std::make_shared<const BoundNode::Statement::Expression>(mchCheckedExpression.Value);
+        const auto returnValue = std::make_shared<const BoundNode::Statement::Expression>(
+            mchCheckedExpression.Value
+        );
 
         return CreateChanged(returnValue);
     }
@@ -37,7 +39,9 @@ namespace Ace::BoundNode::Statement
         if (!mchLoweredExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
 
-        const auto returnValue = std::make_shared<const BoundNode::Statement::Expression>(mchLoweredExpression.Value);
+        const auto returnValue = std::make_shared<const BoundNode::Statement::Expression>(
+            mchLoweredExpression.Value
+        );
         
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
     }

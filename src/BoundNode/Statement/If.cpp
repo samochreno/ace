@@ -101,11 +101,11 @@ namespace Ace::BoundNode::Statement
             auto labelSymbolOwned = std::make_unique<Symbol::Label>(
                 m_Scope,
                 SpecialIdentifier::CreateAnonymous()
-                );
+            );
 
             auto* const labelSymbol = dynamic_cast<Symbol::Label*>(
                 m_Scope->DefineSymbol(std::move(labelSymbolOwned)).Unwrap()
-                );
+            );
 
             labelSymbols.push_back(labelSymbol);
         }
@@ -119,10 +119,14 @@ namespace Ace::BoundNode::Statement
 
             if (!isFirstBody)
             {
-                statements.push_back(std::make_shared<const BoundNode::Statement::Label>(labelSymbols.at(i - 1)));
+                statements.push_back(std::make_shared<const BoundNode::Statement::Label>(
+                    labelSymbols.at(i - 1)
+                ));
             }
 
-            const auto condition = std::make_shared<const BoundNode::Expression::LogicalNegation>(m_Conditions.at(i));
+            const auto condition = std::make_shared<const BoundNode::Expression::LogicalNegation>(
+                m_Conditions.at(i)
+            );
 
             statements.push_back(std::make_shared<const BoundNode::Statement::Jump::Conditional>(
                 condition,
@@ -142,12 +146,16 @@ namespace Ace::BoundNode::Statement
 
         if (hasElse)
         {
-            statements.push_back(std::make_shared<const BoundNode::Statement::Label>(labelSymbols.rbegin()[1]));
+            statements.push_back(std::make_shared<const BoundNode::Statement::Label>(
+                labelSymbols.rbegin()[1]
+            ));
 
             statements.push_back(m_Bodies.back());
         }
 
-        statements.push_back(std::make_shared<const BoundNode::Statement::Label>(labelSymbols.back()));
+        statements.push_back(std::make_shared<const BoundNode::Statement::Label>(
+            labelSymbols.back()
+        ));
 
         const auto returnValue = std::make_shared<const BoundNode::Statement::Group>(
             m_Scope,

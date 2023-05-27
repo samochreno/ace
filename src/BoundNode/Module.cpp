@@ -74,7 +74,7 @@ namespace Ace::BoundNode
             mchCheckedImpls.Value,
             mchCheckedFunctions.Value,
             mchCheckedVariables.Value
-            );
+        );
 
         return CreateChanged(returnValue);
     }
@@ -127,7 +127,7 @@ namespace Ace::BoundNode
             mchLoweredImpls.Value,
             mchLoweredFunctions.Value,
             mchLoweredVariables.Value
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
     }

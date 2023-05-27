@@ -22,7 +22,9 @@ namespace Ace::BoundNode::Statement
         ACE_TRY(mchCheckedContent, TransformExpectedMaybeChangedVector(m_Statements,
         [&](const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
         {
-            return t_statement->GetOrCreateTypeCheckedStatement({ t_context.ParentFunctionTypeSymbol });
+            return t_statement->GetOrCreateTypeCheckedStatement(
+                { t_context.ParentFunctionTypeSymbol }
+            );
         }));
 
         if (!mchCheckedContent.IsChanged)
@@ -31,7 +33,7 @@ namespace Ace::BoundNode::Statement
         const auto returnValue = std::make_shared<const BoundNode::Statement::Group>(
             m_Scope,
             mchCheckedContent.Value
-            );
+        );
 
         return CreateChanged(returnValue);
     }

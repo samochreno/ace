@@ -100,13 +100,15 @@ namespace Ace::BoundNode::Statement::Assignment
             // From:
             // lhs.variable += rhs;
             // 
-            // To: (if lhs is L-value)
+            // To:
+            //
+            // If lhs is L-value:
             // {
             //     tmp_ref: &auto = lhs;
             //     tmp_ref.variable = tmp_ref.field + rhs;
             // }
-
-            // To: (if lhs is R-value)
+            // 
+            // If lhs is R-value:
             // {
             //     tmp: auto = lhs;
             //     tmp_ref: &auto = tmp;
@@ -144,7 +146,7 @@ namespace Ace::BoundNode::Statement::Assignment
 
                         auto* const tmpVariableSymbol = dynamic_cast<Symbol::Variable::Local*>(
                             blockScope->DefineSymbol(std::move(tmpVariableSymbolOwned)).Unwrap()
-                            );
+                        );
                         ACE_ASSERT(tmpVariableSymbol);
 
                         const auto tmpVariableStatement = std::make_shared<const BoundNode::Statement::Variable>(
@@ -176,7 +178,7 @@ namespace Ace::BoundNode::Statement::Assignment
 
             auto* const tmpRefVariableSymbol = dynamic_cast<Symbol::Variable::Local*>(
                 blockScope->DefineSymbol(std::move(tmpRefVariableSymbolOwned)).Unwrap()
-                );
+            );
             ACE_ASSERT(tmpRefVariableSymbol);
 
             const auto tmpRefVariableStatement = std::make_shared<const BoundNode::Statement::Variable>(

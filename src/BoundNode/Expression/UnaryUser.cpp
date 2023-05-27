@@ -44,7 +44,7 @@ namespace Ace::BoundNode::Expression
             GetScope(),
             m_OperatorSymbol,
             std::vector{ mchLoweredExpression.Value }
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
     }

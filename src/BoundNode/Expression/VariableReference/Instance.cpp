@@ -53,7 +53,7 @@ namespace Ace::BoundNode::Expression::VariableReference
         const auto returnValue = std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
             mchLoweredExpression.Value,
             m_VariableSymbol
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
     }

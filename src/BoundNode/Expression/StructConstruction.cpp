@@ -71,7 +71,7 @@ namespace Ace::BoundNode::Expression
             m_Scope,
             m_StructSymbol,
             mchLoweredArguments.Value
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
     }

@@ -44,7 +44,7 @@ namespace Ace::BoundNode::Type
             m_Symbol,
             mchCheckedAttributes.Value,
             mchCheckedVariables.Value
-            );
+        );
 
         return CreateChanged(returnValue);
     }
@@ -73,7 +73,7 @@ namespace Ace::BoundNode::Type
             m_Symbol,
             mchLoweredAttributes.Value,
             mchLoweredVariables.Value
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
     }

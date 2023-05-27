@@ -45,7 +45,7 @@ namespace Ace::BoundNode::Statement
         const auto returnValue = std::make_shared<const BoundNode::Statement::Block>(
             m_SelfScope,
             mchCheckedContent.Value
-            );
+        );
 
         return CreateChanged(returnValue);
     }
@@ -64,7 +64,7 @@ namespace Ace::BoundNode::Statement
         const auto returnValue = std::make_shared<const BoundNode::Statement::Block>(
             m_SelfScope,
             mchLoweredStatements.Value
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
     }

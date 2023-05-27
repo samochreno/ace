@@ -54,7 +54,7 @@ namespace Ace::BoundNode::Statement
             m_Scope,
             mchConvertedAndCheckedCondition.Value,
             mchCheckedBody.Value
-            );
+        );
 
         return CreateChanged(returnValue);
     }
@@ -76,20 +76,20 @@ namespace Ace::BoundNode::Statement
         auto startLabelSymbolOwned = std::make_unique<Symbol::Label>(
             m_Scope,
             SpecialIdentifier::CreateAnonymous()
-            );
+        );
 
         auto* const startLabelSymbol = dynamic_cast<Symbol::Label*>(
             m_Scope->DefineSymbol(std::move(startLabelSymbolOwned)).Unwrap()
-            );
+        );
 
         auto continueLabelSymbolOwned = std::make_unique<Symbol::Label>(
             m_Scope,
             SpecialIdentifier::CreateAnonymous()
-            );
+        );
 
         auto* const continueLabelSymbol = dynamic_cast<Symbol::Label*>(
             m_Scope->DefineSymbol(std::move(continueLabelSymbolOwned)).Unwrap()
-            );
+        );
 
         std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
 
@@ -98,11 +98,15 @@ namespace Ace::BoundNode::Statement
             continueLabelSymbol
         ));
 
-        statements.push_back(std::make_shared<const BoundNode::Statement::Label>(startLabelSymbol));
+        statements.push_back(std::make_shared<const BoundNode::Statement::Label>(
+            startLabelSymbol
+        ));
 
         statements.push_back(m_Body);
 
-        statements.push_back(std::make_shared<const BoundNode::Statement::Label>(continueLabelSymbol));
+        statements.push_back(std::make_shared<const BoundNode::Statement::Label>(
+            continueLabelSymbol
+        ));
 
         statements.push_back(std::make_shared<const BoundNode::Statement::Jump::Conditional>(
             m_Condition,
@@ -112,7 +116,7 @@ namespace Ace::BoundNode::Statement
         const auto returnValue = std::make_shared<const BoundNode::Statement::Group>(
             m_Scope,
             statements
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
     }

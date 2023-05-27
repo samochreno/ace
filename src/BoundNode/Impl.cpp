@@ -52,7 +52,7 @@ namespace Ace::BoundNode
         const auto returnValue = std::make_shared<const BoundNode::Impl>(
             m_Scope,
             mchLoweredFunctions.Value
-            );
+        );
 
         return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
     }
