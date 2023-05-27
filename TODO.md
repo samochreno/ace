@@ -16,7 +16,7 @@
   - [ ] After compilation, do semantic analysis on templates that have never been instantiated
   - [ ] ❓ Create unique signatures for template instances
   - [ ] Default template arguments
-- Conversion operators with traits
+- Conversion operators with traits:
   - [ ] Implement
   - [ ] Change `__deref_as[T](...)` to take any type convertible to `std::Pointer` and remove `std::Reference[T]::ptr(...)`
 - [ ] Strings
