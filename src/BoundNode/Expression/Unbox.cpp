@@ -32,22 +32,23 @@ namespace Ace::BoundNode::Expression
         if (!mchCheckedExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
 
-        const auto returnValue = std::make_shared<const BoundNode::Expression::Unbox>(mchCheckedExpression.Value);
-
+        const auto returnValue = std::make_shared<const BoundNode::Expression::Unbox>(
+            mchCheckedExpression.Value
+        );
         return CreateChanged(returnValue);
     }
 
-    auto Unbox::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>>
+    auto Unbox::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>
     {
-        ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
 
-        ACE_TRY(symbol, Scope::ResolveOrInstantiateTemplateInstance(
+        auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
             GetCompilation().Natives->StrongPointer__value.GetSymbol(),
             std::nullopt,
             { mchLoweredExpression.Value->GetTypeInfo().Symbol->GetWithoutStrongPointer() },
             {}
-        ));
+        ).Unwrap();
 
         auto* const functionSymbol = dynamic_cast<Symbol::Function*>(symbol);
         ACE_ASSERT(functionSymbol);
@@ -57,8 +58,7 @@ namespace Ace::BoundNode::Expression
             functionSymbol,
             std::vector{ mchLoweredExpression.Value }
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto Unbox::GetTypeInfo() const -> TypeInfo

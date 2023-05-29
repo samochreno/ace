@@ -19,7 +19,7 @@ namespace Ace::BoundNode::Statement
         return CreateUnchanged(shared_from_this());
     }
 
-    auto Exit::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Exit>>>
+    auto Exit::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Exit>>
     {
         return CreateUnchanged(shared_from_this());
     }

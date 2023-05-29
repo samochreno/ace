@@ -21,7 +21,7 @@ namespace Ace::BoundNode::Variable::Parameter
         return CreateUnchanged(shared_from_this());
     }
 
-    auto Self::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Self>>>
+    auto Self::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Self>>
     {
         return CreateUnchanged(shared_from_this());
     }

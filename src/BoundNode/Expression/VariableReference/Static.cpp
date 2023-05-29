@@ -30,7 +30,7 @@ namespace Ace::BoundNode::Expression::VariableReference
         return CreateUnchanged(shared_from_this());
     }
 
-    auto Static::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::VariableReference::Static>>>
+    auto Static::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::VariableReference::Static>>
     {
         return CreateUnchanged(shared_from_this());
     }

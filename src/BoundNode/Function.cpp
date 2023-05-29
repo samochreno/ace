@@ -74,36 +74,38 @@ namespace Ace::BoundNode
             mchCheckedOptSelf.Value,
             mchCheckedParameters.Value,
             mchCheckedOptBody.Value
-            );
-
+        );
         return CreateChanged(returnValue);
     }
 
-    auto Function::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Function>>>
+    auto Function::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Function>>
     {
-        ACE_TRY(mchLoweredAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
+        const auto mchLoweredAttributes = TransformMaybeChangedVector(m_Attributes,
         [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
         {
             return t_attribute->GetOrCreateLowered({});
-        }));
+        });
         
-        ACE_TRY(mchLoweredOptSelf, TransformExpectedMaybeChangedOptional(m_OptSelf,
+        const auto mchLoweredOptSelf = TransformMaybeChangedOptional(m_OptSelf,
         [](const std::shared_ptr<const BoundNode::Variable::Parameter::Self>& t_self)
         {
             return t_self->GetOrCreateLowered({});
-        }));
+        });
 
-        ACE_TRY(mchLoweredParameters, TransformExpectedMaybeChangedVector(m_Parameters,
+        const auto mchLoweredParameters = TransformMaybeChangedVector(m_Parameters,
         [](const std::shared_ptr<const BoundNode::Variable::Parameter::Normal>& t_parameter)
         {
             return t_parameter->GetOrCreateLowered({});
-        }));
+        });
 
-        ACE_TRY(mchLoweredOptBody, TransformExpectedMaybeChangedOptional(m_OptBody,
+        if (m_Symbol->GetName() == "control_flow_analysis_1")
+            [](){}();
+
+        const auto mchLoweredOptBody = TransformMaybeChangedOptional(m_OptBody,
         [](const std::shared_ptr<const BoundNode::Statement::Block>& t_body)
         {
             return t_body->GetOrCreateLowered({});
-        }));
+        });
 
         if (
             !mchLoweredAttributes.IsChanged && 
@@ -119,18 +121,7 @@ namespace Ace::BoundNode
             mchLoweredOptSelf.Value,
             mchLoweredParameters.Value,
             mchLoweredOptBody.Value
-            );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
-    }
-
-    auto Function::GetBody() const -> std::optional<std::shared_ptr<const BoundNode::Statement::Block>>
-    {
-        if (!m_OptBody.has_value())
-        {
-            return std::nullopt;
-        }
-
-        return m_OptBody.value();
+        );
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 }

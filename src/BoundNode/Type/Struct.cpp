@@ -45,23 +45,22 @@ namespace Ace::BoundNode::Type
             mchCheckedAttributes.Value,
             mchCheckedVariables.Value
         );
-
         return CreateChanged(returnValue);
     }
 
-    auto Struct::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Type::Struct>>>
+    auto Struct::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Type::Struct>>
     {
-        ACE_TRY(mchLoweredAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
+        const auto mchLoweredAttributes = TransformMaybeChangedVector(m_Attributes,
         [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
         {
             return t_attribute->GetOrCreateLowered({});
-        }));
+        });
 
-        ACE_TRY(mchLoweredVariables, TransformExpectedMaybeChangedVector(m_Variables,
+        const auto mchLoweredVariables = TransformMaybeChangedVector(m_Variables,
         [](const std::shared_ptr<const BoundNode::Variable::Normal::Instance>& t_variable)
         {
             return t_variable->GetOrCreateLowered({});
-        }));
+        });
 
         if (
             !mchLoweredAttributes.IsChanged &&
@@ -74,7 +73,6 @@ namespace Ace::BoundNode::Type
             mchLoweredAttributes.Value,
             mchLoweredVariables.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 }

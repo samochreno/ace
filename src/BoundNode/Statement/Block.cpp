@@ -46,17 +46,16 @@ namespace Ace::BoundNode::Statement
             m_SelfScope,
             mchCheckedContent.Value
         );
-
         return CreateChanged(returnValue);
     }
 
-    auto Block::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Block>>>
+    auto Block::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Block>>
     {
-        ACE_TRY(mchLoweredStatements, TransformExpectedMaybeChangedVector(m_Statements,
+        const auto mchLoweredStatements = TransformMaybeChangedVector(m_Statements,
         [](const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
         {
             return t_statement->GetOrCreateLoweredStatement({});
-        }));
+        });
 
         if (!mchLoweredStatements.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -65,8 +64,7 @@ namespace Ace::BoundNode::Statement
             m_SelfScope,
             mchLoweredStatements.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
+        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
     }
 
     auto Block::Emit(Emitter& t_emitter) const -> void

@@ -38,13 +38,13 @@ namespace Ace::BoundNode::Statement
         return CreateChanged(returnValue);
     }
 
-    auto Group::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>>
+    auto Group::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
     {
-        ACE_TRY(mchLoweredStatements, TransformExpectedMaybeChangedVector(m_Statements,
+        const auto mchLoweredStatements = TransformMaybeChangedVector(m_Statements,
         [&](const std::shared_ptr<const BoundNode::Statement::IBase>& t_statement)
         {
             return t_statement->GetOrCreateLoweredStatement({});
-        }));
+        });
 
         if (!mchLoweredStatements.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -52,9 +52,8 @@ namespace Ace::BoundNode::Statement
         const auto returnValue = std::make_shared<const BoundNode::Statement::Group>(
             m_Scope,
             mchLoweredStatements.Value
-            );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
+        );
+        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
     }
 
     auto Group::CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const BoundNode::Statement::IBase>>

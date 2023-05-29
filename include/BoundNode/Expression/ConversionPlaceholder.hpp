@@ -30,8 +30,8 @@ namespace Ace::BoundNode::Expression
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final { ACE_UNREACHABLE(); }
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::ConversionPlaceholder>>> final { ACE_UNREACHABLE(); }
         auto GetOrCreateTypeCheckedExpression(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final { ACE_UNREACHABLE(); }
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::ConversionPlaceholder>>> final { ACE_UNREACHABLE(); }
-        auto GetOrCreateLoweredExpression(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final { ACE_UNREACHABLE(); }
+        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::ConversionPlaceholder>> final { ACE_UNREACHABLE(); }
+        auto GetOrCreateLoweredExpression(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>> final { ACE_UNREACHABLE(); }
         auto Emit(Emitter& t_emitter) const -> ExpressionEmitResult final { ACE_UNREACHABLE(); }
 
         auto GetTypeInfo() const -> TypeInfo final { return m_TypeInfo; }

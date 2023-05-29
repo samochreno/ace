@@ -35,17 +35,16 @@ namespace Ace::BoundNode::Variable::Parameter
             m_Symbol,
             mchCheckedAttributes.Value
         );
-
         return CreateChanged(returnValue);
     }
 
-    auto Normal::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>>>
+    auto Normal::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>>
     {
-        ACE_TRY(mchLoweredAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
+        const auto mchLoweredAttributes = TransformMaybeChangedVector(m_Attributes,
         [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
         {
             return t_attribute->GetOrCreateLowered({});
-        }));
+        });
 
         if (!mchLoweredAttributes.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -54,7 +53,6 @@ namespace Ace::BoundNode::Variable::Parameter
             m_Symbol,
             mchLoweredAttributes.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 }

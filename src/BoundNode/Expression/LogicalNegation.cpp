@@ -37,14 +37,15 @@ namespace Ace::BoundNode::Expression
         if (mchConvertedAndCheckedExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
 
-        const auto returnValue = std::make_shared<const BoundNode::Expression::LogicalNegation>(mchConvertedAndCheckedExpression.Value);
-
+        const auto returnValue = std::make_shared<const BoundNode::Expression::LogicalNegation>(
+            mchConvertedAndCheckedExpression.Value
+        );
         return CreateChanged(returnValue);
     }
 
-    auto LogicalNegation::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::LogicalNegation>>>
+    auto LogicalNegation::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::LogicalNegation>>
     {
-        ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
 
         if (!mchLoweredExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -52,8 +53,7 @@ namespace Ace::BoundNode::Expression
         const auto returnValue = std::make_shared<const BoundNode::Expression::LogicalNegation>(
             mchLoweredExpression.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto LogicalNegation::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
@@ -61,7 +61,11 @@ namespace Ace::BoundNode::Expression
         std::vector<ExpressionDropData> temporaries{};
 
         const auto expressionEmitResult = m_Expression->Emit(t_emitter);
-        temporaries.insert(end(temporaries), begin(expressionEmitResult.Temporaries), end(expressionEmitResult.Temporaries));
+        temporaries.insert(
+            end(temporaries),
+            begin(expressionEmitResult.Temporaries),
+            end  (expressionEmitResult.Temporaries)
+        );
 
         auto* const boolType = GetCompilation().Natives->Bool.GetIRType();
 

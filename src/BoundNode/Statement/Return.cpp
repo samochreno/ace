@@ -63,13 +63,13 @@ namespace Ace::BoundNode::Statement
         return CreateChanged(returnValue);
     }
 
-    auto Return::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Return>>>
+    auto Return::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Return>>
     {
-        ACE_TRY(mchLoweredOptExpression, TransformExpectedMaybeChangedOptional(m_OptExpression,
+        const auto mchLoweredOptExpression = TransformMaybeChangedOptional(m_OptExpression,
         [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
         {
             return t_expression->GetOrCreateLoweredExpression({});
-        }));
+        });
 
         if (!mchLoweredOptExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -78,8 +78,7 @@ namespace Ace::BoundNode::Statement
             m_Scope,
             mchLoweredOptExpression.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
+        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
     }
 
     auto Return::Emit(Emitter& t_emitter) const -> void

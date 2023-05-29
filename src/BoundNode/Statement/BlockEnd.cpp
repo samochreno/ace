@@ -21,7 +21,7 @@ namespace  Ace::BoundNode::Statement
         return CreateUnchanged(shared_from_this());
     }
 
-    auto BlockEnd::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::BlockEnd>>>
+    auto BlockEnd::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::BlockEnd>>
     {
         return CreateUnchanged(shared_from_this());
     }

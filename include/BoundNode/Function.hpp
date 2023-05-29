@@ -43,11 +43,11 @@ namespace Ace::BoundNode
         auto GetScope() const -> std::shared_ptr<Scope> final { return m_Symbol->GetScope(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Function>>> final;
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Function>>> final;
+        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Function>> final;
 
         auto GetSymbol() const -> Symbol::Function* final { return m_Symbol; }
 
-        auto GetBody() const -> std::optional<std::shared_ptr<const BoundNode::Statement::Block>>;
+        auto GetBody() const -> std::optional<std::shared_ptr<const BoundNode::Statement::Block>> { return m_OptBody; }
 
     private:
         Symbol::Function* m_Symbol{};

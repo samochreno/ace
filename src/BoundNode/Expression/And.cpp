@@ -49,15 +49,14 @@ namespace Ace::BoundNode::Expression
         const auto returnValue = std::make_shared<const BoundNode::Expression::And>(
             mchConvertedAndCheckedLHSExpression.Value,
             mchConvertedAndCheckedRHSExpression.Value
-            );
-
+        );
         return CreateChanged(returnValue);
     }
 
-    auto And::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::And>>>
+    auto And::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::And>>
     {
-        ACE_TRY(mchLoweredLHSExpression, m_LHSExpression->GetOrCreateLoweredExpression({}));
-        ACE_TRY(mchLoweredRHSExpression, m_RHSExpression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredLHSExpression = m_LHSExpression->GetOrCreateLoweredExpression({});
+        const auto mchLoweredRHSExpression = m_RHSExpression->GetOrCreateLoweredExpression({});
 
         if (
             !mchLoweredLHSExpression.IsChanged && 
@@ -69,8 +68,7 @@ namespace Ace::BoundNode::Expression
             mchLoweredLHSExpression.Value,
             mchLoweredRHSExpression.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto And::Emit(Emitter& t_emitter) const -> ExpressionEmitResult

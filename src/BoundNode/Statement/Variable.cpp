@@ -44,17 +44,16 @@ namespace Ace::BoundNode::Statement
             m_Symbol,
             mchConvertedAndCheckedOptAssignedExpression.Value
         );
-
         return CreateChanged(returnValue);
     }
 
-    auto Variable::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>>>
+    auto Variable::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>>
     {
-        ACE_TRY(mchLoweredOptAssignedExpression, TransformExpectedMaybeChangedOptional(m_OptAssignedExpression,
-        [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
+        const auto mchLoweredOptAssignedExpression = TransformMaybeChangedOptional(m_OptAssignedExpression,
+        [](const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
         {
             return t_expression->GetOrCreateLoweredExpression({});
-        }));
+        });
 
         if (!mchLoweredOptAssignedExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -63,8 +62,7 @@ namespace Ace::BoundNode::Statement
             m_Symbol,
             mchLoweredOptAssignedExpression.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
+        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
     }
 
     auto Variable::Emit(Emitter& t_emitter) const -> void

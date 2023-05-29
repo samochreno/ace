@@ -55,11 +55,10 @@ namespace Ace::BoundNode::Statement
             mchConvertedAndCheckedCondition.Value,
             mchCheckedBody.Value
         );
-
         return CreateChanged(returnValue);
     }
 
-    auto While::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>>
+    auto While::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
     {
         // From:
         // while condition {
@@ -117,7 +116,6 @@ namespace Ace::BoundNode::Statement
             m_Scope,
             statements
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
+        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
     }
 }

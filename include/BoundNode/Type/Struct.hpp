@@ -33,8 +33,8 @@ namespace Ace::BoundNode::Type
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Type::Struct>>> final;
         auto GetOrCreateTypeCheckedType(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Type::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Type::Struct>>> final;
-        auto GetOrCreateLoweredType(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Type::IBase>>> final { return GetOrCreateLowered(t_context); }
+        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Type::Struct>> final;
+        auto GetOrCreateLoweredType(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Type::IBase>> final { return GetOrCreateLowered(t_context); }
 
         auto GetSymbol() const -> Symbol::Type::Struct* final { return m_Symbol; }
 

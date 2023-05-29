@@ -46,14 +46,13 @@ namespace Ace::BoundNode::Statement::Assignment
             mchConvertedAndCheckedLHSExpression.Value,
             mchConvertedAndCheckedRHSExpression.Value
         );
-
         return CreateChanged(returnValue);
     }
 
-    auto Normal::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assignment::Normal>>>
+    auto Normal::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assignment::Normal>>
     {
-        ACE_TRY(mchLoweredRHSExpression, m_RHSExpression->GetOrCreateLoweredExpression({}));
-        ACE_TRY(mchLoweredLHSExpression, m_LHSExpression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredRHSExpression = m_RHSExpression->GetOrCreateLoweredExpression({});
+        const auto mchLoweredLHSExpression = m_LHSExpression->GetOrCreateLoweredExpression({});
 
         if (!mchLoweredLHSExpression.IsChanged && !mchLoweredRHSExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -62,8 +61,7 @@ namespace Ace::BoundNode::Statement::Assignment
             mchLoweredLHSExpression.Value,
             mchLoweredRHSExpression.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto Normal::Emit(Emitter& t_emitter) const -> void

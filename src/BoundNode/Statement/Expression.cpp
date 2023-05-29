@@ -28,13 +28,12 @@ namespace Ace::BoundNode::Statement
         const auto returnValue = std::make_shared<const BoundNode::Statement::Expression>(
             mchCheckedExpression.Value
         );
-
         return CreateChanged(returnValue);
     }
 
-    auto Expression::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Expression>>>
+    auto Expression::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Expression>>
     {
-        ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
 
         if (!mchLoweredExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -42,8 +41,7 @@ namespace Ace::BoundNode::Statement
         const auto returnValue = std::make_shared<const BoundNode::Statement::Expression>(
             mchLoweredExpression.Value
         );
-        
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
+        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
     }
 
     auto Expression::Emit(Emitter& t_emitter) const -> void

@@ -22,9 +22,9 @@ namespace Ace::BoundNode::Expression
         return children;
     }
 
-    auto DerefAs::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::DerefAs>>>
+    auto DerefAs::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::DerefAs>>
     {
-        ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
 
         if (!mchLoweredExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -33,8 +33,7 @@ namespace Ace::BoundNode::Expression
             m_Expression,
             m_TypeSymbol
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto DerefAs::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::DerefAs>>>
@@ -54,7 +53,6 @@ namespace Ace::BoundNode::Expression
             m_Expression,
             m_TypeSymbol
         );
-
         return CreateChanged(returnValue);
     }
 

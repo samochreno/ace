@@ -29,21 +29,23 @@ namespace Ace::BoundNode::Expression
         if (!mchCheckedExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
          
-        const auto returnValue = std::make_shared<const BoundNode::Expression::AddressOf>(m_Expression);
-
+        const auto returnValue = std::make_shared<const BoundNode::Expression::AddressOf>(
+            m_Expression
+        );
         return CreateChanged(returnValue);
     }
 
-    auto AddressOf::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::AddressOf>>>
+    auto AddressOf::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::AddressOf>>
     {
-        ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
 
         if (!mchLoweredExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
 
-        const auto returnValue = std::make_shared<const BoundNode::Expression::AddressOf>(mchLoweredExpression.Value);
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        const auto returnValue = std::make_shared<const BoundNode::Expression::AddressOf>(
+            mchLoweredExpression.Value
+        );
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto AddressOf::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
@@ -51,10 +53,17 @@ namespace Ace::BoundNode::Expression
         std::vector<ExpressionDropData> temporaries{};
 
         const auto expressionEmitResult = m_Expression->Emit(t_emitter);
-        temporaries.insert(end(temporaries), begin(expressionEmitResult.Temporaries), end(expressionEmitResult.Temporaries));
+        temporaries.insert(
+            end(temporaries),
+            begin(expressionEmitResult.Temporaries),
+            end  (expressionEmitResult.Temporaries)
+        );
 
         auto* const typeSymbol = m_Expression->GetTypeInfo().Symbol;
-        auto* const type = llvm::PointerType::get(t_emitter.GetIRType(typeSymbol), 0);
+        auto* const type = llvm::PointerType::get(
+            t_emitter.GetIRType(typeSymbol),
+            0
+        );
 
         auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(type);
         temporaries.emplace_back(

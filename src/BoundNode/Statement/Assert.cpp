@@ -46,9 +46,9 @@ namespace Ace::BoundNode::Statement
         return CreateChanged(returnValue);
     }
 
-    auto Assert::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>>
+    auto Assert::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
     {
-        ACE_TRY(mchLoweredCondition, m_Condition->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredCondition = m_Condition->GetOrCreateLoweredExpression({});
 
         const auto condition = std::make_shared<const BoundNode::Expression::LogicalNegation>(
             mchLoweredCondition.Value
@@ -70,7 +70,6 @@ namespace Ace::BoundNode::Statement
             std::vector<std::shared_ptr<const BoundNode::Expression::IBase>>{ condition },
             std::vector<std::shared_ptr<const BoundNode::Statement::Block>>{ bodyStatement }
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 }

@@ -56,7 +56,7 @@ namespace Ace::BoundNode
     public:
         virtual ~ILowerable() = default;
 
-        virtual auto GetOrCreateLowered(const TContext& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const TNode>>> = 0;
+        virtual auto GetOrCreateLowered(const TContext& t_context) const -> MaybeChanged<std::shared_ptr<const TNode>> = 0;
     };
 
     template<typename T>
@@ -80,12 +80,5 @@ namespace Ace::BoundNode
             auto children = t_node->GetChildren();
             t_vec.insert(end(t_vec), begin(children), end(children));
         });
-    }
-
-    template<typename T>
-    auto CreateChangedLoweredReturn(const Expected<MaybeChanged<std::shared_ptr<const T>>>& t_expMchLoweredNode) -> Expected<MaybeChanged<std::shared_ptr<const T>>>
-    {
-        ACE_TRY_ASSERT(t_expMchLoweredNode);
-        return CreateChanged(t_expMchLoweredNode.Unwrap().Value);
     }
 }

@@ -41,13 +41,12 @@ namespace Ace::BoundNode::Statement::Jump
             mchConvertedAndCheckedCondition.Value,
             m_LabelSymbol
         );
-        
         return CreateChanged(returnValue);
     }
 
-    auto Conditional::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Jump::Conditional>>>
+    auto Conditional::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Jump::Conditional>>
     {
-        ACE_TRY(mchLoweredCondition, m_Condition->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredCondition = m_Condition->GetOrCreateLoweredExpression({});
 
         if (!mchLoweredCondition.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -56,8 +55,7 @@ namespace Ace::BoundNode::Statement::Jump
             mchLoweredCondition.Value,
             m_LabelSymbol
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
+        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
     }
 
     auto Conditional::Emit(Emitter& t_emitter) const -> void

@@ -33,7 +33,7 @@ namespace Ace::BoundNode::Variable::Parameter
         auto GetScope() const -> std::shared_ptr<Scope> final { return m_Symbol->GetScope(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
         auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>>> final;
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>>> final;
+        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>> final;
 
         auto GetSymbol() const -> Symbol::Variable::Parameter::Normal* final { return m_Symbol; }
 

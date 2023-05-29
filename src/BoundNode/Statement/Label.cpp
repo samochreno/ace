@@ -19,7 +19,7 @@ namespace Ace::BoundNode::Statement
         return CreateUnchanged(shared_from_this());
     }
 
-    auto Label::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Label>>>
+    auto Label::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Label>>
     {
         return CreateUnchanged(shared_from_this());
     }

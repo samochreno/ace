@@ -23,7 +23,7 @@ namespace Ace::BoundNode::Expression
         virtual ~IBase() = default;
 
         virtual auto GetOrCreateTypeCheckedExpression(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> = 0;
-        virtual auto GetOrCreateLoweredExpression(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> = 0;
+        virtual auto GetOrCreateLoweredExpression(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>> = 0;
 
         virtual auto GetTypeInfo() const -> TypeInfo = 0;
     };

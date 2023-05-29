@@ -93,7 +93,7 @@ namespace Ace::Core
     ) -> std::shared_ptr<const IEmittable<void>>;
 
 #define TTypeChecked        std::remove_reference_t<decltype(t_getOrCreateTypeCheckedFunc(TBound{}).Unwrap().Value)>
-#define TLowered            std::remove_reference_t<decltype(t_getOrCreateLoweredFunc(TTypeChecked{}).Unwrap().Value)>
+#define TLowered            std::remove_reference_t<decltype(t_getOrCreateLoweredFunc(TTypeChecked{}).Value)>
 #define TLoweredTypeChecked std::remove_reference_t<decltype(t_getOrCreateLoweredTypeCheckedFunc(TLowered{}).Unwrap().Value)>
 
     template<
@@ -111,7 +111,7 @@ namespace Ace::Core
     ) -> Expected<TLoweredTypeChecked>
     {
         ACE_TRY(mchTypeCheckedAST, t_getOrCreateTypeCheckedFunc(t_boundAST));
-        ACE_TRY(mchLoweredAST, t_getOrCreateLoweredFunc(mchTypeCheckedAST.Value));
+        const auto mchLoweredAST = t_getOrCreateLoweredFunc(mchTypeCheckedAST.Value);
         ACE_TRY(mchLoweredTypeCheckedAST, t_getOrCreateLoweredTypeCheckedFunc(mchLoweredAST.Value));
 
         auto& finalAST = mchLoweredTypeCheckedAST.Value;
@@ -142,11 +142,11 @@ namespace Ace::Core
             return t_getOrCreateTypeCheckedFunc(t_ast);
         }));
 
-        ACE_TRY(mchLoweredASTs, TransformExpectedMaybeChangedVector(mchTypeCheckedASTs.Value,
+        const auto mchLoweredASTs = TransformMaybeChangedVector(mchTypeCheckedASTs.Value,
         [&](const TTypeChecked& t_ast)
         {
             return t_getOrCreateLoweredFunc(t_ast);
-        }));
+        });
 
         ACE_TRY(mchLoweredTypeCheckedASTs, TransformExpectedMaybeChangedVector(mchLoweredASTs.Value,
         [&](const TLoweredTypeChecked& t_ast)

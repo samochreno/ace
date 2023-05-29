@@ -30,22 +30,23 @@ namespace Ace::BoundNode::Expression
         if (!mchCheckedExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
 
-        const auto returnValue = std::make_shared<const BoundNode::Expression::Box>(mchCheckedExpression.Value);
-
+        const auto returnValue = std::make_shared<const BoundNode::Expression::Box>(
+            mchCheckedExpression.Value
+        );
         return CreateChanged(returnValue);
     }
 
-    auto Box::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>> 
+    auto Box::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>> 
     {
-        ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
 
-        ACE_TRY(symbol, Scope::ResolveOrInstantiateTemplateInstance(
+        const auto symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
             GetCompilation().Natives->StrongPointer__new.GetSymbol(),
             std::nullopt,
             { mchLoweredExpression.Value->GetTypeInfo().Symbol },
             {}
-        ));
+        ).Unwrap();
         
         auto* const functionSymbol = dynamic_cast<Symbol::Function*>(symbol);
         ACE_ASSERT(functionSymbol);
@@ -55,12 +56,15 @@ namespace Ace::BoundNode::Expression
             functionSymbol,
             std::vector{ mchLoweredExpression.Value }
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto Box::GetTypeInfo() const -> TypeInfo
     {
-        return { m_Expression->GetTypeInfo().Symbol->GetWithStrongPointer(), ValueKind::R };
+        return
+        { 
+            m_Expression->GetTypeInfo().Symbol->GetWithStrongPointer(),
+            ValueKind::R
+        };
     }
 }

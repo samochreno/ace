@@ -75,41 +75,40 @@ namespace Ace::BoundNode
             mchCheckedFunctions.Value,
             mchCheckedVariables.Value
         );
-
         return CreateChanged(returnValue);
     }
 
-    auto Module::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Module>>>
+    auto Module::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Module>>
     {
-        ACE_TRY(mchLoweredModules, TransformExpectedMaybeChangedVector(m_Modules,
+        const auto mchLoweredModules = TransformMaybeChangedVector(m_Modules,
         [](const std::shared_ptr<const BoundNode::Module>& t_module)
         {
             return t_module->GetOrCreateLowered({});
-        }));
+        });
 
-        ACE_TRY(mchLoweredTypes, TransformExpectedMaybeChangedVector(m_Types,
+        const auto mchLoweredTypes = TransformMaybeChangedVector(m_Types,
         [](const std::shared_ptr<const BoundNode::Type::IBase>& t_type)
         {
             return t_type->GetOrCreateLoweredType({});
-        }));
+        });
 
-        ACE_TRY(mchLoweredImpls, TransformExpectedMaybeChangedVector(m_Impls,
+        const auto mchLoweredImpls = TransformMaybeChangedVector(m_Impls,
         [](const std::shared_ptr<const BoundNode::Impl>& t_impl)
         {
             return t_impl->GetOrCreateLowered({});
-        }));
+        });
 
-        ACE_TRY(mchLoweredFunctions, TransformExpectedMaybeChangedVector(m_Functions,
+        const auto mchLoweredFunctions = TransformMaybeChangedVector(m_Functions,
         [](const std::shared_ptr<const BoundNode::Function>& t_function)
         {
             return t_function->GetOrCreateLowered({});
-        }));
+        });
 
-        ACE_TRY(mchLoweredVariables, TransformExpectedMaybeChangedVector(m_Variables,
+        const auto mchLoweredVariables = TransformMaybeChangedVector(m_Variables,
         [](const std::shared_ptr<const BoundNode::Variable::Normal::Static>& t_variable)
         {
             return t_variable->GetOrCreateLowered({});
-        }));
+        });
 
         if (
             !mchLoweredModules.IsChanged &&
@@ -128,7 +127,6 @@ namespace Ace::BoundNode
             mchLoweredFunctions.Value,
             mchLoweredVariables.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 }

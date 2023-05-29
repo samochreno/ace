@@ -47,19 +47,18 @@ namespace Ace::BoundNode::Expression::FunctionCall
             m_FunctionSymbol,
             mchConvertedAndCheckedArguments.Value
         );
-
         return CreateChanged(returnValue);
     }
 
-    auto Instance::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Instance>>>
+    auto Instance::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Instance>>
     {
-        ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
 
-        ACE_TRY(mchLoweredArguments, TransformExpectedMaybeChangedVector(m_Arguments,
+        const auto mchLoweredArguments = TransformMaybeChangedVector(m_Arguments,
         [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
         {
             return t_argument->GetOrCreateLoweredExpression({});
-        }));
+        });
 
         if (
             !mchLoweredExpression.IsChanged && 
@@ -72,8 +71,7 @@ namespace Ace::BoundNode::Expression::FunctionCall
             m_FunctionSymbol,
             mchLoweredArguments.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto Instance::Emit(Emitter& t_emitter) const -> ExpressionEmitResult

@@ -19,7 +19,7 @@ namespace Ace::BoundNode::Statement::Jump
         return CreateUnchanged(shared_from_this());
     }
 
-    auto Normal::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Jump::Normal>>>
+    auto Normal::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Jump::Normal>>
     {
         return CreateUnchanged(shared_from_this());
     }

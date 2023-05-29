@@ -38,14 +38,13 @@ namespace Ace::BoundNode::Expression::VariableReference
         const auto returnValue = std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
             mchCheckedExpression.Value,
             m_VariableSymbol
-            );
-        
+        );
         return CreateChanged(returnValue);
     }
 
-    auto Instance::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::VariableReference::Instance>>>
+    auto Instance::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::VariableReference::Instance>>
     {
-        ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
 
         if (!mchLoweredExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -54,8 +53,7 @@ namespace Ace::BoundNode::Expression::VariableReference
             mchLoweredExpression.Value,
             m_VariableSymbol
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto Instance::Emit(Emitter& t_emitter) const -> ExpressionEmitResult

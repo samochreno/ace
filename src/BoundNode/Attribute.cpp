@@ -24,20 +24,22 @@ namespace Ace::BoundNode
         if (!mchCheckedStructureConstructionExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
 
-        const auto returnValue = std::make_shared<const BoundNode::Attribute>(mchCheckedStructureConstructionExpression.Value);
-
+        const auto returnValue = std::make_shared<const BoundNode::Attribute>(
+            mchCheckedStructureConstructionExpression.Value
+        );
         return CreateChanged(returnValue);
     }
 
-    auto Attribute::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Attribute>>>
+    auto Attribute::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Attribute>>
     {
-        ACE_TRY(mchLowewredStructConstructionExpression, m_StructConstructionExpression->GetOrCreateLowered({}));
+        const auto mchLowewredStructConstructionExpression = m_StructConstructionExpression->GetOrCreateLowered({});
 
         if (!mchLowewredStructConstructionExpression.IsChanged)
             return CreateUnchanged(shared_from_this());
 
-        const auto returnValue = std::make_shared<const BoundNode::Attribute>(mchLowewredStructConstructionExpression.Value);
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        const auto returnValue = std::make_shared<const BoundNode::Attribute>(
+            mchLowewredStructConstructionExpression.Value
+        );
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 }

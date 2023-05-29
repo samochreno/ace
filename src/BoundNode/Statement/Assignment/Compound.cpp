@@ -60,7 +60,7 @@ namespace Ace::BoundNode::Statement::Assignment
         return CreateChanged(returnValue);
     }
 
-    auto Compound::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>>
+    auto Compound::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
     {
         std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
 
@@ -224,7 +224,6 @@ namespace Ace::BoundNode::Statement::Assignment
             GetScope(),
             statements
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 }

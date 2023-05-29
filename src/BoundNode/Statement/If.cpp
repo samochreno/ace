@@ -61,12 +61,11 @@ namespace Ace::BoundNode::Statement
             m_Scope,
             mchConvertedAndCheckedConditions.Value,
             mchCheckedBodies.Value
-            );
-
+        );
         return CreateChanged(returnValue);
     }
 
-    auto If::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>>
+    auto If::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
     {
         // From:
         // if condition_0 {
@@ -160,8 +159,7 @@ namespace Ace::BoundNode::Statement
         const auto returnValue = std::make_shared<const BoundNode::Statement::Group>(
             m_Scope,
             statements
-            );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered(t_context));
+        );
+        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
     }
 }

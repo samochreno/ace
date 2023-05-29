@@ -24,7 +24,7 @@ namespace Ace::BoundNode::Expression
         return CreateUnchanged(shared_from_this());
     }
 
-    auto Literal::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::Literal>>>
+    auto Literal::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::Literal>>
     {
         return CreateUnchanged(shared_from_this());
     }

@@ -31,22 +31,20 @@ namespace Ace::BoundNode::Expression
         const auto returnValue = std::make_shared<const BoundNode::Expression::UnaryUser>(
             mchCheckedExpression.Value,
             m_OperatorSymbol
-            );
-
+        );
         return CreateChanged(returnValue);
     }
 
-    auto UnaryUser::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>>
+    auto UnaryUser::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>
     {
-        ACE_TRY(mchLoweredExpression, m_Expression->GetOrCreateLoweredExpression({}));
+        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
             GetScope(),
             m_OperatorSymbol,
             std::vector{ mchLoweredExpression.Value }
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto UnaryUser::GetTypeInfo() const -> TypeInfo

@@ -23,7 +23,7 @@ namespace Ace::BoundNode::Expression
         return CreateUnchanged(shared_from_this());
     }
 
-    auto SizeOf::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::SizeOf>>>
+    auto SizeOf::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::SizeOf>>
     {
         return CreateUnchanged(shared_from_this());
     }

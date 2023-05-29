@@ -126,7 +126,11 @@ namespace Ace::Core
                 if (!t_functionNode->GetBody().has_value())
                     return false;
 
-                return t_functionNode->GetBody().value()->IsEndReachableWithoutReturn();
+                const auto result = t_functionNode->GetBody().value()->IsEndReachableWithoutReturn();
+                if (!result)
+                    return false;
+
+                return true;
             }
         ) == end(functionNodes);
         ACE_TRY_ASSERT(didControlFlowAnalysisSucceed);

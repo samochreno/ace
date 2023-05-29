@@ -33,18 +33,17 @@ namespace Ace::BoundNode
         const auto returnValue = std::make_shared<const BoundNode::Impl>(
             m_Scope,
             mchCheckedFunctions.Value
-            );
-
+        );
         return CreateChanged(returnValue);
     }
 
-    auto Impl::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Impl>>>
+    auto Impl::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Impl>>
     {
-        ACE_TRY(mchLoweredFunctions, TransformExpectedMaybeChangedVector(m_Functions,
+        const auto mchLoweredFunctions = TransformMaybeChangedVector(m_Functions,
         [](const std::shared_ptr<const BoundNode::Function>& t_function)
         {
             return t_function->GetOrCreateLowered({});
-        }));
+        });
 
         if (!mchLoweredFunctions.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -53,7 +52,6 @@ namespace Ace::BoundNode
             m_Scope,
             mchLoweredFunctions.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 }

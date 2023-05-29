@@ -46,23 +46,22 @@ namespace Ace::BoundNode::Expression
             m_Scope,
             m_StructSymbol,
             mchCheckedArguments.Value
-            );
-
+        );
         return CreateChanged(returnValue);
     }
 
-    auto StructConstruction::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::StructConstruction>>>
+    auto StructConstruction::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::StructConstruction>>
     {
-        ACE_TRY(mchLoweredArguments, TransformExpectedMaybeChangedVector(m_Arguments,
-        [&](const Argument& t_argument) -> Expected<MaybeChanged<Argument>>
+        const auto mchLoweredArguments = TransformMaybeChangedVector(m_Arguments,
+        [&](const Argument& t_argument) -> MaybeChanged<Argument>
         {
-            ACE_TRY(mchLoweredValue, t_argument.Value->GetOrCreateLoweredExpression({}));
+            const auto mchLoweredValue = t_argument.Value->GetOrCreateLoweredExpression({});
 
             if (!mchLoweredValue.IsChanged)
                 return CreateUnchanged(t_argument);
 
             return CreateChanged(Argument{ t_argument.Symbol, mchLoweredValue.Value });
-        }));
+        });
 
         if (!mchLoweredArguments.IsChanged)
             return CreateUnchanged(shared_from_this());
@@ -72,8 +71,7 @@ namespace Ace::BoundNode::Expression
             m_StructSymbol,
             mchLoweredArguments.Value
         );
-
-        return CreateChangedLoweredReturn(returnValue->GetOrCreateLowered({}));
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
     auto StructConstruction::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
