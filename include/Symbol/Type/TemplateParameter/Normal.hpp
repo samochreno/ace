@@ -57,4 +57,3 @@ namespace Ace::Symbol::Type::TemplateParameter
     };
 }
 
-

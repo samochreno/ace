@@ -42,4 +42,3 @@ namespace Ace::Symbol
         return false;
     }
 }
-

@@ -72,4 +72,3 @@ namespace Ace
         std::vector<TypeNameModifier> Modifiers;
     };
 }
-

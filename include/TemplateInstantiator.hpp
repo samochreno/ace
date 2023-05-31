@@ -51,4 +51,3 @@ namespace Ace
         std::map<Symbol::Template::IBase*, std::vector<std::shared_ptr<const Node::IBase>>> m_SymbolOnlyInstantiatedASTsMap;
     };
 }
-

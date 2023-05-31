@@ -20,4 +20,3 @@ namespace Ace::Symbol
         return types;
     }
 }
-

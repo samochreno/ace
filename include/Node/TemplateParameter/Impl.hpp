@@ -40,4 +40,3 @@ namespace Ace::Node::TemplateParameter
         std::string m_Name{};
     };
 }
-

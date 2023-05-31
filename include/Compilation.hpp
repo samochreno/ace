@@ -32,4 +32,3 @@ namespace Ace
         std::unique_ptr<llvm::LLVMContext> LLVMContext{};
     };
 }
-

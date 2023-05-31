@@ -14,4 +14,3 @@ namespace Ace::Symbol::Type::TemplateParameter
         return {};
     }
 }
-

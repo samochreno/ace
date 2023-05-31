@@ -55,4 +55,3 @@ namespace Ace::Symbol::Type::TemplateParameter
         std::string m_Name{};
     };
 }
-

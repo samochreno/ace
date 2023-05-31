@@ -41,4 +41,3 @@ namespace Ace::Node::Expression
         Token::Kind::Set m_Operator{};
     };
 }
-

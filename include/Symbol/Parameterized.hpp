@@ -15,4 +15,3 @@ namespace Ace::Symbol
         virtual auto CollectParameterTypes() const -> std::vector<Symbol::Type::IBase*> final;
     };
 }
-

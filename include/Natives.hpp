@@ -662,4 +662,3 @@ namespace Ace
         std::unordered_set<const NativeType*> m_SignedIntTypesSet{};
     };
 }
-

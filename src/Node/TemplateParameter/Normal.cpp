@@ -34,4 +34,3 @@ namespace Ace::Node::TemplateParameter
         };
     }
 }
-
