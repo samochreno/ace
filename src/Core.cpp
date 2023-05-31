@@ -22,6 +22,7 @@
 #include "Emitter.hpp"
 #include "Emittable.hpp"
 #include "Compilation.hpp"
+#include "ControlFlowAnalysis.hpp"
 
 namespace Ace::Core
 {
@@ -126,11 +127,12 @@ namespace Ace::Core
                 if (!t_functionNode->GetBody().has_value())
                     return false;
 
-                const auto result = t_functionNode->GetBody().value()->IsEndReachableWithoutReturn();
-                if (!result)
-                    return false;
+                ControlFlowAnalysis controlFlowAnalysis
+                {
+                    t_functionNode->GetBody().value()
+                };
 
-                return true;
+                return controlFlowAnalysis.IsEndReachableWithoutReturn();
             }
         ) == end(functionNodes);
         ACE_TRY_ASSERT(didControlFlowAnalysisSucceed);

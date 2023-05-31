@@ -3,7 +3,6 @@
 ## 💥 High Priority
 
 - [ ] Rename `found...It`
-- [ ] Refactor BoundNode::Statement::Block::IsEndReachableWithoutReturn()
 - [ ] Add error messages to make debugging easier
 - [ ] Add strong pointer self
 - Traits:

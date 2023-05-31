@@ -38,8 +38,6 @@ namespace Ace::BoundNode::Statement
 
         auto CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> final;
 
-        auto IsEndReachableWithoutReturn() const -> bool;
-
     private:
         std::shared_ptr<Scope> m_SelfScope{};
         std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> m_Statements{};
