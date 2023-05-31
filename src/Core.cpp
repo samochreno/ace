@@ -33,7 +33,6 @@ namespace Ace::Core
     {
         ACE_TRY(tokens, Scanning::Scanner::ScanTokens(
             t_compilation,
-            Scanning::Kind::Language,
             t_text
         ));
 

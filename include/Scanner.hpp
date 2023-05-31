@@ -10,29 +10,19 @@
 
 namespace Ace::Scanning
 {
-    enum class Kind
-    {
-        None,
-        Language,
-        Metadata,
-    };
-
     struct Context
     {
         Context(
             const Compilation& t_compilation,
-            const Scanning::Kind& t_scanningKind,
             const std::string::const_iterator t_iterator,
             const std::string::const_iterator t_iteratorEnd
         ) : Compilation{ t_compilation },
-            ScanningKind{ t_scanningKind },
             Iterator{ t_iterator },
             IteratorEnd{ t_iteratorEnd }
         {
         }
 
         const Compilation& Compilation;
-        Scanning::Kind ScanningKind{};
         const std::string::const_iterator Iterator{};
         const std::string::const_iterator IteratorEnd{};
     };
@@ -44,7 +34,6 @@ namespace Ace::Scanning
 
         static auto ScanTokens(
             const Compilation& t_compilation,
-            const Scanning::Kind& t_scanningKind,
             const std::string& t_string
         ) -> Expected<std::vector<Token>>;
 

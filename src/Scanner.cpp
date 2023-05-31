@@ -53,7 +53,6 @@ namespace Ace::Scanning
 
     auto Scanner::ScanTokens(
         const Compilation& t_compilation,
-        const Scanning::Kind& t_scanningKind,
         const std::string& t_string
     ) -> Expected<std::vector<Token>>
     {
@@ -66,7 +65,6 @@ namespace Ace::Scanning
         {
             ACE_TRY(newTokens, ScanToken({
                 t_compilation, 
-                t_scanningKind, 
                 it, 
                 itEnd 
             }));
@@ -575,12 +573,6 @@ namespace Ace::Scanning
     ) -> Expected<ParseData<std::vector<Token>>>
     {
         auto it = t_context.Iterator;
-
-        if (*it == '$')
-        {
-            ACE_TRY_ASSERT(t_context.ScanningKind == Scanning::Kind::Metadata);
-            ++it;
-        }
 
         for (; it != t_context.IteratorEnd; ++it)
         {
