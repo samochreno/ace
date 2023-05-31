@@ -38,18 +38,28 @@ namespace Ace
         const auto timeParsingStart = now();
         ACE_LOG_INFO("Parsing start");
 
-        ACE_TRY(asts, TransformExpectedVector(t_compilation.Package.FilePaths,
-        [&](const std::filesystem::path& t_filePath) -> Expected<std::shared_ptr<const Node::Module>>
+        ACE_TRY(fileContents, TransformExpectedVector(
+            t_compilation.Package.FilePaths,
+            [&](const std::filesystem::path& t_filePath) -> Expected<std::string>
+            {
+                const std::ifstream fileStream{ t_filePath };
+                ACE_TRY_ASSERT(fileStream.is_open());
+
+                std::stringstream stringStream{};
+                stringStream << fileStream.rdbuf();
+
+                const std::string fileContent = stringStream.str();
+                return fileContent;
+            }
+        ));
+
+        ACE_TRY(asts, TransformExpectedVector(fileContents,
+        [&](const std::string& t_fileContent)
         {
-            const std::ifstream fileStream{ t_filePath };
-            ACE_TRY_ASSERT(fileStream.is_open());
-
-            std::stringstream stringStream{};
-            stringStream << fileStream.rdbuf();
-
-            const std::string text = stringStream.str();
-
-            return Core::ParseAST(t_compilation, text);
+            return Core::ParseAST(
+                t_compilation,
+                t_fileContent
+            );
         }));
 
         const auto timeParsingEnd = now();
