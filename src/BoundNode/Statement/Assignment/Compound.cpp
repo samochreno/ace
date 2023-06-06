@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "BoundNode/Expression//Reference.hpp"
 #include "BoundNode/Expression//Dereference.hpp"

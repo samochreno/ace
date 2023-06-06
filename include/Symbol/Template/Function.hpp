@@ -12,7 +12,7 @@
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "SpecialIdentifier.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Name.hpp"
 
 namespace Ace::Symbol::Template

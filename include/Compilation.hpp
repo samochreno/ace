@@ -5,7 +5,7 @@
 #include <string>
 #include <filesystem>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Package.hpp"
 #include "Natives.hpp"
 #include "Scope.hpp"

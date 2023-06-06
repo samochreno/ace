@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Base.hpp"
 
 namespace Ace

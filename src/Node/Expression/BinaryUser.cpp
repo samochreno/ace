@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "BoundNode/Expression/BinaryUser.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Symbol/Function.hpp"

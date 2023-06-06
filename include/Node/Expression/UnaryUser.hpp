@@ -7,7 +7,7 @@
 #include "BoundNode/Expression/UnaryUser.hpp"
 #include "Token.hpp"
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace::Node::Expression
 {
@@ -19,7 +19,7 @@ namespace Ace::Node::Expression
     public:
         UnaryUser(
             const std::shared_ptr<const Node::Expression::IBase>& t_expression,
-            const Token::Kind::Set& t_operator
+            const TokenKind::Set& t_operator
         ) : m_Expression{ t_expression },
             m_Operator{ t_operator }
         {
@@ -35,6 +35,6 @@ namespace Ace::Node::Expression
             
     private:
         std::shared_ptr<const Node::Expression::IBase> m_Expression{};
-        Token::Kind::Set m_Operator{};
+        TokenKind::Set m_Operator{};
     };
 }

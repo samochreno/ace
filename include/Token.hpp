@@ -2,164 +2,158 @@
 
 #include <string>
 #include <bitset>
+#include <optional>
+
+#include "SourceLocation.hpp"
 
 namespace Ace
 {
-    struct Token
+    struct TokenKind
     {
-        struct Kind
+        TokenKind() = delete;
+
+        enum : uint8_t
         {
-            Kind() = delete;
+            None,
+            EndOfFile,
 
-            enum : uint8_t
-            {
-                End,
+            Colon,
+            ColonColon,
+            Semicolon,
+            Comma,
+            Exclamation,
+            Tilde,
+            Dot,
+            MinusGreaterThan,
 
-                Colon,
-                ColonColon,
-                Semicolon,
-                Comma,
-                Exclamation,
-                Tilde,
-                Dot,
-                MinusGreaterThan,
+            OpenParen,
+            CloseParen,
+            OpenBrace,
+            CloseBrace,
+            OpenBracket,
+            CloseBracket,
 
-                OpenParen,
-                CloseParen,
-                OpenBrace,
-                CloseBrace,
-                OpenBracket,
-                CloseBracket,
+            Identifier,
 
-                Identifier,
+            Int8,
+            Int16,
+            Int32,
+            Int64,
+            
+            UInt8,
+            UInt16,
+            UInt32,
+            UInt64,
+            
+            Int,
 
-                Int8,
-                Int16,
-                Int32,
-                Int64,
-                
-                UInt8,
-                UInt16,
-                UInt32,
-                UInt64,
-                
-                Int,
+            Float32,
+            Float64,
 
-                Float32,
-                Float64,
+            ErrorNumber,
 
-                String,
-                Bool,
+            String,
+            Bool,
 
-                Equals,
-                EqualsEquals,
-                ExclamationEquals,
-                Plus,
-                PlusEquals,
-                Minus,
-                MinusEquals,
-                Asterisk,
-                AsteriskEquals,
-                Slash,
-                SlashEquals,
-                Percent,
-                LessThan,
-                GreaterThan,
-                LessThanEquals,
-                GreaterThanEquals,
-                LessThanLessThan,
-                GreaterThanGreaterThan,
+            Equals,
+            EqualsEquals,
+            ExclamationEquals,
+            Plus,
+            PlusEquals,
+            Minus,
+            MinusEquals,
+            Asterisk,
+            AsteriskEquals,
+            Slash,
+            SlashEquals,
+            Percent,
+            LessThan,
+            GreaterThan,
+            LessThanEquals,
+            GreaterThanEquals,
+            LessThanLessThan,
+            GreaterThanGreaterThan,
 
-                Caret,
-                Ampersand,
-                VerticalBar,
-                AmpersandAmpersand,
-                VerticalBarVerticalBar,
-                PercentEquals,
-                LessThanLessThanEquals,
-                GreaterThanGreaterThanEquals,
-                AmpersandEquals,
-                CaretEquals,
-                VerticalBarEquals,
+            Caret,
+            Ampersand,
+            VerticalBar,
+            AmpersandAmpersand,
+            VerticalBarVerticalBar,
+            PercentEquals,
+            LessThanLessThanEquals,
+            GreaterThanGreaterThanEquals,
+            AmpersandEquals,
+            CaretEquals,
+            VerticalBarEquals,
 
-                IfKeyword,
-                ElseKeyword,
-                ElifKeyword,
-                WhileKeyword,
-                ReturnKeyword,
-                StructKeyword,
-                OperatorKeyword,
-                PublicKeyword,
-                ExternKeyword,
-                CastKeyword,
-                ExitKeyword,
-                AssertKeyword,
-                ModuleKeyword,
-                ImplKeyword,
-                ExplKeyword,
-                AddressOfKeyword,
-                SizeOfKeyword,
-                DerefAsKeyword,
-                BoxKeyword,
-                UnboxKeyword,
-                TrueKeyword,
-                FalseKeyword,
+            IfKeyword,
+            ElseKeyword,
+            ElifKeyword,
+            WhileKeyword,
+            ReturnKeyword,
+            StructKeyword,
+            OperatorKeyword,
+            PublicKeyword,
+            ExternKeyword,
+            CastKeyword,
+            ExitKeyword,
+            AssertKeyword,
+            ModuleKeyword,
+            ImplKeyword,
+            ExplKeyword,
+            AddressOfKeyword,
+            SizeOfKeyword,
+            DerefAsKeyword,
+            BoxKeyword,
+            UnboxKeyword,
+            TrueKeyword,
+            FalseKeyword,
 
-                Length,
-            };
-
-            using Set = std::bitset<static_cast<size_t>(Length)>;
-
-            static inline auto New() -> Set
-            {
-                return Set{};
-            }
-
-            static inline auto New(const uint8_t& t_kind) -> Set
-            {
-                return Set{}.set(t_kind);
-            }
+            Length,
         };
 
-        Token(const uint8_t& t_kind) = delete;
+        using Set = std::bitset<static_cast<size_t>(Length)>;
 
-        Token()
-            : Token{ {}, std::string{} }
+        static inline auto New() -> Set
         {
+            return Set{};
         }
 
+        static inline auto New(const uint8_t& t_kind) -> Set
+        {
+            return Set{}.set(t_kind);
+        }
+    };
+
+    struct Token
+    {
         Token(
-            const Token::Kind::Set& t_kind
-        ) : TokenKind{ t_kind },
+        ) : String{},
+            OptSourceLocation{},
+            Kind{}
+        {
+        }
+        Token(
+            const std::optional<SourceLocation>& t_optSourceLocation,
+            const TokenKind::Set& t_kind
+        ) : OptSourceLocation{ t_optSourceLocation },
+            Kind{ t_kind },
             String{}
+            
         {
         }
-
         Token(
-            const Token::Kind::Set& t_kind,
-            const std::string::const_iterator& t_begin,
-            const std::string::const_iterator& t_end
-        ) : TokenKind{ t_kind },
-            String{ t_begin, t_end }
-        {
-        }
-
-        Token(
+            const std::optional<SourceLocation>& t_optSourceLocation,
+            const TokenKind::Set& t_kind,
             const std::string& t_string
-        ) : TokenKind{ Token::Kind::New(Token::Kind::Identifier) },
+        ) : OptSourceLocation{ t_optSourceLocation },
+            Kind{ t_kind },
             String{ t_string }
         {
         }
 
-        Token(
-            const Token::Kind::Set& t_kind,
-            const std::string& t_string
-        ) : TokenKind{ t_kind },
-            String{ t_string }
-        {
-        }
-
-        Token::Kind::Set TokenKind{};
+        std::optional<SourceLocation> OptSourceLocation{};
+        TokenKind::Set Kind{};
         std::string String{};
     };
 }

@@ -1,17 +1,14 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <optional>
-#include <utility>
 #include <type_traits>
 #include <algorithm>
-#include <functional>
 
+#include "DiagnosticsBase.hpp"
 #include "Asserts.hpp"
 #include "MaybeChanged.hpp"
-
-#pragma warning(push)
-#pragma warning(disable: 26495) // Always initialize a member variable.
 
 #define ACE_MACRO_CONCAT_IMPL(t_x, t_y) t_x##t_y
 #define ACE_MACRO_CONCAT(t_x, t_y) ACE_MACRO_CONCAT_IMPL(t_x, t_y)
@@ -19,204 +16,205 @@
 #define ACE_TRY(t_resultVariableName, t_expExpression) \
 auto ACE_MACRO_CONCAT(_exp, t_resultVariableName) = (t_expExpression); \
 if (!ACE_MACRO_CONCAT(_exp, t_resultVariableName)) \
-    return {}; \
+    return ACE_MACRO_CONCAT(_exp, t_resultVariableName).GetError(); \
 auto t_resultVariableName = std::move(ACE_MACRO_CONCAT(_exp, t_resultVariableName).Unwrap())
 
 #define ACE_TRY_ASSERT(t_boolExpression) \
 if (!(t_boolExpression)) \
-    return {}
+    return std::make_shared<const NoneError>();
 
 #define ACE_TRY_UNREACHABLE() \
-return {}
+return std::make_shared<const NoneError>();
 
 #define ACE_TRY_VOID(t_expExpression) \
-ACE_TRY_ASSERT(t_expExpression)
+{ \
+    const auto expExpression = (t_expExpression); \
+    if (!expExpression) \
+    { \
+        return expExpression.GetError(); \
+    } \
+}
 
 namespace Ace
 {
-    class IError
+    class NoneError : public virtual IDiagnostic
     {
     public:
+        virtual ~NoneError() = default;
+
+        auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
     };
 
-    template<typename T>
+    template<typename TValue, typename TError = NoneError>
     class Expected;
 
     class ExpectedVoidType {};
     inline constexpr const ExpectedVoidType ExpectedVoid{};
 
-    template<>
-    class Expected<void>
+    template<typename TError>
+    class Expected<void, TError>
     {
+        static_assert(
+            std::is_base_of_v<IDiagnostic, TError>,
+            "TError must be derived from IDiagnostic"
+        );
+
     public:
         Expected()
-            : m_HasValue{ false }
         {
         }
-
         Expected(const Expected& t_other)
-            : m_HasValue{ t_other.m_HasValue }
+            : m_OptError{ t_other.m_OptError }
         {
         }
+        Expected(Expected&& t_other) noexcept
+            : m_OptError{ std::move(t_other.m_OptError) }
+        {
+        }
+        Expected(const ExpectedVoidType& t_value)
+        {
+        }
+        template<
+            typename TErrorNew,
+            typename = std::enable_if_t<std::is_base_of_v<TError, TErrorNew>>
+        >
+        Expected(const std::shared_ptr<const TErrorNew>& t_error)
+            : m_OptError{ t_error }
+        {
+        }
+        ~Expected() = default;
 
         auto operator=(const Expected& t_other) -> Expected&
         {
-            m_HasValue = t_other.m_HasValue;
+            m_OptError = t_other.m_OptError;
+
             return *this;
         }
-
-        Expected(Expected&& t_other) noexcept
-            : m_HasValue{ t_other.m_HasValue }
-        {
-            t_other.m_HasValue = false;
-        }
-
         auto operator=(Expected&& t_other) noexcept -> Expected&
         {
-            m_HasValue = t_other.m_HasValue;
-
-            t_other.m_HasValue = false;
+            m_OptError = std::move(t_other.m_OptError);
 
             return *this;
         }
 
-        Expected(const ExpectedVoidType& t_value)
-            : m_HasValue(true)
+        operator bool() const
         {
+            return !m_OptError.has_value();
         }
-
-        Expected(ExpectedVoidType&& t_value) noexcept
-            : m_HasValue(true)
-        {
-        }
-
-        ~Expected() = default;
 
         auto Unwrap() -> void
         {
-            if (m_HasValue)
+            if (!m_OptError.has_value())
                 return;
 
             ACE_UNREACHABLE();
         }
 
-        operator bool() const
+        auto GetError() const -> const std::shared_ptr<const TError>&
         {
-            return m_HasValue;
+            return m_OptError.value();
         }
 
     private:
-        bool m_HasValue;
+        std::optional<std::shared_ptr<const TError>> m_OptError{};
     };
 
-    template<typename T>
+    template<typename TValue, typename TError>
     class Expected
     {
+        static_assert(
+            std::is_base_of_v<IDiagnostic, TError>,
+            "TError must be derived from IDiagnostic"
+        );
+
     public:
         Expected()
-            : m_HasValue(false)
         {
         }
-
-        template<typename T_ = T, std::enable_if<std::is_copy_constructible_v<T>>* = nullptr>
         Expected(const Expected& t_other)
-            : m_HasValue{ t_other.m_HasValue }, m_Value{ t_other.m_Value }
+            : m_OptValue{ t_other.m_OptValue }, m_OptError{ t_other.m_OptError }
         {
         }
-
-        template<typename T_ = T, std::enable_if<std::is_copy_constructible_v<T>>* = nullptr>
-        auto operator=(const Expected& t_other) -> Expected&
-        {
-            m_HasValue = t_other.m_HasValue;
-            m_Value = t_other.m_Value;
-
-            return *this;
-        }
-
         Expected(Expected&& t_other) noexcept
-            : m_HasValue{ t_other.m_HasValue }, m_Value{ std::move(t_other.m_Value) }
-        {
-            t_other.m_HasValue = false;
-        }
-
-        Expected(const Expected& t_other) noexcept
-            : m_HasValue{ t_other.m_HasValue }, m_Value{ t_other.m_Value }
+            : m_OptValue{ std::move(t_other.m_OptValue) }, m_OptError{ std::move(t_other.m_OptError) }
         {
         }
-
-        auto operator=(Expected&& t_other) noexcept -> Expected&
-        {
-            m_HasValue = t_other.m_HasValue;
-
-            if (m_HasValue)
-            {
-                m_Value = std::move(t_other.m_Value);
-            }
-
-            t_other.m_HasValue = false;
-
-            return *this;
-        }
-
-        auto operator=(const Expected& t_other) noexcept -> Expected&
-        {
-            m_HasValue = t_other.m_HasValue;
-
-            if (m_HasValue)
-            {
-                m_Value = t_other.m_Value;
-            }
-
-            return *this;
-        }
-
-        template<typename T_ = T, std::enable_if<std::is_copy_constructible_v<T>>* = nullptr>
-        Expected(const T& t_value)
-            : m_HasValue(true), m_Value(t_value)
+        Expected(const TValue& t_value)
+            : m_OptValue{ t_value }
         {
         }
-
-        Expected(T&& t_value) noexcept
-            : m_HasValue(true), m_Value(std::move(t_value))
+        Expected(TValue&& t_value) noexcept
+            : m_OptValue{ std::move(t_value) }
         {
         }
-
+        template<typename TErrorNew, typename = std::enable_if_t<std::is_base_of_v<TError, TErrorNew>>>
+        Expected(const std::shared_ptr<const TErrorNew>& t_error)
+            : m_OptError{ t_error }
+        {
+        }
         ~Expected() = default;
 
-        auto Unwrap() -> T&
+        auto operator=(const Expected& t_other) -> Expected&
         {
-            ACE_ASSERT(m_HasValue);
-            return m_Value;
-        }
+            m_OptValue = t_other.m_OptValue;
+            m_OptError = t_other.m_OptError;
 
-        auto Unwrap() const -> const T&
+            return *this;
+        }
+        auto operator=(Expected&& t_other) noexcept -> Expected&
         {
-            ACE_ASSERT(m_HasValue);
-            return m_Value;
+            m_OptValue = std::move(t_other.m_OptValue);
+            m_OptError = std::move(t_other.m_OptError);
+
+            return *this;
         }
 
         operator bool() const
         {
-            return m_HasValue;
+            return m_OptValue.has_value();
         }
 
-        template<typename TNew>
-        operator Expected<TNew>() const
+        auto Unwrap() -> TValue&
         {
-            ACE_TRY_ASSERT(m_HasValue);
-            return Expected<TNew>(std::move(m_Value));
+            return m_OptValue.value();
+        }
+        auto Unwrap() const -> const TValue&
+        {
+            return m_OptValue.value();
+        }
+
+        auto GetError() const -> const std::shared_ptr<const TError>&
+        {
+            return m_OptError.value();
+        }
+
+        template<typename TValueNew, typename TErrorNew>
+        operator Expected<TValueNew, TErrorNew>() const
+        {
+            if (*this)
+            {
+                return Expected<TValueNew, TErrorNew>(m_OptValue.value());
+            }
+            else
+            {
+                return Expected<TValueNew, TErrorNew>(m_OptError.value());
+            }
         }
 
     private:
-        bool m_HasValue;
-        T m_Value;
+        std::optional<TValue> m_OptValue{};
+        std::optional<std::shared_ptr<const TError>> m_OptError{};
     };
 
 #define TIn typename std::decay_t<decltype(*TIt{})>
 #define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
 
     template<typename TIt, typename F>
-    auto TransformExpected(TIt t_begin, TIt t_end, F&& t_func) -> Expected<std::vector<TOut>>
+    auto TransformExpected(
+        TIt t_begin,
+        TIt t_end,
+        F&& t_func
+    ) -> Expected<std::vector<TOut>>
     {
         std::vector<TOut> vec{};
         vec.reserve(std::distance(t_begin, t_end));
@@ -237,8 +235,7 @@ namespace Ace
                 vec.push_back(expOut.Unwrap());
             }
 
-        return true;
-
+            return true;
         }) == t_end);
 
         return vec;
@@ -249,7 +246,10 @@ namespace Ace
 #define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
 
     template<typename TIn, typename F>
-    auto TransformExpectedVector(const std::vector<TIn>& t_inVec, F&& t_func) -> std::enable_if_t<!std::is_same_v<TOut, void>, Expected<std::vector<TOut>>>
+    auto TransformExpectedVector(
+        const std::vector<TIn>& t_inVec,
+        F&& t_func
+    ) -> std::enable_if_t<!std::is_same_v<TOut, void>, Expected<std::vector<TOut>>>
     {
         std::vector<TOut> outVec{};
         outVec.reserve(t_inVec.size());
@@ -281,7 +281,10 @@ namespace Ace
 #define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
 
     template<typename TIn, typename F>
-    auto TransformExpectedVector(const std::vector<TIn>& t_inVec, F&& t_func) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
+    auto TransformExpectedVector(
+        const std::vector<TIn>& t_inVec,
+        F&& t_func
+    ) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
     {
         ACE_TRY_ASSERT(std::find_if_not(begin(t_inVec), end(t_inVec),
         [&](const TIn& t_element)
@@ -296,7 +299,10 @@ namespace Ace
 #define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
 
     template<typename TIn, typename F>
-    auto TransformExpectedOptional(const std::optional<TIn>& t_optIn, F&& t_func) -> Expected<std::optional<TOut>>
+    auto TransformExpectedOptional(
+        const std::optional<TIn>& t_optIn,
+        F&& t_func
+    ) -> Expected<std::optional<TOut>>
     {
         if (!t_optIn.has_value())
             return std::optional<TOut>{};
@@ -309,7 +315,10 @@ namespace Ace
 #define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap().Value)>
 
     template<typename TIn, typename F>
-    auto TransformExpectedMaybeChangedVector(const std::vector<TIn>& t_inVec, F&& t_func) -> Expected<MaybeChanged<std::vector<TOut>>>
+    auto TransformExpectedMaybeChangedVector(
+        const std::vector<TIn>& t_inVec,
+        F&& t_func
+    ) -> Expected<MaybeChanged<std::vector<TOut>>>
     {
         bool isChanged = false;
         std::vector<TOut> outVec{};
@@ -350,7 +359,10 @@ namespace Ace
 #define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap().Value)>
 
     template<typename TIn, typename F>
-    auto TransformExpectedMaybeChangedOptional(const std::optional<TIn>& t_optIn, F&& t_func) -> Expected<MaybeChanged<std::optional<TOut>>>
+    auto TransformExpectedMaybeChangedOptional(
+        const std::optional<TIn>& t_optIn,
+        F&& t_func
+    ) -> Expected<MaybeChanged<std::optional<TOut>>>
     {
         bool isChanged = false;
 
@@ -367,4 +379,3 @@ namespace Ace
 
 #undef TOut
 }
-#pragma warning(pop)

@@ -5,7 +5,7 @@
 #include "BoundNode/Base.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "Emittable.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace::BoundNode::Statement

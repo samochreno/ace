@@ -3,7 +3,7 @@
 #include <memory>
 #include <map>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace::Node
 {

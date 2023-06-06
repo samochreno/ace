@@ -4,7 +4,7 @@
 #include <string>
 
 #include "Asserts.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Type/TemplateParameter/Impl.hpp"
 #include "Symbol/Type/TemplateParameter/Normal.hpp"

@@ -9,7 +9,7 @@
 #include "Symbol/Variable/Normal/Instance.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Emittable.hpp"
 
 namespace Ace::Symbol::Type

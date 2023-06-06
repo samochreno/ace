@@ -8,7 +8,7 @@
 #include "BoundNode/Variable/Parameter/Self.hpp"
 #include "BoundNode/Variable/Parameter/Normal.hpp"
 #include "BoundNode/Statement/Block.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace::BoundNode
@@ -97,9 +97,6 @@ namespace Ace::BoundNode
         {
             return t_parameter->GetOrCreateLowered({});
         });
-
-        if (m_Symbol->GetName() == "control_flow_analysis_1")
-            [](){}();
 
         const auto mchLoweredOptBody = TransformMaybeChangedOptional(m_OptBody,
         [](const std::shared_ptr<const BoundNode::Statement::Block>& t_body)

@@ -5,7 +5,7 @@
 
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "Asserts.hpp"

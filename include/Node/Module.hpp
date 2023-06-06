@@ -16,7 +16,7 @@
 #include "Symbol/Base.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace::Node
 {

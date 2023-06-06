@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <vector>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace
 {

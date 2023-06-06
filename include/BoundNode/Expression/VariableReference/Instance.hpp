@@ -6,7 +6,7 @@
 #include "BoundNode/Expression/Base.hpp"
 #include "Symbol/Variable/Normal/Instance.hpp"
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "ExpressionEmitResult.hpp"
 #include "TypeInfo.hpp"

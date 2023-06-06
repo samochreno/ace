@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "BoundNode/Statement/Assert.hpp"
 
 namespace Ace::Node::Statement

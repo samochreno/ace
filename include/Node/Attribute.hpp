@@ -7,7 +7,7 @@
 #include "Node/Expression/StructConstruction.hpp"
 #include "BoundNode/Attribute.hpp"
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace::Node
 {

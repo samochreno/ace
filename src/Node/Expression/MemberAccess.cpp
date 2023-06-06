@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNode/Expression/VariableReference/Instance.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Variable/Normal/Instance.hpp"
 #include "Symbol/Type/Base.hpp"
 

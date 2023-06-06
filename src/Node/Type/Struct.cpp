@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNode/Type/Struct.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Type/Struct.hpp"
 #include "Symbol/Base.hpp"
 

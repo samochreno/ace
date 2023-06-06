@@ -9,7 +9,7 @@
 #include "BoundNode/Statement/Block.hpp"
 #include "BoundNode/Statement/Exit.hpp"
 #include "BoundNode/Expression//LogicalNegation.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"

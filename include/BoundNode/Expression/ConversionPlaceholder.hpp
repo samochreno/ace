@@ -7,7 +7,7 @@
 #include "TypeInfo.hpp"
 #include "Scope.hpp"
 #include "Asserts.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "ExpressionEmitResult.hpp"
 

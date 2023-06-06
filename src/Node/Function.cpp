@@ -12,7 +12,7 @@
 #include "Node/Variable/Parameter/Self.hpp"
 #include "Node/Variable/Parameter/Normal.hpp"
 #include "Node/Statement/Block.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "BoundNode/Function.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Function.hpp"

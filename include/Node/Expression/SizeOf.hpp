@@ -7,7 +7,7 @@
 #include "BoundNode/Expression/SizeOf.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace::Node::Expression
 {

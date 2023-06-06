@@ -5,7 +5,7 @@
 #include <iterator>
 
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Node/Expression/Base.hpp"
 #include "Node/Expression/LiteralSymbol.hpp"
 #include "Node/Expression/MemberAccess.hpp"

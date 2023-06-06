@@ -7,7 +7,7 @@
 #include "Node/Function.hpp"
 #include "Node/Template/Function.hpp"
 #include "BoundNode/Impl.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Base.hpp"
 #include "Symbol/TemplatedImpl.hpp"
 #include "Symbol/Type/Base.hpp"

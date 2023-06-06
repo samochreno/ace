@@ -5,7 +5,7 @@
 #include "Node/Base.hpp"
 #include "BoundNode/Expression/Base.hpp"
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace::Node::Expression
 {

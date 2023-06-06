@@ -16,7 +16,7 @@
 #include "BoundNode/Statement/Variable.hpp"
 #include "Symbol/Label.hpp"
 #include "Symbol/Variable/Local.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 

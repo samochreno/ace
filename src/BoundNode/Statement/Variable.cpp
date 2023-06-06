@@ -7,7 +7,7 @@
 #include "BoundNode/Expression/Base.hpp"
 #include "BoundNode/Expression/VariableReference/Static.hpp"
 #include "BoundNode/Statement/Assignment/Normal.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"

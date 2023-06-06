@@ -6,7 +6,7 @@
 #include "BoundNode/Expression/FunctionCall/Static.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Asserts.hpp"
 

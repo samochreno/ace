@@ -10,7 +10,7 @@
 #include "BoundNode/Variable/Parameter/Normal.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Base.hpp"
 
 namespace Ace::Node::Variable::Parameter

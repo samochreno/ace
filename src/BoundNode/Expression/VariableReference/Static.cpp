@@ -11,7 +11,7 @@
 #include "Symbol/Function.hpp"
 #include "Symbol/Variable/Base.hpp"
 #include "Asserts.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExpressionEmitResult.hpp"

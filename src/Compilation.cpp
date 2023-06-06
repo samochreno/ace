@@ -15,7 +15,7 @@
 
 #pragma warning(pop)
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Package.hpp"
 #include "Natives.hpp"
 #include "Scope.hpp"
@@ -148,7 +148,7 @@ namespace Ace
             }
 
             const auto& optOutputPath = foundOutputPathArgumentIt->second;
-            ACE_TRY_ASSERT(optOutputPath.has_value());
+            ACE_ASSERT(optOutputPath.has_value());
             return optOutputPath.value();
         }();
 

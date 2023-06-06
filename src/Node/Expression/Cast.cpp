@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "BoundNode/Expression/Base.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "TypeInfo.hpp"

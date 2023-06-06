@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Type/Base.hpp"
 
 namespace Ace::Node::Expression

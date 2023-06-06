@@ -7,7 +7,7 @@
 
 #include "Token.hpp"
 #include "Node/All.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "ParseData.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Scope.hpp"
@@ -43,7 +43,10 @@ namespace Ace::Parsing
 
         static auto CreateEmptyAttributes() -> std::vector<std::shared_ptr<const Node::Attribute>>;
 
-        static auto GetOperatorFunctionName(const Token& t_operatorToken, const size_t& t_parameters) -> Expected<const char*>;
+        static auto GetOperatorFunctionName(
+            const Token& t_operatorToken,
+            const size_t& t_parameters
+        ) -> Expected<const char*>;
 
         static auto ParseName(Context t_context) -> Expected<ParseData<std::string>>;
         static auto ParseNestedName(Context t_context) -> Expected<ParseData<std::vector<std::string>>>;

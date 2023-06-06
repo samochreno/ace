@@ -22,16 +22,16 @@ namespace Ace
         return vec;
     }
 
-    inline auto IsInAlphabet(const char& t_char) -> bool
+    inline auto IsInAlphabet(const char& t_character) -> bool
     {
         return
-            ((t_char >= 'a') && (t_char <= 'z')) ||
-            ((t_char >= 'A') && (t_char <= 'Z'));
+            ((t_character >= 'a') && (t_character <= 'z')) ||
+            ((t_character >= 'A') && (t_character <= 'Z'));
     }
 
-    inline auto IsNumber(const char& t_char) -> bool
+    inline auto IsNumber(const char& t_character) -> bool
     {
-        return (t_char >= '0') && (t_char <= '9');
+        return (t_character >= '0') && (t_character <= '9');
     }
 
     inline auto TrimRight(std::string& t_value) -> std::string&

@@ -8,7 +8,7 @@
 #include "Emittable.hpp"
 #include "ExpressionEmitResult.hpp"
 #include "TypeInfo.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Scope.hpp"
 #include "Symbol/Type/Base.hpp"

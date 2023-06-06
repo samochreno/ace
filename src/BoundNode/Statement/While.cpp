@@ -12,7 +12,7 @@
 #include "Scope.hpp"
 #include "Symbol/Label.hpp"
 #include "SpecialIdentifier.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"

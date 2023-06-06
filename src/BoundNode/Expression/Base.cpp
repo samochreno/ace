@@ -10,7 +10,7 @@
 #include "BoundNode/Expression//Reference.hpp"
 #include "BoundNode/Expression//Dereference.hpp"
 #include "TypeInfo.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace::BoundNode::Expression

@@ -7,7 +7,7 @@
 #include "Node/Statement/Base.hpp"
 #include "BoundNode/Statement/Label.hpp"
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Base.hpp"
 
 namespace Ace::Node::Statement

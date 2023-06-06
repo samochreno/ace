@@ -10,7 +10,7 @@
 #include "Symbol/Template/Type.hpp"
 #include "Scope.hpp"
 #include "Asserts.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Utility.hpp"
 
 namespace Ace::Symbol::Type

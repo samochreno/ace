@@ -10,7 +10,7 @@
 #include "BoundNode/Variable/Normal/Static.hpp"
 #include "Name.hpp"
 #include "AccessModifier.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Scope.hpp"
 #include "Symbol/Base.hpp"
 

@@ -5,7 +5,7 @@
 #include <string>
 #include <functional>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Node/Base.hpp"
 #include "Node/Module.hpp"
@@ -16,7 +16,7 @@
 #include "Symbol/Function.hpp"
 #include "Log.hpp"
 #include "Utility.hpp"
-#include "Scanner.hpp"
+#include "Lexer.hpp"
 #include "Parser.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Emitter.hpp"
@@ -28,20 +28,35 @@ namespace Ace::Core
 {
     auto ParseAST(
         const Compilation& t_compilation,
-        const std::string& t_text
-    ) -> Expected<std::shared_ptr<const Node::Module>>
+        const size_t& t_fileIndex,
+        const std::vector<std::string>& t_lines
+    ) -> Diagnosed<std::shared_ptr<const Node::Module>, IDiagnostic>
     {
-        ACE_TRY(tokens, Scanning::Scanner::ScanTokens(
-            t_compilation,
-            t_text
-        ));
+        std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
 
-        ACE_TRY(ast, Parsing::Parser::ParseAST(
+        Lexer lexer
+        {
             t_compilation,
-            std::move(tokens)
-        ));
+            t_fileIndex,
+            t_lines,
+        };
+        auto dgnTokens = lexer.EatTokens();
+        diagnostics.insert(
+            end(diagnostics),
+            begin(dgnTokens.GetDiagnostics()),
+            end  (dgnTokens.GetDiagnostics())
+        );
 
-        return ast;
+        const auto ast = Parsing::Parser::ParseAST(
+            t_compilation,
+            std::move(dgnTokens.Unwrap())
+        ).Unwrap();
+
+        return Diagnosed
+        {
+            ast,
+            diagnostics,
+        };
     }
 
     auto CreateAndDefineSymbols(

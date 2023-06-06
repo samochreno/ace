@@ -7,7 +7,7 @@
 #include "BoundNode/Expression/FunctionCall/Static.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Asserts.hpp"
 

@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <type_traits>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Node/Base.hpp"
 #include "Node/Module.hpp"
@@ -56,8 +56,9 @@ namespace Ace::Core
 
     auto ParseAST(
         const Compilation& t_compilation,
-        const std::string& t_text
-    ) -> Expected<std::shared_ptr<const Node::Module>>;
+        const size_t& t_fileIndex,
+        const std::vector<std::string>& t_lines
+    ) -> Diagnosed<std::shared_ptr<const Node::Module>, IDiagnostic>;
     auto CreateAndDefineSymbols(
         const Compilation& t_compilation,
         const std::vector<const Node::IBase*>& t_nodes

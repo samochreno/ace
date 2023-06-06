@@ -7,10 +7,10 @@
 #include <unordered_set>
 
 #include "LLVM.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Token.hpp"
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "TypeSizeKind.hpp"
 
 namespace Ace::Symbol

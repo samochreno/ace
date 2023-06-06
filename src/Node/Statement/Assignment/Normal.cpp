@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "BoundNode/Statement/Assignment/Normal.hpp"
 
 namespace Ace::Node::Statement::Assignment

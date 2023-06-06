@@ -8,7 +8,7 @@
 #include "BoundNode/Attribute.hpp"
 #include "Symbol/Variable/Normal/Instance.hpp"
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace::BoundNode::Variable::Normal

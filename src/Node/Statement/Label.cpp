@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "BoundNode/Statement/Label.hpp"
 #include "Symbol/Label.hpp"
 #include "Symbol/Base.hpp"

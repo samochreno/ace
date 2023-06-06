@@ -4,7 +4,7 @@
 #include <optional>
 #include <algorithm>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Function.hpp"
 #include "Symbol/Template/Type.hpp"
@@ -13,7 +13,7 @@
 #include "Scope.hpp"
 #include "Emitter.hpp"
 #include "SpecialIdentifier.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace
 {

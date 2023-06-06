@@ -12,7 +12,7 @@
 #include "Node/Function.hpp"
 #include "Node/Template/Function.hpp"
 #include "Node/Variable/Normal/Static.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "BoundNode/Module.hpp"
 #include "Symbol/Base.hpp"
 #include "Symbol/Module.hpp"

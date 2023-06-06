@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "BoundNode/Expression//AddressOf.hpp"
 
 namespace Ace::Node::Expression

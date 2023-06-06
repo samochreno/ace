@@ -12,7 +12,7 @@
 #include <map>
 
 #include "Asserts.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Symbol/All.hpp"
 #include "SymbolCreatable.hpp"
@@ -778,7 +778,9 @@ namespace Ace
     ) -> std::optional<Symbol::IBase*>
     {
         const auto foundIt = m_SymbolMap.find(t_name);
-        ACE_TRY_ASSERT(foundIt != end(m_SymbolMap));
+
+        if (foundIt == end(m_SymbolMap))
+            return std::nullopt;
 
         const bool isTemplateInstance = 
             !t_templateArguments.empty() || 

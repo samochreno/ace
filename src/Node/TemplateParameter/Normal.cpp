@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Base.hpp"
 #include "Symbol/Type/TemplateParameter/Normal.hpp"
 

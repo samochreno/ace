@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Base.hpp"
 #include "Symbol/Template/Function.hpp"
 #include "Node/TemplateParameter/Impl.hpp"

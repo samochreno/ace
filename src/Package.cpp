@@ -8,8 +8,7 @@
 #include <iterator>
 #include <nlohmann/json.hpp>
 
-#include "Error.hpp"
-#include "Scanner.hpp"
+#include "Diagnostics.hpp"
 #include "Utility.hpp"
 
 namespace Ace

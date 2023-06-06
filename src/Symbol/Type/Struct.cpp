@@ -3,7 +3,7 @@
 #include <optional>
 
 #include "Symbol/Function.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Emittable.hpp"
 #include "Core.hpp"
 

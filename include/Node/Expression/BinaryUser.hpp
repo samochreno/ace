@@ -7,7 +7,7 @@
 #include "BoundNode/Expression/BinaryUser.hpp"
 #include "Scope.hpp"
 #include "Token.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace::Node::Expression
 {
@@ -20,7 +20,7 @@ namespace Ace::Node::Expression
         BinaryUser(
             const std::shared_ptr<const Node::Expression::IBase>& t_lhsExpression,
             const std::shared_ptr<const Node::Expression::IBase>& t_rhsExpression,
-            const Token::Kind::Set& t_operator
+            const TokenKind::Set& t_operator
         ) : m_LHSExpression{ t_lhsExpression },
             m_RHSExpression{ t_rhsExpression },
             m_Operator{ t_operator }
@@ -38,6 +38,6 @@ namespace Ace::Node::Expression
     private:
         std::shared_ptr<const Node::Expression::IBase> m_LHSExpression{};
         std::shared_ptr<const Node::Expression::IBase> m_RHSExpression{};
-        Token::Kind::Set m_Operator{};
+        TokenKind::Set m_Operator{};
     };
 }

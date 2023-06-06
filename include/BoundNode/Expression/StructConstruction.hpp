@@ -8,7 +8,7 @@
 #include "Symbol/Variable/Normal/Instance.hpp"
 #include "Symbol/Type/Struct.hpp"
 #include "TypeInfo.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "ExpressionEmitResult.hpp"
 

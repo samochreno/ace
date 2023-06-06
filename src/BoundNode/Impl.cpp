@@ -5,7 +5,7 @@
 
 #include "BoundNode/Function.hpp"
 #include "BoundNode/Variable/Normal/Static.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace::BoundNode

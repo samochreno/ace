@@ -5,7 +5,7 @@
 
 #include "SpecialIdentifier.hpp"
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "BoundNode/Expression/UnaryUser.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Symbol/Function.hpp"

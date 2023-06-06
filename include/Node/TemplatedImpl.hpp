@@ -10,7 +10,7 @@
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Symbol/Base.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace::Node
 {

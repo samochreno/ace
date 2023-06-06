@@ -6,7 +6,7 @@
 #include "BoundNode/Statement/Jump/Base.hpp"
 #include "Scope.hpp"
 #include "Symbol/Label.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace::BoundNode::Statement::Jump

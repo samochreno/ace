@@ -8,7 +8,7 @@
 #include "BoundNode/Statement/Block.hpp"
 #include "BoundNode/Expression/Base.hpp"
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Asserts.hpp"
 

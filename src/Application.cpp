@@ -5,14 +5,14 @@
 #include <string>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
 #include <chrono>
+#include <ranges>
 #include <fmt/format.h>
 #include <llvm/Support/TargetSelect.h>
 
 #include "Log.hpp"
 #include "Core.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "Node/All.hpp"
@@ -22,8 +22,10 @@
 
 namespace Ace
 {
-    static auto Compile(const Compilation& t_compilation) -> Expected<void>
+    static auto Compile(const Compilation& t_compilation) -> Expected<Diagnosed<void, IDiagnostic>>
     {
+        std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
+
         const auto& packageName = t_compilation.Package.Name;
         auto* const globalScope = t_compilation.GlobalScope.get();
 
@@ -38,29 +40,40 @@ namespace Ace
         const auto timeParsingStart = now();
         ACE_LOG_INFO("Parsing start");
 
-        ACE_TRY(fileContents, TransformExpectedVector(
+        ACE_TRY(filesLines, TransformExpectedVector(
             t_compilation.Package.FilePaths,
-            [&](const std::filesystem::path& t_filePath) -> Expected<std::string>
+            [&](const std::filesystem::path& t_filePath) -> Expected<std::vector<std::string>>
             {
-                const std::ifstream fileStream{ t_filePath };
+                std::ifstream fileStream{ t_filePath };
                 ACE_TRY_ASSERT(fileStream.is_open());
 
-                std::stringstream stringStream{};
-                stringStream << fileStream.rdbuf();
+                std::vector<std::string> lines{};
+                std::string line{};
+                while (std::getline(fileStream, line))
+                {
+                    lines.push_back(line);
+                }
 
-                const std::string fileContent = stringStream.str();
-                return fileContent;
+                return lines;
             }
         ));
 
-        ACE_TRY(asts, TransformExpectedVector(fileContents,
-        [&](const std::string& t_fileContent)
+        std::vector<std::shared_ptr<const Node::Module>> asts{};
+        for (size_t fileIndex = 0; fileIndex < filesLines.size(); fileIndex++)
         {
-            return Core::ParseAST(
+            const auto dgnAST = Core::ParseAST(
                 t_compilation,
-                t_fileContent
+                fileIndex,
+                filesLines.at(fileIndex)
             );
-        }));
+            diagnostics.insert(
+                end(diagnostics),
+                begin(dgnAST.GetDiagnostics()),
+                end  (dgnAST.GetDiagnostics())
+            );
+
+            asts.push_back(dgnAST.Unwrap());
+        }
 
         const auto timeParsingEnd = now();
         ACE_LOG_INFO("Parsing success");
@@ -150,8 +163,8 @@ namespace Ace
 
         const auto getFormattedDuration = [](std::chrono::nanoseconds t_duration)
         {
-            const auto minutes = std::chrono::duration_cast<std::chrono::minutes>(t_duration);
-            const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(t_duration -= minutes);
+            const auto minutes     = std::chrono::duration_cast<std::chrono::minutes>     (t_duration);
+            const auto seconds     = std::chrono::duration_cast<std::chrono::seconds>     (t_duration -= minutes);
             const auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(t_duration -= seconds);
 
             std::string value{};
@@ -176,7 +189,7 @@ namespace Ace
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.LLC)                                       << " - Backend | llc");
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.Clang)                                     << " - Backend | clang");
 
-        return ExpectedVoid;
+        return Diagnosed<void, IDiagnostic>{ diagnostics };
     }
 
     static auto Compile(

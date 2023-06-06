@@ -5,7 +5,7 @@
 
 #include "BoundNode/Expression/Base.hpp"
 #include "BoundNode/Expression//Reference.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExpressionEmitResult.hpp"

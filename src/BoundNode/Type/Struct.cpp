@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "BoundNode/Attribute.hpp"
 #include "BoundNode/Variable/Normal/Instance.hpp"

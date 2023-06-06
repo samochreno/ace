@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Node/Attribute.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "BoundNode/Variable/Normal/Instance.hpp"
 #include "Symbol/Variable/Normal/Instance.hpp"
 #include "Symbol/Type/Base.hpp"

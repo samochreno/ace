@@ -6,7 +6,7 @@
 #include "Scope.hpp"
 #include "Node/Expression/Base.hpp"
 #include "BoundNode/Statement/Variable.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Symbol/Variable/Local.hpp"
 
 namespace Ace::Node::Statement

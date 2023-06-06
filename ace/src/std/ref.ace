@@ -8,12 +8,4 @@ std: module -> pub {
             ret __deref_as[Pointer](__address_of(self));
         }
     }
-
-    #: 
-    impl Pointer {
-        operator impl[T](reference: Reference[T]): Pointer -> pub {
-            ret Reference::[T]::ptr(reference);
-        }
-    }
-    :#
 }

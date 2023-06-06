@@ -9,7 +9,7 @@
 #include "Compilation.hpp"
 #include "Scope.hpp"
 #include "SymbolCreatable.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Asserts.hpp"
 
 namespace Ace::Node

@@ -9,7 +9,7 @@
 #include "Node/Statement/Block.hpp"
 #include "BoundNode/Statement/If.hpp"
 #include "Scope.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace::Node::Statement
 {

@@ -10,7 +10,7 @@
 #include "Symbol/Variable/Normal/Instance.hpp"
 #include "Symbol/Function.hpp"
 #include "Asserts.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExpressionEmitResult.hpp"

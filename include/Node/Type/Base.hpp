@@ -5,7 +5,7 @@
 
 #include "Node/Base.hpp"
 #include "BoundNode/Type/Base.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 

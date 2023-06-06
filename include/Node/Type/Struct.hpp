@@ -8,7 +8,7 @@
 #include "Node/Attribute.hpp"
 #include "Node/Variable/Normal/Instance.hpp"
 #include "BoundNode/Type/Struct.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "Symbol/Base.hpp"

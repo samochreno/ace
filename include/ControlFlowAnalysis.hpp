@@ -2,7 +2,7 @@
 
 #include "BoundNode/Statement/Block.hpp"
 #include "Symbol/Label.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace
 {

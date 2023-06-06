@@ -81,7 +81,7 @@ test_4(): int {
     ret i;
 }
 
-fizz_buzz(n: int): int { # FizzBuzz -> Fizz = 8888, Buzz = 1111, FizzBuzz = 88881111.
+fizz_buzz(n: int): int {
     i: int = 1;
     while i <= n {
         is_divisable_by_three: bool = i % 3 == 0;

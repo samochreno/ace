@@ -10,7 +10,7 @@
 #include "BoundNode/Variable/Normal/Static.hpp"
 #include "Scope.hpp"
 #include "Symbol/Module.hpp"
-#include "Error.hpp"
+#include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace::BoundNode
