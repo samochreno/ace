@@ -12,6 +12,15 @@ namespace Ace
         virtual ~ILexerDiagnostic() = default;
     };
 
+    class UnclosedMultiLineCommentError : public virtual ILexerDiagnostic
+    {
+    public:
+        UnclosedMultiLineCommentError() = default;
+        virtual ~UnclosedMultiLineCommentError() = default;
+
+        auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
+    };
+
     class ILexerScanDiagnostic : public virtual ILexerDiagnostic
     {
     public:

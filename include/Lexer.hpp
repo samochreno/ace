@@ -59,18 +59,29 @@ namespace Ace
         auto EatTokens() -> Diagnosed<std::vector<Token>, ILexerDiagnostic>;
 
     private:
-        auto EatTokenSequence() -> std::optional<Diagnosed<std::vector<Token>, ILexerDiagnostic>>;
         auto EatCharacter() -> void;
         auto EatCharacters(const size_t& t_count) -> void;
         auto EatWhitespace() -> void;
+        auto EatComment() -> Diagnosed<void, ILexerDiagnostic>;
+        auto EatSingleLineComment() -> Diagnosed<void, ILexerDiagnostic>;
+        auto EatMultiLineComment() -> Diagnosed<void, ILexerDiagnostic>;
         auto EatLine() -> void;
 
         auto ResetCharacterIterator() -> void;
 
         auto ScanTokenSequence() const -> Expected<Diagnosed<ScanResult, ILexerDiagnostic>, ILexerScanDiagnostic>;
 
-        auto IsEndOfLine() const -> bool;
-        auto IsEndOfFile() const -> bool;
+        auto GetCharacter()                       const -> char;
+        auto GetCharacter(const size_t& t_offset) const -> char;
+        auto GetLine() const -> const std::string&;
+
+        auto IsEndOfLine()    const -> bool;
+        auto IsEndOfFile()    const -> bool;
+        auto IsCommentStart() const -> bool;
+
+        auto CreateTokens(
+            const ScanResult& t_scanResult
+        ) -> std::vector<Token>;
 
         const Compilation* m_Compilation{};
         size_t m_FileIndex{};

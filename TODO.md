@@ -3,7 +3,7 @@
 ## 💥 High Priority
 
 - Add error messages to make debugging easier:
-  - [ ] Reimplement comment lexing
+  - [ ] Add source location to lexing
   - [ ] ❓ Remove second typechecking pass (check why `5i32 + 10i16` fails to compile)
   - [ ] Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
 - [ ] Rename `found...It`

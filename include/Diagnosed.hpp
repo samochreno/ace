@@ -20,6 +20,7 @@ namespace Ace
         );
 
     public:
+        Diagnosed() = default;
         Diagnosed(
             const std::vector<std::shared_ptr<const TDiagnostic>>& t_diagnostics
         ) : m_Diagnostics{ t_diagnostics }
@@ -44,6 +45,11 @@ namespace Ace
         );
 
     public:
+        Diagnosed(
+            const TValue& t_value
+        ) : m_Value{ t_value }
+        {
+        }
         Diagnosed(
             const TValue& t_value,
             const std::vector<std::shared_ptr<const TDiagnostic>>& t_diagnostics

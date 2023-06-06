@@ -159,11 +159,7 @@ namespace Ace
                 },
             };
 
-        return Diagnosed
-        {
-            scanResult,
-            std::vector<std::shared_ptr<const ILexerDiagnostic>>{},
-        };
+        return Diagnosed<ScanResult, ILexerDiagnostic>{ scanResult };
     }
 
     static auto CreateNumericLiteralTokenKind(
@@ -745,19 +741,52 @@ namespace Ace
         std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
         std::vector<Token> tokens{};
 
-        while (const auto optDgnTokenSequence = EatTokenSequence())
+        while (!IsEndOfFile())
         {
-            diagnostics.insert(
-                end(diagnostics),
-                begin(optDgnTokenSequence.value().GetDiagnostics()),
-                end  (optDgnTokenSequence.value().GetDiagnostics())
-            );
+            if (GetLine().empty())
+            {
+                EatLine();
+                continue;
+            }
 
-            tokens.insert(
-                end(tokens),
-                begin(optDgnTokenSequence.value().Unwrap()),
-                end  (optDgnTokenSequence.value().Unwrap())
-            );
+            EatWhitespace();
+
+            if (IsEndOfLine())
+            {
+                EatLine();
+                continue;
+            }
+
+            if (IsCommentStart())
+            {
+                EatComment();
+                continue;
+            }
+
+            if (const auto expDgnScanResult = ScanTokenSequence())
+            {
+                const auto& dgnScanResult = expDgnScanResult.Unwrap();
+                const auto&    scanResult =    dgnScanResult.Unwrap();
+
+                diagnostics.insert(
+                    end(diagnostics),
+                    begin(dgnScanResult.GetDiagnostics()),
+                    end  (dgnScanResult.GetDiagnostics())
+                );
+
+                const auto scannedTokens = CreateTokens(scanResult);
+                tokens.insert(
+                    end(tokens),
+                    begin(scannedTokens),
+                    end  (scannedTokens)
+                );
+                EatCharacters(scanResult.Length);
+            }
+            else
+            {
+                diagnostics.push_back(expDgnScanResult.GetError());
+                EatCharacter();
+            }
         }
 
         tokens.insert(
@@ -781,66 +810,6 @@ namespace Ace
             (t_character == '\v');
     }
 
-    auto Lexer::EatTokenSequence() -> std::optional<Diagnosed<std::vector<Token>, ILexerDiagnostic>>
-    {
-        std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
-
-        EatWhitespace();
-
-        if (IsEndOfFile())
-            return std::nullopt;
-
-        if (IsEndOfLine())
-        {
-            EatLine();
-            return EatTokenSequence();
-        }
-
-        const auto expDgnScanResult = ScanTokenSequence();
-        if (!expDgnScanResult)
-        {
-            diagnostics.push_back(expDgnScanResult.GetError());
-            EatCharacter();
-
-            return EatTokenSequence();
-        }
-
-        const auto& scanResult = expDgnScanResult.Unwrap().Unwrap();
-
-        const SourceLocation sourceLocation
-        {
-            m_Compilation,
-            m_FileIndex,
-            m_LineIndex,
-            Distance(m_CharacterIteratorBegin, m_CharacterIterator),
-            scanResult.Length,
-        };
-
-        std::vector<Token> tokens{};
-        std::transform(
-            begin(scanResult.KindStringPairs),
-            end  (scanResult.KindStringPairs),
-            back_inserter(tokens),
-            [&](const TokenKindStringPair& t_kindStringPair)
-            {
-                return Token
-                {
-                    sourceLocation,
-                    t_kindStringPair.Kind,
-                    t_kindStringPair.String,
-                };
-            }
-        );
-
-        EatCharacters(scanResult.Length);
-
-        return Diagnosed
-        {
-            tokens,
-            diagnostics,
-        };
-    }
-
     auto Lexer::EatCharacter() -> void
     {
         EatCharacters(1);
@@ -853,10 +822,70 @@ namespace Ace
 
     auto Lexer::EatWhitespace() -> void
     {
-        while (IsWhitespace(*m_CharacterIterator))
+        while (IsWhitespace(GetCharacter()))
         {
             EatCharacter();
         }
+    }
+
+    auto Lexer::EatComment() -> Diagnosed<void, ILexerDiagnostic>
+    {
+        ACE_ASSERT(GetCharacter() == '#');
+
+        if (GetCharacter(1) == ':')
+        {
+            return EatMultiLineComment();
+        }
+        else
+        {
+            return EatSingleLineComment();
+        }
+    }
+
+    auto Lexer::EatSingleLineComment() -> Diagnosed<void, ILexerDiagnostic>
+    {
+        ACE_ASSERT(GetCharacter() == '#');
+        EatCharacter();
+
+        ACE_ASSERT(GetCharacter() != ':');
+
+        while (!IsEndOfLine())
+        {
+            EatCharacter();
+        }
+
+        return Diagnosed<void, ILexerDiagnostic>{};
+    }
+
+    auto Lexer::EatMultiLineComment() -> Diagnosed<void, ILexerDiagnostic>
+    {
+        ACE_ASSERT(GetCharacter() == '#');
+        EatCharacter();
+
+        ACE_ASSERT(GetCharacter() == ':');
+        EatCharacter();
+
+        while (
+            (GetCharacter(0) != ':') ||
+            (GetCharacter(1) != '#')
+            )
+        {
+            if (IsEndOfFile())
+            {
+                return Diagnosed<void, ILexerDiagnostic>
+                {
+                    std::vector<std::shared_ptr<const ILexerDiagnostic>>
+                    {
+                        std::make_shared<const UnclosedMultiLineCommentError>()
+                    }
+                };
+            }
+
+            EatCharacter();
+        }
+
+        EatCharacters(2);
+        return Diagnosed<void, ILexerDiagnostic>{};
     }
 
     auto Lexer::EatLine() -> void
@@ -865,13 +894,11 @@ namespace Ace
         ResetCharacterIterator();
     }
 
-    auto Lexer::IsEndOfFile() const -> bool
+    auto Lexer::ResetCharacterIterator() -> void
     {
-        const auto lastLineLindex = m_Lines.size() - 1;
-
-        return 
-            (m_LineIndex == lastLineLindex) &&
-            IsEndOfLine();
+        m_CharacterIteratorBegin = begin(GetLine());
+        m_CharacterIterator      = begin(GetLine());
+        m_CharacterIteratorEnd   = end  (GetLine());
     }
 
     auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<ScanResult, ILexerDiagnostic>, ILexerScanDiagnostic>
@@ -883,17 +910,79 @@ namespace Ace
         });
     }
 
+    auto Lexer::GetCharacter() const -> char
+    {
+        return *m_CharacterIterator;
+    }
+
+    auto Lexer::GetCharacter(const size_t& t_offset) const -> char
+    {
+        const auto remainingCharactersCount = std::distance(
+            m_CharacterIterator,
+            m_CharacterIteratorEnd
+        );
+        if (t_offset > remainingCharactersCount)
+        {
+            return '\0';
+        }
+
+        return *(m_CharacterIterator + t_offset);
+    }
+
+    auto Lexer::GetLine() const -> const std::string&
+    {
+        return m_Lines.at(m_LineIndex);
+    }
+
     auto Lexer::IsEndOfLine() const -> bool
     {
         return m_CharacterIterator == m_CharacterIteratorEnd;
     }
 
-    auto Lexer::ResetCharacterIterator() -> void
+    auto Lexer::IsEndOfFile() const -> bool
     {
-        const auto& line = m_Lines.at(m_LineIndex);
+        const auto lastLineLindex = m_Lines.size() - 1;
 
-        m_CharacterIteratorBegin = begin(line);
-        m_CharacterIterator      = begin(line);
-        m_CharacterIteratorEnd   = end  (line);
+        return 
+            (m_LineIndex == lastLineLindex) &&
+            IsEndOfLine();
+    }
+
+    auto Lexer::IsCommentStart() const -> bool
+    {
+        return GetCharacter() == '#';
+    }
+
+    auto Lexer::CreateTokens(
+        const ScanResult& t_scanResult
+    ) -> std::vector<Token>
+    {
+        std::vector<Token> tokens{};
+
+        const SourceLocation sourceLocation
+        {
+            m_Compilation,
+            m_FileIndex,
+            m_LineIndex,
+            Distance(m_CharacterIteratorBegin, m_CharacterIterator),
+            t_scanResult.Length,
+        };
+
+        std::transform(
+            begin(t_scanResult.KindStringPairs),
+            end  (t_scanResult.KindStringPairs),
+            back_inserter(tokens),
+            [&](const TokenKindStringPair& t_kindStringPair)
+            {
+                return Token
+                {
+                    sourceLocation,
+                    t_kindStringPair.Kind,
+                    t_kindStringPair.String,
+                };
+            }
+        );
+
+        return tokens;
     }
 }
