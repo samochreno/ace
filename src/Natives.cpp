@@ -1145,7 +1145,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int8" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt8Ty(*t_compilation->LLVMContext);
             },
@@ -1160,7 +1160,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int16" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt16Ty(*t_compilation->LLVMContext);
             },
@@ -1175,7 +1175,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int32" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(*t_compilation->LLVMContext);
             },
@@ -1190,7 +1190,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int64" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt64Ty(*t_compilation->LLVMContext);
             },
@@ -1206,7 +1206,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt8" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt8Ty(*t_compilation->LLVMContext);
             },
@@ -1221,7 +1221,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt16" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt16Ty(*t_compilation->LLVMContext);
             },
@@ -1236,7 +1236,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt32" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(*t_compilation->LLVMContext);
             },
@@ -1251,7 +1251,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt64" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt64Ty(*t_compilation->LLVMContext);
             },
@@ -1267,7 +1267,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(*t_compilation->LLVMContext);
             },
@@ -1283,7 +1283,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Float32" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getFloatTy(*t_compilation->LLVMContext);
             },
@@ -1298,7 +1298,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Float64" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getDoubleTy(*t_compilation->LLVMContext);
             },
@@ -1314,7 +1314,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Bool" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt1Ty(*t_compilation->LLVMContext);
             },
@@ -1329,7 +1329,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Void" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getVoidTy(*t_compilation->LLVMContext);
             },
@@ -1357,7 +1357,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Pointer" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&]() -> llvm::Type*
+            [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt8PtrTy(*t_compilation->LLVMContext);
             },
@@ -1401,7 +1401,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "print_int" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&](Emitter& t_emitter)
+            [this, t_compilation](Emitter& t_emitter)
             {
                 std::string string{ "%" PRId32 "\n" };
 
@@ -1412,7 +1412,7 @@ namespace Ace
                 std::vector<llvm::Constant*> chars(string.size());
                 for (size_t i = 0; i < string.size(); i++)
                 {
-                    chars[i] = llvm::ConstantInt::get(charType, string[i]);
+                    chars.at(i) = llvm::ConstantInt::get(charType, string[i]);
                 }
 
                 chars.push_back(llvm::ConstantInt::get(charType, 0));
@@ -1462,7 +1462,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "print_ptr" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&](Emitter& t_emitter)
+            [t_compilation](Emitter& t_emitter)
             {
                 std::string string{ "0x%" PRIXPTR "\n" };
 
@@ -1523,7 +1523,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "mem" }, { "alloc" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&](Emitter& t_emitter)
+            [this](Emitter& t_emitter)
             {
                 auto* const mallocFunction = t_emitter.GetC().GetFunctions().GetMalloc();
 
@@ -1555,7 +1555,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "mem" }, { "dealloc" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&](Emitter& t_emitter)
+            [this](Emitter& t_emitter)
             {
                 auto* const freeFunction = t_emitter.GetC().GetFunctions().GetFree();
 
@@ -1582,7 +1582,7 @@ namespace Ace
                 std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "mem" }, { "copy" } },
                 SymbolNameResolutionScope::Global,
             },
-            [&](Emitter& t_emitter)
+            [this](Emitter& t_emitter)
             {
                 auto* const memcpyFunction = t_emitter.GetC().GetFunctions().GetMemcpy();
 
@@ -1894,7 +1894,7 @@ namespace Ace
         {
             Float32,
             "from_f64",
-            [&](Emitter& t_emitter)
+            [this, t_compilation](Emitter& t_emitter)
             {
                 auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFPTrunc(
                     t_emitter.EmitLoadArgument(0, Float64.GetIRType()),
@@ -1931,7 +1931,7 @@ namespace Ace
         {
             Float64,
             "from_f32",
-            [&](Emitter& t_emitter)
+            [this, t_compilation](Emitter& t_emitter)
             {
                 auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFPExt(
                     t_emitter.EmitLoadArgument(0, Float32.GetIRType()),
