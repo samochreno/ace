@@ -95,7 +95,7 @@ namespace Ace::BoundNode::Expression
 
     auto Literal::GetTypeInfo() const -> TypeInfo
     {
-        auto& natives = GetCompilation().Natives;
+        auto& natives = GetCompilation()->Natives;
 
         auto* const typeSymbol = [&]() -> Symbol::Type::IBase*
         {

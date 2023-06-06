@@ -19,7 +19,7 @@ namespace Ace::Node
     public:
         virtual ~IBase() = default;
 
-        virtual auto GetCompilation() const -> const Compilation& { return GetScope()->GetCompilation(); }
+        virtual auto GetCompilation() const -> const Compilation* { return GetScope()->GetCompilation(); }
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetChildren() const -> std::vector<const IBase*> = 0;
     };

@@ -21,13 +21,13 @@ namespace Ace::Symbol::Type
 
         if (
             self->GetScope() !=
-            GetCompilation().Natives->Reference.GetSymbol()->GetScope()
+            GetCompilation()->Natives->Reference.GetSymbol()->GetScope()
             )
             return false;
 
         if (
             self->GetName() !=
-            GetCompilation().Natives->Reference.GetFullyQualifiedName().Sections.back().Name
+            GetCompilation()->Natives->Reference.GetFullyQualifiedName().Sections.back().Name
             )
             return false;
 
@@ -58,7 +58,7 @@ namespace Ace::Symbol::Type
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
-            GetCompilation().Natives->Reference.GetSymbol(),
+            GetCompilation()->Natives->Reference.GetSymbol(),
             std::nullopt,
             {},
             { this->GetUnaliased() }
@@ -76,12 +76,12 @@ namespace Ace::Symbol::Type
 
         if (
             self->GetScope() !=
-            GetCompilation().Natives->StrongPointer.GetSymbol()->GetScope())
+            GetCompilation()->Natives->StrongPointer.GetSymbol()->GetScope())
             return false;
 
         if (
             self->GetName() !=
-            GetCompilation().Natives->StrongPointer.GetFullyQualifiedName().Sections.back().Name
+            GetCompilation()->Natives->StrongPointer.GetFullyQualifiedName().Sections.back().Name
             )
             return false;
 
@@ -101,7 +101,7 @@ namespace Ace::Symbol::Type
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
-            GetCompilation().Natives->StrongPointer.GetSymbol(),
+            GetCompilation()->Natives->StrongPointer.GetSymbol(),
             std::nullopt,
             {},
             { this->GetUnaliased() }
@@ -172,7 +172,7 @@ namespace Ace::Symbol::Type
         const auto optNativeOperator = GetNativeConversionOperator(
             t_fromType,
             t_toType,
-            t_scope->GetCompilation().Natives->GetImplicitFromOperatorMap()
+            t_scope->GetCompilation()->Natives->GetImplicitFromOperatorMap()
         );
         if (optNativeOperator.has_value())
         {
@@ -195,7 +195,7 @@ namespace Ace::Symbol::Type
         const auto optNativeImplicitOperator = GetNativeConversionOperator(
             t_fromType,
             t_toType,
-            t_scope->GetCompilation().Natives->GetImplicitFromOperatorMap()
+            t_scope->GetCompilation()->Natives->GetImplicitFromOperatorMap()
         );
         if (optNativeImplicitOperator.has_value())
         {
@@ -205,7 +205,7 @@ namespace Ace::Symbol::Type
         const auto optNativeExplicitOperator = GetNativeConversionOperator(
             t_fromType,
             t_toType,
-            t_scope->GetCompilation().Natives->GetExplicitFromOperatorMap()
+            t_scope->GetCompilation()->Natives->GetExplicitFromOperatorMap()
         );
         if (optNativeExplicitOperator)
         {

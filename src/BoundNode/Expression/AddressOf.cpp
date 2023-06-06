@@ -68,7 +68,7 @@ namespace Ace::BoundNode::Expression
         auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(type);
         temporaries.emplace_back(
             allocaInst, 
-            GetCompilation().Natives->Pointer.GetSymbol()
+            GetCompilation()->Natives->Pointer.GetSymbol()
         );
 
         t_emitter.GetBlockBuilder().Builder.CreateStore(
@@ -83,7 +83,7 @@ namespace Ace::BoundNode::Expression
     {
         return 
         { 
-            GetCompilation().Natives->Pointer.GetSymbol(), 
+            GetCompilation()->Natives->Pointer.GetSymbol(), 
             ValueKind::R
         };
     }

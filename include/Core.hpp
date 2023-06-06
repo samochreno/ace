@@ -55,40 +55,40 @@ namespace Ace::Core
 #undef TNodeIBase
 
     auto ParseAST(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const size_t& t_fileIndex,
         const std::vector<std::string>& t_lines
     ) -> Diagnosed<std::shared_ptr<const Node::Module>, IDiagnostic>;
     auto CreateAndDefineSymbols(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::vector<const Node::IBase*>& t_nodes
     ) -> Expected<void>;
     auto DefineAssociations(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::vector<const Node::IBase*>& t_nodes
     ) -> Expected<void>;
     auto ValidateControlFlow(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::vector<const BoundNode::IBase*>& t_nodes
     ) -> Expected<void>;
     auto BindFunctionSymbolsBodies(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::vector<const BoundNode::IBase*>& t_nodes
     ) -> void;
     auto ValidateTypeSizes(
-        const Compilation& t_compilation
+        const Compilation* const t_compilation
     ) -> Expected<void>;
     auto GenerateAndBindGlue(
-        const Compilation& t_compilation
+        const Compilation* const t_compilation
     ) -> void;
 
     auto CreateCopyGlueBody(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         Symbol::Type::Struct* const t_structSymbol,
         Symbol::Function* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>;
     auto CreateDropGlueBody(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         Symbol::Type::Struct* const t_structSymbol,
         Symbol::Function* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>;
@@ -104,7 +104,7 @@ namespace Ace::Core
         typename TGetOrCreateLoweredTypeCheckedFunc
     >
     auto CreateTransformedAndVerifiedAST(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const TBound& t_boundAST,
         TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
         TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc,
@@ -130,7 +130,7 @@ namespace Ace::Core
         typename TGetOrCreateLoweredTypeCheckedFunc
     >
     auto CreateTransformedAndVerifiedASTs(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::vector<TBound>& t_boundASTs,
         TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
         TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc,
@@ -173,7 +173,7 @@ namespace Ace::Core
         typename TGetOrCreateLoweredTypeCheckedFunc
     >
     auto CreateBoundTransformedAndVerifiedAST(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const T& t_ast,
         TCreateBoundFunc&& t_createBoundFunc,
         TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
@@ -200,7 +200,7 @@ namespace Ace::Core
         typename TGetOrCreateLoweredTypeCheckedFunc
     >
     auto CreateBoundTransformedAndVerifiedASTs(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::vector<T>& t_asts,
         TCreateBoundFunc&& t_createBoundFunc,
         TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,

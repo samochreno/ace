@@ -25,7 +25,7 @@ namespace Ace::BoundNode::Expression
     {
         const TypeInfo typeInfo
         {
-            GetCompilation().Natives->Bool.GetSymbol(),
+            GetCompilation()->Natives->Bool.GetSymbol(),
             ValueKind::R,
         };
 
@@ -67,7 +67,7 @@ namespace Ace::BoundNode::Expression
             end  (expressionEmitResult.Temporaries)
         );
 
-        auto* const boolType = GetCompilation().Natives->Bool.GetIRType();
+        auto* const boolType = GetCompilation()->Natives->Bool.GetIRType();
 
         auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,
@@ -93,6 +93,6 @@ namespace Ace::BoundNode::Expression
 
     auto LogicalNegation::GetTypeInfo() const -> TypeInfo
     {
-        return { GetCompilation().Natives->Bool.GetSymbol(), ValueKind::R };
+        return { GetCompilation()->Natives->Bool.GetSymbol(), ValueKind::R };
     }
 }

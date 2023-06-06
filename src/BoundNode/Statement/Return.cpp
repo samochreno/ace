@@ -27,7 +27,7 @@ namespace Ace::BoundNode::Statement
     {
         const bool isFunctionTypeVoid = 
             t_context.ParentFunctionTypeSymbol == 
-            GetCompilation().Natives->Void.GetSymbol();
+            GetCompilation()->Natives->Void.GetSymbol();
 
         ACE_TRY_ASSERT(m_OptExpression.has_value() != isFunctionTypeVoid);
 
@@ -38,7 +38,7 @@ namespace Ace::BoundNode::Statement
 
             const bool isExpressionTypeVoid = 
                 expressionTypeSymbol ==
-                GetCompilation().Natives->Void.GetSymbol();
+                GetCompilation()->Natives->Void.GetSymbol();
 
             ACE_TRY_ASSERT(!isExpressionTypeVoid);
         }

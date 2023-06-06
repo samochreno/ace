@@ -197,7 +197,7 @@ namespace Ace
     }
 
     Scope::Scope(
-        const Compilation& t_compilation
+        const Compilation* const t_compilation
     ) : Scope
         {
             t_compilation,
@@ -572,7 +572,7 @@ namespace Ace
     }
     
     auto Scope::ResolveOrInstantiateTemplateInstance(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         Symbol::Template::IBase* const t_template,
         const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes,
         const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
@@ -595,7 +595,7 @@ namespace Ace
             return expResolvedInstance.Unwrap();
         }
 
-        ACE_TRY(symbol, t_compilation.TemplateInstantiator->InstantiateSymbols(
+        ACE_TRY(symbol, t_compilation->TemplateInstantiator->InstantiateSymbols(
             t_template,
             t_implTemplateArguments,
             deducedTemplateArguments
@@ -700,7 +700,7 @@ namespace Ace
     }
 
     Scope::Scope(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::optional<std::string>& t_optName,
         const std::optional<std::shared_ptr<Scope>>& t_optParent
     ) : m_Compilation{ t_compilation },
@@ -1183,7 +1183,7 @@ namespace Ace
         {
             return std::shared_ptr<const Scope>
             { 
-                m_Compilation.GlobalScope
+                m_Compilation->GlobalScope
             };
         }
 

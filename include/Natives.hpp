@@ -40,7 +40,7 @@ namespace Ace
     public:
         virtual ~INative() = default;
 
-        virtual auto GetCompilation() const -> const Compilation& = 0;
+        virtual auto GetCompilation() const -> const Compilation* = 0;
 
         virtual auto Initialize() -> Expected<void> = 0;
     };
@@ -64,7 +64,7 @@ namespace Ace
     {
     public:
         NativeType(
-            const Compilation& t_compilation,
+            const Compilation* const t_compilation,
             SymbolName&& t_name,
             std::optional<std::function<llvm::Type*()>>&& t_irTypeGetter,
             const TypeSizeKind& t_sizeKind,
@@ -89,7 +89,7 @@ namespace Ace
 
         auto GetFullyQualifiedName() const -> const SymbolName& final { return m_Name; }
 
-        auto GetCompilation() const -> const Compilation& { return m_Compilation; }
+        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
 
         auto Initialize() -> Expected<void> final;
 
@@ -107,7 +107,7 @@ namespace Ace
         }
 
     private:
-        const Compilation& m_Compilation;
+        const Compilation* m_Compilation{};
         SymbolName m_Name{};
         std::optional<std::function<llvm::Type*()>> m_IRTypeGetter{};
         bool m_IsSized{};
@@ -120,7 +120,7 @@ namespace Ace
     {
     public:
         NativeTypeTemplate(
-            const Compilation& t_compilation,
+            const Compilation* const t_compilation,
             SymbolName&& t_name
         ) : m_Compilation{ t_compilation },
             m_Name{ std::move(t_name) }
@@ -130,7 +130,7 @@ namespace Ace
 
         auto GetFullyQualifiedName() const -> const SymbolName& final { return m_Name; }
 
-        auto GetCompilation() const -> const Compilation& { return m_Compilation; }
+        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
 
         auto Initialize() -> Expected<void> final;
 
@@ -141,7 +141,7 @@ namespace Ace
         }
 
     private:
-        const Compilation& m_Compilation;
+        const Compilation* m_Compilation{};
         SymbolName m_Name{};
 
         Symbol::Template::Type* m_Symbol{};
@@ -151,7 +151,7 @@ namespace Ace
     {
     public:
         NativeFunction(
-            const Compilation& t_compilation,
+            const Compilation* const t_compilation,
             SymbolName&& t_name,
             FunctionBodyEmitter&& t_bodyEmitter
         ) : m_Compilation{ t_compilation },
@@ -161,7 +161,7 @@ namespace Ace
         }
         ~NativeFunction() = default;
 
-        auto GetCompilation() const -> const Compilation& { return m_Compilation; }
+        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
 
         auto Initialize() -> Expected<void> final;
 
@@ -172,7 +172,7 @@ namespace Ace
         }
 
     private:
-        const Compilation& m_Compilation;
+        const Compilation* m_Compilation{};
         SymbolName m_Name{};
         FunctionBodyEmitter m_BodyEmitter{};
 
@@ -183,7 +183,7 @@ namespace Ace
     {
     public:
         NativeFunctionTemplate(
-            const Compilation& t_compilation,
+            const Compilation* const t_compilation,
             SymbolName&& t_name
         ) : m_Compilation{ t_compilation },
             m_Name{ std::move(t_name) }
@@ -191,7 +191,7 @@ namespace Ace
         }
         ~NativeFunctionTemplate() = default;
 
-        auto GetCompilation() const -> const Compilation& { return m_Compilation; }
+        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
 
         auto Initialize() -> Expected<void> final;
 
@@ -202,7 +202,7 @@ namespace Ace
         }
 
     private:
-        const Compilation& m_Compilation;
+        const Compilation* m_Compilation{};
         SymbolName m_Name{};
 
         Symbol::Template::Function* m_Symbol{};
@@ -222,7 +222,7 @@ namespace Ace
         }
         ~NativeAssociatedFunction() = default;
 
-        auto GetCompilation() const -> const Compilation& { return m_Type.GetCompilation(); }
+        auto GetCompilation() const -> const Compilation* { return m_Type.GetCompilation(); }
 
         auto Initialize() -> Expected<void> final;
 
@@ -252,7 +252,7 @@ namespace Ace
         }
         ~NativeAssociatedFunctionTemplate() = default;
 
-        auto GetCompilation() const -> const Compilation& { return m_Type.GetCompilation(); }
+        auto GetCompilation() const -> const Compilation* { return m_Type.GetCompilation(); }
 
         auto Initialize() -> Expected<void> final;
 
@@ -272,7 +272,7 @@ namespace Ace
     class Natives
     {
     public:
-        Natives(const Compilation& t_compilation);
+        Natives(const Compilation* const t_compilation);
         ~Natives() = default;
 
         auto Initialize() -> Expected<void>;

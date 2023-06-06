@@ -32,7 +32,7 @@ namespace Ace::BoundNode::Expression
     {
         std::vector<ExpressionDropData> temporaries{};
 
-        auto* const intTypeSymbol = GetCompilation().Natives->Int.GetSymbol();
+        auto* const intTypeSymbol = GetCompilation()->Natives->Int.GetSymbol();
         auto* const intType = t_emitter.GetIRType(intTypeSymbol);
         auto* const type = t_emitter.GetIRType(m_TypeSymbol);
 
@@ -56,7 +56,7 @@ namespace Ace::BoundNode::Expression
     {
         return
         {
-            GetCompilation().Natives->Int.GetSymbol(),
+            GetCompilation()->Natives->Int.GetSymbol(),
             ValueKind::R
         };
     }

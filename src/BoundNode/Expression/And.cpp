@@ -26,7 +26,7 @@ namespace Ace::BoundNode::Expression
     {
         const TypeInfo typeInfo
         {
-            GetCompilation().Natives->Bool.GetSymbol(),
+            GetCompilation()->Natives->Bool.GetSymbol(),
             ValueKind::R,
         };
 
@@ -75,7 +75,7 @@ namespace Ace::BoundNode::Expression
     {
         std::vector<ExpressionDropData> temporaries{};
 
-        auto* const boolType = GetCompilation().Natives->Bool.GetIRType();
+        auto* const boolType = GetCompilation()->Natives->Bool.GetIRType();
 
         auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
 
@@ -93,12 +93,12 @@ namespace Ace::BoundNode::Expression
         );
 
         auto trueBlockBuilder = std::make_unique<BlockBuilder>(
-            *GetCompilation().LLVMContext,
+            *GetCompilation()->LLVMContext,
             t_emitter.GetFunction()
             );
 
         auto endBlockBuilder = std::make_unique<BlockBuilder>(
-            *GetCompilation().LLVMContext,
+            *GetCompilation()->LLVMContext,
             t_emitter.GetFunction()
             );
 
@@ -134,7 +134,7 @@ namespace Ace::BoundNode::Expression
     {
         return
         {
-            GetCompilation().Natives->Bool.GetSymbol(),
+            GetCompilation()->Natives->Bool.GetSymbol(),
             ValueKind::R
         };
     }

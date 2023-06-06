@@ -40,7 +40,7 @@ namespace Ace::BoundNode::Expression
     {
         auto* const typeSymbol = m_Expression->GetTypeInfo().Symbol->GetUnaliased();
         ACE_TRY_ASSERT(
-            (typeSymbol == GetCompilation().Natives->Pointer.GetSymbol()) ||
+            (typeSymbol == GetCompilation()->Natives->Pointer.GetSymbol()) ||
             (typeSymbol->IsReference())
         );
 
@@ -67,7 +67,7 @@ namespace Ace::BoundNode::Expression
             end  (expressionEmitResult.Temporaries)
         );
 
-        auto* const pointerType = GetCompilation().Natives->Pointer.GetIRType();
+        auto* const pointerType = GetCompilation()->Natives->Pointer.GetIRType();
 
         auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
             pointerType,

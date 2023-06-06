@@ -17,7 +17,7 @@ namespace Ace
     struct ScanContext
     {
         ScanContext(
-            const Compilation& t_compilation,
+            const Compilation* const t_compilation,
             const std::string::const_iterator& t_it,
             const std::string::const_iterator& t_itEnd
         ) : Compilation{ t_compilation },
@@ -26,7 +26,7 @@ namespace Ace
         {
         }
 
-        const Compilation& Compilation;
+        const Compilation* const Compilation;
         std::string::const_iterator Iterator{};
         std::string::const_iterator IteratorEnd{};
     };
@@ -69,7 +69,7 @@ namespace Ace
         const std::string& t_string
     ) -> std::optional<ScanResult>
     {
-        const auto& natives = t_context.Compilation.Natives;
+        const auto& natives = t_context.Compilation->Natives;
 
         std::vector<TokenKindStringPair> kindStringPairs{};
         kindStringPairs.emplace_back(
@@ -730,7 +730,7 @@ namespace Ace
     }
 
     Lexer::Lexer(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const size_t& t_fileIndex,
         const std::vector<std::string>& t_lines
     ) : m_Compilation{ t_compilation },
@@ -809,7 +809,7 @@ namespace Ace
 
         const SourceLocation sourceLocation
         {
-            &m_Compilation,
+            m_Compilation,
             m_FileIndex,
             m_LineIndex,
             Distance(m_CharacterIteratorBegin, m_CharacterIterator),

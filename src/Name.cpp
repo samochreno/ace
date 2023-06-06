@@ -83,11 +83,11 @@ namespace Ace
     }
 
     static auto GetModifierFullyQualifiedName(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const TypeNameModifier& t_modifier
     ) -> const SymbolName&
     {
-        const auto& natives = t_compilation.Natives;
+        const auto& natives = t_compilation->Natives;
 
         switch (t_modifier)
         {
@@ -114,7 +114,7 @@ namespace Ace
     }
 
     auto TypeName::ToSymbolName(
-        const Compilation& t_compilation
+        const Compilation* const t_compilation
     ) const -> Ace::SymbolName
     {
         if (Modifiers.empty())

@@ -22,12 +22,12 @@
 
 namespace Ace
 {
-    static auto Compile(const Compilation& t_compilation) -> Expected<Diagnosed<void, IDiagnostic>>
+    static auto Compile(const Compilation* const t_compilation) -> Expected<Diagnosed<void, IDiagnostic>>
     {
         std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
 
-        const auto& packageName = t_compilation.Package.Name;
-        auto* const globalScope = t_compilation.GlobalScope.get();
+        const auto& packageName = t_compilation->Package.Name;
+        auto* const globalScope = t_compilation->GlobalScope.get();
 
         const auto& now = std::chrono::steady_clock::now;
 
@@ -41,7 +41,7 @@ namespace Ace
         ACE_LOG_INFO("Parsing start");
 
         ACE_TRY(filesLines, TransformExpectedVector(
-            t_compilation.Package.FilePaths,
+            t_compilation->Package.FilePaths,
             [&](const std::filesystem::path& t_filePath) -> Expected<std::vector<std::string>>
             {
                 std::ifstream fileStream{ t_filePath };
@@ -91,15 +91,15 @@ namespace Ace
 
         ACE_LOG_INFO("Template placeholder symbols instantiation start");
         const auto templateSymbols = globalScope->CollectSymbolsRecursive<Symbol::Template::IBase>();
-        t_compilation.TemplateInstantiator->SetSymbols(templateSymbols);
-        ACE_TRY_VOID(t_compilation.TemplateInstantiator->InstantiatePlaceholderSymbols());
+        t_compilation->TemplateInstantiator->SetSymbols(templateSymbols);
+        ACE_TRY_VOID(t_compilation->TemplateInstantiator->InstantiatePlaceholderSymbols());
         ACE_LOG_INFO("Template placeholder symbols instantiation success");
 
         const auto timeBindingAndVerificationStart = now();
         ACE_LOG_INFO("Binding and verification start");
 
         ACE_LOG_INFO("Native symbol initialization start");
-        ACE_TRY_VOID(t_compilation.Natives->Initialize());
+        ACE_TRY_VOID(t_compilation->Natives->Initialize());
         ACE_LOG_INFO("Native symbol initialization success");
 
         ACE_LOG_INFO("AST binding and verification start");
@@ -133,7 +133,7 @@ namespace Ace
         ACE_LOG_INFO("Function symbol body binding success");
 
         ACE_LOG_INFO("Template semantics instantiation start");
-        t_compilation.TemplateInstantiator->InstantiateSemanticsForSymbols();
+        t_compilation->TemplateInstantiator->InstantiateSemanticsForSymbols();
         ACE_LOG_INFO("Template semantics instantiation success");
 
         ACE_LOG_INFO("Glue generation start");
@@ -197,7 +197,7 @@ namespace Ace
     ) -> Expected<void>
     {
         ACE_TRY(compilation, Compilation::ParseAndVerify(t_args));
-        ACE_TRY_VOID(Compile(*compilation.get()));
+        ACE_TRY_VOID(Compile(compilation.get()));
 
         return ExpectedVoid;
     }

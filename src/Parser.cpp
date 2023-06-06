@@ -97,7 +97,7 @@ namespace Ace::Parsing
     }
 
     auto Parser::ParseAST(
-        const Compilation& t_compilation, 
+        const Compilation* const t_compilation, 
         std::vector<Token>&& t_tokens
     ) -> Expected<std::shared_ptr<const Node::Module>>
     {
@@ -105,7 +105,7 @@ namespace Ace::Parsing
         leadingTokens.emplace_back(
             std::nullopt,
             TokenKind::New(TokenKind::Identifier),
-            t_compilation.Package.Name
+            t_compilation->Package.Name
         );
         leadingTokens.emplace_back(
             std::nullopt,
@@ -132,7 +132,7 @@ namespace Ace::Parsing
 
         auto it = begin(t_tokens);
 
-        ACE_TRY(module, ParseModule({ it, t_compilation.GlobalScope }));
+        ACE_TRY(module, ParseModule({ it, t_compilation->GlobalScope }));
         it += module.Length;
 
         ACE_TRY_ASSERT(it->Kind == TokenKind::New(TokenKind::EndOfFile));

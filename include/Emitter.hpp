@@ -66,7 +66,7 @@ namespace Ace
                     return foundIt->second;
 
                 auto block = llvm::BasicBlock::Create(
-                    *m_Emitter.GetCompilation().LLVMContext,
+                    *m_Emitter.GetCompilation()->LLVMContext,
                     "",
                     m_Emitter.GetFunction()
                 );
@@ -91,7 +91,7 @@ namespace Ace
             size_t StatementIndex{};
         };
 
-        Emitter(const Compilation& t_compilation);
+        Emitter(const Compilation* const t_compilation);
         ~Emitter();
 
         auto SetASTs(
@@ -121,7 +121,7 @@ namespace Ace
         ) -> void;
         auto EmitDropArguments() -> void;
 
-        auto GetCompilation() const -> const Compilation& { return m_Compilation; }
+        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
         auto GetModule() const -> llvm::Module& { return *m_Module.get(); }
         auto GetC() const -> const C& { return m_C; }
 
@@ -154,7 +154,7 @@ namespace Ace
             const std::vector<Symbol::Function*>& t_functionSymbols
         ) -> void;
 
-        const Compilation& m_Compilation{};
+        const Compilation* m_Compilation{};
 
         std::vector<std::shared_ptr<const BoundNode::Module>> m_ASTs{};
 

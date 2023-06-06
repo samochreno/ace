@@ -33,7 +33,7 @@ namespace Ace::BoundNode
     public:
         virtual ~IBase() = default;
 
-        virtual auto GetCompilation() const -> const Compilation&
+        virtual auto GetCompilation() const -> const Compilation*
         {
             return GetScope()->GetCompilation();
         }

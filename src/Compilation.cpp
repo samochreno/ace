@@ -177,12 +177,11 @@ namespace Ace
         }
 
         auto self = std::make_unique<Compilation>();
-        auto& selfRef = *self.get();
 
         self->Package              = std::move(package);
         self->OutputPath           = std::move(options.OutputPath);
-        self->Natives              = std::make_unique<Ace::Natives>(selfRef);
-        self->GlobalScope          = std::make_shared<Scope>(selfRef);
+        self->Natives              = std::make_unique<Ace::Natives>(self.get());
+        self->GlobalScope          = std::make_shared<Scope>(self.get());
         self->TemplateInstantiator = std::make_unique<Ace::TemplateInstantiator>();
         self->LLVMContext          = std::make_unique<llvm::LLVMContext>();
 

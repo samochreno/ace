@@ -42,7 +42,7 @@ namespace Ace::BoundNode::Expression
 
         const auto symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
-            GetCompilation().Natives->StrongPointer__new.GetSymbol(),
+            GetCompilation()->Natives->StrongPointer__new.GetSymbol(),
             std::nullopt,
             { mchLoweredExpression.Value->GetTypeInfo().Symbol },
             {}

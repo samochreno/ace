@@ -27,7 +27,7 @@
 namespace Ace::Core
 {
     auto ParseAST(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const size_t& t_fileIndex,
         const std::vector<std::string>& t_lines
     ) -> Diagnosed<std::shared_ptr<const Node::Module>, IDiagnostic>
@@ -60,7 +60,7 @@ namespace Ace::Core
     }
 
     auto CreateAndDefineSymbols(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::vector<const Node::IBase*>& t_nodes
     ) -> Expected<void>
     {
@@ -103,7 +103,7 @@ namespace Ace::Core
     }
 
     auto DefineAssociations(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::vector<const Node::IBase*>& t_nodes
     ) -> Expected<void>
     {
@@ -121,7 +121,7 @@ namespace Ace::Core
     }
 
     auto ValidateControlFlow(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::vector<const BoundNode::IBase*>& t_nodes
     ) -> Expected<void>
     {
@@ -134,7 +134,7 @@ namespace Ace::Core
             {
                 if (
                     t_functionNode->GetSymbol()->GetType()->GetUnaliased() == 
-                    t_compilation.Natives->Void.GetSymbol()
+                    t_compilation->Natives->Void.GetSymbol()
                     )
                     return false;
 
@@ -155,7 +155,7 @@ namespace Ace::Core
     }
 
     auto BindFunctionSymbolsBodies(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::vector<const BoundNode::IBase*>& t_nodes
     ) -> void
     {
@@ -173,10 +173,10 @@ namespace Ace::Core
     }
 
     auto ValidateTypeSizes(
-        const Compilation& t_compilation
+        const Compilation* const t_compilation
     ) -> Expected<void>
     {
-        const auto typeSymbols = t_compilation.GlobalScope->CollectSymbolsRecursive<Symbol::Type::IBase>();
+        const auto typeSymbols = t_compilation->GlobalScope->CollectSymbolsRecursive<Symbol::Type::IBase>();
 
         const bool didValidateTypeSizes = std::find_if_not(
             begin(typeSymbols), 
@@ -198,7 +198,7 @@ namespace Ace::Core
     }
 
     static auto GetOrDefineCopyGlueSymbols(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         Symbol::Type::IBase* const t_typeSymbol
     ) -> Symbol::Function*
     {
@@ -219,7 +219,7 @@ namespace Ace::Core
             name,
             SymbolCategory::Static,
             AccessModifier::Public,
-            t_compilation.Natives->Void.GetSymbol()
+            t_compilation->Natives->Void.GetSymbol()
         );
 
         auto* const glueSymbol = Scope::DefineSymbol(
@@ -243,7 +243,7 @@ namespace Ace::Core
     }
 
     static auto GetOrDefineDropGlueSymbols(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         Symbol::Type::IBase* const t_typeSymbol
     ) -> Symbol::Function*
     {
@@ -264,7 +264,7 @@ namespace Ace::Core
             name,
             SymbolCategory::Static,
             AccessModifier::Public,
-            t_compilation.Natives->Void.GetSymbol()
+            t_compilation->Natives->Void.GetSymbol()
         );
 
         auto* const glueSymbol = Scope::DefineSymbol(
@@ -282,9 +282,9 @@ namespace Ace::Core
     }
 
     static auto TryDefineGlueSymbols(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         Symbol::Type::IBase* const t_typeSymbol,
-        const std::function<Symbol::Function*(const Compilation&, Symbol::Type::IBase* const)>& t_getOrDefineGlueSymbols
+        const std::function<Symbol::Function*(const Compilation* const, Symbol::Type::IBase* const)>& t_getOrDefineGlueSymbols
     ) -> std::optional<Symbol::Function*>
     {
         auto* const templatableSymbol = dynamic_cast<Symbol::ITemplatable*>(
@@ -303,7 +303,7 @@ namespace Ace::Core
     }
 
     static auto CreateAndBindGlueBody(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         const std::function<std::shared_ptr<const IEmittable<void>>(Symbol::Type::IBase* const, Symbol::Function* const)>& t_createGlueBody,
         Symbol::Type::IBase* const t_typeSymbol,
         Symbol::Function* const t_glueSymbol
@@ -314,13 +314,13 @@ namespace Ace::Core
     }
 
     static auto GenerateAndBindGlue(
-        const Compilation& t_compilation,
-        const std::function<Symbol::Function*(const Compilation&, Symbol::Type::IBase* const)>& t_getOrDefineGlueSymbols,
+        const Compilation* const t_compilation,
+        const std::function<Symbol::Function*(const Compilation* const, Symbol::Type::IBase* const)>& t_getOrDefineGlueSymbols,
         const std::function<std::shared_ptr<const IEmittable<void>>(Symbol::Type::IBase* const, Symbol::Function* const)>& t_createGlueBody,
         const std::function<void(Symbol::Type::IBase* const, Symbol::Function* const)>& t_bindGlue
     ) -> void
     {
-        const auto typeSymbols = t_compilation.GlobalScope->CollectSymbolsRecursive<Symbol::Type::IBase>();
+        const auto typeSymbols = t_compilation->GlobalScope->CollectSymbolsRecursive<Symbol::Type::IBase>();
 
         struct TypeGlueSymbolPair
         {
@@ -364,7 +364,7 @@ namespace Ace::Core
         });
     }
 
-    auto GenerateAndBindGlue(const Compilation& t_compilation) -> void
+    auto GenerateAndBindGlue(const Compilation* const t_compilation) -> void
     {
         GenerateAndBindGlue(
             t_compilation,
@@ -405,7 +405,7 @@ namespace Ace::Core
     }
 
     static auto CreateTrivialCopyGlueBody(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         Symbol::Type::Struct* const t_structSymbol,
         Symbol::Function* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
@@ -457,7 +457,7 @@ namespace Ace::Core
     }
 
     static auto CreateTrivialDropGlueBody(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         Symbol::Type::IBase* const t_typeSymbol,
         Symbol::Function* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
@@ -478,7 +478,7 @@ namespace Ace::Core
     }
 
     auto CreateCopyGlueBody(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         Symbol::Type::Struct* const t_structSymbol,
         Symbol::Function* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
@@ -507,7 +507,7 @@ namespace Ace::Core
         auto operatorName = t_structSymbol->CreateFullyQualifiedName();
         operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Copy);
         const auto expOperatorSymbol = 
-            t_compilation.GlobalScope->ResolveStaticSymbol<Symbol::Function>(operatorName);
+            t_compilation->GlobalScope->ResolveStaticSymbol<Symbol::Function>(operatorName);
 
         std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
         if (expOperatorSymbol)
@@ -578,7 +578,7 @@ namespace Ace::Core
             [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
             { 
                 return t_bodyNode->GetOrCreateTypeChecked(
-                    { t_compilation.Natives->Void.GetSymbol() }
+                    { t_compilation->Natives->Void.GetSymbol() }
                 ); 
             },
             [](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
@@ -588,14 +588,14 @@ namespace Ace::Core
             [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateTypeChecked(
-                    { t_compilation.Natives->Void.GetSymbol() }
+                    { t_compilation->Natives->Void.GetSymbol() }
                 );
             }
         ).Unwrap();
     }
 
     auto CreateDropGlueBody(
-        const Compilation& t_compilation,
+        const Compilation* const t_compilation,
         Symbol::Type::Struct* const t_structSymbol,
         Symbol::Function* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
@@ -622,7 +622,7 @@ namespace Ace::Core
         auto operatorName = t_structSymbol->CreateFullyQualifiedName();
         operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Drop);
         const auto expOperatorSymbol = 
-            t_compilation.GlobalScope->ResolveStaticSymbol<Symbol::Function>(operatorName);
+            t_compilation->GlobalScope->ResolveStaticSymbol<Symbol::Function>(operatorName);
 
         if (expOperatorSymbol)
         {
@@ -684,7 +684,7 @@ namespace Ace::Core
             [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
             { 
                 return t_bodyNode->GetOrCreateTypeChecked(
-                    { t_compilation.Natives->Void.GetSymbol() }
+                    { t_compilation->Natives->Void.GetSymbol() }
                 ); 
             },
             [](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
@@ -694,7 +694,7 @@ namespace Ace::Core
             [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateTypeChecked(
-                    { t_compilation.Natives->Void.GetSymbol() }
+                    { t_compilation->Natives->Void.GetSymbol() }
                 );
             }
         ).Unwrap();

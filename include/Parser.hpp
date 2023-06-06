@@ -37,7 +37,7 @@ namespace Ace::Parsing
         Parser() = delete;
 
         static auto ParseAST(
-            const Compilation& t_compilation, 
+            const Compilation* const t_compilation, 
             std::vector<Token>&& t_tokens
         ) -> Expected<std::shared_ptr<const Node::Module>>;
 

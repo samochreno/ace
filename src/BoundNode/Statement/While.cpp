@@ -33,7 +33,7 @@ namespace Ace::BoundNode::Statement
     {
         const TypeInfo typeInfo
         {
-            GetCompilation().Natives->Bool.GetSymbol(),
+            GetCompilation()->Natives->Bool.GetSymbol(),
             ValueKind::R,
         };
 

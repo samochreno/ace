@@ -25,7 +25,7 @@ namespace Ace::BoundNode::Statement::Jump
     {
         const TypeInfo typeInfo
         {
-            GetCompilation().Natives->Bool.GetSymbol(),
+            GetCompilation()->Natives->Bool.GetSymbol(),
             ValueKind::R,
         };
 
@@ -61,14 +61,14 @@ namespace Ace::BoundNode::Statement::Jump
     auto Conditional::Emit(Emitter& t_emitter) const -> void
     {
         auto blockBuilder = std::make_unique<BlockBuilder>(
-            *GetCompilation().LLVMContext,
+            *GetCompilation()->LLVMContext,
             t_emitter.GetFunction()
         );
 
         const auto conditionEmitResult = m_Condition->Emit(t_emitter);
 
         auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
-            GetCompilation().Natives->Bool.GetIRType(),
+            GetCompilation()->Natives->Bool.GetIRType(),
             conditionEmitResult.Value
         );
 

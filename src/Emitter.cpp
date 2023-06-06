@@ -41,13 +41,13 @@
 namespace Ace
 {
     Emitter::Emitter(
-        const Compilation& t_compilation
+        const Compilation* const t_compilation
     ) : m_Compilation{ t_compilation },
         m_Module
         {
             std::make_unique<llvm::Module>(
                 "module",
-                *t_compilation.LLVMContext
+                *t_compilation->LLVMContext
             )
         },
         m_LabelBlockMap{ *this }
@@ -63,11 +63,11 @@ namespace Ace
 
     auto Emitter::Emit() -> Result
     {
-        auto* const globalScope = m_Compilation.GlobalScope.get();
-        const auto& packageName = m_Compilation.Package.Name;
-        const auto& natives     = m_Compilation.Natives;
+        auto* const globalScope = m_Compilation->GlobalScope.get();
+        const auto& packageName = m_Compilation->Package.Name;
+        const auto& natives     = m_Compilation->Natives;
 
-        m_C.Initialize(*m_Compilation.LLVMContext, *m_Module);
+        m_C.Initialize(*m_Compilation->LLVMContext, *m_Module);
 
         const auto& now = std::chrono::steady_clock::now;
 
@@ -143,7 +143,7 @@ namespace Ace
         ACE_ASSERT(mainFunctionSymbol->CollectAllParameters().empty());
 
         auto* const mainType = llvm::FunctionType::get(
-            llvm::Type::getInt32Ty(*m_Compilation.LLVMContext),
+            llvm::Type::getInt32Ty(*m_Compilation->LLVMContext),
             false
         );
 
@@ -155,7 +155,7 @@ namespace Ace
         );
 
         auto* const mainBlock = llvm::BasicBlock::Create(
-            *m_Compilation.LLVMContext,
+            *m_Compilation->LLVMContext,
             "",
             mainFunction
         );
@@ -203,7 +203,7 @@ namespace Ace
         moduleOStream.flush();
         std::ofstream irFileStream
         { 
-            m_Compilation.OutputPath / (packageName + ".ll") 
+            m_Compilation->OutputPath / (packageName + ".ll") 
         };
         ACE_ASSERT(irFileStream);
         irFileStream << moduleString;
@@ -212,7 +212,7 @@ namespace Ace
         std::error_code errorCode{};
         llvm::raw_fd_ostream bitcodeFileOStream
         { 
-            (m_Compilation.OutputPath / (packageName + ".bc")).string(),
+            (m_Compilation->OutputPath / (packageName + ".bc")).string(),
             errorCode, 
             llvm::sys::fs::OF_None 
         };
@@ -224,8 +224,8 @@ namespace Ace
 
         const std::string llc = 
             "llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj "
-            "-o " + (m_Compilation.OutputPath / (packageName + ".obj")).string() + " " +
-            (m_Compilation.OutputPath / (packageName + ".bc")).string();
+            "-o " + (m_Compilation->OutputPath / (packageName + ".obj")).string() + " " +
+            (m_Compilation->OutputPath / (packageName + ".bc")).string();
         system(llc.c_str());
 
         const auto timeLLCEnd = now();
@@ -234,8 +234,8 @@ namespace Ace
 
         const std::string clang = 
             "clang -lc -lm "
-            "-o " + (m_Compilation.OutputPath / packageName).string() + " " +
-            (m_Compilation.OutputPath / (packageName + ".obj")).string();
+            "-o " + (m_Compilation->OutputPath / packageName).string() + " " +
+            (m_Compilation->OutputPath / (packageName + ".obj")).string();
         system(clang.c_str());
 
         const auto timeClangEnd = now();
@@ -589,7 +589,7 @@ namespace Ace
 
     auto Emitter::EmitNativeTypes() -> void
     {
-        for (auto& typeSymbolPair : m_Compilation.Natives->GetIRTypeSymbolMap())
+        for (auto& typeSymbolPair : m_Compilation->Natives->GetIRTypeSymbolMap())
         {
             m_TypeMap[typeSymbolPair.first] = typeSymbolPair.second;
         }
@@ -606,7 +606,7 @@ namespace Ace
                 return;
 
             m_TypeMap[t_structSymbol] = llvm::StructType::create(
-                *m_Compilation.LLVMContext,
+                *m_Compilation->LLVMContext,
                 t_structSymbol->CreateSignature()
             );
         });
@@ -702,7 +702,7 @@ namespace Ace
                 m_FunctionMap[t_functionSymbol] = function;
 
                 auto* const block = llvm::BasicBlock::Create(
-                    *m_Compilation.LLVMContext,
+                    *m_Compilation->LLVMContext,
                     "",
                     function
                 );

@@ -88,10 +88,10 @@ namespace Ace
     public:
         int ChildCount = 0;
 
-        Scope(const Compilation& t_compilation);
+        Scope(const Compilation* const t_compilation);
         ~Scope();
         
-        auto GetCompilation() const -> const Compilation& { return m_Compilation; }
+        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
         auto GetNestLevel() const -> size_t { return m_NestLevel; }
         auto GetParent() const -> const std::optional<std::shared_ptr<Scope>>& { return m_OptParent; }
         auto GetName() const -> const std::string& { return m_Name; }
@@ -359,7 +359,7 @@ namespace Ace
         auto CollectAllDefinedSymbolsRecursive() const -> std::vector<Symbol::IBase*>;
 
         static auto ResolveOrInstantiateTemplateInstance(
-            const Compilation& t_compilation,
+            const Compilation* const t_compilation,
             Symbol::Template::IBase* const t_template,
             const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes,
             const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
@@ -378,7 +378,7 @@ namespace Ace
 
     private:
         Scope(
-            const Compilation& t_compilation,
+            const Compilation* const t_compilation,
             const std::optional<std::string>& t_optName,
             const std::optional<std::shared_ptr<Scope>>& t_optParent
         );
@@ -439,7 +439,7 @@ namespace Ace
             const std::shared_ptr<const Scope>& t_startScope
         ) -> std::vector<Symbol::Type::IBase*>;
 
-        const Compilation& m_Compilation;
+        const Compilation* m_Compilation{};
         size_t m_NestLevel{};
         std::string m_Name{};
         std::optional<std::shared_ptr<Scope>> m_OptParent{};

@@ -44,7 +44,7 @@ namespace Ace::BoundNode::Expression
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
-            GetCompilation().Natives->StrongPointer__value.GetSymbol(),
+            GetCompilation()->Natives->StrongPointer__value.GetSymbol(),
             std::nullopt,
             { mchLoweredExpression.Value->GetTypeInfo().Symbol->GetWithoutStrongPointer() },
             {}

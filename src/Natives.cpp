@@ -37,7 +37,7 @@ namespace Ace
 
     auto NativeType::Initialize() -> Expected<void>
     {
-        ACE_TRY(symbol, GetCompilation().GlobalScope->ResolveStaticSymbol<Symbol::Type::IBase>(m_Name));
+        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Type::IBase>(m_Name));
 
         if (m_IRTypeGetter.has_value())
         {
@@ -63,14 +63,14 @@ namespace Ace
         auto name = m_Name;
         name.Sections.back().Name = SpecialIdentifier::CreateTemplate(name.Sections.back().Name);
 
-        ACE_TRY(symbol, GetCompilation().GlobalScope->ResolveStaticSymbol<Symbol::Template::Type>(name));
+        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Type>(name));
         m_Symbol = symbol;
         return ExpectedVoid;
     }
 
     auto NativeFunction::Initialize() -> Expected<void>
     {
-        ACE_TRY(symbol, GetCompilation().GlobalScope->ResolveStaticSymbol<Symbol::Function>(m_Name));
+        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Function>(m_Name));
 
         const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
         symbol->BindBody(emittableBody);
@@ -81,7 +81,7 @@ namespace Ace
 
     auto NativeFunctionTemplate::Initialize() -> Expected<void>
     {
-        ACE_TRY(symbol, GetCompilation().GlobalScope->ResolveStaticSymbol<Symbol::Template::Function>(m_Name));
+        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Function>(m_Name));
         m_Symbol = symbol;
         return ExpectedVoid;
     }
@@ -91,7 +91,7 @@ namespace Ace
         auto name = m_Type.GetFullyQualifiedName();
         name.Sections.emplace_back(m_Name);
 
-        ACE_TRY(symbol, GetCompilation().GlobalScope->ResolveStaticSymbol<Symbol::Function>(name));
+        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Function>(name));
 
         const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
         symbol->BindBody(emittableBody);
@@ -105,7 +105,7 @@ namespace Ace
         auto name = m_Type.GetFullyQualifiedName();
         name.Sections.emplace_back(m_Name);
 
-        ACE_TRY(symbol, GetCompilation().GlobalScope->ResolveStaticSymbol<Symbol::Template::Function>(name));
+        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Function>(name));
 
         m_Symbol = symbol;
         return ExpectedVoid;
@@ -127,7 +127,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (t_fromType.GetCompilation().Natives->IsIntTypeSigned(t_fromType))
+                        if (t_fromType.GetCompilation()->Natives->IsIntTypeSigned(t_fromType))
                         {
                             return t_emitter.GetBlockBuilder().Builder.CreateSExtOrTrunc(
                                 t_emitter.EmitLoadArgument(0, t_fromType.GetIRType()),
@@ -270,7 +270,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (t_fromType.GetCompilation().Natives->IsIntTypeSigned(t_toType))
+                        if (t_fromType.GetCompilation()->Natives->IsIntTypeSigned(t_toType))
                         {
                             return t_emitter.GetBlockBuilder().Builder.CreateFPToSI(
                                 t_emitter.EmitLoadArgument(0, t_fromType.GetIRType()),
@@ -327,7 +327,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (t_selfType.GetCompilation().Natives->IsIntTypeSigned(t_selfType))
+                        if (t_selfType.GetCompilation()->Natives->IsIntTypeSigned(t_selfType))
                         {
                             return t_emitter.GetBlockBuilder().Builder.CreateSDiv(
                                 t_emitter.EmitLoadArgument(0, t_selfType.GetIRType()),
@@ -360,7 +360,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (t_selfType.GetCompilation().Natives->IsIntTypeSigned(t_selfType))
+                        if (t_selfType.GetCompilation()->Natives->IsIntTypeSigned(t_selfType))
                         {
                             return t_emitter.GetBlockBuilder().Builder.CreateSRem(
                                 t_emitter.EmitLoadArgument(0, t_selfType.GetIRType()),
@@ -742,7 +742,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (t_fromType.GetCompilation().Natives->IsIntTypeSigned(t_fromType))
+                        if (t_fromType.GetCompilation()->Natives->IsIntTypeSigned(t_fromType))
                         {
                             return t_emitter.GetBlockBuilder().Builder.CreateSIToFP(
                                 t_emitter.EmitLoadArgument(0, t_fromType.GetIRType()),
@@ -1136,7 +1136,7 @@ namespace Ace
     }
 
     Natives::Natives(
-        const Compilation& t_compilation
+        const Compilation* const t_compilation
     ) : Int8
         {
             t_compilation,
@@ -1147,7 +1147,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt8Ty(*t_compilation.LLVMContext);
+                return llvm::Type::getInt8Ty(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1162,7 +1162,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt16Ty(*t_compilation.LLVMContext);
+                return llvm::Type::getInt16Ty(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1177,7 +1177,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt32Ty(*t_compilation.LLVMContext);
+                return llvm::Type::getInt32Ty(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1192,7 +1192,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt64Ty(*t_compilation.LLVMContext);
+                return llvm::Type::getInt64Ty(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1208,7 +1208,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt8Ty(*t_compilation.LLVMContext);
+                return llvm::Type::getInt8Ty(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1223,7 +1223,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt16Ty(*t_compilation.LLVMContext);
+                return llvm::Type::getInt16Ty(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1238,7 +1238,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt32Ty(*t_compilation.LLVMContext);
+                return llvm::Type::getInt32Ty(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1253,7 +1253,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt64Ty(*t_compilation.LLVMContext);
+                return llvm::Type::getInt64Ty(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1269,7 +1269,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt32Ty(*t_compilation.LLVMContext);
+                return llvm::Type::getInt32Ty(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1285,7 +1285,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getFloatTy(*t_compilation.LLVMContext);
+                return llvm::Type::getFloatTy(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1300,7 +1300,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getDoubleTy(*t_compilation.LLVMContext);
+                return llvm::Type::getDoubleTy(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1316,7 +1316,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt1Ty(*t_compilation.LLVMContext);
+                return llvm::Type::getInt1Ty(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1331,7 +1331,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getVoidTy(*t_compilation.LLVMContext);
+                return llvm::Type::getVoidTy(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Unsized,
             NativeCopyabilityKind::NonTrivial,
@@ -1359,7 +1359,7 @@ namespace Ace
             },
             [&]() -> llvm::Type*
             {
-                return llvm::Type::getInt8PtrTy(*t_compilation.LLVMContext);
+                return llvm::Type::getInt8PtrTy(*t_compilation->LLVMContext);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1406,7 +1406,7 @@ namespace Ace
                 std::string string{ "%" PRId32 "\n" };
 
                 auto* const charType = llvm::Type::getInt8Ty(
-                    *t_compilation.LLVMContext
+                    *t_compilation->LLVMContext
                 );
 
                 std::vector<llvm::Constant*> chars(string.size());
@@ -1467,7 +1467,7 @@ namespace Ace
                 std::string string{ "0x%" PRIXPTR "\n" };
 
                 auto* const charType = llvm::Type::getInt8Ty(
-                    *t_compilation.LLVMContext
+                    *t_compilation->LLVMContext
                 );
 
                 std::vector<llvm::Constant*> chars(string.size());
@@ -1503,7 +1503,7 @@ namespace Ace
                 ));
                 arguments.push_back(t_emitter.EmitLoadArgument(
                     0,
-                    llvm::Type::getInt8PtrTy(*t_compilation.LLVMContext)
+                    llvm::Type::getInt8PtrTy(*t_compilation->LLVMContext)
                 ));
 
                 t_emitter.GetBlockBuilder().Builder.CreateCall(
@@ -1898,7 +1898,7 @@ namespace Ace
             {
                 auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFPTrunc(
                     t_emitter.EmitLoadArgument(0, Float64.GetIRType()),
-                    llvm::Type::getFloatTy(*t_compilation.LLVMContext)
+                    llvm::Type::getFloatTy(*t_compilation->LLVMContext)
                 );
 
                 t_emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1935,7 +1935,7 @@ namespace Ace
             {
                 auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFPExt(
                     t_emitter.EmitLoadArgument(0, Float32.GetIRType()),
-                    llvm::Type::getDoubleTy(*t_compilation.LLVMContext)
+                    llvm::Type::getDoubleTy(*t_compilation->LLVMContext)
                 );
 
                 t_emitter.GetBlockBuilder().Builder.CreateRet(value);

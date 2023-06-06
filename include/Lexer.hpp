@@ -50,7 +50,7 @@ namespace Ace
     {
     public:
         Lexer(
-            const Compilation& t_compilation,
+            const Compilation* const t_compilation,
             const size_t& t_fileIndex,
             const std::vector<std::string>& t_lines
         );
@@ -72,7 +72,7 @@ namespace Ace
         auto IsEndOfLine() const -> bool;
         auto IsEndOfFile() const -> bool;
 
-        const Compilation& m_Compilation;
+        const Compilation* m_Compilation{};
         size_t m_FileIndex{};
         std::vector<std::string> m_Lines{};
         

@@ -65,7 +65,7 @@ namespace Ace
         ~TypeName();
 
         auto ToSymbolName(
-            const Compilation& t_compilation
+            const Compilation* const t_compilation
         ) const -> SymbolName;
 
         SymbolName SymbolName;

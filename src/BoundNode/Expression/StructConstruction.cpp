@@ -92,7 +92,7 @@ namespace Ace::BoundNode::Expression
             const auto variableIndex = t_argument.Symbol->GetIndex();
 
             auto* const int32Type = llvm::Type::getInt32Ty(
-                *GetCompilation().LLVMContext
+                *GetCompilation()->LLVMContext
             );
 
             std::vector<llvm::Value*> indexList{};
