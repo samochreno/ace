@@ -99,7 +99,7 @@ namespace Ace
         ACE_LOG_INFO("Binding and verification start");
 
         ACE_LOG_INFO("Native symbol initialization start");
-        ACE_TRY_VOID(t_compilation->Natives->Initialize());
+        t_compilation->Natives->Initialize();
         ACE_LOG_INFO("Native symbol initialization success");
 
         ACE_LOG_INFO("AST binding and verification start");

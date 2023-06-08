@@ -35,9 +35,9 @@ namespace Ace
         FunctionBodyEmitter m_BodyEmitter;
     };
 
-    auto NativeType::Initialize() -> Expected<void>
+    auto NativeType::Initialize() -> void
     {
-        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Type::IBase>(m_Name));
+        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Type::IBase>(m_Name).Unwrap();
 
         if (m_IRTypeGetter.has_value())
         {
@@ -55,60 +55,56 @@ namespace Ace
         }
 
         m_Symbol = symbol;
-        return ExpectedVoid;
     }
 
-    auto NativeTypeTemplate::Initialize() -> Expected<void> 
+    auto NativeTypeTemplate::Initialize() -> void
     {
         auto name = m_Name;
         name.Sections.back().Name = SpecialIdentifier::CreateTemplate(name.Sections.back().Name);
 
-        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Type>(name));
+        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Type>(name).Unwrap();
+
         m_Symbol = symbol;
-        return ExpectedVoid;
     }
 
-    auto NativeFunction::Initialize() -> Expected<void>
+    auto NativeFunction::Initialize() -> void
     {
-        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Function>(m_Name));
+        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Function>(m_Name).Unwrap();
 
         const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
         symbol->BindBody(emittableBody);
 
         m_Symbol = symbol;
-        return ExpectedVoid;
     }
 
-    auto NativeFunctionTemplate::Initialize() -> Expected<void>
+    auto NativeFunctionTemplate::Initialize() -> void
     {
-        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Function>(m_Name));
+        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Function>(m_Name).Unwrap();
+
         m_Symbol = symbol;
-        return ExpectedVoid;
     }
 
-    auto NativeAssociatedFunction::Initialize() -> Expected<void>
+    auto NativeAssociatedFunction::Initialize() -> void
     {
         auto name = m_Type.GetFullyQualifiedName();
         name.Sections.emplace_back(m_Name);
 
-        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Function>(name));
+        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Function>(name).Unwrap();
 
         const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
         symbol->BindBody(emittableBody);
 
         m_Symbol = symbol;
-        return ExpectedVoid;
     }
 
-    auto NativeAssociatedFunctionTemplate::Initialize() -> Expected<void>
+    auto NativeAssociatedFunctionTemplate::Initialize() -> void
     {
         auto name = m_Type.GetFullyQualifiedName();
         name.Sections.emplace_back(m_Name);
 
-        ACE_TRY(symbol, GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Function>(name));
+        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Function>(name).Unwrap();
 
         m_Symbol = symbol;
-        return ExpectedVoid;
     }
 
     namespace I
@@ -1968,15 +1964,15 @@ namespace Ace
     {
     }
 
-    auto Natives::Initialize() -> Expected<void>
+    auto Natives::Initialize() -> void
     {
         InitializeCollectionsOfNatives();
 
-        ACE_TRY_VOID(TransformExpectedVector(m_Natives,
-        [&](INative* const t_native)
+        std::for_each(begin(m_Natives), end(m_Natives),
+        [](INative* const t_native)
         {
-            return t_native->Initialize();
-        }));
+            t_native->Initialize();
+        });
 
         InitializeIRTypeSymbolMap();
 
@@ -1984,8 +1980,6 @@ namespace Ace
         InitializeExplicitFromOperatorMap();
 
         InitializeSignedIntTypesSet();
-
-        return ExpectedVoid;
     }
 
     auto Natives::IsIntTypeSigned(const NativeType& t_intType) const -> bool

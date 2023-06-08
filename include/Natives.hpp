@@ -42,7 +42,7 @@ namespace Ace
 
         virtual auto GetCompilation() const -> const Compilation* = 0;
 
-        virtual auto Initialize() -> Expected<void> = 0;
+        virtual auto Initialize() -> void = 0;
     };
 
     class ITypeableNative : public virtual INative
@@ -91,7 +91,7 @@ namespace Ace
 
         auto GetCompilation() const -> const Compilation* { return m_Compilation; }
 
-        auto Initialize() -> Expected<void> final;
+        auto Initialize() -> void final;
 
         auto GetSymbol() const -> Symbol::Type::IBase*
         {
@@ -132,7 +132,7 @@ namespace Ace
 
         auto GetCompilation() const -> const Compilation* { return m_Compilation; }
 
-        auto Initialize() -> Expected<void> final;
+        auto Initialize() -> void final;
 
         auto GetSymbol() const -> Symbol::Template::Type*
         {
@@ -163,7 +163,7 @@ namespace Ace
 
         auto GetCompilation() const -> const Compilation* { return m_Compilation; }
 
-        auto Initialize() -> Expected<void> final;
+        auto Initialize() -> void final;
 
         auto GetSymbol() const -> Symbol::Function*
         {
@@ -193,7 +193,7 @@ namespace Ace
 
         auto GetCompilation() const -> const Compilation* { return m_Compilation; }
 
-        auto Initialize() -> Expected<void> final;
+        auto Initialize() -> void final;
 
         auto GetSymbol() const -> Symbol::Template::Function*
         {
@@ -224,7 +224,7 @@ namespace Ace
 
         auto GetCompilation() const -> const Compilation* { return m_Type.GetCompilation(); }
 
-        auto Initialize() -> Expected<void> final;
+        auto Initialize() -> void final;
 
         auto GetSymbol() const -> Symbol::Function*
         {
@@ -254,7 +254,7 @@ namespace Ace
 
         auto GetCompilation() const -> const Compilation* { return m_Type.GetCompilation(); }
 
-        auto Initialize() -> Expected<void> final;
+        auto Initialize() -> void final;
 
         auto GetSymbol() const -> Symbol::Template::Function*
         {
@@ -275,7 +275,7 @@ namespace Ace
         Natives(const Compilation* const t_compilation);
         ~Natives() = default;
 
-        auto Initialize() -> Expected<void>;
+        auto Initialize() -> void;
 
         auto GetIRTypeSymbolMap() const -> const std::unordered_map<Symbol::Type::IBase*, llvm::Type*>& { return m_IRTypeSymbolMap; }
         auto GetImplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>& { return m_ImplicitFromOperatorMap; }
