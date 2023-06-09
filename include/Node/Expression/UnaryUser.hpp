@@ -19,7 +19,7 @@ namespace Ace::Node::Expression
     public:
         UnaryUser(
             const std::shared_ptr<const Node::Expression::IBase>& t_expression,
-            const TokenKind::Set& t_operator
+            const TokenKind& t_operator
         ) : m_Expression{ t_expression },
             m_Operator{ t_operator }
         {
@@ -35,6 +35,6 @@ namespace Ace::Node::Expression
             
     private:
         std::shared_ptr<const Node::Expression::IBase> m_Expression{};
-        TokenKind::Set m_Operator{};
+        TokenKind m_Operator{};
     };
 }

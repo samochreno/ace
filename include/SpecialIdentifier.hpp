@@ -48,42 +48,42 @@ namespace Ace::SpecialIdentifier
         inline constexpr const char* ImplicitFrom       = "$operator_implicit_from";
         inline constexpr const char* ExplicitFrom       = "$operator_explicit_from";
 
-        inline const std::unordered_map<TokenKind::Set, std::string> BinaryNameMap
+        inline const std::unordered_map<TokenKind, std::string> BinaryNameMap
         {
-            { TokenKind::New(TokenKind::Asterisk), SpecialIdentifier::Operator::Multiplication },
-            { TokenKind::New(TokenKind::Slash), SpecialIdentifier::Operator::Division },
-            { TokenKind::New(TokenKind::Percent), SpecialIdentifier::Operator::Remainder },
-            { TokenKind::New(TokenKind::Plus), SpecialIdentifier::Operator::Addition },
-            { TokenKind::New(TokenKind::Minus), SpecialIdentifier::Operator::Subtraction },
-            { TokenKind::New(TokenKind::LessThan), SpecialIdentifier::Operator::LessThan },
-            { TokenKind::New(TokenKind::GreaterThan), SpecialIdentifier::Operator::GreaterThan },
-            { TokenKind::New(TokenKind::LessThanEquals), SpecialIdentifier::Operator::LessThanEquals },
-            { TokenKind::New(TokenKind::GreaterThanEquals), SpecialIdentifier::Operator::GreaterThanEquals },
-            { TokenKind::New(TokenKind::LessThanLessThan), SpecialIdentifier::Operator::LeftShift },
-            { TokenKind::New(TokenKind::GreaterThanGreaterThan), SpecialIdentifier::Operator::RightShift },
-            { TokenKind::New(TokenKind::EqualsEquals), SpecialIdentifier::Operator::Equals },
-            { TokenKind::New(TokenKind::ExclamationEquals), SpecialIdentifier::Operator::NotEquals },
-            { TokenKind::New(TokenKind::Caret), SpecialIdentifier::Operator::XOR },
-            { TokenKind::New(TokenKind::VerticalBar), SpecialIdentifier::Operator::OR },
-            { TokenKind::New(TokenKind::Ampersand), SpecialIdentifier::Operator::AND },
+            { TokenKind::Asterisk, SpecialIdentifier::Operator::Multiplication },
+            { TokenKind::Slash, SpecialIdentifier::Operator::Division },
+            { TokenKind::Percent, SpecialIdentifier::Operator::Remainder },
+            { TokenKind::Plus, SpecialIdentifier::Operator::Addition },
+            { TokenKind::Minus, SpecialIdentifier::Operator::Subtraction },
+            { TokenKind::LessThan, SpecialIdentifier::Operator::LessThan },
+            { TokenKind::GreaterThan, SpecialIdentifier::Operator::GreaterThan },
+            { TokenKind::LessThanEquals, SpecialIdentifier::Operator::LessThanEquals },
+            { TokenKind::GreaterThanEquals, SpecialIdentifier::Operator::GreaterThanEquals },
+            { TokenKind::LessThanLessThan, SpecialIdentifier::Operator::LeftShift },
+            { TokenKind::GreaterThanGreaterThan, SpecialIdentifier::Operator::RightShift },
+            { TokenKind::EqualsEquals, SpecialIdentifier::Operator::Equals },
+            { TokenKind::ExclamationEquals, SpecialIdentifier::Operator::NotEquals },
+            { TokenKind::Caret, SpecialIdentifier::Operator::XOR },
+            { TokenKind::VerticalBar, SpecialIdentifier::Operator::OR },
+            { TokenKind::Ampersand, SpecialIdentifier::Operator::AND },
 
-            { TokenKind::New(TokenKind::PlusEquals), SpecialIdentifier::Operator::Addition },
-            { TokenKind::New(TokenKind::MinusEquals), SpecialIdentifier::Operator::Subtraction },
-            { TokenKind::New(TokenKind::AsteriskEquals), SpecialIdentifier::Operator::Multiplication },
-            { TokenKind::New(TokenKind::SlashEquals), SpecialIdentifier::Operator::Division },
-            { TokenKind::New(TokenKind::PercentEquals), SpecialIdentifier::Operator::Remainder },
-            { TokenKind::New(TokenKind::LessThanLessThanEquals), SpecialIdentifier::Operator::LeftShift },
-            { TokenKind::New(TokenKind::GreaterThanGreaterThanEquals), SpecialIdentifier::Operator::RightShift },
-            { TokenKind::New(TokenKind::CaretEquals), SpecialIdentifier::Operator::XOR },
-            { TokenKind::New(TokenKind::VerticalBarEquals), SpecialIdentifier::Operator::OR },
-            { TokenKind::New(TokenKind::AmpersandEquals), SpecialIdentifier::Operator::AND },
+            { TokenKind::PlusEquals, SpecialIdentifier::Operator::Addition },
+            { TokenKind::MinusEquals, SpecialIdentifier::Operator::Subtraction },
+            { TokenKind::AsteriskEquals, SpecialIdentifier::Operator::Multiplication },
+            { TokenKind::SlashEquals, SpecialIdentifier::Operator::Division },
+            { TokenKind::PercentEquals, SpecialIdentifier::Operator::Remainder },
+            { TokenKind::LessThanLessThanEquals, SpecialIdentifier::Operator::LeftShift },
+            { TokenKind::GreaterThanGreaterThanEquals, SpecialIdentifier::Operator::RightShift },
+            { TokenKind::CaretEquals, SpecialIdentifier::Operator::XOR },
+            { TokenKind::VerticalBarEquals, SpecialIdentifier::Operator::OR },
+            { TokenKind::AmpersandEquals, SpecialIdentifier::Operator::AND },
         };
 
-        inline const std::unordered_map<TokenKind::Set, std::string> UnaryNameMap
+        inline const std::unordered_map<TokenKind, std::string> UnaryNameMap
         {
-            { TokenKind::New(TokenKind::Plus), SpecialIdentifier::Operator::UnaryPlus },
-            { TokenKind::New(TokenKind::Minus), SpecialIdentifier::Operator::UnaryNegation },
-            { TokenKind::New(TokenKind::Tilde), SpecialIdentifier::Operator::OneComplement },
+            { TokenKind::Plus, SpecialIdentifier::Operator::UnaryPlus },
+            { TokenKind::Minus, SpecialIdentifier::Operator::UnaryNegation },
+            { TokenKind::Tilde, SpecialIdentifier::Operator::OneComplement },
         };
     }
 }

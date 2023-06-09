@@ -2,8 +2,10 @@
 
 ## 💥 High Priority
 
+- [ ] Remove pragmas
+- [ ] Move ParseData to Parser
 - Add error messages to make debugging easier:
-  - [ ] Add source location to lexing
+  - [ ] Consider making errors just enums not full types
   - [ ] ❓ Remove second typechecking pass (check why `5i32 + 10i16` fails to compile)
   - [ ] Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
 - [ ] Rename `found...It`

@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "DiagnosticsBase.hpp"
+#include "SourceLocation.hpp"
 #include "Asserts.hpp"
 #include "MaybeChanged.hpp"
 
@@ -43,6 +44,7 @@ namespace Ace
         virtual ~NoneError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return std::nullopt; }
     };
 
     template<typename TValue, typename TError = NoneError>

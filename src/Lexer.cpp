@@ -1,9 +1,8 @@
 #include "Lexer.hpp"
 
+#include <memory>
 #include <vector>
 #include <string>
-#include <stdexcept>
-#include <limits>
 
 #include "Token.hpp"
 #include "Diagnostics.hpp"
@@ -18,312 +17,373 @@ namespace Ace
     {
         ScanContext(
             const Compilation* const t_compilation,
+            const size_t& t_fileIndex,
+            const size_t& t_lineIndex,
             const std::string::const_iterator& t_it,
             const std::string::const_iterator& t_itEnd
         ) : Compilation{ t_compilation },
+            FileIndex{ t_fileIndex },
+            LineIndex{ t_lineIndex },
             Iterator{ t_it },
             IteratorEnd{ t_itEnd }
         {
         }
 
-        const Compilation* const Compilation;
+        const Compilation* Compilation{};
+        size_t FileIndex{};
+        size_t LineIndex{};
+
         std::string::const_iterator Iterator{};
         std::string::const_iterator IteratorEnd{};
     };
 
     static auto CreateNativeTypeName(
+        const ScanContext& t_context,
+        const SourceLocation& t_sourceLocation,
         const NativeType& t_nativeType
-    ) -> std::vector<TokenKindStringPair>
+    ) -> std::vector<Token>
     {
         const auto name = t_nativeType.GetFullyQualifiedName();
 
-        std::vector<TokenKindStringPair> kindStringPairs{};
+        std::vector<Token> tokens{};
 
         ACE_ASSERT(name.IsGlobal);
-        kindStringPairs.emplace_back(
-            TokenKind::New(TokenKind::ColonColon),
-            std::string{}
+        tokens.emplace_back(
+            t_sourceLocation,
+            TokenKind::ColonColon
         );
 
-        for (size_t i = 0; i < name.Sections.size(); i++)
+        for(size_t i = 0; i < name.Sections.size(); i++)
         {
             if (i != 0)
             {
-                kindStringPairs.emplace_back(
-                    TokenKind::New(TokenKind::ColonColon),
-                    std::string{}
+                tokens.emplace_back(
+                    t_sourceLocation,
+                    TokenKind::ColonColon
                 );
             }
 
-            kindStringPairs.emplace_back(
-                TokenKind::New(TokenKind::Identifier),
+            tokens.emplace_back(
+                t_sourceLocation,
+                TokenKind::Identifier,
                 name.Sections.at(i).Name
             );
         }
 
-        return kindStringPairs;
+        return tokens;
     }
 
     static auto CreateKeyword(
         const ScanContext& t_context,
-        const std::string& t_string
-    ) -> std::optional<ScanResult>
+        const std::string& t_string,
+        const SourceLocation& t_sourceLocation
+    ) -> std::optional<std::vector<Token>>
     {
         const auto& natives = t_context.Compilation->Natives;
 
-        std::vector<TokenKindStringPair> kindStringPairs{};
-        kindStringPairs.emplace_back(
-            TokenKind::New(TokenKind::None),
-            std::string{}
-        );
+        Token token
+        {
+            t_sourceLocation,
+            TokenKind::None,
+        };
 
-        if      (t_string == Keyword::If)          kindStringPairs.front().Kind = TokenKind::New(TokenKind::IfKeyword);
-        else if (t_string == Keyword::Else)        kindStringPairs.front().Kind = TokenKind::New(TokenKind::ElseKeyword);
-        else if (t_string == Keyword::Elif)        kindStringPairs.front().Kind = TokenKind::New(TokenKind::ElifKeyword);
-        else if (t_string == Keyword::While)       kindStringPairs.front().Kind = TokenKind::New(TokenKind::WhileKeyword);
-        else if (t_string == Keyword::Return)      kindStringPairs.front().Kind = TokenKind::New(TokenKind::ReturnKeyword);
-        else if (t_string == Keyword::Struct)      kindStringPairs.front().Kind = TokenKind::New(TokenKind::StructKeyword);
-        else if (t_string == Keyword::Operator)    kindStringPairs.front().Kind = TokenKind::New(TokenKind::OperatorKeyword);
-        else if (t_string == Keyword::Public)      kindStringPairs.front().Kind = TokenKind::New(TokenKind::PublicKeyword);
-        else if (t_string == Keyword::Extern)      kindStringPairs.front().Kind = TokenKind::New(TokenKind::ExternKeyword);
-        else if (t_string == Keyword::Cast)        kindStringPairs.front().Kind = TokenKind::New(TokenKind::CastKeyword);
-        else if (t_string == Keyword::Exit)        kindStringPairs.front().Kind = TokenKind::New(TokenKind::ExitKeyword);
-        else if (t_string == Keyword::Assert)      kindStringPairs.front().Kind = TokenKind::New(TokenKind::AssertKeyword);
-        else if (t_string == Keyword::Module)      kindStringPairs.front().Kind = TokenKind::New(TokenKind::ModuleKeyword);
-        else if (t_string == Keyword::Impl)        kindStringPairs.front().Kind = TokenKind::New(TokenKind::ImplKeyword);
-        else if (t_string == Keyword::Expl)        kindStringPairs.front().Kind = TokenKind::New(TokenKind::ExplKeyword);
-        else if (t_string == Keyword::AddressOf)   kindStringPairs.front().Kind = TokenKind::New(TokenKind::AddressOfKeyword);
-        else if (t_string == Keyword::SizeOf)      kindStringPairs.front().Kind = TokenKind::New(TokenKind::SizeOfKeyword);
-        else if (t_string == Keyword::DerefAs)     kindStringPairs.front().Kind = TokenKind::New(TokenKind::DerefAsKeyword);
-        else if (t_string == Keyword::Box)         kindStringPairs.front().Kind = TokenKind::New(TokenKind::BoxKeyword);
-        else if (t_string == Keyword::Unbox)       kindStringPairs.front().Kind = TokenKind::New(TokenKind::UnboxKeyword);
-        else if (t_string == Keyword::True)        kindStringPairs.front().Kind = TokenKind::New(TokenKind::TrueKeyword);
-        else if (t_string == Keyword::False)       kindStringPairs.front().Kind = TokenKind::New(TokenKind::FalseKeyword);
+        if      (t_string == Keyword::If)        token.Kind = TokenKind::IfKeyword;
+        else if (t_string == Keyword::Else)      token.Kind = TokenKind::ElseKeyword;
+        else if (t_string == Keyword::Elif)      token.Kind = TokenKind::ElifKeyword;
+        else if (t_string == Keyword::While)     token.Kind = TokenKind::WhileKeyword;
+        else if (t_string == Keyword::Return)    token.Kind = TokenKind::ReturnKeyword;
+        else if (t_string == Keyword::Struct)    token.Kind = TokenKind::StructKeyword;
+        else if (t_string == Keyword::Operator)  token.Kind = TokenKind::OperatorKeyword;
+        else if (t_string == Keyword::Public)    token.Kind = TokenKind::PublicKeyword;
+        else if (t_string == Keyword::Extern)    token.Kind = TokenKind::ExternKeyword;
+        else if (t_string == Keyword::Cast)      token.Kind = TokenKind::CastKeyword;
+        else if (t_string == Keyword::Exit)      token.Kind = TokenKind::ExitKeyword;
+        else if (t_string == Keyword::Assert)    token.Kind = TokenKind::AssertKeyword;
+        else if (t_string == Keyword::Module)    token.Kind = TokenKind::ModuleKeyword;
+        else if (t_string == Keyword::Impl)      token.Kind = TokenKind::ImplKeyword;
+        else if (t_string == Keyword::Expl)      token.Kind = TokenKind::ExplKeyword;
+        else if (t_string == Keyword::AddressOf) token.Kind = TokenKind::AddressOfKeyword;
+        else if (t_string == Keyword::SizeOf)    token.Kind = TokenKind::SizeOfKeyword;
+        else if (t_string == Keyword::DerefAs)   token.Kind = TokenKind::DerefAsKeyword;
+        else if (t_string == Keyword::Box)       token.Kind = TokenKind::BoxKeyword;
+        else if (t_string == Keyword::Unbox)     token.Kind = TokenKind::UnboxKeyword;
+        else if (t_string == Keyword::True)      token.Kind = TokenKind::TrueKeyword;
+        else if (t_string == Keyword::False)     token.Kind = TokenKind::FalseKeyword;
 
-        else if (t_string == Keyword::Int8)        kindStringPairs = CreateNativeTypeName(natives->Int8);
-        else if (t_string == Keyword::Int16)       kindStringPairs = CreateNativeTypeName(natives->Int16);
-        else if (t_string == Keyword::Int32)       kindStringPairs = CreateNativeTypeName(natives->Int32);
-        else if (t_string == Keyword::Int64)       kindStringPairs = CreateNativeTypeName(natives->Int64);
-        else if (t_string == Keyword::UInt8)       kindStringPairs = CreateNativeTypeName(natives->UInt8);
-        else if (t_string == Keyword::UInt16)      kindStringPairs = CreateNativeTypeName(natives->UInt16);
-        else if (t_string == Keyword::UInt32)      kindStringPairs = CreateNativeTypeName(natives->UInt32);
-        else if (t_string == Keyword::UInt64)      kindStringPairs = CreateNativeTypeName(natives->UInt64);
-        else if (t_string == Keyword::Int)         kindStringPairs = CreateNativeTypeName(natives->Int);
-        else if (t_string == Keyword::Float32)     kindStringPairs = CreateNativeTypeName(natives->Float32);
-        else if (t_string == Keyword::Float64)     kindStringPairs = CreateNativeTypeName(natives->Float64);
-        else if (t_string == Keyword::Bool)        kindStringPairs = CreateNativeTypeName(natives->Bool);
-        else if (t_string == Keyword::Void)        kindStringPairs = CreateNativeTypeName(natives->Void);
+        else if (t_string == Keyword::Int8)    return CreateNativeTypeName(t_context, t_sourceLocation, natives->Int8);
+        else if (t_string == Keyword::Int16)   return CreateNativeTypeName(t_context, t_sourceLocation, natives->Int16);
+        else if (t_string == Keyword::Int32)   return CreateNativeTypeName(t_context, t_sourceLocation, natives->Int32);
+        else if (t_string == Keyword::Int64)   return CreateNativeTypeName(t_context, t_sourceLocation, natives->Int64);
+        else if (t_string == Keyword::UInt8)   return CreateNativeTypeName(t_context, t_sourceLocation, natives->UInt8);
+        else if (t_string == Keyword::UInt16)  return CreateNativeTypeName(t_context, t_sourceLocation, natives->UInt16);
+        else if (t_string == Keyword::UInt32)  return CreateNativeTypeName(t_context, t_sourceLocation, natives->UInt32);
+        else if (t_string == Keyword::UInt64)  return CreateNativeTypeName(t_context, t_sourceLocation, natives->UInt64);
+        else if (t_string == Keyword::Int)     return CreateNativeTypeName(t_context, t_sourceLocation, natives->Int);
+        else if (t_string == Keyword::Float32) return CreateNativeTypeName(t_context, t_sourceLocation, natives->Float32);
+        else if (t_string == Keyword::Float64) return CreateNativeTypeName(t_context, t_sourceLocation, natives->Float64);
+        else if (t_string == Keyword::Bool)    return CreateNativeTypeName(t_context, t_sourceLocation, natives->Bool);
+        else if (t_string == Keyword::Void)    return CreateNativeTypeName(t_context, t_sourceLocation, natives->Void);
 
         else return std::nullopt;
 
-        return ScanResult
-        {
-            t_string.size(),
-            kindStringPairs,
-        };
+        return std::vector{ token };
     }
 
     static auto ScanIdentifier(
         const ScanContext& t_context
-    ) -> Diagnosed<ScanResult, ILexerDiagnostic>
+    ) -> std::vector<Token>
     {
         auto it = t_context.Iterator;
 
-        std::string string{};
+        ACE_ASSERT(IsInAlphabet(*it) || (*it == '_'));
+
         while (it != t_context.IteratorEnd)
         {
-            const auto& character = *it;
-
             if (
-                !IsInAlphabet(character) &&
-                !IsNumber(character) &&
-                !(character == '_')
+                !IsInAlphabet(*it) &&
+                !IsNumber(*it) &&
+                !(*it == '_')
                 )
                 break;
 
-            string += character;
             ++it;
         }
 
-        const auto optKeywordScanResult = CreateKeyword(t_context, string);
+        const SourceLocation sourceLocation
+        {
+            t_context.Compilation,
+            t_context.FileIndex,
+            t_context.LineIndex,
+            t_context.Iterator,
+            it,
+        };
 
-        const auto scanResult = optKeywordScanResult.has_value() ?
-            optKeywordScanResult.value() :
-            ScanResult
-            {
-                string.size(),
-                TokenKindStringPair
-                {
-                    TokenKind::New(TokenKind::Identifier),
-                    string,
-                },
-            };
+        const std::string string{ t_context.Iterator, it };
 
-        return Diagnosed<ScanResult, ILexerDiagnostic>{ scanResult };
+        const Token identifierToken
+        {
+            sourceLocation,
+            TokenKind::Identifier,
+            string,
+        };
+
+        const auto optKeywordTokens = CreateKeyword(
+            t_context,
+            string,
+            sourceLocation
+        );
+
+        const auto tokens = optKeywordTokens.has_value() ?
+            optKeywordTokens.value() :
+            std::vector{ identifierToken };
+
+        return tokens;
     }
 
     static auto CreateNumericLiteralTokenKind(
-        const std::string& t_suffix
-    ) -> std::optional<TokenKind::Set>
+        const Token& t_suffix
+    ) -> Expected<TokenKind, ILexerDiagnostic>
     {
-        if (t_suffix.empty())  return TokenKind::New(TokenKind::Int);
-
-        if (t_suffix == "i8")  return TokenKind::New(TokenKind::Int8);
-        if (t_suffix == "i16") return TokenKind::New(TokenKind::Int16);
-        if (t_suffix == "i32") return TokenKind::New(TokenKind::Int32);
-        if (t_suffix == "i64") return TokenKind::New(TokenKind::Int64);
+        if (t_suffix.String == "i8")  return TokenKind::Int8;
+        if (t_suffix.String == "i16") return TokenKind::Int16;
+        if (t_suffix.String == "i32") return TokenKind::Int32;
+        if (t_suffix.String == "i64") return TokenKind::Int64;
         
-        if (t_suffix == "u8")  return TokenKind::New(TokenKind::UInt8);
-        if (t_suffix == "u16") return TokenKind::New(TokenKind::UInt16);
-        if (t_suffix == "u32") return TokenKind::New(TokenKind::UInt32);
-        if (t_suffix == "u64") return TokenKind::New(TokenKind::UInt64);
-        if (t_suffix == "u64") return TokenKind::New(TokenKind::UInt64);
+        if (t_suffix.String == "u8")  return TokenKind::UInt8;
+        if (t_suffix.String == "u16") return TokenKind::UInt16;
+        if (t_suffix.String == "u32") return TokenKind::UInt32;
+        if (t_suffix.String == "u64") return TokenKind::UInt64;
+        if (t_suffix.String == "u64") return TokenKind::UInt64;
 
-        if (t_suffix == "f32") return TokenKind::New(TokenKind::Float32);
-        if (t_suffix == "f64") return TokenKind::New(TokenKind::Float64);
+        if (t_suffix.String == "f32") return TokenKind::Float32;
+        if (t_suffix.String == "f64") return TokenKind::Float64;
 
-        return std::nullopt;
+        return std::make_shared<const InvalidNumericLiteralTypeSuffixError>(
+            t_suffix.OptSourceLocation.value()
+        );
     }
 
     static auto ScanNumericLiteralNumber(
         const ScanContext& t_context
-    ) -> Diagnosed<ScanResult, ILexerDiagnostic>
+    ) -> Token
     {
-        std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
         auto it = t_context.Iterator;
+
+        ACE_ASSERT(IsNumber(*it));
 
         std::string string{};
         bool hasDecimalPoint = false;
-        while (IsNumber(*it) || (*it == '.'))
+        while (
+            IsNumber(*it) ||
+            (!hasDecimalPoint && (*it == '.') && IsNumber(*(it + 1)))
+            )
         {
-            const auto& character = *it;
-
-            const bool isCharacterDecimalPoint = character == '.';
-            const bool hasMultipleDecimalPoints = isCharacterDecimalPoint && hasDecimalPoint;
-
-            if (isCharacterDecimalPoint)
+            if (*it == '.')
             {
                 hasDecimalPoint = true;
             }
 
-            if (hasMultipleDecimalPoints)
-            {
-                diagnostics.push_back(std::make_shared<const MultipleDecimalPointsInNumericLiteralError>(
-                    Distance(t_context.Iterator, it)
-                ));
-            }
-            else
-            {
-                string += *it;
-            }
-
+            string += *it;
             ++it;
         }
 
-        return Diagnosed
+        const SourceLocation sourceLocation
         {
-            ScanResult
-            {
-                Distance(t_context.Iterator, it),
-                TokenKindStringPair
-                {
-                    TokenKind::None,
-                    string,
-                },
-            },
-            diagnostics,
+            t_context.Compilation,
+            t_context.FileIndex,
+            t_context.LineIndex,
+            t_context.Iterator,
+            it,
+        };
+
+        return Token
+        {
+            sourceLocation,
+            TokenKind::None,
+            string,
         };
     }
 
-    static auto ScanTypeSuffix(
+    static auto ScanNumericLiteralSuffix(
         const ScanContext& t_context
-    ) -> std::string
+    ) -> Token
     {
         auto it = t_context.Iterator;
 
-        std::string string{};
-        if (IsInAlphabet(*it))
-        {
-            string += *it;
-            ++it;
+        ACE_ASSERT(IsInAlphabet(*it));
+        ++it;
 
-            while (IsNumber(*it))
-            {
-                string += *it;
-                ++it;
-            }
+        while (IsNumber(*it))
+        {
+            ++it;
         }
 
-        return string;
+        const SourceLocation sourceLocation
+        {
+            t_context.Compilation,
+            t_context.FileIndex,
+            t_context.LineIndex,
+            t_context.Iterator,
+            it,
+        };
+
+        return Token
+        {
+            sourceLocation,
+            TokenKind::None,
+            std::string{ t_context.Iterator, it },
+        };
     }
 
     static auto ScanNumericLiteral(
         const ScanContext& t_context
-    ) -> Diagnosed<ScanResult, ILexerDiagnostic>
+    ) -> Diagnosed<Token, ILexerDiagnostic>
     {
         std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
         auto it = t_context.Iterator;
 
-        const auto dgnNumberScanResult = ScanNumericLiteralNumber({
+        auto numberToken = ScanNumericLiteralNumber({
             t_context.Compilation,
+            t_context.FileIndex,
+            t_context.LineIndex,
             it,
-            t_context.IteratorEnd
+            t_context.IteratorEnd,
         });
-        diagnostics.insert(
-            end(diagnostics),
-            begin(dgnNumberScanResult.GetDiagnostics()),
-            end  (dgnNumberScanResult.GetDiagnostics())
-        );
-        it += dgnNumberScanResult.Unwrap().Length;
+        it = numberToken.OptSourceLocation->IteratorEnd;
 
-        const auto typeSuffix = ScanTypeSuffix({
-            t_context.Compilation,
-            it,
-            t_context.IteratorEnd
-        });
-        it += typeSuffix.size();
-
-        const auto optTokenKind = CreateNumericLiteralTokenKind(
-            typeSuffix
-        );
-        if (!optTokenKind.has_value())
+        const auto optTypeSuffix = [&]() -> std::optional<Token>
         {
-            diagnostics.push_back(std::make_shared<const InvalidNumericLiteralTypeSuffix>(
-                dgnNumberScanResult.Unwrap().Length,
-                typeSuffix.size()
-            ));
+            if (!IsInAlphabet(*it))
+                return std::nullopt;
+
+            return ScanNumericLiteralSuffix({
+                t_context.Compilation,
+                t_context.FileIndex,
+                t_context.LineIndex,
+                it,
+                t_context.IteratorEnd
+            });
+        }();
+        if (optTypeSuffix.has_value())
+        {
+            it = optTypeSuffix.value().OptSourceLocation.value().IteratorEnd;
         }
 
-        // TODO: assert is float if has decimal point
-
-        const auto tokenKind = optTokenKind.has_value() ?
-            optTokenKind.value() : 
-            TokenKind::New(TokenKind::ErrorNumber);
-
-        const ScanResult scanResult
+        const auto tokenKind = [&]() -> TokenKind
         {
-            dgnNumberScanResult.Unwrap().Length + typeSuffix.size(),
-            TokenKindStringPair
+            if (!optTypeSuffix.has_value())
             {
-                tokenKind,
-                dgnNumberScanResult.Unwrap().KindStringPairs.front().String,
-            },
+                return TokenKind::Int;
+            }
+
+            const auto expTokenKind = CreateNumericLiteralTokenKind(
+                optTypeSuffix.value()
+            );
+            if (!expTokenKind)
+            {
+                diagnostics.push_back(expTokenKind.GetError());
+                return TokenKind::Int;
+            }
+
+            return expTokenKind.Unwrap();
+        }();
+
+        const auto decimalPointPos = numberToken.String.find_first_of('.');
+        if (decimalPointPos != std::string::npos)
+        {
+            const bool isFloatKind =
+                (tokenKind == TokenKind::Float32) ||
+                (tokenKind == TokenKind::Float64);
+
+            if (!isFloatKind)
+            {
+                const SourceLocation sourceLocation
+                {
+                    t_context.Compilation,
+                    t_context.FileIndex,
+                    t_context.LineIndex,
+                    t_context.Iterator + decimalPointPos,
+                    t_context.Iterator + decimalPointPos + 1,
+                };
+
+                diagnostics.push_back(std::make_shared<const DecimalPointInNonFloatNumericLiteralError>(
+                    sourceLocation
+                ));
+
+                numberToken.String.erase(decimalPointPos);
+            } 
+        }
+
+        const SourceLocation sourceLocation
+        {
+            t_context.Compilation,
+            t_context.FileIndex,
+            t_context.LineIndex,
+            t_context.Iterator,
+            it, 
+        };
+
+        const Token token
+        {
+            sourceLocation,
+            tokenKind,
+            numberToken.String,
         };
 
         return Diagnosed
         {
-            scanResult,
+            token,
             diagnostics,
         };
     }
 
     static auto ScanDefault(
         const ScanContext& t_context
-    ) -> Expected<Diagnosed<ScanResult, ILexerDiagnostic>, ILexerScanDiagnostic>
+    ) -> Expected<Diagnosed<Token, ILexerDiagnostic>, ILexerDiagnostic>
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY(kind, ([&]() -> Expected<TokenKind::Set, ILexerScanDiagnostic>
+        ACE_TRY(tokenKind, ([&]() -> Expected<TokenKind, ILexerDiagnostic>
         {
             switch (*it)
             {
@@ -334,11 +394,11 @@ namespace Ace
                     if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::EqualsEquals);
+                        return TokenKind::EqualsEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::Equals);
+                        return TokenKind::Equals;
                     }
                 }
 
@@ -349,11 +409,11 @@ namespace Ace
                     if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::PlusEquals);
+                        return TokenKind::PlusEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::Plus);
+                        return TokenKind::Plus;
                     }
                 }
 
@@ -364,16 +424,16 @@ namespace Ace
                     if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::MinusEquals);
+                        return TokenKind::MinusEquals;
                     }
                     else if (*it == '>')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::MinusGreaterThan);
+                        return TokenKind::MinusGreaterThan;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::Minus);
+                        return TokenKind::Minus;
                     }
                 }
 
@@ -384,11 +444,11 @@ namespace Ace
                     if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::AsteriskEquals);
+                        return TokenKind::AsteriskEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::Asterisk);
+                        return TokenKind::Asterisk;
                     }
                 }
 
@@ -399,11 +459,11 @@ namespace Ace
                     if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::SlashEquals);
+                        return TokenKind::SlashEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::Slash);
+                        return TokenKind::Slash;
                     }
                 }
 
@@ -414,11 +474,11 @@ namespace Ace
                     if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::PercentEquals);
+                        return TokenKind::PercentEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::Percent);
+                        return TokenKind::Percent;
                     }
                 }
 
@@ -433,21 +493,21 @@ namespace Ace
                         if (*it == '=')
                         {
                             ++it;
-                            return TokenKind::New(TokenKind::LessThanLessThanEquals);
+                            return TokenKind::LessThanLessThanEquals;
                         }
                         else
                         {
-                            return TokenKind::New(TokenKind::LessThanLessThan);
+                            return TokenKind::LessThanLessThan;
                         }
                     }
                     else if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::LessThanEquals);
+                        return TokenKind::LessThanEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::LessThan);
+                        return TokenKind::LessThan;
                     }
                 }
 
@@ -462,21 +522,21 @@ namespace Ace
                         if (*it == '=')
                         {
                             ++it;
-                            return TokenKind::New(TokenKind::GreaterThanGreaterThanEquals);
+                            return TokenKind::GreaterThanGreaterThanEquals;
                         }
                         else
                         {
-                            return TokenKind::New(TokenKind::GreaterThanGreaterThan);
+                            return TokenKind::GreaterThanGreaterThan;
                         }
                     }
                     else if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::GreaterThanEquals);
+                        return TokenKind::GreaterThanEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::GreaterThan);
+                        return TokenKind::GreaterThan;
                     }
                 }
 
@@ -487,16 +547,16 @@ namespace Ace
                     if (*it == '&')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::AmpersandAmpersand);
+                        return TokenKind::AmpersandAmpersand;
                     }
                     else if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::AmpersandEquals);
+                        return TokenKind::AmpersandEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::Ampersand);
+                        return TokenKind::Ampersand;
                     }
                 }
 
@@ -507,11 +567,11 @@ namespace Ace
                     if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::CaretEquals);
+                        return TokenKind::CaretEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::Caret);
+                        return TokenKind::Caret;
                     }
                 }
 
@@ -522,16 +582,16 @@ namespace Ace
                     if (*it == '|')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::VerticalBarVerticalBar);
+                        return TokenKind::VerticalBarVerticalBar;
                     }
                     else if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::VerticalBarEquals);
+                        return TokenKind::VerticalBarEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::VerticalBar);
+                        return TokenKind::VerticalBar;
                     }
                 }
 
@@ -542,30 +602,30 @@ namespace Ace
                     if (*it == ':')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::ColonColon);
+                        return TokenKind::ColonColon;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::Colon);
+                        return TokenKind::Colon;
                     }
                 }
 
                 case '.':
                 {
                     ++it;
-                    return TokenKind::New(TokenKind::Dot);
+                    return TokenKind::Dot;
                 }
 
                 case ',':
                 {
                     ++it;
-                    return TokenKind::New(TokenKind::Comma);
+                    return TokenKind::Comma;
                 }
 
                 case ';':
                 {
                     ++it;
-                    return TokenKind::New(TokenKind::Semicolon);
+                    return TokenKind::Semicolon;
                 }
 
                 case '!':
@@ -575,89 +635,99 @@ namespace Ace
                     if (*it == '=')
                     {
                         ++it;
-                        return TokenKind::New(TokenKind::ExclamationEquals);
+                        return TokenKind::ExclamationEquals;
                     }
                     else
                     {
-                        return TokenKind::New(TokenKind::Exclamation);
+                        return TokenKind::Exclamation;
                     }
                 }
 
                 case '~':
                 {
                     ++it;
-                    return TokenKind::New(TokenKind::Tilde);
+                    return TokenKind::Tilde;
                 }
 
 
                 case '(':
                 {
                     ++it;
-                    return TokenKind::New(TokenKind::OpenParen);
+                    return TokenKind::OpenParen;
                 }
 
                 case ')':
                 {
                     ++it;
-                    return TokenKind::New(TokenKind::CloseParen);
+                    return TokenKind::CloseParen;
                 }
 
                 case '{':
                 {
                     ++it;
-                    return TokenKind::New(TokenKind::OpenBrace);
+                    return TokenKind::OpenBrace;
                 }
 
                 case '}':
                 {
                     ++it;
-                    return TokenKind::New(TokenKind::CloseBrace);
+                    return TokenKind::CloseBrace;
                 }
 
                 case '[':
                 {
                     ++it;
-                    return TokenKind::New(TokenKind::OpenBracket);
+                    return TokenKind::OpenBracket;
                 }
 
                 case ']':
                 {
                     ++it;
-                    return TokenKind::New(TokenKind::CloseBracket);
+                    return TokenKind::CloseBracket;
                 }
 
                 default:
                 {
-                    return std::make_shared<const UnexpectedCharacterError>();
+                    const SourceLocation sourceLocation
+                    {
+                        t_context.Compilation,
+                        t_context.FileIndex,
+                        t_context.LineIndex,
+                        it,
+                        it + 1,
+                    };
+
+                    return std::make_shared<const UnexpectedCharacterError>(
+                        sourceLocation
+                    );
                 }
             }
         }()));
 
-        const TokenKindStringPair kindStringPair
+        const SourceLocation sourceLocation
         {
-            kind,
-            std::string{ t_context.Iterator, it },
+            t_context.Compilation,
+            t_context.FileIndex,
+            t_context.LineIndex,
+            t_context.Iterator,
+            it,
         };
 
-        const ScanResult scanResult
+        const Token token
         {
-            kindStringPair.String.length(),
-            kindStringPair,
+            sourceLocation,
+            tokenKind,
         };
 
-        return Expected<Diagnosed<ScanResult, ILexerDiagnostic>, ILexerScanDiagnostic>
+        return Expected<Diagnosed<Token, ILexerDiagnostic>, ILexerDiagnostic>
         {
-            Diagnosed
-            {
-                scanResult,
-                std::vector<std::shared_ptr<const ILexerDiagnostic>>{},
-            }
+            token
         };
     }
 
     static auto ScanString(
         const ScanContext& t_context
-    ) -> Diagnosed<ScanResult, ILexerDiagnostic>
+    ) -> Diagnosed<Token, ILexerDiagnostic>
     {
         std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
         auto it = t_context.Iterator;
@@ -669,8 +739,17 @@ namespace Ace
         {
             if (it == t_context.IteratorEnd)
             {
+                const SourceLocation sourceLocation
+                {
+                    t_context.Compilation,
+                    t_context.FileIndex,
+                    t_context.LineIndex,
+                    t_context.Iterator,
+                    it,
+                };
+
                 diagnostics.push_back(std::make_shared<const UnclosedStringLiteralError>(
-                    Distance(t_context.Iterator, it) - 1
+                    sourceLocation
                 ));
 
                 break;
@@ -684,45 +763,69 @@ namespace Ace
             ++it;
         }
 
-        const ScanResult scanResult
+        const SourceLocation sourceLocation
         {
-            Distance(t_context.Iterator, it),
-            TokenKindStringPair
-            {
-                TokenKind::New(TokenKind::String),
-                std::string{ t_context.Iterator, it + 1 },
-            },
+            t_context.Compilation,
+            t_context.FileIndex,
+            t_context.LineIndex,
+            t_context.Iterator,
+            it,
+        };
+
+        const Token token
+        {
+            sourceLocation,
+            TokenKind::String,
+            std::string{ t_context.Iterator + 1, it },
         };
 
         return Diagnosed
         {
-            scanResult,
+            token,
             diagnostics,
         };
     }
 
     static auto Scan(
         const ScanContext& t_context
-    ) -> Expected<Diagnosed<ScanResult, ILexerDiagnostic>, ILexerScanDiagnostic>
+    ) -> Expected<Diagnosed<std::vector<Token>, ILexerDiagnostic>, ILexerDiagnostic>
     {
-        const auto firstCharacter = *t_context.Iterator;
+        const auto character = *t_context.Iterator;
 
-        if (firstCharacter == '"')
+        if (character == '"')
         {
-            return ScanString(t_context);
+            const auto dgnString = ScanString(t_context);
+            return Diagnosed<std::vector<Token>, ILexerDiagnostic>
+            {
+                std::vector{ dgnString.Unwrap() },
+                dgnString.GetDiagnostics(),
+            };
         }
 
-        if (IsInAlphabet(firstCharacter) || (firstCharacter == '_'))
+        if (IsInAlphabet(character) || (character == '_'))
         {
-            return ScanIdentifier(t_context);
+            return Diagnosed<std::vector<Token>, ILexerDiagnostic>
+            {
+                ScanIdentifier(t_context)
+            };
         }
 
-        if (IsNumber(firstCharacter))
+        if (IsNumber(character))
         {
-            return ScanNumericLiteral(t_context);
+            const auto dgnNumericLiteral = ScanNumericLiteral(t_context);
+            return Diagnosed<std::vector<Token>, ILexerDiagnostic>
+            {
+                std::vector{ dgnNumericLiteral.Unwrap() },
+                dgnNumericLiteral.GetDiagnostics(),
+            };
         }
 
-        return ScanDefault(t_context);
+        ACE_TRY(dgnDefault, ScanDefault(t_context));
+        return Diagnosed<std::vector<Token>, ILexerDiagnostic>
+        {
+            std::vector{ dgnDefault.Unwrap() },
+            dgnDefault.GetDiagnostics(),
+        };
     }
 
     Lexer::Lexer(
@@ -763,35 +866,34 @@ namespace Ace
                 continue;
             }
 
-            if (const auto expDgnScanResult = ScanTokenSequence())
+            if (const auto expDgnTokens = ScanTokenSequence())
             {
-                const auto& dgnScanResult = expDgnScanResult.Unwrap();
-                const auto&    scanResult =    dgnScanResult.Unwrap();
-
                 diagnostics.insert(
                     end(diagnostics),
-                    begin(dgnScanResult.GetDiagnostics()),
-                    end  (dgnScanResult.GetDiagnostics())
+                    begin(expDgnTokens.Unwrap().GetDiagnostics()),
+                    end  (expDgnTokens.Unwrap().GetDiagnostics())
                 );
 
-                const auto scannedTokens = CreateTokens(scanResult);
+                const auto& scannedTokens = expDgnTokens.Unwrap().Unwrap();
                 tokens.insert(
                     end(tokens),
                     begin(scannedTokens),
                     end  (scannedTokens)
                 );
-                EatCharacters(scanResult.Length);
+                EatCharactersUntil(
+                    tokens.back().OptSourceLocation.value().IteratorEnd
+                );
             }
             else
             {
-                diagnostics.push_back(expDgnScanResult.GetError());
+                diagnostics.push_back(expDgnTokens.GetError());
                 EatCharacter();
             }
         }
 
         tokens.insert(
             end(tokens),
-            Token{ std::nullopt, TokenKind::New(TokenKind::EndOfFile) }
+            Token{ std::nullopt, TokenKind::EndOfFile }
         );
 
         return Diagnosed
@@ -818,6 +920,14 @@ namespace Ace
     auto Lexer::EatCharacters(const size_t& t_count) -> void
     {
         m_CharacterIterator += t_count;
+    }
+
+    auto Lexer::EatCharactersUntil(const std::string::const_iterator& t_it) -> void
+    {
+        while (m_CharacterIterator != t_it)
+        {
+            m_CharacterIterator++;
+        }
     }
 
     auto Lexer::EatWhitespace() -> void
@@ -854,11 +964,13 @@ namespace Ace
             EatCharacter();
         }
 
-        return Diagnosed<void, ILexerDiagnostic>{};
+        return {};
     }
 
     auto Lexer::EatMultiLineComment() -> Diagnosed<void, ILexerDiagnostic>
     {
+        const auto itBegin = m_CharacterIteratorBegin;
+
         ACE_ASSERT(GetCharacter() == '#');
         EatCharacter();
 
@@ -872,11 +984,22 @@ namespace Ace
         {
             if (IsEndOfFile())
             {
+                const SourceLocation sourceLocation
+                {
+                    m_Compilation,
+                    m_FileIndex,
+                    m_LineIndex,
+                    itBegin,
+                    m_CharacterIterator,
+                };
+
                 return Diagnosed<void, ILexerDiagnostic>
                 {
                     std::vector<std::shared_ptr<const ILexerDiagnostic>>
                     {
-                        std::make_shared<const UnclosedMultiLineCommentError>()
+                        std::make_shared<const UnclosedMultiLineCommentError>(
+                            sourceLocation
+                        )
                     }
                 };
             }
@@ -885,7 +1008,7 @@ namespace Ace
         }
 
         EatCharacters(2);
-        return Diagnosed<void, ILexerDiagnostic>{};
+        return {};
     }
 
     auto Lexer::EatLine() -> void
@@ -901,12 +1024,14 @@ namespace Ace
         m_CharacterIteratorEnd   = end  (GetLine());
     }
 
-    auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<ScanResult, ILexerDiagnostic>, ILexerScanDiagnostic>
+    auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<std::vector<Token>, ILexerDiagnostic>, ILexerDiagnostic>
     {
         return Ace::Scan({
             m_Compilation,
+            m_FileIndex,
+            m_LineIndex,
             m_CharacterIterator,
-            m_CharacterIteratorEnd
+            m_CharacterIteratorEnd,
         });
     }
 
@@ -951,38 +1076,5 @@ namespace Ace
     auto Lexer::IsCommentStart() const -> bool
     {
         return GetCharacter() == '#';
-    }
-
-    auto Lexer::CreateTokens(
-        const ScanResult& t_scanResult
-    ) -> std::vector<Token>
-    {
-        std::vector<Token> tokens{};
-
-        const SourceLocation sourceLocation
-        {
-            m_Compilation,
-            m_FileIndex,
-            m_LineIndex,
-            Distance(m_CharacterIteratorBegin, m_CharacterIterator),
-            t_scanResult.Length,
-        };
-
-        std::transform(
-            begin(t_scanResult.KindStringPairs),
-            end  (t_scanResult.KindStringPairs),
-            back_inserter(tokens),
-            [&](const TokenKindStringPair& t_kindStringPair)
-            {
-                return Token
-                {
-                    sourceLocation,
-                    t_kindStringPair.Kind,
-                    t_kindStringPair.String,
-                };
-            }
-        );
-
-        return tokens;
     }
 }

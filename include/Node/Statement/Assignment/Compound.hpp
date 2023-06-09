@@ -21,7 +21,7 @@ namespace Ace::Node::Statement::Assignment
             const std::shared_ptr<Scope>& t_scope,
             const std::shared_ptr<const Node::Expression::IBase>& t_lhsExpression,
             const std::shared_ptr<const Node::Expression::IBase>& t_rhsExpression,
-            const TokenKind::Set& t_operator
+            const TokenKind& t_operator
         ) : m_Scope{ t_scope },
             m_LHSExpression{ t_lhsExpression },
             m_RHSExpression{ t_rhsExpression },
@@ -41,6 +41,6 @@ namespace Ace::Node::Statement::Assignment
         std::shared_ptr<Scope> m_Scope{};
         std::shared_ptr<const Node::Expression::IBase> m_LHSExpression{};
         std::shared_ptr<const Node::Expression::IBase> m_RHSExpression{};
-        TokenKind::Set m_Operator{};
+        TokenKind m_Operator{};
     };
 }

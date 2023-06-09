@@ -1,8 +1,11 @@
 #pragma once
 
+#include <optional>
+
 #include "DiagnosticsBase.hpp"
 #include "Expected.hpp"
 #include "Diagnosed.hpp"
+#include "SourceLocation.hpp"
 
 namespace Ace
 {
@@ -15,89 +18,85 @@ namespace Ace
     class UnclosedMultiLineCommentError : public virtual ILexerDiagnostic
     {
     public:
-        UnclosedMultiLineCommentError() = default;
+        UnclosedMultiLineCommentError(
+            const SourceLocation& t_sourceLocation
+        ) : m_SourceLocation{ t_sourceLocation }
+        {
+        }
         virtual ~UnclosedMultiLineCommentError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-    };
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
 
-    class ILexerScanDiagnostic : public virtual ILexerDiagnostic
-    {
-    public:
-        virtual ~ILexerScanDiagnostic() = default;
-
-        virtual auto GetOffset() const -> size_t = 0;
-        virtual auto GetLength() const -> size_t = 0;
+    private:
+        SourceLocation m_SourceLocation{};
     };
     
-    class UnclosedStringLiteralError : public virtual ILexerScanDiagnostic
+    class UnclosedStringLiteralError : public virtual ILexerDiagnostic
     {
     public:
         UnclosedStringLiteralError(
-            const size_t& t_offset
-        ) : m_Offset{ t_offset }
+            const SourceLocation& t_sourceLocation
+        ) : m_SourceLocation{ t_sourceLocation }
         {
         }
         virtual ~UnclosedStringLiteralError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-
-        auto GetOffset() const -> size_t final { return m_Offset; }
-        auto GetLength() const -> size_t final { return 1; }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
 
     private:
-        size_t m_Offset{};
+        SourceLocation m_SourceLocation{};
     };
 
-    class UnexpectedCharacterError : public virtual ILexerScanDiagnostic
+    class UnexpectedCharacterError : public virtual ILexerDiagnostic
     {
     public:
-        UnexpectedCharacterError() = default;
+        UnexpectedCharacterError(
+            const SourceLocation& t_sourceLocation
+        ) : m_SourceLocation{ t_sourceLocation } 
+        {
+        }
         virtual ~UnexpectedCharacterError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-
-        auto GetOffset() const -> size_t final { return 0; }
-        auto GetLength() const -> size_t final { return 1; }
-    };
-
-    class InvalidNumericLiteralTypeSuffix : public virtual ILexerScanDiagnostic
-    {
-    public:
-        InvalidNumericLiteralTypeSuffix(
-            const size_t& t_offset,
-            const size_t& t_length
-        ) : m_Length{ t_length }
-        {
-        }
-        virtual ~InvalidNumericLiteralTypeSuffix() = default;
-
-        auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-
-        auto GetOffset() const -> size_t final { return m_Offset; }
-        auto GetLength() const -> size_t final { return m_Length; }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
 
     private:
-        size_t m_Offset{};
-        size_t m_Length{};
+        SourceLocation m_SourceLocation{};
     };
 
-    class MultipleDecimalPointsInNumericLiteralError : public virtual ILexerScanDiagnostic
+    class InvalidNumericLiteralTypeSuffixError : public virtual ILexerDiagnostic
     {
     public:
-        MultipleDecimalPointsInNumericLiteralError(
-            const size_t& t_offset
-        ) : m_Offset{ t_offset }
+        InvalidNumericLiteralTypeSuffixError(
+            const SourceLocation& t_sourceLocation
+        ) : m_SourceLocation{ t_sourceLocation } 
         {
         }
-        virtual ~MultipleDecimalPointsInNumericLiteralError() = default;
+        virtual ~InvalidNumericLiteralTypeSuffixError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-
-        auto GetOffset() const -> size_t final { return m_Offset; }
-        auto GetLength() const -> size_t final { return 1; }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
 
     private:
-        size_t m_Offset{};
+        SourceLocation m_SourceLocation{};
+    };
+
+    class DecimalPointInNonFloatNumericLiteralError : public virtual ILexerDiagnostic
+    {
+    public:
+        DecimalPointInNonFloatNumericLiteralError(
+            const SourceLocation& t_sourceLocation
+        ) : m_SourceLocation{ t_sourceLocation } 
+        {
+        }
+        virtual ~DecimalPointInNonFloatNumericLiteralError() = default;
+
+        auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+
+    private:
+        SourceLocation m_SourceLocation{};
     };
 }

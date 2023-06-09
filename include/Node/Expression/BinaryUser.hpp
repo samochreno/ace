@@ -20,7 +20,7 @@ namespace Ace::Node::Expression
         BinaryUser(
             const std::shared_ptr<const Node::Expression::IBase>& t_lhsExpression,
             const std::shared_ptr<const Node::Expression::IBase>& t_rhsExpression,
-            const TokenKind::Set& t_operator
+            const TokenKind& t_operator
         ) : m_LHSExpression{ t_lhsExpression },
             m_RHSExpression{ t_rhsExpression },
             m_Operator{ t_operator }
@@ -38,6 +38,6 @@ namespace Ace::Node::Expression
     private:
         std::shared_ptr<const Node::Expression::IBase> m_LHSExpression{};
         std::shared_ptr<const Node::Expression::IBase> m_RHSExpression{};
-        TokenKind::Set m_Operator{};
+        TokenKind m_Operator{};
     };
 }
