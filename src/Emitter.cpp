@@ -9,8 +9,6 @@
 #include <climits>
 #include <cinttypes>
 
-#pragma warning(push, 0)
-
 #include <llvm/Support/InitLLVM.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/Error.h>
@@ -24,8 +22,6 @@
 #include <llvm/Pass.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Target/TargetMachine.h>
-
-#pragma warning(pop)
 
 #include "Scope.hpp"
 #include "Symbol/All.hpp"

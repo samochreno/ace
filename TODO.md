@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Remove pragmas
 - [ ] Move ParseData to Parser
 - Add error messages to make debugging easier:
   - [ ] Consider making errors just enums not full types

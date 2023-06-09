@@ -1,8 +1,5 @@
 #pragma once
 
-#pragma warning(push)
-#pragma warning(disable: 26495) // Always initialize a member variable.
-
 namespace Ace
 {
     template<typename T>
@@ -28,5 +25,3 @@ namespace Ace
         size_t Length;
     };
 }
-
-#pragma warning(pop)

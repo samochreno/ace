@@ -9,11 +9,7 @@
 #include <fstream>
 #include <sstream>
 
-#pragma warning(push, 0)
-
 #include <llvm/IR/LLVMContext.h>
-
-#pragma warning(pop)
 
 #include "Diagnostics.hpp"
 #include "Package.hpp"
