@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- [ ] Move ParseData to Parser
 - Add error messages to make debugging easier:
   - [ ] Consider making errors just enums not full types
   - [ ] ❓ Remove second typechecking pass (check why `5i32 + 10i16` fails to compile)

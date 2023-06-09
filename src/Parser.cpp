@@ -19,7 +19,6 @@
 #include "Diagnostics.hpp"
 #include "AccessModifier.hpp"
 #include "SpecialIdentifier.hpp"
-#include "ParseData.hpp"
 #include "Scope.hpp"
 #include "Utility.hpp"
 #include "Name.hpp"
