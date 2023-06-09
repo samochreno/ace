@@ -23,7 +23,7 @@
 #include "Utility.hpp"
 #include "Name.hpp"
 
-namespace Ace::Parsing
+namespace Ace
 {
     enum class OperatorAssociativity
     {
@@ -361,7 +361,7 @@ namespace Ace::Parsing
         ACE_TRY_UNREACHABLE();
     }
 
-    auto Parser::ParseName(Context t_context) -> Expected<ParseData<std::string>>
+    auto Parser::ParseName(const ParseContext& t_context) -> Expected<ParseData<std::string>>
     {
         ACE_TRY_ASSERT(t_context.Iterator->Kind == TokenKind::Identifier);
 
@@ -372,7 +372,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseNestedName(Context t_context) -> Expected<ParseData<std::vector<std::string>>>
+    auto Parser::ParseNestedName(const ParseContext& t_context) -> Expected<ParseData<std::vector<std::string>>>
     {
         std::vector<std::string> name{};
         auto it = t_context.Iterator;
@@ -397,7 +397,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseSymbolName(Context t_context) -> Expected<ParseData<SymbolName>>
+    auto Parser::ParseSymbolName(const ParseContext& t_context) -> Expected<ParseData<SymbolName>>
     {
         auto it = t_context.Iterator;
 
@@ -434,7 +434,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseSymbolNameSection(Context t_context) -> Expected<ParseData<SymbolNameSection>>
+    auto Parser::ParseSymbolNameSection(const ParseContext& t_context) -> Expected<ParseData<SymbolNameSection>>
     {
         auto it = t_context.Iterator;
 
@@ -463,7 +463,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTypeName(Context t_context, const bool& t_doAllowReferences) -> Expected<ParseData<TypeName>>
+    auto Parser::ParseTypeName(const ParseContext& t_context, const bool& t_doAllowReferences) -> Expected<ParseData<TypeName>>
     {
         auto it = t_context.Iterator;
 
@@ -508,7 +508,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTemplateParameterNames(Context t_context) -> Expected<ParseData<std::vector<std::string>>>
+    auto Parser::ParseTemplateParameterNames(const ParseContext& t_context) -> Expected<ParseData<std::vector<std::string>>>
     {
         auto it = t_context.Iterator;
 
@@ -539,7 +539,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseImplTemplateParameters(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>>>
+    auto Parser::ParseImplTemplateParameters(const ParseContext& t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>>>
     {
         ACE_TRY(names, ParseTemplateParameterNames(t_context));
         
@@ -564,7 +564,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTemplateParameters(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>>>
+    auto Parser::ParseTemplateParameters(const ParseContext& t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>>>
     {
         ACE_TRY(names, ParseTemplateParameterNames(t_context));
         
@@ -589,7 +589,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTemplateArguments(Context t_context) -> Expected<ParseData<std::vector<SymbolName>>>
+    auto Parser::ParseTemplateArguments(const ParseContext& t_context) -> Expected<ParseData<std::vector<SymbolName>>>
     {
         auto it = t_context.Iterator;
 
@@ -620,7 +620,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseModule(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Module>>>
+    auto Parser::ParseModule(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Module>>>
     {
         auto it = t_context.Iterator;
 
@@ -763,7 +763,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseImpl(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Impl>>>
+    auto Parser::ParseImpl(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Impl>>>
     {
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -825,7 +825,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseImplFunction(Context t_context, const SymbolName& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Function>>>
+    auto Parser::ParseImplFunction(const ParseContext& t_context, const SymbolName& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Function>>>
     {
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -972,7 +972,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseImplFunctionTemplate(Context t_context, const SymbolName& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
+    auto Parser::ParseImplFunctionTemplate(const ParseContext& t_context, const SymbolName& t_selfTypeName) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
     {
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -1057,7 +1057,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTemplatedImpl(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::TemplatedImpl>>>
+    auto Parser::ParseTemplatedImpl(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::TemplatedImpl>>>
     {
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -1151,7 +1151,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseTemplatedImplFunction(Context t_context, const SymbolName& t_selfTypeName, const std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>& t_implTemplateParameters) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
+    auto Parser::ParseTemplatedImplFunction(const ParseContext& t_context, const SymbolName& t_selfTypeName, const std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>& t_implTemplateParameters) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
     {
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -1306,7 +1306,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseFunction(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Function>>>
+    auto Parser::ParseFunction(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Function>>>
     {
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -1383,7 +1383,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseFunctionTemplate(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
+    auto Parser::ParseFunctionTemplate(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Function>>>
     {
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -1457,7 +1457,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseParameters(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>>>>
+    auto Parser::ParseParameters(const ParseContext& t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>>>>
     {
         std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>> parameters{};
         auto it = t_context.Iterator;
@@ -1508,7 +1508,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseVariable(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Variable::Normal::Static>>>
+    auto Parser::ParseVariable(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Variable::Normal::Static>>>
     {
         auto it = t_context.Iterator;
 
@@ -1556,7 +1556,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseMemberVariable(Context t_context, const size_t& t_index) -> Expected<ParseData<std::shared_ptr<const Node::Variable::Normal::Instance>>>
+    auto Parser::ParseMemberVariable(const ParseContext& t_context, const size_t& t_index) -> Expected<ParseData<std::shared_ptr<const Node::Variable::Normal::Instance>>>
     {
         auto it = t_context.Iterator;
 
@@ -1602,7 +1602,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseType(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Type::IBase>>>
+    auto Parser::ParseType(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Type::IBase>>>
     {
         if (const auto expStruct = ParseStruct({ t_context.Iterator, t_context.Scope }))
         {
@@ -1616,7 +1616,7 @@ namespace Ace::Parsing
         ACE_TRY_UNREACHABLE();
     }
 
-    auto Parser::ParseTypeTemplate(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Type>>>
+    auto Parser::ParseTypeTemplate(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Type>>>
     {
         if (const auto expStructTemplate = ParseStructTemplate({ t_context.Iterator, t_context.Scope }))
         {
@@ -1626,7 +1626,7 @@ namespace Ace::Parsing
         ACE_TRY_UNREACHABLE();
     }
 
-    auto Parser::ParseStruct(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Type::Struct>>>
+    auto Parser::ParseStruct(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Type::Struct>>>
     {
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -1675,7 +1675,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseStructBody(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>>>
+    auto Parser::ParseStructBody(const ParseContext& t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>>>
     {
         auto it = t_context.Iterator;
 
@@ -1708,7 +1708,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseStructTemplate(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Type>>>
+    auto Parser::ParseStructTemplate(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Template::Type>>>
     {
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -1765,7 +1765,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::IBase>>>
+    auto Parser::ParseStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::IBase>>>
     {
         if (const auto expExpressionStatemment = ParseExpressionStatement(t_context))
         {
@@ -1824,7 +1824,7 @@ namespace Ace::Parsing
         ACE_TRY_UNREACHABLE();
     }
 
-    auto Parser::ParseExpressionStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Expression>>>
+    auto Parser::ParseExpressionStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Expression>>>
     {
         auto it = t_context.Iterator;
 
@@ -1841,7 +1841,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseAssignmentStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Assignment::Normal>>>
+    auto Parser::ParseAssignmentStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Assignment::Normal>>>
     {
         auto it = t_context.Iterator;
 
@@ -1868,7 +1868,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseCompoundAssignmentStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Assignment::Compound>>>
+    auto Parser::ParseCompoundAssignmentStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Assignment::Compound>>>
     {
         auto it = t_context.Iterator;
 
@@ -1897,7 +1897,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseVariableStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Variable>>>
+    auto Parser::ParseVariableStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Variable>>>
     {
         auto it = t_context.Iterator;
 
@@ -1945,7 +1945,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseKeywordStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::IBase>>>
+    auto Parser::ParseKeywordStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::IBase>>>
     {
         if (const auto expIfStatement = ParseIfStatement(t_context))
         {
@@ -1995,7 +1995,7 @@ namespace Ace::Parsing
         ACE_TRY_UNREACHABLE();
     }
 
-    auto Parser::ParseIfStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::If>>>
+    auto Parser::ParseIfStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::If>>>
     {
         auto it = t_context.Iterator;
 
@@ -2034,7 +2034,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseIfBlock(Context t_context) -> Expected<ParseData<std::pair<std::shared_ptr<const Node::Expression::IBase>, std::shared_ptr<const Node::Statement::Block>>>>
+    auto Parser::ParseIfBlock(const ParseContext& t_context) -> Expected<ParseData<std::pair<std::shared_ptr<const Node::Expression::IBase>, std::shared_ptr<const Node::Statement::Block>>>>
     {
         auto it = t_context.Iterator;
 
@@ -2058,7 +2058,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseElifBlock(Context t_context) -> Expected<ParseData<std::pair<std::shared_ptr<const Node::Expression::IBase>, std::shared_ptr<const Node::Statement::Block>>>>
+    auto Parser::ParseElifBlock(const ParseContext& t_context) -> Expected<ParseData<std::pair<std::shared_ptr<const Node::Expression::IBase>, std::shared_ptr<const Node::Statement::Block>>>>
     {
         auto it = t_context.Iterator;
 
@@ -2082,7 +2082,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseElseBlock(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Block>>>
+    auto Parser::ParseElseBlock(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Block>>>
     {
         auto it = t_context.Iterator;
 
@@ -2099,7 +2099,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseWhileStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::While>>>
+    auto Parser::ParseWhileStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::While>>>
     {
         auto it = t_context.Iterator;
 
@@ -2123,7 +2123,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseReturnStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Return>>>
+    auto Parser::ParseReturnStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Return>>>
     {
         auto it = t_context.Iterator;
 
@@ -2157,7 +2157,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseExitStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Exit>>>
+    auto Parser::ParseExitStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Exit>>>
     {
         auto it = t_context.Iterator;
 
@@ -2174,7 +2174,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseAssertStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Assert>>>
+    auto Parser::ParseAssertStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Assert>>>
     {
         auto it = t_context.Iterator;
 
@@ -2197,7 +2197,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseBlockStatement(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Block>>>
+    auto Parser::ParseBlockStatement(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Statement::Block>>>
     {
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
@@ -2225,7 +2225,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::IBase>>>
+    auto Parser::ParseExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::IBase>>>
     {
         static constexpr size_t binaryOperatorPrecedenceMin = 9;
         static const auto getBinaryOperatorPrecedence = [](const TokenKind& t_tokenKind) -> size_t
@@ -2452,7 +2452,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseSimpleExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::IBase>>>
+    auto Parser::ParseSimpleExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::IBase>>>
     {
         static constexpr size_t unaryOperatorPrecedenceMin = 1;
         static const auto getUnaryOperatorPrecedence = [](const TokenKind& t_tokenKind) -> size_t
@@ -2620,7 +2620,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseMemberAccessExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::MemberAccess>>>
+    auto Parser::ParseMemberAccessExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::MemberAccess>>>
     {
         auto it = t_context.Iterator;
 
@@ -2643,7 +2643,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseArguments(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Expression::IBase>>>>
+    auto Parser::ParseArguments(const ParseContext& t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Expression::IBase>>>>
     {
         auto it = t_context.Iterator;
 
@@ -2678,7 +2678,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParsePrimaryExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::IBase>>>
+    auto Parser::ParsePrimaryExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::IBase>>>
     {
         if (const auto expExpressionExpression = ParseExpressionExpression(t_context))
         {
@@ -2755,7 +2755,7 @@ namespace Ace::Parsing
         ACE_TRY_UNREACHABLE();
     }
 
-    auto Parser::ParseExpressionExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::Expression>>>
+    auto Parser::ParseExpressionExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::Expression>>>
     {
         auto it = t_context.Iterator;
 
@@ -2775,7 +2775,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseLiteralExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::Literal>>>
+    auto Parser::ParseLiteralExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::Literal>>>
     {
         ACE_TRY(literalKind, [&]() -> Expected<LiteralKind>
         {
@@ -2810,7 +2810,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseLiteralSymbolExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::LiteralSymbol>>>
+    auto Parser::ParseLiteralSymbolExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::LiteralSymbol>>>
     {
         ACE_TRY(name, ParseSymbolName({ t_context.Iterator, t_context.Scope }));
 
@@ -2824,7 +2824,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseStructConstructionExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::StructConstruction>>>
+    auto Parser::ParseStructConstructionExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::StructConstruction>>>
     {
         auto it = t_context.Iterator;
 
@@ -2882,7 +2882,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseCastExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::Cast>>>
+    auto Parser::ParseCastExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::Cast>>>
     {
         auto it = t_context.Iterator;
 
@@ -2917,7 +2917,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseAddressOfExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::AddressOf>>>
+    auto Parser::ParseAddressOfExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::AddressOf>>>
     {
         auto it = t_context.Iterator;
 
@@ -2940,7 +2940,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseSizeOfExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::SizeOf>>>
+    auto Parser::ParseSizeOfExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::SizeOf>>>
     {
         auto it = t_context.Iterator;
 
@@ -2966,7 +2966,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseDerefAsExpression(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::DerefAs>>>
+    auto Parser::ParseDerefAsExpression(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Expression::DerefAs>>>
     {
         auto it = t_context.Iterator;
 
@@ -3001,7 +3001,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseAttribute(Context t_context) -> Expected<ParseData<std::shared_ptr<const Node::Attribute>>>
+    auto Parser::ParseAttribute(const ParseContext& t_context) -> Expected<ParseData<std::shared_ptr<const Node::Attribute>>>
     {
         auto it = t_context.Iterator;
 
@@ -3018,7 +3018,7 @@ namespace Ace::Parsing
         };
     }
 
-    auto Parser::ParseAttributes(Context t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Attribute>>>>
+    auto Parser::ParseAttributes(const ParseContext& t_context) -> Expected<ParseData<std::vector<std::shared_ptr<const Node::Attribute>>>>
     {
         auto it = t_context.Iterator;
 

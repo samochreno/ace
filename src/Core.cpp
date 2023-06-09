@@ -47,7 +47,7 @@ namespace Ace::Core
             end  (dgnTokens.GetDiagnostics())
         );
 
-        const auto ast = Parsing::Parser::ParseAST(
+        const auto ast = Parser::ParseAST(
             t_compilation,
             std::move(dgnTokens.Unwrap())
         ).Unwrap();
