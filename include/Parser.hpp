@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <memory>
+#include <vector>
 #include <string>
 #include <utility>
 
@@ -38,17 +38,34 @@ namespace Ace
         size_t Length;
     };
 
+    class TokenEntry
+    {
+    public:
+        TokenEntry(
+            const std::shared_ptr<const Token>& t_value
+        ) : m_Value{ t_value }
+        {
+        }
+        ~TokenEntry() = default;
+
+        auto Unwrap() const -> const Token& { return *m_Value.get(); }
+        operator const std::shared_ptr<const Token>&() const { return m_Value; }
+
+    private:
+        std::shared_ptr<const Token> m_Value{};
+    };
+
     struct ParseContext
     {
         ParseContext(
-            const std::vector<Token>::const_iterator& t_iterator,
+            const std::vector<TokenEntry>::const_iterator& t_iterator,
             const std::shared_ptr<Scope>& t_scope
         ) : Iterator{ t_iterator },
             Scope{ t_scope }
         {
         }
 
-        const std::vector<Token>::const_iterator Iterator{};
+        const std::vector<TokenEntry>::const_iterator Iterator{};
         std::shared_ptr<Ace::Scope> Scope{};
     };
 
@@ -59,13 +76,13 @@ namespace Ace
 
         static auto ParseAST(
             const Compilation* const t_compilation, 
-            std::vector<Token>&& t_tokens
+            const std::vector<std::shared_ptr<const Token>>& t_tokens
         ) -> Expected<std::shared_ptr<const Node::Module>>;
 
         static auto CreateEmptyAttributes() -> std::vector<std::shared_ptr<const Node::Attribute>>;
 
         static auto GetOperatorFunctionName(
-            const Token& t_operatorToken,
+            const std::shared_ptr<const Token>& t_operatorToken,
             const size_t& t_parameters
         ) -> Expected<const char*>;
 

@@ -42,33 +42,33 @@ namespace Ace
         const ScanContext& t_context,
         const SourceLocation& t_sourceLocation,
         const NativeType& t_nativeType
-    ) -> std::vector<Token>
+    ) -> std::vector<std::shared_ptr<const Token>>
     {
         const auto name = t_nativeType.GetFullyQualifiedName();
 
-        std::vector<Token> tokens{};
+        std::vector<std::shared_ptr<const Token>> tokens{};
 
         ACE_ASSERT(name.IsGlobal);
-        tokens.emplace_back(
+        tokens.push_back(std::make_shared<const Token>(
             t_sourceLocation,
             TokenKind::ColonColon
-        );
+        ));
 
         for(size_t i = 0; i < name.Sections.size(); i++)
         {
             if (i != 0)
             {
-                tokens.emplace_back(
+                tokens.emplace_back(std::make_shared<const Token>(
                     t_sourceLocation,
                     TokenKind::ColonColon
-                );
+                ));
             }
 
-            tokens.emplace_back(
+            tokens.emplace_back(std::make_shared<const Token>(
                 t_sourceLocation,
                 TokenKind::Identifier,
                 name.Sections.at(i).Name
-            );
+            ));
         }
 
         return tokens;
@@ -78,7 +78,7 @@ namespace Ace
         const ScanContext& t_context,
         const std::string& t_string,
         const SourceLocation& t_sourceLocation
-    ) -> std::optional<std::vector<Token>>
+    ) -> std::optional<std::vector<std::shared_ptr<const Token>>>
     {
         const auto& natives = t_context.Compilation->Natives;
 
@@ -127,12 +127,12 @@ namespace Ace
 
         else return std::nullopt;
 
-        return std::vector{ token };
+        return std::vector{ std::make_shared<const Token>(token) };
     }
 
     static auto ScanIdentifier(
         const ScanContext& t_context
-    ) -> std::vector<Token>
+    ) -> std::vector<std::shared_ptr<const Token>>
     {
         auto it = t_context.Iterator;
 
@@ -161,12 +161,11 @@ namespace Ace
 
         const std::string string{ t_context.Iterator, it };
 
-        const Token identifierToken
-        {
+        const auto identifierToken = std::make_shared<const Token>(
             sourceLocation,
             TokenKind::Identifier,
-            string,
-        };
+            string
+        );
 
         const auto optKeywordTokens = CreateKeyword(
             t_context,
@@ -182,25 +181,25 @@ namespace Ace
     }
 
     static auto CreateNumericLiteralTokenKind(
-        const Token& t_suffix
+        const std::shared_ptr<const Token>& t_suffix
     ) -> Expected<TokenKind, ILexerDiagnostic>
     {
-        if (t_suffix.String == "i8")  return TokenKind::Int8;
-        if (t_suffix.String == "i16") return TokenKind::Int16;
-        if (t_suffix.String == "i32") return TokenKind::Int32;
-        if (t_suffix.String == "i64") return TokenKind::Int64;
+        if (t_suffix->String == "i8")  return TokenKind::Int8;
+        if (t_suffix->String == "i16") return TokenKind::Int16;
+        if (t_suffix->String == "i32") return TokenKind::Int32;
+        if (t_suffix->String == "i64") return TokenKind::Int64;
         
-        if (t_suffix.String == "u8")  return TokenKind::UInt8;
-        if (t_suffix.String == "u16") return TokenKind::UInt16;
-        if (t_suffix.String == "u32") return TokenKind::UInt32;
-        if (t_suffix.String == "u64") return TokenKind::UInt64;
-        if (t_suffix.String == "u64") return TokenKind::UInt64;
+        if (t_suffix->String == "u8")  return TokenKind::UInt8;
+        if (t_suffix->String == "u16") return TokenKind::UInt16;
+        if (t_suffix->String == "u32") return TokenKind::UInt32;
+        if (t_suffix->String == "u64") return TokenKind::UInt64;
+        if (t_suffix->String == "u64") return TokenKind::UInt64;
 
-        if (t_suffix.String == "f32") return TokenKind::Float32;
-        if (t_suffix.String == "f64") return TokenKind::Float64;
+        if (t_suffix->String == "f32") return TokenKind::Float32;
+        if (t_suffix->String == "f64") return TokenKind::Float64;
 
         return std::make_shared<const InvalidNumericLiteralTypeSuffixError>(
-            t_suffix.OptSourceLocation.value()
+            t_suffix->OptSourceLocation.value()
         );
     }
 
@@ -247,7 +246,7 @@ namespace Ace
 
     static auto ScanNumericLiteralSuffix(
         const ScanContext& t_context
-    ) -> Token
+    ) -> std::shared_ptr<const Token>
     {
         auto it = t_context.Iterator;
 
@@ -268,17 +267,16 @@ namespace Ace
             it,
         };
 
-        return Token
-        {
+        return std::make_shared<const Token>(
             sourceLocation,
             TokenKind::None,
-            std::string{ t_context.Iterator, it },
-        };
+            std::string{ t_context.Iterator, it }
+        );
     }
 
     static auto ScanNumericLiteral(
         const ScanContext& t_context
-    ) -> Diagnosed<Token, ILexerDiagnostic>
+    ) -> Diagnosed<std::shared_ptr<const Token>, ILexerDiagnostic>
     {
         std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
         auto it = t_context.Iterator;
@@ -292,7 +290,7 @@ namespace Ace
         });
         it = numberToken.OptSourceLocation->IteratorEnd;
 
-        const auto optTypeSuffix = [&]() -> std::optional<Token>
+        const auto optTypeSuffix = [&]() -> std::optional<std::shared_ptr<const Token>>
         {
             if (!IsInAlphabet(*it))
                 return std::nullopt;
@@ -307,7 +305,7 @@ namespace Ace
         }();
         if (optTypeSuffix.has_value())
         {
-            it = optTypeSuffix.value().OptSourceLocation.value().IteratorEnd;
+            it = optTypeSuffix.value()->OptSourceLocation.value().IteratorEnd;
         }
 
         const auto tokenKind = [&]() -> TokenKind
@@ -364,12 +362,11 @@ namespace Ace
             it, 
         };
 
-        const Token token
-        {
+        const auto token = std::make_shared<const Token>(
             sourceLocation,
             tokenKind,
-            numberToken.String,
-        };
+            numberToken.String
+        );
 
         return Diagnosed
         {
@@ -380,7 +377,7 @@ namespace Ace
 
     static auto ScanDefault(
         const ScanContext& t_context
-    ) -> Expected<Diagnosed<Token, ILexerDiagnostic>, ILexerDiagnostic>
+    ) -> Expected<Diagnosed<std::shared_ptr<const Token>, ILexerDiagnostic>, ILexerDiagnostic>
     {
         auto it = t_context.Iterator;
 
@@ -714,13 +711,12 @@ namespace Ace
             it,
         };
 
-        const Token token
-        {
+        const auto token = std::make_shared<const Token>(
             sourceLocation,
-            tokenKind,
-        };
+            tokenKind
+        );
 
-        return Expected<Diagnosed<Token, ILexerDiagnostic>, ILexerDiagnostic>
+        return Expected<Diagnosed<std::shared_ptr<const Token>, ILexerDiagnostic>, ILexerDiagnostic>
         {
             token
         };
@@ -728,7 +724,7 @@ namespace Ace
 
     static auto ScanString(
         const ScanContext& t_context
-    ) -> Diagnosed<Token, ILexerDiagnostic>
+    ) -> Diagnosed<std::shared_ptr<const Token>, ILexerDiagnostic>
     {
         std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
         auto it = t_context.Iterator;
@@ -773,12 +769,11 @@ namespace Ace
             it,
         };
 
-        const Token token
-        {
+        const auto token = std::make_shared<const Token>(
             sourceLocation,
             TokenKind::String,
-            std::string{ t_context.Iterator + 1, it },
-        };
+            std::string{ t_context.Iterator + 1, it }
+        );
 
         return Diagnosed
         {
@@ -789,14 +784,14 @@ namespace Ace
 
     static auto Scan(
         const ScanContext& t_context
-    ) -> Expected<Diagnosed<std::vector<Token>, ILexerDiagnostic>, ILexerDiagnostic>
+    ) -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>, ILexerDiagnostic>
     {
         const auto character = *t_context.Iterator;
 
         if (character == '"')
         {
             const auto dgnString = ScanString(t_context);
-            return Diagnosed<std::vector<Token>, ILexerDiagnostic>
+            return Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
             {
                 std::vector{ dgnString.Unwrap() },
                 dgnString.GetDiagnostics(),
@@ -805,7 +800,7 @@ namespace Ace
 
         if (IsInAlphabet(character) || (character == '_'))
         {
-            return Diagnosed<std::vector<Token>, ILexerDiagnostic>
+            return Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
             {
                 ScanIdentifier(t_context)
             };
@@ -814,7 +809,7 @@ namespace Ace
         if (IsNumber(character))
         {
             const auto dgnNumericLiteral = ScanNumericLiteral(t_context);
-            return Diagnosed<std::vector<Token>, ILexerDiagnostic>
+            return Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
             {
                 std::vector{ dgnNumericLiteral.Unwrap() },
                 dgnNumericLiteral.GetDiagnostics(),
@@ -822,7 +817,7 @@ namespace Ace
         }
 
         ACE_TRY(dgnDefault, ScanDefault(t_context));
-        return Diagnosed<std::vector<Token>, ILexerDiagnostic>
+        return Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
         {
             std::vector{ dgnDefault.Unwrap() },
             dgnDefault.GetDiagnostics(),
@@ -840,10 +835,10 @@ namespace Ace
         ResetCharacterIterator();
     }
 
-    auto Lexer::EatTokens() -> Diagnosed<std::vector<Token>, ILexerDiagnostic>
+    auto Lexer::EatTokens() -> Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
     {
         std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
-        std::vector<Token> tokens{};
+        std::vector<std::shared_ptr<const Token>> tokens{};
 
         while (!IsEndOfFile())
         {
@@ -882,7 +877,7 @@ namespace Ace
                     end  (scannedTokens)
                 );
                 EatCharactersUntil(
-                    tokens.back().OptSourceLocation.value().IteratorEnd
+                    tokens.back()->OptSourceLocation.value().IteratorEnd
                 );
             }
             else
@@ -892,10 +887,10 @@ namespace Ace
             }
         }
 
-        tokens.insert(
-            end(tokens),
-            Token{ std::nullopt, TokenKind::EndOfFile }
-        );
+        tokens.push_back(std::make_shared<const Token>(
+            std::nullopt,
+            TokenKind::EndOfFile
+        ));
 
         return Diagnosed
         {
@@ -1025,7 +1020,7 @@ namespace Ace
         m_CharacterIteratorEnd   = end  (GetLine());
     }
 
-    auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<std::vector<Token>, ILexerDiagnostic>, ILexerDiagnostic>
+    auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>, ILexerDiagnostic>
     {
         return Ace::Scan({
             m_Compilation,
