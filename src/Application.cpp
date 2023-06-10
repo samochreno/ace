@@ -42,9 +42,9 @@ namespace Ace
 
         ACE_TRY(filesLines, TransformExpectedVector(
             t_compilation->Package.FilePaths,
-            [&](const std::filesystem::path& t_filePath) -> Expected<std::vector<std::string>>
+            [&](const std::shared_ptr<const std::filesystem::path>& t_filePath) -> Expected<std::vector<std::string>>
             {
-                std::ifstream fileStream{ t_filePath };
+                std::ifstream fileStream{ *t_filePath.get() };
                 ACE_TRY_ASSERT(fileStream.is_open());
 
                 std::vector<std::string> lines{};
@@ -58,22 +58,34 @@ namespace Ace
             }
         ));
 
-        std::vector<std::shared_ptr<const Node::Module>> asts{};
-        for (size_t fileIndex = 0; fileIndex < filesLines.size(); fileIndex++)
-        {
-            const auto dgnAST = Core::ParseAST(
-                t_compilation,
-                fileIndex,
-                filesLines.at(fileIndex)
-            );
-            diagnostics.insert(
-                end(diagnostics),
-                begin(dgnAST.GetDiagnostics()),
-                end  (dgnAST.GetDiagnostics())
-            );
+        ACE_TRY(asts, TransformExpectedVector(
+            t_compilation->Package.FilePaths,
+            [&](const std::shared_ptr<const std::filesystem::path>& t_filePath) -> Expected<std::shared_ptr<const Node::Module>>
+            {
+                std::ifstream fileStream{ *t_filePath.get() };
+                ACE_TRY_ASSERT(fileStream.is_open());
 
-            asts.push_back(dgnAST.Unwrap());
-        }
+                std::vector<std::string> fileLines{};
+                std::string line{};
+                while (std::getline(fileStream, line))
+                {
+                    fileLines.push_back(line);
+                }
+
+                const auto dgnAST = Core::ParseAST(
+                    t_compilation,
+                    t_filePath,
+                    fileLines
+                );
+                diagnostics.insert(
+                    end(diagnostics),
+                    begin(dgnAST.GetDiagnostics()),
+                    end  (dgnAST.GetDiagnostics())
+                );
+
+                return dgnAST.Unwrap();
+            }
+        ));
 
         const auto timeParsingEnd = now();
         ACE_LOG_INFO("Parsing success");

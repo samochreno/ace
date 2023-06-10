@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 #include "Token.hpp"
 #include "Diagnostics.hpp"
@@ -17,12 +18,12 @@ namespace Ace
     {
         ScanContext(
             const Compilation* const t_compilation,
-            const size_t& t_fileIndex,
+            const std::shared_ptr<const std::filesystem::path>& t_filePath,
             const size_t& t_lineIndex,
             const std::string::const_iterator& t_it,
             const std::string::const_iterator& t_itEnd
         ) : Compilation{ t_compilation },
-            FileIndex{ t_fileIndex },
+            FilePath{ t_filePath },
             LineIndex{ t_lineIndex },
             Iterator{ t_it },
             IteratorEnd{ t_itEnd }
@@ -30,7 +31,7 @@ namespace Ace
         }
 
         const Compilation* Compilation{};
-        size_t FileIndex{};
+        std::shared_ptr<const std::filesystem::path> FilePath{};
         size_t LineIndex{};
 
         std::string::const_iterator Iterator{};
@@ -152,7 +153,7 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.Compilation,
-            t_context.FileIndex,
+            t_context.FilePath,
             t_context.LineIndex,
             t_context.Iterator,
             it,
@@ -230,7 +231,7 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.Compilation,
-            t_context.FileIndex,
+            t_context.FilePath,
             t_context.LineIndex,
             t_context.Iterator,
             it,
@@ -261,7 +262,7 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.Compilation,
-            t_context.FileIndex,
+            t_context.FilePath,
             t_context.LineIndex,
             t_context.Iterator,
             it,
@@ -284,7 +285,7 @@ namespace Ace
 
         auto numberToken = ScanNumericLiteralNumber({
             t_context.Compilation,
-            t_context.FileIndex,
+            t_context.FilePath,
             t_context.LineIndex,
             it,
             t_context.IteratorEnd,
@@ -298,7 +299,7 @@ namespace Ace
 
             return ScanNumericLiteralSuffix({
                 t_context.Compilation,
-                t_context.FileIndex,
+                t_context.FilePath,
                 t_context.LineIndex,
                 it,
                 t_context.IteratorEnd
@@ -340,7 +341,7 @@ namespace Ace
                 const SourceLocation sourceLocation
                 {
                     t_context.Compilation,
-                    t_context.FileIndex,
+                    t_context.FilePath,
                     t_context.LineIndex,
                     t_context.Iterator + decimalPointPos,
                     t_context.Iterator + decimalPointPos + 1,
@@ -357,7 +358,7 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.Compilation,
-            t_context.FileIndex,
+            t_context.FilePath,
             t_context.LineIndex,
             t_context.Iterator,
             it, 
@@ -691,7 +692,7 @@ namespace Ace
                     const SourceLocation sourceLocation
                     {
                         t_context.Compilation,
-                        t_context.FileIndex,
+                        t_context.FilePath,
                         t_context.LineIndex,
                         it,
                         it + 1,
@@ -707,7 +708,7 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.Compilation,
-            t_context.FileIndex,
+            t_context.FilePath,
             t_context.LineIndex,
             t_context.Iterator,
             it,
@@ -742,7 +743,7 @@ namespace Ace
                 const SourceLocation sourceLocation
                 {
                     t_context.Compilation,
-                    t_context.FileIndex,
+                    t_context.FilePath,
                     t_context.LineIndex,
                     t_context.Iterator,
                     it,
@@ -766,7 +767,7 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.Compilation,
-            t_context.FileIndex,
+            t_context.FilePath,
             t_context.LineIndex,
             t_context.Iterator,
             it,
@@ -830,10 +831,10 @@ namespace Ace
 
     Lexer::Lexer(
         const Compilation* const t_compilation,
-        const size_t& t_fileIndex,
+        const std::shared_ptr<const std::filesystem::path>& t_filePath,
         const std::vector<std::string>& t_lines
     ) : m_Compilation{ t_compilation },
-        m_FileIndex{ t_fileIndex },
+        m_FilePath{ t_filePath },
         m_Lines{ t_lines }
     {
         ResetCharacterIterator();
@@ -987,7 +988,7 @@ namespace Ace
                 const SourceLocation sourceLocation
                 {
                     m_Compilation,
-                    m_FileIndex,
+                    m_FilePath,
                     m_LineIndex,
                     itBegin,
                     m_CharacterIterator,
@@ -1028,7 +1029,7 @@ namespace Ace
     {
         return Ace::Scan({
             m_Compilation,
-            m_FileIndex,
+            m_FilePath,
             m_LineIndex,
             m_CharacterIterator,
             m_CharacterIteratorEnd,

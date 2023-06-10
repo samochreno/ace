@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <filesystem>
 #include <vector>
@@ -15,7 +16,7 @@ namespace Ace
         ) -> Expected<Package>;
 
         std::string Name{};
-        std::vector<std::filesystem::path> FilePaths{};
-        std::vector<std::filesystem::path> DependencyFilePaths{};
+        std::vector<std::shared_ptr<const std::filesystem::path>> FilePaths{};
+        std::vector<std::shared_ptr<const std::filesystem::path>> DependencyFilePaths{};
     };
 }

@@ -1,7 +1,9 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 #include "Token.hpp"
 #include "Diagnostics.hpp"
@@ -14,7 +16,7 @@ namespace Ace
     public:
         Lexer(
             const Compilation* const t_compilation,
-            const size_t& t_fileIndex,
+            const std::shared_ptr<const std::filesystem::path>& t_filePath,
             const std::vector<std::string>& t_lines
         );
         ~Lexer() = default;
@@ -44,7 +46,7 @@ namespace Ace
         auto IsCommentStart() const -> bool;
 
         const Compilation* m_Compilation{};
-        size_t m_FileIndex{};
+        std::shared_ptr<const std::filesystem::path> m_FilePath{};
         std::vector<std::string> m_Lines{};
         
         size_t m_LineIndex{};
