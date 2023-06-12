@@ -156,7 +156,7 @@ namespace Ace
         const std::vector<std::shared_ptr<const Token>>& t_tokens
     ) -> Expected<std::shared_ptr<const Node::Module>>
     {
-        std::vector<TokenEntry> tokens{};
+        std::vector<ParseToken> tokens{};
 
         tokens.emplace_back(std::make_shared<const Token>(
             std::nullopt,

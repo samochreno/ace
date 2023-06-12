@@ -38,15 +38,15 @@ namespace Ace
         size_t Length;
     };
 
-    class TokenEntry
+    class ParseToken
     {
     public:
-        TokenEntry(
+        ParseToken(
             const std::shared_ptr<const Token>& t_value
         ) : m_Value{ t_value }
         {
         }
-        ~TokenEntry() = default;
+        ~ParseToken() = default;
 
         auto Unwrap() const -> const Token& { return *m_Value.get(); }
         operator const std::shared_ptr<const Token>&() const { return m_Value; }
@@ -58,14 +58,14 @@ namespace Ace
     struct ParseContext
     {
         ParseContext(
-            const std::vector<TokenEntry>::const_iterator& t_iterator,
+            const std::vector<ParseToken>::const_iterator& t_iterator,
             const std::shared_ptr<Scope>& t_scope
         ) : Iterator{ t_iterator },
             Scope{ t_scope }
         {
         }
 
-        const std::vector<TokenEntry>::const_iterator Iterator{};
+        const std::vector<ParseToken>::const_iterator Iterator{};
         std::shared_ptr<Ace::Scope> Scope{};
     };
 
