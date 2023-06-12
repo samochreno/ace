@@ -62,7 +62,10 @@ namespace Ace::Node::Expression
 
         if (expLHSOperatorSymbol && expRHSOperatorSymbol)
         {
-            ACE_TRY_ASSERT(expLHSOperatorSymbol.Unwrap() == expRHSOperatorSymbol.Unwrap());
+            ACE_TRY_ASSERT(
+                expLHSOperatorSymbol.Unwrap() ==
+                expRHSOperatorSymbol.Unwrap()
+            );
         }
 
         auto* const operatorSymbol = expLHSOperatorSymbol ?

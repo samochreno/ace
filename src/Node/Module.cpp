@@ -170,7 +170,7 @@ namespace Ace::Node
             allBoundImpls,
             boundFunctions,
             boundVariables
-            );
+        );
     }
 
     auto Module::GetSymbolScope() const -> std::shared_ptr<Scope>

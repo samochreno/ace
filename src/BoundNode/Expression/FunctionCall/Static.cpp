@@ -24,7 +24,6 @@ namespace Ace::BoundNode::Expression::FunctionCall
 
     auto Static::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>>
     {
-
         const auto argumentTypeInfos = m_FunctionSymbol->CollectArgumentTypeInfos();
         ACE_TRY_ASSERT(m_Arguments.size() == argumentTypeInfos.size());
 

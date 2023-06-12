@@ -42,7 +42,7 @@ namespace Ace
         return true;
     }
 
-     auto FindTemplatedImplContext(
+    auto FindTemplatedImplContext(
         const std::shared_ptr<const Scope>& t_scope
     ) -> std::optional<Symbol::TemplatedImpl*>
     {

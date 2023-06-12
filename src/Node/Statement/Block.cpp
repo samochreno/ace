@@ -47,6 +47,6 @@ namespace Ace::Node::Statement
         return std::make_shared<const BoundNode::Statement::Block>(
             m_SelfScope,
             boundStatements
-            );
+        );
     }
 }

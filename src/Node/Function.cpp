@@ -107,6 +107,11 @@ namespace Ace::Node
             return t_parameter->CreateBound();
         }));
 
+        if (m_Name == "implicit_conversion_with_operator")
+        {
+            [](){}();
+        }
+
         ACE_TRY(boundOptBody, TransformExpectedOptional(m_OptBody,
         [](const std::shared_ptr<const Node::Statement::Block>& t_body)
         {
@@ -146,7 +151,7 @@ namespace Ace::Node
                 m_OptSelf.has_value() ? SymbolCategory::Instance : SymbolCategory::Static,
                 m_AccessModifier,
                 typeSymbol
-                )
+            )
         };
     }
 }
