@@ -27,6 +27,67 @@
 
 namespace Ace::Core
 {
+    static auto LogDiagnostics(
+        const std::vector<std::shared_ptr<const IDiagnostic>>& t_diagnostics
+    ) -> void
+    {
+        std::for_each(begin(t_diagnostics), end(t_diagnostics),
+        [](const std::shared_ptr<const IDiagnostic>& t_diagnostic)
+        {
+            std::string message{};
+
+            const auto sourceLocation =
+                t_diagnostic->GetSourceLocation().value();
+
+            message += sourceLocation.File->Path.string();
+            message += ":";
+
+
+            const auto lineIndex = std::distance(
+                begin(sourceLocation.File->Lines),
+                sourceLocation.LineIterator
+            );
+            message += std::to_string(lineIndex + 1);
+            message += ":";
+
+            const auto& line = *sourceLocation.LineIterator;
+            const auto characterIndex = std::distance(
+                begin(line),
+                sourceLocation.CharacterIteratorBegin
+            );
+            message += std::to_string(characterIndex + 1);
+            message += ": ";
+
+            message += t_diagnostic->GetMessage();
+
+            switch (t_diagnostic->GetSeverity())
+            {
+                case DiagnosticSeverity::Info:
+                {
+                    ACE_LOG_INFO(message);
+                    break;
+                }
+
+                case DiagnosticSeverity::Warning:
+                {
+                    ACE_LOG_WARNING(message);
+                    break;
+                }
+
+                case DiagnosticSeverity::Error:
+                {
+                    ACE_LOG_ERROR(message);
+                    break;
+                }
+
+                default:
+                {
+                    ACE_UNREACHABLE();
+                }
+            }
+        });
+    }
+
     auto ParseAST(
         const Compilation* const t_compilation,
         const File* const t_file
@@ -41,6 +102,8 @@ namespace Ace::Core
             begin(dgnTokens.GetDiagnostics()),
             end  (dgnTokens.GetDiagnostics())
         );
+
+        LogDiagnostics(diagnostics);
 
         const auto ast = Parser::ParseAST(
             t_compilation,
