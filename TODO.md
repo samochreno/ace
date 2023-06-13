@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- Rename BinaryUser to UserBinary
 - Add error messages to make debugging easier:
   - [ ] Remove second typechecking pass
   - [ ] Consider making errors just enums not full types

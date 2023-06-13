@@ -15,14 +15,14 @@
 
 namespace Ace::BoundNode::Expression
 {
-    class UnaryUser :
-        public std::enable_shared_from_this<BoundNode::Expression::UnaryUser>,
+    class UserUnary :
+        public std::enable_shared_from_this<BoundNode::Expression::UserUnary>,
         public virtual BoundNode::Expression::IBase,
-        public virtual BoundNode::ITypeCheckable<BoundNode::Expression::UnaryUser>,
+        public virtual BoundNode::ITypeCheckable<BoundNode::Expression::UserUnary>,
         public virtual BoundNode::ILowerable<BoundNode::Expression::FunctionCall::Static>
     {
     public:
-        UnaryUser(
+        UserUnary(
             const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression,
             Symbol::Function* const t_operatorSymbol
         ) : m_Expression{ t_expression },
@@ -30,11 +30,11 @@ namespace Ace::BoundNode::Expression
             
         {
         }
-        virtual ~UnaryUser() = default;
+        virtual ~UserUnary() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final { return m_Expression->GetScope(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::UnaryUser>>> final;
+        auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::UserUnary>>> final;
         auto GetOrCreateTypeCheckedExpression(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
         auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>> final;
         auto GetOrCreateLoweredExpression(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>> final { return GetOrCreateLowered(t_context); }

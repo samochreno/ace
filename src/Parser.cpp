@@ -2375,7 +2375,7 @@ namespace Ace
                 }
                 else
                 {
-                    return std::make_shared<const Node::Expression::BinaryUser>(
+                    return std::make_shared<const Node::Expression::UserBinary>(
                         lhsExpression,
                         rhsExpression,
                         tokenKind
@@ -2553,7 +2553,7 @@ namespace Ace
                 }
                 else
                 {
-                    return std::make_shared<const Node::Expression::UnaryUser>(
+                    return std::make_shared<const Node::Expression::UserUnary>(
                         expression, 
                         tokenKind
                     );

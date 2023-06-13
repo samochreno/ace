@@ -1,17 +1,17 @@
-#include "Node/Expression/BinaryUser.hpp"
+#include "Node/Expression/UserBinary.hpp"
 
 #include <memory>
 #include <vector>
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Expression/BinaryUser.hpp"
+#include "BoundNode/Expression/UserBinary.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Symbol/Function.hpp"
 
 namespace Ace::Node::Expression
 {
-    auto BinaryUser::GetChildren() const -> std::vector<const Node::IBase*>
+    auto UserBinary::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
 
@@ -21,16 +21,16 @@ namespace Ace::Node::Expression
         return children;
     }
 
-    auto BinaryUser::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::BinaryUser>
+    auto UserBinary::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expression::UserBinary>
     {
-        return std::make_shared<const Node::Expression::BinaryUser>(
+        return std::make_shared<const Node::Expression::UserBinary>(
             m_LHSExpression->CloneInScopeExpression(t_scope),
             m_RHSExpression->CloneInScopeExpression(t_scope),
             m_Operator
         );
     }
 
-    auto BinaryUser::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::BinaryUser>>
+    auto UserBinary::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expression::UserBinary>>
     {
         ACE_TRY(boundLHSExpression, m_LHSExpression->CreateBoundExpression());
         ACE_TRY(boundRHSExpression, m_RHSExpression->CreateBoundExpression());
@@ -106,7 +106,7 @@ namespace Ace::Node::Expression
             expLHSOperatorSymbol.Unwrap() :
             expRHSOperatorSymbol.Unwrap();
 
-        return std::make_shared<const BoundNode::Expression::BinaryUser>(
+        return std::make_shared<const BoundNode::Expression::UserBinary>(
             boundLHSExpression,
             boundRHSExpression,
             operatorSymbol

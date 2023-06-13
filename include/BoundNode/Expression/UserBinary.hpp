@@ -15,14 +15,14 @@
 
 namespace Ace::BoundNode::Expression
 {
-    class BinaryUser :
-        public std::enable_shared_from_this<BoundNode::Expression::BinaryUser>,
+    class UserBinary :
+        public std::enable_shared_from_this<BoundNode::Expression::UserBinary>,
         public virtual BoundNode::Expression::IBase,
-        public virtual BoundNode::ITypeCheckable<BoundNode::Expression::BinaryUser>,
+        public virtual BoundNode::ITypeCheckable<BoundNode::Expression::UserBinary>,
         public virtual BoundNode::ILowerable<BoundNode::Expression::FunctionCall::Static>
     {
     public:
-        BinaryUser(
+        UserBinary(
             const std::shared_ptr<const BoundNode::Expression::IBase>& t_lhsExpression,
             const std::shared_ptr<const BoundNode::Expression::IBase>& t_rhsExpression,
             Symbol::Function* const t_operatorSymbol
@@ -31,11 +31,11 @@ namespace Ace::BoundNode::Expression
             m_OperatorSymbol{ t_operatorSymbol }
         {
         }
-        virtual ~BinaryUser() = default;
+        virtual ~UserBinary() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final { return m_LHSExpression->GetScope(); }
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::BinaryUser>>> final;
+        auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::UserBinary>>> final;
         auto GetOrCreateTypeCheckedExpression(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
         auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>> final;
         auto GetOrCreateLoweredExpression(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>> final { return GetOrCreateLowered(t_context); }

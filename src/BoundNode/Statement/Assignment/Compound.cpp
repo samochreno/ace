@@ -9,7 +9,7 @@
 #include "BoundNode/Expression//Dereference.hpp"
 #include "BoundNode/Expression/VariableReference/Static.hpp"
 #include "BoundNode/Expression/VariableReference/Instance.hpp"
-#include "BoundNode/Expression/BinaryUser.hpp"
+#include "BoundNode/Expression/UserBinary.hpp"
 #include "BoundNode/Statement/Group.hpp"
 #include "BoundNode/Statement/Block.hpp"
 #include "BoundNode/Statement/Expression.hpp"
@@ -83,7 +83,7 @@ namespace Ace::BoundNode::Statement::Assignment
             // To:
             // lhs = lhs + rhs;
 
-            const auto userBinaryExpression = std::make_shared<const BoundNode::Expression::BinaryUser>(
+            const auto userBinaryExpression = std::make_shared<const BoundNode::Expression::UserBinary>(
                 m_LHSExpression,
                 m_RHSExpression,
                 m_OperatorSymbol
@@ -197,7 +197,7 @@ namespace Ace::BoundNode::Statement::Assignment
                 instanceVariableReferenceExpression->GetVariableSymbol()
             );
 
-            const auto userBinaryExpression = std::make_shared<const BoundNode::Expression::BinaryUser>(
+            const auto userBinaryExpression = std::make_shared<const BoundNode::Expression::UserBinary>(
                 tmpRefVariableFieldReferenceExpression,
                 m_RHSExpression,
                 m_OperatorSymbol
