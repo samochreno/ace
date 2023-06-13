@@ -3,12 +3,12 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include <filesystem>
 
 #include "Token.hpp"
 #include "Diagnostics.hpp"
 #include "Keyword.hpp"
 #include "Utility.hpp"
+#include "File.hpp"
 #include "Compilation.hpp"
 #include "SourceLocation.hpp"
 
@@ -17,21 +17,18 @@ namespace Ace
     struct ScanContext
     {
         ScanContext(
-            const Compilation* const t_compilation,
-            const std::shared_ptr<const std::filesystem::path>& t_filePath,
+            const File* const t_file,
             const size_t& t_lineIndex,
             const std::string::const_iterator& t_it,
             const std::string::const_iterator& t_itEnd
-        ) : Compilation{ t_compilation },
-            FilePath{ t_filePath },
+        ) : File{ t_file },
             LineIndex{ t_lineIndex },
             Iterator{ t_it },
             IteratorEnd{ t_itEnd }
         {
         }
 
-        const Compilation* Compilation{};
-        std::shared_ptr<const std::filesystem::path> FilePath{};
+        const File* File{};
         size_t LineIndex{};
 
         std::string::const_iterator Iterator{};
@@ -80,7 +77,7 @@ namespace Ace
         const SourceLocation& t_sourceLocation
     ) -> std::optional<std::vector<std::shared_ptr<const Token>>>
     {
-        const auto& natives = t_context.Compilation->Natives;
+        const auto& natives = t_context.File->Compilation->Natives;
 
         Token token
         {
@@ -152,8 +149,7 @@ namespace Ace
 
         const SourceLocation sourceLocation
         {
-            t_context.Compilation,
-            t_context.FilePath,
+            t_context.File,
             t_context.LineIndex,
             t_context.Iterator,
             it,
@@ -229,8 +225,7 @@ namespace Ace
 
         const SourceLocation sourceLocation
         {
-            t_context.Compilation,
-            t_context.FilePath,
+            t_context.File,
             t_context.LineIndex,
             t_context.Iterator,
             it,
@@ -260,8 +255,7 @@ namespace Ace
 
         const SourceLocation sourceLocation
         {
-            t_context.Compilation,
-            t_context.FilePath,
+            t_context.File,
             t_context.LineIndex,
             t_context.Iterator,
             it,
@@ -282,8 +276,7 @@ namespace Ace
         auto it = t_context.Iterator;
 
         auto numberToken = ScanNumericLiteralNumber({
-            t_context.Compilation,
-            t_context.FilePath,
+            t_context.File,
             t_context.LineIndex,
             it,
             t_context.IteratorEnd,
@@ -296,8 +289,7 @@ namespace Ace
                 return std::nullopt;
 
             return ScanNumericLiteralSuffix({
-                t_context.Compilation,
-                t_context.FilePath,
+                t_context.File,
                 t_context.LineIndex,
                 it,
                 t_context.IteratorEnd
@@ -338,8 +330,7 @@ namespace Ace
             {
                 const SourceLocation sourceLocation
                 {
-                    t_context.Compilation,
-                    t_context.FilePath,
+                    t_context.File,
                     t_context.LineIndex,
                     t_context.Iterator + decimalPointPos,
                     t_context.Iterator + decimalPointPos + 1,
@@ -355,8 +346,7 @@ namespace Ace
 
         const SourceLocation sourceLocation
         {
-            t_context.Compilation,
-            t_context.FilePath,
+            t_context.File,
             t_context.LineIndex,
             t_context.Iterator,
             it, 
@@ -688,8 +678,7 @@ namespace Ace
                 {
                     const SourceLocation sourceLocation
                     {
-                        t_context.Compilation,
-                        t_context.FilePath,
+                        t_context.File,
                         t_context.LineIndex,
                         it,
                         it + 1,
@@ -704,8 +693,7 @@ namespace Ace
 
         const SourceLocation sourceLocation
         {
-            t_context.Compilation,
-            t_context.FilePath,
+            t_context.File,
             t_context.LineIndex,
             t_context.Iterator,
             it,
@@ -738,8 +726,7 @@ namespace Ace
             {
                 const SourceLocation sourceLocation
                 {
-                    t_context.Compilation,
-                    t_context.FilePath,
+                    t_context.File,
                     t_context.LineIndex,
                     t_context.Iterator,
                     it,
@@ -762,8 +749,7 @@ namespace Ace
 
         const SourceLocation sourceLocation
         {
-            t_context.Compilation,
-            t_context.FilePath,
+            t_context.File,
             t_context.LineIndex,
             t_context.Iterator,
             it,
@@ -824,12 +810,8 @@ namespace Ace
     }
 
     Lexer::Lexer(
-        const Compilation* const t_compilation,
-        const std::shared_ptr<const std::filesystem::path>& t_filePath,
-        const std::vector<std::string>& t_lines
-    ) : m_Compilation{ t_compilation },
-        m_FilePath{ t_filePath },
-        m_Lines{ t_lines }
+        const File* const t_file
+    ) : m_File{ t_file }
     {
         ResetCharacterIterator();
     }
@@ -981,8 +963,7 @@ namespace Ace
             {
                 const SourceLocation sourceLocation
                 {
-                    m_Compilation,
-                    m_FilePath,
+                    m_File,
                     m_LineIndex,
                     itBegin,
                     m_CharacterIterator,
@@ -1022,8 +1003,7 @@ namespace Ace
     auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>, ILexerDiagnostic>
     {
         return Ace::Scan({
-            m_Compilation,
-            m_FilePath,
+            m_File,
             m_LineIndex,
             m_CharacterIterator,
             m_CharacterIteratorEnd,
@@ -1051,7 +1031,7 @@ namespace Ace
 
     auto Lexer::GetLine() const -> const std::string&
     {
-        return m_Lines.at(m_LineIndex);
+        return m_File->Lines.at(m_LineIndex);
     }
 
     auto Lexer::IsEndOfLine() const -> bool
@@ -1061,7 +1041,7 @@ namespace Ace
 
     auto Lexer::IsEndOfFile() const -> bool
     {
-        const auto lastLineLindex = m_Lines.size() - 1;
+        const auto lastLineLindex = m_File->Lines.size() - 1;
 
         return 
             (m_LineIndex == lastLineLindex) &&

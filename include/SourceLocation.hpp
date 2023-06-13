@@ -1,32 +1,27 @@
 #pragma once
 
-#include <memory>
-#include <cstddef>
-#include <filesystem>
+#include <string>
 
 namespace Ace
 {
-    class Compilation;
+    class File;
 
     struct SourceLocation
     {
         SourceLocation() = default;
         SourceLocation(
-            const Compilation* const t_compilation,
-            const std::shared_ptr<const std::filesystem::path>& t_filePath,
+            const File* const t_file,
             const size_t& t_lineIndex,
             const std::string::const_iterator& t_itBegin,
             const std::string::const_iterator& t_itEnd
-        ) : Compilation{ t_compilation },
-            FilePath{ t_filePath },
+        ) : File{ t_file },
             LineIndex{ t_lineIndex },
             IteratorBegin{ t_itBegin },
             IteratorEnd{ t_itEnd }
         {
         }
 
-        const Compilation* Compilation{};
-        std::shared_ptr<const std::filesystem::path> FilePath{};
+        const File* File{};
         size_t LineIndex{};
         std::string::const_iterator IteratorBegin{};
         std::string::const_iterator IteratorEnd{};

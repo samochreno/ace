@@ -11,6 +11,7 @@
 
 #include "Diagnostics.hpp"
 #include "Utility.hpp"
+#include "Compilation.hpp"
 
 namespace Ace
 {
@@ -26,7 +27,7 @@ namespace Ace
     struct FilteredDirectory
     {
         FilteredDirectory(
-            const std::shared_ptr<const std::filesystem::path>& t_path, 
+            const std::filesystem::path& t_path, 
             const std::optional<std::string>& t_optExtensionFilter, 
             const bool& t_isRecursive
         ) : Path{ t_path }, 
@@ -35,7 +36,7 @@ namespace Ace
         {
         }
 
-        std::shared_ptr<const std::filesystem::path> Path{};
+        std::filesystem::path Path{};
         std::optional<std::string> OptExtensionFilter{};
         bool IsRecursive{};
     };
@@ -63,20 +64,18 @@ namespace Ace
 
     static auto CollectFilteredDirectoryFilePaths(
         const FilteredDirectory& t_directory
-    ) -> std::vector<std::shared_ptr<const std::filesystem::path>>
+    ) -> std::vector<std::filesystem::path>
     {
-        if (!std::filesystem::exists(*t_directory.Path.get()))
-        {
+        if (!std::filesystem::exists(t_directory.Path))
             return {};
-        }
 
-        std::vector<std::shared_ptr<const std::filesystem::path>> filePaths{};
+        std::vector<std::filesystem::path> filePaths{};
 
         if (t_directory.IsRecursive)
         {
             for (
                 const auto& directoryEntry :
-                std::filesystem::recursive_directory_iterator(*t_directory.Path.get())
+                std::filesystem::recursive_directory_iterator(t_directory.Path)
                 )
             {
                 const bool doesMatch = DoesDirectoryEntryMatchFilter(
@@ -86,16 +85,14 @@ namespace Ace
                 if (!doesMatch)
                     continue;
 
-                filePaths.push_back(
-                    std::make_shared<const std::filesystem::path>(directoryEntry.path())
-                );
+                filePaths.push_back(directoryEntry.path());
             }
         }
         else
         {
             for (
                 const auto& directoryEntry :
-                std::filesystem::directory_iterator(*t_directory.Path.get())
+                std::filesystem::directory_iterator(t_directory.Path)
                 )
             {
                 const bool doesMatch = DoesDirectoryEntryMatchFilter(
@@ -105,9 +102,7 @@ namespace Ace
                 if (!doesMatch)
                     continue;
 
-                filePaths.push_back(
-                    std::make_shared<const std::filesystem::path>(directoryEntry.path())
-                );
+                filePaths.push_back(directoryEntry.path());
             }
         }
 
@@ -185,7 +180,7 @@ namespace Ace
     public:
         FilePathOrFilteredDirectory() = default;
         FilePathOrFilteredDirectory(
-            const std::shared_ptr<const std::filesystem::path>& t_filePath
+            const std::filesystem::path& t_filePath
         ) : m_OptFilePath{ t_filePath }
         {
         }
@@ -198,12 +193,12 @@ namespace Ace
         auto IsFilePath()      const -> bool { return m_OptFilePath.has_value(); }
         auto IsDirectoryPath() const -> bool { return m_OptFilteredDirectory.has_value(); }
 
-        auto GetFilePath()          -> const std::shared_ptr<const std::filesystem::path>& { return m_OptFilePath.value(); }
-        auto GetFilteredDirectory() -> FilteredDirectory&     { return m_OptFilteredDirectory.value(); }
+        auto GetFilePath()          -> const std::filesystem::path& { return m_OptFilePath.value(); }
+        auto GetFilteredDirectory() -> FilteredDirectory&           { return m_OptFilteredDirectory.value(); }
 
     private:
-        std::optional<std::shared_ptr<const std::filesystem::path>> m_OptFilePath{};
-        std::optional<FilteredDirectory> m_OptFilteredDirectory{};
+        std::optional<std::filesystem::path> m_OptFilePath{};
+        std::optional<FilteredDirectory>     m_OptFilteredDirectory{};
     };
 
     static auto ExpandFirstFilePathPart(
@@ -250,17 +245,14 @@ namespace Ace
         if (isFilePath)
         {
             path += lastFilePathPartData.OptPath.value();
-            return FilePathOrFilteredDirectory
-            {
-                std::make_shared<const std::filesystem::path>(path)
-            };
+            return FilePathOrFilteredDirectory{ path };
         }
 
         return FilePathOrFilteredDirectory
         {
             FilteredDirectory
             {
-                std::make_shared<const std::filesystem::path>(path),
+                path,
                 lastFilePathPartData.OptExtension,
                 lastFilePathPartData.IsRecursive
             }
@@ -313,7 +305,7 @@ namespace Ace
         const std::filesystem::path& t_packageFilePath,
         const std::vector<std::string>& t_filePaths,
         const std::unordered_map<std::string, std::string>& t_pathMacroMap
-    ) -> Expected<std::vector<std::shared_ptr<const std::filesystem::path>>>
+    ) -> Expected<std::vector<std::filesystem::path>>
     {
         ACE_TRY(filePathsParts, TransformExpectedVector(t_filePaths,
         [&](const std::string& t_filePath) -> Expected<std::vector<std::string>>
@@ -323,7 +315,7 @@ namespace Ace
 
         const auto packageDirectoryPath = t_packageFilePath.parent_path();
 
-        std::vector<std::shared_ptr<const std::filesystem::path>> finalFilePaths{};
+        std::vector<std::filesystem::path> finalFilePaths{};
         ACE_TRY_VOID(TransformExpectedVector(filePathsParts,
         [&](const std::vector<std::string>& t_filePathParts) -> Expected<void>
         {
@@ -337,14 +329,12 @@ namespace Ace
                 const auto expandedFilePath =
                     filePathOrFilteredDirectory.GetFilePath();
 
-                const auto filePath = [&]() -> std::shared_ptr<const std::filesystem::path>
+                const auto filePath = [&]() -> std::filesystem::path
                 {
-                    if (expandedFilePath->is_absolute())
+                    if (expandedFilePath.is_absolute())
                         return expandedFilePath;
 
-                    return std::make_shared<const std::filesystem::path>(
-                        packageDirectoryPath / *expandedFilePath.get()
-                    );
+                    return packageDirectoryPath / expandedFilePath;
                 }();
 
                 finalFilePaths.push_back(filePath);
@@ -355,15 +345,9 @@ namespace Ace
                 auto directory =
                     filePathOrFilteredDirectory.GetFilteredDirectory();
 
-                directory.Path = [&]() -> std::shared_ptr<const std::filesystem::path>
-                {
-                    if (directory.Path->is_absolute())
-                        return directory.Path;
-
-                    return std::make_shared<const std::filesystem::path>(
-                        packageDirectoryPath / *directory.Path.get()
-                    );
-                }();
+                directory.Path = directory.Path.is_absolute() ? 
+                    directory.Path : 
+                    (packageDirectoryPath / directory.Path);
 
                 const auto directoryFilePaths =
                     CollectFilteredDirectoryFilePaths(directory);
@@ -382,6 +366,7 @@ namespace Ace
     }
 
     static auto NewInternal(
+        const Compilation* const t_compilation,
         const std::filesystem::path& t_filePath
     ) -> Expected<Package>
     {
@@ -427,6 +412,11 @@ namespace Ace
             originalFilePaths,
             pathMacroMap
         ));
+        ACE_TRY(files, TransformExpectedVector(finalFilePaths,
+        [&](const std::filesystem::path& t_filePath)
+        {
+            return File::New(t_compilation, t_filePath);
+        }));
 
         std::vector<std::string> originalDependencyFilePaths{};
         std::transform(
@@ -444,18 +434,19 @@ namespace Ace
         return Package
         {
             std::move(name),
-            std::move(finalFilePaths),
+            std::move(files),
             std::move(finalDependencyFilePaths),
         };
     }
 
     auto Package::New(
+        const Compilation* const t_compilation,
         const std::filesystem::path& t_filePath
     ) -> Expected<Package>
     {
         try
         {
-            ACE_TRY(package, NewInternal(t_filePath));
+            ACE_TRY(package, NewInternal(t_compilation, t_filePath));
             return std::move(package);
         }
         catch (nlohmann::json::exception&)

@@ -23,23 +23,18 @@
 #include "Emittable.hpp"
 #include "Compilation.hpp"
 #include "ControlFlowAnalysis.hpp"
+#include "File.hpp"
 
 namespace Ace::Core
 {
     auto ParseAST(
         const Compilation* const t_compilation,
-        const std::shared_ptr<const std::filesystem::path>& t_filePath,
-        const std::vector<std::string>& t_lines
+        const File* const t_file
     ) -> Diagnosed<std::shared_ptr<const Node::Module>, IDiagnostic>
     {
         std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
 
-        Lexer lexer
-        {
-            t_compilation,
-            t_filePath,
-            t_lines,
-        };
+        Lexer lexer{ t_file };
         auto dgnTokens = lexer.EatTokens();
         diagnostics.insert(
             end(diagnostics),

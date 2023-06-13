@@ -19,6 +19,7 @@
 #include "BoundNode/All.hpp"
 #include "Symbol/All.hpp"
 #include "Compilation.hpp"
+#include "File.hpp"
 
 namespace Ace
 {
@@ -40,42 +41,13 @@ namespace Ace
         const auto timeParsingStart = now();
         ACE_LOG_INFO("Parsing start");
 
-        ACE_TRY(filesLines, TransformExpectedVector(
-            t_compilation->Package.FilePaths,
-            [&](const std::shared_ptr<const std::filesystem::path>& t_filePath) -> Expected<std::vector<std::string>>
-            {
-                std::ifstream fileStream{ *t_filePath.get() };
-                ACE_TRY_ASSERT(fileStream.is_open());
-
-                std::vector<std::string> lines{};
-                std::string line{};
-                while (std::getline(fileStream, line))
-                {
-                    lines.push_back(line);
-                }
-
-                return lines;
-            }
-        ));
-
         ACE_TRY(asts, TransformExpectedVector(
-            t_compilation->Package.FilePaths,
-            [&](const std::shared_ptr<const std::filesystem::path>& t_filePath) -> Expected<std::shared_ptr<const Node::Module>>
+            t_compilation->Package.Files,
+            [&](const File& t_file) -> Expected<std::shared_ptr<const Node::Module>>
             {
-                std::ifstream fileStream{ *t_filePath.get() };
-                ACE_TRY_ASSERT(fileStream.is_open());
-
-                std::vector<std::string> fileLines{};
-                std::string line{};
-                while (std::getline(fileStream, line))
-                {
-                    fileLines.push_back(line);
-                }
-
                 const auto dgnAST = Core::ParseAST(
                     t_compilation,
-                    t_filePath,
-                    fileLines
+                    &t_file
                 );
                 diagnostics.insert(
                     end(diagnostics),

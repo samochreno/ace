@@ -3,11 +3,10 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include <filesystem>
 
 #include "Token.hpp"
 #include "Diagnostics.hpp"
-#include "Compilation.hpp"
+#include "File.hpp"
 
 namespace Ace
 {
@@ -15,9 +14,7 @@ namespace Ace
     {
     public:
         Lexer(
-            const Compilation* const t_compilation,
-            const std::shared_ptr<const std::filesystem::path>& t_filePath,
-            const std::vector<std::string>& t_lines
+            const File* const t_file
         );
         ~Lexer() = default;
 
@@ -45,9 +42,7 @@ namespace Ace
         auto IsEndOfFile()    const -> bool;
         auto IsCommentStart() const -> bool;
 
-        const Compilation* m_Compilation{};
-        std::shared_ptr<const std::filesystem::path> m_FilePath{};
-        std::vector<std::string> m_Lines{};
+        const File* m_File{};
         
         size_t m_LineIndex{};
         std::string::const_iterator m_CharacterIteratorBegin{};

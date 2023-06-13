@@ -159,8 +159,10 @@ namespace Ace
         const std::vector<std::string>& t_args
     ) -> Expected<std::unique_ptr<const Compilation>>
     {
+        auto self = std::make_unique<Compilation>();
+
         ACE_TRY(options, ParseOptions(t_args));
-        ACE_TRY(package, Package::New(options.PackagePath));
+        ACE_TRY(package, Package::New(self.get(), options.PackagePath));
 
         const auto& outputPath = options.OutputPath;
 
@@ -171,8 +173,6 @@ namespace Ace
         {
             std::filesystem::create_directories(outputPath);
         }
-
-        auto self = std::make_unique<Compilation>();
 
         self->Package              = std::move(package);
         self->OutputPath           = std::move(options.OutputPath);
