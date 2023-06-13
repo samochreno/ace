@@ -2,13 +2,14 @@
 
 ## 💥 High Priority
 
-- Remove `ACE_TRY` macros, make opening braces on the same line
+- ❓ Remove `ACE_TRY` macros, make opening braces on the same line
 - Add error messages to make debugging easier:
   - [ ] Remove second typechecking pass
-  - [ ] Consider making errors just enums not full types
-  - [ ] Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
-  - [ ] Parsing errors
-  - [ ] Printing errors
+  - [ ] `Compilation` parsing and verification errors
+  - [ ] Parsing errors:
+    - Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
+  - [ ] Error printing
+  - [ ] ❓ Make errors just enums, not full types
 - [ ] Rename `found...It`
 - [ ] Add strong pointer self
 - Traits:
@@ -56,7 +57,6 @@
   }
   ```
 - [ ] Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
-- [ ] Error messages
 - [ ] Check out LLVM attributes
 - [ ] Struct update constructor syntax
 - Mutability/Immutability:
@@ -93,10 +93,6 @@
 - [ ] Enums
 - [ ] Figure out how to share globals between dlls
 - [ ] ❓ Remove local variable shadowing, it causes more mistakes than usefulness
-
-## 🛠️ Bootstrapping
-
-- Maybe dont make global scope a global variable
 
 ## 💡 Ideas
 
