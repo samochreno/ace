@@ -536,6 +536,11 @@ unwrapper(): int {
     ret unwrap(wrapped);
 }
 
+implicit_conversion_with_binary_operator(): int {
+    i: i32 = 5i32 + 9i16;
+    ret 0;
+}
+
 main(): int {
     value: int = unwrapper();
     print_int(value);

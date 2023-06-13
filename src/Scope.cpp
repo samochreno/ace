@@ -19,29 +19,10 @@
 #include "BoundNode/Expression/Base.hpp"
 #include "BoundNode/Expression/ConversionPlaceholder.hpp"
 #include "Compilation.hpp"
+#include "TypeConversions.hpp"
 
 namespace Ace
 {
-    static auto AreTypesSame(
-        const std::vector<Symbol::Type::IBase*>& t_typesA,
-        const std::vector<Symbol::Type::IBase*>& t_typesB
-    ) -> bool
-    {
-        if (t_typesA.size() != t_typesB.size())
-            return false;
-
-        for (size_t i = 0; i < t_typesA.size(); i++)
-        {
-            if (
-                t_typesA.at(i)->GetUnaliased() !=
-                t_typesB.at(i)->GetUnaliased()
-                )
-                return false;
-        }
-
-        return true;
-    }
-
     auto FindTemplatedImplContext(
         const std::shared_ptr<const Scope>& t_scope
     ) -> std::optional<Symbol::TemplatedImpl*>

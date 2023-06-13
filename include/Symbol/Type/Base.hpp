@@ -64,15 +64,4 @@ namespace Ace::Symbol::Type
         virtual auto GetUnaliased() const -> const Symbol::Type::IBase* final;
         virtual auto GetTemplate() const -> std::optional<Symbol::Template::Type*> final;
     };
-
-    auto GetImplicitConversionOperator(
-        const std::shared_ptr<Scope>& t_scope,
-        Symbol::Type::IBase* t_fromType,
-        Symbol::Type::IBase* t_targetType
-    ) -> Expected<Symbol::Function*>;
-    auto GetExplicitConversionOperator(
-        const std::shared_ptr<Scope>& t_scope,
-        Symbol::Type::IBase* t_fromType,
-        Symbol::Type::IBase* t_targetType
-    ) -> Expected<Symbol::Function*>;
 }

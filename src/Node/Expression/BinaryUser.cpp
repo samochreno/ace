@@ -47,16 +47,50 @@ namespace Ace::Node::Expression
         auto rhsName = rhsTypeSymbol->CreateFullyQualifiedName();
         rhsName.Sections.emplace_back(operatorNameIt->second);
 
-        const std::vector argumentTypeSymbols{ lhsTypeSymbol, rhsTypeSymbol };
+        const std::vector<TypeInfo> argumentTypeInfos
+        {
+            boundLHSExpression->GetTypeInfo(),
+            boundRHSExpression->GetTypeInfo(),
+        };
 
-        const auto expLHSOperatorSymbol = GetScope()->ResolveStaticSymbol<Symbol::Function>(
-            lhsName,
-            Scope::CreateArgumentTypes(argumentTypeSymbols)
+        std::vector<Symbol::Type::IBase*> argumentTypeSymbols{};
+        std::transform(
+            begin(argumentTypeInfos),
+            end  (argumentTypeInfos),
+            back_inserter(argumentTypeSymbols),
+            [](const TypeInfo& t_typeInfo) { return t_typeInfo.Symbol; }
         );
-        const auto expRHSOperatorSymbol = GetScope()->ResolveStaticSymbol<Symbol::Function>(
-            rhsName,
-            Scope::CreateArgumentTypes(argumentTypeSymbols)
-        );
+
+        const auto expLHSOperatorSymbol = [&]() -> Expected<Symbol::Function*>
+        {
+            ACE_TRY(symbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(
+                lhsName,
+                Scope::CreateArgumentTypes(argumentTypeSymbols)
+            ));
+
+            ACE_TRY_ASSERT(AreTypesConvertible(
+                GetScope(),
+                argumentTypeInfos,
+                symbol->CollectArgumentTypeInfos()
+            ));
+
+            return symbol;
+        }();
+        const auto expRHSOperatorSymbol = [&]() -> Expected<Symbol::Function*>
+        {
+            ACE_TRY(symbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(
+                rhsName,
+                Scope::CreateArgumentTypes(argumentTypeSymbols)
+            ));
+
+            ACE_TRY_ASSERT(AreTypesConvertible(
+                GetScope(),
+                argumentTypeInfos,
+                symbol->CollectArgumentTypeInfos()
+            ));
+
+            return symbol;
+        }();
 
         ACE_TRY_ASSERT(expLHSOperatorSymbol || expRHSOperatorSymbol);
 

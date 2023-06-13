@@ -14,6 +14,7 @@
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Function.hpp"
 #include "Asserts.hpp"
+#include "TypeConversions.hpp"
 
 namespace Ace::BoundNode::Expression
 {
@@ -32,11 +33,11 @@ namespace Ace::BoundNode::Expression
     auto CreateConverted(std::shared_ptr<const BoundNode::Expression::IBase> t_expression, TypeInfo t_targetTypeInfo, ConversionOperatorGetterFunction t_func) -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>;
     inline auto CreateImplicitlyConverted(const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression, const TypeInfo& t_targetTypeInfo)
     {
-        return CreateConverted(t_expression, t_targetTypeInfo, &Symbol::Type::GetImplicitConversionOperator);
+        return CreateConverted(t_expression, t_targetTypeInfo, &GetImplicitConversionOperator);
     }
     inline auto CreateExplicitlyConverted(const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression, const TypeInfo& t_targetTypeInfo)
     {
-        return CreateConverted(t_expression, t_targetTypeInfo, &Symbol::Type::GetExplicitConversionOperator);
+        return CreateConverted(t_expression, t_targetTypeInfo, &GetExplicitConversionOperator);
     }
 
     typedef Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>(*ConversionFunction)(const std::shared_ptr<const BoundNode::Expression::IBase>&, const TypeInfo&);
