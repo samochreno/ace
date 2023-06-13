@@ -11,7 +11,7 @@
 #include "SpecialIdentifier.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
-#include "Compilation.hpp"
+#include "File.hpp"
 
 namespace Ace
 {
@@ -75,7 +75,7 @@ namespace Ace
         Parser() = delete;
 
         static auto ParseAST(
-            const Compilation* const t_compilation, 
+            const File* const t_file, 
             const std::vector<std::shared_ptr<const Token>>& t_tokens
         ) -> Expected<std::shared_ptr<const Node::Module>>;
 

@@ -191,7 +191,7 @@ namespace Ace
         if (t_suffix->String == "f64") return TokenKind::Float64;
 
         return std::make_shared<const InvalidNumericLiteralTypeSuffixError>(
-            t_suffix->OptSourceLocation.value()
+            t_suffix->SourceLocation
         );
     }
 
@@ -276,7 +276,7 @@ namespace Ace
             t_context.LineIterator,
             it,
         });
-        it = numberToken.OptSourceLocation->CharacterIteratorEnd;
+        it = numberToken.SourceLocation.CharacterIteratorEnd;
 
         const auto optTypeSuffix = [&]() -> std::optional<std::shared_ptr<const Token>>
         {
@@ -291,7 +291,7 @@ namespace Ace
         }();
         if (optTypeSuffix.has_value())
         {
-            it = optTypeSuffix.value()->OptSourceLocation.value().CharacterIteratorEnd;
+            it = optTypeSuffix.value()->SourceLocation.CharacterIteratorEnd;
         }
 
         const auto tokenKind = [&]() -> TokenKind
@@ -853,7 +853,7 @@ namespace Ace
                     end  (scannedTokens)
                 );
                 EatCharactersUntil(
-                    tokens.back()->OptSourceLocation.value().CharacterIteratorEnd
+                    tokens.back()->SourceLocation.CharacterIteratorEnd
                 );
             }
             else
@@ -864,7 +864,7 @@ namespace Ace
         }
 
         tokens.push_back(std::make_shared<const Token>(
-            std::nullopt,
+            SourceLocation{},
             TokenKind::EndOfFile
         ));
 

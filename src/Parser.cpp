@@ -22,6 +22,8 @@
 #include "Scope.hpp"
 #include "Utility.hpp"
 #include "Name.hpp"
+#include "File.hpp"
+#include "Compilation.hpp"
 
 namespace Ace
 {
@@ -152,27 +154,48 @@ namespace Ace
     }
 
     auto Parser::ParseAST(
-        const Compilation* const t_compilation, 
+        const File* const t_file,
         const std::vector<std::shared_ptr<const Token>>& t_tokens
     ) -> Expected<std::shared_ptr<const Node::Module>>
     {
         std::vector<ParseToken> tokens{};
 
+        const auto firstLineIt = begin(t_file->Lines);
+        const auto  lastLineIt =   end(t_file->Lines) - 1;
+
+        const auto& firstLine = *firstLineIt;
+        const auto&  lastLine = * lastLineIt;
+
+        const SourceLocation leadingSourceLocation
+        {
+            t_file,
+            firstLineIt,
+            begin(firstLine),
+            begin(firstLine) + 1,
+        };
+        const SourceLocation trailingSourceLocation
+        {
+            t_file,
+            lastLineIt,
+            end(lastLine) - 1,
+            end(lastLine),
+        };
+
         tokens.emplace_back(std::make_shared<const Token>(
-            std::nullopt,
+            leadingSourceLocation,
             TokenKind::Identifier,
-            t_compilation->Package.Name
+            t_file->Compilation->Package.Name
         ));
         tokens.emplace_back(std::make_shared<const Token>(
-            std::nullopt,
+            leadingSourceLocation,
             TokenKind::Colon
         ));
         tokens.emplace_back(std::make_shared<const Token>(
-            std::nullopt,
+            leadingSourceLocation,
             TokenKind::ModuleKeyword
         ));
         tokens.emplace_back(std::make_shared<const Token>(
-            std::nullopt,
+            leadingSourceLocation,
             TokenKind::OpenBrace
         ));
 
@@ -189,14 +212,14 @@ namespace Ace
         tokens.insert(
             end(tokens) - 1,
             std::make_shared<const Token>(
-                std::nullopt,
+                trailingSourceLocation,
                 TokenKind::CloseBrace
             )
         );
 
         auto it = begin(tokens);
 
-        ACE_TRY(module, ParseModule({ it, t_compilation->GlobalScope }));
+        ACE_TRY(module, ParseModule({ it, t_file->Compilation->GlobalScope }));
         it += module.Length;
 
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::EndOfFile);

@@ -37,7 +37,7 @@ namespace Ace::Core
             std::string message{};
 
             const auto sourceLocation =
-                t_diagnostic->GetSourceLocation().value();
+                t_diagnostic->GetSourceLocation();
 
             message += sourceLocation.File->Path.string();
             message += ":";
@@ -106,7 +106,7 @@ namespace Ace::Core
         LogDiagnostics(diagnostics);
 
         const auto ast = Parser::ParseAST(
-            t_compilation,
+            t_file,
             std::move(dgnTokens.Unwrap())
         ).Unwrap();
 

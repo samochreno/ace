@@ -1,8 +1,6 @@
 #pragma once
 
 #include <string>
-#include <bitset>
-#include <optional>
 
 #include "SourceLocation.hpp"
 
@@ -108,30 +106,30 @@ namespace Ace
     {
         Token(
         ) : String{},
-            OptSourceLocation{},
+            SourceLocation{},
             Kind{}
         {
         }
         Token(
-            const std::optional<SourceLocation>& t_optSourceLocation,
+            const SourceLocation& t_sourceLocation,
             const TokenKind& t_kind
-        ) : OptSourceLocation{ t_optSourceLocation },
+        ) : SourceLocation{ t_sourceLocation },
             Kind{ t_kind },
             String{}
             
         {
         }
         Token(
-            const std::optional<SourceLocation>& t_optSourceLocation,
+            const SourceLocation& t_sourceLocation,
             const TokenKind& t_kind,
             const std::string& t_string
-        ) : OptSourceLocation{ t_optSourceLocation },
+        ) : SourceLocation{ t_sourceLocation },
             Kind{ t_kind },
             String{ t_string }
         {
         }
 
-        std::optional<SourceLocation> OptSourceLocation{};
+        SourceLocation SourceLocation{};
         TokenKind Kind{};
         std::string String{};
     };

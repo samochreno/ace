@@ -44,7 +44,11 @@ namespace Ace
         virtual ~NoneError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return std::nullopt; }
+        auto GetSourceLocation() const -> const SourceLocation& final
+        {
+            static const SourceLocation sourceLocation{};
+            return sourceLocation;
+        }
         auto GetMessage() const -> const char*
         {
             return "Empty error";

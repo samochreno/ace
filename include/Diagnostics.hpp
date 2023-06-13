@@ -26,7 +26,7 @@ namespace Ace
         virtual ~UnterminatedMultiLineCommentError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
         auto GetMessage() const -> const char* final
         {
             return "Unterminated multiline comment";
@@ -47,7 +47,7 @@ namespace Ace
         virtual ~UnterminatedStringLiteralError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
         auto GetMessage() const -> const char* final
         {
             return "Unterminated string literal";
@@ -68,7 +68,7 @@ namespace Ace
         virtual ~UnexpectedCharacterError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
         auto GetMessage() const -> const char* final
         {
             return "Unexpected character";
@@ -89,7 +89,7 @@ namespace Ace
         virtual ~InvalidNumericLiteralTypeSuffixError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
         auto GetMessage() const -> const char* final
         {
             return "Invalid numeric literal type suffix";
@@ -110,7 +110,7 @@ namespace Ace
         virtual ~DecimalPointInNonFloatNumericLiteralError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
         auto GetMessage() const -> const char* final
         {
             return "Decimal point in non-float numeric literal";
