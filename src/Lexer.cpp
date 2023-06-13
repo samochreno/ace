@@ -745,7 +745,7 @@ namespace Ace
                     it,
                 };
 
-                diagnostics.push_back(std::make_shared<const UnclosedStringLiteralError>(
+                diagnostics.push_back(std::make_shared<const UnterminatedStringLiteralError>(
                     sourceLocation
                 ));
 
@@ -992,7 +992,7 @@ namespace Ace
                 {
                     std::vector<std::shared_ptr<const ILexerDiagnostic>>
                     {
-                        std::make_shared<const UnclosedMultiLineCommentError>(
+                        std::make_shared<const UnterminatedMultiLineCommentError>(
                             sourceLocation
                         )
                     }

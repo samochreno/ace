@@ -15,15 +15,15 @@ namespace Ace
         virtual ~ILexerDiagnostic() = default;
     };
 
-    class UnclosedMultiLineCommentError : public virtual ILexerDiagnostic
+    class UnterminatedMultiLineCommentError : public virtual ILexerDiagnostic
     {
     public:
-        UnclosedMultiLineCommentError(
+        UnterminatedMultiLineCommentError(
             const SourceLocation& t_sourceLocation
         ) : m_SourceLocation{ t_sourceLocation }
         {
         }
-        virtual ~UnclosedMultiLineCommentError() = default;
+        virtual ~UnterminatedMultiLineCommentError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
         auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
@@ -32,15 +32,15 @@ namespace Ace
         SourceLocation m_SourceLocation{};
     };
     
-    class UnclosedStringLiteralError : public virtual ILexerDiagnostic
+    class UnterminatedStringLiteralError : public virtual ILexerDiagnostic
     {
     public:
-        UnclosedStringLiteralError(
+        UnterminatedStringLiteralError(
             const SourceLocation& t_sourceLocation
         ) : m_SourceLocation{ t_sourceLocation }
         {
         }
-        virtual ~UnclosedStringLiteralError() = default;
+        virtual ~UnterminatedStringLiteralError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
         auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
