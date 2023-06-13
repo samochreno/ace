@@ -377,7 +377,7 @@ namespace Ace
 
     static auto ScanDefault(
         const ScanContext& t_context
-    ) -> Expected<Diagnosed<std::shared_ptr<const Token>, ILexerDiagnostic>, ILexerDiagnostic>
+    ) -> Expected<std::shared_ptr<const Token>, ILexerDiagnostic>
     {
         auto it = t_context.Iterator;
 
@@ -716,7 +716,7 @@ namespace Ace
             tokenKind
         );
 
-        return Expected<Diagnosed<std::shared_ptr<const Token>, ILexerDiagnostic>, ILexerDiagnostic>
+        return Expected<std::shared_ptr<const Token>, ILexerDiagnostic>
         {
             token
         };
@@ -816,11 +816,10 @@ namespace Ace
             };
         }
 
-        ACE_TRY(dgnDefault, ScanDefault(t_context));
+        ACE_TRY(dfault, ScanDefault(t_context));
         return Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
         {
-            std::vector{ dgnDefault.Unwrap() },
-            dgnDefault.GetDiagnostics(),
+            std::vector{ dfault }
         };
     }
 
