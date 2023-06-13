@@ -44,9 +44,7 @@ namespace Ace
 
         const File* m_File{};
         
-        size_t m_LineIndex{};
-        std::string::const_iterator m_CharacterIteratorBegin{};
+        std::vector<std::string>::const_iterator m_LineIterator{};
         std::string::const_iterator m_CharacterIterator{};
-        std::string::const_iterator m_CharacterIteratorEnd{};
     };
 }

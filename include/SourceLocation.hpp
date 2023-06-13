@@ -11,19 +11,19 @@ namespace Ace
         SourceLocation() = default;
         SourceLocation(
             const File* const t_file,
-            const size_t& t_lineIndex,
-            const std::string::const_iterator& t_itBegin,
-            const std::string::const_iterator& t_itEnd
+            const std::vector<std::string>::const_iterator t_lineIt,
+            const std::string::const_iterator& t_characterItBegin,
+            const std::string::const_iterator& t_characterItEnd
         ) : File{ t_file },
-            LineIndex{ t_lineIndex },
-            IteratorBegin{ t_itBegin },
-            IteratorEnd{ t_itEnd }
+            LineIterator{ t_lineIt },
+            CharacterIteratorBegin{ t_characterItBegin },
+            CharacterIteratorEnd{ t_characterItEnd }
         {
         }
 
         const File* File{};
-        size_t LineIndex{};
-        std::string::const_iterator IteratorBegin{};
-        std::string::const_iterator IteratorEnd{};
+        std::vector<std::string>::const_iterator LineIterator{};
+        std::string::const_iterator CharacterIteratorBegin{};
+        std::string::const_iterator CharacterIteratorEnd{};
     };
 }

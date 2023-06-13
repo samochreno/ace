@@ -18,21 +18,17 @@ namespace Ace
     {
         ScanContext(
             const File* const t_file,
-            const size_t& t_lineIndex,
-            const std::string::const_iterator& t_it,
-            const std::string::const_iterator& t_itEnd
+            const std::vector<std::string>::const_iterator& t_lineIt,
+            const std::string::const_iterator& t_characterIt
         ) : File{ t_file },
-            LineIndex{ t_lineIndex },
-            Iterator{ t_it },
-            IteratorEnd{ t_itEnd }
+            LineIterator{ t_lineIt },
+            CharacterIterator{ t_characterIt }
         {
         }
 
         const File* File{};
-        size_t LineIndex{};
-
-        std::string::const_iterator Iterator{};
-        std::string::const_iterator IteratorEnd{};
+        std::vector<std::string>::const_iterator LineIterator{};
+        std::string::const_iterator CharacterIterator{};
     };
 
     static auto CreateNativeTypeName(
@@ -131,11 +127,11 @@ namespace Ace
         const ScanContext& t_context
     ) -> std::vector<std::shared_ptr<const Token>>
     {
-        auto it = t_context.Iterator;
+        auto it = t_context.CharacterIterator;
 
         ACE_ASSERT(IsInAlphabet(*it) || (*it == '_'));
 
-        while (it != t_context.IteratorEnd)
+        while (it != end(*t_context.LineIterator))
         {
             if (
                 !IsInAlphabet(*it) &&
@@ -150,12 +146,12 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.File,
-            t_context.LineIndex,
-            t_context.Iterator,
+            t_context.LineIterator,
+            t_context.CharacterIterator,
             it,
         };
 
-        const std::string string{ t_context.Iterator, it };
+        const std::string string{ t_context.CharacterIterator, it };
 
         const auto identifierToken = std::make_shared<const Token>(
             sourceLocation,
@@ -203,7 +199,7 @@ namespace Ace
         const ScanContext& t_context
     ) -> Token
     {
-        auto it = t_context.Iterator;
+        auto it = t_context.CharacterIterator;
 
         ACE_ASSERT(IsNumber(*it));
 
@@ -226,8 +222,8 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.File,
-            t_context.LineIndex,
-            t_context.Iterator,
+            t_context.LineIterator,
+            t_context.CharacterIterator,
             it,
         };
 
@@ -243,7 +239,7 @@ namespace Ace
         const ScanContext& t_context
     ) -> std::shared_ptr<const Token>
     {
-        auto it = t_context.Iterator;
+        auto it = t_context.CharacterIterator;
 
         ACE_ASSERT(IsInAlphabet(*it));
         ++it;
@@ -256,15 +252,15 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.File,
-            t_context.LineIndex,
-            t_context.Iterator,
+            t_context.LineIterator,
+            t_context.CharacterIterator,
             it,
         };
 
         return std::make_shared<const Token>(
             sourceLocation,
             TokenKind::None,
-            std::string{ t_context.Iterator, it }
+            std::string{ t_context.CharacterIterator, it }
         );
     }
 
@@ -273,15 +269,14 @@ namespace Ace
     ) -> Diagnosed<std::shared_ptr<const Token>, ILexerDiagnostic>
     {
         std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
-        auto it = t_context.Iterator;
+        auto it = t_context.CharacterIterator;
 
         auto numberToken = ScanNumericLiteralNumber({
             t_context.File,
-            t_context.LineIndex,
+            t_context.LineIterator,
             it,
-            t_context.IteratorEnd,
         });
-        it = numberToken.OptSourceLocation->IteratorEnd;
+        it = numberToken.OptSourceLocation->CharacterIteratorEnd;
 
         const auto optTypeSuffix = [&]() -> std::optional<std::shared_ptr<const Token>>
         {
@@ -290,14 +285,13 @@ namespace Ace
 
             return ScanNumericLiteralSuffix({
                 t_context.File,
-                t_context.LineIndex,
+                t_context.LineIterator,
                 it,
-                t_context.IteratorEnd
             });
         }();
         if (optTypeSuffix.has_value())
         {
-            it = optTypeSuffix.value()->OptSourceLocation.value().IteratorEnd;
+            it = optTypeSuffix.value()->OptSourceLocation.value().CharacterIteratorEnd;
         }
 
         const auto tokenKind = [&]() -> TokenKind
@@ -331,9 +325,9 @@ namespace Ace
                 const SourceLocation sourceLocation
                 {
                     t_context.File,
-                    t_context.LineIndex,
-                    t_context.Iterator + decimalPointPos,
-                    t_context.Iterator + decimalPointPos + 1,
+                    t_context.LineIterator,
+                    t_context.CharacterIterator + decimalPointPos,
+                    t_context.CharacterIterator + decimalPointPos + 1,
                 };
 
                 diagnostics.push_back(std::make_shared<const DecimalPointInNonFloatNumericLiteralError>(
@@ -347,8 +341,8 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.File,
-            t_context.LineIndex,
-            t_context.Iterator,
+            t_context.LineIterator,
+            t_context.CharacterIterator,
             it, 
         };
 
@@ -369,7 +363,7 @@ namespace Ace
         const ScanContext& t_context
     ) -> Expected<std::shared_ptr<const Token>, ILexerDiagnostic>
     {
-        auto it = t_context.Iterator;
+        auto it = t_context.CharacterIterator;
 
         ACE_TRY(tokenKind, ([&]() -> Expected<TokenKind, ILexerDiagnostic>
         {
@@ -679,7 +673,7 @@ namespace Ace
                     const SourceLocation sourceLocation
                     {
                         t_context.File,
-                        t_context.LineIndex,
+                        t_context.LineIterator,
                         it,
                         it + 1,
                     };
@@ -694,8 +688,8 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.File,
-            t_context.LineIndex,
-            t_context.Iterator,
+            t_context.LineIterator,
+            t_context.CharacterIterator,
             it,
         };
 
@@ -715,20 +709,20 @@ namespace Ace
     ) -> Diagnosed<std::shared_ptr<const Token>, ILexerDiagnostic>
     {
         std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
-        auto it = t_context.Iterator;
+        auto it = t_context.CharacterIterator;
 
         ACE_ASSERT(*it == '"');
         ++it;
 
         while (*it != '"')
         {
-            if (it == t_context.IteratorEnd)
+            if (it == end(*t_context.LineIterator))
             {
                 const SourceLocation sourceLocation
                 {
                     t_context.File,
-                    t_context.LineIndex,
-                    t_context.Iterator,
+                    t_context.LineIterator,
+                    t_context.CharacterIterator,
                     it,
                 };
 
@@ -750,15 +744,15 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.File,
-            t_context.LineIndex,
-            t_context.Iterator,
+            t_context.LineIterator,
+            t_context.CharacterIterator,
             it,
         };
 
         const auto token = std::make_shared<const Token>(
             sourceLocation,
             TokenKind::String,
-            std::string{ t_context.Iterator + 1, it }
+            std::string{ t_context.CharacterIterator + 1, it }
         );
 
         return Diagnosed
@@ -772,7 +766,7 @@ namespace Ace
         const ScanContext& t_context
     ) -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>, ILexerDiagnostic>
     {
-        const auto character = *t_context.Iterator;
+        const auto character = *t_context.CharacterIterator;
 
         if (character == '"')
         {
@@ -813,6 +807,7 @@ namespace Ace
         const File* const t_file
     ) : m_File{ t_file }
     {
+        m_LineIterator = begin(m_File->Lines);
         ResetCharacterIterator();
     }
 
@@ -858,7 +853,7 @@ namespace Ace
                     end  (scannedTokens)
                 );
                 EatCharactersUntil(
-                    tokens.back()->OptSourceLocation.value().IteratorEnd
+                    tokens.back()->OptSourceLocation.value().CharacterIteratorEnd
                 );
             }
             else
@@ -946,7 +941,7 @@ namespace Ace
 
     auto Lexer::EatMultiLineComment() -> Diagnosed<void, ILexerDiagnostic>
     {
-        const auto itBegin = m_CharacterIteratorBegin;
+        const auto itBegin = m_CharacterIterator;
 
         ACE_ASSERT(GetCharacter() == '#');
         EatCharacter();
@@ -964,7 +959,7 @@ namespace Ace
                 const SourceLocation sourceLocation
                 {
                     m_File,
-                    m_LineIndex,
+                    m_LineIterator,
                     itBegin,
                     m_CharacterIterator,
                 };
@@ -989,24 +984,21 @@ namespace Ace
 
     auto Lexer::EatLine() -> void
     {
-        m_LineIndex++;
+        m_LineIterator++;
         ResetCharacterIterator();
     }
 
     auto Lexer::ResetCharacterIterator() -> void
     {
-        m_CharacterIteratorBegin = begin(GetLine());
-        m_CharacterIterator      = begin(GetLine());
-        m_CharacterIteratorEnd   = end  (GetLine());
+        m_CharacterIterator = begin(GetLine());
     }
 
     auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>, ILexerDiagnostic>
     {
         return Ace::Scan({
             m_File,
-            m_LineIndex,
-            m_CharacterIterator,
-            m_CharacterIteratorEnd,
+            m_LineIterator,
+            m_CharacterIterator
         });
     }
 
@@ -1019,7 +1011,7 @@ namespace Ace
     {
         const auto remainingCharactersCount = std::distance(
             m_CharacterIterator,
-            m_CharacterIteratorEnd
+            end(GetLine())
         );
         if (t_offset > remainingCharactersCount)
         {
@@ -1031,21 +1023,19 @@ namespace Ace
 
     auto Lexer::GetLine() const -> const std::string&
     {
-        return m_File->Lines.at(m_LineIndex);
+        return *m_LineIterator;
     }
 
     auto Lexer::IsEndOfLine() const -> bool
     {
-        return m_CharacterIterator == m_CharacterIteratorEnd;
+        return m_CharacterIterator == end(GetLine());
     }
 
     auto Lexer::IsEndOfFile() const -> bool
     {
-        const auto lastLineLindex = m_File->Lines.size() - 1;
+        const bool isLastLine = (m_LineIterator == (end(m_File->Lines) - 1));
 
-        return 
-            (m_LineIndex == lastLineLindex) &&
-            IsEndOfLine();
+        return isLastLine && IsEndOfLine();
     }
 
     auto Lexer::IsCommentStart() const -> bool
