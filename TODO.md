@@ -2,6 +2,7 @@
 
 ## 💥 High Priority
 
+- Remove `ACE_TRY` macros, make opening braces on the same line
 - Add error messages to make debugging easier:
   - [ ] Remove second typechecking pass
   - [ ] Consider making errors just enums not full types
