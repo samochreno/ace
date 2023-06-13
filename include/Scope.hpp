@@ -86,8 +86,6 @@ namespace Ace
     class Scope : public std::enable_shared_from_this<Scope>
     {
     public:
-        int ChildCount = 0;
-
         Scope(const Compilation* const t_compilation);
         ~Scope();
         

@@ -718,8 +718,6 @@ namespace Ace
 
     auto Scope::AddChild(const std::optional<std::string>& t_optName) -> std::shared_ptr<Scope>
     {
-        ChildCount++;
-
         std::shared_ptr<Scope> child
         {
             new Scope(
