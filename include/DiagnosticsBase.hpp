@@ -22,5 +22,6 @@ namespace Ace
 
         virtual auto GetSeverity() const -> DiagnosticSeverity = 0;
         virtual auto GetSourceLocation() const -> std::optional<SourceLocation> = 0;
+        virtual auto GetMessage() const -> const char* = 0;
     };
 }

@@ -45,6 +45,10 @@ namespace Ace
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
         auto GetSourceLocation() const -> std::optional<SourceLocation> final { return std::nullopt; }
+        auto GetMessage() const -> const char*
+        {
+            return "Empty error";
+        }
     };
 
     template<typename TValue, typename TError = NoneError>

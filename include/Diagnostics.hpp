@@ -27,6 +27,10 @@ namespace Ace
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
         auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+        auto GetMessage() const -> const char* final
+        {
+            return "Unterminated multiline comment";
+        }
 
     private:
         SourceLocation m_SourceLocation{};
@@ -44,6 +48,10 @@ namespace Ace
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
         auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+        auto GetMessage() const -> const char* final
+        {
+            return "Unterminated string literal";
+        }
 
     private:
         SourceLocation m_SourceLocation{};
@@ -61,6 +69,10 @@ namespace Ace
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
         auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+        auto GetMessage() const -> const char* final
+        {
+            return "Unexpected character";
+        }
 
     private:
         SourceLocation m_SourceLocation{};
@@ -78,6 +90,10 @@ namespace Ace
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
         auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+        auto GetMessage() const -> const char* final
+        {
+            return "Invalid numeric literal type suffix";
+        }
 
     private:
         SourceLocation m_SourceLocation{};
@@ -95,6 +111,10 @@ namespace Ace
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
         auto GetSourceLocation() const -> std::optional<SourceLocation> final { return m_SourceLocation; }
+        auto GetMessage() const -> const char* final
+        {
+            return "Decimal point in non-float numeric literal";
+        }
 
     private:
         SourceLocation m_SourceLocation{};
