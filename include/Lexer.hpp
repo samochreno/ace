@@ -18,21 +18,21 @@ namespace Ace
         );
         ~Lexer() = default;
 
-        auto EatTokens() -> Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>;
+        auto EatTokens() -> Diagnosed<std::vector<std::shared_ptr<const Token>>>;
 
     private:
         auto EatCharacter() -> void;
         auto EatCharacters(const size_t& t_count) -> void;
         auto EatCharactersUntil(const std::string::const_iterator& t_it) -> void;
         auto EatWhitespace() -> void;
-        auto EatComment() -> Diagnosed<void, ILexerDiagnostic>;
-        auto EatSingleLineComment() -> Diagnosed<void, ILexerDiagnostic>;
-        auto EatMultiLineComment() -> Diagnosed<void, ILexerDiagnostic>;
+        auto EatComment() -> Diagnosed<void>;
+        auto EatSingleLineComment() -> Diagnosed<void>;
+        auto EatMultiLineComment() -> Diagnosed<void>;
         auto EatLine() -> void;
 
         auto ResetCharacterIterator() -> void;
 
-        auto ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>, ILexerDiagnostic>;
+        auto ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>>>;
 
         auto GetCharacter()                       const -> char;
         auto GetCharacter(const size_t& t_offset) const -> char;

@@ -8,7 +8,7 @@
 
 namespace Ace
 {
-    template<typename TValue, typename TDiagnostic>
+    template<typename TValue, typename TDiagnostic = IDiagnostic>
     class Diagnosed;
 
     template<typename TDiagnostic>

@@ -174,7 +174,7 @@ namespace Ace
 
     static auto CreateNumericLiteralTokenKind(
         const std::shared_ptr<const Token>& t_suffix
-    ) -> Expected<TokenKind, ILexerDiagnostic>
+    ) -> Expected<TokenKind>
     {
         if (t_suffix->String == "i8")  return TokenKind::Int8;
         if (t_suffix->String == "i16") return TokenKind::Int16;
@@ -266,9 +266,9 @@ namespace Ace
 
     static auto ScanNumericLiteral(
         const ScanContext& t_context
-    ) -> Diagnosed<std::shared_ptr<const Token>, ILexerDiagnostic>
+    ) -> Diagnosed<std::shared_ptr<const Token>>
     {
-        std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
+        std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
         auto it = t_context.CharacterIterator;
 
         auto numberToken = ScanNumericLiteralNumber({
@@ -361,11 +361,11 @@ namespace Ace
 
     static auto ScanDefault(
         const ScanContext& t_context
-    ) -> Expected<std::shared_ptr<const Token>, ILexerDiagnostic>
+    ) -> Expected<std::shared_ptr<const Token>>
     {
         auto it = t_context.CharacterIterator;
 
-        ACE_TRY(tokenKind, ([&]() -> Expected<TokenKind, ILexerDiagnostic>
+        ACE_TRY(tokenKind, ([&]() -> Expected<TokenKind>
         {
             switch (*it)
             {
@@ -698,7 +698,7 @@ namespace Ace
             tokenKind
         );
 
-        return Expected<std::shared_ptr<const Token>, ILexerDiagnostic>
+        return Expected<std::shared_ptr<const Token>>
         {
             token
         };
@@ -706,9 +706,9 @@ namespace Ace
 
     static auto ScanString(
         const ScanContext& t_context
-    ) -> Diagnosed<std::shared_ptr<const Token>, ILexerDiagnostic>
+    ) -> Diagnosed<std::shared_ptr<const Token>>
     {
-        std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
+        std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
         auto it = t_context.CharacterIterator;
 
         ACE_ASSERT(*it == '"');
@@ -764,14 +764,14 @@ namespace Ace
 
     static auto Scan(
         const ScanContext& t_context
-    ) -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>, ILexerDiagnostic>
+    ) -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>>>
     {
         const auto character = *t_context.CharacterIterator;
 
         if (character == '"')
         {
             const auto dgnString = ScanString(t_context);
-            return Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
+            return Diagnosed<std::vector<std::shared_ptr<const Token>>>
             {
                 std::vector{ dgnString.Unwrap() },
                 dgnString.GetDiagnostics(),
@@ -780,7 +780,7 @@ namespace Ace
 
         if (IsInAlphabet(character) || (character == '_'))
         {
-            return Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
+            return Diagnosed<std::vector<std::shared_ptr<const Token>>>
             {
                 ScanIdentifier(t_context)
             };
@@ -789,7 +789,7 @@ namespace Ace
         if (IsNumber(character))
         {
             const auto dgnNumericLiteral = ScanNumericLiteral(t_context);
-            return Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
+            return Diagnosed<std::vector<std::shared_ptr<const Token>>>
             {
                 std::vector{ dgnNumericLiteral.Unwrap() },
                 dgnNumericLiteral.GetDiagnostics(),
@@ -797,7 +797,7 @@ namespace Ace
         }
 
         ACE_TRY(dfault, ScanDefault(t_context));
-        return Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
+        return Diagnosed<std::vector<std::shared_ptr<const Token>>>
         {
             std::vector{ dfault }
         };
@@ -811,9 +811,9 @@ namespace Ace
         ResetCharacterIterator();
     }
 
-    auto Lexer::EatTokens() -> Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>
+    auto Lexer::EatTokens() -> Diagnosed<std::vector<std::shared_ptr<const Token>>>
     {
-        std::vector<std::shared_ptr<const ILexerDiagnostic>> diagnostics{};
+        std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
         std::vector<std::shared_ptr<const Token>> tokens{};
 
         while (!IsEndOfFile())
@@ -910,7 +910,7 @@ namespace Ace
         }
     }
 
-    auto Lexer::EatComment() -> Diagnosed<void, ILexerDiagnostic>
+    auto Lexer::EatComment() -> Diagnosed<void>
     {
         ACE_ASSERT(GetCharacter() == '#');
 
@@ -924,7 +924,7 @@ namespace Ace
         }
     }
 
-    auto Lexer::EatSingleLineComment() -> Diagnosed<void, ILexerDiagnostic>
+    auto Lexer::EatSingleLineComment() -> Diagnosed<void>
     {
         ACE_ASSERT(GetCharacter() == '#');
         EatCharacter();
@@ -939,7 +939,7 @@ namespace Ace
         return {};
     }
 
-    auto Lexer::EatMultiLineComment() -> Diagnosed<void, ILexerDiagnostic>
+    auto Lexer::EatMultiLineComment() -> Diagnosed<void>
     {
         const auto itBegin = m_CharacterIterator;
 
@@ -964,9 +964,9 @@ namespace Ace
                     m_CharacterIterator,
                 };
 
-                return Diagnosed<void, ILexerDiagnostic>
+                return Diagnosed<void>
                 {
-                    std::vector<std::shared_ptr<const ILexerDiagnostic>>
+                    std::vector<std::shared_ptr<const IDiagnostic>>
                     {
                         std::make_shared<const UnterminatedMultiLineCommentError>(
                             sourceLocation
@@ -993,7 +993,7 @@ namespace Ace
         m_CharacterIterator = begin(GetLine());
     }
 
-    auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>, ILexerDiagnostic>, ILexerDiagnostic>
+    auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>>>
     {
         return Ace::Scan({
             m_File,
@@ -1042,4 +1042,4 @@ namespace Ace
     {
         return GetCharacter() == '#';
     }
-}
+

@@ -55,7 +55,7 @@ namespace Ace
         }
     };
 
-    template<typename TValue, typename TError = NoneError>
+    template<typename TValue, typename TError = IDiagnostic>
     class Expected;
 
     class ExpectedVoidType {};

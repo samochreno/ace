@@ -9,13 +9,7 @@
 
 namespace Ace
 {
-    class ILexerDiagnostic : public virtual IDiagnostic
-    {
-    public:
-        virtual ~ILexerDiagnostic() = default;
-    };
-
-    class UnterminatedMultiLineCommentError : public virtual ILexerDiagnostic
+    class UnterminatedMultiLineCommentError : public virtual IDiagnostic
     {
     public:
         UnterminatedMultiLineCommentError(
@@ -36,7 +30,7 @@ namespace Ace
         SourceLocation m_SourceLocation{};
     };
     
-    class UnterminatedStringLiteralError : public virtual ILexerDiagnostic
+    class UnterminatedStringLiteralError : public virtual IDiagnostic
     {
     public:
         UnterminatedStringLiteralError(
@@ -57,7 +51,7 @@ namespace Ace
         SourceLocation m_SourceLocation{};
     };
 
-    class UnexpectedCharacterError : public virtual ILexerDiagnostic
+    class UnexpectedCharacterError : public virtual IDiagnostic
     {
     public:
         UnexpectedCharacterError(
@@ -78,7 +72,7 @@ namespace Ace
         SourceLocation m_SourceLocation{};
     };
 
-    class InvalidNumericLiteralTypeSuffixError : public virtual ILexerDiagnostic
+    class InvalidNumericLiteralTypeSuffixError : public virtual IDiagnostic
     {
     public:
         InvalidNumericLiteralTypeSuffixError(
@@ -99,7 +93,7 @@ namespace Ace
         SourceLocation m_SourceLocation{};
     };
 
-    class DecimalPointInNonFloatNumericLiteralError : public virtual ILexerDiagnostic
+    class DecimalPointInNonFloatNumericLiteralError : public virtual IDiagnostic
     {
     public:
         DecimalPointInNonFloatNumericLiteralError(
