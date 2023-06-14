@@ -47,7 +47,7 @@ namespace Ace
             TokenKind::ColonColon
         ));
 
-        for(size_t i = 0; i < name.Sections.size(); i++)
+        for (size_t i = 0; i < name.Sections.size(); i++)
         {
             if (i != 0)
             {
