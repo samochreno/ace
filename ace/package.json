@@ -1,19 +1,19 @@
 {
-  "name": "ace",
-  "path_macros": [
-    {
-      "name": "sources",
-      "value": "src"
-    },
-    {
-      "name": "dependencies",
-      "value": "lib"
-    }
-  ],
-  "file_paths": [
-    "$sources/**.ace"
-  ],
-  "dependency_file_paths": [
-    "$dependencies/**.dll"
-  ]
+    "name": "ace",
+    "path_macros": [
+        {
+            "name": "sources",
+            "value": "src"
+        },
+        {
+            "name": "dependencies",
+            "value": "lib"
+        }
+    ],
+    "file_paths": [
+        "$sources/**.ace"
+    ],
+    "dependency_file_paths": [
+        "$dependencies/**.dll"
+    ]
 }
