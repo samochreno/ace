@@ -2,6 +2,7 @@
 
 ## 💥 High Priority
 
+- Rename SourceLocation variables to Location 
 - Bring back explicit `TError`
 - Use `Measured` in lexer
 - ❓ Remove `ACE_TRY` macros, make opening braces on the same line
@@ -232,3 +233,11 @@
     }
   }
   ```
+- Equivalent of Rust's `Self` type
+- `Ret` type:
+  ```rs
+  func(): std::Optional[int] {
+      ret Ret::new(5);
+  }
+  ```
+ 
