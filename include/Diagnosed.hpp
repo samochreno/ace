@@ -5,10 +5,11 @@
 #include <type_traits>
 
 #include "DiagnosticsBase.hpp"
+#include "DiagnosticBag.hpp"
 
 namespace Ace
 {
-    template<typename TValue, typename TDiagnostic = IDiagnostic>
+    template<typename TValue, typename TDiagnostic>
     class Diagnosed;
 
     template<typename TDiagnostic>
@@ -22,18 +23,18 @@ namespace Ace
     public:
         Diagnosed() = default;
         Diagnosed(
-            const std::vector<std::shared_ptr<const TDiagnostic>>& t_diagnostics
-        ) : m_Diagnostics{ t_diagnostics }
+            const DiagnosticBag<TDiagnostic>& t_diagnosticBag
+        ) : m_DiagnosticBag{ t_diagnosticBag }
         {
         }
 
-        auto GetDiagnostics() const -> const std::vector<std::shared_ptr<const TDiagnostic>>&
+        auto GetDiagnosticBag() const -> const DiagnosticBag<TDiagnostic>&
         {
-            return m_Diagnostics;
+            return m_DiagnosticBag;
         }
 
     private:
-        std::vector<std::shared_ptr<const TDiagnostic>> m_Diagnostics{};
+        DiagnosticBag<TDiagnostic> m_DiagnosticBag{};
     };
 
     template<typename TValue, typename TDiagnostic>
@@ -52,9 +53,9 @@ namespace Ace
         }
         Diagnosed(
             const TValue& t_value,
-            const std::vector<std::shared_ptr<const TDiagnostic>>& t_diagnostics
+            const DiagnosticBag<TDiagnostic>& t_diagnosticBag
         ) : m_Value{ t_value },
-            m_Diagnostics{ t_diagnostics }
+            m_DiagnosticBag{ t_diagnosticBag }
         {
         }
 
@@ -67,13 +68,13 @@ namespace Ace
             return m_Value;
         }
 
-        auto GetDiagnostics() const -> const std::vector<std::shared_ptr<const TDiagnostic>>&
+        auto GetDiagnosticBag() const -> const DiagnosticBag<TDiagnostic>&
         {
-            return m_Diagnostics;
+            return m_DiagnosticBag;
         }
 
     private:
         TValue m_Value{};
-        std::vector<std::shared_ptr<const TDiagnostic>> m_Diagnostics{};
+        DiagnosticBag<TDiagnostic> m_DiagnosticBag{};
     };
 }

@@ -25,7 +25,7 @@ namespace Ace
 {
     static auto Compile(const Compilation* const t_compilation) -> Expected<Diagnosed<void, IDiagnostic>>
     {
-        std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
+        DiagnosticBag<IDiagnostic> diagnosticBag{};
 
         const auto& packageName = t_compilation->Package.Name;
         auto* const globalScope = t_compilation->GlobalScope.get();
@@ -49,11 +49,7 @@ namespace Ace
                     t_compilation,
                     &t_file
                 );
-                diagnostics.insert(
-                    end(diagnostics),
-                    begin(dgnAST.GetDiagnostics()),
-                    end  (dgnAST.GetDiagnostics())
-                );
+                diagnosticBag.Add(dgnAST.GetDiagnosticBag());
 
                 return dgnAST.Unwrap();
             }
@@ -173,7 +169,7 @@ namespace Ace
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.LLC)                                       << " - Backend | llc");
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.Clang)                                     << " - Backend | clang");
 
-        return Diagnosed<void, IDiagnostic>{ diagnostics };
+        return Diagnosed<void, IDiagnostic>{ diagnosticBag };
     }
 
     static auto Compile(

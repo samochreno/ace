@@ -7,7 +7,6 @@
 #include <algorithm>
 
 #include "DiagnosticsBase.hpp"
-#include "SourceLocation.hpp"
 #include "Asserts.hpp"
 #include "MaybeChanged.hpp"
 
@@ -44,18 +43,13 @@ namespace Ace
         virtual ~NoneError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> const SourceLocation& final
-        {
-            static const SourceLocation sourceLocation{};
-            return sourceLocation;
-        }
         auto GetMessage() const -> const char*
         {
             return "Empty error";
         }
     };
 
-    template<typename TValue, typename TError = IDiagnostic>
+    template<typename TValue, typename TError = NoneError>
     class Expected;
 
     class ExpectedVoidType {};

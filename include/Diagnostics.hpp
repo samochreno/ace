@@ -9,7 +9,15 @@
 
 namespace Ace
 {
-    class UnterminatedMultiLineCommentError : public virtual IDiagnostic
+    class ISourceDiagnostic : public virtual IDiagnostic
+    {
+    public:
+        virtual ~ISourceDiagnostic() = default;
+
+        virtual auto GetSourceLocation() const -> const SourceLocation& = 0;
+    };
+
+    class UnterminatedMultiLineCommentError : public virtual ISourceDiagnostic
     {
     public:
         UnterminatedMultiLineCommentError(
@@ -20,17 +28,17 @@ namespace Ace
         virtual ~UnterminatedMultiLineCommentError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
         auto GetMessage() const -> const char* final
         {
             return "Unterminated multiline comment";
         }
+        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 
     private:
         SourceLocation m_SourceLocation{};
     };
     
-    class UnterminatedStringLiteralError : public virtual IDiagnostic
+    class UnterminatedStringLiteralError : public virtual ISourceDiagnostic
     {
     public:
         UnterminatedStringLiteralError(
@@ -41,17 +49,17 @@ namespace Ace
         virtual ~UnterminatedStringLiteralError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
         auto GetMessage() const -> const char* final
         {
             return "Unterminated string literal";
         }
+        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 
     private:
         SourceLocation m_SourceLocation{};
     };
 
-    class UnexpectedCharacterError : public virtual IDiagnostic
+    class UnexpectedCharacterError : public virtual ISourceDiagnostic
     {
     public:
         UnexpectedCharacterError(
@@ -62,17 +70,17 @@ namespace Ace
         virtual ~UnexpectedCharacterError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
         auto GetMessage() const -> const char* final
         {
             return "Unexpected character";
         }
+        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 
     private:
         SourceLocation m_SourceLocation{};
     };
 
-    class InvalidNumericLiteralTypeSuffixError : public virtual IDiagnostic
+    class InvalidNumericLiteralTypeSuffixError : public virtual ISourceDiagnostic
     {
     public:
         InvalidNumericLiteralTypeSuffixError(
@@ -83,17 +91,17 @@ namespace Ace
         virtual ~InvalidNumericLiteralTypeSuffixError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
         auto GetMessage() const -> const char* final
         {
             return "Invalid numeric literal type suffix";
         }
+        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 
     private:
         SourceLocation m_SourceLocation{};
     };
 
-    class DecimalPointInNonFloatNumericLiteralError : public virtual IDiagnostic
+    class DecimalPointInNonFloatNumericLiteralError : public virtual ISourceDiagnostic
     {
     public:
         DecimalPointInNonFloatNumericLiteralError(
@@ -104,11 +112,11 @@ namespace Ace
         virtual ~DecimalPointInNonFloatNumericLiteralError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
         auto GetMessage() const -> const char* final
         {
             return "Decimal point in non-float numeric literal";
         }
+        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 
     private:
         SourceLocation m_SourceLocation{};

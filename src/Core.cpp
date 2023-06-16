@@ -27,83 +27,82 @@
 
 namespace Ace::Core
 {
-    static auto LogDiagnostics(
-        const std::vector<std::shared_ptr<const IDiagnostic>>& t_diagnostics
+    static auto LogSourceDiagnosticBag(
+        const DiagnosticBag<ISourceDiagnostic>& t_diagnosticBag
     ) -> void
     {
-        std::for_each(begin(t_diagnostics), end(t_diagnostics),
-        [](const std::shared_ptr<const IDiagnostic>& t_diagnostic)
-        {
-            std::string message{};
-
-            const auto sourceLocation =
-                t_diagnostic->GetSourceLocation();
-
-            message += sourceLocation.File->Path.string();
-            message += ":";
-
-
-            const auto lineIndex = std::distance(
-                begin(sourceLocation.File->Lines),
-                sourceLocation.LineIterator
-            );
-            message += std::to_string(lineIndex + 1);
-            message += ":";
-
-            const auto& line = *sourceLocation.LineIterator;
-            const auto characterIndex = std::distance(
-                begin(line),
-                sourceLocation.CharacterIteratorBegin
-            );
-            message += std::to_string(characterIndex + 1);
-            message += ": ";
-
-            message += t_diagnostic->GetMessage();
-
-            switch (t_diagnostic->GetSeverity())
+        std::for_each(
+            begin(t_diagnosticBag.GetDiagnostics()),
+            end  (t_diagnosticBag.GetDiagnostics()),
+            [](const std::shared_ptr<const ISourceDiagnostic>& t_diagnostic)
             {
-                case DiagnosticSeverity::Info:
-                {
-                    ACE_LOG_INFO(message);
-                    break;
-                }
+                std::string message{};
 
-                case DiagnosticSeverity::Warning:
-                {
-                    ACE_LOG_WARNING(message);
-                    break;
-                }
+                const auto sourceLocation =
+                    t_diagnostic->GetSourceLocation();
 
-                case DiagnosticSeverity::Error:
-                {
-                    ACE_LOG_ERROR(message);
-                    break;
-                }
+                message += sourceLocation.File->Path.string();
+                message += ":";
 
-                default:
+
+                const auto lineIndex = std::distance(
+                    begin(sourceLocation.File->Lines),
+                    sourceLocation.LineIterator
+                );
+                message += std::to_string(lineIndex + 1);
+                message += ":";
+
+                const auto& line = *sourceLocation.LineIterator;
+                const auto characterIndex = std::distance(
+                    begin(line),
+                    sourceLocation.CharacterIteratorBegin
+                );
+                message += std::to_string(characterIndex + 1);
+                message += ": ";
+
+                message += t_diagnostic->GetMessage();
+
+                switch (t_diagnostic->GetSeverity())
                 {
-                    ACE_UNREACHABLE();
+                    case DiagnosticSeverity::Info:
+                    {
+                        ACE_LOG_INFO(message);
+                        break;
+                    }
+
+                    case DiagnosticSeverity::Warning:
+                    {
+                        ACE_LOG_WARNING(message);
+                        break;
+                    }
+
+                    case DiagnosticSeverity::Error:
+                    {
+                        ACE_LOG_ERROR(message);
+                        break;
+                    }
+
+                    default:
+                    {
+                        ACE_UNREACHABLE();
+                    }
                 }
             }
-        });
+        );
     }
 
     auto ParseAST(
         const Compilation* const t_compilation,
         const File* const t_file
-    ) -> Diagnosed<std::shared_ptr<const Node::Module>, IDiagnostic>
+    ) -> Diagnosed<std::shared_ptr<const Node::Module>, ISourceDiagnostic>
     {
-        std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
+        DiagnosticBag<ISourceDiagnostic> diagnosticBag{};
 
         Lexer lexer{ t_file };
         auto dgnTokens = lexer.EatTokens();
-        diagnostics.insert(
-            end(diagnostics),
-            begin(dgnTokens.GetDiagnostics()),
-            end  (dgnTokens.GetDiagnostics())
-        );
+        diagnosticBag.Add(dgnTokens.GetDiagnosticBag());
 
-        LogDiagnostics(diagnostics);
+        LogSourceDiagnosticBag(diagnosticBag);
 
         const auto ast = Parser::ParseAST(
             t_file,
@@ -113,7 +112,7 @@ namespace Ace::Core
         return Diagnosed
         {
             ast,
-            diagnostics,
+            diagnosticBag,
         };
     }
 

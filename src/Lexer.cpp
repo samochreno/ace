@@ -174,7 +174,7 @@ namespace Ace
 
     static auto CreateNumericLiteralTokenKind(
         const std::shared_ptr<const Token>& t_suffix
-    ) -> Expected<TokenKind>
+    ) -> Expected<TokenKind, ISourceDiagnostic>
     {
         if (t_suffix->String == "i8")  return TokenKind::Int8;
         if (t_suffix->String == "i16") return TokenKind::Int16;
@@ -266,9 +266,9 @@ namespace Ace
 
     static auto ScanNumericLiteral(
         const ScanContext& t_context
-    ) -> Diagnosed<std::shared_ptr<const Token>>
+    ) -> Diagnosed<std::shared_ptr<const Token>, ISourceDiagnostic>
     {
-        std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
+        DiagnosticBag<ISourceDiagnostic> diagnosticBag{};
         auto it = t_context.CharacterIterator;
 
         auto numberToken = ScanNumericLiteralNumber({
@@ -306,7 +306,7 @@ namespace Ace
             );
             if (!expTokenKind)
             {
-                diagnostics.push_back(expTokenKind.GetError());
+                diagnosticBag.Add(expTokenKind.GetError());
                 return TokenKind::Int;
             }
 
@@ -330,9 +330,9 @@ namespace Ace
                     t_context.CharacterIterator + decimalPointPos + 1,
                 };
 
-                diagnostics.push_back(std::make_shared<const DecimalPointInNonFloatNumericLiteralError>(
+                diagnosticBag.Add<DecimalPointInNonFloatNumericLiteralError>(
                     sourceLocation
-                ));
+                );
 
                 numberToken.String.erase(decimalPointPos);
             } 
@@ -355,17 +355,17 @@ namespace Ace
         return Diagnosed
         {
             token,
-            diagnostics,
+            diagnosticBag,
         };
     }
 
     static auto ScanDefault(
         const ScanContext& t_context
-    ) -> Expected<std::shared_ptr<const Token>>
+    ) -> Expected<std::shared_ptr<const Token>, ISourceDiagnostic>
     {
         auto it = t_context.CharacterIterator;
 
-        ACE_TRY(tokenKind, ([&]() -> Expected<TokenKind>
+        ACE_TRY(tokenKind, ([&]() -> Expected<TokenKind, ISourceDiagnostic>
         {
             switch (*it)
             {
@@ -698,7 +698,7 @@ namespace Ace
             tokenKind
         );
 
-        return Expected<std::shared_ptr<const Token>>
+        return Expected<std::shared_ptr<const Token>, ISourceDiagnostic>
         {
             token
         };
@@ -706,9 +706,9 @@ namespace Ace
 
     static auto ScanString(
         const ScanContext& t_context
-    ) -> Diagnosed<std::shared_ptr<const Token>>
+    ) -> Diagnosed<std::shared_ptr<const Token>, ISourceDiagnostic>
     {
-        std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
+        DiagnosticBag<ISourceDiagnostic> diagnosticBag{};
         auto it = t_context.CharacterIterator;
 
         ACE_ASSERT(*it == '"');
@@ -726,9 +726,9 @@ namespace Ace
                     it,
                 };
 
-                diagnostics.push_back(std::make_shared<const UnterminatedStringLiteralError>(
+                diagnosticBag.Add<UnterminatedStringLiteralError>(
                     sourceLocation
-                ));
+                );
 
                 break;
             }
@@ -758,48 +758,50 @@ namespace Ace
         return Diagnosed
         {
             token,
-            diagnostics,
+            diagnosticBag,
         };
     }
 
     static auto Scan(
         const ScanContext& t_context
-    ) -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>>>
+    ) -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>, ISourceDiagnostic>, ISourceDiagnostic>
     {
         const auto character = *t_context.CharacterIterator;
 
         if (character == '"')
         {
             const auto dgnString = ScanString(t_context);
-            return Diagnosed<std::vector<std::shared_ptr<const Token>>>
+            return Diagnosed
             {
                 std::vector{ dgnString.Unwrap() },
-                dgnString.GetDiagnostics(),
+                dgnString.GetDiagnosticBag(),
             };
         }
 
         if (IsInAlphabet(character) || (character == '_'))
         {
-            return Diagnosed<std::vector<std::shared_ptr<const Token>>>
+            return Diagnosed
             {
-                ScanIdentifier(t_context)
+                ScanIdentifier(t_context),
+                DiagnosticBag<ISourceDiagnostic>{},
             };
         }
 
         if (IsNumber(character))
         {
             const auto dgnNumericLiteral = ScanNumericLiteral(t_context);
-            return Diagnosed<std::vector<std::shared_ptr<const Token>>>
+            return Diagnosed
             {
                 std::vector{ dgnNumericLiteral.Unwrap() },
-                dgnNumericLiteral.GetDiagnostics(),
+                dgnNumericLiteral.GetDiagnosticBag(),
             };
         }
 
         ACE_TRY(dfault, ScanDefault(t_context));
-        return Diagnosed<std::vector<std::shared_ptr<const Token>>>
+        return Diagnosed
         {
-            std::vector{ dfault }
+            std::vector{ dfault },
+            DiagnosticBag<ISourceDiagnostic>{},
         };
     }
 
@@ -811,9 +813,9 @@ namespace Ace
         ResetCharacterIterator();
     }
 
-    auto Lexer::EatTokens() -> Diagnosed<std::vector<std::shared_ptr<const Token>>>
+    auto Lexer::EatTokens() -> Diagnosed<std::vector<std::shared_ptr<const Token>>, ISourceDiagnostic>
     {
-        std::vector<std::shared_ptr<const IDiagnostic>> diagnostics{};
+        DiagnosticBag<ISourceDiagnostic> diagnosticBag{};
         std::vector<std::shared_ptr<const Token>> tokens{};
 
         while (!IsEndOfFile())
@@ -840,11 +842,7 @@ namespace Ace
 
             if (const auto expDgnTokens = ScanTokenSequence())
             {
-                diagnostics.insert(
-                    end(diagnostics),
-                    begin(expDgnTokens.Unwrap().GetDiagnostics()),
-                    end  (expDgnTokens.Unwrap().GetDiagnostics())
-                );
+                diagnosticBag.Add(expDgnTokens.Unwrap().GetDiagnosticBag());
 
                 const auto& scannedTokens = expDgnTokens.Unwrap().Unwrap();
                 tokens.insert(
@@ -858,7 +856,7 @@ namespace Ace
             }
             else
             {
-                diagnostics.push_back(expDgnTokens.GetError());
+                diagnosticBag.Add(expDgnTokens.GetError());
                 EatCharacter();
             }
         }
@@ -871,7 +869,7 @@ namespace Ace
         return Diagnosed
         {
             tokens,
-            diagnostics,
+            diagnosticBag,
         };
     }
 
@@ -910,7 +908,7 @@ namespace Ace
         }
     }
 
-    auto Lexer::EatComment() -> Diagnosed<void>
+    auto Lexer::EatComment() -> Diagnosed<void, ISourceDiagnostic>
     {
         ACE_ASSERT(GetCharacter() == '#');
 
@@ -924,7 +922,7 @@ namespace Ace
         }
     }
 
-    auto Lexer::EatSingleLineComment() -> Diagnosed<void>
+    auto Lexer::EatSingleLineComment() -> Diagnosed<void, ISourceDiagnostic>
     {
         ACE_ASSERT(GetCharacter() == '#');
         EatCharacter();
@@ -939,7 +937,7 @@ namespace Ace
         return {};
     }
 
-    auto Lexer::EatMultiLineComment() -> Diagnosed<void>
+    auto Lexer::EatMultiLineComment() -> Diagnosed<void, ISourceDiagnostic>
     {
         const auto itBegin = m_CharacterIterator;
 
@@ -964,15 +962,11 @@ namespace Ace
                     m_CharacterIterator,
                 };
 
-                return Diagnosed<void>
-                {
-                    std::vector<std::shared_ptr<const IDiagnostic>>
-                    {
-                        std::make_shared<const UnterminatedMultiLineCommentError>(
-                            sourceLocation
-                        )
-                    }
-                };
+                DiagnosticBag<ISourceDiagnostic> diagnosticBag{};
+                diagnosticBag.Add<UnterminatedMultiLineCommentError>(
+                    sourceLocation
+                );
+                return Diagnosed<void, ISourceDiagnostic>{ diagnosticBag };
             }
 
             EatCharacter();
@@ -993,7 +987,7 @@ namespace Ace
         m_CharacterIterator = begin(GetLine());
     }
 
-    auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>>>
+    auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>, ISourceDiagnostic>, ISourceDiagnostic>
     {
         return Ace::Scan({
             m_File,
@@ -1042,4 +1036,5 @@ namespace Ace
     {
         return GetCharacter() == '#';
     }
+}
 
