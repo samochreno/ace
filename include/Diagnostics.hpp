@@ -80,20 +80,20 @@ namespace Ace
         SourceLocation m_SourceLocation{};
     };
 
-    class InvalidNumericLiteralTypeSuffixError : public virtual ISourceDiagnostic
+    class UnknownNumericLiteralTypeSuffixError : public virtual ISourceDiagnostic
     {
     public:
-        InvalidNumericLiteralTypeSuffixError(
+        UnknownNumericLiteralTypeSuffixError(
             const SourceLocation& t_sourceLocation
         ) : m_SourceLocation{ t_sourceLocation } 
         {
         }
-        virtual ~InvalidNumericLiteralTypeSuffixError() = default;
+        virtual ~UnknownNumericLiteralTypeSuffixError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
         auto GetMessage() const -> const char* final
         {
-            return "Invalid numeric literal type suffix";
+            return "Unknown numeric literal type suffix";
         }
         auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 

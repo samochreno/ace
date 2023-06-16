@@ -190,7 +190,7 @@ namespace Ace
         if (t_suffix->String == "f32") return TokenKind::Float32;
         if (t_suffix->String == "f64") return TokenKind::Float64;
 
-        return std::make_shared<const InvalidNumericLiteralTypeSuffixError>(
+        return std::make_shared<const UnknownNumericLiteralTypeSuffixError>(
             t_suffix->SourceLocation
         );
     }
