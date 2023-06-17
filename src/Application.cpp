@@ -27,7 +27,7 @@ namespace Ace
         DiagnosticBag<IDiagnostic> diagnosticBag{};
 
         const auto& packageName = t_compilation->Package.Name;
-        auto* const globalScope = t_compilation->GlobalScope.get();
+        auto* const globalScope = t_compilation->GlobalScope.Unwrap().get();
 
         const auto& now = std::chrono::steady_clock::now;
 

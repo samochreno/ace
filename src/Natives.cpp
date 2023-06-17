@@ -37,7 +37,8 @@ namespace Ace
 
     auto NativeType::Initialize() -> void
     {
-        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Type::IBase>(m_Name).Unwrap();
+        auto* const symbol =
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Type::IBase>(m_Name).Unwrap();
 
         if (m_IRTypeGetter.has_value())
         {
@@ -62,14 +63,16 @@ namespace Ace
         auto name = m_Name;
         name.Sections.back().Name = SpecialIdentifier::CreateTemplate(name.Sections.back().Name);
 
-        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Type>(name).Unwrap();
+        auto* const symbol =
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Template::Type>(name).Unwrap();
 
         m_Symbol = symbol;
     }
 
     auto NativeFunction::Initialize() -> void
     {
-        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Function>(m_Name).Unwrap();
+        auto* const symbol =
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Function>(m_Name).Unwrap();
 
         const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
         symbol->BindBody(emittableBody);
@@ -79,7 +82,8 @@ namespace Ace
 
     auto NativeFunctionTemplate::Initialize() -> void
     {
-        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Function>(m_Name).Unwrap();
+        auto* const symbol =
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Template::Function>(m_Name).Unwrap();
 
         m_Symbol = symbol;
     }
@@ -89,7 +93,8 @@ namespace Ace
         auto name = m_Type.GetFullyQualifiedName();
         name.Sections.emplace_back(m_Name);
 
-        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Function>(name).Unwrap();
+        auto* const symbol =
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Function>(name).Unwrap();
 
         const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
         symbol->BindBody(emittableBody);
@@ -102,7 +107,8 @@ namespace Ace
         auto name = m_Type.GetFullyQualifiedName();
         name.Sections.emplace_back(m_Name);
 
-        auto* const symbol = GetCompilation()->GlobalScope->ResolveStaticSymbol<Symbol::Template::Function>(name).Unwrap();
+        auto* const symbol =
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Template::Function>(name).Unwrap();
 
         m_Symbol = symbol;
     }

@@ -220,7 +220,7 @@ namespace Ace
 
         auto it = begin(tokens);
 
-        ACE_TRY(module, ParseModule({ it, t_file->Compilation->GlobalScope }));
+        ACE_TRY(module, ParseModule({ it, t_file->Compilation->GlobalScope.Unwrap() }));
         it += module.Length;
 
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::EndOfFile);

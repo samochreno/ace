@@ -233,7 +233,7 @@ namespace Ace::Core
         const Compilation* const t_compilation
     ) -> Expected<void>
     {
-        const auto typeSymbols = t_compilation->GlobalScope->CollectSymbolsRecursive<Symbol::Type::IBase>();
+        const auto typeSymbols = t_compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<Symbol::Type::IBase>();
 
         const bool didValidateTypeSizes = std::find_if_not(
             begin(typeSymbols), 
@@ -377,7 +377,7 @@ namespace Ace::Core
         const std::function<void(Symbol::Type::IBase* const, Symbol::Function* const)>& t_bindGlue
     ) -> void
     {
-        const auto typeSymbols = t_compilation->GlobalScope->CollectSymbolsRecursive<Symbol::Type::IBase>();
+        const auto typeSymbols = t_compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<Symbol::Type::IBase>();
 
         struct TypeGlueSymbolPair
         {
@@ -564,7 +564,7 @@ namespace Ace::Core
         auto operatorName = t_structSymbol->CreateFullyQualifiedName();
         operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Copy);
         const auto expOperatorSymbol = 
-            t_compilation->GlobalScope->ResolveStaticSymbol<Symbol::Function>(operatorName);
+            t_compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Function>(operatorName);
 
         std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
         if (expOperatorSymbol)
@@ -679,7 +679,7 @@ namespace Ace::Core
         auto operatorName = t_structSymbol->CreateFullyQualifiedName();
         operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Drop);
         const auto expOperatorSymbol = 
-            t_compilation->GlobalScope->ResolveStaticSymbol<Symbol::Function>(operatorName);
+            t_compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Function>(operatorName);
 
         if (expOperatorSymbol)
         {

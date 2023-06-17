@@ -177,15 +177,21 @@ namespace Ace
     {
     }
 
-    Scope::Scope(
-        const Compilation* const t_compilation
-    ) : Scope
-        {
-            t_compilation,
-            std::string{ SpecialIdentifier::Global },
-            std::nullopt
-        }
+    GlobalScope::GlobalScope()
     {
+    }
+
+    GlobalScope::GlobalScope(const Compilation* const t_compilation)
+        : m_Scope{ new Scope(t_compilation) }
+    {
+    }
+
+    GlobalScope::~GlobalScope()
+    {
+        if (!m_Scope)
+            return;
+
+        m_Scope->Clear();
     }
     
     static auto FindExpiredChild(
@@ -681,6 +687,29 @@ namespace Ace
     }
 
     Scope::Scope(
+        const Compilation* const t_compilation
+    ) : Scope
+        {
+            t_compilation,
+            std::string{ SpecialIdentifier::Global },
+            std::nullopt
+        }
+    {
+    }
+
+    auto Scope::Clear() -> void
+    {
+        std::for_each(begin(m_Children), end(m_Children),
+        [](const std::weak_ptr<Scope>& t_child)
+        {
+            t_child.lock()->Clear();
+        });
+
+        m_SymbolMap.clear();
+        m_OptParent = std::nullopt;
+    }
+
+    Scope::Scope(
         const Compilation* const t_compilation,
         const std::optional<std::string>& t_optName,
         const std::optional<std::shared_ptr<Scope>>& t_optParent
@@ -1162,7 +1191,7 @@ namespace Ace
         {
             return std::shared_ptr<const Scope>
             { 
-                m_Compilation->GlobalScope
+                m_Compilation->GlobalScope.Unwrap()
             };
         }
 

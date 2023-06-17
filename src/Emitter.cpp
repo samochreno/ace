@@ -59,7 +59,7 @@ namespace Ace
 
     auto Emitter::Emit() -> Result
     {
-        auto* const globalScope = m_Compilation->GlobalScope.get();
+        auto* const globalScope = m_Compilation->GlobalScope.Unwrap().get();
         const auto& packageName = m_Compilation->Package.Name;
         const auto& natives     = m_Compilation->Natives;
 

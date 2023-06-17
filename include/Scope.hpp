@@ -83,10 +83,24 @@ namespace Ace
         std::string TemplateName{};
     };
 
-    class Scope : public std::enable_shared_from_this<Scope>
+    class GlobalScope
     {
     public:
-        Scope(const Compilation* const t_compilation);
+        GlobalScope();
+        GlobalScope(const Compilation* const t_compilation);
+        ~GlobalScope();
+
+        auto Unwrap() const -> const std::shared_ptr<Scope>& { return m_Scope; }
+
+    private:
+        std::shared_ptr<Scope> m_Scope{};
+    };
+
+    class Scope : public std::enable_shared_from_this<Scope>
+    {
+        friend GlobalScope;
+
+    public:
         ~Scope();
         
         auto GetCompilation() const -> const Compilation* { return m_Compilation; }
@@ -375,6 +389,9 @@ namespace Ace
         ) -> Expected<void>;
 
     private:
+        Scope(const Compilation* const t_compilation);
+        auto Clear() -> void;
+
         Scope(
             const Compilation* const t_compilation,
             const std::optional<std::string>& t_optName,
