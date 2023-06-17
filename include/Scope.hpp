@@ -70,17 +70,17 @@ namespace Ace
             const bool t_isSymbolTemplate
         );
 
-        const std::shared_ptr<const Scope>& ResolvingFromScope{};
-        const std::vector<SymbolNameSection>::const_iterator& NameSectionsBegin{};
-        const std::vector<SymbolNameSection>::const_iterator& NameSectionsEnd{};
-        const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& OptArgumentTypes{};
-        const std::function<bool(const Symbol::IBase* const)>& IsCorrectSymbolType{};
-        const std::vector<std::shared_ptr<const Scope>>& Scopes{};
-        const std::vector<Symbol::Type::IBase*>& ImplTemplateArguments{};
-        const bool IsSymbolTemplate{};
-        const bool IsLastNameSection{};
-        const std::string& Name{};
-        const std::string TemplateName{};
+        std::shared_ptr<const Scope> ResolvingFromScope{};
+        std::vector<SymbolNameSection>::const_iterator NameSectionsBegin{};
+        std::vector<SymbolNameSection>::const_iterator NameSectionsEnd{};
+        std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>> OptArgumentTypes{};
+        std::function<bool(const Symbol::IBase* const)> IsCorrectSymbolType{};
+        std::vector<std::shared_ptr<const Scope>> Scopes{};
+        std::vector<Symbol::Type::IBase*> ImplTemplateArguments{};
+        bool IsSymbolTemplate{};
+        bool IsLastNameSection{};
+        std::string Name{};
+        std::string TemplateName{};
     };
 
     class Scope : public std::enable_shared_from_this<Scope>
