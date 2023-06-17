@@ -58,6 +58,13 @@ namespace Ace
             m_DiagnosticBag{ t_diagnosticBag }
         {
         }
+        Diagnosed(
+            TValue&& t_value,
+            const DiagnosticBag<TDiagnostic>& t_diagnosticBag
+        ) : m_Value{ std::move(t_value) },
+            m_DiagnosticBag{ t_diagnosticBag }
+        {
+        }
 
         auto Unwrap() -> TValue&
         {
