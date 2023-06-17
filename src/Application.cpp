@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <fstream>
 #include <chrono>
-#include <ranges>
 #include <fmt/format.h>
 #include <llvm/Support/TargetSelect.h>
 
