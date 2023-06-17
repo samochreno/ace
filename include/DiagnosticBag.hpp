@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Asserts.hpp"
+#include "Expected.hpp"
 #include "DiagnosticsBase.hpp"
 
 namespace Ace
@@ -40,6 +41,16 @@ namespace Ace
                     Add(t_diagnostic);
                 }
             );
+        }
+        template<typename TDiagnosticNew>
+        auto Add(
+            const Expected<void, TDiagnosticNew>& t_expected
+        ) -> void
+        {
+            if (t_expected)
+                return;
+
+            Add(t_expected.GetError());
         }
 
         auto GetDiagnostics() const -> const std::vector<std::shared_ptr<const TDiagnostic>>& { return m_Diagnostics; }
