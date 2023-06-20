@@ -9,42 +9,32 @@
 
 namespace Ace
 {
-    template<typename TValue, typename TDiagnostic>
+    template<typename TValue>
     class Diagnosed;
 
-    template<typename TDiagnostic>
-    class Diagnosed<void, TDiagnostic>
+    template<>
+    class Diagnosed<void>
     {
-        static_assert(
-            std::is_base_of_v<IDiagnostic, TDiagnostic>,
-            "TDiagnostic must be derived from IDiagnostic"
-        );
-
     public:
         Diagnosed() = default;
         Diagnosed(
-            const DiagnosticBag<TDiagnostic>& t_diagnosticBag
+            const DiagnosticBag& t_diagnosticBag
         ) : m_DiagnosticBag{ t_diagnosticBag }
         {
         }
 
-        auto GetDiagnosticBag() const -> const DiagnosticBag<TDiagnostic>&
+        auto GetDiagnosticBag() const -> const DiagnosticBag&
         {
             return m_DiagnosticBag;
         }
 
     private:
-        DiagnosticBag<TDiagnostic> m_DiagnosticBag{};
+        DiagnosticBag m_DiagnosticBag{};
     };
 
-    template<typename TValue, typename TDiagnostic>
+    template<typename TValue>
     class Diagnosed
     {
-        static_assert(
-            std::is_base_of_v<IDiagnostic, TDiagnostic>,
-            "TDiagnostic must be derived from IDiagnostic"
-        );
-
     public:
         Diagnosed(
             const TValue& t_value
@@ -53,14 +43,14 @@ namespace Ace
         }
         Diagnosed(
             const TValue& t_value,
-            const DiagnosticBag<TDiagnostic>& t_diagnosticBag
+            const DiagnosticBag& t_diagnosticBag
         ) : m_Value{ t_value },
             m_DiagnosticBag{ t_diagnosticBag }
         {
         }
         Diagnosed(
             TValue&& t_value,
-            const DiagnosticBag<TDiagnostic>& t_diagnosticBag
+            const DiagnosticBag& t_diagnosticBag
         ) : m_Value{ std::move(t_value) },
             m_DiagnosticBag{ t_diagnosticBag }
         {
@@ -75,13 +65,13 @@ namespace Ace
             return m_Value;
         }
 
-        auto GetDiagnosticBag() const -> const DiagnosticBag<TDiagnostic>&
+        auto GetDiagnosticBag() const -> const DiagnosticBag&
         {
             return m_DiagnosticBag;
         }
 
     private:
         TValue m_Value{};
-        DiagnosticBag<TDiagnostic> m_DiagnosticBag{};
+        DiagnosticBag m_DiagnosticBag{};
     };
 }

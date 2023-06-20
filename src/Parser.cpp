@@ -22,7 +22,7 @@
 #include "Scope.hpp"
 #include "Utility.hpp"
 #include "Name.hpp"
-#include "File.hpp"
+#include "FileBuffer.hpp"
 #include "Compilation.hpp"
 #include "Measured.hpp"
 
@@ -155,29 +155,27 @@ namespace Ace
     }
 
     auto Parser::ParseAST(
-        const File* const t_file,
+        const FileBuffer* const t_fileBuffer,
         const std::vector<std::shared_ptr<const Token>>& t_tokens
     ) -> Expected<std::shared_ptr<const Node::Module>>
     {
         std::vector<ParseToken> tokens{};
 
-        const auto firstLineIt = begin(t_file->Lines);
-        const auto  lastLineIt =   end(t_file->Lines) - 1;
+        const auto firstLineIt = begin(t_fileBuffer->GetLines());
+        const auto  lastLineIt =   end(t_fileBuffer->GetLines()) - 1;
 
         const auto& firstLine = *firstLineIt;
         const auto&  lastLine = * lastLineIt;
 
         const SourceLocation leadingSourceLocation
         {
-            t_file,
-            firstLineIt,
+            t_fileBuffer,
             begin(firstLine),
             begin(firstLine) + 1,
         };
         const SourceLocation trailingSourceLocation
         {
-            t_file,
-            lastLineIt,
+            t_fileBuffer,
             end(lastLine) - 1,
             end(lastLine),
         };
@@ -185,7 +183,7 @@ namespace Ace
         tokens.emplace_back(std::make_shared<const Token>(
             leadingSourceLocation,
             TokenKind::Identifier,
-            t_file->Compilation->Package.Name
+            t_fileBuffer->GetCompilation()->Package.Name
         ));
         tokens.emplace_back(std::make_shared<const Token>(
             leadingSourceLocation,
@@ -204,10 +202,7 @@ namespace Ace
             begin(t_tokens),
             end  (t_tokens),
             back_inserter(tokens),
-            [](const std::shared_ptr<const Token>& t_token)
-            {
-                return t_token;
-            }
+            [](const std::shared_ptr<const Token>& t_token) { return t_token; }
         );
 
         tokens.insert(
@@ -220,7 +215,11 @@ namespace Ace
 
         auto it = begin(tokens);
 
-        ACE_TRY(module, ParseModule({ it, t_file->Compilation->GlobalScope.Unwrap() }));
+        ACE_TRY(module, ParseModule({
+            it,
+            t_fileBuffer->GetCompilation()->GlobalScope.Unwrap()
+        }));
+
         it += module.Length;
 
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::EndOfFile);

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <string>
 #include <optional>
+#include <filesystem>
 
 #include "DiagnosticsBase.hpp"
 #include "Expected.hpp"
@@ -9,15 +11,60 @@
 
 namespace Ace
 {
-    class ISourceDiagnostic : public virtual IDiagnostic
+    class FileNotFoundError : public virtual IDiagnostic
     {
     public:
-        virtual ~ISourceDiagnostic() = default;
+        FileNotFoundError(
+            const std::filesystem::path& t_path
+        ) : m_Path{ t_path }
+        {
+        }
+        virtual ~FileNotFoundError() = default;
 
-        virtual auto GetSourceLocation() const -> const SourceLocation& = 0;
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return std::nullopt;
+        }
+        auto CreateMessage() const -> std::string final
+        {
+            return "File not found: " + m_Path.string();
+        }
+
+    private:
+        std::filesystem::path m_Path{};
     };
 
-    class UnterminatedMultiLineCommentError : public virtual ISourceDiagnostic
+    class FileOpenError : public virtual IDiagnostic
+    {
+    public:
+        FileOpenError(
+            const std::filesystem::path& t_path
+        ) : m_Path{ t_path }
+        {
+        }
+
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return std::nullopt;
+        }
+        auto CreateMessage() const -> std::string final
+        {
+            return "Unable to open file: " + m_Path.string();
+        }
+
+    private:
+        std::filesystem::path m_Path{};
+    };
+
+    class UnterminatedMultiLineCommentError : public virtual IDiagnostic
     {
     public:
         UnterminatedMultiLineCommentError(
@@ -27,18 +74,24 @@ namespace Ace
         }
         virtual ~UnterminatedMultiLineCommentError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetMessage() const -> const char* final
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return m_SourceLocation;
+        }
+        auto CreateMessage() const -> std::string final
         {
             return "Unterminated multiline comment";
         }
-        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 
     private:
         SourceLocation m_SourceLocation{};
     };
     
-    class UnterminatedStringLiteralError : public virtual ISourceDiagnostic
+    class UnterminatedStringLiteralError : public virtual IDiagnostic
     {
     public:
         UnterminatedStringLiteralError(
@@ -48,18 +101,24 @@ namespace Ace
         }
         virtual ~UnterminatedStringLiteralError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetMessage() const -> const char* final
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return m_SourceLocation;
+        }
+        auto CreateMessage() const -> std::string final
         {
             return "Unterminated string literal";
         }
-        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 
     private:
         SourceLocation m_SourceLocation{};
     };
 
-    class UnexpectedCharacterError : public virtual ISourceDiagnostic
+    class UnexpectedCharacterError : public virtual IDiagnostic
     {
     public:
         UnexpectedCharacterError(
@@ -69,18 +128,24 @@ namespace Ace
         }
         virtual ~UnexpectedCharacterError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetMessage() const -> const char* final
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return m_SourceLocation;
+        }
+        auto CreateMessage() const -> std::string final
         {
             return "Unexpected character";
         }
-        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 
     private:
         SourceLocation m_SourceLocation{};
     };
 
-    class UnknownNumericLiteralTypeSuffixError : public virtual ISourceDiagnostic
+    class UnknownNumericLiteralTypeSuffixError : public virtual IDiagnostic
     {
     public:
         UnknownNumericLiteralTypeSuffixError(
@@ -90,18 +155,24 @@ namespace Ace
         }
         virtual ~UnknownNumericLiteralTypeSuffixError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetMessage() const -> const char* final
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return m_SourceLocation;
+        }
+        auto CreateMessage() const -> std::string final
         {
             return "Unknown numeric literal type suffix";
         }
-        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 
     private:
         SourceLocation m_SourceLocation{};
     };
 
-    class DecimalPointInNonFloatNumericLiteralError : public virtual ISourceDiagnostic
+    class DecimalPointInNonFloatNumericLiteralError : public virtual IDiagnostic
     {
     public:
         DecimalPointInNonFloatNumericLiteralError(
@@ -111,12 +182,18 @@ namespace Ace
         }
         virtual ~DecimalPointInNonFloatNumericLiteralError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetMessage() const -> const char* final
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return m_SourceLocation;
+        }
+        auto CreateMessage() const -> std::string final
         {
             return "Decimal point in non-float numeric literal";
         }
-        auto GetSourceLocation() const -> const SourceLocation& final { return m_SourceLocation; }
 
     private:
         SourceLocation m_SourceLocation{};

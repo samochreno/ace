@@ -412,10 +412,10 @@ namespace Ace
             originalFilePaths,
             pathMacroMap
         ));
-        ACE_TRY(files, TransformExpectedVector(finalFilePaths,
+        ACE_TRY(sourceFileBuffers, TransformExpectedVector(finalFilePaths,
         [&](const std::filesystem::path& t_filePath)
         {
-            return File::New(t_compilation, t_filePath);
+            return FileBuffer::Read(t_compilation, t_filePath);
         }));
 
         std::vector<std::string> originalDependencyFilePaths{};
@@ -434,7 +434,7 @@ namespace Ace
         return Package
         {
             std::move(name),
-            std::move(files),
+            std::move(sourceFileBuffers),
             std::move(finalDependencyFilePaths),
         };
     }

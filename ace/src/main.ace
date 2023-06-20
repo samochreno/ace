@@ -2,6 +2,7 @@ Vector2: struct -> pub {
     x: int -> pub, 
     y: int -> pub,
 }
+$
 
 Template[T]: struct {
     field: T

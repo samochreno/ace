@@ -11,7 +11,7 @@
 #include "SpecialIdentifier.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
-#include "File.hpp"
+#include "FileBuffer.hpp"
 #include "Measured.hpp"
 
 namespace Ace
@@ -53,7 +53,7 @@ namespace Ace
         Parser() = delete;
 
         static auto ParseAST(
-            const File* const t_file, 
+            const FileBuffer* const t_fileBuffer,
             const std::vector<std::shared_ptr<const Token>>& t_tokens
         ) -> Expected<std::shared_ptr<const Node::Module>>;
 

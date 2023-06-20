@@ -9,14 +9,13 @@
 
 namespace Ace
 {
-    template<typename TDiagnostic>
     class DiagnosticBag
     {
     public:
         DiagnosticBag() = default;
         ~DiagnosticBag() = default;
 
-        auto Add(const std::shared_ptr<const TDiagnostic>& t_diagnostic) -> void
+        auto Add(const std::shared_ptr<const IDiagnostic>& t_diagnostic) -> void
         {
             m_Diagnostics.push_back(t_diagnostic);
             AddSeverity(t_diagnostic->GetSeverity());
@@ -28,23 +27,21 @@ namespace Ace
                 std::forward<A>(args)...
             ));
         }
-        template<typename TDiagnosticNew>
         auto Add(
-            const DiagnosticBag<TDiagnosticNew>& t_diagnosticBag
+            const DiagnosticBag& t_diagnosticBag
         ) -> void
         {
             std::for_each(
                 begin(t_diagnosticBag.GetDiagnostics()),
                 end  (t_diagnosticBag.GetDiagnostics()),
-                [&](const std::shared_ptr<const TDiagnosticNew>& t_diagnostic)
+                [&](const std::shared_ptr<const IDiagnostic>& t_diagnostic)
                 {
                     Add(t_diagnostic);
                 }
             );
         }
-        template<typename TDiagnosticNew>
         auto Add(
-            const Expected<void, TDiagnosticNew>& t_expected
+            const Expected<void>& t_expected
         ) -> void
         {
             if (t_expected)
@@ -53,7 +50,7 @@ namespace Ace
             Add(t_expected.GetError());
         }
 
-        auto GetDiagnostics() const -> const std::vector<std::shared_ptr<const TDiagnostic>>& { return m_Diagnostics; }
+        auto GetDiagnostics() const -> const std::vector<std::shared_ptr<const IDiagnostic>>& { return m_Diagnostics; }
         auto GetSeverity() const -> DiagnosticSeverity { return m_Severity; }
 
     private:
@@ -89,7 +86,7 @@ namespace Ace
             }
         }
 
-        std::vector<std::shared_ptr<const TDiagnostic>> m_Diagnostics{};
+        std::vector<std::shared_ptr<const IDiagnostic>> m_Diagnostics{};
         DiagnosticSeverity m_Severity = DiagnosticSeverity::Info;
     };
 }

@@ -18,13 +18,13 @@
 #include "BoundNode/All.hpp"
 #include "Symbol/All.hpp"
 #include "Compilation.hpp"
-#include "File.hpp"
+#include "FileBuffer.hpp"
 
 namespace Ace
 {
-    static auto Compile(const Compilation* const t_compilation) -> Expected<Diagnosed<void, IDiagnostic>>
+    static auto Compile(const Compilation* const t_compilation) -> Expected<Diagnosed<void>>
     {
-        DiagnosticBag<IDiagnostic> diagnosticBag{};
+        DiagnosticBag diagnosticBag{};
 
         const auto& packageName = t_compilation->Package.Name;
         auto* const globalScope = t_compilation->GlobalScope.Unwrap().get();
@@ -40,19 +40,21 @@ namespace Ace
         const auto timeParsingStart = now();
         ACE_LOG_INFO("Parsing start");
 
-        ACE_TRY(asts, TransformExpectedVector(
-            t_compilation->Package.Files,
-            [&](const File& t_file) -> Expected<std::shared_ptr<const Node::Module>>
+        std::vector<std::shared_ptr<const Node::Module>> asts{};
+        std::transform(
+            begin(t_compilation->Package.SourceFileBuffers),
+            end  (t_compilation->Package.SourceFileBuffers),
+            back_inserter(asts),
+            [&](const FileBuffer& t_sourceFileBuffer)
             {
                 const auto dgnAST = Core::ParseAST(
                     t_compilation,
-                    &t_file
+                    &t_sourceFileBuffer
                 );
                 diagnosticBag.Add(dgnAST.GetDiagnosticBag());
-
                 return dgnAST.Unwrap();
             }
-        ));
+        );
 
         const auto timeParsingEnd = now();
         ACE_LOG_INFO("Parsing success");
@@ -168,7 +170,7 @@ namespace Ace
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.LLC)                                       << " - Backend | llc");
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.Clang)                                     << " - Backend | clang");
 
-        return Diagnosed<void, IDiagnostic>{ diagnosticBag };
+        return Diagnosed<void>{ diagnosticBag };
     }
 
     static auto Compile(
@@ -183,14 +185,13 @@ namespace Ace
 
     auto Main(const std::vector<std::string>& t_args) -> void
     {
-        std::vector<std::string> args{};
-        args.push_back("-o=ace/build");
-        args.push_back("ace/package.json");
-
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
 
-        const auto didCompile = Compile(args);
+        const auto didCompile = Compile(std::vector<std::string>{
+            { "-o=ace/build/" },
+            { "ace/package.json" }
+        });
         if (!didCompile)
         {
             ACE_LOG_ERROR("Build fail");

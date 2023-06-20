@@ -12,6 +12,7 @@
 #include <llvm/IR/LLVMContext.h>
 
 #include "Diagnostics.hpp"
+#include "CommandLineArgumentBuffer.hpp"
 #include "Package.hpp"
 #include "Natives.hpp"
 #include "Scope.hpp"
@@ -39,7 +40,7 @@ namespace Ace
     };
 
     static auto ParseArgument(
-        const std::string& t_arg,
+        const std::string_view& t_arg,
         const ArgumentKind& t_kind
     ) -> Expected<ArgumentNameValuePair>
     {
@@ -94,7 +95,7 @@ namespace Ace
     }
 
     static auto ParseArgument(
-        const std::string& t_arg
+        const std::string_view& t_arg
     ) -> Expected<ArgumentNameValuePair>
     {
         ACE_ASSERT(t_arg.starts_with('-'));
@@ -109,14 +110,14 @@ namespace Ace
     }
 
     static auto ParseOptions(
-        const std::vector<std::string>& t_args
+        const CommandLineArgumentBuffer* const t_commandLineArgumentBuffer
     ) -> Expected<CompilationOptions>
     {
-        std::vector<std::string> packagePaths{};
+        std::vector<std::string_view> packagePaths{};
         std::unordered_map<std::string, std::optional<std::string>> argumentMap{};
 
-        ACE_TRY_VOID(TransformExpectedVector(t_args,
-        [&](const std::string& t_arg) -> Expected<void>
+        ACE_TRY_VOID(TransformExpectedVector(t_commandLineArgumentBuffer->GetArgs(),
+        [&](const std::string_view& t_arg) -> Expected<void>
         {
             if (t_arg.starts_with('-'))
             {
@@ -132,7 +133,7 @@ namespace Ace
         }));
 
         ACE_TRY_ASSERT(packagePaths.size() == 1);
-        const std::string& packagePath = packagePaths.front();
+        const std::string_view& packagePath = packagePaths.front();
 
         const auto outputPath = [&]() -> std::filesystem::path
         {
@@ -161,7 +162,9 @@ namespace Ace
     {
         auto self = std::make_unique<Compilation>();
 
-        ACE_TRY(options, ParseOptions(t_args));
+        self->CommandLineArgumentBuffer = { self.get(), t_args };
+
+        ACE_TRY(options, ParseOptions(&self->CommandLineArgumentBuffer));
         ACE_TRY(package, Package::New(self.get(), options.PackagePath));
 
         const auto& outputPath = options.OutputPath;
@@ -174,16 +177,13 @@ namespace Ace
             std::filesystem::create_directories(outputPath);
         }
 
-        self->Package              = std::move(package);
-        self->OutputPath           = std::move(options.OutputPath);
-        self->Natives              = std::make_unique<Ace::Natives>(self.get());
-        self->GlobalScope          = Ace::GlobalScope{ self.get() };
+        self->Package = std::move(package);
+        self->OutputPath = std::move(options.OutputPath);
+        self->Natives = std::make_unique<Ace::Natives>(self.get());
+        self->GlobalScope = { self.get() };
         self->TemplateInstantiator = std::make_unique<Ace::TemplateInstantiator>();
-        self->LLVMContext          = std::make_unique<llvm::LLVMContext>();
+        self->LLVMContext = std::make_unique<llvm::LLVMContext>();
 
-        return Expected<std::unique_ptr<const Compilation>>
-        {
-            std::move(self)
-        };
+        return std::unique_ptr<const Compilation>{ std::move(self) };
     }
 }

@@ -6,6 +6,7 @@
 #include <filesystem>
 
 #include "Diagnostics.hpp"
+#include "CommandLineArgumentBuffer.hpp"
 #include "Package.hpp"
 #include "Scope.hpp"
 #include "Natives.hpp"
@@ -24,6 +25,7 @@ namespace Ace
             const std::vector<std::string>& t_args
         ) -> Expected<std::unique_ptr<const Compilation>>;
 
+        CommandLineArgumentBuffer CommandLineArgumentBuffer{};
         Package Package{};
         std::filesystem::path OutputPath{};
         std::unique_ptr<Natives> Natives{};

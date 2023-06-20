@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- Rename SourceLocation variables to Location 
 - Use `Measured` in lexer
 - ❓ Remove `ACE_TRY` macros, make opening braces on the same line
 - Add error messages to make debugging easier:

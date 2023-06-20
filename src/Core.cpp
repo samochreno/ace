@@ -23,44 +23,25 @@
 #include "Emittable.hpp"
 #include "Compilation.hpp"
 #include "ControlFlowAnalysis.hpp"
-#include "File.hpp"
+#include "FileBuffer.hpp"
 
 namespace Ace::Core
 {
-    static auto LogSourceDiagnosticBag(
-        const DiagnosticBag<ISourceDiagnostic>& t_diagnosticBag
+    static auto LogDiagnosticBag(
+        const DiagnosticBag& t_diagnosticBag
     ) -> void
     {
         std::for_each(
             begin(t_diagnosticBag.GetDiagnostics()),
             end  (t_diagnosticBag.GetDiagnostics()),
-            [](const std::shared_ptr<const ISourceDiagnostic>& t_diagnostic)
+            [](const std::shared_ptr<const IDiagnostic>& t_diagnostic)
             {
                 std::string message{};
 
-                const auto sourceLocation =
-                    t_diagnostic->GetSourceLocation();
+                const auto sourceLocation = t_diagnostic->GetSourceLocation().value();
+                message += sourceLocation.Buffer->FormatLocation(sourceLocation);
 
-                message += sourceLocation.File->Path.string();
-                message += ":";
-
-
-                const auto lineIndex = std::distance(
-                    begin(sourceLocation.File->Lines),
-                    sourceLocation.LineIterator
-                );
-                message += std::to_string(lineIndex + 1);
-                message += ":";
-
-                const auto& line = *sourceLocation.LineIterator;
-                const auto characterIndex = std::distance(
-                    begin(line),
-                    sourceLocation.CharacterIteratorBegin
-                );
-                message += std::to_string(characterIndex + 1);
-                message += ": ";
-
-                message += t_diagnostic->GetMessage();
+                message += t_diagnostic->CreateMessage();
 
                 switch (t_diagnostic->GetSeverity())
                 {
@@ -93,19 +74,19 @@ namespace Ace::Core
 
     auto ParseAST(
         const Compilation* const t_compilation,
-        const File* const t_file
-    ) -> Diagnosed<std::shared_ptr<const Node::Module>, ISourceDiagnostic>
+        const FileBuffer* const t_fileBuffer
+    ) -> Diagnosed<std::shared_ptr<const Node::Module>>
     {
-        DiagnosticBag<ISourceDiagnostic> diagnosticBag{};
+        DiagnosticBag diagnosticBag{};
 
-        Lexer lexer{ t_file };
+        Lexer lexer{ t_fileBuffer };
         auto dgnTokens = lexer.EatTokens();
         diagnosticBag.Add(dgnTokens.GetDiagnosticBag());
 
-        LogSourceDiagnosticBag(diagnosticBag);
+        LogDiagnosticBag(diagnosticBag);
 
         const auto ast = Parser::ParseAST(
-            t_file,
+            t_fileBuffer,
             std::move(dgnTokens.Unwrap())
         ).Unwrap();
 

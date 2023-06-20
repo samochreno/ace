@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Diagnostics.hpp"
-#include "File.hpp"
+#include "FileBuffer.hpp"
 
 namespace Ace
 {
@@ -20,7 +20,7 @@ namespace Ace
         ) -> Expected<Package>;
 
         std::string Name{};
-        std::vector<File> Files{};
+        std::vector<FileBuffer> SourceFileBuffers{};
         std::vector<std::filesystem::path> DependencyFilePaths{};
     };
 }

@@ -56,8 +56,8 @@ namespace Ace::Core
 
     auto ParseAST(
         const Compilation* const t_compilation,
-        const File* const t_file
-    ) -> Diagnosed<std::shared_ptr<const Node::Module>, ISourceDiagnostic>;
+        const FileBuffer* const t_fileBuffer
+    ) -> Diagnosed<std::shared_ptr<const Node::Module>>;
     auto CreateAndDefineSymbols(
         const Compilation* const t_compilation,
         const std::vector<const Node::IBase*>& t_nodes

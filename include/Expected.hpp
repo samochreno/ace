@@ -42,27 +42,29 @@ namespace Ace
     public:
         virtual ~NoneError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final { return DiagnosticSeverity::Error; }
-        auto GetMessage() const -> const char*
+        auto GetSeverity() const -> DiagnosticSeverity final
         {
-            return "Empty error";
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return std::nullopt;
+        }
+        auto CreateMessage() const -> std::string final
+        {
+            return "<Empty error message>";
         }
     };
 
-    template<typename TValue, typename TError = NoneError>
+    template<typename TValue>
     class Expected;
 
     class ExpectedVoidType {};
     inline constexpr const ExpectedVoidType ExpectedVoid{};
 
-    template<typename TError>
-    class Expected<void, TError>
+    template<>
+    class Expected<void>
     {
-        static_assert(
-            std::is_base_of_v<IDiagnostic, TError>,
-            "TError must be derived from IDiagnostic"
-        );
-
     public:
         Expected()
         {
@@ -78,12 +80,9 @@ namespace Ace
         Expected(const ExpectedVoidType& t_value)
         {
         }
-        template<
-            typename TErrorNew,
-            typename = std::enable_if_t<std::is_base_of_v<TError, TErrorNew>>
-        >
-        Expected(const std::shared_ptr<const TErrorNew>& t_error)
-            : m_OptError{ t_error }
+        template<typename TDiagnostic, typename = std::enable_if_t<std::is_base_of_v<IDiagnostic, TDiagnostic>>>
+        Expected(const std::shared_ptr<const TDiagnostic>& t_error)
+            : m_OptError{ std::shared_ptr<const IDiagnostic>{ t_error } }
         {
         }
         ~Expected() = default;
@@ -114,23 +113,18 @@ namespace Ace
             ACE_UNREACHABLE();
         }
 
-        auto GetError() const -> const std::shared_ptr<const TError>&
+        auto GetError() const -> const std::shared_ptr<const IDiagnostic>&
         {
             return m_OptError.value();
         }
 
     private:
-        std::optional<std::shared_ptr<const TError>> m_OptError{};
+        std::optional<std::shared_ptr<const IDiagnostic>> m_OptError{};
     };
 
-    template<typename TValue, typename TError>
+    template<typename TValue>
     class Expected
     {
-        static_assert(
-            std::is_base_of_v<IDiagnostic, TError>,
-            "TError must be derived from IDiagnostic"
-        );
-
     public:
         Expected()
         {
@@ -151,9 +145,9 @@ namespace Ace
             : m_OptValue{ std::move(t_value) }
         {
         }
-        template<typename TErrorNew, typename = std::enable_if_t<std::is_base_of_v<TError, TErrorNew>>>
-        Expected(const std::shared_ptr<const TErrorNew>& t_error)
-            : m_OptError{ t_error }
+        template<typename TDiagnostic, typename = std::enable_if_t<std::is_base_of_v<IDiagnostic, TDiagnostic>>>
+        Expected(const std::shared_ptr<const TDiagnostic>& t_error)
+            : m_OptError{ std::shared_ptr<const IDiagnostic>{ t_error } }
         {
         }
         ~Expected() = default;
@@ -187,27 +181,27 @@ namespace Ace
             return m_OptValue.value();
         }
 
-        auto GetError() const -> const std::shared_ptr<const TError>&
+        auto GetError() const -> const std::shared_ptr<const IDiagnostic>&
         {
             return m_OptError.value();
         }
 
-        template<typename TValueNew, typename TErrorNew>
-        operator Expected<TValueNew, TErrorNew>() const
+        template<typename TValueNew>
+        operator Expected<TValueNew>() const
         {
             if (*this)
             {
-                return Expected<TValueNew, TErrorNew>(m_OptValue.value());
+                return Expected<TValueNew>(m_OptValue.value());
             }
             else
             {
-                return Expected<TValueNew, TErrorNew>(m_OptError.value());
+                return Expected<TValueNew>(m_OptError.value());
             }
         }
 
     private:
         std::optional<TValue> m_OptValue{};
-        std::optional<std::shared_ptr<const TError>> m_OptError{};
+        std::optional<std::shared_ptr<const IDiagnostic>> m_OptError{};
     };
 
 #define TIn typename std::decay_t<decltype(*TIt{})>

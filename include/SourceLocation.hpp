@@ -1,30 +1,26 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include <string_view>
 
 namespace Ace
 {
-    class File;
+    class ISourceBuffer;
 
     struct SourceLocation
     {
         SourceLocation() = default;
         SourceLocation(
-            const File* const t_file,
-            const std::vector<std::string>::const_iterator t_lineIt,
-            const std::string::const_iterator& t_characterItBegin,
-            const std::string::const_iterator& t_characterItEnd
-        ) : File{ t_file },
-            LineIterator{ t_lineIt },
-            CharacterIteratorBegin{ t_characterItBegin },
-            CharacterIteratorEnd{ t_characterItEnd }
+            const ISourceBuffer* const t_buffer,
+            const std::string_view::const_iterator& t_characterBeginIt,
+            const std::string_view::const_iterator& t_characterEndIt
+        ) : Buffer{ t_buffer },
+            CharacterBeginIterator{ t_characterBeginIt },
+            CharacterEndIterator{ t_characterEndIt }
         {
         }
 
-        const File* File{};
-        std::vector<std::string>::const_iterator LineIterator{};
-        std::string::const_iterator CharacterIteratorBegin{};
-        std::string::const_iterator CharacterIteratorEnd{};
+        const ISourceBuffer* Buffer{};
+        std::string_view::const_iterator CharacterBeginIterator{};
+        std::string_view::const_iterator CharacterEndIterator{};
     };
 }
