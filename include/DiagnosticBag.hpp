@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "Asserts.hpp"
-#include "Expected.hpp"
 #include "DiagnosticsBase.hpp"
 
 namespace Ace
@@ -15,21 +14,25 @@ namespace Ace
         DiagnosticBag() = default;
         ~DiagnosticBag() = default;
 
-        auto Add(const std::shared_ptr<const IDiagnostic>& t_diagnostic) -> void
+        auto Add(
+            const std::shared_ptr<const IDiagnostic>& t_diagnostic
+        ) -> DiagnosticBag&
         {
             m_Diagnostics.push_back(t_diagnostic);
             AddSeverity(t_diagnostic->GetSeverity());
+
+            return *this;
         }
         template<typename TDiagnosticNew, typename... A>
-        auto Add(A&&... args) -> void
+        auto Add(A&&... args) -> DiagnosticBag&
         {
             Add(std::make_shared<TDiagnosticNew>(
                 std::forward<A>(args)...
             ));
+
+            return *this;
         }
-        auto Add(
-            const DiagnosticBag& t_diagnosticBag
-        ) -> void
+        auto Add(const DiagnosticBag& t_diagnosticBag) -> DiagnosticBag&
         {
             std::for_each(
                 begin(t_diagnosticBag.GetDiagnostics()),
@@ -39,17 +42,11 @@ namespace Ace
                     Add(t_diagnostic);
                 }
             );
-        }
-        auto Add(
-            const Expected<void>& t_expected
-        ) -> void
-        {
-            if (t_expected)
-                return;
 
-            Add(t_expected.GetError());
+            return *this;
         }
 
+        auto IsEmpty() const -> bool { return m_Diagnostics.empty(); }
         auto GetDiagnostics() const -> const std::vector<std::shared_ptr<const IDiagnostic>>& { return m_Diagnostics; }
         auto GetSeverity() const -> DiagnosticSeverity { return m_Severity; }
 

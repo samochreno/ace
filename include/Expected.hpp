@@ -7,33 +7,9 @@
 #include <algorithm>
 
 #include "DiagnosticsBase.hpp"
+#include "DiagnosticBag.hpp"
 #include "Asserts.hpp"
 #include "MaybeChanged.hpp"
-
-#define ACE_MACRO_CONCAT_IMPL(t_x, t_y) t_x##t_y
-#define ACE_MACRO_CONCAT(t_x, t_y) ACE_MACRO_CONCAT_IMPL(t_x, t_y)
-
-#define ACE_TRY(t_resultVariableName, t_expExpression) \
-auto ACE_MACRO_CONCAT(_exp, t_resultVariableName) = (t_expExpression); \
-if (!ACE_MACRO_CONCAT(_exp, t_resultVariableName)) \
-    return ACE_MACRO_CONCAT(_exp, t_resultVariableName).GetError(); \
-auto t_resultVariableName = std::move(ACE_MACRO_CONCAT(_exp, t_resultVariableName).Unwrap())
-
-#define ACE_TRY_ASSERT(t_boolExpression) \
-if (!(t_boolExpression)) \
-    return std::make_shared<const NoneError>();
-
-#define ACE_TRY_UNREACHABLE() \
-return std::make_shared<const NoneError>();
-
-#define ACE_TRY_VOID(t_expExpression) \
-{ \
-    const auto expExpression = (t_expExpression); \
-    if (!expExpression) \
-    { \
-        return expExpression.GetError(); \
-    } \
-}
 
 namespace Ace
 {
@@ -70,56 +46,60 @@ namespace Ace
         {
         }
         Expected(const Expected& t_other)
-            : m_OptError{ t_other.m_OptError }
+            : m_DiagnosticBag{ t_other.m_DiagnosticBag }
         {
         }
         Expected(Expected&& t_other) noexcept
-            : m_OptError{ std::move(t_other.m_OptError) }
+            : m_DiagnosticBag{ std::move(t_other.m_DiagnosticBag) }
         {
         }
         Expected(const ExpectedVoidType& t_value)
         {
         }
         template<typename TDiagnostic, typename = std::enable_if_t<std::is_base_of_v<IDiagnostic, TDiagnostic>>>
-        Expected(const std::shared_ptr<const TDiagnostic>& t_error)
-            : m_OptError{ std::shared_ptr<const IDiagnostic>{ t_error } }
+        Expected(const std::shared_ptr<const TDiagnostic>& t_diagnostic)
         {
+            m_DiagnosticBag.Add(t_diagnostic);
+        }
+        Expected(const DiagnosticBag& t_diagnosticBag)
+        {
+            m_DiagnosticBag.Add(t_diagnosticBag);
         }
         ~Expected() = default;
 
         auto operator=(const Expected& t_other) -> Expected&
         {
-            m_OptError = t_other.m_OptError;
+            m_DiagnosticBag = t_other.m_DiagnosticBag;
 
             return *this;
         }
         auto operator=(Expected&& t_other) noexcept -> Expected&
         {
-            m_OptError = std::move(t_other.m_OptError);
+            m_DiagnosticBag = std::move(t_other.m_DiagnosticBag);
 
             return *this;
         }
 
         operator bool() const
         {
-            return !m_OptError.has_value();
+            return m_DiagnosticBag.IsEmpty();
         }
 
         auto Unwrap() -> void
         {
-            if (!m_OptError.has_value())
+            if (m_DiagnosticBag.IsEmpty())
                 return;
 
             ACE_UNREACHABLE();
         }
 
-        auto GetError() const -> const std::shared_ptr<const IDiagnostic>&
+        auto GetDiagnosticBag() const -> const DiagnosticBag&
         {
-            return m_OptError.value();
+            return m_DiagnosticBag;
         }
 
     private:
-        std::optional<std::shared_ptr<const IDiagnostic>> m_OptError{};
+        DiagnosticBag m_DiagnosticBag{};
     };
 
     template<typename TValue>
@@ -129,12 +109,17 @@ namespace Ace
         Expected()
         {
         }
-        Expected(const Expected& t_other)
-            : m_OptValue{ t_other.m_OptValue }, m_OptError{ t_other.m_OptError }
+        Expected(
+            const Expected& t_other
+        ) : m_OptValue{ t_other.m_OptValue },
+            m_DiagnosticBag{ t_other.m_DiagnosticBag }
         {
         }
-        Expected(Expected&& t_other) noexcept
-            : m_OptValue{ std::move(t_other.m_OptValue) }, m_OptError{ std::move(t_other.m_OptError) }
+        Expected(
+            Expected&& t_other
+        ) noexcept
+          : m_OptValue{ std::move(t_other.m_OptValue) },
+            m_DiagnosticBag{ std::move(t_other.m_DiagnosticBag) }
         {
         }
         Expected(const TValue& t_value)
@@ -146,23 +131,27 @@ namespace Ace
         {
         }
         template<typename TDiagnostic, typename = std::enable_if_t<std::is_base_of_v<IDiagnostic, TDiagnostic>>>
-        Expected(const std::shared_ptr<const TDiagnostic>& t_error)
-            : m_OptError{ std::shared_ptr<const IDiagnostic>{ t_error } }
+        Expected(const std::shared_ptr<const TDiagnostic>& t_diagnostic)
         {
+            m_DiagnosticBag.Add(t_diagnostic);
+        }
+        Expected(const DiagnosticBag& t_diagnosticBag)
+        {
+            m_DiagnosticBag.Add(t_diagnosticBag);
         }
         ~Expected() = default;
 
         auto operator=(const Expected& t_other) -> Expected&
         {
             m_OptValue = t_other.m_OptValue;
-            m_OptError = t_other.m_OptError;
+            m_DiagnosticBag = t_other.m_DiagnosticBag;
 
             return *this;
         }
         auto operator=(Expected&& t_other) noexcept -> Expected&
         {
             m_OptValue = std::move(t_other.m_OptValue);
-            m_OptError = std::move(t_other.m_OptError);
+            m_DiagnosticBag = std::move(t_other.m_DiagnosticBag);
 
             return *this;
         }
@@ -181,27 +170,27 @@ namespace Ace
             return m_OptValue.value();
         }
 
-        auto GetError() const -> const std::shared_ptr<const IDiagnostic>&
+        auto GetDiagnosticBag() const -> const DiagnosticBag&
         {
-            return m_OptError.value();
+            return m_DiagnosticBag;
         }
 
         template<typename TValueNew>
         operator Expected<TValueNew>() const
         {
-            if (*this)
+            if (m_DiagnosticBag.IsEmpty())
             {
                 return Expected<TValueNew>(m_OptValue.value());
             }
             else
             {
-                return Expected<TValueNew>(m_OptError.value());
+                return Expected<TValueNew>(m_DiagnosticBag);
             }
         }
 
     private:
         std::optional<TValue> m_OptValue{};
-        std::optional<std::shared_ptr<const IDiagnostic>> m_OptError{};
+        DiagnosticBag m_DiagnosticBag{};
     };
 
 #define TIn typename std::decay_t<decltype(*TIt{})>
