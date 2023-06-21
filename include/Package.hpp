@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <string>
 #include <filesystem>
 #include <vector>
@@ -15,9 +14,8 @@ namespace Ace
     struct Package
     {
         static auto New(
-            const Compilation* const t_compilation,
-            const std::filesystem::path& t_filePath
-        ) -> Expected<Package>;
+            const FileBuffer* const t_fileBuffer
+        ) -> Expected<Diagnosed<Package>>;
 
         std::string Name{};
         std::vector<FileBuffer> SourceFileBuffers{};

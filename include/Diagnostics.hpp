@@ -3,6 +3,7 @@
 #include <string>
 #include <optional>
 #include <filesystem>
+#include <nlohmann/json.hpp>
 
 #include "DiagnosticsBase.hpp"
 #include "Expected.hpp"
@@ -11,6 +12,188 @@
 
 namespace Ace
 {
+    class MissingPackagePathArgumentError : public virtual IDiagnostic
+    {
+    public:
+        MissingPackagePathArgumentError() = default;
+        virtual ~MissingPackagePathArgumentError() = default;
+
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return std::nullopt;
+        }
+        auto CreateMessage() const -> std::string final
+        {
+            return "Missing package path argument";
+        }
+    };
+
+    class MultiplePackagePathArgumentsError : public virtual IDiagnostic
+    {
+    public:
+        MultiplePackagePathArgumentsError(
+            const SourceLocation& t_sourceLocation
+        ) : m_SourceLocation{ t_sourceLocation }
+        {
+        }
+        virtual ~MultiplePackagePathArgumentsError() = default;
+
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return m_SourceLocation;
+        }
+        auto CreateMessage() const -> std::string final
+        {
+            return "Multiple package path arguments";
+        }
+
+    private:
+        SourceLocation m_SourceLocation{};
+    };
+
+    class MissingCommandLineOptionNameError : public virtual IDiagnostic
+    {
+    public:
+        MissingCommandLineOptionNameError(
+            const SourceLocation& t_sourceLocation
+        ) : m_SourceLocation{ t_sourceLocation }
+        {
+        }
+        virtual ~MissingCommandLineOptionNameError() = default;
+
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return m_SourceLocation;
+        }
+        auto CreateMessage() const -> std::string final
+        {
+            return "Missing option name";
+        }
+
+    private:
+        SourceLocation m_SourceLocation{};
+    };
+
+    class UnknownCommandLineOptionNameError : public virtual IDiagnostic
+    {
+    public:
+        UnknownCommandLineOptionNameError(
+            const SourceLocation& t_sourceLocation
+        ) : m_SourceLocation{ t_sourceLocation }
+        {
+        }
+        virtual ~UnknownCommandLineOptionNameError() = default;
+
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return m_SourceLocation;
+        }
+        auto CreateMessage() const -> std::string final
+        {
+            return "Unknown option name";
+        }
+
+    private:
+        SourceLocation m_SourceLocation{};
+    };
+
+    class MissingCommandLineOptionValueError : public virtual IDiagnostic
+    {
+    public:
+        MissingCommandLineOptionValueError(
+            const SourceLocation& t_sourceLocation
+        ) : m_SourceLocation{ t_sourceLocation }
+        {
+        }
+        virtual ~MissingCommandLineOptionValueError() = default;
+
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return m_SourceLocation;
+        }
+        auto CreateMessage() const -> std::string final
+        {
+            return "Missing option argument";
+        }
+
+    private:
+        SourceLocation m_SourceLocation{};
+    };
+
+    class UnexpectedCommandLineOptionValueError : public virtual IDiagnostic
+    {
+    public:
+        UnexpectedCommandLineOptionValueError(
+            const SourceLocation& t_sourceLocation
+        ) : m_SourceLocation{ t_sourceLocation }
+        {
+        }
+        virtual ~UnexpectedCommandLineOptionValueError() = default;
+
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return m_SourceLocation;
+        }
+        auto CreateMessage() const -> std::string final
+        {
+            return "Unexpected option argument";
+        }
+
+    private:
+        SourceLocation m_SourceLocation{};
+    };
+
+    class JsonError : public virtual IDiagnostic
+    {
+    public:
+        JsonError(
+            const nlohmann::json::exception& t_jsonException
+        ) : m_Message{ t_jsonException.what() }
+        {
+        }
+        virtual ~JsonError() = default;
+
+        auto GetSeverity() const -> DiagnosticSeverity final
+        {
+            return DiagnosticSeverity::Error;
+        }
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final
+        {
+            return std::nullopt;
+        }
+        auto CreateMessage() const -> std::string final
+        {
+            return "Unexpected option argument";
+        }
+
+    private:
+        const char* m_Message{};
+    };
+
     class FileNotFoundError : public virtual IDiagnostic
     {
     public:
@@ -46,6 +229,7 @@ namespace Ace
         ) : m_Path{ t_path }
         {
         }
+        virtual ~FileOpenError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final
         {

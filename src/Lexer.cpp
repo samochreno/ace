@@ -303,7 +303,7 @@ namespace Ace
             );
             if (!expTokenKind)
             {
-                diagnosticBag.Add(expTokenKind.GetError());
+                diagnosticBag.Add(expTokenKind.GetDiagnosticBag());
                 return TokenKind::Int;
             }
 
@@ -846,7 +846,7 @@ namespace Ace
             }
             else
             {
-                diagnosticBag.Add(expDgnTokens.GetError());
+                diagnosticBag.Add(expDgnTokens.GetDiagnosticBag());
                 EatCharacter();
             }
         }

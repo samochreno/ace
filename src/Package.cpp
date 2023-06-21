@@ -17,11 +17,11 @@ namespace Ace
 {
     namespace Property
     {
-        static const std::string PathMacros             = "path_macros";
-        static const std::string FilePaths              = "file_paths";
-        static const std::string DependencyFilePaths    = "dependency_file_paths";
-        static const std::string Name                   = "name";
-        static const std::string Value                  = "value";
+        static const std::string Name                = "name";
+        static const std::string Value               = "value";
+        static const std::string PathMacros          = "path_macros";
+        static const std::string SourceFiles         = "source_files";
+        static const std::string DependencyFiles     = "dependency_files";
     }
 
     struct FilteredDirectory
@@ -365,23 +365,18 @@ namespace Ace
         return finalFilePaths;
     }
 
-    static auto NewInternal(
-        const Compilation* const t_compilation,
-        const std::filesystem::path& t_filePath
-    ) -> Expected<Package>
+    static auto New(
+        const FileBuffer* const t_fileBuffer
+    ) -> Expected<Diagnosed<Package>>
     {
-        std::ifstream fileStream{ t_filePath };
-        ACE_TRY_ASSERT(fileStream.is_open());
+        DiagnosticBag diagnosticBag{};
 
-        std::stringstream packageStringStream{};
-        packageStringStream << fileStream.rdbuf();
-
-        const auto package = nlohmann::json::parse(packageStringStream.str());
+        const auto package = nlohmann::json::parse(t_fileBuffer->GetBuffer());
 
         ACE_TRY_ASSERT(package.contains(Property::Name));
         ACE_TRY_ASSERT(package.contains(Property::PathMacros));
-        ACE_TRY_ASSERT(package.contains(Property::FilePaths));
-        ACE_TRY_ASSERT(package.contains(Property::DependencyFilePaths));
+        ACE_TRY_ASSERT(package.contains(Property::SourceFiles));
+        ACE_TRY_ASSERT(package.contains(Property::DependencyFiles));
         ACE_TRY_ASSERT(package.size() == 4);
 
         std::string name = package[Property::Name];
@@ -400,58 +395,71 @@ namespace Ace
             pathMacroMap[pathMacro[Property::Name]] = std::move(Trim(path));
         }
 
-        std::vector<std::string> originalFilePaths{};
+        std::vector<std::string> originalSourceFilePaths{};
         std::transform(
-            begin(package[Property::FilePaths]),
-            end  (package[Property::FilePaths]),
-            back_inserter(originalFilePaths),
+            begin(package[Property::SourceFiles]),
+            end  (package[Property::SourceFiles]),
+            back_inserter(originalSourceFilePaths),
             [](const nlohmann::json& t_filePath) { return t_filePath; }
         );
-        ACE_TRY(finalFilePaths, TransformFilePaths(
-            t_filePath,
-            originalFilePaths,
+        ACE_TRY(finalSourceFilePaths, TransformFilePaths(
+            t_fileBuffer->GetPath(),
+            originalSourceFilePaths,
             pathMacroMap
         ));
-        ACE_TRY(sourceFileBuffers, TransformExpectedVector(finalFilePaths,
+        ACE_TRY(sourceFileBuffers, TransformExpectedVector(finalSourceFilePaths,
         [&](const std::filesystem::path& t_filePath)
         {
-            return FileBuffer::Read(t_compilation, t_filePath);
+            return FileBuffer::Read(
+                t_fileBuffer->GetCompilation(),
+                t_filePath
+            );
         }));
 
         std::vector<std::string> originalDependencyFilePaths{};
         std::transform(
-            begin(package[Property::DependencyFilePaths]),
-            end  (package[Property::DependencyFilePaths]),
+            begin(package[Property::DependencyFiles]),
+            end  (package[Property::DependencyFiles]),
             back_inserter(originalDependencyFilePaths),
             [](const nlohmann::json& t_filePath) { return t_filePath; }
         );
         ACE_TRY(finalDependencyFilePaths, TransformFilePaths(
-            t_filePath,
+            t_fileBuffer->GetPath(),
             originalDependencyFilePaths,
             pathMacroMap
         ));
 
-        return Package
+        return Diagnosed
         {
-            std::move(name),
-            std::move(sourceFileBuffers),
-            std::move(finalDependencyFilePaths),
+            Package
+            {
+                std::move(name),
+                std::move(sourceFileBuffers),
+                std::move(finalDependencyFilePaths),
+            },
+            diagnosticBag,
         };
     }
 
     auto Package::New(
-        const Compilation* const t_compilation,
-        const std::filesystem::path& t_filePath
-    ) -> Expected<Package>
+        const FileBuffer* const t_fileBuffer
+    ) -> Expected<Diagnosed<Package>>
     {
+        DiagnosticBag diagnosticBag{};
+
         try
         {
-            ACE_TRY(package, NewInternal(t_compilation, t_filePath));
-            return std::move(package);
+            ACE_EXP_DGN(package, diagnosticBag, Ace::New(t_fileBuffer));
+
+            return Diagnosed
+            {
+                std::move(package),
+                diagnosticBag,
+            };
         }
-        catch (nlohmann::json::exception&)
+        catch (const nlohmann::json::exception& exception)
         {
-            ACE_TRY_UNREACHABLE();
+            return diagnosticBag.Add<JsonError>(exception);
         }
     }
 }

@@ -10,10 +10,10 @@
             "value": "lib"
         }
     ],
-    "file_paths": [
+    "source_files": [
         "$sources/**.ace"
     ],
-    "dependency_file_paths": [
+    "dependency_files": [
         "$dependencies/**.dll"
     ]
 }

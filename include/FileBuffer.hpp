@@ -27,12 +27,13 @@ namespace Ace
         ) -> Expected<FileBuffer>;
 
         auto GetCompilation() const -> const Compilation* final { return m_Compilation; }
-        auto GetBuffer() const -> std::string_view final { return m_Buffer; }
+        auto GetBuffer() const -> const std::string& final { return m_Buffer; }
 
         auto FormatLocation(
             const SourceLocation& t_location
         ) const -> std::string final;
 
+        auto GetPath() const -> const std::filesystem::path& { return m_Path; }
         auto GetLines() const -> const std::vector<std::string_view>& { return m_Lines; }
 
     private:

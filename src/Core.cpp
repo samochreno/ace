@@ -27,9 +27,7 @@
 
 namespace Ace::Core
 {
-    static auto LogDiagnosticBag(
-        const DiagnosticBag& t_diagnosticBag
-    ) -> void
+    auto LogDiagnosticBag(const DiagnosticBag& t_diagnosticBag) -> void
     {
         std::for_each(
             begin(t_diagnosticBag.GetDiagnostics()),
@@ -38,8 +36,13 @@ namespace Ace::Core
             {
                 std::string message{};
 
-                const auto sourceLocation = t_diagnostic->GetSourceLocation().value();
-                message += sourceLocation.Buffer->FormatLocation(sourceLocation);
+                const auto optSourceLocation = t_diagnostic->GetSourceLocation();
+                if (optSourceLocation)
+                {
+                    message += optSourceLocation.value().Buffer->FormatLocation(
+                        optSourceLocation.value()
+                    );
+                }
 
                 message += t_diagnostic->CreateMessage();
 

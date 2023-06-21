@@ -2,18 +2,19 @@
 
 #include <vector>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace Ace
 {
     CommandLineArgumentBuffer::CommandLineArgumentBuffer(
         const Compilation* const t_compilation,
-        const std::vector<std::string>& t_args
+        const std::vector<std::string_view>& t_args
     ) : m_Compilation{ t_compilation }
     {
         std::vector<std::pair<size_t, size_t>> argIndexLengthPairs{};
         std::for_each(begin(t_args), end(t_args),
-        [&](const std::string& t_arg)
+        [&](const std::string_view& t_arg)
         {
             const auto index = m_Buffer.size();
 

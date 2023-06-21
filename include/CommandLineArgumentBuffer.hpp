@@ -16,7 +16,7 @@ namespace Ace
         CommandLineArgumentBuffer(CommandLineArgumentBuffer&&) = default;
         CommandLineArgumentBuffer(
             const Compilation* const t_compilation,
-            const std::vector<std::string>& t_args
+            const std::vector<std::string_view>& t_args
         );
         ~CommandLineArgumentBuffer() = default;
 
@@ -24,7 +24,7 @@ namespace Ace
         auto operator=(CommandLineArgumentBuffer&&) -> CommandLineArgumentBuffer& = default;
 
         auto GetCompilation() const -> const Compilation* { return m_Compilation; }
-        auto GetBuffer() const -> std::string_view final { return m_Buffer; }
+        auto GetBuffer() const -> const std::string& final { return m_Buffer; }
 
         auto FormatLocation(
             const SourceLocation& t_location

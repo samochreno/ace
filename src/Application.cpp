@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include <string>
+#include <string_view>
 #include <filesystem>
 #include <fstream>
 #include <chrono>
@@ -174,27 +174,33 @@ namespace Ace
     }
 
     static auto Compile(
-        const std::vector<std::string>& t_args
+        const std::vector<std::string_view>& t_args
     ) -> Expected<void>
     {
-        ACE_TRY(compilation, Compilation::ParseAndVerify(t_args));
+        DiagnosticBag diagnosticBag{};
+
+        ACE_EXP_DGN(compilation, diagnosticBag, Compilation::Parse(t_args));
+        if (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error)
+        {
+            return diagnosticBag;
+        }
+
         ACE_TRY_VOID(Compile(compilation.get()));
 
         return ExpectedVoid;
     }
 
-    auto Main(const std::vector<std::string>& t_args) -> void
+    auto Main(const std::vector<std::string_view>& t_args) -> void
     {
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
 
-        const auto didCompile = Compile(std::vector<std::string>{
-            { "-o=ace/build/" },
-            { "ace/package.json" }
+        const auto didCompile = Compile(std::vector<std::string_view>{
+            { "-oace/build" },
+            { "ace/package.json" },
         });
         if (!didCompile)
         {
-            ACE_LOG_ERROR("Build fail");
             return;
         }
     }
