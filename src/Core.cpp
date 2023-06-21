@@ -137,10 +137,10 @@ namespace Ace::Core
         [](const Node::ISymbolCreatable* const t_symbolCreatableNode) -> Expected<void>
         {
             ACE_TRY(symbol, Scope::DefineSymbol(t_symbolCreatableNode));
-            return ExpectedVoid;
+            return Void;
         }));
 
-        return ExpectedVoid;
+        return Void;
     }
 
     auto DefineAssociations(
@@ -154,11 +154,11 @@ namespace Ace::Core
         [](const Node::Impl* const t_implNode) -> Expected<void>
         {
             ACE_TRY_VOID(t_implNode->DefineAssociations());
-            return ExpectedVoid;
+            return Void;
         });
         ACE_TRY_ASSERT(didCreateAssociations);
 
-        return ExpectedVoid;
+        return Void;
     }
 
     auto ValidateControlFlow(
@@ -192,7 +192,7 @@ namespace Ace::Core
         ) == end(functionNodes);
         ACE_TRY_ASSERT(didControlFlowAnalysisSucceed);
 
-        return ExpectedVoid;
+        return Void;
     }
 
     auto BindFunctionSymbolsBodies(
@@ -235,7 +235,7 @@ namespace Ace::Core
         ) == end(typeSymbols);
         ACE_TRY_ASSERT(didValidateTypeSizes);
 
-        return ExpectedVoid;
+        return Void;
     }
 
     static auto GetOrDefineCopyGlueSymbols(

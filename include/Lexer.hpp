@@ -6,6 +6,7 @@
 
 #include "Token.hpp"
 #include "Diagnostics.hpp"
+#include "Measured.hpp"
 #include "FileBuffer.hpp"
 
 namespace Ace
@@ -32,7 +33,7 @@ namespace Ace
 
         auto ResetCharacterIterator() -> void;
 
-        auto ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>>>;
+        auto ScanTokenSequence() const -> Expected<Measured<std::vector<std::shared_ptr<const Token>>>>;
 
         auto GetCharacter()                       const -> char;
         auto GetCharacter(const size_t& t_offset) const -> char;

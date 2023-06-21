@@ -85,6 +85,6 @@ namespace Ace::Node
     { 
         ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<Symbol::Template::Type>(m_TypeTemplateName));
         templateSymbol->GetSelfScope()->DefineAssociation(m_SelfScope);
-        return ExpectedVoid;
+        return Void;
     }
 }

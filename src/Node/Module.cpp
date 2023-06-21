@@ -217,7 +217,7 @@ namespace Ace::Node
 
         ACE_TRY_ASSERT(moduleSymbol->GetAccessModifier() == m_AccessModifier);
 
-        return ExpectedVoid;
+        return Void;
     }
 
     auto Module::GetName() const -> const std::string&

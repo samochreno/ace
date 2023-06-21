@@ -15,7 +15,7 @@ namespace Ace
     {
         static auto New(
             const FileBuffer* const t_fileBuffer
-        ) -> Expected<Diagnosed<Package>>;
+        ) -> Expected<Package>;
 
         std::string Name{};
         std::vector<FileBuffer> SourceFileBuffers{};

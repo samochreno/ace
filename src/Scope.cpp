@@ -507,13 +507,13 @@ namespace Ace
                     const bool isAlreadyDefinedSame =
                         foundIt->second == t_deductionResult.TemplateArgument;
                     ACE_TRY_ASSERT(isAlreadyDefinedSame);
-                    return ExpectedVoid;
+                    return Void;
                 }
 
                 templateArgumentMap[t_deductionResult.TemplateParameter] =
                     t_deductionResult.TemplateArgument;
 
-                return ExpectedVoid;
+                return Void;
             }));
         }
 
@@ -683,7 +683,7 @@ namespace Ace
             ACE_TRY(symbol, DefineSymbol(std::move(aliasSymbol)));
         }
 
-        return ExpectedVoid;
+        return Void;
     }
 
     Scope::Scope(

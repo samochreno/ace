@@ -96,6 +96,6 @@ namespace Ace::Node
         }());
 
         scope->DefineAssociation(m_SelfScope);
-        return ExpectedVoid;
+        return Void;
     }
 }

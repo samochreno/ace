@@ -247,7 +247,7 @@ namespace Ace
         const size_t length =
             (!optValue.has_value() || isValueInCurrentString) ? 1 : 2;
 
-        return Diagnosed
+        return
         {
             Measured
             {
@@ -341,7 +341,7 @@ namespace Ace
         const size_t length =
             (!optValue.has_value() || isValueInCurrentArgument) ? 1 : 2;
 
-        return Diagnosed
+        return
         {
             Measured
             {
@@ -403,14 +403,17 @@ namespace Ace
                 std::optional{ *nextArgIt } : 
                 std::optional<std::string_view>{};
 
-            ACE_DGN(option, diagnosticBag, ParseOption({
+            const auto dgnOption = ParseOption({
                 t_commandLineArgumentBuffer,
                 arg,
                 optNextArg
-            }));
+            });
+            diagnosticBag.Add(dgnOption);
 
-            optionMap[option.Value.Definition] = option.Value.OptValue;
-            argIt += option.Length;
+            optionMap[dgnOption.Unwrap().Value.Definition] =
+                dgnOption.Unwrap().Value.OptValue;
+
+            argIt += dgnOption.Unwrap().Length;
         }  
 
         if (packagePathArgIts.empty())
@@ -440,7 +443,7 @@ namespace Ace
             });
         }
 
-        return Diagnosed
+        return
         {
             optionMap,
             diagnosticBag,
@@ -449,7 +452,7 @@ namespace Ace
 
     auto Compilation::Parse(
         const std::vector<std::string_view>& t_args
-    ) -> Expected<Diagnosed<std::unique_ptr<const Compilation>>>
+    ) -> Expected<std::unique_ptr<const Compilation>>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -457,28 +460,43 @@ namespace Ace
 
         self->CommandLineArgumentBuffer = { self.get(), t_args };
 
-        ACE_DGN(optionMap, diagnosticBag, ParseOptions(
+        const auto dgnOptionMap = ParseOptions(
             &self->CommandLineArgumentBuffer
-        ));
+        );
+        diagnosticBag.Add(dgnOptionMap);
 
-        const auto optPackagePath = optionMap.at(&PackagePathOptionDefinition);
+        const auto optPackagePath = dgnOptionMap.Unwrap().at(
+            &PackagePathOptionDefinition
+        );
         if (!optPackagePath.has_value())
         {
             return diagnosticBag;
         }
 
-        ACE_EXP(packageFileBuffer, diagnosticBag, FileBuffer::Read(
+        auto expPackageFileBuffer = FileBuffer::Read(
             self.get(),
             optPackagePath.value()
-        ));
-        self->PackageFileBuffer = std::move(packageFileBuffer);
+        );
+        diagnosticBag.Add(expPackageFileBuffer);
+        if (!expPackageFileBuffer)
+        {
+            return diagnosticBag;
+        }
 
-        ACE_EXP_DGN(package, diagnosticBag, Package::New(
-            &self->PackageFileBuffer
-        ));
-        self->Package = std::move(package);
+        self->PackageFileBuffer = std::move(expPackageFileBuffer.Unwrap());
 
-        const auto optOutputPath = optionMap.at(&OutputPathOptionDefinition);
+        auto expPackage = Package::New(&self->PackageFileBuffer);
+        diagnosticBag.Add(expPackage);
+        if (!expPackage)
+        {
+            return diagnosticBag;
+        }
+
+        self->Package = std::move(expPackage.Unwrap());
+
+        const auto optOutputPath = dgnOptionMap.Unwrap().at(
+            &OutputPathOptionDefinition
+        );
         if (optOutputPath.has_value())
         {
             if (
@@ -499,7 +517,7 @@ namespace Ace
         self->TemplateInstantiator = std::make_unique<Ace::TemplateInstantiator>();
         self->LLVMContext = std::make_unique<llvm::LLVMContext>();
 
-        return Diagnosed
+        return
         {
             std::unique_ptr<const Compilation>{ std::move(self) },
             diagnosticBag,

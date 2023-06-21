@@ -22,7 +22,7 @@
 
 namespace Ace
 {
-    static auto Compile(const Compilation* const t_compilation) -> Expected<Diagnosed<void>>
+    static auto Compile(const Compilation* const t_compilation) -> Expected<void>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -170,7 +170,11 @@ namespace Ace
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.LLC)                                       << " - Backend | llc");
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.Clang)                                     << " - Backend | clang");
 
-        return Diagnosed<void>{ diagnosticBag };
+        return
+        {
+            Void,
+            diagnosticBag,
+        };
     }
 
     static auto Compile(
@@ -179,15 +183,30 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        ACE_EXP_DGN(compilation, diagnosticBag, Compilation::Parse(t_args));
-        if (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error)
+        const auto expCompilation = Compilation::Parse(t_args);
+        diagnosticBag.Add(expCompilation);
+
+        const auto hasCompilationError =
+            expCompilation.GetDiagnosticBag().GetSeverity() ==
+            DiagnosticSeverity::Error;
+
+        if (!expCompilation || hasCompilationError)
         {
             return diagnosticBag;
         }
 
-        ACE_TRY_VOID(Compile(compilation.get()));
+        const auto expDidCompile = Compile(expCompilation.Unwrap().get());
+        diagnosticBag.Add(expDidCompile);
+        if (!expDidCompile)
+        {
+            return diagnosticBag;
+        }
 
-        return ExpectedVoid;
+        return
+        {
+            Void,
+            diagnosticBag,
+        };
     }
 
     auto Main(const std::vector<std::string_view>& t_args) -> void

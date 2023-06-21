@@ -13,7 +13,7 @@ namespace Ace
     class Diagnosed;
 
     template<>
-    class Diagnosed<void>
+    class Diagnosed<void> : public IDiagnosed
     {
     public:
         Diagnosed() = default;
@@ -23,7 +23,7 @@ namespace Ace
         {
         }
 
-        auto GetDiagnosticBag() const -> const DiagnosticBag&
+        auto GetDiagnosticBag() const -> const DiagnosticBag& final
         {
             return m_DiagnosticBag;
         }
@@ -33,7 +33,7 @@ namespace Ace
     };
 
     template<typename TValue>
-    class Diagnosed
+    class Diagnosed : public IDiagnosed
     {
     public:
         Diagnosed(
@@ -65,7 +65,7 @@ namespace Ace
             return m_Value;
         }
 
-        auto GetDiagnosticBag() const -> const DiagnosticBag&
+        auto GetDiagnosticBag() const -> const DiagnosticBag& final
         {
             return m_DiagnosticBag;
         }

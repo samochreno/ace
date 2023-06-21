@@ -24,7 +24,7 @@ namespace Ace
     {
         static auto Parse(
             const std::vector<std::string_view>& t_args
-        ) -> Expected<Diagnosed<std::unique_ptr<const Compilation>>>;
+        ) -> Expected<std::unique_ptr<const Compilation>>;
 
         CommandLineArgumentBuffer CommandLineArgumentBuffer{};
         FileBuffer PackageFileBuffer{};

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <type_traits>
 
 #include "Asserts.hpp"
 #include "DiagnosticsBase.hpp"
@@ -44,6 +45,11 @@ namespace Ace
             );
 
             return *this;
+        }
+        template<typename TDiagnosed, typename = std::enable_if_t<std::is_base_of_v<IDiagnosed, TDiagnosed>>>
+        auto Add(const TDiagnosed& t_diagnosed) -> DiagnosticBag&
+        {
+            return Add(t_diagnosed.GetDiagnosticBag());
         }
 
         auto IsEmpty() const -> bool { return m_Diagnostics.empty(); }

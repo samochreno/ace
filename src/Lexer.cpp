@@ -11,6 +11,7 @@
 #include "FileBuffer.hpp"
 #include "Compilation.hpp"
 #include "SourceLocation.hpp"
+#include "Measured.hpp"
 
 namespace Ace
 {
@@ -125,7 +126,7 @@ namespace Ace
 
     static auto ScanIdentifier(
         const ScanContext& t_context
-    ) -> std::vector<std::shared_ptr<const Token>>
+    ) -> Measured<std::vector<std::shared_ptr<const Token>>>
     {
         auto it = t_context.CharacterIterator;
 
@@ -168,13 +169,19 @@ namespace Ace
             optKeywordTokens.value() :
             std::vector{ identifierToken };
 
-        return tokens;
+        return
+        {
+            tokens,
+            Distance(t_context.CharacterIterator, it),
+        };
     }
 
     static auto CreateNumericLiteralTokenKind(
         const std::shared_ptr<const Token>& t_suffix
     ) -> Expected<TokenKind>
     {
+        DiagnosticBag diagnosticBag{};
+
         if (t_suffix->String == "i8")  return TokenKind::Int8;
         if (t_suffix->String == "i16") return TokenKind::Int16;
         if (t_suffix->String == "i32") return TokenKind::Int32;
@@ -189,14 +196,14 @@ namespace Ace
         if (t_suffix->String == "f32") return TokenKind::Float32;
         if (t_suffix->String == "f64") return TokenKind::Float64;
 
-        return std::make_shared<const UnknownNumericLiteralTypeSuffixError>(
+        return diagnosticBag.Add<UnknownNumericLiteralTypeSuffixError>(
             t_suffix->SourceLocation
         );
     }
 
     static auto ScanNumericLiteralNumber(
         const ScanContext& t_context
-    ) -> Token
+    ) -> Measured<Token>
     {
         auto it = t_context.CharacterIterator;
 
@@ -225,17 +232,21 @@ namespace Ace
             it,
         };
 
-        return Token
+        return
         {
-            sourceLocation,
-            TokenKind::None,
-            string,
+            Token
+            {
+                sourceLocation,
+                TokenKind::None,
+                string,
+            },
+            Distance(t_context.CharacterIterator, it),
         };
     }
 
     static auto ScanNumericLiteralSuffix(
         const ScanContext& t_context
-    ) -> std::shared_ptr<const Token>
+    ) -> Measured<std::shared_ptr<const Token>>
     {
         auto it = t_context.CharacterIterator;
 
@@ -254,16 +265,22 @@ namespace Ace
             it,
         };
 
-        return std::make_shared<const Token>(
+        const auto token = std::make_shared<const Token>(
             sourceLocation,
             TokenKind::None,
             std::string{ t_context.CharacterIterator, it }
         );
+
+        return
+        {
+            token,
+            Distance(t_context.CharacterIterator, it),
+        };
     }
 
     static auto ScanNumericLiteral(
         const ScanContext& t_context
-    ) -> Diagnosed<std::shared_ptr<const Token>>
+    ) -> Diagnosed<Measured<std::shared_ptr<const Token>>>
     {
         DiagnosticBag diagnosticBag{};
         auto it = t_context.CharacterIterator;
@@ -273,9 +290,9 @@ namespace Ace
             t_context.LineIterator,
             it,
         });
-        it = numberToken.SourceLocation.CharacterEndIterator;
+        it += numberToken.Length;
 
-        const auto optTypeSuffix = [&]() -> std::optional<std::shared_ptr<const Token>>
+        const auto optTypeSuffix = [&]() -> std::optional<Measured<std::shared_ptr<const Token>>>
         {
             if (!IsInAlphabet(*it))
                 return std::nullopt;
@@ -288,7 +305,7 @@ namespace Ace
         }();
         if (optTypeSuffix.has_value())
         {
-            it = optTypeSuffix.value()->SourceLocation.CharacterEndIterator;
+            it += optTypeSuffix.value().Length;
         }
 
         const auto tokenKind = [&]() -> TokenKind
@@ -299,18 +316,18 @@ namespace Ace
             }
 
             const auto expTokenKind = CreateNumericLiteralTokenKind(
-                optTypeSuffix.value()
+                optTypeSuffix.value().Value
             );
             if (!expTokenKind)
             {
-                diagnosticBag.Add(expTokenKind.GetDiagnosticBag());
+                diagnosticBag.Add(expTokenKind);
                 return TokenKind::Int;
             }
 
             return expTokenKind.Unwrap();
         }();
 
-        const auto decimalPointPos = numberToken.String.find_first_of('.');
+        const auto decimalPointPos = numberToken.Value.String.find_first_of('.');
         if (decimalPointPos != std::string::npos)
         {
             const bool isFloatKind =
@@ -330,7 +347,7 @@ namespace Ace
                     sourceLocation
                 );
 
-                numberToken.String.erase(decimalPointPos);
+                numberToken.Value.String.erase(decimalPointPos);
             } 
         }
 
@@ -344,340 +361,331 @@ namespace Ace
         const auto token = std::make_shared<const Token>(
             sourceLocation,
             tokenKind,
-            numberToken.String
+            numberToken.Value.String
         );
 
-        return Diagnosed
+        return
         {
-            token,
+            Measured
+            {
+                token,
+                Distance(t_context.CharacterIterator, it),
+            },
             diagnosticBag,
         };
     }
 
-    static auto ScanDefault(
+    static auto ScanDefaultTokenKind(
         const ScanContext& t_context
-    ) -> Expected<std::shared_ptr<const Token>>
+    ) -> Expected<Measured<TokenKind>>
     {
+        DiagnosticBag diagnosticBag{};
+        
         auto it = t_context.CharacterIterator;
 
-        ACE_TRY(tokenKind, ([&]() -> Expected<TokenKind>
+        switch (*it)
         {
-            switch (*it)
+            case '=':
             {
-                case '=':
-                {
-                    ++it;
+                ++it;
 
-                    if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::EqualsEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::Equals;
-                    }
+                if (*it == '=')
+                {
+                    return Measured{ TokenKind::EqualsEquals, 2 };
                 }
-
-                case '+':
+                else
                 {
-                    ++it;
-
-                    if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::PlusEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::Plus;
-                    }
-                }
-
-                case '-':
-                {
-                    ++it;
-
-                    if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::MinusEquals;
-                    }
-                    else if (*it == '>')
-                    {
-                        ++it;
-                        return TokenKind::MinusGreaterThan;
-                    }
-                    else
-                    {
-                        return TokenKind::Minus;
-                    }
-                }
-
-                case '*':
-                {
-                    ++it;
-
-                    if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::AsteriskEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::Asterisk;
-                    }
-                }
-
-                case '/':
-                {
-                    ++it;
-
-                    if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::SlashEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::Slash;
-                    }
-                }
-
-                case '%':
-                {
-                    ++it;
-
-                    if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::PercentEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::Percent;
-                    }
-                }
-
-                case '<':
-                {
-                    ++it;
-
-                    if (*it == '<')
-                    {
-                        ++it;
-
-                        if (*it == '=')
-                        {
-                            ++it;
-                            return TokenKind::LessThanLessThanEquals;
-                        }
-                        else
-                        {
-                            return TokenKind::LessThanLessThan;
-                        }
-                    }
-                    else if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::LessThanEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::LessThan;
-                    }
-                }
-
-                case '>':
-                {
-                    ++it;
-
-                    if (*it == '>')
-                    {
-                        ++it;
-
-                        if (*it == '=')
-                        {
-                            ++it;
-                            return TokenKind::GreaterThanGreaterThanEquals;
-                        }
-                        else
-                        {
-                            return TokenKind::GreaterThanGreaterThan;
-                        }
-                    }
-                    else if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::GreaterThanEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::GreaterThan;
-                    }
-                }
-
-                case '&':
-                {
-                    ++it;
-
-                    if (*it == '&')
-                    {
-                        ++it;
-                        return TokenKind::AmpersandAmpersand;
-                    }
-                    else if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::AmpersandEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::Ampersand;
-                    }
-                }
-
-                case '^':
-                {
-                    ++it;
-
-                    if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::CaretEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::Caret;
-                    }
-                }
-
-                case '|':
-                {
-                    ++it;
-
-                    if (*it == '|')
-                    {
-                        ++it;
-                        return TokenKind::VerticalBarVerticalBar;
-                    }
-                    else if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::VerticalBarEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::VerticalBar;
-                    }
-                }
-
-                case ':':
-                {
-                    ++it;
-
-                    if (*it == ':')
-                    {
-                        ++it;
-                        return TokenKind::ColonColon;
-                    }
-                    else
-                    {
-                        return TokenKind::Colon;
-                    }
-                }
-
-                case '.':
-                {
-                    ++it;
-                    return TokenKind::Dot;
-                }
-
-                case ',':
-                {
-                    ++it;
-                    return TokenKind::Comma;
-                }
-
-                case ';':
-                {
-                    ++it;
-                    return TokenKind::Semicolon;
-                }
-
-                case '!':
-                {
-                    ++it;
-
-                    if (*it == '=')
-                    {
-                        ++it;
-                        return TokenKind::ExclamationEquals;
-                    }
-                    else
-                    {
-                        return TokenKind::Exclamation;
-                    }
-                }
-
-                case '~':
-                {
-                    ++it;
-                    return TokenKind::Tilde;
-                }
-
-
-                case '(':
-                {
-                    ++it;
-                    return TokenKind::OpenParen;
-                }
-
-                case ')':
-                {
-                    ++it;
-                    return TokenKind::CloseParen;
-                }
-
-                case '{':
-                {
-                    ++it;
-                    return TokenKind::OpenBrace;
-                }
-
-                case '}':
-                {
-                    ++it;
-                    return TokenKind::CloseBrace;
-                }
-
-                case '[':
-                {
-                    ++it;
-                    return TokenKind::OpenBracket;
-                }
-
-                case ']':
-                {
-                    ++it;
-                    return TokenKind::CloseBracket;
-                }
-
-                default:
-                {
-                    const SourceLocation sourceLocation
-                    {
-                        t_context.FileBuffer,
-                        it,
-                        it + 1,
-                    };
-
-                    return std::make_shared<const UnexpectedCharacterError>(
-                        sourceLocation
-                    );
+                    return Measured{ TokenKind::Equals, 1 };
                 }
             }
-        }()));
+
+            case '+':
+            {
+                ++it;
+
+                if (*it == '=')
+                {
+                    return Measured{ TokenKind::PlusEquals, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::Plus, 1 };
+                }
+            }
+
+            case '-':
+            {
+                ++it;
+
+                if (*it == '=')
+                {
+                    return Measured{ TokenKind::MinusEquals, 2 };
+                }
+                else if (*it == '>')
+                {
+                    return Measured{ TokenKind::MinusGreaterThan, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::Minus, 1 };
+                }
+            }
+
+            case '*':
+            {
+                ++it;
+
+                if (*it == '=')
+                {
+                    return Measured{ TokenKind::AsteriskEquals, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::Asterisk, 1 };
+                }
+            }
+
+            case '/':
+            {
+                ++it;
+
+                if (*it == '=')
+                {
+                    return Measured{ TokenKind::SlashEquals, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::Slash, 1 };
+                }
+            }
+
+            case '%':
+            {
+                ++it;
+
+                if (*it == '=')
+                {
+                    return Measured{ TokenKind::PercentEquals, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::Percent, 1 };
+                }
+            }
+
+            case '<':
+            {
+                ++it;
+
+                if (*it == '<')
+                {
+                    ++it;
+
+                    if (*it == '=')
+                    {
+                        return Measured{ TokenKind::LessThanLessThanEquals, 3 };
+                    }
+                    else
+                    {
+                        return Measured{ TokenKind::LessThanLessThan, 2 };
+                    }
+                }
+                else if (*it == '=')
+                {
+                    return Measured{ TokenKind::LessThanEquals, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::LessThan, 1 };
+                }
+            }
+
+            case '>':
+            {
+                ++it;
+
+                if (*it == '>')
+                {
+                    ++it;
+
+                    if (*it == '=')
+                    {
+                        return Measured{ TokenKind::GreaterThanGreaterThanEquals, 3 };
+                    }
+                    else
+                    {
+                        return Measured{ TokenKind::GreaterThanGreaterThan, 2 };
+                    }
+                }
+                else if (*it == '=')
+                {
+                    return Measured{ TokenKind::GreaterThanEquals, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::GreaterThan, 1 };
+                }
+            }
+
+            case '&':
+            {
+                ++it;
+
+                if (*it == '&')
+                {
+                    return Measured{ TokenKind::AmpersandAmpersand, 2 };
+                }
+                else if (*it == '=')
+                {
+                    return Measured{ TokenKind::AmpersandEquals, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::Ampersand, 1 };
+                }
+            }
+
+            case '^':
+            {
+                ++it;
+
+                if (*it == '=')
+                {
+                    return Measured{ TokenKind::CaretEquals, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::Caret, 1 };
+                }
+            }
+
+            case '|':
+            {
+                ++it;
+
+                if (*it == '|')
+                {
+                    return Measured{ TokenKind::VerticalBarVerticalBar, 2 };
+                }
+                else if (*it == '=')
+                {
+                    return Measured{ TokenKind::VerticalBarEquals, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::VerticalBar, 1 };
+                }
+            }
+
+            case ':':
+            {
+                ++it;
+
+                if (*it == ':')
+                {
+                    return Measured{ TokenKind::ColonColon, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::Colon, 1 };
+                }
+            }
+
+            case '.':
+            {
+                return Measured{ TokenKind::Dot, 1 };
+            }
+
+            case ',':
+            {
+                return Measured{ TokenKind::Comma, 1 };
+            }
+
+            case ';':
+            {
+                return Measured{ TokenKind::Semicolon, 1 };
+            }
+
+            case '!':
+            {
+                ++it;
+
+                if (*it == '=')
+                {
+                    return Measured{ TokenKind::ExclamationEquals, 2 };
+                }
+                else
+                {
+                    return Measured{ TokenKind::Exclamation, 1 };
+                }
+            }
+
+            case '~':
+            {
+                return Measured{ TokenKind::Tilde, 1 };
+            }
+
+            case '(':
+            {
+                return Measured{ TokenKind::OpenParen, 1 };
+            }
+
+            case ')':
+            {
+                return Measured{ TokenKind::CloseParen, 1 };
+            }
+
+            case '{':
+            {
+                return Measured{ TokenKind::OpenBrace, 1 };
+            }
+
+            case '}':
+            {
+                return Measured{ TokenKind::CloseBrace, 1 };
+            }
+
+            case '[':
+            {
+                return Measured{ TokenKind::OpenBracket, 1 };
+            }
+
+            case ']':
+            {
+                return Measured{ TokenKind::CloseBracket, 1 };
+            }
+
+            default:
+            {
+                const SourceLocation sourceLocation
+                {
+                    t_context.FileBuffer,
+                    it,
+                    it + 1,
+                };
+
+                return diagnosticBag.Add<UnexpectedCharacterError>(
+                    sourceLocation
+                );
+            }
+        }
+    }
+
+    static auto ScanDefault(
+        const ScanContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const Token>>>
+    {
+        DiagnosticBag diagnosticBag{};
+
+        auto it = t_context.CharacterIterator;
+
+        const auto expTokenKind = ScanDefaultTokenKind(t_context);
+        diagnosticBag.Add(expTokenKind);
+        if (!expTokenKind)
+        {
+            return diagnosticBag;
+        }
+        it += expTokenKind.Unwrap().Length;
 
         const SourceLocation sourceLocation
         {
@@ -688,20 +696,26 @@ namespace Ace
 
         const auto token = std::make_shared<const Token>(
             sourceLocation,
-            tokenKind
+            expTokenKind.Unwrap().Value
         );
 
-        return Expected<std::shared_ptr<const Token>>
+        return
         {
-            token
+            Measured
+            {
+                token,
+                Distance(t_context.CharacterIterator, it),
+            },
+            diagnosticBag,
         };
     }
 
     static auto ScanString(
         const ScanContext& t_context
-    ) -> Diagnosed<std::shared_ptr<const Token>>
+    ) -> Diagnosed<Measured<std::shared_ptr<const Token>>>
     {
         DiagnosticBag diagnosticBag{};
+
         auto it = t_context.CharacterIterator;
 
         ACE_ASSERT(*it == '"');
@@ -746,53 +760,75 @@ namespace Ace
             std::string{ t_context.CharacterIterator + 1, it }
         );
 
-        return Diagnosed
+        return
         {
-            token,
+            Measured
+            {
+                token,
+                Distance(t_context.CharacterIterator, it),
+            },
             diagnosticBag,
         };
     }
 
     static auto Scan(
         const ScanContext& t_context
-    ) -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>>>
+    ) -> Expected<Measured<std::vector<std::shared_ptr<const Token>>>>
     {
+        DiagnosticBag diagnosticBag{};
+
         const auto character = *t_context.CharacterIterator;
 
         if (character == '"')
         {
             const auto dgnString = ScanString(t_context);
-            return Diagnosed
+            diagnosticBag.Add(dgnString);
+            return
             {
-                std::vector{ dgnString.Unwrap() },
-                dgnString.GetDiagnosticBag(),
+                Measured
+                {
+                    std::vector{ dgnString.Unwrap().Value },
+                    dgnString.Unwrap().Length,
+                },
+                diagnosticBag,
             };
         }
 
         if (IsInAlphabet(character) || (character == '_'))
         {
-            return Diagnosed
-            {
-                ScanIdentifier(t_context),
-                DiagnosticBag{},
-            };
+            return ScanIdentifier(t_context);
         }
 
         if (IsNumber(character))
         {
             const auto dgnNumericLiteral = ScanNumericLiteral(t_context);
-            return Diagnosed
+            diagnosticBag.Add(dgnNumericLiteral);
+            return
             {
-                std::vector{ dgnNumericLiteral.Unwrap() },
-                dgnNumericLiteral.GetDiagnosticBag(),
+                Measured
+                {
+                    std::vector{ dgnNumericLiteral.Unwrap().Value },
+                    dgnNumericLiteral.Unwrap().Length
+                },
+                diagnosticBag,
             };
         }
 
-        ACE_TRY(dfault, ScanDefault(t_context));
-        return Diagnosed
+        const auto expDefault = ScanDefault(t_context);
+        diagnosticBag.Add(expDefault);
+        if (!expDefault)
         {
-            std::vector{ dfault },
-            DiagnosticBag{},
+            return diagnosticBag;
+        }
+
+        return
+        {
+            Measured
+            {
+                std::vector{ expDefault.Unwrap().Value },
+                expDefault.Unwrap().Length,
+            },
+            diagnosticBag,
         };
     }
 
@@ -806,6 +842,7 @@ namespace Ace
     auto Lexer::EatTokens() -> Diagnosed<std::vector<std::shared_ptr<const Token>>>
     {
         DiagnosticBag diagnosticBag{};
+
         std::vector<std::shared_ptr<const Token>> tokens{};
 
         while (!IsEndOfFile())
@@ -830,23 +867,23 @@ namespace Ace
                 continue;
             }
 
-            if (const auto expDgnTokens = ScanTokenSequence())
-            {
-                diagnosticBag.Add(expDgnTokens.Unwrap().GetDiagnosticBag());
+            const auto expTokens = ScanTokenSequence();
+            diagnosticBag.Add(expTokens);
 
-                const auto& scannedTokens = expDgnTokens.Unwrap().Unwrap();
+            if (expTokens)
+            {
                 tokens.insert(
                     end(tokens),
-                    begin(scannedTokens),
-                    end  (scannedTokens)
+                    begin(expTokens.Unwrap().Value),
+                    end  (expTokens.Unwrap().Value)
                 );
+
                 EatCharactersUntil(
                     tokens.back()->SourceLocation.CharacterEndIterator
                 );
             }
             else
             {
-                diagnosticBag.Add(expDgnTokens.GetDiagnosticBag());
                 EatCharacter();
             }
         }
@@ -931,6 +968,8 @@ namespace Ace
 
     auto Lexer::EatMultiLineComment() -> Diagnosed<void>
     {
+        DiagnosticBag diagnosticBag{};
+
         const auto itBegin = m_CharacterIterator;
 
         ACE_ASSERT(GetCharacter() == '#');
@@ -953,11 +992,9 @@ namespace Ace
                     m_CharacterIterator,
                 };
 
-                DiagnosticBag diagnosticBag{};
-                diagnosticBag.Add<UnterminatedMultiLineCommentError>(
+                return diagnosticBag.Add<UnterminatedMultiLineCommentError>(
                     sourceLocation
                 );
-                return Diagnosed<void>{ diagnosticBag };
             }
 
             EatCharacter();
@@ -978,7 +1015,7 @@ namespace Ace
         m_CharacterIterator = begin(GetLine());
     }
 
-    auto Lexer::ScanTokenSequence() const -> Expected<Diagnosed<std::vector<std::shared_ptr<const Token>>>>
+    auto Lexer::ScanTokenSequence() const -> Expected<Measured<std::vector<std::shared_ptr<const Token>>>>
     {
         return Ace::Scan({
             m_FileBuffer,
@@ -1029,4 +1066,3 @@ namespace Ace
         return GetCharacter() == '#';
     }
 }
-

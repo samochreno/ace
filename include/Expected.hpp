@@ -36,58 +36,73 @@ namespace Ace
     class Expected;
 
     class ExpectedVoidType {};
-    inline constexpr const ExpectedVoidType ExpectedVoid{};
+    inline constexpr const ExpectedVoidType Void{};
 
     template<>
-    class Expected<void>
+    class Expected<void> : public IDiagnosed
     {
     public:
         Expected()
         {
         }
-        Expected(const Expected& t_other)
-            : m_DiagnosticBag{ t_other.m_DiagnosticBag }
+        Expected(
+            const Expected& t_other
+        ) : m_IsFatal{ t_other.m_IsFatal },
+            m_DiagnosticBag{ t_other.m_DiagnosticBag }
         {
         }
         Expected(Expected&& t_other) noexcept
-            : m_DiagnosticBag{ std::move(t_other.m_DiagnosticBag) }
+          : m_IsFatal{ t_other.m_IsFatal },
+            m_DiagnosticBag{ std::move(t_other.m_DiagnosticBag) }
         {
+            t_other.m_IsFatal = false;
         }
         Expected(const ExpectedVoidType& t_value)
         {
         }
-        template<typename TDiagnostic, typename = std::enable_if_t<std::is_base_of_v<IDiagnostic, TDiagnostic>>>
-        Expected(const std::shared_ptr<const TDiagnostic>& t_diagnostic)
+        Expected(
+            const ExpectedVoidType& t_value,
+            const DiagnosticBag& t_diagnosticBag
+        ) : m_DiagnosticBag{ t_diagnosticBag }
+        {
+        }
+        Expected(const std::shared_ptr<const NoneError>& t_diagnostic)
+            : m_IsFatal{ true }
         {
             m_DiagnosticBag.Add(t_diagnostic);
         }
-        Expected(const DiagnosticBag& t_diagnosticBag)
+        Expected(const DiagnosticBag& t_bag)
+            : m_IsFatal{ true }
         {
-            m_DiagnosticBag.Add(t_diagnosticBag);
+            m_DiagnosticBag.Add(t_bag);
         }
         ~Expected() = default;
 
         auto operator=(const Expected& t_other) -> Expected&
         {
+            m_IsFatal = t_other.m_IsFatal;
             m_DiagnosticBag = t_other.m_DiagnosticBag;
 
             return *this;
         }
         auto operator=(Expected&& t_other) noexcept -> Expected&
         {
+            m_IsFatal = t_other.m_IsFatal;
             m_DiagnosticBag = std::move(t_other.m_DiagnosticBag);
+
+            t_other.m_IsFatal = false;
 
             return *this;
         }
 
         operator bool() const
         {
-            return m_DiagnosticBag.IsEmpty();
+            return !m_IsFatal;
         }
 
         auto Unwrap() -> void
         {
-            if (m_DiagnosticBag.IsEmpty())
+            if (!m_IsFatal)
                 return;
 
             ACE_UNREACHABLE();
@@ -99,11 +114,12 @@ namespace Ace
         }
 
     private:
+        bool m_IsFatal{};
         DiagnosticBag m_DiagnosticBag{};
     };
 
     template<typename TValue>
-    class Expected
+    class Expected : public IDiagnosed
     {
     public:
         Expected()
@@ -115,29 +131,42 @@ namespace Ace
             m_DiagnosticBag{ t_other.m_DiagnosticBag }
         {
         }
-        Expected(
-            Expected&& t_other
-        ) noexcept
+        Expected(Expected&& t_other) noexcept
           : m_OptValue{ std::move(t_other.m_OptValue) },
             m_DiagnosticBag{ std::move(t_other.m_DiagnosticBag) }
         {
         }
-        Expected(const TValue& t_value)
-            : m_OptValue{ t_value }
+        Expected(
+            const TValue& t_value
+        ) : m_OptValue{ t_value }
+        {
+        }
+        Expected(
+            const TValue& t_value,
+            const DiagnosticBag& t_bag
+        ) : m_OptValue{ t_value },
+            m_DiagnosticBag{ t_bag }
         {
         }
         Expected(TValue&& t_value) noexcept
             : m_OptValue{ std::move(t_value) }
         {
         }
-        template<typename TDiagnostic, typename = std::enable_if_t<std::is_base_of_v<IDiagnostic, TDiagnostic>>>
-        Expected(const std::shared_ptr<const TDiagnostic>& t_diagnostic)
+        Expected(
+            TValue&& t_value,
+            const DiagnosticBag& t_bag
+        ) noexcept
+          : m_OptValue{ std::move(t_value) },
+            m_DiagnosticBag{ t_bag }
+        {
+        }
+        Expected(const std::shared_ptr<const NoneError>& t_diagnostic)
         {
             m_DiagnosticBag.Add(t_diagnostic);
         }
-        Expected(const DiagnosticBag& t_diagnosticBag)
+        Expected(const DiagnosticBag& t_bag)
         {
-            m_DiagnosticBag.Add(t_diagnosticBag);
+            m_DiagnosticBag.Add(t_bag);
         }
         ~Expected() = default;
 
@@ -170,7 +199,7 @@ namespace Ace
             return m_OptValue.value();
         }
 
-        auto GetDiagnosticBag() const -> const DiagnosticBag&
+        auto GetDiagnosticBag() const -> const DiagnosticBag& final
         {
             return m_DiagnosticBag;
         }
@@ -279,7 +308,7 @@ namespace Ace
             return t_func(t_element);
         }) == end(t_inVec));
 
-        return ExpectedVoid;
+        return Void;
     }
 
 #undef TOut

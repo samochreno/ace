@@ -359,7 +359,7 @@ namespace Ace
                 );
             }
 
-            return ExpectedVoid;
+            return Void;
         }));
 
         return finalFilePaths;
@@ -367,7 +367,7 @@ namespace Ace
 
     static auto New(
         const FileBuffer* const t_fileBuffer
-    ) -> Expected<Diagnosed<Package>>
+    ) -> Expected<Package>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -429,7 +429,7 @@ namespace Ace
             pathMacroMap
         ));
 
-        return Diagnosed
+        return
         {
             Package
             {
@@ -443,17 +443,22 @@ namespace Ace
 
     auto Package::New(
         const FileBuffer* const t_fileBuffer
-    ) -> Expected<Diagnosed<Package>>
+    ) -> Expected<Package>
     {
         DiagnosticBag diagnosticBag{};
 
         try
         {
-            ACE_EXP_DGN(package, diagnosticBag, Ace::New(t_fileBuffer));
-
-            return Diagnosed
+            auto expPackage = Ace::New(t_fileBuffer);
+            diagnosticBag.Add(expPackage);
+            if (!expPackage)
             {
-                std::move(package),
+                return diagnosticBag;
+            }
+
+            return
+            {
+                std::move(expPackage.Unwrap()),
                 diagnosticBag,
             };
         }

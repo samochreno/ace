@@ -14,15 +14,17 @@ namespace Ace
         const std::filesystem::path& t_path
     ) -> Expected<FileBuffer>
     {
+        DiagnosticBag diagnosticBag{};
+
         if (!std::filesystem::exists(t_path))
         {
-            return std::make_shared<const FileNotFoundError>(t_path);
+            return diagnosticBag.Add<FileNotFoundError>(t_path);
         }
 
         std::ifstream fileStream{ t_path };
         if (!fileStream.is_open())
         {
-            return std::make_shared<const FileOpenError>(t_path);
+            return diagnosticBag.Add<FileOpenError>(t_path);
         }
 
         std::string buffer{};
@@ -62,13 +64,17 @@ namespace Ace
             [&](const std::string_view& t_line) { return begin(t_line); }
         );
 
-        return FileBuffer
+        return
         {
-            t_compilation,
-            t_path,
-            std::move(buffer),
-            std::move(lines),
-            std::move(lineBeginIterators),
+            FileBuffer
+            {
+                t_compilation,
+                t_path,
+                std::move(buffer),
+                std::move(lines),
+                std::move(lineBeginIterators),
+            },
+            diagnosticBag,
         };
     }
 

@@ -39,7 +39,7 @@ namespace Ace::Symbol::Type
             {
                 ACE_TRY(sizeKind, t_variable->GetType()->GetSizeKind());
                 ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
-                return ExpectedVoid;
+                return Void;
             });
             
             m_IsResolvingSize = false;
