@@ -1,12 +1,12 @@
 #pragma once
 
-#include "BoundNode/Statement/Block.hpp"
+#include "BoundNode/Stmt/Block.hpp"
 #include "Symbol/Label.hpp"
 #include "Diagnostics.hpp"
 
 namespace Ace
 {
-    enum class ControlFlowStatementKind
+    enum class ControlFlowStmtKind
     {
         Label,
         NormalJump,
@@ -15,9 +15,9 @@ namespace Ace
         Exit,
     };
 
-    struct ControlFlowStatement
+    struct ControlFlowStmt
     {
-        ControlFlowStatementKind Kind{};
+        ControlFlowStmtKind Kind{};
         Symbol::Label* LabelSymbol{};
     };
 
@@ -25,22 +25,22 @@ namespace Ace
     {
     public:
         ControlFlowAnalysis(
-            const std::shared_ptr<const BoundNode::Statement::Block>& t_blockStatementNode
+            const std::shared_ptr<const BoundNode::Stmt::Block>& t_blockStmtNode
         );
         ~ControlFlowAnalysis() = default;
 
         auto IsEndReachableWithoutReturn() const -> bool;
 
     private:
-        auto FindLabelStatement(
+        auto FindLabelStmt(
             const Symbol::Label* const t_labelSymbol
-        ) const -> std::vector<ControlFlowStatement>::const_iterator;
+        ) const -> std::vector<ControlFlowStmt>::const_iterator;
 
         auto IsEndReachableWithoutReturn(
-            const std::vector<ControlFlowStatement>::const_iterator& t_begin,
-            const std::vector<std::vector<ControlFlowStatement>::const_iterator>& t_ends
+            const std::vector<ControlFlowStmt>::const_iterator& t_begin,
+            const std::vector<std::vector<ControlFlowStmt>::const_iterator>& t_ends
         ) const -> bool;
 
-        std::vector<ControlFlowStatement> m_Statements{};
+        std::vector<ControlFlowStmt> m_Stmts{};
     };
 }

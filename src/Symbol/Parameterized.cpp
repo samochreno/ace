@@ -1,19 +1,19 @@
-#include "Symbol/Parameterized.hpp"
+#include "Symbol/Paramized.hpp"
 
 namespace Ace::Symbol
 {
-    auto IParameterized::CollectParameterTypes() const -> std::vector<Symbol::Type::IBase*>
+    auto IParamized::CollectParamTypes() const -> std::vector<Symbol::Type::IBase*>
     {
-        const auto parameters = CollectParameters();
+        const auto params = CollectParams();
 
         std::vector<Symbol::Type::IBase*> types{};
         std::transform(
-            begin(parameters),
-            end  (parameters),
+            begin(params),
+            end  (params),
             back_inserter(types),
-            [](Symbol::Variable::Parameter::IBase* const t_parameter)
+            [](Symbol::Var::Param::IBase* const t_param)
             {
-                return t_parameter->GetType();
+                return t_param->GetType();
             }
         );
         

@@ -8,16 +8,16 @@
 #define ACE_MACRO_CONCAT_IMPL(t_x, t_y) t_x##t_y
 #define ACE_MACRO_CONCAT(t_x, t_y) ACE_MACRO_CONCAT_IMPL(t_x, t_y)
 
-#define ACE_TRY(t_resultVariableName, t_expExpression) \
-auto ACE_MACRO_CONCAT(_exp_, t_resultVariableName) = (t_expExpression); \
-if (!ACE_MACRO_CONCAT(_exp_, t_resultVariableName)) \
+#define ACE_TRY(t_resultVarName, t_expExpr) \
+auto ACE_MACRO_CONCAT(_exp_, t_resultVarName) = (t_expExpr); \
+if (!ACE_MACRO_CONCAT(_exp_, t_resultVarName)) \
 { \
-    return ACE_MACRO_CONCAT(_exp_, t_resultVariableName).GetDiagnosticBag(); \
+    return ACE_MACRO_CONCAT(_exp_, t_resultVarName).GetDiagnosticBag(); \
 } \
-auto t_resultVariableName = std::move(ACE_MACRO_CONCAT(_exp_, t_resultVariableName).Unwrap())
+auto t_resultVarName = std::move(ACE_MACRO_CONCAT(_exp_, t_resultVarName).Unwrap())
 
-#define ACE_TRY_ASSERT(t_boolExpression) \
-if (!(t_boolExpression)) \
+#define ACE_TRY_ASSERT(t_boolExpr) \
+if (!(t_boolExpr)) \
 { \
     return std::make_shared<const NoneError>(); \
 }
@@ -25,12 +25,12 @@ if (!(t_boolExpression)) \
 #define ACE_TRY_UNREACHABLE() \
 return std::make_shared<const NoneError>();
 
-#define ACE_TRY_VOID(t_expExpression) \
+#define ACE_TRY_VOID(t_expExpr) \
 { \
-    const auto expExpression = (t_expExpression); \
-    if (!expExpression) \
+    const auto expExpr = (t_expExpr); \
+    if (!expExpr) \
     { \
-        return expExpression.GetDiagnosticBag(); \
+        return expExpr.GetDiagnosticBag(); \
     } \
 }
 

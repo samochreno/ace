@@ -7,7 +7,7 @@
 #include "BoundNode/Type/Base.hpp"
 #include "BoundNode/Impl.hpp"
 #include "BoundNode/Function.hpp"
-#include "BoundNode/Variable/Normal/Static.hpp"
+#include "BoundNode/Var/Normal/Static.hpp"
 #include "Scope.hpp"
 #include "Symbol/Module.hpp"
 #include "Diagnostics.hpp"
@@ -28,7 +28,7 @@ namespace Ace::BoundNode
             const std::vector<std::shared_ptr<const BoundNode::Type::IBase>>& t_types,
             const std::vector<std::shared_ptr<const BoundNode::Impl>>& t_impls,
             const std::vector<std::shared_ptr<const BoundNode::Function>>& t_functions,
-            const std::vector<std::shared_ptr<const BoundNode::Variable::Normal::Static>>& t_variables
+            const std::vector<std::shared_ptr<const BoundNode::Var::Normal::Static>>& t_variables
         );
         virtual ~Module() = default;
 
@@ -47,6 +47,6 @@ namespace Ace::BoundNode
         std::vector<std::shared_ptr<const BoundNode::Type::IBase>> m_Types{};
         std::vector<std::shared_ptr<const BoundNode::Impl>> m_Impls{};
         std::vector<std::shared_ptr<const BoundNode::Function>> m_Functions{};
-        std::vector<std::shared_ptr<const BoundNode::Variable::Normal::Static>> m_Variables{};
+        std::vector<std::shared_ptr<const BoundNode::Var::Normal::Static>> m_Vars{};
     };
 }

@@ -5,8 +5,8 @@
 #include <string>
 
 #include "Symbol/Base.hpp"
-#include "Symbol/Type/TemplateParameter/Impl.hpp"
-#include "Symbol/Type/TemplateParameter/Normal.hpp"
+#include "Symbol/Type/TemplateParam/Impl.hpp"
+#include "Symbol/Type/TemplateParam/Normal.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "SpecialIdentifier.hpp"
@@ -32,8 +32,8 @@ namespace Ace::Symbol::Template
     public:
         virtual ~IBase() = default;
 
-        virtual auto CollectImplParameters() const -> std::vector<Symbol::Type::TemplateParameter::Impl*>   = 0;
-        virtual auto CollectParameters()     const -> std::vector<Symbol::Type::TemplateParameter::Normal*> = 0;
+        virtual auto CollectImplParams() const -> std::vector<Symbol::Type::TemplateParam::Impl*>   = 0;
+        virtual auto CollectParams()     const -> std::vector<Symbol::Type::TemplateParam::Normal*> = 0;
 
         virtual auto GetASTName() const -> const std::string& = 0;
 
@@ -43,8 +43,8 @@ namespace Ace::Symbol::Template
         virtual auto GetPlaceholderSymbol() const -> Symbol::IBase* = 0;
 
         virtual auto InstantiateSymbols(
-            const std::vector<Symbol::Type::IBase*>& t_implArguments,
-            const std::vector<Symbol::Type::IBase*>& t_arguments
+            const std::vector<Symbol::Type::IBase*>& t_implArgs,
+            const std::vector<Symbol::Type::IBase*>& t_args
         ) -> Expected<TemplateSymbolsInstantationResult> = 0;
         virtual auto InstantiateSemanticsForSymbols(
             const std::shared_ptr<const Node::IBase>& t_ast

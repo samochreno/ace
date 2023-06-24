@@ -15,12 +15,12 @@ namespace Ace
         SymbolNameSection(const std::string& t_name);
         SymbolNameSection(
             const std::string& t_name,
-            const std::vector<SymbolName>& t_templateArguments
+            const std::vector<SymbolName>& t_templateArgs
         );
         ~SymbolNameSection();
 
         std::string Name;
-        std::vector<SymbolName> TemplateArguments;
+        std::vector<SymbolName> TemplateArgs;
     };
 
     enum class SymbolNameResolutionScope

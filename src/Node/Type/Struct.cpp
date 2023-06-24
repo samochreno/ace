@@ -15,12 +15,12 @@ namespace Ace::Node::Type
         const std::string& t_name,
         const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
         const AccessModifier& t_accessModifier,
-        const std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>& t_variables
+        const std::vector<std::shared_ptr<const Node::Var::Normal::Instance>>& t_variables
     ) : m_SelfScope{ t_selfScope },
         m_Name{ t_name },
         m_Attributes{ t_attributes },
         m_AccessModifier{ t_accessModifier },
-        m_Variables{ t_variables }
+        m_Vars{ t_variables }
     {
     }
 
@@ -39,7 +39,7 @@ namespace Ace::Node::Type
         std::vector<const Node::IBase*> children{};
 
         AddChildren(children, m_Attributes);
-        AddChildren(children, m_Variables);
+        AddChildren(children, m_Vars);
 
         return children;
     }
@@ -61,12 +61,12 @@ namespace Ace::Node::Type
             }
         );
 
-        std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>> clonedVariables{};
+        std::vector<std::shared_ptr<const Node::Var::Normal::Instance>> clonedVars{};
         std::transform(
-            begin(m_Variables),
-            end  (m_Variables),
-            back_inserter(clonedVariables),
-            [&](const std::shared_ptr<const Node::Variable::Normal::Instance>& t_variable)
+            begin(m_Vars),
+            end  (m_Vars),
+            back_inserter(clonedVars),
+            [&](const std::shared_ptr<const Node::Var::Normal::Instance>& t_variable)
             {
                 return t_variable->CloneInScope(selfScope);
             }
@@ -77,7 +77,7 @@ namespace Ace::Node::Type
             m_Name,
             clonedAttributes,
             m_AccessModifier,
-            clonedVariables
+            clonedVars
         );
     }
 
@@ -96,22 +96,22 @@ namespace Ace::Node::Type
             return t_attribute->CreateBound();
         }));
 
-        ACE_TRY(boundVariables, TransformExpectedVector(m_Variables,
-        [](const std::shared_ptr<const Node::Variable::Normal::Instance>& t_variable)
+        ACE_TRY(boundVars, TransformExpectedVector(m_Vars,
+        [](const std::shared_ptr<const Node::Var::Normal::Instance>& t_variable)
         {
             return t_variable->CreateBound();
         }));
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<Symbol::Type::Struct>(
             m_Name,
-            m_SelfScope->CollectImplTemplateArguments(),
-            m_SelfScope->CollectTemplateArguments()
+            m_SelfScope->CollectImplTemplateArgs(),
+            m_SelfScope->CollectTemplateArgs()
         ).Unwrap();
 
         return std::make_shared<const BoundNode::Type::Struct>(
             selfSymbol,
             boundAttributes,
-            boundVariables
+            boundVars
         );
     }
 

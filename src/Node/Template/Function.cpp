@@ -8,17 +8,17 @@
 #include "Diagnostics.hpp"
 #include "Symbol/Base.hpp"
 #include "Symbol/Template/Function.hpp"
-#include "Node/TemplateParameter/Impl.hpp"
-#include "Node/TemplateParameter/Normal.hpp"
+#include "Node/TemplateParam/Impl.hpp"
+#include "Node/TemplateParam/Normal.hpp"
 
 namespace Ace::Node::Template
 {
     Function::Function(
-        const std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>& t_implParameters,
-        const std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>& t_parameters,
+        const std::vector<std::shared_ptr<const Node::TemplateParam::Impl>>& t_implParams,
+        const std::vector<std::shared_ptr<const Node::TemplateParam::Normal>>& t_params,
         const std::shared_ptr<const Node::Function>& t_ast
-    ) : m_ImplParameters{ t_implParameters },
-        m_Parameters{ t_parameters },
+    ) : m_ImplParams{ t_implParams },
+        m_Params{ t_params },
         m_AST{ t_ast }
     {
     }
@@ -32,8 +32,8 @@ namespace Ace::Node::Template
     {
         std::vector<const Node::IBase*> children{};
         
-        AddChildren(children, m_ImplParameters);
-        AddChildren(children, m_Parameters);
+        AddChildren(children, m_ImplParams);
+        AddChildren(children, m_Params);
 
         return children;
     }
@@ -42,31 +42,31 @@ namespace Ace::Node::Template
         const std::shared_ptr<Scope>& t_scope
     ) const -> std::shared_ptr<const Node::Template::Function>
     {
-        std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>> clonedImplParameters{};
+        std::vector<std::shared_ptr<const Node::TemplateParam::Impl>> clonedImplParams{};
         std::transform(
-            begin(m_ImplParameters),
-            end  (m_ImplParameters),
-            back_inserter(clonedImplParameters),
-            [&](const std::shared_ptr<const Node::TemplateParameter::Impl>& t_implParameter)
+            begin(m_ImplParams),
+            end  (m_ImplParams),
+            back_inserter(clonedImplParams),
+            [&](const std::shared_ptr<const Node::TemplateParam::Impl>& t_implParam)
             {
-                return t_implParameter->CloneInScope(m_AST->GetSelfScope());
+                return t_implParam->CloneInScope(m_AST->GetSelfScope());
             }
         );
 
-        std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>> clonedParameters{};
+        std::vector<std::shared_ptr<const Node::TemplateParam::Normal>> clonedParams{};
         std::transform(
-            begin(m_Parameters),
-            end  (m_Parameters),
-            back_inserter(clonedParameters),
-            [&](const std::shared_ptr<const Node::TemplateParameter::Normal>& t_parameter)
+            begin(m_Params),
+            end  (m_Params),
+            back_inserter(clonedParams),
+            [&](const std::shared_ptr<const Node::TemplateParam::Normal>& t_param)
             {
-                return t_parameter->CloneInScope(m_AST->GetSelfScope());
+                return t_param->CloneInScope(m_AST->GetSelfScope());
             }
         );
 
         return std::make_shared<const Node::Template::Function>(
-            clonedImplParameters,
-            clonedParameters,
+            clonedImplParams,
+            clonedParams,
             m_AST->CloneInScope(t_scope)
         );
     }
@@ -94,32 +94,32 @@ namespace Ace::Node::Template
         };
     }
 
-    auto Function::CollectImplParameterNames() const -> std::vector<std::string>
+    auto Function::CollectImplParamNames() const -> std::vector<std::string>
     {
         std::vector<std::string> names{};
         std::transform(
-            begin(m_ImplParameters),
-            end  (m_ImplParameters),
+            begin(m_ImplParams),
+            end  (m_ImplParams),
             back_inserter(names),
-            [](const std::shared_ptr<const Node::TemplateParameter::Impl>& t_implParameter)
+            [](const std::shared_ptr<const Node::TemplateParam::Impl>& t_implParam)
             {
-                return t_implParameter->GetName();
+                return t_implParam->GetName();
             }
         );
 
         return names;
     }
 
-    auto Function::CollectParameterNames() const -> std::vector<std::string>
+    auto Function::CollectParamNames() const -> std::vector<std::string>
     {
         std::vector<std::string> names{};
         std::transform(
-            begin(m_Parameters),
-            end  (m_Parameters),
+            begin(m_Params),
+            end  (m_Params),
             back_inserter(names),
-            [](const std::shared_ptr<const Node::TemplateParameter::Normal>& t_parameter)
+            [](const std::shared_ptr<const Node::TemplateParam::Normal>& t_param)
             {
-                return t_parameter->GetName();
+                return t_param->GetName();
             }
         );
 

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Node/Base.hpp"
-#include "Node/Expression/StructConstruction.hpp"
+#include "Node/Expr/StructConstruction.hpp"
 #include "BoundNode/Attribute.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
@@ -18,7 +18,7 @@ namespace Ace::Node
     {
     public:
         Attribute(
-            const std::shared_ptr<const Node::Expression::StructConstruction>& t_structConstructionExpression
+            const std::shared_ptr<const Node::Expr::StructConstruction>& t_structConstructionExpr
         );
         virtual ~Attribute() = default;
 
@@ -30,6 +30,6 @@ namespace Ace::Node
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Attribute>> final;
 
     private:
-        std::shared_ptr<const Node::Expression::StructConstruction> m_StructConstructionExpression{};
+        std::shared_ptr<const Node::Expr::StructConstruction> m_StructConstructionExpr{};
     };
 }

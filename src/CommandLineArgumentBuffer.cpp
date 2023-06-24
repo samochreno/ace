@@ -1,4 +1,4 @@
-#include "CommandLineArgumentBuffer.hpp"
+#include "CommandLineArgBuffer.hpp"
 
 #include <vector>
 #include <string>
@@ -7,7 +7,7 @@
 
 namespace Ace
 {
-    CommandLineArgumentBuffer::CommandLineArgumentBuffer(
+    CommandLineArgBuffer::CommandLineArgBuffer(
         const Compilation* const t_compilation,
         const std::vector<std::string_view>& t_args
     ) : m_Compilation{ t_compilation }
@@ -39,24 +39,24 @@ namespace Ace
         );
     }
 
-    auto CommandLineArgumentBuffer::GetCompilation() const -> const Compilation*
+    auto CommandLineArgBuffer::GetCompilation() const -> const Compilation*
     {
         return m_Compilation;
     }
 
-    auto CommandLineArgumentBuffer::GetBuffer() const -> const std::string&
+    auto CommandLineArgBuffer::GetBuffer() const -> const std::string&
     {
         return m_Buffer;
     }
 
-    auto CommandLineArgumentBuffer::FormatLocation(
+    auto CommandLineArgBuffer::FormatLocation(
         const SourceLocation& t_location
     ) const -> std::string
     {
         return {};
     }
 
-    auto CommandLineArgumentBuffer::GetArgs() const -> const std::vector<std::string_view>&
+    auto CommandLineArgBuffer::GetArgs() const -> const std::vector<std::string_view>&
     {
         return m_Args;
     }

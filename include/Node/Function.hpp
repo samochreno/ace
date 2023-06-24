@@ -7,9 +7,9 @@
 
 #include "Node/Typed.hpp"
 #include "Node/Attribute.hpp"
-#include "Node/Variable/Parameter/Self.hpp"
-#include "Node/Variable/Parameter/Normal.hpp"
-#include "Node/Statement/Block.hpp"
+#include "Node/Var/Param/Self.hpp"
+#include "Node/Var/Param/Normal.hpp"
+#include "Node/Stmt/Block.hpp"
 #include "BoundNode/Function.hpp"
 #include "Name.hpp"
 #include "AccessModifier.hpp"
@@ -32,9 +32,9 @@ namespace Ace::Node
             const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
             const AccessModifier& t_accessModifier,
-            const std::optional<std::shared_ptr<const Node::Variable::Parameter::Self>>& t_optSelf,
-            const std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>>& t_parameters,
-            const std::optional<std::shared_ptr<const Node::Statement::Block>>& t_optBody
+            const std::optional<std::shared_ptr<const Node::Var::Param::Self>>& t_optSelf,
+            const std::vector<std::shared_ptr<const Node::Var::Param::Normal>>& t_params,
+            const std::optional<std::shared_ptr<const Node::Stmt::Block>>& t_optBody
         );
         virtual ~Function() = default;
 
@@ -54,7 +54,7 @@ namespace Ace::Node
         
         auto GetSelfScope() const -> std::shared_ptr<Scope>;
         auto GetAccessModifier() const -> AccessModifier;
-        auto GetParameters() const -> const std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>>&;
+        auto GetParams() const -> const std::vector<std::shared_ptr<const Node::Var::Param::Normal>>&;
 
     protected:
         std::shared_ptr<Scope> m_SelfScope{};
@@ -63,8 +63,8 @@ namespace Ace::Node
         std::vector<std::shared_ptr<const Node::Attribute>> m_Attributes{};
         SymbolCategory m_SymbolCategory{};
         AccessModifier m_AccessModifier{};
-        std::optional<std::shared_ptr<const Node::Variable::Parameter::Self>> m_OptSelf{};
-        std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>> m_Parameters{};
-        std::optional<std::shared_ptr<const Node::Statement::Block>> m_OptBody{};
+        std::optional<std::shared_ptr<const Node::Var::Param::Self>> m_OptSelf{};
+        std::vector<std::shared_ptr<const Node::Var::Param::Normal>> m_Params{};
+        std::optional<std::shared_ptr<const Node::Stmt::Block>> m_OptBody{};
     };
 }

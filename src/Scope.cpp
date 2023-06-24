@@ -16,8 +16,8 @@
 #include "SpecialIdentifier.hpp"
 #include "Symbol/All.hpp"
 #include "SymbolCreatable.hpp"
-#include "BoundNode/Expression/Base.hpp"
-#include "BoundNode/Expression/ConversionPlaceholder.hpp"
+#include "BoundNode/Expr/Base.hpp"
+#include "BoundNode/Expr/ConversionPlaceholder.hpp"
 #include "Compilation.hpp"
 #include "TypeConversions.hpp"
 
@@ -72,21 +72,21 @@ namespace Ace
             contextB->GetImplementedTypeTemplate();
     }
 
-    static auto ResolveTemplateArguments(
+    static auto ResolveTemplateArgs(
         const std::shared_ptr<const Scope>& t_scope,
-        const std::vector<SymbolName>& t_templateArgumentNames
+        const std::vector<SymbolName>& t_templateArgNames
     ) -> Expected<std::vector<Symbol::Type::IBase*>>
     {
-        ACE_TRY(templateArguments, TransformExpectedVector(t_templateArgumentNames,
+        ACE_TRY(templateArgs, TransformExpectedVector(t_templateArgNames,
         [&](const SymbolName& t_typeName)
         {
             return t_scope->ResolveStaticSymbol<Symbol::Type::IBase>(t_typeName);
         }));
 
-        return templateArguments;
+        return templateArgs;
     }
 
-    static auto IsInstanceVariable(
+    static auto IsInstanceVar(
         const SymbolResolutionData& t_data,
         const std::vector<std::unique_ptr<Symbol::IBase>>& t_symbols
     ) -> bool
@@ -103,10 +103,10 @@ namespace Ace
 
         auto* const symbol = t_symbols.front().get();
 
-        auto* const instanceVariableSymbol =
-            dynamic_cast<Symbol::Variable::Normal::Instance*>(symbol);
+        auto* const instanceVarSymbol =
+            dynamic_cast<Symbol::Var::Normal::Instance*>(symbol);
 
-        if (!instanceVariableSymbol)
+        if (!instanceVarSymbol)
         {
             return false;
         }
@@ -176,18 +176,18 @@ namespace Ace
         const std::shared_ptr<const Scope>& t_resolvingFromScope,
         const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
         const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
-        const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes,
+        const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgTypes,
         const std::function<bool(const Symbol::IBase* const)>& t_isCorrectSymbolType,
         const std::vector<std::shared_ptr<const Scope>>& t_scopes,
-        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
+        const std::vector<Symbol::Type::IBase*>& t_implTemplateArgs,
         const bool t_isSymbolTemplate
     ) : ResolvingFromScope{ t_resolvingFromScope },
         NameSectionsBegin{ t_nameSectionsBegin },
         NameSectionsEnd{ t_nameSectionsEnd },
-        OptArgumentTypes{ t_optArgumentTypes },
+        OptArgTypes{ t_optArgTypes },
         IsCorrectSymbolType{ t_isCorrectSymbolType },
         Scopes{ t_scopes },
-        ImplTemplateArguments{ t_implTemplateArguments },
+        ImplTemplateArgs{ t_implTemplateArgs },
         IsSymbolTemplate{ t_isSymbolTemplate },
         IsLastNameSection{ std::distance(t_nameSectionsBegin, t_nameSectionsEnd) == 1 },
         Name{ t_nameSectionsBegin->Name },
@@ -415,20 +415,20 @@ namespace Ace
         m_Associations.insert(t_association);
     }
 
-    auto Scope::CreateArgumentTypes(
-        Symbol::Type::IBase* const t_argumentType
+    auto Scope::CreateArgTypes(
+        Symbol::Type::IBase* const t_argType
     ) -> std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>
     {
-        std::vector<Symbol::Type::IBase*> argumentTypes{ t_argumentType };
-        std::reference_wrapper<const std::vector<Symbol::Type::IBase*>> argumentTypesRef{ argumentTypes };
-        return argumentTypesRef;
+        std::vector<Symbol::Type::IBase*> argTypes{ t_argType };
+        std::reference_wrapper<const std::vector<Symbol::Type::IBase*>> argTypesRef{ argTypes };
+        return argTypesRef;
     }
-    auto Scope::CreateArgumentTypes(
-        const std::vector<Symbol::Type::IBase*>& t_argumentTypes
+    auto Scope::CreateArgTypes(
+        const std::vector<Symbol::Type::IBase*>& t_argTypes
     ) -> std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>
     {
-        std::reference_wrapper<const std::vector<Symbol::Type::IBase*>> argumentTypesRef{ t_argumentTypes };
-        return argumentTypesRef;
+        std::reference_wrapper<const std::vector<Symbol::Type::IBase*>> argTypesRef{ t_argTypes };
+        return argTypesRef;
     }
 
     auto Scope::CollectAllDefinedSymbols() const -> std::vector<Symbol::IBase*>
@@ -472,66 +472,66 @@ namespace Ace
         return symbols;
     }
 
-    struct TemplateArgumentDeductionResult
+    struct TemplateArgDeductionResult
     {
-        Symbol::Type::TemplateParameter::Normal* TemplateParameter{};
-        Symbol::Type::IBase* TemplateArgument{};
+        Symbol::Type::TemplateParam::Normal* TemplateParam{};
+        Symbol::Type::IBase* TemplateArg{};
     };
 
-    static auto DeduceTemplateArguments(
-        Symbol::Type::IBase* t_argumentType,
-        Symbol::Type::IBase* t_parameterType
-    ) -> Expected<std::vector<TemplateArgumentDeductionResult>>
+    static auto DeduceTemplateArgs(
+        Symbol::Type::IBase* t_argType,
+        Symbol::Type::IBase* t_paramType
+    ) -> Expected<std::vector<TemplateArgDeductionResult>>
     {
-        t_argumentType = t_argumentType->GetWithoutReference();
-        t_parameterType = t_parameterType->GetWithoutReference();
+        t_argType = t_argType->GetWithoutReference();
+        t_paramType = t_paramType->GetWithoutReference();
 
-        auto* const templateParameter = dynamic_cast<Symbol::Type::TemplateParameter::Normal*>(
-            t_parameterType->GetUnaliased()
+        auto* const templateParam = dynamic_cast<Symbol::Type::TemplateParam::Normal*>(
+            t_paramType->GetUnaliased()
         );
-        if (templateParameter)
+        if (templateParam)
         {
             return std::vector
             {
-                TemplateArgumentDeductionResult
+                TemplateArgDeductionResult
                 {
-                    templateParameter,
-                    t_argumentType,
+                    templateParam,
+                    t_argType,
                 }
             };
         }
 
-        const auto optArgumentTypeTemplate = t_argumentType->GetTemplate();
-        const auto optParameterTypeTemplate = t_parameterType->GetTemplate();
+        const auto optArgTypeTemplate = t_argType->GetTemplate();
+        const auto optParamTypeTemplate = t_paramType->GetTemplate();
 
         ACE_TRY_ASSERT(
-            optArgumentTypeTemplate.has_value() ==
-            optParameterTypeTemplate.has_value()
+            optArgTypeTemplate.has_value() ==
+            optParamTypeTemplate.has_value()
         );
 
-        const bool isTemplate = optArgumentTypeTemplate.has_value();
+        const bool isTemplate = optArgTypeTemplate.has_value();
         if (!isTemplate)
             return {};
 
-        const auto argumentTypeTemplateParameters =
-            t_argumentType->CollectTemplateArguments();
+        const auto argTypeTemplateParams =
+            t_argType->CollectTemplateArgs();
 
-        const auto parameterTypeTemplateParameters =
-            t_parameterType->CollectTemplateArguments();
+        const auto paramTypeTemplateParams =
+            t_paramType->CollectTemplateArgs();
 
-        std::vector<TemplateArgumentDeductionResult> finalDeductionResults{};
-        const auto parametersSize = argumentTypeTemplateParameters.size();
-        for (size_t i = 0; i < parametersSize; i++)
+        std::vector<TemplateArgDeductionResult> finalDeductionResults{};
+        const auto paramsSize = argTypeTemplateParams.size();
+        for (size_t i = 0; i < paramsSize; i++)
         {
-            auto* const argumentTypeTemplateParameter =
-                argumentTypeTemplateParameters.at(i);
+            auto* const argTypeTemplateParam =
+                argTypeTemplateParams.at(i);
 
-            auto* const parameterTypeTemplateParameter =
-                parameterTypeTemplateParameters.at(i);
+            auto* const paramTypeTemplateParam =
+                paramTypeTemplateParams.at(i);
 
-            ACE_TRY(deductionResults, DeduceTemplateArguments(
-                argumentTypeTemplateParameter,
-                parameterTypeTemplateParameter
+            ACE_TRY(deductionResults, DeduceTemplateArgs(
+                argTypeTemplateParam,
+                paramTypeTemplateParam
             ));
             
             finalDeductionResults.insert(
@@ -545,108 +545,108 @@ namespace Ace
     }
 
     static auto DeduceAlgorithm(
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments,
-        const std::vector<Symbol::Type::TemplateParameter::Normal*>& t_templateParameters,
-        const std::vector<Symbol::Type::IBase*>& t_argumentTypes,
-        const std::vector<Symbol::Type::IBase*>& t_parameterTypes
+        const std::vector<Symbol::Type::IBase*>& t_templateArgs,
+        const std::vector<Symbol::Type::TemplateParam::Normal*>& t_templateParams,
+        const std::vector<Symbol::Type::IBase*>& t_argTypes,
+        const std::vector<Symbol::Type::IBase*>& t_paramTypes
     ) -> Expected<std::vector<Symbol::Type::IBase*>>
     {
-        std::map<Symbol::Type::TemplateParameter::Normal*, Symbol::Type::IBase*> templateArgumentMap{};
+        std::map<Symbol::Type::TemplateParam::Normal*, Symbol::Type::IBase*> templateArgMap{};
 
-        for (size_t i = 0; i < t_templateArguments.size(); i++)
+        for (size_t i = 0; i < t_templateArgs.size(); i++)
         {
-            templateArgumentMap[t_templateParameters.at(i)] =
-                t_templateArguments.at(i);
+            templateArgMap[t_templateParams.at(i)] =
+                t_templateArgs.at(i);
         }
 
-        for (size_t i = 0; i < t_argumentTypes.size(); i++)
+        for (size_t i = 0; i < t_argTypes.size(); i++)
         {
-            ACE_TRY(deductionResults, DeduceTemplateArguments(
-                t_argumentTypes.at(i),
-                t_parameterTypes.at(i)
+            ACE_TRY(deductionResults, DeduceTemplateArgs(
+                t_argTypes.at(i),
+                t_paramTypes.at(i)
             ));
 
             ACE_TRY_VOID(TransformExpectedVector(deductionResults,
-            [&](const TemplateArgumentDeductionResult& t_deductionResult) -> Expected<void>
+            [&](const TemplateArgDeductionResult& t_deductionResult) -> Expected<void>
             {
-                const auto templateArgumentIt = templateArgumentMap.find(
-                    t_deductionResult.TemplateParameter
+                const auto templateArgIt = templateArgMap.find(
+                    t_deductionResult.TemplateParam
                 );
 
-                if (templateArgumentIt != end(templateArgumentMap))
+                if (templateArgIt != end(templateArgMap))
                 {
                     const bool isAlreadyDefinedSame =
-                        templateArgumentIt->second == t_deductionResult.TemplateArgument;
+                        templateArgIt->second == t_deductionResult.TemplateArg;
                     ACE_TRY_ASSERT(isAlreadyDefinedSame);
                     return Void;
                 }
 
-                templateArgumentMap[t_deductionResult.TemplateParameter] =
-                    t_deductionResult.TemplateArgument;
+                templateArgMap[t_deductionResult.TemplateParam] =
+                    t_deductionResult.TemplateArg;
 
                 return Void;
             }));
         }
 
-        ACE_TRY(templateArguments, TransformExpectedVector(t_templateParameters,
-        [&](Symbol::Type::TemplateParameter::Normal* const t_templateParameter) -> Expected<Symbol::Type::IBase*>
+        ACE_TRY(templateArgs, TransformExpectedVector(t_templateParams,
+        [&](Symbol::Type::TemplateParam::Normal* const t_templateParam) -> Expected<Symbol::Type::IBase*>
         {
-            const auto foundIt = templateArgumentMap.find(t_templateParameter);
-            ACE_TRY_ASSERT(foundIt != end(templateArgumentMap));
+            const auto foundIt = templateArgMap.find(t_templateParam);
+            ACE_TRY_ASSERT(foundIt != end(templateArgMap));
             return foundIt->second;
         }));
 
-        return templateArguments;
+        return templateArgs;
     }
 
-    static auto DeduceTemplateArguments(
+    static auto DeduceTemplateArgs(
         Symbol::Template::IBase* const t_template,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments,
-        const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes
+        const std::vector<Symbol::Type::IBase*>& t_templateArgs,
+        const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgTypes
     ) -> Expected<std::vector<Symbol::Type::IBase*>>
     {
-        const auto templateParameters = t_template->CollectParameters();
-        if (templateParameters.size() == t_templateArguments.size())
+        const auto templateParams = t_template->CollectParams();
+        if (templateParams.size() == t_templateArgs.size())
         {
-            return t_templateArguments;
+            return t_templateArgs;
         }
 
-        ACE_TRY_ASSERT(t_optArgumentTypes.has_value());
+        ACE_TRY_ASSERT(t_optArgTypes.has_value());
 
-        auto* const parametrized = dynamic_cast<Symbol::IParameterized*>(
+        auto* const parametrized = dynamic_cast<Symbol::IParamized*>(
             t_template->GetPlaceholderSymbol()
         );
         ACE_TRY_ASSERT(parametrized);
 
-        const auto parameterTypes = parametrized->CollectParameterTypes();
-        ACE_TRY_ASSERT(!parameterTypes.empty());
+        const auto paramTypes = parametrized->CollectParamTypes();
+        ACE_TRY_ASSERT(!paramTypes.empty());
 
         return DeduceAlgorithm(
-            t_templateArguments,
-            templateParameters,
-            t_optArgumentTypes.value(),
-            parameterTypes
+            t_templateArgs,
+            templateParams,
+            t_optArgTypes.value(),
+            paramTypes
         );
     }
     
     auto Scope::ResolveOrInstantiateTemplateInstance(
         const Compilation* const t_compilation,
         Symbol::Template::IBase* const t_template,
-        const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgumentTypes,
-        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments
+        const std::optional<std::reference_wrapper<const std::vector<Symbol::Type::IBase*>>>& t_optArgTypes,
+        const std::vector<Symbol::Type::IBase*>& t_implTemplateArgs,
+        const std::vector<Symbol::Type::IBase*>& t_templateArgs
     ) -> Expected<Symbol::IBase*>
     {
-        ACE_TRY(deducedTemplateArguments, DeduceTemplateArguments(
+        ACE_TRY(deducedTemplateArgs, DeduceTemplateArgs(
             t_template,
-            t_templateArguments,
-            t_optArgumentTypes
+            t_templateArgs,
+            t_optArgTypes
         ));
 
         const auto expResolvedInstance = ResolveTemplateInstance(
             t_template,
-            t_implTemplateArguments,
-            deducedTemplateArguments
+            t_implTemplateArgs,
+            deducedTemplateArgs
         );
         if (expResolvedInstance)
         {
@@ -655,103 +655,103 @@ namespace Ace
 
         ACE_TRY(symbol, t_compilation->TemplateInstantiator->InstantiateSymbols(
             t_template,
-            t_implTemplateArguments,
-            deducedTemplateArguments
+            t_implTemplateArgs,
+            deducedTemplateArgs
         ));
 
         return symbol;
     }
 
-    auto Scope::CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
+    auto Scope::CollectTemplateArgs() const -> std::vector<Symbol::Type::IBase*>
     {
         auto aliases =
-            CollectSymbols<Symbol::Type::Alias::TemplateArgument::Normal>();
+            CollectSymbols<Symbol::Type::Alias::TemplateArg::Normal>();
 
         std::sort(begin(aliases), end(aliases),
         [](
-            const Symbol::Type::Alias::TemplateArgument::Normal* const t_lhs,
-            const Symbol::Type::Alias::TemplateArgument::Normal* const t_rhs
+            const Symbol::Type::Alias::TemplateArg::Normal* const t_lhs,
+            const Symbol::Type::Alias::TemplateArg::Normal* const t_rhs
             )
         {
             return t_lhs->GetIndex() < t_rhs->GetIndex();
         });
 
-        std::vector<Symbol::Type::IBase*> arguments{};
+        std::vector<Symbol::Type::IBase*> args{};
         std::transform(
             begin(aliases),
             end  (aliases),
-            back_inserter(arguments),
-            [](const Symbol::Type::Alias::TemplateArgument::Normal* const t_alias)
+            back_inserter(args),
+            [](const Symbol::Type::Alias::TemplateArg::Normal* const t_alias)
             {
                 return t_alias->GetAliasedType();
             }
         );
 
-        return arguments;
+        return args;
     }
 
-    auto Scope::CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
+    auto Scope::CollectImplTemplateArgs() const -> std::vector<Symbol::Type::IBase*>
     {
         auto aliases =
-            CollectSymbols<Symbol::Type::Alias::TemplateArgument::Impl>();
+            CollectSymbols<Symbol::Type::Alias::TemplateArg::Impl>();
 
         std::sort(begin(aliases), end(aliases),
         [](
-            const Symbol::Type::Alias::TemplateArgument::Impl* const t_lhs,
-            const Symbol::Type::Alias::TemplateArgument::Impl* const t_rhs
+            const Symbol::Type::Alias::TemplateArg::Impl* const t_lhs,
+            const Symbol::Type::Alias::TemplateArg::Impl* const t_rhs
             )
         {
             return t_lhs->GetIndex() < t_rhs->GetIndex();
         });
 
-        std::vector<Symbol::Type::IBase*> arguments{};
+        std::vector<Symbol::Type::IBase*> args{};
         std::transform(
             begin(aliases),
             end  (aliases),
-            back_inserter(arguments),
-            [](const Symbol::Type::Alias::TemplateArgument::Impl* const t_alias)
+            back_inserter(args),
+            [](const Symbol::Type::Alias::TemplateArg::Impl* const t_alias)
             {
                 return t_alias->GetAliasedType();
             }
         );
 
-        return arguments;
+        return args;
     }
 
-    auto Scope::DefineTemplateArgumentAliases(
-        const std::vector<std::string>& t_implTemplateParameterNames, 
-        const std::vector<Symbol::Type::IBase*> t_implTemplateArguments, 
-        const std::vector<std::string>& t_templateParameterNames, 
-        const std::vector<Symbol::Type::IBase*> t_templateArguments
+    auto Scope::DefineTemplateArgAliases(
+        const std::vector<std::string>& t_implTemplateParamNames, 
+        const std::vector<Symbol::Type::IBase*> t_implTemplateArgs, 
+        const std::vector<std::string>& t_templateParamNames, 
+        const std::vector<Symbol::Type::IBase*> t_templateArgs
     ) -> Expected<void>
     {
         ACE_TRY_ASSERT(
-            t_implTemplateParameterNames.size() ==
-            t_implTemplateArguments.size()
+            t_implTemplateParamNames.size() ==
+            t_implTemplateArgs.size()
         );
         ACE_TRY_ASSERT(
-            t_templateParameterNames.size() ==
-            t_templateArguments.size()
+            t_templateParamNames.size() ==
+            t_templateArgs.size()
         );
 
-        for (size_t i = 0; i < t_implTemplateParameterNames.size(); i++)
+        for (size_t i = 0; i < t_implTemplateParamNames.size(); i++)
         {
-            auto aliasSymbol = std::make_unique<Symbol::Type::Alias::TemplateArgument::Impl>(
+            auto aliasSymbol = std::make_unique<Symbol::Type::Alias::TemplateArg::Impl>(
                 shared_from_this(),
-                t_implTemplateParameterNames.at(i),
-                t_implTemplateArguments.at(i),
+                t_implTemplateParamNames.at(i),
+                t_implTemplateArgs.at(i),
                 i
             );
 
             ACE_TRY(symbol, DefineSymbol(std::move(aliasSymbol)));
         }
 
-        for (size_t i = 0; i < t_templateParameterNames.size(); i++)
+        for (size_t i = 0; i < t_templateParamNames.size(); i++)
         {
-            auto aliasSymbol = std::make_unique<Symbol::Type::Alias::TemplateArgument::Normal>(
+            auto aliasSymbol = std::make_unique<Symbol::Type::Alias::TemplateArg::Normal>(
                 shared_from_this(),
-                t_templateParameterNames.at(i),
-                t_templateArguments.at(i),
+                t_templateParamNames.at(i),
+                t_templateArgs.at(i),
                 i
             );
 
@@ -820,7 +820,7 @@ namespace Ace
     {
         // TODO: Dont allow private types to leak in public interface.
 
-#if 0 // This doesnt work for associated functions parameters, needs rework.
+#if 0 // This doesnt work for associated functions params, needs rework.
         if (auto typedSymbol = dynamic_cast<const Symbol::IBase*>(t_symbol))
         {
             if (
@@ -831,7 +831,7 @@ namespace Ace
         }
 #endif
 
-        const auto [templateArguments, implTemplateArguments] = [&]() -> std::tuple<std::vector<Symbol::Type::IBase*>, std::vector<Symbol::Type::IBase*>>
+        const auto [templateArgs, implTemplateArgs] = [&]() -> std::tuple<std::vector<Symbol::Type::IBase*>, std::vector<Symbol::Type::IBase*>>
         {
             const auto* const templatableSymbol = dynamic_cast<const Symbol::ITemplatable*>(
                 t_symbol
@@ -843,23 +843,23 @@ namespace Ace
 
             return 
             { 
-                templatableSymbol->CollectTemplateArguments(), 
-                templatableSymbol->CollectImplTemplateArguments() 
+                templatableSymbol->CollectTemplateArgs(), 
+                templatableSymbol->CollectImplTemplateArgs() 
             };
         }();
 
         return !GetDefinedSymbol(
             t_symbol->GetName(), 
 
-            templateArguments, 
-            implTemplateArguments
+            templateArgs, 
+            implTemplateArgs
         ).has_value();
     }
 
     auto Scope::GetDefinedSymbol(
         const std::string& t_name,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments,
-        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments
+        const std::vector<Symbol::Type::IBase*>& t_templateArgs,
+        const std::vector<Symbol::Type::IBase*>& t_implTemplateArgs
     ) -> std::optional<Symbol::IBase*>
     {
         const auto matchingNameSymbolsIt = m_SymbolMap.find(t_name);
@@ -871,8 +871,8 @@ namespace Ace
         const auto& matchingNameSymbols = matchingNameSymbolsIt->second;
 
         const bool isTemplateInstance = 
-            !t_templateArguments.empty() || 
-            !t_implTemplateArguments.empty();
+            !t_templateArgs.empty() || 
+            !t_implTemplateArgs.empty();
 
         if (isTemplateInstance)
         {
@@ -886,28 +886,28 @@ namespace Ace
                     );
                     ACE_ASSERT(templatableSymbol);
 
-                    const auto templateArguments =
-                        templatableSymbol->CollectTemplateArguments();
+                    const auto templateArgs =
+                        templatableSymbol->CollectTemplateArgs();
 
-                    const bool doTemplateArgumentsMatch = AreTypesSame(
-                        templateArguments,
-                        t_templateArguments
+                    const bool doTemplateArgsMatch = AreTypesSame(
+                        templateArgs,
+                        t_templateArgs
                     );
 
-                    if (!doTemplateArgumentsMatch)
+                    if (!doTemplateArgsMatch)
                     {
                         return false;
                     }
 
-                    const auto implTemplateArguments =
-                        templatableSymbol->CollectImplTemplateArguments();
+                    const auto implTemplateArgs =
+                        templatableSymbol->CollectImplTemplateArgs();
 
-                    const bool doImplTemplateArgumentsMatch = AreTypesSame(
-                        implTemplateArguments,
-                        t_implTemplateArguments
+                    const bool doImplTemplateArgsMatch = AreTypesSame(
+                        implTemplateArgs,
+                        t_implTemplateArgs
                     );
 
-                    if (!doImplTemplateArgumentsMatch)
+                    if (!doImplTemplateArgsMatch)
                     {
                         return false;
                     }
@@ -959,24 +959,24 @@ namespace Ace
         const SymbolResolutionData& t_data
     ) -> Expected<Symbol::IBase*>
     {
-        ACE_TRY(templateArguments, ResolveTemplateArguments(
+        ACE_TRY(templateArgs, ResolveTemplateArgs(
             t_data.ResolvingFromScope,
-            t_data.NameSectionsBegin->TemplateArguments
+            t_data.NameSectionsBegin->TemplateArgs
         ));
 
-        return ResolveSymbolInScopes(t_data, templateArguments);
+        return ResolveSymbolInScopes(t_data, templateArgs);
     }
 
     auto Scope::ResolveSymbolInScopes(
         const SymbolResolutionData& t_data,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments
+        const std::vector<Symbol::Type::IBase*>& t_templateArgs
     ) -> Expected<Symbol::IBase*>
     {
         ACE_ASSERT(
-            t_data.NameSectionsBegin->TemplateArguments.empty() || 
+            t_data.NameSectionsBegin->TemplateArgs.empty() || 
             (
-                t_templateArguments.size() == 
-                t_data.NameSectionsBegin->TemplateArguments.size()
+                t_templateArgs.size() == 
+                t_data.NameSectionsBegin->TemplateArgs.size()
             )
         );
 
@@ -985,7 +985,7 @@ namespace Ace
         [&](const std::shared_ptr<const Scope>& t_scope)
         {
             const auto matchingSymbols = 
-                t_scope->CollectMatchingSymbols(t_data, t_templateArguments);
+                t_scope->CollectMatchingSymbols(t_data, t_templateArgs);
 
             symbols.insert(
                 end(symbols),
@@ -1029,10 +1029,10 @@ namespace Ace
                 t_data.ResolvingFromScope,
                 t_data.NameSectionsBegin + 1,
                 t_data.NameSectionsEnd,
-                t_data.OptArgumentTypes,
+                t_data.OptArgTypes,
                 t_data.IsCorrectSymbolType,
                 scopes,
-                t_templateArguments,
+                t_templateArgs,
                 t_data.IsSymbolTemplate
             });
         }
@@ -1040,7 +1040,7 @@ namespace Ace
 
     auto Scope::CollectMatchingSymbols(
         const SymbolResolutionData& t_data,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments
+        const std::vector<Symbol::Type::IBase*>& t_templateArgs
     ) const -> std::vector<Symbol::IBase*>
     {
         const auto remainingNameSectionsSize = std::distance(
@@ -1066,33 +1066,33 @@ namespace Ace
 
         const auto& matchingNameSymbols = matchingNameSymbolsIt->second;
 
-        const bool isInstanceVariable = IsInstanceVariable(
+        const bool isInstanceVar = IsInstanceVar(
             t_data,
             matchingNameSymbols
         );
 
         const bool isTemplateSymbol = 
-            isTemplate && isLastNameSection && !isInstanceVariable;
+            isTemplate && isLastNameSection && !isInstanceVar;
 
         if (isTemplateSymbol)
         {
             return CollectMatchingTemplateSymbols(
                 t_data,
-                t_templateArguments,
+                t_templateArgs,
                 matchingNameSymbols
             );
         }
 
         return CollectMatchingNormalSymbols(
             t_data,
-            t_templateArguments,
+            t_templateArgs,
             matchingNameSymbols
         );
     }
 
     auto Scope::CollectMatchingNormalSymbols(
         const SymbolResolutionData& t_data,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments,
+        const std::vector<Symbol::Type::IBase*>& t_templateArgs,
         const std::vector<std::unique_ptr<Symbol::IBase>>& t_matchingNameSymbols
     ) const -> std::vector<Symbol::IBase*>
     {
@@ -1112,7 +1112,7 @@ namespace Ace
 
     auto Scope::CollectMatchingTemplateSymbols(
         const SymbolResolutionData& t_data,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments,
+        const std::vector<Symbol::Type::IBase*>& t_templateArgs,
         const std::vector<std::unique_ptr<Symbol::IBase>>& t_matchingNameSymbols
     ) const -> std::vector<Symbol::IBase*>
     {
@@ -1133,9 +1133,9 @@ namespace Ace
             const auto expTemplateInstance = ResolveOrInstantiateTemplateInstance(
                 GetCompilation(),
                 tmplate,
-                t_data.OptArgumentTypes,
-                t_data.ImplTemplateArguments,
-                t_templateArguments
+                t_data.OptArgTypes,
+                t_data.ImplTemplateArgs,
+                t_templateArgs
             );
             if (!expTemplateInstance)
                 return {};
@@ -1148,8 +1148,8 @@ namespace Ace
 
     auto Scope::ResolveTemplateInstance(
         const Symbol::Template::IBase* const t_template,
-        const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments,
-        const std::vector<Symbol::Type::IBase*>& t_templateArguments
+        const std::vector<Symbol::Type::IBase*>& t_implTemplateArgs,
+        const std::vector<Symbol::Type::IBase*>& t_templateArgs
     ) -> Expected<Symbol::IBase*>
     {
         const auto scope = t_template->GetScope();
@@ -1168,30 +1168,30 @@ namespace Ace
             );
             ACE_ASSERT(templatableSymbol);
 
-            const auto collectedTemplateArguments =
-                templatableSymbol->CollectTemplateArguments();
+            const auto collectedTemplateArgs =
+                templatableSymbol->CollectTemplateArgs();
 
-            const bool doTemplateArgumentsMatch = AreTypesSame(
-                t_templateArguments,
-                collectedTemplateArguments
+            const bool doTemplateArgsMatch = AreTypesSame(
+                t_templateArgs,
+                collectedTemplateArgs
             );
 
-            if (!doTemplateArgumentsMatch)
+            if (!doTemplateArgsMatch)
             {
                 return false;
             }
 
-            const auto collectedImplTemplateArguments =
-                templatableSymbol->CollectImplTemplateArguments();
+            const auto collectedImplTemplateArgs =
+                templatableSymbol->CollectImplTemplateArgs();
 
-            if (!collectedImplTemplateArguments.empty())
+            if (!collectedImplTemplateArgs.empty())
             {
-                const bool doImplTemplateArgumentsMatch = AreTypesSame(
-                    t_implTemplateArguments,
-                    collectedImplTemplateArguments
+                const bool doImplTemplateArgsMatch = AreTypesSame(
+                    t_implTemplateArgs,
+                    collectedImplTemplateArgs
                 );
 
-                if (!doImplTemplateArgumentsMatch)
+                if (!doImplTemplateArgsMatch)
                 {
                     return false;
                 }
@@ -1271,11 +1271,11 @@ namespace Ace
         return scopes;
     }
 
-    auto Scope::CollectInstanceSymbolResolutionImplTemplateArguments(
+    auto Scope::CollectInstanceSymbolResolutionImplTemplateArgs(
         Symbol::Type::IBase* const t_selfType
     ) -> std::vector<Symbol::Type::IBase*>
     {
-        return t_selfType->CollectTemplateArguments();
+        return t_selfType->CollectTemplateArgs();
     }
 
     auto Scope::GetStaticSymbolResolutionStartScope(
@@ -1317,7 +1317,7 @@ namespace Ace
         ACE_TRY_UNREACHABLE();
     }
 
-    auto Scope::GetStaticSymbolResolutionImplTemplateArguments(
+    auto Scope::GetStaticSymbolResolutionImplTemplateArgs(
         const std::shared_ptr<const Scope>& t_startScope
     ) -> std::vector<Symbol::Type::IBase*>
     {
@@ -1329,12 +1329,12 @@ namespace Ace
         {
             const auto scope = optScope.value();
 
-            const auto implTemplateArguments =
-                scope->CollectImplTemplateArguments();
+            const auto implTemplateArgs =
+                scope->CollectImplTemplateArgs();
 
-            if (!implTemplateArguments.empty())
+            if (!implTemplateArgs.empty())
             {
-                return implTemplateArguments;
+                return implTemplateArgs;
             }
         }
 

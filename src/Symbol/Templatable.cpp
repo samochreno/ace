@@ -1,18 +1,18 @@
 #include "Symbol/Templatable.hpp"
 
-#include "Symbol/Type/TemplateParameter/Impl.hpp"
-#include "Symbol/Type/TemplateParameter/Normal.hpp"
+#include "Symbol/Type/TemplateParam/Impl.hpp"
+#include "Symbol/Type/TemplateParam/Normal.hpp"
 
 namespace Ace::Symbol
 {
-    static auto IsParameter(Symbol::Type::IBase* t_argument) -> bool
+    static auto IsParam(Symbol::Type::IBase* t_arg) -> bool
     {
-        t_argument = t_argument->GetUnaliased();
+        t_arg = t_arg->GetUnaliased();
 
-        if (dynamic_cast<Symbol::Type::TemplateParameter::Impl*>(t_argument))
+        if (dynamic_cast<Symbol::Type::TemplateParam::Impl*>(t_arg))
             return true;
 
-        if (dynamic_cast<Symbol::Type::TemplateParameter::Normal*>(t_argument))
+        if (dynamic_cast<Symbol::Type::TemplateParam::Normal*>(t_arg))
             return true;
 
         return false;
@@ -20,23 +20,23 @@ namespace Ace::Symbol
 
     auto ITemplatable::IsTemplatePlaceholder() const -> bool
     {
-        const auto implTemplateArguments = CollectImplTemplateArguments();
-        const auto     templateArguments = CollectTemplateArguments();
+        const auto implTemplateArgs = CollectImplTemplateArgs();
+        const auto     templateArgs = CollectTemplateArgs();
 
         const auto implFoundIt = std::find_if(
-            begin(implTemplateArguments),
-            end  (implTemplateArguments),
-            IsParameter
+            begin(implTemplateArgs),
+            end  (implTemplateArgs),
+            IsParam
         );
-        if (implFoundIt != end(implTemplateArguments))
+        if (implFoundIt != end(implTemplateArgs))
             return true;
 
         const auto foundIt = std::find_if(
-            begin(templateArguments),
-            end  (templateArguments),
-            IsParameter
+            begin(templateArgs),
+            end  (templateArgs),
+            IsParam
         );
-        if (foundIt != end(templateArguments))
+        if (foundIt != end(templateArgs))
             return true;
 
         return false;

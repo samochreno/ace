@@ -1,46 +1,46 @@
 #include "ControlFlowAnalysis.hpp"
 
 #include "Asserts.hpp"
-#include "BoundNode/Statement/Base.hpp"
-#include "BoundNode/Statement/Block.hpp"
-#include "BoundNode/Statement/Label.hpp"
-#include "BoundNode/Statement/Jump/Normal.hpp"
-#include "BoundNode/Statement/Jump/Conditional.hpp"
-#include "BoundNode/Statement/Return.hpp"
-#include "BoundNode/Statement/Exit.hpp"
+#include "BoundNode/Stmt/Base.hpp"
+#include "BoundNode/Stmt/Block.hpp"
+#include "BoundNode/Stmt/Label.hpp"
+#include "BoundNode/Stmt/Jump/Normal.hpp"
+#include "BoundNode/Stmt/Jump/Conditional.hpp"
+#include "BoundNode/Stmt/Return.hpp"
+#include "BoundNode/Stmt/Exit.hpp"
 
 namespace Ace
 {
-    static auto CreateStatement(
-        const std::shared_ptr<const BoundNode::Statement::IBase>& t_statementNode
-    ) -> Expected<ControlFlowStatement>
+    static auto CreateStmt(
+        const std::shared_ptr<const BoundNode::Stmt::IBase>& t_stmtNode
+    ) -> Expected<ControlFlowStmt>
     {
-        auto* const statementNode = t_statementNode.get();
+        auto* const stmtNode = t_stmtNode.get();
 
-        ControlFlowStatement self{};
+        ControlFlowStmt self{};
 
-        if (const auto* const labelStatement = dynamic_cast<const BoundNode::Statement::Label*>(statementNode))
+        if (const auto* const labelStmt = dynamic_cast<const BoundNode::Stmt::Label*>(stmtNode))
         {
-            self.Kind = ControlFlowStatementKind::Label;
-            self.LabelSymbol = labelStatement->GetLabelSymbol();
+            self.Kind = ControlFlowStmtKind::Label;
+            self.LabelSymbol = labelStmt->GetLabelSymbol();
         }
-        else if (const auto* const normalJumpStatement = dynamic_cast<const BoundNode::Statement::Jump::Normal*>(statementNode))
+        else if (const auto* const normalJumpStmt = dynamic_cast<const BoundNode::Stmt::Jump::Normal*>(stmtNode))
         {
-            self.Kind = ControlFlowStatementKind::NormalJump;
-            self.LabelSymbol = normalJumpStatement->GetLabelSymbol();
+            self.Kind = ControlFlowStmtKind::NormalJump;
+            self.LabelSymbol = normalJumpStmt->GetLabelSymbol();
         }
-        else if (const auto* const conditionalJumpStatement = dynamic_cast<const BoundNode::Statement::Jump::Conditional*>(statementNode))
+        else if (const auto* const conditionalJumpStmt = dynamic_cast<const BoundNode::Stmt::Jump::Conditional*>(stmtNode))
         {
-            self.Kind = ControlFlowStatementKind::ConditionalJump;
-            self.LabelSymbol = conditionalJumpStatement->GetLabelSymbol();
+            self.Kind = ControlFlowStmtKind::ConditionalJump;
+            self.LabelSymbol = conditionalJumpStmt->GetLabelSymbol();
         }
-        else if (const auto* const returnStatement = dynamic_cast<const BoundNode::Statement::Return*>(statementNode))
+        else if (const auto* const returnStmt = dynamic_cast<const BoundNode::Stmt::Return*>(stmtNode))
         {
-            self.Kind = ControlFlowStatementKind::Return;
+            self.Kind = ControlFlowStmtKind::Return;
         }
-        else if (const auto* const exitStatement = dynamic_cast<const BoundNode::Statement::Exit*>(statementNode))
+        else if (const auto* const exitStmt = dynamic_cast<const BoundNode::Stmt::Exit*>(stmtNode))
         {
-            self.Kind = ControlFlowStatementKind::Exit;
+            self.Kind = ControlFlowStmtKind::Exit;
         }
         else
         {
@@ -51,55 +51,55 @@ namespace Ace
     }
 
     ControlFlowAnalysis::ControlFlowAnalysis(
-        const std::shared_ptr<const BoundNode::Statement::Block>& t_blockStatementNode
+        const std::shared_ptr<const BoundNode::Stmt::Block>& t_blockStmtNode
     )
     {
-        const auto statementNodes = t_blockStatementNode->CreateExpanded();
+        const auto stmtNodes = t_blockStmtNode->CreateExpanded();
 
-        std::for_each(begin(statementNodes), end(statementNodes),
-        [&](const std::shared_ptr<const BoundNode::Statement::IBase>& t_statementNode)
+        std::for_each(begin(stmtNodes), end(stmtNodes),
+        [&](const std::shared_ptr<const BoundNode::Stmt::IBase>& t_stmtNode)
         {
-            const auto expStatement = CreateStatement(t_statementNode);
-            if (!expStatement)
+            const auto expStmt = CreateStmt(t_stmtNode);
+            if (!expStmt)
                 return;
 
-            m_Statements.push_back(expStatement.Unwrap());
+            m_Stmts.push_back(expStmt.Unwrap());
         });
     }
 
     auto ControlFlowAnalysis::IsEndReachableWithoutReturn() const -> bool
     {
-        return IsEndReachableWithoutReturn(begin(m_Statements), {});
+        return IsEndReachableWithoutReturn(begin(m_Stmts), {});
     }
 
-    auto ControlFlowAnalysis::FindLabelStatement(
+    auto ControlFlowAnalysis::FindLabelStmt(
         const Symbol::Label* const t_labelSymbol
-    ) const -> std::vector<ControlFlowStatement>::const_iterator
+    ) const -> std::vector<ControlFlowStmt>::const_iterator
     {
         const auto foundIt = std::find_if(
-            begin(m_Statements),
-            end  (m_Statements),
-            [&](const ControlFlowStatement& t_statement)
+            begin(m_Stmts),
+            end  (m_Stmts),
+            [&](const ControlFlowStmt& t_stmt)
             {
                 return 
-                    (t_statement.Kind == ControlFlowStatementKind::Label) &&
-                    (t_statement.LabelSymbol == t_labelSymbol);
+                    (t_stmt.Kind == ControlFlowStmtKind::Label) &&
+                    (t_stmt.LabelSymbol == t_labelSymbol);
             }
         );
 
-        ACE_ASSERT(foundIt != end(m_Statements));
+        ACE_ASSERT(foundIt != end(m_Stmts));
         return foundIt;
     }
 
     static auto IsEnd(
-        const std::vector<std::vector<ControlFlowStatement>::const_iterator>& t_ends,
-        const std::vector<ControlFlowStatement>::const_iterator& t_statementIt
+        const std::vector<std::vector<ControlFlowStmt>::const_iterator>& t_ends,
+        const std::vector<ControlFlowStmt>::const_iterator& t_stmtIt
     ) -> bool
     {
         const auto foundEndIt = std::find_if(begin(t_ends), end(t_ends),
-        [&](const std::vector<ControlFlowStatement>::const_iterator& t_end)
+        [&](const std::vector<ControlFlowStmt>::const_iterator& t_end)
         {
-            return t_statementIt == t_end;
+            return t_stmtIt == t_end;
         });
         if (foundEndIt != end(t_ends))
             return true;
@@ -108,69 +108,69 @@ namespace Ace
     }
 
     auto ControlFlowAnalysis::IsEndReachableWithoutReturn(
-        const std::vector<ControlFlowStatement>::const_iterator& t_begin,
-        const std::vector<std::vector<ControlFlowStatement>::const_iterator>& t_ends
+        const std::vector<ControlFlowStmt>::const_iterator& t_begin,
+        const std::vector<std::vector<ControlFlowStmt>::const_iterator>& t_ends
     ) const -> bool
     {
         for (
-            auto statementIt = t_begin;
-            statementIt != end(m_Statements);
-            ++statementIt
+            auto stmtIt = t_begin;
+            stmtIt != end(m_Stmts);
+            ++stmtIt
             )
         {
-            if (IsEnd(t_ends, statementIt))
+            if (IsEnd(t_ends, stmtIt))
             {
                 return false;
             }
 
-            const auto& statement = *statementIt;
+            const auto& stmt = *stmtIt;
 
-            switch (statement.Kind)
+            switch (stmt.Kind)
             {
-                case ControlFlowStatementKind::Label:
+                case ControlFlowStmtKind::Label:
                 {
                     continue;
                 }
 
-                case ControlFlowStatementKind::NormalJump:
+                case ControlFlowStmtKind::NormalJump:
                 {
-                    const auto labelStatementIt = FindLabelStatement(
-                        statement.LabelSymbol
+                    const auto labelStmtIt = FindLabelStmt(
+                        stmt.LabelSymbol
                     );
 
                     auto ends = t_ends;
-                    ends.push_back(statementIt);
+                    ends.push_back(stmtIt);
 
                     return IsEndReachableWithoutReturn(
-                        labelStatementIt,
+                        labelStmtIt,
                         ends
                     );
                 }
 
-                case ControlFlowStatementKind::ConditionalJump:
+                case ControlFlowStmtKind::ConditionalJump:
                 {
-                    const auto labelStatementIt = FindLabelStatement(
-                        statement.LabelSymbol
+                    const auto labelStmtIt = FindLabelStmt(
+                        stmt.LabelSymbol
                     );
 
                     auto whenTrueEnds = t_ends;
-                    whenTrueEnds.push_back(statementIt);
+                    whenTrueEnds.push_back(stmtIt);
 
                     const bool whenTrue = IsEndReachableWithoutReturn(
-                        labelStatementIt,
+                        labelStmtIt,
                         whenTrueEnds
                     );
 
                     const bool whenFalse = IsEndReachableWithoutReturn(
-                        statementIt + 1,
+                        stmtIt + 1,
                         t_ends
                     );
 
                     return whenTrue || whenFalse;
                 }
 
-                case ControlFlowStatementKind::Return:
-                case ControlFlowStatementKind::Exit:
+                case ControlFlowStmtKind::Return:
+                case ControlFlowStmtKind::Exit:
                 {
                     return false;
                 }

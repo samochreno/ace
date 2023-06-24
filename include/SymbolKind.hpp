@@ -13,16 +13,16 @@ namespace Ace
         Struct,
         Label,
         Function,
-        StaticVariable,
-        InstanceVariable,
-        LocalVariable,
-        ParameterVariable,
+        StaticVar,
+        InstanceVar,
+        LocalVar,
+        ParamVar,
         FunctionTemplate,
         TypeTemplate,
         TypeAlias,
         TemplatedImpl,
-        ImplTemplateParameter,
-        TemplateParameter,
+        ImplTemplateParam,
+        TemplateParam,
     };
 
     constexpr auto operator&(

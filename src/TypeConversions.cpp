@@ -10,8 +10,8 @@
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Function.hpp"
 #include "TypeInfo.hpp"
-#include "BoundNode/Expression/Base.hpp"
-#include "BoundNode/Expression/ConversionPlaceholder.hpp"
+#include "BoundNode/Expr/Base.hpp"
+#include "BoundNode/Expr/ConversionPlaceholder.hpp"
 
 namespace Ace
 {
@@ -146,16 +146,16 @@ namespace Ace
 
         for (size_t i = 0; i < t_fromTypeInfos.size(); i++)
         {
-            const auto dummyExpression = std::make_shared<const BoundNode::Expression::ConversionPlaceholder>(
+            const auto dummyExpr = std::make_shared<const BoundNode::Expr::ConversionPlaceholder>(
                 t_scope,
                 t_fromTypeInfos.at(i)
             );
 
-            const auto expConvertedExpression = BoundNode::Expression::CreateImplicitlyConverted(
-                dummyExpression,
+            const auto expConvertedExpr = BoundNode::Expr::CreateImplicitlyConverted(
+                dummyExpr,
                 t_targetTypeInfos.at(i)
             );
-            if (expConvertedExpression)
+            if (expConvertedExpr)
             {
                 continue;
             }

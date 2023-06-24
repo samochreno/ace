@@ -6,7 +6,7 @@
 #include "BoundNode/Type/Base.hpp"
 #include "BoundNode/Impl.hpp"
 #include "BoundNode/Function.hpp"
-#include "BoundNode/Variable/Normal/Static.hpp"
+#include "BoundNode/Var/Normal/Static.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
@@ -18,13 +18,13 @@ namespace Ace::BoundNode
         const std::vector<std::shared_ptr<const BoundNode::Type::IBase>>& t_types,
         const std::vector<std::shared_ptr<const BoundNode::Impl>>& t_impls,
         const std::vector<std::shared_ptr<const BoundNode::Function>>& t_functions,
-        const std::vector<std::shared_ptr<const BoundNode::Variable::Normal::Static>>& t_variables
+        const std::vector<std::shared_ptr<const BoundNode::Var::Normal::Static>>& t_variables
     ) : m_Symbol{ t_symbol },
         m_Modules{ t_modules },
         m_Types{ t_types },
         m_Impls{ t_impls },
         m_Functions{ t_functions },
-        m_Variables{ t_variables }
+        m_Vars{ t_variables }
     {
     }
 
@@ -41,7 +41,7 @@ namespace Ace::BoundNode
         AddChildren(children, m_Types);
         AddChildren(children, m_Impls);
         AddChildren(children, m_Functions);
-        AddChildren(children, m_Variables);
+        AddChildren(children, m_Vars);
 
         return children;
     }
@@ -74,8 +74,8 @@ namespace Ace::BoundNode
             return t_function->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedVariables, TransformExpectedMaybeChangedVector(m_Variables,
-        [](const std::shared_ptr<const BoundNode::Variable::Normal::Static>& t_variable)
+        ACE_TRY(mchCheckedVars, TransformExpectedMaybeChangedVector(m_Vars,
+        [](const std::shared_ptr<const BoundNode::Var::Normal::Static>& t_variable)
         {
             return t_variable->GetOrCreateTypeChecked({});
         }));
@@ -85,7 +85,7 @@ namespace Ace::BoundNode
             !mchCheckedTypes.IsChanged &&
             !mchCheckedImpls.IsChanged &&
             !mchCheckedFunctions.IsChanged && 
-            !mchCheckedVariables.IsChanged
+            !mchCheckedVars.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -97,7 +97,7 @@ namespace Ace::BoundNode
             mchCheckedTypes.Value,
             mchCheckedImpls.Value,
             mchCheckedFunctions.Value,
-            mchCheckedVariables.Value
+            mchCheckedVars.Value
         );
         return CreateChanged(returnValue);
     }
@@ -130,8 +130,8 @@ namespace Ace::BoundNode
             return t_function->GetOrCreateLowered({});
         });
 
-        const auto mchLoweredVariables = TransformMaybeChangedVector(m_Variables,
-        [](const std::shared_ptr<const BoundNode::Variable::Normal::Static>& t_variable)
+        const auto mchLoweredVars = TransformMaybeChangedVector(m_Vars,
+        [](const std::shared_ptr<const BoundNode::Var::Normal::Static>& t_variable)
         {
             return t_variable->GetOrCreateLowered({});
         });
@@ -141,7 +141,7 @@ namespace Ace::BoundNode
             !mchLoweredTypes.IsChanged &&
             !mchLoweredImpls.IsChanged && 
             !mchLoweredFunctions.IsChanged && 
-            !mchLoweredVariables.IsChanged
+            !mchLoweredVars.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -153,7 +153,7 @@ namespace Ace::BoundNode
             mchLoweredTypes.Value,
             mchLoweredImpls.Value,
             mchLoweredFunctions.Value,
-            mchLoweredVariables.Value
+            mchLoweredVars.Value
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }

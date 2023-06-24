@@ -9,10 +9,10 @@
 #include "SpecialIdentifier.hpp"
 #include "Diagnostics.hpp"
 #include "Symbol/Type/Base.hpp"
-#include "Symbol/Type/TemplateParameter/Impl.hpp"
-#include "Symbol/Type/TemplateParameter/Normal.hpp"
-#include "Symbol/Type/Alias/TemplateArgument/Impl.hpp"
-#include "Symbol/Type/Alias/TemplateArgument/Normal.hpp"
+#include "Symbol/Type/TemplateParam/Impl.hpp"
+#include "Symbol/Type/TemplateParam/Normal.hpp"
+#include "Symbol/Type/Alias/TemplateArg/Impl.hpp"
+#include "Symbol/Type/Alias/TemplateArg/Normal.hpp"
 #include "Symbol/Function.hpp"
 #include "Core.hpp"
 #include "Name.hpp"
@@ -51,14 +51,14 @@ namespace Ace::Symbol::Template
         return m_TemplateNode->GetAST()->GetAccessModifier();
     }
 
-    auto Function::CollectImplParameters() const -> std::vector<Symbol::Type::TemplateParameter::Impl*>
+    auto Function::CollectImplParams() const -> std::vector<Symbol::Type::TemplateParam::Impl*>
     {
-        return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<Symbol::Type::TemplateParameter::Impl>();
+        return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<Symbol::Type::TemplateParam::Impl>();
     }
 
-    auto Function::CollectParameters() const -> std::vector<Symbol::Type::TemplateParameter::Normal*>
+    auto Function::CollectParams() const -> std::vector<Symbol::Type::TemplateParam::Normal*>
     {
-        return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<Symbol::Type::TemplateParameter::Normal>();
+        return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<Symbol::Type::TemplateParam::Normal>();
     }
 
     auto Function::GetASTName() const -> const std::string&
@@ -77,23 +77,23 @@ namespace Ace::Symbol::Template
     }
 
     auto Function::InstantiateSymbols(
-        const std::vector<Symbol::Type::IBase*>& t_implArguments,
-        const std::vector<Symbol::Type::IBase*>& t_arguments
+        const std::vector<Symbol::Type::IBase*>& t_implArgs,
+        const std::vector<Symbol::Type::IBase*>& t_args
     ) -> Expected<TemplateSymbolsInstantationResult>
     {
-        const auto implParameterNames = m_TemplateNode->CollectImplParameterNames();
-        const auto parameterNames = m_TemplateNode->CollectParameterNames();
+        const auto implParamNames = m_TemplateNode->CollectImplParamNames();
+        const auto paramNames = m_TemplateNode->CollectParamNames();
 
-        ACE_TRY_ASSERT(t_implArguments.size() == implParameterNames.size());
-        ACE_TRY_ASSERT(t_arguments.size() == parameterNames.size());
+        ACE_TRY_ASSERT(t_implArgs.size() == implParamNames.size());
+        ACE_TRY_ASSERT(t_args.size() == paramNames.size());
 
         const auto ast = m_TemplateNode->GetAST()->CloneInScope(m_TemplateNode->GetScope());
 
-        ACE_TRY_VOID(ast->GetSelfScope()->DefineTemplateArgumentAliases(
-            implParameterNames,
-            t_implArguments,
-            parameterNames,
-            t_arguments
+        ACE_TRY_VOID(ast->GetSelfScope()->DefineTemplateArgAliases(
+            implParamNames,
+            t_implArgs,
+            paramNames,
+            t_args
         ));
 
         const auto nodes = Core::GetAllNodes(ast);
@@ -105,8 +105,8 @@ namespace Ace::Symbol::Template
             GetCompilation(),
             this,
             std::nullopt,
-            t_implArguments,
-            t_arguments
+            t_implArgs,
+            t_args
         ).Unwrap();
 
         return TemplateSymbolsInstantationResult{ symbol, ast };

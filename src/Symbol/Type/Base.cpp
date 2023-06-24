@@ -5,7 +5,7 @@
 #include <map>
 
 #include "Symbol/Type/Alias/Base.hpp"
-#include "Symbol/Type/Alias/TemplateArgument/Normal.hpp"
+#include "Symbol/Type/Alias/TemplateArg/Normal.hpp"
 #include "Symbol/Function.hpp"
 #include "Symbol/Template/Type.hpp"
 #include "Scope.hpp"
@@ -40,7 +40,7 @@ namespace Ace::Symbol::Type
             return this;
 
         auto* const self = GetUnaliased();
-        return self->CollectTemplateArguments().front();
+        return self->CollectTemplateArgs().front();
     }
 
     auto IBase::GetWithoutReference() const -> const Symbol::Type::IBase*
@@ -49,7 +49,7 @@ namespace Ace::Symbol::Type
             return this;
 
         const auto* const self = GetUnaliased();
-        return self->CollectTemplateArguments().front();
+        return self->CollectTemplateArgs().front();
     }
 
     auto IBase::GetWithReference() -> Symbol::Type::IBase*
@@ -94,7 +94,7 @@ namespace Ace::Symbol::Type
             return this;
 
         auto* const self = GetUnaliased();
-        return self->CollectTemplateArguments().front();
+        return self->CollectTemplateArgs().front();
     }
 
     auto IBase::GetWithStrongPointer() -> Symbol::Type::IBase*

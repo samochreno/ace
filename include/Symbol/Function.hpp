@@ -9,9 +9,9 @@
 #include "Symbol/Typed.hpp"
 #include "Symbol/SelfScoped.hpp"
 #include "Symbol/Templatable.hpp"
-#include "Symbol/Parameterized.hpp"
-#include "Symbol/Variable/Parameter/Base.hpp"
-#include "Symbol/Variable/Parameter/Normal.hpp"
+#include "Symbol/Paramized.hpp"
+#include "Symbol/Var/Param/Base.hpp"
+#include "Symbol/Var/Param/Normal.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
@@ -30,7 +30,7 @@ namespace Ace::Symbol
         public virtual Symbol::ITyped,
         public virtual Symbol::ISelfScoped,
         public virtual Symbol::ITemplatable,
-        public virtual Symbol::IParameterized
+        public virtual Symbol::IParamized
     {
     public:
         Function(
@@ -51,18 +51,18 @@ namespace Ace::Symbol
 
         auto GetType() const -> Symbol::Type::IBase* final;
 
-        auto CollectParameters()    const -> std::vector<Symbol::Variable::Parameter::IBase*> final;
-        auto CollectAllParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>;
+        auto CollectParams()    const -> std::vector<Symbol::Var::Param::IBase*> final;
+        auto CollectAllParams() const -> std::vector<Symbol::Var::Param::IBase*>;
 
-        auto CollectArgumentTypeInfos() const -> std::vector<TypeInfo>;
+        auto CollectArgTypeInfos() const -> std::vector<TypeInfo>;
 
         auto BindBody(const std::shared_ptr<const IEmittable<void>>& t_body) -> void;
         auto GetBody() -> std::optional<const IEmittable<void>*>;
 
         auto GetTemplate() const -> std::optional<Symbol::Template::Function*>;
 
-        auto CollectTemplateArguments()     const -> std::vector<Symbol::Type::IBase*> final;
-        auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
+        auto CollectTemplateArgs()     const -> std::vector<Symbol::Type::IBase*> final;
+        auto CollectImplTemplateArgs() const -> std::vector<Symbol::Type::IBase*> final;
 
     private:
         std::shared_ptr<Scope> m_SelfScope{};

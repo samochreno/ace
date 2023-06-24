@@ -7,8 +7,8 @@
 #include "Symbol/Template/Base.hpp"
 #include "Symbol/SelfScoped.hpp"
 #include "Symbol/Template/Type.hpp"
-#include "Symbol/Type/TemplateParameter/Impl.hpp"
-#include "Symbol/Type/TemplateParameter/Normal.hpp"
+#include "Symbol/Type/TemplateParam/Impl.hpp"
+#include "Symbol/Type/TemplateParam/Normal.hpp"
 #include "Node/Template/Type.hpp"
 #include "Node/Type/Base.hpp"
 #include "Scope.hpp"
@@ -32,8 +32,8 @@ namespace Ace::Symbol::Template
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
 
-        auto CollectImplParameters() const -> std::vector<Symbol::Type::TemplateParameter::Impl*>   final;
-        auto CollectParameters()     const -> std::vector<Symbol::Type::TemplateParameter::Normal*> final;
+        auto CollectImplParams() const -> std::vector<Symbol::Type::TemplateParam::Impl*>   final;
+        auto CollectParams()     const -> std::vector<Symbol::Type::TemplateParam::Normal*> final;
 
         auto GetASTName() const -> const std::string& final;
   
@@ -41,8 +41,8 @@ namespace Ace::Symbol::Template
         auto GetPlaceholderSymbol() const -> Symbol::IBase* final;
 
         auto InstantiateSymbols(
-            const std::vector<Symbol::Type::IBase*>& t_implArguments,
-            const std::vector<Symbol::Type::IBase*>& t_arguments
+            const std::vector<Symbol::Type::IBase*>& t_implArgs,
+            const std::vector<Symbol::Type::IBase*>& t_args
         ) -> Expected<TemplateSymbolsInstantationResult> final;
         auto InstantiateSemanticsForSymbols(
             const std::shared_ptr<const Node::IBase>& t_ast

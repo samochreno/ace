@@ -96,7 +96,7 @@ namespace Ace::Node
     {
         ACE_TRY(scope, [&]() -> Expected<std::shared_ptr<Scope>>
         {
-            if (m_TypeName.Sections.back().TemplateArguments.empty())
+            if (m_TypeName.Sections.back().TemplateArgs.empty())
             {
                 ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName));
                 return typeSymbol->GetSelfScope();
@@ -106,7 +106,7 @@ namespace Ace::Node
                 auto typeName = m_TypeName;
 
                 auto& lastNameSection = typeName.Sections.back();
-                lastNameSection.TemplateArguments.clear();
+                lastNameSection.TemplateArgs.clear();
                 lastNameSection.Name = SpecialIdentifier::CreateTemplate(
                     lastNameSection.Name
                 );

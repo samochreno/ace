@@ -41,8 +41,8 @@ namespace Ace
 
         auto InstantiateSymbols(
             Symbol::Template::IBase* const t_templateSymbol,
-            const std::vector<Symbol::Type::IBase*>& t_implArguments,
-            const std::vector<Symbol::Type::IBase*>& t_arguments
+            const std::vector<Symbol::Type::IBase*>& t_implArgs,
+            const std::vector<Symbol::Type::IBase*>& t_args
         ) -> Expected<Symbol::IBase*>;
         auto InstantiateSemanticsForSymbols() -> void;
 

@@ -6,7 +6,7 @@
 #include <filesystem>
 
 #include "Diagnostics.hpp"
-#include "CommandLineArgumentBuffer.hpp"
+#include "CommandLineArgBuffer.hpp"
 #include "FileBuffer.hpp"
 #include "Package.hpp"
 #include "Scope.hpp"
@@ -26,7 +26,7 @@ namespace Ace
             const std::vector<std::string_view>& t_args
         ) -> Expected<std::unique_ptr<const Compilation>>;
 
-        CommandLineArgumentBuffer CommandLineArgumentBuffer{};
+        CommandLineArgBuffer CommandLineArgBuffer{};
         FileBuffer PackageFileBuffer{};
         Package Package{};
         std::filesystem::path OutputPath{};

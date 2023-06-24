@@ -6,7 +6,7 @@
 
 #include "Node/Type/Base.hpp"
 #include "Node/Attribute.hpp"
-#include "Node/Variable/Normal/Instance.hpp"
+#include "Node/Var/Normal/Instance.hpp"
 #include "BoundNode/Type/Struct.hpp"
 #include "Diagnostics.hpp"
 #include "Scope.hpp"
@@ -26,7 +26,7 @@ namespace Ace::Node::Type
             const std::string& t_name,
             const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
             const AccessModifier& t_accessModifier,
-            const std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>& t_variables
+            const std::vector<std::shared_ptr<const Node::Var::Normal::Instance>>& t_variables
         );
         virtual ~Struct() = default;
 
@@ -55,6 +55,6 @@ namespace Ace::Node::Type
         std::string m_Name{};
         std::vector<std::shared_ptr<const Node::Attribute>> m_Attributes{};
         AccessModifier m_AccessModifier{};
-        std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>> m_Variables{};
+        std::vector<std::shared_ptr<const Node::Var::Normal::Instance>> m_Vars{};
     };
 }

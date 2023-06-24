@@ -7,7 +7,7 @@
 
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Function.hpp"
-#include "Symbol/Variable/Normal/Instance.hpp"
+#include "Symbol/Var/Normal/Instance.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostics.hpp"
@@ -54,10 +54,10 @@ namespace Ace::Symbol::Type
         auto BindDropGlue(Symbol::Function* const t_glue) -> void final;
         auto GetDropGlue() const -> std::optional<Symbol::Function*> final;
 
-        auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
-        auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
+        auto CollectTemplateArgs() const -> std::vector<Symbol::Type::IBase*> final;
+        auto CollectImplTemplateArgs() const -> std::vector<Symbol::Type::IBase*> final;
 
-        auto GetVariables() const -> std::vector<Symbol::Variable::Normal::Instance*>;
+        auto GetVars() const -> std::vector<Symbol::Var::Normal::Instance*>;
 
     private:
         std::shared_ptr<Scope> m_SelfScope{};

@@ -6,8 +6,8 @@
 
 #include "Node/Template/Base.hpp"
 #include "Node/Type/Base.hpp"
-#include "Node/TemplateParameter/Impl.hpp"
-#include "Node/TemplateParameter/Normal.hpp"
+#include "Node/TemplateParam/Impl.hpp"
+#include "Node/TemplateParam/Normal.hpp"
 #include "Scope.hpp"
 #include "Symbol/Base.hpp"
 
@@ -19,7 +19,7 @@ namespace Ace::Node::Template
     {
     public:
         Type(
-            const std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>& t_parameters,
+            const std::vector<std::shared_ptr<const Node::TemplateParam::Normal>>& t_params,
             const std::shared_ptr<const Node::Type::IBase>& t_ast
         );
         virtual ~Type() = default;
@@ -35,14 +35,14 @@ namespace Ace::Node::Template
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
 
-        auto CollectImplParameterNames() const -> std::vector<std::string> final;
-        auto CollectParameterNames()     const -> std::vector<std::string> final;
+        auto CollectImplParamNames() const -> std::vector<std::string> final;
+        auto CollectParamNames()     const -> std::vector<std::string> final;
 
         auto GetAST() const -> const std::shared_ptr<const Node::Type::IBase>&;
         auto GetSelfScope() const -> std::shared_ptr<Scope>;
 
     private:
-        std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>> m_Parameters{};
+        std::vector<std::shared_ptr<const Node::TemplateParam::Normal>> m_Params{};
         std::shared_ptr<const Node::Type::IBase> m_AST{};
     };
 }

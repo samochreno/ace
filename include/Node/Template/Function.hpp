@@ -6,8 +6,8 @@
 
 #include "Node/Template/Base.hpp"
 #include "Node/Function.hpp"
-#include "Node/TemplateParameter/Impl.hpp"
-#include "Node/TemplateParameter/Normal.hpp"
+#include "Node/TemplateParam/Impl.hpp"
+#include "Node/TemplateParam/Normal.hpp"
 #include "Scope.hpp"
 #include "Symbol/Base.hpp"
 
@@ -19,8 +19,8 @@ namespace Ace::Node::Template
     {
     public:
         Function(
-            const std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>& t_implParameters,
-            const std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>& t_parameters,
+            const std::vector<std::shared_ptr<const Node::TemplateParam::Impl>>& t_implParams,
+            const std::vector<std::shared_ptr<const Node::TemplateParam::Normal>>& t_params,
             const std::shared_ptr<const Node::Function>& t_ast
         );
         virtual ~Function() = default;
@@ -36,14 +36,14 @@ namespace Ace::Node::Template
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
 
-        auto CollectImplParameterNames() const -> std::vector<std::string> final;
-        auto CollectParameterNames()     const -> std::vector<std::string> final;
+        auto CollectImplParamNames() const -> std::vector<std::string> final;
+        auto CollectParamNames()     const -> std::vector<std::string> final;
 
         auto GetAST() const -> const std::shared_ptr<const Node::Function>&;
 
     private:
-        std::vector<std::shared_ptr<const Node::TemplateParameter::Impl>>   m_ImplParameters{};
-        std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>> m_Parameters{};
+        std::vector<std::shared_ptr<const Node::TemplateParam::Impl>>   m_ImplParams{};
+        std::vector<std::shared_ptr<const Node::TemplateParam::Normal>> m_Params{};
         std::shared_ptr<const Node::Function> m_AST{};
     };
 }

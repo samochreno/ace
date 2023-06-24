@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNode/Base.hpp"
-#include "BoundNode/Expression/StructConstruction.hpp"
+#include "BoundNode/Expr/StructConstruction.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -19,7 +19,7 @@ namespace Ace::BoundNode
     {
     public:
         Attribute(
-            const std::shared_ptr<const BoundNode::Expression::StructConstruction>& t_structConstructionExpression
+            const std::shared_ptr<const BoundNode::Expr::StructConstruction>& t_structConstructionExpr
         );
         virtual ~Attribute() = default;
 
@@ -33,6 +33,6 @@ namespace Ace::BoundNode
         ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Attribute>> final;
 
     private:
-        std::shared_ptr<const BoundNode::Expression::StructConstruction> m_StructConstructionExpression{};
+        std::shared_ptr<const BoundNode::Expr::StructConstruction> m_StructConstructionExpr{};
     };
 }

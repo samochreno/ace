@@ -15,16 +15,16 @@ namespace Ace
         { SymbolKind::Struct,                0 },
         { SymbolKind::TypeTemplate,          0 },
         { SymbolKind::Label,                 0 },
-        { SymbolKind::ImplTemplateParameter, 0 },
-        { SymbolKind::TemplateParameter,     0 },
+        { SymbolKind::ImplTemplateParam, 0 },
+        { SymbolKind::TemplateParam,     0 },
         { SymbolKind::TypeAlias,             1 },
         { SymbolKind::TemplatedImpl,         1 },
         { SymbolKind::Function,              3 },
         { SymbolKind::FunctionTemplate,      3 },
-        { SymbolKind::StaticVariable,        3 },
-        { SymbolKind::InstanceVariable,      3 },
-        { SymbolKind::ParameterVariable,     2 },
-        { SymbolKind::LocalVariable,         3 },
+        { SymbolKind::StaticVar,        3 },
+        { SymbolKind::InstanceVar,      3 },
+        { SymbolKind::ParamVar,     2 },
+        { SymbolKind::LocalVar,         3 },
     };
 
     constexpr auto operator&(

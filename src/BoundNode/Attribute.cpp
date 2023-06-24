@@ -9,21 +9,21 @@
 namespace Ace::BoundNode
 {
     Attribute::Attribute(
-        const std::shared_ptr<const BoundNode::Expression::StructConstruction>& t_structConstructionExpression
-    ) : m_StructConstructionExpression{ t_structConstructionExpression }
+        const std::shared_ptr<const BoundNode::Expr::StructConstruction>& t_structConstructionExpr
+    ) : m_StructConstructionExpr{ t_structConstructionExpr }
     {
     }
 
     auto Attribute::GetScope() const -> std::shared_ptr<Scope>
     {
-        return m_StructConstructionExpression->GetScope();
+        return m_StructConstructionExpr->GetScope();
     }
 
     auto Attribute::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
 
-        AddChildren(children, m_StructConstructionExpression);
+        AddChildren(children, m_StructConstructionExpr);
 
         return children;
     }
@@ -32,15 +32,15 @@ namespace Ace::BoundNode
         const BoundNode::Context::TypeChecking& t_context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Attribute>>>
     {
-        ACE_TRY(mchCheckedStructureConstructionExpression, m_StructConstructionExpression->GetOrCreateTypeChecked({}));
+        ACE_TRY(mchCheckedStructureConstructionExpr, m_StructConstructionExpr->GetOrCreateTypeChecked({}));
 
-        if (!mchCheckedStructureConstructionExpression.IsChanged)
+        if (!mchCheckedStructureConstructionExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
 
         const auto returnValue = std::make_shared<const BoundNode::Attribute>(
-            mchCheckedStructureConstructionExpression.Value
+            mchCheckedStructureConstructionExpr.Value
         );
         return CreateChanged(returnValue);
     }
@@ -49,16 +49,16 @@ namespace Ace::BoundNode
         const BoundNode::Context::Lowering& t_context
     ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Attribute>>
     {
-        const auto mchLowewredStructConstructionExpression =
-            m_StructConstructionExpression->GetOrCreateLowered({});
+        const auto mchLowewredStructConstructionExpr =
+            m_StructConstructionExpr->GetOrCreateLowered({});
 
-        if (!mchLowewredStructConstructionExpression.IsChanged)
+        if (!mchLowewredStructConstructionExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
 
         const auto returnValue = std::make_shared<const BoundNode::Attribute>(
-            mchLowewredStructConstructionExpression.Value
+            mchLowewredStructConstructionExpr.Value
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }

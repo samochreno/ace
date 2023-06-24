@@ -8,9 +8,9 @@
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "Node/Attribute.hpp"
-#include "Node/Variable/Parameter/Self.hpp"
-#include "Node/Variable/Parameter/Normal.hpp"
-#include "Node/Statement/Block.hpp"
+#include "Node/Var/Param/Self.hpp"
+#include "Node/Var/Param/Normal.hpp"
+#include "Node/Stmt/Block.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNode/Function.hpp"
 #include "Symbol/Type/Base.hpp"
@@ -25,16 +25,16 @@ namespace Ace::Node
         const TypeName& t_typeName,
         const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
         const AccessModifier& t_accessModifier,
-        const std::optional<std::shared_ptr<const Node::Variable::Parameter::Self>>& t_optSelf,
-        const std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>>& t_parameters,
-        const std::optional<std::shared_ptr<const Node::Statement::Block>>& t_optBody
+        const std::optional<std::shared_ptr<const Node::Var::Param::Self>>& t_optSelf,
+        const std::vector<std::shared_ptr<const Node::Var::Param::Normal>>& t_params,
+        const std::optional<std::shared_ptr<const Node::Stmt::Block>>& t_optBody
     ) : m_SelfScope{ t_selfScope },
         m_Name{ t_name },
         m_TypeName{ t_typeName },
         m_Attributes{ t_attributes },
         m_AccessModifier{ t_accessModifier },
         m_OptSelf{ t_optSelf },
-        m_Parameters{ t_parameters },
+        m_Params{ t_params },
         m_OptBody{ t_optBody }
     {
     }
@@ -55,7 +55,7 @@ namespace Ace::Node
             AddChildren(children, m_OptSelf.value());
         }
 
-        AddChildren(children, m_Parameters);
+        AddChildren(children, m_Params);
 
         if (m_OptBody.has_value())
         {
@@ -82,7 +82,7 @@ namespace Ace::Node
             }
         );
 
-        const auto clonedOptSelf = [&]() -> std::optional<std::shared_ptr<const Node::Variable::Parameter::Self>>
+        const auto clonedOptSelf = [&]() -> std::optional<std::shared_ptr<const Node::Var::Param::Self>>
         {
             if (!m_OptSelf.has_value())
                 return std::nullopt;
@@ -90,18 +90,18 @@ namespace Ace::Node
             return m_OptSelf.value()->CloneInScope(selfScope);
         }();
 
-        std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>> clonedParameters{};
+        std::vector<std::shared_ptr<const Node::Var::Param::Normal>> clonedParams{};
         std::transform(
-            begin(m_Parameters),
-            end  (m_Parameters),
-            back_inserter(clonedParameters),
-            [&](const std::shared_ptr<const Node::Variable::Parameter::Normal>& t_parameter)
+            begin(m_Params),
+            end  (m_Params),
+            back_inserter(clonedParams),
+            [&](const std::shared_ptr<const Node::Var::Param::Normal>& t_param)
             {
-                return t_parameter->CloneInScope(selfScope);
+                return t_param->CloneInScope(selfScope);
             }
         );
 
-        const auto clonedOptBody = [&]() -> std::optional<std::shared_ptr<const Node::Statement::Block>>
+        const auto clonedOptBody = [&]() -> std::optional<std::shared_ptr<const Node::Stmt::Block>>
         {
             if (!m_OptBody.has_value())
             {
@@ -118,7 +118,7 @@ namespace Ace::Node
             clonedAttributes,
             m_AccessModifier,
             clonedOptSelf,
-            clonedParameters,
+            clonedParams,
             clonedOptBody
         );
     }
@@ -132,15 +132,15 @@ namespace Ace::Node
         }));
 
         ACE_TRY(boundOptSelf, TransformExpectedOptional(m_OptSelf,
-        [](const std::shared_ptr<const Node::Variable::Parameter::Self>& t_parameter)
+        [](const std::shared_ptr<const Node::Var::Param::Self>& t_param)
         {
-            return t_parameter->CreateBound();
+            return t_param->CreateBound();
         }));
 
-        ACE_TRY(boundParameters, TransformExpectedVector(m_Parameters,
-        [](const std::shared_ptr<const Node::Variable::Parameter::Normal>& t_parameter)
+        ACE_TRY(boundParams, TransformExpectedVector(m_Params,
+        [](const std::shared_ptr<const Node::Var::Param::Normal>& t_param)
         {
-            return t_parameter->CreateBound();
+            return t_param->CreateBound();
         }));
 
         if (m_Name == "implicit_conversion_with_operator")
@@ -149,7 +149,7 @@ namespace Ace::Node
         }
 
         ACE_TRY(boundOptBody, TransformExpectedOptional(m_OptBody,
-        [](const std::shared_ptr<const Node::Statement::Block>& t_body)
+        [](const std::shared_ptr<const Node::Stmt::Block>& t_body)
         {
             return t_body->CreateBound();
         }));
@@ -160,15 +160,15 @@ namespace Ace::Node
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<Symbol::Function>(
             m_Name,
-            m_SelfScope->CollectImplTemplateArguments(),
-            m_SelfScope->CollectTemplateArguments()
+            m_SelfScope->CollectImplTemplateArgs(),
+            m_SelfScope->CollectTemplateArgs()
         ).Unwrap();
 
         return std::make_shared<const BoundNode::Function>(
             selfSymbol,
             boundAttributes,
             boundOptSelf,
-            boundParameters,
+            boundParams,
             boundOptBody
         );
     }
@@ -223,8 +223,8 @@ namespace Ace::Node
         return m_AccessModifier;
     }
 
-    auto Function::GetParameters() const -> const std::vector<std::shared_ptr<const Node::Variable::Parameter::Normal>>&
+    auto Function::GetParams() const -> const std::vector<std::shared_ptr<const Node::Var::Param::Normal>>&
     {
-        return m_Parameters;
+        return m_Params;
     }
 }

@@ -11,13 +11,13 @@
 #include "Asserts.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
-#include "Symbol/Variable/Parameter/Base.hpp"
-#include "Symbol/Variable/Parameter/Self.hpp"
-#include "Symbol/Variable/Parameter/Normal.hpp"
+#include "Symbol/Var/Param/Base.hpp"
+#include "Symbol/Var/Param/Self.hpp"
+#include "Symbol/Var/Param/Normal.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Template/Function.hpp"
-#include "Symbol/Type/Alias/TemplateArgument/Normal.hpp"
-#include "Symbol/Type/Alias/TemplateArgument/Impl.hpp"
+#include "Symbol/Type/Alias/TemplateArg/Normal.hpp"
+#include "Symbol/Type/Alias/TemplateArg/Impl.hpp"
 #include "Emittable.hpp"
 #include "TypeInfo.hpp"
 #include "Utility.hpp"
@@ -73,96 +73,96 @@ namespace Ace::Symbol
         return m_Type;
     }
 
-    auto Function::CollectParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>
+    auto Function::CollectParams() const -> std::vector<Symbol::Var::Param::IBase*>
     {
-        auto normalParameters = m_SelfScope->CollectSymbols<Symbol::Variable::Parameter::Normal>();
-        std::sort(begin(normalParameters), end(normalParameters),
+        auto normalParams = m_SelfScope->CollectSymbols<Symbol::Var::Param::Normal>();
+        std::sort(begin(normalParams), end(normalParams),
         [](
-            const Symbol::Variable::Parameter::Normal* const t_lhs, 
-            const Symbol::Variable::Parameter::Normal* const t_rhs
+            const Symbol::Var::Param::Normal* const t_lhs, 
+            const Symbol::Var::Param::Normal* const t_rhs
             )
         {
             return t_lhs->GetIndex() < t_rhs->GetIndex();
         });
 
-        std::vector<Symbol::Variable::Parameter::IBase*> parameters{};
-        parameters.insert(
-            end(parameters),
-            begin(normalParameters),
-            end  (normalParameters)
+        std::vector<Symbol::Var::Param::IBase*> params{};
+        params.insert(
+            end(params),
+            begin(normalParams),
+            end  (normalParams)
         );
 
-        return parameters;
+        return params;
     }
 
-    auto Function::CollectAllParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>
+    auto Function::CollectAllParams() const -> std::vector<Symbol::Var::Param::IBase*>
     {
-        const auto definedParameters = m_SelfScope->CollectSymbols<Symbol::Variable::Parameter::IBase>();
+        const auto definedParams = m_SelfScope->CollectSymbols<Symbol::Var::Param::IBase>();
 
-        std::vector<Symbol::Variable::Parameter::Self*> selfParameters{};
-        std::vector<Symbol::Variable::Parameter::Normal*> normalParameters{};
+        std::vector<Symbol::Var::Param::Self*> selfParams{};
+        std::vector<Symbol::Var::Param::Normal*> normalParams{};
         std::for_each(
-            begin(definedParameters),
-            end  (definedParameters),
-            [&](Symbol::Variable::Parameter::IBase* const t_parameter)
+            begin(definedParams),
+            end  (definedParams),
+            [&](Symbol::Var::Param::IBase* const t_param)
             {
-                auto* const normalParameter =
-                    dynamic_cast<Symbol::Variable::Parameter::Normal*>(t_parameter);
+                auto* const normalParam =
+                    dynamic_cast<Symbol::Var::Param::Normal*>(t_param);
 
-                if (normalParameter)
+                if (normalParam)
                 {
-                    normalParameters.push_back(normalParameter);
+                    normalParams.push_back(normalParam);
                     return;
                 }
 
-                auto* const selfParameter =
-                    dynamic_cast<Symbol::Variable::Parameter::Self*>(t_parameter);
+                auto* const selfParam =
+                    dynamic_cast<Symbol::Var::Param::Self*>(t_param);
 
-                if (selfParameter)
+                if (selfParam)
                 {
-                    selfParameters.push_back(selfParameter);
+                    selfParams.push_back(selfParam);
                     return;
                 }
             }
         );
 
-        std::vector<Symbol::Variable::Parameter::IBase*> parameters{};
+        std::vector<Symbol::Var::Param::IBase*> params{};
 
-        if (!selfParameters.empty())
+        if (!selfParams.empty())
         {
-            ACE_ASSERT(selfParameters.size() == 1);
-            parameters.push_back(selfParameters.front());
+            ACE_ASSERT(selfParams.size() == 1);
+            params.push_back(selfParams.front());
         }
 
-        std::sort(begin(normalParameters), end(normalParameters),
+        std::sort(begin(normalParams), end(normalParams),
         [](
-            const Symbol::Variable::Parameter::Normal* const t_lhs,
-            const Symbol::Variable::Parameter::Normal* const t_rhs
+            const Symbol::Var::Param::Normal* const t_lhs,
+            const Symbol::Var::Param::Normal* const t_rhs
             )
         {
             return t_lhs->GetIndex() < t_rhs->GetIndex();
         });
-        parameters.insert(
-            end(parameters),
-            begin(normalParameters), 
-            end  (normalParameters)
+        params.insert(
+            end(params),
+            begin(normalParams), 
+            end  (normalParams)
         );
 
-        return parameters;
+        return params;
     }
 
-    auto Function::CollectArgumentTypeInfos() const -> std::vector<TypeInfo>
+    auto Function::CollectArgTypeInfos() const -> std::vector<TypeInfo>
     {
-        const auto parameters = CollectParameters();
+        const auto params = CollectParams();
 
         std::vector<TypeInfo> typeInfos{};
         std::transform(
-            begin(parameters),
-            end  (parameters),
+            begin(params),
+            end  (params),
             back_inserter(typeInfos),
-            [](const Symbol::Variable::Parameter::IBase* const t_parameter)
+            [](const Symbol::Var::Param::IBase* const t_param)
             {
-                return TypeInfo{ t_parameter->GetType(), ValueKind::R };
+                return TypeInfo{ t_param->GetType(), ValueKind::R };
             }
         );
 
@@ -191,13 +191,13 @@ namespace Ace::Symbol
         return expTemplate ? expTemplate.Unwrap() : std::optional<Symbol::Template::Function*>{};
     }
     
-    auto Function::CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
+    auto Function::CollectTemplateArgs() const -> std::vector<Symbol::Type::IBase*>
     {
-        return m_SelfScope->CollectTemplateArguments();
+        return m_SelfScope->CollectTemplateArgs();
     }
 
-    auto Function::CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
+    auto Function::CollectImplTemplateArgs() const -> std::vector<Symbol::Type::IBase*>
     {
-        return m_SelfScope->CollectImplTemplateArguments();
+        return m_SelfScope->CollectImplTemplateArgs();
     }
 }

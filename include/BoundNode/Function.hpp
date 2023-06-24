@@ -7,9 +7,9 @@
 #include "BoundNode/Base.hpp"
 #include "BoundNode/Typed.hpp"
 #include "BoundNode/Attribute.hpp"
-#include "BoundNode/Variable/Parameter/Self.hpp"
-#include "BoundNode/Variable/Parameter/Normal.hpp"
-#include "BoundNode/Statement/Block.hpp"
+#include "BoundNode/Var/Param/Self.hpp"
+#include "BoundNode/Var/Param/Normal.hpp"
+#include "BoundNode/Stmt/Block.hpp"
 #include "Symbol/Function.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
@@ -28,9 +28,9 @@ namespace Ace::BoundNode
         Function(
             Symbol::Function* const t_symbol,
             const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes,
-            const std::optional<const std::shared_ptr<const BoundNode::Variable::Parameter::Self>>& t_optSelf,
-            const std::vector<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>>& t_parameters,
-            const std::optional<std::shared_ptr<const BoundNode::Statement::Block>>& t_optBody
+            const std::optional<const std::shared_ptr<const BoundNode::Var::Param::Self>>& t_optSelf,
+            const std::vector<std::shared_ptr<const BoundNode::Var::Param::Normal>>& t_params,
+            const std::optional<std::shared_ptr<const BoundNode::Stmt::Block>>& t_optBody
         );
         virtual ~Function() = default;
 
@@ -45,13 +45,13 @@ namespace Ace::BoundNode
 
         auto GetSymbol() const -> Symbol::Function* final;
 
-        auto GetBody() const -> std::optional<std::shared_ptr<const BoundNode::Statement::Block>>;
+        auto GetBody() const -> std::optional<std::shared_ptr<const BoundNode::Stmt::Block>>;
 
     private:
         Symbol::Function* m_Symbol{};
         std::vector<std::shared_ptr<const BoundNode::Attribute>> m_Attributes{};
-        std::optional<std::shared_ptr<const BoundNode::Variable::Parameter::Self>> m_OptSelf{};
-        std::vector<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>> m_Parameters{};
-        std::optional<std::shared_ptr<const BoundNode::Statement::Block>> m_OptBody{};
+        std::optional<std::shared_ptr<const BoundNode::Var::Param::Self>> m_OptSelf{};
+        std::vector<std::shared_ptr<const BoundNode::Var::Param::Normal>> m_Params{};
+        std::optional<std::shared_ptr<const BoundNode::Stmt::Block>> m_OptBody{};
     };
 }

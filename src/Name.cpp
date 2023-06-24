@@ -45,19 +45,19 @@ namespace Ace
     }
 
     SymbolNameSection::SymbolNameSection()
-        : Name{}, TemplateArguments{}
+        : Name{}, TemplateArgs{}
     {
     }
 
     SymbolNameSection::SymbolNameSection(const std::string& t_name)
-        : Name{ t_name }, TemplateArguments{}
+        : Name{ t_name }, TemplateArgs{}
     {
     }
 
     SymbolNameSection::SymbolNameSection(
         const std::string& t_name,
-        const std::vector<SymbolName>& t_templateArguments
-    ) : Name{ t_name }, TemplateArguments{ t_templateArguments }
+        const std::vector<SymbolName>& t_templateArgs
+    ) : Name{ t_name }, TemplateArgs{ t_templateArgs }
     {
     }
 
@@ -130,7 +130,7 @@ namespace Ace
                 t_compilation,
                 t_modifier
             );
-            modifiedName.Sections.back().TemplateArguments.push_back(name);
+            modifiedName.Sections.back().TemplateArgs.push_back(name);
             name = modifiedName;
         });
 

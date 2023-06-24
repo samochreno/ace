@@ -291,13 +291,13 @@ namespace Ace::Core
             std::move(ownedGlueSymbol)
         ).Unwrap();
 
-        Scope::DefineSymbol(std::make_unique<Symbol::Variable::Parameter::Normal>(
+        Scope::DefineSymbol(std::make_unique<Symbol::Var::Param::Normal>(
             selfScope,
             SpecialIdentifier::CreateAnonymous(),
             t_typeSymbol->GetWithReference(),
             0
         )).Unwrap();
-        Scope::DefineSymbol(std::make_unique<Symbol::Variable::Parameter::Normal>(
+        Scope::DefineSymbol(std::make_unique<Symbol::Var::Param::Normal>(
             selfScope,
             SpecialIdentifier::CreateAnonymous(),
             t_typeSymbol->GetWithReference(),
@@ -336,7 +336,7 @@ namespace Ace::Core
             std::move(ownedGlueSymbol)
         ).Unwrap();
 
-        Scope::DefineSymbol(std::make_unique<Symbol::Variable::Parameter::Normal>(
+        Scope::DefineSymbol(std::make_unique<Symbol::Var::Param::Normal>(
             selfScope,
             SpecialIdentifier::CreateAnonymous(),
             t_typeSymbol->GetWithReference(),
@@ -493,12 +493,12 @@ namespace Ace::Core
                     0
                 );
                 
-                auto* const selfPtr = t_emitter.EmitLoadArgument(
+                auto* const selfPtr = t_emitter.EmitLoadArg(
                     0,
                     ptrType
                 );
 
-                auto* const otherPtr = t_emitter.EmitLoadArgument(
+                auto* const otherPtr = t_emitter.EmitLoadArg(
                     1, 
                     ptrType
                 );
@@ -562,14 +562,14 @@ namespace Ace::Core
 
         const auto bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
-        const auto parameterSymbols = t_glueSymbol->CollectParameters();
-        const auto selfParameterReferenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
+        const auto paramSymbols = t_glueSymbol->CollectParams();
+        const auto selfParamReferenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Static>(
             bodyScope,
-            parameterSymbols.at(0)
+            paramSymbols.at(0)
         );
-        const auto otherParameterReferenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
+        const auto otherParamReferenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Static>(
             bodyScope,
-            parameterSymbols.at(1)
+            paramSymbols.at(1)
         );
 
         auto operatorName = t_structSymbol->CreateFullyQualifiedName();
@@ -577,30 +577,30 @@ namespace Ace::Core
         const auto expOperatorSymbol = 
             t_compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Function>(operatorName);
 
-        std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
+        std::vector<std::shared_ptr<const BoundNode::Stmt::IBase>> stmts{};
         if (expOperatorSymbol)
         {
-            std::vector<std::shared_ptr<const BoundNode::Expression::IBase>> arguments{};
-            arguments.push_back(selfParameterReferenceExpressionNode);
-            arguments.push_back(otherParameterReferenceExpressionNode);
+            std::vector<std::shared_ptr<const BoundNode::Expr::IBase>> args{};
+            args.push_back(selfParamReferenceExprNode);
+            args.push_back(otherParamReferenceExprNode);
 
-            const auto functionCallExpressionNode = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
+            const auto functionCallExprNode = std::make_shared<const BoundNode::Expr::FunctionCall::Static>(
                 bodyScope,
                 expOperatorSymbol.Unwrap(),
-                arguments
+                args
             );
 
-            const auto expressionStatementNode = std::make_shared<const BoundNode::Statement::Expression>(
-                functionCallExpressionNode
+            const auto exprStmtNode = std::make_shared<const BoundNode::Stmt::Expr>(
+                functionCallExprNode
             );
 
-            statements.push_back(expressionStatementNode);
+            stmts.push_back(exprStmtNode);
         }
         else
         {
-            const auto variableSymbols = t_structSymbol->GetVariables();
+            const auto variableSymbols = t_structSymbol->GetVars();
             std::for_each(begin(variableSymbols), end(variableSymbols),
-            [&](Symbol::Variable::Normal::Instance* const t_variableSymbol)
+            [&](Symbol::Var::Normal::Instance* const t_variableSymbol)
             {
                 auto* const variableTypeSymbol = t_variableSymbol->GetType();
                 const auto variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
@@ -608,52 +608,52 @@ namespace Ace::Core
                     SpecialIdentifier::CreateCopyGlue(variableTypeSymbol->CreatePartialSignature())
                 ).Unwrap();
                 
-                const auto selfParameterVariableRerefenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
-                    selfParameterReferenceExpressionNode,
+                const auto selfParamVarRerefenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Instance>(
+                    selfParamReferenceExprNode,
                     t_variableSymbol
                 );
-                const auto otherParameterVariableRerefenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
-                    otherParameterReferenceExpressionNode,
+                const auto otherParamVarRerefenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Instance>(
+                    otherParamReferenceExprNode,
                     t_variableSymbol
                 );
 
-                std::vector<std::shared_ptr<const BoundNode::Expression::IBase>> arguments{};
-                arguments.push_back(selfParameterVariableRerefenceExpressionNode);
-                arguments.push_back(otherParameterVariableRerefenceExpressionNode);
+                std::vector<std::shared_ptr<const BoundNode::Expr::IBase>> args{};
+                args.push_back(selfParamVarRerefenceExprNode);
+                args.push_back(otherParamVarRerefenceExprNode);
 
-                const auto functionCallExpressionNode = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
+                const auto functionCallExprNode = std::make_shared<const BoundNode::Expr::FunctionCall::Static>(
                     bodyScope,
                     variableTypeGlueSymbol,
-                    arguments
+                    args
                 );
 
-                const auto expressionStatementNode = std::make_shared<const BoundNode::Statement::Expression>(
-                    functionCallExpressionNode
+                const auto exprStmtNode = std::make_shared<const BoundNode::Stmt::Expr>(
+                    functionCallExprNode
                 );
 
-                statements.push_back(expressionStatementNode);
+                stmts.push_back(exprStmtNode);
             });
         }
 
-        const auto bodyNode = std::make_shared<const BoundNode::Statement::Block>(
+        const auto bodyNode = std::make_shared<const BoundNode::Stmt::Block>(
             bodyScope->GetParent().value(),
-            statements
+            stmts
         );
 
         return CreateTransformedAndVerifiedAST(
             t_compilation,
             bodyNode,
-            [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            [&](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
             { 
                 return t_bodyNode->GetOrCreateTypeChecked(
                     { t_compilation->Natives->Void.GetSymbol() }
                 ); 
             },
-            [](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            [](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateLowered({});
             },
-            [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            [&](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateTypeChecked(
                     { t_compilation->Natives->Void.GetSymbol() }
@@ -679,13 +679,13 @@ namespace Ace::Core
 
         const auto bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
-        const auto parameterSymbols = t_glueSymbol->CollectParameters();
-        const auto selfParameterReferenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
+        const auto paramSymbols = t_glueSymbol->CollectParams();
+        const auto selfParamReferenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Static>(
             bodyScope,
-            parameterSymbols.at(0)
+            paramSymbols.at(0)
         );
 
-        std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
+        std::vector<std::shared_ptr<const BoundNode::Stmt::IBase>> stmts{};
 
         auto operatorName = t_structSymbol->CreateFullyQualifiedName();
         operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Drop);
@@ -694,25 +694,25 @@ namespace Ace::Core
 
         if (expOperatorSymbol)
         {
-            std::vector<std::shared_ptr<const BoundNode::Expression::IBase>> arguments{};
-            arguments.push_back(selfParameterReferenceExpressionNode);
+            std::vector<std::shared_ptr<const BoundNode::Expr::IBase>> args{};
+            args.push_back(selfParamReferenceExprNode);
 
-            const auto functionCallExpressionNode = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
+            const auto functionCallExprNode = std::make_shared<const BoundNode::Expr::FunctionCall::Static>(
                 bodyScope,
                 expOperatorSymbol.Unwrap(),
-                arguments
+                args
             );
 
-            const auto expressionStatementNode = std::make_shared<const BoundNode::Statement::Expression>(
-                functionCallExpressionNode
+            const auto exprStmtNode = std::make_shared<const BoundNode::Stmt::Expr>(
+                functionCallExprNode
             );
 
-            statements.push_back(expressionStatementNode);
+            stmts.push_back(exprStmtNode);
         }
 
-        const auto variableSymbols = t_structSymbol->GetVariables();
+        const auto variableSymbols = t_structSymbol->GetVars();
         std::for_each(rbegin(variableSymbols), rend(variableSymbols),
-        [&](Symbol::Variable::Normal::Instance* const t_variableSymbol)
+        [&](Symbol::Var::Normal::Instance* const t_variableSymbol)
         {
             auto* const variableTypeSymbol = t_variableSymbol->GetType();
             const auto variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
@@ -720,46 +720,46 @@ namespace Ace::Core
                 SpecialIdentifier::CreateDropGlue(variableTypeSymbol->CreatePartialSignature())
             ).Unwrap();
             
-            const auto selfParameterVariableRerefenceExpressionNode = std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
-                selfParameterReferenceExpressionNode,
+            const auto selfParamVarRerefenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Instance>(
+                selfParamReferenceExprNode,
                 t_variableSymbol
             );
 
-            std::vector<std::shared_ptr<const BoundNode::Expression::IBase>> arguments{};
-            arguments.push_back(selfParameterVariableRerefenceExpressionNode);
+            std::vector<std::shared_ptr<const BoundNode::Expr::IBase>> args{};
+            args.push_back(selfParamVarRerefenceExprNode);
 
-            const auto functionCallExpressionNode = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
+            const auto functionCallExprNode = std::make_shared<const BoundNode::Expr::FunctionCall::Static>(
                 bodyScope,
                 variableTypeGlueSymbol,
-                arguments
+                args
             );
 
-            const auto expressionStatementNode = std::make_shared<const BoundNode::Statement::Expression>(
-                functionCallExpressionNode
+            const auto exprStmtNode = std::make_shared<const BoundNode::Stmt::Expr>(
+                functionCallExprNode
             );
 
-            statements.push_back(expressionStatementNode);
+            stmts.push_back(exprStmtNode);
         });
 
-        const auto bodyNode = std::make_shared<const BoundNode::Statement::Block>(
+        const auto bodyNode = std::make_shared<const BoundNode::Stmt::Block>(
             bodyScope->GetParent().value(),
-            statements
+            stmts
         );
 
         return Core::CreateTransformedAndVerifiedAST(
             t_compilation,
             bodyNode,
-            [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            [&](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
             { 
                 return t_bodyNode->GetOrCreateTypeChecked(
                     { t_compilation->Natives->Void.GetSymbol() }
                 ); 
             },
-            [](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            [](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateLowered({});
             },
-            [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_bodyNode)
+            [&](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateTypeChecked(
                     { t_compilation->Natives->Void.GetSymbol() }

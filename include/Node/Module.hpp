@@ -11,7 +11,7 @@
 #include "Node/TemplatedImpl.hpp"
 #include "Node/Function.hpp"
 #include "Node/Template/Function.hpp"
-#include "Node/Variable/Normal/Static.hpp"
+#include "Node/Var/Normal/Static.hpp"
 #include "BoundNode/Module.hpp"
 #include "Symbol/Base.hpp"
 #include "Scope.hpp"
@@ -39,7 +39,7 @@ namespace Ace::Node
             const std::vector<std::shared_ptr<const Node::TemplatedImpl>>& t_templatedImpls,
             const std::vector<std::shared_ptr<const Node::Function>>& t_functions,
             const std::vector<std::shared_ptr<const Node::Template::Function>>& t_functionTemplates,
-            const std::vector<std::shared_ptr<const Node::Variable::Normal::Static>>& t_variables
+            const std::vector<std::shared_ptr<const Node::Var::Normal::Static>>& t_variables
         );
         virtual ~Module() = default;
 
@@ -71,6 +71,6 @@ namespace Ace::Node
         std::vector<std::shared_ptr<const Node::TemplatedImpl>> m_TemplatedImpls{};
         std::vector<std::shared_ptr<const Node::Function>> m_Functions{};
         std::vector<std::shared_ptr<const Node::Template::Function>> m_FunctionTemplates{};
-        std::vector<std::shared_ptr<const Node::Variable::Normal::Static>> m_Variables{};
+        std::vector<std::shared_ptr<const Node::Var::Normal::Static>> m_Vars{};
     };
 }

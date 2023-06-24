@@ -10,21 +10,21 @@
 namespace Ace::Node
 {
     Attribute::Attribute(
-        const std::shared_ptr<const Node::Expression::StructConstruction>& t_structConstructionExpression
-    ) : m_StructConstructionExpression{ t_structConstructionExpression }
+        const std::shared_ptr<const Node::Expr::StructConstruction>& t_structConstructionExpr
+    ) : m_StructConstructionExpr{ t_structConstructionExpr }
     {
     }
 
     auto Attribute::GetScope() const -> std::shared_ptr<Scope>
     {
-        return m_StructConstructionExpression->GetScope();
+        return m_StructConstructionExpr->GetScope();
     }
 
     auto Attribute::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
 
-        AddChildren(children, m_StructConstructionExpression);
+        AddChildren(children, m_StructConstructionExpr);
 
         return children;
     }
@@ -34,15 +34,15 @@ namespace Ace::Node
     ) const -> std::shared_ptr<const Node::Attribute>
     {
         return std::make_shared<const Node::Attribute>(
-            m_StructConstructionExpression->CloneInScope(t_scope)
+            m_StructConstructionExpr->CloneInScope(t_scope)
         );
     }
 
     auto Attribute::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Attribute>>
     {
-        ACE_TRY(boundStructConstructionExpression, m_StructConstructionExpression->CreateBound());
+        ACE_TRY(boundStructConstructionExpr, m_StructConstructionExpr->CreateBound());
         return std::make_shared<const BoundNode::Attribute>(
-            boundStructConstructionExpression
+            boundStructConstructionExpr
         );
     }
 }

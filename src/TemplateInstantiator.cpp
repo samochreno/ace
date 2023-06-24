@@ -2,8 +2,8 @@
 
 #include "Symbol/Template/Base.hpp"
 #include "Symbol/Type/Base.hpp"
-#include "Symbol/Type/TemplateParameter/Impl.hpp"
-#include "Symbol/Type/TemplateParameter/Normal.hpp"
+#include "Symbol/Type/TemplateParam/Impl.hpp"
+#include "Symbol/Type/TemplateParam/Normal.hpp"
 #include "Symbol/Templatable.hpp"
 #include "Diagnostics.hpp"
 
@@ -30,24 +30,24 @@ namespace Ace
         return TransformExpectedVector(m_Symbols,
         [&](Symbol::Template::IBase* const t_symbol) -> Expected<void>
         {
-            const auto implParameters = t_symbol->CollectImplParameters();
-            std::vector<Symbol::Type::IBase*> upcastedImplParameters
+            const auto implParams = t_symbol->CollectImplParams();
+            std::vector<Symbol::Type::IBase*> upcastedImplParams
             {
-                begin(implParameters),
-                end  (implParameters),
+                begin(implParams),
+                end  (implParams),
             };
 
-            const auto parameters = t_symbol->CollectParameters();
-            std::vector<Symbol::Type::IBase*> upcastedParameters
+            const auto params = t_symbol->CollectParams();
+            std::vector<Symbol::Type::IBase*> upcastedParams
             {
-                begin(parameters),
-                end  (parameters),
+                begin(params),
+                end  (params),
             };
 
             ACE_TRY(placeholderSymbol, InstantiateSymbols(
                 t_symbol,
-                upcastedImplParameters,
-                upcastedParameters
+                upcastedImplParams,
+                upcastedParams
             ));
             t_symbol->SetPlaceholderSymbol(placeholderSymbol);
 
@@ -55,81 +55,81 @@ namespace Ace
         });
     }
 
-    static auto IsArgumentPlaceholder(
-        Symbol::Type::IBase* const t_argument
+    static auto IsArgPlaceholder(
+        Symbol::Type::IBase* const t_arg
     ) -> bool;
 
-    static auto AreArgumentsPlaceholders(
-        const std::vector<Symbol::Type::IBase*>& t_implArguments,
-        const std::vector<Symbol::Type::IBase*>& t_arguments
+    static auto AreArgsPlaceholders(
+        const std::vector<Symbol::Type::IBase*>& t_implArgs,
+        const std::vector<Symbol::Type::IBase*>& t_args
     ) -> bool
     {
         const auto foundImplIt = std::find_if(
-            begin(t_implArguments),
-            end  (t_implArguments),
-            [](Symbol::Type::IBase* const t_implArgument)
+            begin(t_implArgs),
+            end  (t_implArgs),
+            [](Symbol::Type::IBase* const t_implArg)
             {
-                return IsArgumentPlaceholder(t_implArgument);
+                return IsArgPlaceholder(t_implArg);
             }
         );
-        if (foundImplIt != end(t_implArguments))
+        if (foundImplIt != end(t_implArgs))
             return true;
 
         const auto foundIt = std::find_if(
-            begin(t_arguments),
-            end  (t_arguments),
-            [](Symbol::Type::IBase* const t_argument)
+            begin(t_args),
+            end  (t_args),
+            [](Symbol::Type::IBase* const t_arg)
             {
-                return IsArgumentPlaceholder(t_argument);
+                return IsArgPlaceholder(t_arg);
             }
         );
-        if (foundIt != end(t_arguments))
+        if (foundIt != end(t_args))
             return true;
 
         return false;
     }
 
-    static auto IsArgumentPlaceholder(
-        Symbol::Type::IBase* t_argument
+    static auto IsArgPlaceholder(
+        Symbol::Type::IBase* t_arg
     ) -> bool
     {
-        t_argument = t_argument->GetUnaliased();
+        t_arg = t_arg->GetUnaliased();
 
-        if (dynamic_cast<Symbol::Type::TemplateParameter::Impl*>(t_argument))
+        if (dynamic_cast<Symbol::Type::TemplateParam::Impl*>(t_arg))
             return true;
 
-        if (dynamic_cast<Symbol::Type::TemplateParameter::Normal*>(t_argument))
+        if (dynamic_cast<Symbol::Type::TemplateParam::Normal*>(t_arg))
             return true;
 
         auto* const templatable =
-            dynamic_cast<Symbol::ITemplatable*>(t_argument);
+            dynamic_cast<Symbol::ITemplatable*>(t_arg);
         if (!templatable)
         {
             return false;
         }
 
-        return AreArgumentsPlaceholders(
-            templatable->CollectImplTemplateArguments(),
-            templatable->CollectTemplateArguments()
+        return AreArgsPlaceholders(
+            templatable->CollectImplTemplateArgs(),
+            templatable->CollectTemplateArgs()
         );
     }
 
     auto TemplateInstantiator::InstantiateSymbols(
         Symbol::Template::IBase* const t_template,
-        const std::vector<Symbol::Type::IBase*>& t_implArguments,
-        const std::vector<Symbol::Type::IBase*>& t_arguments
+        const std::vector<Symbol::Type::IBase*>& t_implArgs,
+        const std::vector<Symbol::Type::IBase*>& t_args
     ) -> Expected<Symbol::IBase*>
     {
         ACE_TRY(symbolsInstantiationResult, t_template->InstantiateSymbols(
-            t_implArguments,
-            t_arguments
+            t_implArgs,
+            t_args
         ));
 
-        const bool areArgumentsPlaceholders = AreArgumentsPlaceholders(
-            t_implArguments,
-            t_arguments
+        const bool areArgsPlaceholders = AreArgsPlaceholders(
+            t_implArgs,
+            t_args
         );
-        if (!areArgumentsPlaceholders)
+        if (!areArgsPlaceholders)
         {
             m_SymbolOnlyInstantiatedASTsMap[t_template].push_back(
                 symbolsInstantiationResult.AST

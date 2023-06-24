@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNode/Function.hpp"
-#include "BoundNode/Variable/Normal/Static.hpp"
+#include "BoundNode/Var/Normal/Static.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 

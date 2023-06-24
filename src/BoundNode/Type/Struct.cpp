@@ -6,17 +6,17 @@
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "BoundNode/Attribute.hpp"
-#include "BoundNode/Variable/Normal/Instance.hpp"
+#include "BoundNode/Var/Normal/Instance.hpp"
 
 namespace Ace::BoundNode::Type
 {
     Struct::Struct(
         Symbol::Type::Struct* const t_symbol,
         const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes,
-        const std::vector<std::shared_ptr<const BoundNode::Variable::Normal::Instance>>& t_variables
+        const std::vector<std::shared_ptr<const BoundNode::Var::Normal::Instance>>& t_variables
     ) : m_Symbol{ t_symbol },
         m_Attributes{ t_attributes },
-        m_Variables{ t_variables }
+        m_Vars{ t_variables }
     {
     }
 
@@ -30,7 +30,7 @@ namespace Ace::BoundNode::Type
         std::vector<const BoundNode::IBase*> children{};
 
         AddChildren(children, m_Attributes);
-        AddChildren(children, m_Variables);
+        AddChildren(children, m_Vars);
 
         return children;
     }
@@ -45,15 +45,15 @@ namespace Ace::BoundNode::Type
             return t_attribute->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedVariables, TransformExpectedMaybeChangedVector(m_Variables,
-        [](const std::shared_ptr<const BoundNode::Variable::Normal::Instance>& t_variable)
+        ACE_TRY(mchCheckedVars, TransformExpectedMaybeChangedVector(m_Vars,
+        [](const std::shared_ptr<const BoundNode::Var::Normal::Instance>& t_variable)
         {
             return t_variable->GetOrCreateTypeChecked({});
         }));
 
         if (
             !mchCheckedAttributes.IsChanged &&
-            !mchCheckedVariables.IsChanged
+            !mchCheckedVars.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -62,7 +62,7 @@ namespace Ace::BoundNode::Type
         const auto returnValue = std::make_shared<const BoundNode::Type::Struct>(
             m_Symbol,
             mchCheckedAttributes.Value,
-            mchCheckedVariables.Value
+            mchCheckedVars.Value
         );
         return CreateChanged(returnValue);
     }
@@ -82,15 +82,15 @@ namespace Ace::BoundNode::Type
             return t_attribute->GetOrCreateLowered({});
         });
 
-        const auto mchLoweredVariables = TransformMaybeChangedVector(m_Variables,
-        [](const std::shared_ptr<const BoundNode::Variable::Normal::Instance>& t_variable)
+        const auto mchLoweredVars = TransformMaybeChangedVector(m_Vars,
+        [](const std::shared_ptr<const BoundNode::Var::Normal::Instance>& t_variable)
         {
             return t_variable->GetOrCreateLowered({});
         });
 
         if (
             !mchLoweredAttributes.IsChanged &&
-            !mchLoweredVariables.IsChanged
+            !mchLoweredVars.IsChanged
             )
         {
             return CreateUnchanged(this->shared_from_this());
@@ -99,7 +99,7 @@ namespace Ace::BoundNode::Type
         const auto returnValue = std::make_shared<const BoundNode::Type::Struct>(
             m_Symbol,
             mchLoweredAttributes.Value,
-            mchLoweredVariables.Value
+            mchLoweredVars.Value
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }

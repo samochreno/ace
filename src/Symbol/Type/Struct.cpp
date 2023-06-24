@@ -76,10 +76,10 @@ namespace Ace::Symbol::Type
                 return TypeSizeKind::Unsized;
             }
 
-            const auto variables = GetVariables();
+            const auto variables = GetVars();
 
-            const auto canResolveSize = TransformExpectedVector(GetVariables(),
-            [](const Symbol::Variable::Normal::Instance* const t_variable) -> Expected<void>
+            const auto canResolveSize = TransformExpectedVector(GetVars(),
+            [](const Symbol::Var::Normal::Instance* const t_variable) -> Expected<void>
             {
                 ACE_TRY(sizeKind, t_variable->GetType()->GetSizeKind());
                 ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
@@ -175,23 +175,23 @@ namespace Ace::Symbol::Type
         return m_OptDropGlue;
     }
 
-    auto Struct::CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
+    auto Struct::CollectTemplateArgs() const -> std::vector<Symbol::Type::IBase*>
     {
-        return m_SelfScope->CollectTemplateArguments();
+        return m_SelfScope->CollectTemplateArgs();
     }
 
-    auto Struct::CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
+    auto Struct::CollectImplTemplateArgs() const -> std::vector<Symbol::Type::IBase*>
     {
-        return m_SelfScope->CollectImplTemplateArguments();
+        return m_SelfScope->CollectImplTemplateArgs();
     }
 
-    auto Struct::GetVariables() const -> std::vector<Symbol::Variable::Normal::Instance*>
+    auto Struct::GetVars() const -> std::vector<Symbol::Var::Normal::Instance*>
     {
-        auto variables = m_SelfScope->CollectSymbols<Symbol::Variable::Normal::Instance>();
+        auto variables = m_SelfScope->CollectSymbols<Symbol::Var::Normal::Instance>();
         std::sort(begin(variables), end(variables),
         [](
-            const Symbol::Variable::Normal::Instance* const t_lhs,
-            const Symbol::Variable::Normal::Instance* const t_rhs
+            const Symbol::Var::Normal::Instance* const t_lhs,
+            const Symbol::Var::Normal::Instance* const t_rhs
         )
         {
             return t_lhs->GetIndex() < t_rhs->GetIndex();

@@ -5,7 +5,7 @@
 
 #include "BoundNode/Type/Base.hpp"
 #include "BoundNode/Attribute.hpp"
-#include "Node/Variable/Normal/Instance.hpp"
+#include "Node/Var/Normal/Instance.hpp"
 #include "Scope.hpp"
 #include "Symbol/Type/Struct.hpp"
 
@@ -21,7 +21,7 @@ namespace Ace::BoundNode::Type
         Struct(
             Symbol::Type::Struct* const t_symbol,
             const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes,
-            const std::vector<std::shared_ptr<const BoundNode::Variable::Normal::Instance>>& t_variables
+            const std::vector<std::shared_ptr<const BoundNode::Var::Normal::Instance>>& t_variables
         );
         virtual ~Struct() = default;
 
@@ -45,6 +45,6 @@ namespace Ace::BoundNode::Type
     private:
         Symbol::Type::Struct* m_Symbol{};
         std::vector<std::shared_ptr<const BoundNode::Attribute>> m_Attributes{};
-        std::vector<std::shared_ptr<const BoundNode::Variable::Normal::Instance>> m_Variables{};
+        std::vector<std::shared_ptr<const BoundNode::Var::Normal::Instance>> m_Vars{};
     };
 }

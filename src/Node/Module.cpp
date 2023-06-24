@@ -12,7 +12,7 @@
 #include "Node/TemplatedImpl.hpp"
 #include "Node/Function.hpp"
 #include "Node/Template/Function.hpp"
-#include "Node/Variable/Normal/Static.hpp"
+#include "Node/Var/Normal/Static.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNode/Module.hpp"
 #include "Symbol/Base.hpp"
@@ -32,7 +32,7 @@ namespace Ace::Node
         const std::vector<std::shared_ptr<const Node::TemplatedImpl>>& t_templatedImpls,
         const std::vector<std::shared_ptr<const Node::Function>>& t_functions,
         const std::vector<std::shared_ptr<const Node::Template::Function>>& t_functionTemplates,
-        const std::vector<std::shared_ptr<const Node::Variable::Normal::Static>>& t_variables
+        const std::vector<std::shared_ptr<const Node::Var::Normal::Static>>& t_variables
     ) : m_Scope{ t_scope },
         m_SelfScope{ t_selfScope },
         m_Name{ t_name },
@@ -44,7 +44,7 @@ namespace Ace::Node
         m_TemplatedImpls{ t_templatedImpls },
         m_Functions{ t_functions },
         m_FunctionTemplates{ t_functionTemplates },
-        m_Variables{ t_variables }
+        m_Vars{ t_variables }
     {
     }
 
@@ -64,7 +64,7 @@ namespace Ace::Node
         AddChildren(children, m_TemplatedImpls);
         AddChildren(children, m_Functions);
         AddChildren(children, m_FunctionTemplates);
-        AddChildren(children, m_Variables);
+        AddChildren(children, m_Vars);
 
         return children;
     }
@@ -152,12 +152,12 @@ namespace Ace::Node
             }
         );
 
-        std::vector<std::shared_ptr<const Node::Variable::Normal::Static>> clonedVariables{};
+        std::vector<std::shared_ptr<const Node::Var::Normal::Static>> clonedVars{};
         std::transform(
-            begin(m_Variables),
-            end  (m_Variables),
-            back_inserter(clonedVariables),
-            [&](const std::shared_ptr<const Node::Variable::Normal::Static>& t_variable)
+            begin(m_Vars),
+            end  (m_Vars),
+            back_inserter(clonedVars),
+            [&](const std::shared_ptr<const Node::Var::Normal::Static>& t_variable)
             {
                 return t_variable->CloneInScope(selfScope);
             }
@@ -175,7 +175,7 @@ namespace Ace::Node
             clonedTemplatedImpls,
             clonedFunctions,
             clonedFunctionTemplates,
-            clonedVariables
+            clonedVars
         );
     }
 
@@ -211,8 +211,8 @@ namespace Ace::Node
             return t_function->CreateBound();
         }));
 
-        ACE_TRY(boundVariables, TransformExpectedVector(m_Variables,
-        [](const std::shared_ptr<const Node::Variable::Normal::Static>& t_variable)
+        ACE_TRY(boundVars, TransformExpectedVector(m_Vars,
+        [](const std::shared_ptr<const Node::Var::Normal::Static>& t_variable)
         {
             return t_variable->CreateBound();
         }));
@@ -238,7 +238,7 @@ namespace Ace::Node
             boundTypes,
             allBoundImpls,
             boundFunctions,
-            boundVariables
+            boundVars
         );
     }
 

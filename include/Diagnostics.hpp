@@ -12,11 +12,11 @@
 
 namespace Ace
 {
-    class MissingPackagePathArgumentError : public virtual IDiagnostic
+    class MissingPackagePathArgError : public virtual IDiagnostic
     {
     public:
-        MissingPackagePathArgumentError() = default;
-        virtual ~MissingPackagePathArgumentError() = default;
+        MissingPackagePathArgError() = default;
+        virtual ~MissingPackagePathArgError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final
         {
@@ -28,19 +28,19 @@ namespace Ace
         }
         auto CreateMessage() const -> std::string final
         {
-            return "Missing package path argument";
+            return "Missing package path arg";
         }
     };
 
-    class MultiplePackagePathArgumentsError : public virtual IDiagnostic
+    class MultiplePackagePathArgsError : public virtual IDiagnostic
     {
     public:
-        MultiplePackagePathArgumentsError(
+        MultiplePackagePathArgsError(
             const SourceLocation& t_sourceLocation
         ) : m_SourceLocation{ t_sourceLocation }
         {
         }
-        virtual ~MultiplePackagePathArgumentsError() = default;
+        virtual ~MultiplePackagePathArgsError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final
         {
@@ -52,7 +52,7 @@ namespace Ace
         }
         auto CreateMessage() const -> std::string final
         {
-            return "Multiple package path arguments";
+            return "Multiple package path args";
         }
 
     private:
@@ -133,7 +133,7 @@ namespace Ace
         }
         auto CreateMessage() const -> std::string final
         {
-            return "Missing option argument";
+            return "Missing option arg";
         }
 
     private:
@@ -160,7 +160,7 @@ namespace Ace
         }
         auto CreateMessage() const -> std::string final
         {
-            return "Unexpected option argument";
+            return "Unexpected option arg";
         }
 
     private:
@@ -187,7 +187,7 @@ namespace Ace
         }
         auto CreateMessage() const -> std::string final
         {
-            return "Unexpected option argument";
+            return "Unexpected option arg";
         }
 
     private:

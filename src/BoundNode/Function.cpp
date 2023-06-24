@@ -5,9 +5,9 @@
 #include <optional>
 
 #include "BoundNode/Attribute.hpp"
-#include "BoundNode/Variable/Parameter/Self.hpp"
-#include "BoundNode/Variable/Parameter/Normal.hpp"
-#include "BoundNode/Statement/Block.hpp"
+#include "BoundNode/Var/Param/Self.hpp"
+#include "BoundNode/Var/Param/Normal.hpp"
+#include "BoundNode/Stmt/Block.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
@@ -16,13 +16,13 @@ namespace Ace::BoundNode
     Function::Function(
         Symbol::Function* const t_symbol,
         const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes,
-        const std::optional<const std::shared_ptr<const BoundNode::Variable::Parameter::Self>>& t_optSelf,
-        const std::vector<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>>& t_parameters,
-        const std::optional<std::shared_ptr<const BoundNode::Statement::Block>>& t_optBody
+        const std::optional<const std::shared_ptr<const BoundNode::Var::Param::Self>>& t_optSelf,
+        const std::vector<std::shared_ptr<const BoundNode::Var::Param::Normal>>& t_params,
+        const std::optional<std::shared_ptr<const BoundNode::Stmt::Block>>& t_optBody
     ) : m_Symbol{ t_symbol },
         m_Attributes{ t_attributes },
         m_OptSelf{ t_optSelf },
-        m_Parameters{ t_parameters },
+        m_Params{ t_params },
         m_OptBody{ t_optBody }
     {
     }
@@ -43,7 +43,7 @@ namespace Ace::BoundNode
             AddChildren(children, m_OptSelf.value());
         }
 
-        AddChildren(children, m_Parameters);
+        AddChildren(children, m_Params);
 
         if (m_OptBody.has_value())
         {
@@ -64,19 +64,19 @@ namespace Ace::BoundNode
         }));
 
         ACE_TRY(mchCheckedOptSelf, TransformExpectedMaybeChangedOptional(m_OptSelf,
-        [](const std::shared_ptr<const BoundNode::Variable::Parameter::Self>& t_self)
+        [](const std::shared_ptr<const BoundNode::Var::Param::Self>& t_self)
         {
             return t_self->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedParameters, TransformExpectedMaybeChangedVector(m_Parameters,
-        [](const std::shared_ptr<const BoundNode::Variable::Parameter::Normal>& t_parameter)
+        ACE_TRY(mchCheckedParams, TransformExpectedMaybeChangedVector(m_Params,
+        [](const std::shared_ptr<const BoundNode::Var::Param::Normal>& t_param)
         {
-            return t_parameter->GetOrCreateTypeChecked({});
+            return t_param->GetOrCreateTypeChecked({});
         }));
 
         ACE_TRY(mchCheckedOptBody, TransformExpectedMaybeChangedOptional(m_OptBody,
-        [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_body)
+        [&](const std::shared_ptr<const BoundNode::Stmt::Block>& t_body)
         {
             return t_body->GetOrCreateTypeChecked({ m_Symbol->GetType() });
         }));
@@ -84,7 +84,7 @@ namespace Ace::BoundNode
         if (
             !mchCheckedAttributes.IsChanged &&
             !mchCheckedOptSelf.IsChanged && 
-            !mchCheckedParameters.IsChanged && 
+            !mchCheckedParams.IsChanged && 
             !mchCheckedOptBody.IsChanged
             )
         {
@@ -95,7 +95,7 @@ namespace Ace::BoundNode
             m_Symbol,
             mchCheckedAttributes.Value,
             mchCheckedOptSelf.Value,
-            mchCheckedParameters.Value,
+            mchCheckedParams.Value,
             mchCheckedOptBody.Value
         );
         return CreateChanged(returnValue);
@@ -112,19 +112,19 @@ namespace Ace::BoundNode
         });
         
         const auto mchLoweredOptSelf = TransformMaybeChangedOptional(m_OptSelf,
-        [](const std::shared_ptr<const BoundNode::Variable::Parameter::Self>& t_self)
+        [](const std::shared_ptr<const BoundNode::Var::Param::Self>& t_self)
         {
             return t_self->GetOrCreateLowered({});
         });
 
-        const auto mchLoweredParameters = TransformMaybeChangedVector(m_Parameters,
-        [](const std::shared_ptr<const BoundNode::Variable::Parameter::Normal>& t_parameter)
+        const auto mchLoweredParams = TransformMaybeChangedVector(m_Params,
+        [](const std::shared_ptr<const BoundNode::Var::Param::Normal>& t_param)
         {
-            return t_parameter->GetOrCreateLowered({});
+            return t_param->GetOrCreateLowered({});
         });
 
         const auto mchLoweredOptBody = TransformMaybeChangedOptional(m_OptBody,
-        [](const std::shared_ptr<const BoundNode::Statement::Block>& t_body)
+        [](const std::shared_ptr<const BoundNode::Stmt::Block>& t_body)
         {
             return t_body->GetOrCreateLowered({});
         });
@@ -132,7 +132,7 @@ namespace Ace::BoundNode
         if (
             !mchLoweredAttributes.IsChanged && 
             !mchLoweredOptSelf.IsChanged &&
-            !mchLoweredParameters.IsChanged && 
+            !mchLoweredParams.IsChanged && 
             !mchLoweredOptBody.IsChanged
             )
         {
@@ -143,7 +143,7 @@ namespace Ace::BoundNode
             m_Symbol,
             mchLoweredAttributes.Value,
             mchLoweredOptSelf.Value,
-            mchLoweredParameters.Value,
+            mchLoweredParams.Value,
             mchLoweredOptBody.Value
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
@@ -154,7 +154,7 @@ namespace Ace::BoundNode
         return m_Symbol;
     }
 
-    auto Function::GetBody() const -> std::optional<std::shared_ptr<const BoundNode::Statement::Block>>
+    auto Function::GetBody() const -> std::optional<std::shared_ptr<const BoundNode::Stmt::Block>>
     {
         return m_OptBody;
     }

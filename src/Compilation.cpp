@@ -9,7 +9,7 @@
 
 #include <llvm/IR/LLVMContext.h>
 
-#include "CommandLineArgumentBuffer.hpp"
+#include "CommandLineArgBuffer.hpp"
 #include "FileBuffer.hpp"
 #include "SourceLocation.hpp"
 #include "Diagnostics.hpp"
@@ -25,8 +25,8 @@ namespace Ace
     struct CompilationParseContext
     {
         const ISourceBuffer* SourceBuffer{};
-        std::string_view Argument{};
-        std::optional<std::string_view> OptNextArgument{};
+        std::string_view Arg{};
+        std::optional<std::string_view> OptNextArg{};
     };
 
     struct OptionDefinition
@@ -101,8 +101,8 @@ namespace Ace
         const SourceLocation sourceLocation
         {
             t_context.SourceBuffer,
-            begin(t_context.Argument),
-            end  (t_context.Argument),
+            begin(t_context.Arg),
+            end  (t_context.Arg),
         };
 
         diagnosticBag.Add<MissingCommandLineOptionNameError>(sourceLocation);
@@ -125,8 +125,8 @@ namespace Ace
             SourceLocation sourceLocation
             {
                 t_context.SourceBuffer,
-                begin(t_context.Argument),
-                end  (t_context.Argument),
+                begin(t_context.Arg),
+                end  (t_context.Arg),
             };
 
             diagnosticBag.Add<MissingCommandLineOptionValueError>(
@@ -162,13 +162,13 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        ACE_ASSERT(t_context.Argument.at(0) == '-');
-        ACE_ASSERT(t_context.Argument.at(1) == '-');
+        ACE_ASSERT(t_context.Arg.at(0) == '-');
+        ACE_ASSERT(t_context.Arg.at(1) == '-');
 
         const std::string_view name
         {
-            begin(t_context.Argument) + 2,
-            std::find(begin(t_context.Argument), end(t_context.Argument), '='),
+            begin(t_context.Arg) + 2,
+            std::find(begin(t_context.Arg), end(t_context.Arg), '='),
         };
 
         diagnosticBag.Add(ErrorIfMissingOptionName(
@@ -204,7 +204,7 @@ namespace Ace
             *matchedDefinitionIt;
 
         const bool isValueInCurrentString =
-            end(name) != end(t_context.Argument);
+            end(name) != end(t_context.Arg);
 
         const auto optValue = [&]() -> std::optional<std::string_view>
         {
@@ -213,7 +213,7 @@ namespace Ace
                 const std::string_view value
                 {
                     end(name) + 1,
-                    end(t_context.Argument),
+                    end(t_context.Arg),
                 };
 
                 if (value.empty())
@@ -229,7 +229,7 @@ namespace Ace
                 return std::nullopt;
             }
 
-            return t_context.OptNextArgument;
+            return t_context.OptNextArg;
         }();
 
         diagnosticBag.Add(ErrorIfMissingOrUnexpectedOptionValue(
@@ -264,13 +264,13 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        ACE_ASSERT(t_context.Argument.at(0) == '-');
-        ACE_ASSERT(t_context.Argument.at(1) != '-');
+        ACE_ASSERT(t_context.Arg.at(0) == '-');
+        ACE_ASSERT(t_context.Arg.at(1) != '-');
 
         const std::string_view name
         {
-            begin(t_context.Argument) + 1,
-            begin(t_context.Argument) + 2,
+            begin(t_context.Arg) + 1,
+            begin(t_context.Arg) + 2,
         };
 
         diagnosticBag.Add(ErrorIfMissingOptionName(
@@ -305,16 +305,16 @@ namespace Ace
             &ErrorOptionDefinition : 
             *matchedDefinitionIt;
 
-        const bool isValueInCurrentArgument = t_context.Argument.size() > 2;
+        const bool isValueInCurrentArg = t_context.Arg.size() > 2;
 
         const auto optValue = [&]() -> std::optional<std::string_view>
         {
-            if (isValueInCurrentArgument)
+            if (isValueInCurrentArg)
             {
                 return std::string_view
                 {
                     end(name),
-                    end(t_context.Argument),
+                    end(t_context.Arg),
                 };
             }
 
@@ -323,7 +323,7 @@ namespace Ace
                 return std::nullopt;
             }
 
-            return t_context.OptNextArgument;
+            return t_context.OptNextArg;
         }();
 
         diagnosticBag.Add(ErrorIfMissingOrUnexpectedOptionValue(
@@ -339,7 +339,7 @@ namespace Ace
         };
 
         const size_t length =
-            (!optValue.has_value() || isValueInCurrentArgument) ? 1 : 2;
+            (!optValue.has_value() || isValueInCurrentArg) ? 1 : 2;
 
         return
         {
@@ -356,9 +356,9 @@ namespace Ace
         const CompilationParseContext& t_context
     ) -> Diagnosed<Measured<Option>>
     {
-        ACE_ASSERT(t_context.Argument.at(0) == '-');
+        ACE_ASSERT(t_context.Arg.at(0) == '-');
 
-        return (t_context.Argument.at(1) != '-') ? 
+        return (t_context.Arg.at(1) != '-') ? 
             ParseShortOption(t_context) :
             ParseLongOption(t_context);
     }
@@ -374,7 +374,7 @@ namespace Ace
     }
 
     static auto ParseOptions(
-        const CommandLineArgumentBuffer* const t_commandLineArgumentBuffer
+        const CommandLineArgBuffer* const t_commandLineArgBuffer
     ) -> Diagnosed<OptionMap>
     {
         DiagnosticBag diagnosticBag{};
@@ -382,7 +382,7 @@ namespace Ace
         std::vector<std::vector<std::string_view>::const_iterator> packagePathArgIts{};
         auto optionMap = CreateDefaultOptionMap();
 
-        const auto& args = t_commandLineArgumentBuffer->GetArgs();
+        const auto& args = t_commandLineArgBuffer->GetArgs();
 
         auto argIt = begin(args);
         while (argIt != end(args))
@@ -404,7 +404,7 @@ namespace Ace
                 std::optional<std::string_view>{};
 
             const auto dgnOption = ParseOption({
-                t_commandLineArgumentBuffer,
+                t_commandLineArgBuffer,
                 arg,
                 optNextArg
             });
@@ -418,7 +418,7 @@ namespace Ace
 
         if (packagePathArgIts.empty())
         {
-            diagnosticBag.Add<MissingPackagePathArgumentError>();
+            diagnosticBag.Add<MissingPackagePathArgError>();
         }
         else if (packagePathArgIts.size() == 1)
         {
@@ -432,12 +432,12 @@ namespace Ace
             {
                 SourceLocation sourceLocation
                 {
-                    t_commandLineArgumentBuffer,
+                    t_commandLineArgBuffer,
                     begin(*t_packagePathArgIt),
                     end  (*t_packagePathArgIt),
                 };
 
-                diagnosticBag.Add<MultiplePackagePathArgumentsError>(
+                diagnosticBag.Add<MultiplePackagePathArgsError>(
                     sourceLocation
                 );
             });
@@ -458,10 +458,10 @@ namespace Ace
 
         auto self = std::make_unique<Compilation>();
 
-        self->CommandLineArgumentBuffer = { self.get(), t_args };
+        self->CommandLineArgBuffer = { self.get(), t_args };
 
         const auto dgnOptionMap = ParseOptions(
-            &self->CommandLineArgumentBuffer
+            &self->CommandLineArgBuffer
         );
         diagnosticBag.Add(dgnOptionMap);
 
