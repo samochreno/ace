@@ -17,15 +17,16 @@ namespace Ace::Node
         public virtual Node::IBindable<BoundNode::Attribute>
     {
     public:
-        Attribute(const std::shared_ptr<const Node::Expression::StructConstruction>& t_structConstructionExpression) 
-            : m_StructConstructionExpression{ t_structConstructionExpression }
-        {
-        }
+        Attribute(
+            const std::shared_ptr<const Node::Expression::StructConstruction>& t_structConstructionExpression
+        );
         virtual ~Attribute() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_StructConstructionExpression->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Attribute> final;
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Attribute> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Attribute>> final;
 
     private:

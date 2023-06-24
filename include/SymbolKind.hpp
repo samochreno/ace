@@ -25,10 +25,10 @@ namespace Ace
         TemplateParameter,
     };
 
-    inline auto operator&(const SymbolKind& t_lhs, const SymbolKind& t_rhs) -> uint16_t
-    {
-        return static_cast<uint16_t>(t_lhs) & static_cast<uint16_t>(t_rhs);
-    }
+    constexpr auto operator&(
+        const SymbolKind& t_lhs,
+        const SymbolKind& t_rhs
+    ) -> bool;
 
     auto GetSymbolCreationOrder(const SymbolKind& t_kind) -> int8_t;
 }

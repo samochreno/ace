@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <utility>
 #include <type_traits>
 
@@ -10,12 +11,18 @@ namespace Ace
     {
         Measured() = default;
         template<typename T_ = T, std::enable_if<std::is_copy_constructible_v<T>>* = nullptr>
-        Measured(const T& t_value, const size_t& t_length)
-            : Value{ t_value }, Length{ t_length }
+        Measured(
+            const T& t_value,
+            const size_t& t_length
+        ) : Value{ t_value },
+            Length{ t_length }
         {
         }
-        Measured(T&& t_value, const size_t& t_length)
-            : Value{ std::move(t_value) }, Length{ t_length }
+        Measured(
+            T&& t_value,
+            const size_t& t_length
+        ) : Value{ std::move(t_value) },
+            Length{ t_length }
         {
         }
 

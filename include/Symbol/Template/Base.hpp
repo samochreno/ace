@@ -27,7 +27,6 @@ namespace Ace
 
 namespace Ace::Symbol::Template
 {
-
     class IBase : public virtual Symbol::IBase
     {
     public:

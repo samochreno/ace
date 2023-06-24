@@ -295,7 +295,9 @@ namespace Ace
         const auto optTypeSuffix = [&]() -> std::optional<Measured<std::shared_ptr<const Token>>>
         {
             if (!IsInAlphabet(*it))
+            {
                 return std::nullopt;
+            }
 
             return ScanNumericLiteralSuffix({
                 t_context.FileBuffer,
@@ -327,7 +329,9 @@ namespace Ace
             return expTokenKind.Unwrap();
         }();
 
-        const auto decimalPointPos = numberToken.Value.String.find_first_of('.');
+        const auto decimalPointPos =
+            numberToken.Value.String.find_first_of('.');
+
         if (decimalPointPos != std::string::npos)
         {
             const bool isFloatKind =

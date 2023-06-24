@@ -1,7 +1,11 @@
 #include "Symbol/Type/Struct.hpp"
 
+#include <vector>
+#include <string>
 #include <optional>
 
+#include "Scope.hpp"
+#include "AccessModifier.hpp"
 #include "Symbol/Function.hpp"
 #include "Diagnostics.hpp"
 #include "Emittable.hpp"
@@ -9,6 +13,46 @@
 
 namespace Ace::Symbol::Type
 {
+    Struct::Struct(
+        const std::shared_ptr<Scope>& t_selfScope,
+        const std::string& t_name,
+        const AccessModifier& t_accessModifier
+    ) : m_SelfScope{ t_selfScope },
+        m_Name{ t_name },
+        m_AccessModifier{ t_accessModifier }
+    {
+    }
+
+    auto Struct::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_SelfScope->GetParent().value();
+    }
+
+    auto Struct::GetSelfScope() const -> std::shared_ptr<Scope>
+    {
+        return m_SelfScope;
+    }
+
+    auto Struct::GetName() const -> const std::string&
+    {
+        return m_Name;
+    }
+
+    auto Struct::GetSymbolKind() const -> SymbolKind
+    {
+        return SymbolKind::Struct;
+    }
+
+    auto Struct::GetSymbolCategory() const -> SymbolCategory
+    {
+        return SymbolCategory::Static;
+    }
+
+    auto Struct::GetAccessModifier() const -> AccessModifier
+    {
+        return m_AccessModifier;
+    }
+
     auto Struct::GetSizeKind() const -> Expected<TypeSizeKind>
     {
         if (m_OptSizeKindCache.has_value())
@@ -67,6 +111,26 @@ namespace Ace::Symbol::Type
         return m_IsPrimitivelyEmittable;
     }
 
+    auto Struct::SetAsTriviallyCopyable() -> void
+    {
+        m_IsTriviallyCopyable = true;
+    }
+
+    auto Struct::IsTriviallyCopyable() const -> bool
+    {
+        return m_IsTriviallyCopyable;
+    }
+
+    auto Struct::SetAsTriviallyDroppable() -> void
+    {
+        m_IsTriviallyDroppable = true;
+    }
+
+    auto Struct::IsTriviallyDroppable() const -> bool
+    {
+        return m_IsTriviallyDroppable;
+    }
+
     auto Struct::CreateCopyGlueBody(
         Symbol::Function* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>> 
@@ -109,6 +173,16 @@ namespace Ace::Symbol::Type
     auto Struct::GetDropGlue() const -> std::optional<Symbol::Function*>
     {
         return m_OptDropGlue;
+    }
+
+    auto Struct::CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
+    {
+        return m_SelfScope->CollectTemplateArguments();
+    }
+
+    auto Struct::CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
+    {
+        return m_SelfScope->CollectImplTemplateArguments();
     }
 
     auto Struct::GetVariables() const -> std::vector<Symbol::Variable::Normal::Instance*>

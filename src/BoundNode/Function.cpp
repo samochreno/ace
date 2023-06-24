@@ -13,6 +13,25 @@
 
 namespace Ace::BoundNode
 {
+    Function::Function(
+        Symbol::Function* const t_symbol,
+        const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes,
+        const std::optional<const std::shared_ptr<const BoundNode::Variable::Parameter::Self>>& t_optSelf,
+        const std::vector<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>>& t_parameters,
+        const std::optional<std::shared_ptr<const BoundNode::Statement::Block>>& t_optBody
+    ) : m_Symbol{ t_symbol },
+        m_Attributes{ t_attributes },
+        m_OptSelf{ t_optSelf },
+        m_Parameters{ t_parameters },
+        m_OptBody{ t_optBody }
+    {
+    }
+
+    auto Function::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Symbol->GetScope();
+    }
+
     auto Function::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -34,7 +53,9 @@ namespace Ace::BoundNode
         return children;
     }
 
-    auto Function::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Function>>>
+    auto Function::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Function>>>
     {
         ACE_TRY(mchCheckedAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
         [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
@@ -66,7 +87,9 @@ namespace Ace::BoundNode
             !mchCheckedParameters.IsChanged && 
             !mchCheckedOptBody.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Function>(
             m_Symbol,
@@ -78,7 +101,9 @@ namespace Ace::BoundNode
         return CreateChanged(returnValue);
     }
 
-    auto Function::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Function>>
+    auto Function::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Function>>
     {
         const auto mchLoweredAttributes = TransformMaybeChangedVector(m_Attributes,
         [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
@@ -110,7 +135,9 @@ namespace Ace::BoundNode
             !mchLoweredParameters.IsChanged && 
             !mchLoweredOptBody.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Function>(
             m_Symbol,
@@ -120,5 +147,15 @@ namespace Ace::BoundNode
             mchLoweredOptBody.Value
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+    }
+
+    auto Function::GetSymbol() const -> Symbol::Function*
+    {
+        return m_Symbol;
+    }
+
+    auto Function::GetBody() const -> std::optional<std::shared_ptr<const BoundNode::Statement::Block>>
+    {
+        return m_OptBody;
     }
 }

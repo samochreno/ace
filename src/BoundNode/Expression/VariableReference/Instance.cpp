@@ -19,6 +19,19 @@
 
 namespace Ace::BoundNode::Expression::VariableReference
 {
+    Instance::Instance(
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression,
+        Symbol::Variable::Normal::Instance* const t_variableSymbol
+    ) : m_Expression{ t_expression },
+        m_VariableSymbol{ t_variableSymbol }
+    {
+    }
+
+    auto Instance::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Expression->GetScope();
+    }
+
     auto Instance::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -28,12 +41,16 @@ namespace Ace::BoundNode::Expression::VariableReference
         return children;
     }
 
-    auto Instance::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::VariableReference::Instance>>>
+    auto Instance::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::VariableReference::Instance>>>
     {
         ACE_TRY(mchCheckedExpression, m_Expression->GetOrCreateTypeCheckedExpression({}));
 
         if (!mchCheckedExpression.IsChanged)
+        {
             CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
             mchCheckedExpression.Value,
@@ -42,12 +59,24 @@ namespace Ace::BoundNode::Expression::VariableReference
         return CreateChanged(returnValue);
     }
 
-    auto Instance::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::VariableReference::Instance>>
+    auto Instance::GetOrCreateTypeCheckedExpression(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>
     {
-        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto Instance::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::VariableReference::Instance>>
+    {
+        const auto mchLoweredExpression =
+            m_Expression->GetOrCreateLoweredExpression({});
 
         if (!mchLoweredExpression.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::VariableReference::Instance>(
             mchLoweredExpression.Value,
@@ -56,11 +85,19 @@ namespace Ace::BoundNode::Expression::VariableReference
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
+    auto Instance::GetOrCreateLoweredExpression(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
     auto Instance::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
     {
         std::vector<ExpressionDropData> temporaries{};
 
-        auto* const variableSymbol = dynamic_cast<Symbol::Variable::Normal::Instance*>(m_VariableSymbol);
+        auto* const variableSymbol =
+            dynamic_cast<Symbol::Variable::Normal::Instance*>(m_VariableSymbol);
         ACE_ASSERT(variableSymbol);
 
         const std::function<std::shared_ptr<const BoundNode::Expression::IBase>(const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)>
@@ -72,7 +109,9 @@ namespace Ace::BoundNode::Expression::VariableReference
             const bool isStrongPointer = typeSymbol->IsStrongPointer();
 
             if (!isReference && !isStrongPointer)
+            {
                 return t_expression;
+            }
 
             return getDereferenced([&]()
             {
@@ -130,5 +169,15 @@ namespace Ace::BoundNode::Expression::VariableReference
     auto Instance::GetTypeInfo() const -> TypeInfo
     {
         return { m_VariableSymbol->GetType(), ValueKind::L };
+    }
+
+    auto Instance::GetExpression() const -> std::shared_ptr<const BoundNode::Expression::IBase>
+    {
+        return m_Expression;
+    }
+
+    auto Instance::GetVariableSymbol() const -> Symbol::Variable::Normal::Instance*
+    {
+        return m_VariableSymbol;
     }
 }

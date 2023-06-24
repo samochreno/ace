@@ -10,6 +10,19 @@
 
 namespace Ace::BoundNode
 {
+    Impl::Impl(
+        const std::shared_ptr<Scope>& t_scope,
+        const std::vector<std::shared_ptr<const BoundNode::Function>>& t_functions
+    ) : m_Scope{ t_scope },
+        m_Functions{ t_functions }
+    {
+    }
+
+    auto Impl::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto Impl::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -19,7 +32,9 @@ namespace Ace::BoundNode
         return children;
     }
 
-    auto Impl::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Impl>>>
+    auto Impl::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Impl>>>
     {
         ACE_TRY(mchCheckedFunctions, TransformExpectedMaybeChangedVector(m_Functions,
         [](const std::shared_ptr<const BoundNode::Function>& t_function)
@@ -37,7 +52,9 @@ namespace Ace::BoundNode
         return CreateChanged(returnValue);
     }
 
-    auto Impl::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Impl>>
+    auto Impl::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Impl>>
     {
         const auto mchLoweredFunctions = TransformMaybeChangedVector(m_Functions,
         [](const std::shared_ptr<const BoundNode::Function>& t_function)

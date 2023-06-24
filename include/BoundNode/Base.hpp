@@ -33,10 +33,7 @@ namespace Ace::BoundNode
     public:
         virtual ~IBase() = default;
 
-        virtual auto GetCompilation() const -> const Compilation*
-        {
-            return GetScope()->GetCompilation();
-        }
+        virtual auto GetCompilation() const -> const Compilation* final;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetChildren() const -> std::vector<const BoundNode::IBase*> = 0;
     };
@@ -47,7 +44,9 @@ namespace Ace::BoundNode
     public:
         virtual ~ITypeCheckable() = default;
 
-        virtual auto GetOrCreateTypeChecked(const TContext& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const TNode>>> = 0;
+        virtual auto GetOrCreateTypeChecked(
+            const TContext& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const TNode>>> = 0;
     };
 
     template<typename TNode, typename TContext = Context::Lowering>
@@ -56,11 +55,16 @@ namespace Ace::BoundNode
     public:
         virtual ~ILowerable() = default;
 
-        virtual auto GetOrCreateLowered(const TContext& t_context) const -> MaybeChanged<std::shared_ptr<const TNode>> = 0;
+        virtual auto GetOrCreateLowered(
+            const TContext& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const TNode>> = 0;
     };
 
     template<typename T>
-    auto AddChildren(std::vector<const BoundNode::IBase*>& t_vec, const std::shared_ptr<const T>& t_node) -> void
+    auto AddChildren(
+        std::vector<const BoundNode::IBase*>& t_vec,
+        const std::shared_ptr<const T>& t_node
+    ) -> void
     {
         if (!t_node)
             return;
@@ -71,9 +75,13 @@ namespace Ace::BoundNode
     }
 
     template<typename T>
-    auto AddChildren(std::vector<const BoundNode::IBase*>& t_vec, const std::vector<std::shared_ptr<const T>>& t_nodes) -> void
+    auto AddChildren(
+        std::vector<const BoundNode::IBase*>& t_vec,
+        const std::vector<std::shared_ptr<const T>>& t_nodes
+    ) -> void
     {
-        std::for_each(begin(t_nodes), end(t_nodes), [&](const std::shared_ptr<const T>& t_node)
+        std::for_each(begin(t_nodes), end(t_nodes),
+        [&](const std::shared_ptr<const T>& t_node)
         {
             t_vec.push_back(t_node.get());
 

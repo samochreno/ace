@@ -14,19 +14,52 @@
 
 namespace Ace::BoundNode::Expression
 {
+    Literal::Literal(
+        const std::shared_ptr<Scope>& t_scope,
+        const LiteralKind& t_kind,
+        const std::string& t_string
+    ) : m_Scope{ t_scope },
+        m_Kind{ t_kind },
+        m_String{ t_string }
+    {
+    }
+
+    auto Literal::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto Literal::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         return {};
     }
 
-    auto Literal::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::Literal>>>
+    auto Literal::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::Literal>>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
-    auto Literal::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::Literal>>
+    auto Literal::GetOrCreateTypeCheckedExpression(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto Literal::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::Literal>>
     {
         return CreateUnchanged(shared_from_this());
+    }
+
+    auto Literal::GetOrCreateLoweredExpression(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
     }
 
     auto Literal::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
@@ -87,7 +120,8 @@ namespace Ace::BoundNode::Expression
 
         ACE_ASSERT(value);
         
-        auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(value->getType());
+        auto* const allocaInst =
+            t_emitter.GetBlockBuilder().Builder.CreateAlloca(value->getType());
         t_emitter.GetBlockBuilder().Builder.CreateStore(value, allocaInst);
 
         return { allocaInst, { { allocaInst, GetTypeInfo().Symbol } } };

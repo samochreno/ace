@@ -20,6 +20,21 @@
 
 namespace Ace::BoundNode::Statement::Assignment
 {
+    Compound::Compound(
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_lhsExpression,
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_rhsExpression,
+        Symbol::Function* const t_operatorSymbol
+    ) : m_LHSExpression{ t_lhsExpression },
+        m_RHSExpression{ t_rhsExpression },
+        m_OperatorSymbol{ t_operatorSymbol }
+    {
+    }
+
+    auto Compound::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_LHSExpression->GetScope();
+    }
+
     auto Compound::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -30,9 +45,12 @@ namespace Ace::BoundNode::Statement::Assignment
         return children;
     }
 
-    auto Compound::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assignment::Compound>>>
+    auto Compound::GetOrCreateTypeChecked(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assignment::Compound>>>
     {
-        const auto argumentTypeInfos = m_OperatorSymbol->CollectArgumentTypeInfos();
+        const auto argumentTypeInfos =
+            m_OperatorSymbol->CollectArgumentTypeInfos();
         ACE_ASSERT(argumentTypeInfos.size() == 2);
 
         ACE_TRY(mchConvertedAndCheckedLHSExpression, CreateImplicitlyConvertedAndTypeChecked(
@@ -49,7 +67,9 @@ namespace Ace::BoundNode::Statement::Assignment
             !mchConvertedAndCheckedLHSExpression.IsChanged &&
             !mchConvertedAndCheckedRHSExpression.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Statement::Assignment::Compound>(
             mchConvertedAndCheckedLHSExpression.Value,
@@ -60,7 +80,16 @@ namespace Ace::BoundNode::Statement::Assignment
         return CreateChanged(returnValue);
     }
 
-    auto Compound::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
+    auto Compound::GetOrCreateTypeCheckedStatement(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto Compound::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
     {
         std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> statements{};
 
@@ -225,5 +254,17 @@ namespace Ace::BoundNode::Statement::Assignment
             statements
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+    }
+
+    auto Compound::GetOrCreateLoweredStatement(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
+    auto Compound::Emit(Emitter& t_emitter) const -> void
+    {
+        ACE_UNREACHABLE();
     }
 }

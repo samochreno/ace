@@ -26,23 +26,21 @@ namespace Ace::Node::Variable::Parameter
         Self(
             const std::shared_ptr<Scope>& t_scope,
             const SymbolName& t_typeName
-        ) : m_Scope{ t_scope },
-            m_Name{ SpecialIdentifier::Self },
-            m_TypeName{ t_typeName, std::vector{ TypeNameModifier::Reference } }
-        {
-        }
+        );
         virtual ~Self() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Variable::Parameter::Self> final;
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Variable::Parameter::Self> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Variable::Parameter::Self>> final;
 
-        auto GetName() const -> const std::string& final { return m_Name; }
+        auto GetName() const -> const std::string& final;
 
-        auto GetSymbolScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
-        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Function; }
-        auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
+        auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
+        auto GetSymbolKind() const -> SymbolKind final;
+        auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
 
     private:

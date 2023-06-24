@@ -23,11 +23,15 @@ namespace Ace
     {
         const auto foundTypeIt = t_fromOperatorMap.find(t_toType);
         if (foundTypeIt == end(t_fromOperatorMap))
+        {
             return std::nullopt;
+        }
 
         const auto foundOperatorIt = foundTypeIt->second.find(t_fromType);
         if (foundOperatorIt == end(foundTypeIt->second))
+        {
             return std::nullopt;
+        }
 
         return foundOperatorIt->second;
     }
@@ -49,7 +53,9 @@ namespace Ace
         }
 
         auto name = t_toType->CreateFullyQualifiedName();
-        name.Sections.emplace_back(std::string{ SpecialIdentifier::Operator::ImplicitFrom });
+        name.Sections.emplace_back(
+            std::string{ SpecialIdentifier::Operator::ImplicitFrom }
+        );
 
         ACE_TRY(operatorSymbol, t_scope->ResolveStaticSymbol<Symbol::Function>(name));
         return operatorSymbol;
@@ -85,14 +91,16 @@ namespace Ace
         name.Sections.emplace_back(std::string{});
 
         name.Sections.back().Name = SpecialIdentifier::Operator::ExplicitFrom;
-        const auto expExplicitOperatorSymbol = t_scope->ResolveStaticSymbol<Symbol::Function>(name);
+        const auto expExplicitOperatorSymbol =
+            t_scope->ResolveStaticSymbol<Symbol::Function>(name);
         if (expExplicitOperatorSymbol)
         {
             return expExplicitOperatorSymbol.Unwrap();
         }
 
         name.Sections.back().Name = SpecialIdentifier::Operator::ImplicitFrom;
-        const auto expImplicitOperatorSymbol = t_scope->ResolveStaticSymbol<Symbol::Function>(name);
+        const auto expImplicitOperatorSymbol =
+            t_scope->ResolveStaticSymbol<Symbol::Function>(name);
         if (expImplicitOperatorSymbol)
         {
             return expImplicitOperatorSymbol.Unwrap();
@@ -107,7 +115,9 @@ namespace Ace
     ) -> bool
     {
         if (t_typesA.size() != t_typesB.size())
+        {
             return false;
+        }
 
         for (size_t i = 0; i < t_typesA.size(); i++)
         {
@@ -115,7 +125,9 @@ namespace Ace
                 t_typesA.at(i)->GetUnaliased() !=
                 t_typesB.at(i)->GetUnaliased()
                 )
+            {
                 return false;
+            }
         }
 
         return true;
@@ -128,7 +140,9 @@ namespace Ace
     ) -> bool
     {
         if (t_fromTypeInfos.size() != t_targetTypeInfos.size())
+        {
             return false;
+        }
 
         for (size_t i = 0; i < t_fromTypeInfos.size(); i++)
         {
@@ -142,7 +156,9 @@ namespace Ace
                 t_targetTypeInfos.at(i)
             );
             if (expConvertedExpression)
+            {
                 continue;
+            }
 
             return false;
         }

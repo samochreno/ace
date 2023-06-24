@@ -35,6 +35,56 @@ namespace Ace
         FunctionBodyEmitter m_BodyEmitter;
     };
 
+    NativeType::NativeType(
+        const Compilation* const t_compilation,
+        SymbolName&& t_name,
+        std::optional<std::function<llvm::Type*()>>&& t_irTypeGetter,
+        const TypeSizeKind& t_sizeKind,
+        const NativeCopyabilityKind& t_copyabilityKind
+    ) : m_Compilation{ t_compilation },
+        m_Name{ std::move(t_name) },
+        m_IRTypeGetter{ std::move(t_irTypeGetter) },
+        m_IsSized{ t_sizeKind == TypeSizeKind::Sized },
+        m_IsTriviallyCopyable{ t_copyabilityKind == NativeCopyabilityKind::Trivial }
+    {
+        ACE_ASSERT(
+            (t_sizeKind == TypeSizeKind::Sized) ||
+            (t_sizeKind == TypeSizeKind::Unsized)
+        );
+
+        ACE_ASSERT(
+            (t_copyabilityKind == NativeCopyabilityKind::Trivial) ||
+            (t_copyabilityKind == NativeCopyabilityKind::NonTrivial)
+        );
+    }
+
+    auto NativeType::GetFullyQualifiedName() const -> const SymbolName&
+    {
+        return m_Name;
+    }
+
+    auto NativeType::GetCompilation() const -> const Compilation*
+    {
+        return m_Compilation;
+    }
+
+    auto NativeType::GetSymbol() const -> Symbol::Type::IBase*
+    {
+        ACE_ASSERT(m_Symbol);
+        return m_Symbol;
+    }
+
+    auto NativeType::HasIRType() const -> bool
+    {
+        return m_IRTypeGetter.has_value();
+    }
+
+    auto NativeType::GetIRType() const -> llvm::Type*
+    {
+        ACE_ASSERT(HasIRType());
+        return m_IRTypeGetter.value()();
+    }
+
     auto NativeType::Initialize() -> void
     {
         auto* const symbol =
@@ -61,7 +111,9 @@ namespace Ace
     auto NativeTypeTemplate::Initialize() -> void
     {
         auto name = m_Name;
-        name.Sections.back().Name = SpecialIdentifier::CreateTemplate(name.Sections.back().Name);
+        name.Sections.back().Name = SpecialIdentifier::CreateTemplate(
+            name.Sections.back().Name
+        );
 
         auto* const symbol =
             GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Template::Type>(name).Unwrap();
@@ -69,15 +121,69 @@ namespace Ace
         m_Symbol = symbol;
     }
 
+    NativeTypeTemplate::NativeTypeTemplate(
+        const Compilation* const t_compilation,
+        SymbolName&& t_name
+    ) : m_Compilation{ t_compilation },
+        m_Name{ std::move(t_name) }
+    {
+    }
+
+    auto NativeTypeTemplate::GetFullyQualifiedName() const -> const SymbolName&
+    {
+        return m_Name;
+    }
+
+    auto NativeTypeTemplate::GetCompilation() const -> const Compilation*
+    {
+        return m_Compilation;
+    }
+
+    auto NativeTypeTemplate::GetSymbol() const -> Symbol::Template::Type*
+    {
+        ACE_ASSERT(m_Symbol);
+        return m_Symbol;
+    }
+
+    NativeFunction::NativeFunction(
+        const Compilation* const t_compilation,
+        SymbolName&& t_name,
+        FunctionBodyEmitter&& t_bodyEmitter
+    ) : m_Compilation{ t_compilation },
+        m_Name{ std::move(t_name) },
+        m_BodyEmitter{ std::move(t_bodyEmitter) }
+    {
+    }
+
+    auto NativeFunction::GetCompilation() const -> const Compilation*
+    {
+        return m_Compilation;
+    }
+
+    auto NativeFunction::GetSymbol() const -> Symbol::Function*
+    {
+        ACE_ASSERT(m_Symbol);
+        return m_Symbol;
+    }
+
     auto NativeFunction::Initialize() -> void
     {
         auto* const symbol =
             GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Function>(m_Name).Unwrap();
 
-        const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
-        symbol->BindBody(emittableBody);
+        symbol->BindBody(std::make_shared<FunctionEmittableBody>(
+            m_BodyEmitter
+        ));
 
         m_Symbol = symbol;
+    }
+
+    NativeFunctionTemplate::NativeFunctionTemplate(
+        const Compilation* const t_compilation,
+        SymbolName&& t_name
+    ) : m_Compilation{ t_compilation },
+        m_Name{ std::move(t_name) }
+    {
     }
 
     auto NativeFunctionTemplate::Initialize() -> void
@@ -88,6 +194,26 @@ namespace Ace
         m_Symbol = symbol;
     }
 
+    auto NativeFunctionTemplate::GetCompilation() const -> const Compilation*
+    {
+        return m_Compilation;
+    }
+
+    NativeAssociatedFunction::NativeAssociatedFunction(
+        const ITypeableNative& t_type,
+        const char* const t_name,
+        FunctionBodyEmitter&& t_bodyEmitter
+    ) : m_Type{ t_type },
+        m_Name{ t_name },
+        m_BodyEmitter{ std::move(t_bodyEmitter) }
+    {
+    }
+
+    auto NativeAssociatedFunction::GetCompilation() const -> const Compilation*
+    {
+        return m_Type.GetCompilation();
+    }
+
     auto NativeAssociatedFunction::Initialize() -> void
     {
         auto name = m_Type.GetFullyQualifiedName();
@@ -96,10 +222,30 @@ namespace Ace
         auto* const symbol =
             GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Function>(name).Unwrap();
 
-        const auto emittableBody = std::make_shared<FunctionEmittableBody>(m_BodyEmitter);
-        symbol->BindBody(emittableBody);
+        symbol->BindBody(std::make_shared<FunctionEmittableBody>(
+            m_BodyEmitter
+        ));
 
         m_Symbol = symbol;
+    }
+
+    auto NativeAssociatedFunction::GetSymbol() const -> Symbol::Function*
+    {
+        ACE_ASSERT(m_Symbol);
+        return m_Symbol;
+    }
+
+    NativeAssociatedFunctionTemplate::NativeAssociatedFunctionTemplate(
+        const ITypeableNative& t_type,
+        const char* const t_name
+    ) : m_Type{ t_type },
+        m_Name{ t_name }
+    {
+    }
+
+    auto NativeAssociatedFunctionTemplate::GetCompilation() const -> const Compilation*
+    {
+        return m_Type.GetCompilation();
     }
 
     auto NativeAssociatedFunctionTemplate::Initialize() -> void
@@ -111,6 +257,12 @@ namespace Ace
             GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Template::Function>(name).Unwrap();
 
         m_Symbol = symbol;
+    }
+
+    auto NativeAssociatedFunctionTemplate::GetSymbol() const -> Symbol::Template::Function*
+    {
+        ACE_ASSERT(m_Symbol);
+        return m_Symbol;
     }
 
     namespace I
@@ -1414,12 +1566,17 @@ namespace Ace
                 std::vector<llvm::Constant*> chars(string.size());
                 for (size_t i = 0; i < string.size(); i++)
                 {
-                    chars.at(i) = llvm::ConstantInt::get(charType, string[i]);
+                    chars.at(i) = llvm::ConstantInt::get(
+                        charType, string.at(i)
+                    );
                 }
 
                 chars.push_back(llvm::ConstantInt::get(charType, 0));
 
-                auto* const stringType = llvm::ArrayType::get(charType, chars.size());
+                auto* const stringType = llvm::ArrayType::get(
+                    charType,
+                    chars.size()
+                );
 
                 auto* const globalDeclaration = llvm::cast<llvm::GlobalVariable>(
                     t_emitter.GetModule().getOrInsertGlobal("printf_string_int", stringType)
@@ -1436,7 +1593,8 @@ namespace Ace
                     llvm::GlobalValue::UnnamedAddr::Global
                 );
 
-                auto* const printfFunction = t_emitter.GetC().GetFunctions().GetPrintf();
+                auto* const printfFunction =
+                    t_emitter.GetC().GetFunctions().GetPrintf();
 
                 std::vector<llvm::Value*> arguments{};
                 arguments.push_back(llvm::ConstantExpr::getBitCast(
@@ -1475,12 +1633,18 @@ namespace Ace
                 std::vector<llvm::Constant*> chars(string.size());
                 for (size_t i = 0; i < string.size(); i++)
                 {
-                    chars.at(i) = llvm::ConstantInt::get(charType, string[i]);
+                    chars.at(i) = llvm::ConstantInt::get(
+                        charType,
+                        string.at(i)
+                    );
                 }
 
                 chars.push_back(llvm::ConstantInt::get(charType, 0));
 
-                auto* const stringType = llvm::ArrayType::get(charType, chars.size());
+                auto* const stringType = llvm::ArrayType::get(
+                    charType,
+                    chars.size()
+                );
 
                 auto* const globalDeclaration = llvm::cast<llvm::GlobalVariable>(
                     t_emitter.GetModule().getOrInsertGlobal("printf_string_ptr", stringType)
@@ -1496,7 +1660,8 @@ namespace Ace
                     llvm::GlobalValue::UnnamedAddr::Global
                 );
 
-                auto* const printfFunction = t_emitter.GetC().GetFunctions().GetPrintf();
+                auto* const printfFunction =
+                    t_emitter.GetC().GetFunctions().GetPrintf();
 
                 std::vector<llvm::Value*> arguments{};
                 arguments.push_back(llvm::ConstantExpr::getBitCast(
@@ -1527,7 +1692,8 @@ namespace Ace
             },
             [this](Emitter& t_emitter)
             {
-                auto* const mallocFunction = t_emitter.GetC().GetFunctions().GetMalloc();
+                auto* const mallocFunction =
+                    t_emitter.GetC().GetFunctions().GetMalloc();
 
                 auto* const intTypeSymbol = Int.GetSymbol();
                 auto* const intType = t_emitter.GetIRType(intTypeSymbol);
@@ -1559,7 +1725,8 @@ namespace Ace
             },
             [this](Emitter& t_emitter)
             {
-                auto* const freeFunction = t_emitter.GetC().GetFunctions().GetFree();
+                auto* const freeFunction =
+                    t_emitter.GetC().GetFunctions().GetFree();
 
                 auto* const pointerType = Pointer.GetIRType();
 
@@ -1586,14 +1753,16 @@ namespace Ace
             },
             [this](Emitter& t_emitter)
             {
-                auto* const memcpyFunction = t_emitter.GetC().GetFunctions().GetMemcpy();
+                auto* const memcpyFunction =
+                    t_emitter.GetC().GetFunctions().GetMemcpy();
 
                 auto* const pointerType = Pointer.GetIRType();
 
                 auto* const intTypeSymbol = Int.GetSymbol();
                 auto* const intType = t_emitter.GetIRType(intTypeSymbol);
 
-                auto* const cSizeType = (memcpyFunction->arg_begin() + 2)->getType();
+                auto* const cSizeType =
+                    (memcpyFunction->arg_begin() + 2)->getType();
 
                 auto* const srcValue = t_emitter.EmitLoadArgument(0, pointerType);
                 auto* const dstValue = t_emitter.EmitLoadArgument(1, pointerType);
@@ -1986,6 +2155,21 @@ namespace Ace
         InitializeExplicitFromOperatorMap();
 
         InitializeSignedIntTypesSet();
+    }
+
+    auto Natives::GetIRTypeSymbolMap() const -> const std::unordered_map<Symbol::Type::IBase*, llvm::Type*>&
+    {
+        return m_IRTypeSymbolMap;
+    }
+
+    auto Natives::GetImplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>&
+    {
+        return m_ImplicitFromOperatorMap;
+    }
+
+    auto Natives::GetExplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>&
+    {
+        return m_ExplicitFromOperatorMap;
     }
 
     auto Natives::IsIntTypeSigned(const NativeType& t_intType) const -> bool

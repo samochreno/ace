@@ -13,6 +13,21 @@
 
 namespace Ace::BoundNode::Expression
 {
+    StructConstruction::StructConstruction(
+        const std::shared_ptr<Scope>& t_scope,
+        Symbol::Type::Struct* const t_structSymbol,
+        const std::vector<Argument>& t_arguments
+    ) : m_Scope{ t_scope },
+        m_StructSymbol{ t_structSymbol },
+        m_Arguments{ t_arguments }
+    {
+    }
+
+    auto StructConstruction::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto StructConstruction::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -25,8 +40,10 @@ namespace Ace::BoundNode::Expression
 
         return children;
     }
-    
-    auto StructConstruction::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::StructConstruction>>>
+
+    auto StructConstruction::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::StructConstruction>>>
     {
         ACE_TRY(mchCheckedArguments, TransformExpectedMaybeChangedVector(m_Arguments,
         [](const Argument& t_argument) -> Expected<MaybeChanged<Argument>>
@@ -34,13 +51,20 @@ namespace Ace::BoundNode::Expression
             ACE_TRY(mchCheckedValue, t_argument.Value->GetOrCreateTypeCheckedExpression({}));
 
             if (!mchCheckedValue.IsChanged)
+            {
                 return CreateUnchanged(t_argument);
+            }
 
-            return CreateChanged(Argument{ t_argument.Symbol, mchCheckedValue.Value });
+            return CreateChanged(Argument{
+                t_argument.Symbol,
+                mchCheckedValue.Value
+            });
         }));
 
         if (!mchCheckedArguments.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::StructConstruction>(
             m_Scope,
@@ -50,21 +74,38 @@ namespace Ace::BoundNode::Expression
         return CreateChanged(returnValue);
     }
 
-    auto StructConstruction::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::StructConstruction>>
+    auto StructConstruction::GetOrCreateTypeCheckedExpression(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto StructConstruction::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::StructConstruction>>
     {
         const auto mchLoweredArguments = TransformMaybeChangedVector(m_Arguments,
         [&](const Argument& t_argument) -> MaybeChanged<Argument>
         {
-            const auto mchLoweredValue = t_argument.Value->GetOrCreateLoweredExpression({});
+            const auto mchLoweredValue =
+                t_argument.Value->GetOrCreateLoweredExpression({});
 
             if (!mchLoweredValue.IsChanged)
+            {
                 return CreateUnchanged(t_argument);
+            }
 
-            return CreateChanged(Argument{ t_argument.Symbol, mchLoweredValue.Value });
+            return CreateChanged(Argument{
+                t_argument.Symbol,
+                mchLoweredValue.Value
+            });
         });
 
         if (!mchLoweredArguments.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::StructConstruction>(
             m_Scope,
@@ -74,19 +115,30 @@ namespace Ace::BoundNode::Expression
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
-    auto StructConstruction::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
+    auto StructConstruction::GetOrCreateLoweredExpression(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
+    auto StructConstruction::Emit(
+        Emitter& t_emitter
+    ) const -> ExpressionEmitResult
     {
         std::vector<ExpressionDropData> temporaries{};
 
         auto* const structureType = t_emitter.GetIRType(m_StructSymbol);
 
-        auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(structureType);
+        auto* const allocaInst =
+            t_emitter.GetBlockBuilder().Builder.CreateAlloca(structureType);
         temporaries.emplace_back(allocaInst, m_StructSymbol);
 
         std::for_each(begin(m_Arguments), end(m_Arguments),
         [&](const BoundNode::Expression::StructConstruction::Argument& t_argument)
         {
-            auto* const argumentTypeSymbol = t_argument.Value->GetTypeInfo().Symbol;
+            auto* const argumentTypeSymbol =
+                t_argument.Value->GetTypeInfo().Symbol;
             auto* const argumentType = t_emitter.GetIRType(argumentTypeSymbol);
 
             const auto variableIndex = t_argument.Symbol->GetIndex();
@@ -114,7 +166,11 @@ namespace Ace::BoundNode::Expression
             );
 
             const auto argumentEmitResult = t_argument.Value->Emit(t_emitter);
-            temporaries.insert(end(temporaries), begin(argumentEmitResult.Temporaries), end(argumentEmitResult.Temporaries));
+            temporaries.insert(
+                end(temporaries),
+                begin(argumentEmitResult.Temporaries),
+                end  (argumentEmitResult.Temporaries)
+            );
 
             t_emitter.EmitCopy(
                 elementPtr,

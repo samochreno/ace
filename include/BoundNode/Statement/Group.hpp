@@ -23,19 +23,24 @@ namespace Ace::BoundNode::Statement
         Group(
             const std::shared_ptr<Scope>& t_scope,
             const std::vector<std::shared_ptr<const BoundNode::Statement::IBase>>& t_statements
-        ) : m_Scope{ t_scope },
-            m_Statements{ t_statements }
-        {
-        }
+        );
         virtual ~Group() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>> final;
-        auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>> final;
-        auto GetOrCreateLoweredStatement(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>> final { return GetOrCreateLowered(t_context); }
-        auto Emit(Emitter& t_emitter) const -> void final { ACE_UNREACHABLE(); }
+        auto GetOrCreateTypeChecked(
+            const BoundNode::Statement::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>> final;
+        auto GetOrCreateTypeCheckedStatement(
+            const BoundNode::Statement::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final;
+        auto GetOrCreateLowered(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>> final;
+        auto GetOrCreateLoweredStatement(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>> final;
+        auto Emit(Emitter& t_emitter) const -> void final;
         
         auto CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const BoundNode::Statement::IBase>> final;
 

@@ -2,39 +2,45 @@
 
 ## 💥 High Priority
 
+- Consider splitting `Core.hpp` into multiple files, especially glue generation
+- Un-nest names for example `Node::...`, `BoundNode::...`, `C::`
+- Refactor expression parsing
+- Refactor compound assignment lowering
+- Refactor emitting of variable references
+- Remove primitive references
 - Use `Measured` in lexer
 - ❓ Remove `ACE_TRY` macros, make opening braces on the same line
 - Add error messages to make debugging easier:
-  - [ ] Remove second typechecking pass
-  - [ ] `Compilation` parsing and verification errors
-  - [ ] Parsing errors:
+  - Remove second typechecking pass
+  - `Compilation` parsing and verification errors
+  - Parsing errors:
     - Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
-  - [ ] Error printing
-  - [ ] ❓ Make errors just enums, not full types
-- [ ] Rename `found...It`
-- [ ] Add strong pointer self
+  - Error printing
+  - ❓ Make errors just enums, not full types
+- Rename `found...It`
+- Add strong pointer self
 - Traits:
-  - [ ] Implement parsing
-  - [ ] Implement symbols
-  - [ ] Implement binding
-  - [ ] ❓ Implement Rust's orphan rule
+  - Implement parsing
+  - Implement symbols
+  - Implement binding
+  - ❓ Implement Rust's orphan rule
 - Templates:
-  - [ ] Implement constraints
-  - [ ] When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first
-  - [ ] After compilation, do semantic analysis on templates that have never been instantiated
-  - [ ] ❓ Create unique signatures for template instances
-  - [ ] Default template arguments
+  - Implement constraints
+  - When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first
+  - After compilation, do semantic analysis on templates that have never been instantiated
+  - ❓ Create unique signatures for template instances
+  - Default template arguments
 - Conversion operators with traits:
-  - [ ] Implement
-  - [ ] Change `__deref_as[T](...)` to take any type convertible to `std::Pointer` and remove `std::Reference[T]::ptr(...)`
-- [ ] Strings
-- [ ] Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; This could maybe be fixed by forcing the copy trait to also implement default trait)
-- [ ] Add lifetime trait: default, copy, drop
-- [ ] Check if there is any better way to not use external programs like `llc` and `clang`
+  - Implement
+  -  Change `__deref_as[T](...)` to take any type convertible to `std::Pointer` and remove `std::Reference[T]::ptr(...)`
+- Strings
+- Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; This could maybe be fixed by forcing the copy trait to also implement default trait)
+- Add lifetime trait: default, copy, drop
+- ] Check if there is any better way to not use external programs like `llc` and `clang`
 
 ## 🔔 Medium Priority
 
-- [ ] Rewrite Package.json to package.ace:
+- Rewrite Package.json to package.ace:
   ```rs
   import std::build::*;
 
@@ -57,43 +63,43 @@
       };
   }
   ```
-- [ ] Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
-- [ ] Check out LLVM attributes
-- [ ] Struct update constructor syntax
+- Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
+- Check out LLVM attributes
+- Struct update constructor syntax
 - Mutability/Immutability:
-  - [ ] Implement
-  - [ ] Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`
-- [ ] Dont allow private types to leak in public interface
+  - Implement
+  - Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`
+- Dont allow private types to leak in public interface
 - Struct construction syntax:
-  - [ ] New syntax for struct construction. The current `new Struct { ... }` and `Struct::new(...)` are too similiar
-  - [ ] Add struct update constructor syntax
-- [ ] Full and partial template specialization
-- [ ] Add associated variables
-- [ ] Remove duplicate module filepaths: `./dawg/../dawg/` is the same as `./dawg/`
+  - New syntax for struct construction. The current `new Struct { ... }` and `Struct::new(...)` are too similiar
+  - Add struct update constructor syntax
+- Full and partial template specialization
+- Add associated variables
+-  Remove duplicate module filepaths: `./dawg/../dawg/` is the same as `./dawg/`
 - Operator verification:
-  - [ ] Operators must be public and static (this can be implemented in the parser)
-  - [ ] A conversion operator must convert to the enclosing type, from a type other than the enclosing type.
-  - [ ] You can have a `impl` or an `expl` operator to a type, not both
-  - [ ] First parameter of `drop` has to be of type `&Self`
-  - [ ] First and second parameters of `copy` have to be of type `&Self`
-  - [ ] `==` reqiures a matching `!=` &larr;
-  - [ ] `<=` requires a matching `>=` &larr; These will be handled by traits, eg.: `Equatable` &rarr; `operator ==(...)` and `operator !=(...)`
-  - [ ] `<` requires matching `>`     &larr;
+  - Operators must be public and static (this can be implemented in the parser)
+  - A conversion operator must convert to the enclosing type, from a type other than the enclosing type.
+  - You can have a `impl` or an `expl` operator to a type, not both
+  - First parameter of `drop` has to be of type `&Self`
+  - First and second parameters of `copy` have to be of type `&Self`
+  - `==` reqiures a matching `!=` &larr;
+  - `<=` requires a matching `>=` &larr; These will be handled by traits, eg.: `Equatable` &rarr; `operator ==(...)` and `operator !=(...)`
+  - `<` requires matching `>`     &larr;
 
 ## 🥶 Low Priority
 
-- [ ] Local variable assignment analysis (data flow analysis), control flow graph
+- Local variable assignment analysis (data flow analysis), control flow graph
 - Metadata:
-  - [ ] Export/import symbol metadata for reflection and headers
+  - Export/import symbol metadata for reflection and headers
   - Metadata will be stored in exe/dll files this way:
     - Last 8 bytes of file will be u64 which stores value of metadata size in bytes
     - `[ ? bytes - Content of exe/dll ][ X bytes -  Metadata ][ 8 bytes - X ]`
-- [ ] Dll package dependencies
-- [ ] Dll calls
-- [ ] Reflection
-- [ ] Enums
-- [ ] Figure out how to share globals between dlls
-- [ ] ❓ Remove local variable shadowing, it causes more mistakes than usefulness
+- Dll package dependencies
+- Dll calls
+- Reflection
+- Enums
+- Figure out how to share globals between dlls
+- ❓ Remove local variable shadowing, it causes more mistakes than usefulness
 
 ## 💡 Ideas
 
@@ -238,4 +244,3 @@
       ret Ret::new(5);
   }
   ```
- 

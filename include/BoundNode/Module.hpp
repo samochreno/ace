@@ -29,20 +29,17 @@ namespace Ace::BoundNode
             const std::vector<std::shared_ptr<const BoundNode::Impl>>& t_impls,
             const std::vector<std::shared_ptr<const BoundNode::Function>>& t_functions,
             const std::vector<std::shared_ptr<const BoundNode::Variable::Normal::Static>>& t_variables
-        ) : m_Symbol{ t_symbol },
-            m_Modules{ t_modules },
-            m_Types{ t_types },
-            m_Impls{ t_impls },
-            m_Functions{ t_functions },
-            m_Variables{ t_variables }
-        {
-        }
+        );
         virtual ~Module() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Symbol->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Module>>> final;
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Module>> final;
+        auto GetOrCreateTypeChecked(
+            const BoundNode::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Module>>> final;
+        auto GetOrCreateLowered(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Module>> final;
 
     private:
         Symbol::Module* m_Symbol{};

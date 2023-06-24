@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <string>
 
@@ -21,30 +22,23 @@ namespace Ace::Symbol::Template
         public virtual Symbol::ISelfScoped
     {
     public:
-        Type(
-            const Node::Template::Type* const t_templateNode
-        ) : m_Name{ SpecialIdentifier::CreateTemplate(t_templateNode->GetAST()->GetName()) },
-            m_TemplateNode{ t_templateNode }
-        {
-        }
+        Type(const Node::Template::Type* const t_templateNode);
         virtual ~Type() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_TemplateNode->GetScope(); }
-        auto GetSelfScope() const -> std::shared_ptr<Scope> final { return m_TemplateNode->GetSelfScope(); }
-        auto GetName() const -> const std::string& final { return m_Name; }
-        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TypeTemplate; }
-        auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
-        auto GetAccessModifier() const -> AccessModifier final { return m_TemplateNode->GetAST()->GetAccessModifier(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
+        auto GetSelfScope() const -> std::shared_ptr<Scope> final;
+        auto GetName() const -> const std::string& final;
+        auto GetSymbolKind() const -> SymbolKind final;
+        auto GetSymbolCategory() const -> SymbolCategory final;
+        auto GetAccessModifier() const -> AccessModifier final;
 
         auto CollectImplParameters() const -> std::vector<Symbol::Type::TemplateParameter::Impl*>   final;
         auto CollectParameters()     const -> std::vector<Symbol::Type::TemplateParameter::Normal*> final;
 
-        auto GetASTName() const -> const std::string& final { return m_TemplateNode->GetAST()->GetName(); }
+        auto GetASTName() const -> const std::string& final;
   
-        auto SetPlaceholderSymbol(
-            Symbol::IBase* const t_symbol
-        ) -> void final { m_PlaceholderSymbol = t_symbol; }
-        auto GetPlaceholderSymbol() const -> Symbol::IBase* final { return m_PlaceholderSymbol; }
+        auto SetPlaceholderSymbol(Symbol::IBase* const t_symbol) -> void final;
+        auto GetPlaceholderSymbol() const -> Symbol::IBase* final;
 
         auto InstantiateSymbols(
             const std::vector<Symbol::Type::IBase*>& t_implArguments,
@@ -54,8 +48,7 @@ namespace Ace::Symbol::Template
             const std::shared_ptr<const Node::IBase>& t_ast
         ) -> void final;
 
-
-private:
+    private:
         std::string m_Name{};
         AccessModifier m_AccessModifier{};
         const Node::Template::Type* m_TemplateNode{};

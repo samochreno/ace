@@ -39,10 +39,25 @@ namespace Ace
         );
     }
 
+    auto CommandLineArgumentBuffer::GetCompilation() const -> const Compilation*
+    {
+        return m_Compilation;
+    }
+
+    auto CommandLineArgumentBuffer::GetBuffer() const -> const std::string&
+    {
+        return m_Buffer;
+    }
+
     auto CommandLineArgumentBuffer::FormatLocation(
         const SourceLocation& t_location
     ) const -> std::string
     {
         return {};
+    }
+
+    auto CommandLineArgumentBuffer::GetArgs() const -> const std::vector<std::string_view>&
+    {
+        return m_Args;
     }
 }

@@ -21,21 +21,26 @@ namespace Ace::BoundNode::Statement::Jump
         Normal(
             const std::shared_ptr<Scope>& t_scope,
             Symbol::Label* const t_labelSymbol
-        ) : m_Scope{ t_scope },
-            m_LabelSymbol{ t_labelSymbol }
-        {
-        }
+        );
         virtual ~Normal() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Jump::Normal>>> final;
-        auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Jump::Normal>> final;
-        auto GetOrCreateLoweredStatement(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>> final { return GetOrCreateLowered(t_context); }
+        auto GetOrCreateTypeChecked(
+            const BoundNode::Statement::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Jump::Normal>>> final;
+        auto GetOrCreateTypeCheckedStatement(
+            const BoundNode::Statement::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final;
+        auto GetOrCreateLowered(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Jump::Normal>> final;
+        auto GetOrCreateLoweredStatement(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>> final;
         auto Emit(Emitter& t_emitter) const -> void final;
 
-        auto GetLabelSymbol() const -> Symbol::Label* final { return m_LabelSymbol; }
+        auto GetLabelSymbol() const -> Symbol::Label* final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

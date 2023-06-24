@@ -24,18 +24,19 @@ namespace Ace::BoundNode::Variable::Normal
         Instance(
             Symbol::Variable::Normal::Instance* const t_symbol,
             const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes
-        ) : m_Symbol{ t_symbol },
-            m_Attributes{ t_attributes }
-        {
-        }
+        );
         virtual ~Instance() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Symbol->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Instance>>> final;
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Instance>> final;
+        auto GetOrCreateTypeChecked(
+            const BoundNode::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Instance>>> final;
+        auto GetOrCreateLowered(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Instance>> final;
 
-        auto GetSymbol() const -> Symbol::Variable::Normal::Instance* final { return m_Symbol; }
+        auto GetSymbol() const -> Symbol::Variable::Normal::Instance* final;
 
     private:
         Symbol::Variable::Normal::Instance* m_Symbol{};

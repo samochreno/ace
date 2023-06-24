@@ -90,7 +90,7 @@ namespace Ace
         GlobalScope(const Compilation* const t_compilation);
         ~GlobalScope();
 
-        auto Unwrap() const -> const std::shared_ptr<Scope>& { return m_Scope; }
+        auto Unwrap() const -> const std::shared_ptr<Scope>&;
 
     private:
         std::shared_ptr<Scope> m_Scope{};
@@ -103,16 +103,18 @@ namespace Ace
     public:
         ~Scope();
         
-        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
-        auto GetNestLevel() const -> size_t { return m_NestLevel; }
-        auto GetParent() const -> const std::optional<std::shared_ptr<Scope>>& { return m_OptParent; }
-        auto GetName() const -> const std::string& { return m_Name; }
+        auto GetCompilation() const -> const Compilation*;
+        auto GetNestLevel() const -> size_t;
+        auto GetParent() const -> const std::optional<std::shared_ptr<Scope>>&;
+        auto GetName() const -> const std::string&;
         auto FindModule() const -> std::optional<Symbol::Module*>;
 
         auto GetOrCreateChild(
             const std::optional<std::string>& t_optName
         ) -> std::shared_ptr<Scope>;
-        auto HasChild(const std::shared_ptr<const Scope>& t_scope) const -> bool;
+        auto HasChild(
+            const std::shared_ptr<const Scope>& t_scope
+        ) const -> bool;
 
         template<typename TSymbol>
         static auto DefineSymbol(
@@ -132,7 +134,9 @@ namespace Ace
             Symbol::IBase* const t_symbol
         ) -> void;
 
-        auto DefineAssociation(const std::shared_ptr<Scope>& t_association) -> void;
+        auto DefineAssociation(
+            const std::shared_ptr<Scope>& t_association
+        ) -> void;
 
         static auto CreateArgumentTypes(
             Symbol::Type::IBase* const t_argumentType
@@ -422,12 +426,12 @@ namespace Ace
         auto CollectMatchingNormalSymbols(
             const SymbolResolutionData& t_data,
         const std::vector<Symbol::Type::IBase*>& t_templateArguments,
-            const std::vector<std::unique_ptr<Symbol::IBase>>& t_nameMatchedSymbols
+            const std::vector<std::unique_ptr<Symbol::IBase>>& t_matchingNameSymbols
         ) const -> std::vector<Symbol::IBase*>;
         auto CollectMatchingTemplateSymbols(
             const SymbolResolutionData& t_data,
             const std::vector<Symbol::Type::IBase*>& t_templateArguments,
-            const std::vector<std::unique_ptr<Symbol::IBase>>& t_nameMatchedSymbols
+            const std::vector<std::unique_ptr<Symbol::IBase>>& t_matchingNameSymbols
         ) const -> std::vector<Symbol::IBase*>;
 
         static auto ResolveTemplateInstance(

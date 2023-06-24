@@ -27,7 +27,6 @@ namespace Ace::Node
         public virtual Node::IPartiallySymbolCreatable
     {
     public:
-        
         Module(
             const std::shared_ptr<Scope>& t_scope,
             const std::shared_ptr<Scope>& t_selfScope,
@@ -41,32 +40,23 @@ namespace Ace::Node
             const std::vector<std::shared_ptr<const Node::Function>>& t_functions,
             const std::vector<std::shared_ptr<const Node::Template::Function>>& t_functionTemplates,
             const std::vector<std::shared_ptr<const Node::Variable::Normal::Static>>& t_variables
-        ) : m_Scope{ t_scope },
-            m_SelfScope{ t_selfScope },
-            m_Name{ t_name },
-            m_AccessModifier{ t_accessModifier },
-            m_Modules{ t_modules },
-            m_Types{ t_types },
-            m_TypeTemplates{ t_typeTemplates },
-            m_Impls{ t_impls },
-            m_TemplatedImpls{ t_templatedImpls },
-            m_Functions{ t_functions },
-            m_FunctionTemplates{ t_functionTemplates },
-            m_Variables{ t_variables }
-        {
-        }
+        );
         virtual ~Module() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Module> final;
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Module> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Module>> final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
-        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Module; }
+        auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
-        auto ContinueCreatingSymbol(Symbol::IBase* const t_symbol) const -> Expected<void> final;
+        auto ContinueCreatingSymbol(
+            Symbol::IBase* const t_symbol
+        ) const -> Expected<void> final;
         auto GetName() const -> const std::string& final;
 
     private:

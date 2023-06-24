@@ -9,6 +9,19 @@
 
 namespace Ace::BoundNode::Variable::Normal
 {
+    Instance::Instance(
+        Symbol::Variable::Normal::Instance* const t_symbol,
+        const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes
+    ) : m_Symbol{ t_symbol },
+        m_Attributes{ t_attributes }
+    {
+    }
+
+    auto Instance::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Symbol->GetScope();
+    }
+
     auto Instance::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -18,7 +31,9 @@ namespace Ace::BoundNode::Variable::Normal
         return children;
     }
 
-    auto Instance::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Instance>>>
+    auto Instance::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Instance>>>
     {
         ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
         ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
@@ -30,7 +45,9 @@ namespace Ace::BoundNode::Variable::Normal
         }));
 
         if (!mchCheckedAttributes.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Variable::Normal::Instance>(
             m_Symbol,
@@ -39,7 +56,9 @@ namespace Ace::BoundNode::Variable::Normal
         return CreateChanged(returnValue);
     }
 
-    auto Instance::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Instance>>
+    auto Instance::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Variable::Normal::Instance>>
     {
         const auto mchLoweredAttributes = TransformMaybeChangedVector(m_Attributes,
         [](const std::shared_ptr<const BoundNode::Attribute>& t_attribute)
@@ -48,12 +67,19 @@ namespace Ace::BoundNode::Variable::Normal
         });
 
         if (!mchLoweredAttributes.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Variable::Normal::Instance>(
             m_Symbol,
             mchLoweredAttributes.Value
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+    }
+
+    auto Instance::GetSymbol() const -> Symbol::Variable::Normal::Instance*
+    {
+        return m_Symbol;
     }
 }

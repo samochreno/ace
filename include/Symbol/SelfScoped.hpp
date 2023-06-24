@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "Symbol/Base.hpp"
 
 namespace Ace::Symbol

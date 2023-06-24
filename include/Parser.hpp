@@ -19,14 +19,10 @@ namespace Ace
     class ParseToken
     {
     public:
-        ParseToken(
-            const std::shared_ptr<const Token>& t_value
-        ) : m_Value{ t_value }
-        {
-        }
+        ParseToken(const std::shared_ptr<const Token>& t_value);
         ~ParseToken() = default;
 
-        auto Unwrap() const -> const Token& { return *m_Value.get(); }
+        auto Unwrap() const -> const Token&;
         operator const std::shared_ptr<const Token>&() const { return m_Value; }
 
     private:

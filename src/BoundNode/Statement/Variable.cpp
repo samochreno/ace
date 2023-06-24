@@ -15,6 +15,19 @@
 
 namespace Ace::BoundNode::Statement
 {
+    Variable::Variable(
+        Symbol::Variable::Local* const t_symbol,
+        const std::optional<std::shared_ptr<const BoundNode::Expression::IBase>>& t_optAssignedExpression
+    ) : m_Symbol{ t_symbol },
+        m_OptAssignedExpression{ t_optAssignedExpression }
+    {
+    }
+
+    auto Variable::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Symbol->GetScope();
+    }
+
     auto Variable::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -27,7 +40,9 @@ namespace Ace::BoundNode::Statement
         return children;
     }
 
-    auto Variable::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>>>
+    auto Variable::GetOrCreateTypeChecked(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>>>
     {
         ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
         ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
@@ -38,7 +53,9 @@ namespace Ace::BoundNode::Statement
         ));
 
         if (!mchConvertedAndCheckedOptAssignedExpression.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Statement::Variable>(
             m_Symbol,
@@ -47,7 +64,16 @@ namespace Ace::BoundNode::Statement
         return CreateChanged(returnValue);
     }
 
-    auto Variable::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>>
+    auto Variable::GetOrCreateTypeCheckedStatement(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto Variable::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>>
     {
         const auto mchLoweredOptAssignedExpression = TransformMaybeChangedOptional(m_OptAssignedExpression,
         [](const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
@@ -56,7 +82,9 @@ namespace Ace::BoundNode::Statement
         });
 
         if (!mchLoweredOptAssignedExpression.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Statement::Variable>(
             m_Symbol,
@@ -65,10 +93,19 @@ namespace Ace::BoundNode::Statement
         return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
     }
 
+    auto Variable::GetOrCreateLoweredStatement(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
     auto Variable::Emit(Emitter& t_emitter) const -> void
     {
         if (!m_OptAssignedExpression.has_value())
+        {
             return;
+        }
 
         const auto variableReferenceExpression = std::make_shared<const BoundNode::Expression::VariableReference::Static>(
             GetScope(),
@@ -82,5 +119,10 @@ namespace Ace::BoundNode::Statement
         );
 
         assignmentStatement->Emit(t_emitter);
+    }
+
+    auto Variable::GetSymbol() const -> Symbol::Variable::Local*
+    {
+        return m_Symbol;
     }
 }

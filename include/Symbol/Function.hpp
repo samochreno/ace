@@ -39,23 +39,17 @@ namespace Ace::Symbol
             const SymbolCategory& t_symbolCategory,
             const AccessModifier& t_accessModifier,
             Symbol::Type::IBase* const t_type
-        ) : m_SelfScope{ t_selfScope },
-            m_Name{ t_name },
-            m_SymbolCategory{ t_symbolCategory },
-            m_AccessModifier{ t_accessModifier },
-            m_Type{ t_type }
-        {
-        }
+        );
         virtual ~Function() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_SelfScope->GetParent().value(); }
-        auto GetSelfScope() const -> std::shared_ptr<Scope> final { return m_SelfScope; }
-        auto GetName() const -> const std::string& final { return m_Name; }
-        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Function; }
-        auto GetSymbolCategory() const -> SymbolCategory final { return m_SymbolCategory; }
-        auto GetAccessModifier() const -> AccessModifier final { return m_AccessModifier; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
+        auto GetSelfScope() const -> std::shared_ptr<Scope> final;
+        auto GetName() const -> const std::string& final;
+        auto GetSymbolKind() const -> SymbolKind final;
+        auto GetSymbolCategory() const -> SymbolCategory final;
+        auto GetAccessModifier() const -> AccessModifier final;
 
-        auto GetType() const -> Symbol::Type::IBase* final { return m_Type; }
+        auto GetType() const -> Symbol::Type::IBase* final;
 
         auto CollectParameters()    const -> std::vector<Symbol::Variable::Parameter::IBase*> final;
         auto CollectAllParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>;

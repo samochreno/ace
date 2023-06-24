@@ -37,6 +37,21 @@ namespace Ace
         llvm::IRBuilder<>  Builder;
     };
 
+    class LabelBlockMap
+    {
+    public:
+        LabelBlockMap(Emitter& t_emitter);
+
+        auto GetOrCreateAt(
+            const Symbol::Label* const t_labelSymbol
+        ) -> llvm::BasicBlock*;
+        auto Clear() -> void;
+
+    private:
+        Emitter& m_Emitter;
+        std::unordered_map<const Symbol::Label*, llvm::BasicBlock*> m_Map{};
+    };
+
     class Emitter
     {
     public:
@@ -51,40 +66,6 @@ namespace Ace
             } Durations{};
         };
 
-        class LabelBlockMap
-        {
-        public:
-            LabelBlockMap(Emitter& t_emitter)
-                : m_Emitter{ t_emitter }
-            {
-            }
-
-            auto GetOrCreateAt(const Symbol::Label* const t_labelSymbol) -> llvm::BasicBlock*
-            {
-                auto foundIt = m_Map.find(t_labelSymbol);
-                if (foundIt != end(m_Map))
-                    return foundIt->second;
-
-                auto block = llvm::BasicBlock::Create(
-                    *m_Emitter.GetCompilation()->LLVMContext,
-                    "",
-                    m_Emitter.GetFunction()
-                );
-
-                m_Map[t_labelSymbol] = block;
-                return block;
-            }
-
-            auto Clear() -> void
-            {
-                m_Map.clear();
-            }
-
-        private:
-            Emitter& m_Emitter;
-            std::unordered_map<const Symbol::Label*, llvm::BasicBlock*> m_Map{};
-        };
-
         struct LocalVariableSymbolStatementIndexPair
         {
             Symbol::Variable::Local* LocalVariableSymbol{};
@@ -96,7 +77,7 @@ namespace Ace
 
         auto SetASTs(
             const std::vector<std::shared_ptr<const BoundNode::Module>>& t_asts
-        ) -> void { m_ASTs = t_asts; }
+        ) -> void;
 
         auto Emit() -> Result;
 
@@ -121,23 +102,25 @@ namespace Ace
         ) -> void;
         auto EmitDropArguments() -> void;
 
-        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
-        auto GetModule() const -> llvm::Module& { return *m_Module.get(); }
-        auto GetC() const -> const C& { return m_C; }
+        auto GetCompilation() const -> const Compilation*;
+        auto GetModule() const -> llvm::Module&;
+        auto GetC() const -> const C&;
 
-        auto GetIRType(const Symbol::Type::IBase* const t_typeSymbol) const -> llvm::Type*;
+        auto GetIRType(
+            const Symbol::Type::IBase* const t_typeSymbol
+        ) const -> llvm::Type*;
 
-        auto GetStaticVariableMap() const -> const std::unordered_map<const Symbol::Variable::Normal::Static*, llvm::Constant*>& { return m_StaticVariableMap; }
-        auto GetFunctionMap() const -> const std::unordered_map<const Symbol::Function*, llvm::FunctionCallee>& { return m_FunctionMap; }
+        auto GetStaticVariableMap() const -> const std::unordered_map<const Symbol::Variable::Normal::Static*, llvm::Constant*>&;
+        auto GetFunctionMap() const -> const std::unordered_map<const Symbol::Function*, llvm::FunctionCallee>&;
 
-        auto GetLocalVariableMap() const -> const std::unordered_map<const Symbol::Variable::IBase*, llvm::Value*>& { return m_LocalVariableMap; }
-        auto GetLabelBlockMap() -> LabelBlockMap& { return m_LabelBlockMap; }
-        auto GetFunction() const -> llvm::Function* { return m_Function; }
+        auto GetLocalVariableMap() const -> const std::unordered_map<const Symbol::Variable::IBase*, llvm::Value*>&;
+        auto GetLabelBlockMap() -> LabelBlockMap&;
+        auto GetFunction() const -> llvm::Function*;
 
-        auto GetBlockBuilder() -> BlockBuilder& { return *m_BlockBuilder.get(); }
+        auto GetBlockBuilder() -> BlockBuilder&;
         auto SetBlockBuilder(
             std::unique_ptr<BlockBuilder>&& t_value
-        ) -> void { m_BlockBuilder = std::move(t_value); }
+        ) -> void;
 
     private:
         auto EmitTypes(

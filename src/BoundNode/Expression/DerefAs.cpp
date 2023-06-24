@@ -13,6 +13,19 @@
 
 namespace Ace::BoundNode::Expression
 {
+    DerefAs::DerefAs(
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression,
+        Symbol::Type::IBase* const t_typeSymbol
+    ) : m_TypeSymbol{ t_typeSymbol },
+        m_Expression{ t_expression }
+    {
+    }
+
+    auto DerefAs::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Expression->GetScope();
+    }
+
     auto DerefAs::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -22,23 +35,13 @@ namespace Ace::BoundNode::Expression
         return children;
     }
 
-    auto DerefAs::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::DerefAs>>
+    auto DerefAs::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::DerefAs>>>
     {
-        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
+        auto* const typeSymbol =
+            m_Expression->GetTypeInfo().Symbol->GetUnaliased();
 
-        if (!mchLoweredExpression.IsChanged)
-            return CreateUnchanged(shared_from_this());
-
-        const auto returnValue = std::make_shared<const BoundNode::Expression::DerefAs>(
-            m_Expression,
-            m_TypeSymbol
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
-    }
-
-    auto DerefAs::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::DerefAs>>>
-    {
-        auto* const typeSymbol = m_Expression->GetTypeInfo().Symbol->GetUnaliased();
         ACE_TRY_ASSERT(
             (typeSymbol == GetCompilation()->Natives->Pointer.GetSymbol()) ||
             (typeSymbol->IsReference())
@@ -47,13 +50,48 @@ namespace Ace::BoundNode::Expression
         ACE_TRY(mchCheckedExpression, m_Expression->GetOrCreateTypeCheckedExpression({}));
 
         if (!mchCheckedExpression.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::DerefAs>(
             m_Expression,
             m_TypeSymbol
         );
         return CreateChanged(returnValue);
+    }
+
+    auto DerefAs::GetOrCreateTypeCheckedExpression(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto DerefAs::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::DerefAs>>
+    {
+        const auto mchLoweredExpression =
+            m_Expression->GetOrCreateLoweredExpression({});
+
+        if (!mchLoweredExpression.IsChanged)
+        {
+            return CreateUnchanged(shared_from_this());
+        }
+
+        const auto returnValue = std::make_shared<const BoundNode::Expression::DerefAs>(
+            m_Expression,
+            m_TypeSymbol
+        );
+        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+    }
+
+    auto DerefAs::GetOrCreateLoweredExpression(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
     }
 
     auto DerefAs::Emit(Emitter& t_emitter) const -> ExpressionEmitResult

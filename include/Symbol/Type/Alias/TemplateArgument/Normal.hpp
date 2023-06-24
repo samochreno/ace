@@ -1,13 +1,15 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <string>
 #include <optional>
 
+#include "Asserts.hpp"
 #include "Symbol/Type/Alias/TemplateArgument/Base.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "Scope.hpp"
-#include "Asserts.hpp"
+#include "AccessModifier.hpp"
 #include "Emittable.hpp"
 
 namespace Ace::Symbol::Type::Alias::TemplateArgument
@@ -20,45 +22,44 @@ namespace Ace::Symbol::Type::Alias::TemplateArgument
             const std::string& t_name,
             Symbol::Type::IBase* const t_aliasedType,
             const size_t& t_index
-        ) : m_Scope{ t_scope },
-            m_Name{ t_name },
-            m_AliasedType{ t_aliasedType },
-            m_Index{ t_index }
-        {
-        }
+        );
         virtual ~Normal() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
-        auto GetSelfScope() const -> std::shared_ptr<Scope> final { return m_AliasedType->GetSelfScope(); }
-        auto GetName() const -> const std::string& final { return m_Name; }
-        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::TypeAlias; }
-        auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
-        auto GetAccessModifier() const -> AccessModifier final { return AccessModifier::Private; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
+        auto GetSelfScope() const -> std::shared_ptr<Scope> final;
+        auto GetName() const -> const std::string& final;
+        auto GetSymbolKind() const -> SymbolKind final;
+        auto GetSymbolCategory() const -> SymbolCategory final;
+        auto GetAccessModifier() const -> AccessModifier final;
 
-        auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_AliasedType->CollectTemplateArguments(); }
-        auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_AliasedType->CollectImplTemplateArguments(); }
+        auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
+        auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
 
-        auto GetSizeKind() const -> Expected<TypeSizeKind> final { return m_AliasedType->GetSizeKind(); }
-        auto SetAsUnsized() -> void final { return m_AliasedType->SetAsUnsized(); }
-        auto SetAsPrimitivelyEmittable() -> void final { m_AliasedType->SetAsPrimitivelyEmittable(); }
-        auto IsPrimitivelyEmittable() const -> bool final { return m_AliasedType->IsPrimitivelyEmittable(); }
+        auto GetSizeKind() const -> Expected<TypeSizeKind> final;
+        auto SetAsUnsized() -> void final;
+        auto SetAsPrimitivelyEmittable() -> void final;
+        auto IsPrimitivelyEmittable() const -> bool final;
 
-        auto SetAsTriviallyCopyable() -> void final { m_AliasedType->SetAsTriviallyCopyable(); }
-        auto IsTriviallyCopyable() const -> bool final { return m_AliasedType->IsTriviallyCopyable(); }
-        auto SetAsTriviallyDroppable() -> void final { m_AliasedType->SetAsTriviallyDroppable(); }
-        auto IsTriviallyDroppable() const -> bool final { return m_AliasedType->IsTriviallyDroppable(); }
+        auto SetAsTriviallyCopyable() -> void final;
+        auto IsTriviallyCopyable() const -> bool final;
+        auto SetAsTriviallyDroppable() -> void final;
+        auto IsTriviallyDroppable() const -> bool final;
 
-        auto CreateCopyGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>> final { return m_AliasedType->CreateCopyGlueBody(t_glueSymbol); }
-        auto CreateDropGlueBody(Symbol::Function* const t_glueSymbol) -> std::shared_ptr<const IEmittable<void>> final { return m_AliasedType->CreateDropGlueBody(t_glueSymbol); }
+        auto CreateCopyGlueBody(
+            Symbol::Function* const t_glueSymbol
+        ) -> std::shared_ptr<const IEmittable<void>> final;
+        auto CreateDropGlueBody(
+            Symbol::Function* const t_glueSymbol
+        ) -> std::shared_ptr<const IEmittable<void>> final;
 
-        auto BindCopyGlue(Symbol::Function* const t_glue) -> void final { m_AliasedType->BindCopyGlue(t_glue); }
-        auto GetCopyGlue() const -> std::optional<Symbol::Function*> final { return m_AliasedType->GetCopyGlue(); }
-        auto BindDropGlue(Symbol::Function* const t_glue) -> void final { m_AliasedType->BindDropGlue(t_glue); }
-        auto GetDropGlue() const -> std::optional<Symbol::Function*> final { return m_AliasedType->GetDropGlue(); }
+        auto BindCopyGlue(Symbol::Function* const t_glue) -> void final;
+        auto GetCopyGlue() const -> std::optional<Symbol::Function*> final;
+        auto BindDropGlue(Symbol::Function* const t_glue) -> void final;
+        auto GetDropGlue() const -> std::optional<Symbol::Function*> final;
 
-        auto GetAliasedType() const -> Symbol::Type::IBase* final { return m_AliasedType; }
+        auto GetAliasedType() const -> Symbol::Type::IBase* final;
 
-        auto GetIndex() const -> size_t final { return m_Index; }
+        auto GetIndex() const -> size_t final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

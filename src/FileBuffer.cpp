@@ -78,6 +78,26 @@ namespace Ace
         };
     }
 
+    auto FileBuffer::GetCompilation() const -> const Compilation*
+    {
+        return m_Compilation;
+    }
+
+    auto FileBuffer::GetBuffer() const -> const std::string&
+    {
+        return m_Buffer;
+    }
+
+    auto FileBuffer::GetPath() const -> const std::filesystem::path&
+    {
+        return m_Path;
+    }
+
+    auto FileBuffer::GetLines() const -> const std::vector<std::string_view>&
+    {
+        return m_Lines;
+    }
+
     auto FileBuffer::FormatLocation(
         const SourceLocation& t_location
     ) const -> std::string

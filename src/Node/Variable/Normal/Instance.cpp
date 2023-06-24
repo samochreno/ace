@@ -13,6 +13,27 @@
 
 namespace Ace::Node::Variable::Normal
 {
+    Instance::Instance(
+        const std::shared_ptr<Scope>& t_scope,
+        const std::string& t_name,
+        const TypeName& t_typeName,
+        const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
+        const AccessModifier& t_accessModifier,
+        const size_t& t_index
+    ) : m_Scope{ t_scope },
+        m_Name{ t_name },
+        m_TypeName{ t_typeName },
+        m_Attributes{ t_attributes },
+        m_AccessModifier{ t_accessModifier },
+        m_Index{ t_index }
+    {
+    }
+
+    auto Instance::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto Instance::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -22,14 +43,20 @@ namespace Ace::Node::Variable::Normal
         return children;
     }
 
-    auto Instance::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Variable::Normal::Instance>
+    auto Instance::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Variable::Normal::Instance>
     {
         std::vector<std::shared_ptr<const Node::Attribute>> clonedAttributes{};
-        std::transform(begin(m_Attributes), end(m_Attributes), back_inserter(clonedAttributes),
-        [&](const std::shared_ptr<const Node::Attribute>& t_attribute)
-        {
-            return t_attribute->CloneInScope(t_scope);
-        });
+        std::transform(
+            begin(m_Attributes),
+            end  (m_Attributes),
+            back_inserter(clonedAttributes),
+            [&](const std::shared_ptr<const Node::Attribute>& t_attribute)
+            {
+                return t_attribute->CloneInScope(t_scope);
+            }
+        );
 
         return std::make_shared<const Node::Variable::Normal::Instance>(
             t_scope,
@@ -49,12 +76,33 @@ namespace Ace::Node::Variable::Normal
             return t_attribute->CreateBound();
         }));
 
-        auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<Symbol::Variable::Normal::Instance>(m_Name).Unwrap();
+        auto* const selfSymbol =
+            m_Scope->ExclusiveResolveSymbol<Symbol::Variable::Normal::Instance>(m_Name).Unwrap();
 
         return std::make_shared<const BoundNode::Variable::Normal::Instance>(
             selfSymbol,
             boundAttributes
-            );
+        );
+    }
+
+    auto Instance::GetName() const -> const std::string&
+    {
+        return m_Name;
+    }
+
+    auto Instance::GetSymbolScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
+    auto Instance::GetSymbolKind() const -> SymbolKind
+    {
+        return SymbolKind::InstanceVariable;
+    }
+
+    auto Instance::GetSymbolCreationSuborder() const -> size_t
+    {
+        return 0;
     }
 
     auto Instance::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
@@ -71,7 +119,7 @@ namespace Ace::Node::Variable::Normal
                 m_AccessModifier,
                 typeSymbol,
                 m_Index
-                )
+            )
         };
     }
 }

@@ -36,8 +36,10 @@ namespace Ace
         {
             const auto parentScope = scope->GetParent().value();
 
-            const auto templatedImplSymbols = parentScope->CollectSymbols<Symbol::TemplatedImpl>();
-            const auto foundIt = std::find_if(
+            const auto templatedImplSymbols =
+                parentScope->CollectSymbols<Symbol::TemplatedImpl>();
+
+            const auto matchingTemplatedImplIt = std::find_if(
                 begin(templatedImplSymbols),
                 end  (templatedImplSymbols),
                 [&](Symbol::TemplatedImpl* const t_templatedImpl)
@@ -46,10 +48,12 @@ namespace Ace
                 }
             );
 
-            if (foundIt == end(templatedImplSymbols))
+            if (matchingTemplatedImplIt == end(templatedImplSymbols))
+            {
                 continue;
+            }
 
-            return *foundIt;
+            return *matchingTemplatedImplIt;
         }
 
         return nullptr;
@@ -88,10 +92,14 @@ namespace Ace
     ) -> bool
     {
         if (!t_data.IsLastNameSection)
+        {
             return false;
+        }
 
         if (t_symbols.size() != 1)
+        {
             return false;
+        }
 
         auto* const symbol = t_symbols.front().get();
 
@@ -99,7 +107,9 @@ namespace Ace
             dynamic_cast<Symbol::Variable::Normal::Instance*>(symbol);
 
         if (!instanceVariableSymbol)
+        {
             return false;
+        }
 
         return true;
     }
@@ -120,24 +130,32 @@ namespace Ace
             {
                 const auto optSymbolModule = t_symbol->GetScope()->FindModule();
                 if (!optSymbolModule.has_value())
+                {
                     return true; 
+                }
 
                 auto* const symbolModule = optSymbolModule.value();
 
                 const auto optScopeModule = t_scope->FindModule();
                 if (!optScopeModule.has_value())
+                {
                     return false;
+                }
 
                 auto* const scopeModule = optScopeModule.value();
 
                 if (symbolModule == scopeModule)
+                {
                     return true;
+                }
 
                 const bool isSymbolChildOfScope = symbolModule->GetSelfScope()->HasChild(
                     scopeModule->GetSelfScope()
                 );
                 if (isSymbolChildOfScope)
+                {
                     return true;
+                }
 
                 return false;
             }
@@ -189,9 +207,16 @@ namespace Ace
     GlobalScope::~GlobalScope()
     {
         if (!m_Scope)
+        {
             return;
+        }
 
         m_Scope->Clear();
+    }
+
+    auto GlobalScope::Unwrap() const -> const std::shared_ptr<Scope>&
+    {
+        return m_Scope;
     }
     
     static auto FindExpiredChild(
@@ -211,15 +236,37 @@ namespace Ace
     Scope::~Scope()
     {
         if (!m_OptParent.has_value())
+        {
             return;
+        }
 
         auto& parentChildren = m_OptParent.value()->m_Children;
 
-        const auto foundIt = FindExpiredChild(parentChildren);
-        ACE_ASSERT(foundIt != end(parentChildren));
-        parentChildren.erase(foundIt);
+        const auto expiredChildIt = FindExpiredChild(parentChildren);
+        ACE_ASSERT(expiredChildIt != end(parentChildren));
+        parentChildren.erase(expiredChildIt);
 
         ACE_ASSERT(FindExpiredChild(parentChildren) == end(parentChildren));
+    }
+
+    auto Scope::GetCompilation() const -> const Compilation*
+    {
+        return m_Compilation;
+    }
+
+    auto Scope::GetNestLevel() const -> size_t
+    {
+        return m_NestLevel;
+    }
+
+    auto Scope::GetParent() const -> const std::optional<std::shared_ptr<Scope>>&
+    {
+        return m_OptParent;
+    }
+
+    auto Scope::GetName() const -> const std::string&
+    {
+        return m_Name;
     }
 
     auto Scope::FindModule() const -> std::optional<Symbol::Module*>
@@ -240,16 +287,22 @@ namespace Ace
             const auto foundIt = parent->m_SymbolMap.find(child->GetName());
 
             if (foundIt == end(parent->m_SymbolMap))
+            {
                 continue;
+            }
 
             if (foundIt->second.size() != 1)
+            {
                 continue;
+            }
 
             auto* const moduleSymbol = dynamic_cast<Symbol::Module*>(
                 foundIt->second.front().get()
             );
             if (!moduleSymbol)
+            {
                 continue;
+            }
 
             return moduleSymbol;
         }
@@ -281,7 +334,9 @@ namespace Ace
         return AddChild(t_optName);
     }
 
-    auto Scope::HasChild(const std::shared_ptr<const Scope>& t_scope) const -> bool
+    auto Scope::HasChild(
+        const std::shared_ptr<const Scope>& t_scope
+    ) const -> bool
     {
         const auto foundIt = std::find_if(
             begin(m_Children),
@@ -291,10 +346,14 @@ namespace Ace
                 const auto child = t_child.lock();
 
                 if (child.get() == t_scope.get())
+                {
                     return true;
+                }
 
                 if (child->HasChild(t_scope))
+                {
                     return true;
+                }
 
                 return false;
             }
@@ -336,17 +395,22 @@ namespace Ace
         const auto scope = t_symbol->GetScope();
         auto& symbols = scope->m_SymbolMap.at(t_symbol->GetName());
 
-        const auto foundIt = std::find_if(begin(symbols), end(symbols),
-        [&](const std::unique_ptr<Symbol::IBase>& t_ownedSymbol)
-        {
-            return t_ownedSymbol.get() == t_symbol;
-        });
-        ACE_ASSERT(foundIt != end(symbols));
+        const auto matchingSymbolIt = std::find_if(
+            begin(symbols),
+            end  (symbols),
+            [&](const std::unique_ptr<Symbol::IBase>& t_ownedSymbol)
+            {
+                return t_ownedSymbol.get() == t_symbol;
+            }
+        );
+        ACE_ASSERT(matchingSymbolIt != end(symbols));
 
-        symbols.erase(foundIt);
+        symbols.erase(matchingSymbolIt);
     }
 
-    auto Scope::DefineAssociation(const std::shared_ptr<Scope>& t_association) -> void
+    auto Scope::DefineAssociation(
+        const std::shared_ptr<Scope>& t_association
+    ) -> void
     {
         m_Associations.insert(t_association);
     }
@@ -374,11 +438,15 @@ namespace Ace
         std::for_each(begin(m_SymbolMap), end(m_SymbolMap),
         [&](const std::pair<const std::string&, const std::vector<std::unique_ptr<Symbol::IBase>>&>& t_pair)
         {
-            std::transform(begin(t_pair.second), end(t_pair.second), back_inserter(symbols),
-            [](const std::unique_ptr<Symbol::IBase>& t_symbol)
-            {
-                return t_symbol.get();
-            });
+            std::transform(
+                begin(t_pair.second),
+                end  (t_pair.second),
+                back_inserter(symbols),
+                [](const std::unique_ptr<Symbol::IBase>& t_symbol)
+                {
+                    return t_symbol.get();
+                }
+            );
         });
 
         return symbols;
@@ -391,7 +459,9 @@ namespace Ace
         std::for_each(begin(m_Children), end(m_Children),
         [&](const std::weak_ptr<Scope>& t_child)
         {
-            auto childSymbols = t_child.lock()->CollectAllDefinedSymbolsRecursive();
+            const auto childSymbols =
+                t_child.lock()->CollectAllDefinedSymbolsRecursive();
+
             symbols.insert(
                 end(symbols),
                 begin(childSymbols),
@@ -485,7 +555,8 @@ namespace Ace
 
         for (size_t i = 0; i < t_templateArguments.size(); i++)
         {
-            templateArgumentMap[t_templateParameters.at(i)] = t_templateArguments.at(i);
+            templateArgumentMap[t_templateParameters.at(i)] =
+                t_templateArguments.at(i);
         }
 
         for (size_t i = 0; i < t_argumentTypes.size(); i++)
@@ -498,14 +569,14 @@ namespace Ace
             ACE_TRY_VOID(TransformExpectedVector(deductionResults,
             [&](const TemplateArgumentDeductionResult& t_deductionResult) -> Expected<void>
             {
-                const auto foundIt = templateArgumentMap.find(
+                const auto templateArgumentIt = templateArgumentMap.find(
                     t_deductionResult.TemplateParameter
                 );
 
-                if (foundIt != end(templateArgumentMap))
+                if (templateArgumentIt != end(templateArgumentMap))
                 {
                     const bool isAlreadyDefinedSame =
-                        foundIt->second == t_deductionResult.TemplateArgument;
+                        templateArgumentIt->second == t_deductionResult.TemplateArgument;
                     ACE_TRY_ASSERT(isAlreadyDefinedSame);
                     return Void;
                 }
@@ -593,7 +664,9 @@ namespace Ace
 
     auto Scope::CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
     {
-        auto aliases = CollectSymbols<Symbol::Type::Alias::TemplateArgument::Normal>();
+        auto aliases =
+            CollectSymbols<Symbol::Type::Alias::TemplateArgument::Normal>();
+
         std::sort(begin(aliases), end(aliases),
         [](
             const Symbol::Type::Alias::TemplateArgument::Normal* const t_lhs,
@@ -619,7 +692,9 @@ namespace Ace
 
     auto Scope::CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*>
     {
-        auto aliases = CollectSymbols<Symbol::Type::Alias::TemplateArgument::Impl>();
+        auto aliases =
+            CollectSymbols<Symbol::Type::Alias::TemplateArgument::Impl>();
+
         std::sort(begin(aliases), end(aliases),
         [](
             const Symbol::Type::Alias::TemplateArgument::Impl* const t_lhs,
@@ -666,7 +741,7 @@ namespace Ace
                 t_implTemplateParameterNames.at(i),
                 t_implTemplateArguments.at(i),
                 i
-                );
+            );
 
             ACE_TRY(symbol, DefineSymbol(std::move(aliasSymbol)));
         }
@@ -678,7 +753,7 @@ namespace Ace
                 t_templateParameterNames.at(i),
                 t_templateArguments.at(i),
                 i
-                );
+            );
 
             ACE_TRY(symbol, DefineSymbol(std::move(aliasSymbol)));
         }
@@ -762,7 +837,9 @@ namespace Ace
                 t_symbol
             );
             if (!templatableSymbol)
+            {
                 return {};
+            }
 
             return 
             { 
@@ -785,10 +862,13 @@ namespace Ace
         const std::vector<Symbol::Type::IBase*>& t_implTemplateArguments
     ) -> std::optional<Symbol::IBase*>
     {
-        const auto foundIt = m_SymbolMap.find(t_name);
-
-        if (foundIt == end(m_SymbolMap))
+        const auto matchingNameSymbolsIt = m_SymbolMap.find(t_name);
+        if (matchingNameSymbolsIt == end(m_SymbolMap))
+        {
             return std::nullopt;
+        }
+
+        const auto& matchingNameSymbols = matchingNameSymbolsIt->second;
 
         const bool isTemplateInstance = 
             !t_templateArguments.empty() || 
@@ -797,8 +877,8 @@ namespace Ace
         if (isTemplateInstance)
         {
             const auto perfectMatchIt = std::find_if(
-                begin(foundIt->second), 
-                end  (foundIt->second), 
+                begin(matchingNameSymbols), 
+                end  (matchingNameSymbols), 
                 [&] (const std::unique_ptr<Symbol::IBase>& t_symbol)
                 {
                     auto* const templatableSymbol = dynamic_cast<const Symbol::ITemplatable*>(
@@ -815,7 +895,9 @@ namespace Ace
                     );
 
                     if (!doTemplateArgumentsMatch)
+                    {
                         return false;
+                    }
 
                     const auto implTemplateArguments =
                         templatableSymbol->CollectImplTemplateArguments();
@@ -826,20 +908,22 @@ namespace Ace
                     );
 
                     if (!doImplTemplateArgumentsMatch)
+                    {
                         return false;
+                    }
 
                     return true;
                 }
             );
 
-            return (perfectMatchIt == end(foundIt->second)) ?
+            return (perfectMatchIt == end(matchingNameSymbols)) ?
                 std::optional<Symbol::IBase*>{} :
                 perfectMatchIt->get();
         }
         else
         {
-            ACE_ASSERT(foundIt->second.size() == 1);
-            return foundIt->second.front().get();
+            ACE_ASSERT(matchingNameSymbols.size() == 1);
+            return matchingNameSymbols.front().get();
         }
     }
 
@@ -933,7 +1017,8 @@ namespace Ace
 
             std::vector<std::shared_ptr<const Scope>> scopes{};
             scopes.push_back(selfScopedSymbol->GetSelfScope());
-            const auto& selfScopeAssociations = selfScopedSymbol->GetSelfScope()->m_Associations;
+            const auto& selfScopeAssociations =
+                selfScopedSymbol->GetSelfScope()->m_Associations;
             scopes.insert(
                 end(scopes),
                 begin(selfScopeAssociations),
@@ -964,21 +1049,26 @@ namespace Ace
         );
         const bool isLastNameSection = remainingNameSectionsSize == 1;
 
-        const auto foundTemplateIt = m_SymbolMap.find(t_data.TemplateName);
-        const bool isTemplate = foundTemplateIt != end(m_SymbolMap);
+        const auto matchingTemplateNameSymbolsIt =
+            m_SymbolMap.find(t_data.TemplateName);
 
-        const auto foundIt = isTemplate ? 
-            foundTemplateIt :
+        const bool isTemplate =
+            matchingTemplateNameSymbolsIt != end(m_SymbolMap);
+
+        const auto matchingNameSymbolsIt = isTemplate ? 
+            matchingTemplateNameSymbolsIt :
             m_SymbolMap.find(t_data.Name);
 
-        if (foundIt == end(m_SymbolMap))
+        if (matchingNameSymbolsIt == end(m_SymbolMap))
+        {
             return {};
+        }
 
-        const auto& nameMatchedSymbols = foundIt->second;
+        const auto& matchingNameSymbols = matchingNameSymbolsIt->second;
 
         const bool isInstanceVariable = IsInstanceVariable(
             t_data,
-            nameMatchedSymbols
+            matchingNameSymbols
         );
 
         const bool isTemplateSymbol = 
@@ -989,27 +1079,27 @@ namespace Ace
             return CollectMatchingTemplateSymbols(
                 t_data,
                 t_templateArguments,
-                nameMatchedSymbols
+                matchingNameSymbols
             );
         }
 
         return CollectMatchingNormalSymbols(
             t_data,
             t_templateArguments,
-            nameMatchedSymbols
+            matchingNameSymbols
         );
     }
 
     auto Scope::CollectMatchingNormalSymbols(
         const SymbolResolutionData& t_data,
         const std::vector<Symbol::Type::IBase*>& t_templateArguments,
-        const std::vector<std::unique_ptr<Symbol::IBase>>& t_nameMatchedSymbols
+        const std::vector<std::unique_ptr<Symbol::IBase>>& t_matchingNameSymbols
     ) const -> std::vector<Symbol::IBase*>
     {
         std::vector<Symbol::IBase*> symbols{};
         std::transform(
-            begin(t_nameMatchedSymbols), 
-            end  (t_nameMatchedSymbols), 
+            begin(t_matchingNameSymbols), 
+            end  (t_matchingNameSymbols), 
             back_inserter(symbols), 
             [&](const std::unique_ptr<Symbol::IBase>& t_symbol)
             {
@@ -1023,14 +1113,14 @@ namespace Ace
     auto Scope::CollectMatchingTemplateSymbols(
         const SymbolResolutionData& t_data,
         const std::vector<Symbol::Type::IBase*>& t_templateArguments,
-        const std::vector<std::unique_ptr<Symbol::IBase>>& t_nameMatchedSymbols
+        const std::vector<std::unique_ptr<Symbol::IBase>>& t_matchingNameSymbols
     ) const -> std::vector<Symbol::IBase*>
     {
         std::vector<Symbol::IBase*> symbols{};
 
-        ACE_ASSERT(t_nameMatchedSymbols.size() == 1);
+        ACE_ASSERT(t_matchingNameSymbols.size() == 1);
         auto* const tmplate = dynamic_cast<Symbol::Template::IBase*>(
-            t_nameMatchedSymbols.front().get()
+            t_matchingNameSymbols.front().get()
         );
         ACE_ASSERT(tmplate);
 
@@ -1064,10 +1154,11 @@ namespace Ace
     {
         const auto scope = t_template->GetScope();
 
-        const auto foundIt = scope->m_SymbolMap.find(t_template->GetASTName());
-        ACE_TRY_ASSERT(foundIt != end(scope->m_SymbolMap));
+        const auto matchingNameSymbolsIt =
+            scope->m_SymbolMap.find(t_template->GetASTName());
+        ACE_TRY_ASSERT(matchingNameSymbolsIt != end(scope->m_SymbolMap));
 
-        auto& symbols = foundIt->second;
+        auto& symbols = matchingNameSymbolsIt->second;
 
         const auto perfectCandidateIt = std::find_if(begin(symbols), end(symbols),
         [&](const std::unique_ptr<Symbol::IBase>& t_symbol)
@@ -1086,7 +1177,9 @@ namespace Ace
             );
 
             if (!doTemplateArgumentsMatch)
+            {
                 return false;
+            }
 
             const auto collectedImplTemplateArguments =
                 templatableSymbol->CollectImplTemplateArguments();
@@ -1099,7 +1192,9 @@ namespace Ace
                 );
 
                 if (!doImplTemplateArgumentsMatch)
+                {
                     return false;
+                }
             }
             
             return true;
@@ -1113,13 +1208,13 @@ namespace Ace
         const std::string& t_name
     ) const -> Expected<Symbol::Template::IBase*>
     {
-        auto foundIt = m_SymbolMap.find(t_name);
-        ACE_TRY_ASSERT(foundIt != end(m_SymbolMap));
+        auto matchingNameSymbolsIt = m_SymbolMap.find(t_name);
+        ACE_TRY_ASSERT(matchingNameSymbolsIt != end(m_SymbolMap));
 
         std::vector<Symbol::IBase*> symbols{};
         std::transform(
-            begin(foundIt->second),
-            end  (foundIt->second),
+            begin(matchingNameSymbolsIt->second),
+            end  (matchingNameSymbolsIt->second),
             back_inserter(symbols),
             [](const std::unique_ptr<Symbol::IBase>& t_symbol)
             {
@@ -1212,7 +1307,9 @@ namespace Ace
                 !scope->m_SymbolMap.contains(templateName) &&
                 !scope->m_SymbolMap.contains(name)
                 )
+            {
                 continue;
+            }
 
             return scope;
         }

@@ -12,6 +12,19 @@
 
 namespace Ace::BoundNode::Expression
 {
+    Or::Or(
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_lhsExpression,
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_rhsExpression
+    ) : m_LHSExpression{ t_lhsExpression },
+        m_RHSExpression{ t_rhsExpression }
+    {
+    }
+
+    auto Or::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_LHSExpression->GetScope();
+    }
+
     auto Or::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -22,7 +35,9 @@ namespace Ace::BoundNode::Expression
         return children;
     }
 
-    auto Or::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::Or>>>
+    auto Or::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::Or>>>
     {
         const TypeInfo typeInfo
         {
@@ -44,7 +59,9 @@ namespace Ace::BoundNode::Expression
             !mchConvertedAndCheckedLHSExpression.IsChanged &&
             !mchConvertedAndCheckedRHSExpression.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::Or>(
             mchConvertedAndCheckedLHSExpression.Value,
@@ -53,10 +70,22 @@ namespace Ace::BoundNode::Expression
         return CreateChanged(returnValue);
     }
 
-    auto Or::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::Or>>
+    auto Or::GetOrCreateTypeCheckedExpression(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>
     {
-        const auto mchLoweredLHSExpression = m_LHSExpression->GetOrCreateLoweredExpression({});
-        const auto mchLoweredRHSExpression = m_RHSExpression->GetOrCreateLoweredExpression({});
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto Or::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::Or>>
+    {
+        const auto mchLoweredLHSExpression =
+            m_LHSExpression->GetOrCreateLoweredExpression({});
+
+        const auto mchLoweredRHSExpression =
+            m_RHSExpression->GetOrCreateLoweredExpression({});
 
         if (
             !mchLoweredLHSExpression.IsChanged &&
@@ -71,13 +100,21 @@ namespace Ace::BoundNode::Expression
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
+    auto Or::GetOrCreateLoweredExpression(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
     auto Or::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
     {
         std::vector<ExpressionDropData> temporaries{};
 
         auto* const boolType = GetCompilation()->Natives->Bool.GetIRType();
 
-        auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
+        auto* const allocaInst =
+            t_emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
 
         const auto lhsEmitResult = m_LHSExpression->Emit(t_emitter);
         temporaries.insert(

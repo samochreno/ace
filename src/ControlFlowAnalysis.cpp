@@ -119,7 +119,9 @@ namespace Ace
             )
         {
             if (IsEnd(t_ends, statementIt))
+            {
                 return false;
+            }
 
             const auto& statement = *statementIt;
 

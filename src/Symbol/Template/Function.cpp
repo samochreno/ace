@@ -4,6 +4,9 @@
 #include <string>
 
 #include "Asserts.hpp"
+#include "Scope.hpp"
+#include "AccessModifier.hpp"
+#include "SpecialIdentifier.hpp"
 #include "Diagnostics.hpp"
 #include "Symbol/Type/Base.hpp"
 #include "Symbol/Type/TemplateParameter/Impl.hpp"
@@ -16,6 +19,38 @@
 
 namespace Ace::Symbol::Template
 {
+    Function::Function(
+        const Node::Template::Function* const t_templateNode
+    ) : m_Name{ SpecialIdentifier::CreateTemplate(t_templateNode->GetAST()->GetName()) },
+        m_TemplateNode{ t_templateNode }
+    {
+    }
+
+    auto Function::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_TemplateNode->GetScope();
+    }
+
+    auto Function::GetName() const -> const std::string&
+    {
+        return m_Name;
+    }
+
+    auto Function::GetSymbolKind() const -> SymbolKind
+    {
+        return SymbolKind::FunctionTemplate;
+    }
+
+    auto Function::GetSymbolCategory() const -> SymbolCategory
+    {
+        return SymbolCategory::Static;
+    }
+
+    auto Function::GetAccessModifier() const -> AccessModifier
+    {
+        return m_TemplateNode->GetAST()->GetAccessModifier();
+    }
+
     auto Function::CollectImplParameters() const -> std::vector<Symbol::Type::TemplateParameter::Impl*>
     {
         return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<Symbol::Type::TemplateParameter::Impl>();
@@ -24,6 +59,21 @@ namespace Ace::Symbol::Template
     auto Function::CollectParameters() const -> std::vector<Symbol::Type::TemplateParameter::Normal*>
     {
         return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<Symbol::Type::TemplateParameter::Normal>();
+    }
+
+    auto Function::GetASTName() const -> const std::string&
+    {
+        return m_TemplateNode->GetAST()->GetName();
+    }
+
+    auto Function::SetPlaceholderSymbol(Symbol::IBase* const t_symbol) -> void
+    {
+        m_PlaceholderSymbol = t_symbol;
+    }
+
+    auto Function::GetPlaceholderSymbol() const -> Symbol::IBase*
+    {
+        return m_PlaceholderSymbol;
     }
 
     auto Function::InstantiateSymbols(

@@ -33,8 +33,12 @@ namespace Ace
         BoolMask    = True | False,
     };
 
-    inline constexpr auto operator&(const LiteralKind& t_lhs, const LiteralKind& t_rhs) -> bool
+    inline constexpr auto operator&(
+        const LiteralKind& t_lhs,
+        const LiteralKind& t_rhs
+    ) -> bool
     {
-        return (static_cast<uint16_t>(t_lhs) & static_cast<uint16_t>(t_rhs)) != 0;
+        return
+            (static_cast<uint16_t>(t_lhs) & static_cast<uint16_t>(t_rhs)) != 0;
     }
 }

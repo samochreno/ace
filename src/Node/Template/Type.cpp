@@ -12,6 +12,19 @@
 
 namespace Ace::Node::Template
 {
+    Type::Type(
+        const std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>>& t_parameters,
+        const std::shared_ptr<const Node::Type::IBase>& t_ast
+    ) : m_Parameters{ t_parameters },
+        m_AST{ t_ast }
+    {
+    }
+
+    auto Type::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_AST->GetScope();
+    }
+
     auto Type::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -21,7 +34,9 @@ namespace Ace::Node::Template
         return children;
     }
 
-    auto Type::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Template::Type>
+    auto Type::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Template::Type>
     {
         std::vector<std::shared_ptr<const Node::TemplateParameter::Normal>> clonedParameters{};
         std::transform(
@@ -38,6 +53,21 @@ namespace Ace::Node::Template
             clonedParameters,
             m_AST->CloneInScopeType(t_scope)
         );
+    }
+
+    auto Type::GetSymbolScope() const -> std::shared_ptr<Scope>
+    {
+        return GetScope();
+    }
+
+    auto Type::GetSymbolKind() const -> SymbolKind
+    {
+        return SymbolKind::TypeTemplate;
+    }
+
+    auto Type::GetSymbolCreationSuborder() const -> size_t
+    {
+        return 0;
     }
 
     auto Type::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
@@ -67,5 +97,15 @@ namespace Ace::Node::Template
         );
 
         return names;
+    }
+
+    auto Type::GetAST() const -> const std::shared_ptr<const Node::Type::IBase>&
+    {
+        return m_AST;
+    }
+
+    auto Type::GetSelfScope() const -> std::shared_ptr<Scope>
+    {
+        return m_AST->GetSelfScope();
     }
 }

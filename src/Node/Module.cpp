@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Scope.hpp"
+#include "AccessModifier.hpp"
 #include "Node/Type/Base.hpp"
 #include "Node/Template/Type.hpp"
 #include "Node/Impl.hpp"
@@ -19,6 +20,39 @@
 
 namespace Ace::Node
 {
+    Module::Module(
+        const std::shared_ptr<Scope>& t_scope,
+        const std::shared_ptr<Scope>& t_selfScope,
+        const std::vector<std::string>& t_name,
+        const AccessModifier& t_accessModifier,
+        const std::vector<std::shared_ptr<const Node::Module>>& t_modules,
+        const std::vector<std::shared_ptr<const Node::Type::IBase>>& t_types,
+        const std::vector<std::shared_ptr<const Node::Template::Type>>& t_typeTemplates,
+        const std::vector<std::shared_ptr<const Node::Impl>>& t_impls,
+        const std::vector<std::shared_ptr<const Node::TemplatedImpl>>& t_templatedImpls,
+        const std::vector<std::shared_ptr<const Node::Function>>& t_functions,
+        const std::vector<std::shared_ptr<const Node::Template::Function>>& t_functionTemplates,
+        const std::vector<std::shared_ptr<const Node::Variable::Normal::Static>>& t_variables
+    ) : m_Scope{ t_scope },
+        m_SelfScope{ t_selfScope },
+        m_Name{ t_name },
+        m_AccessModifier{ t_accessModifier },
+        m_Modules{ t_modules },
+        m_Types{ t_types },
+        m_TypeTemplates{ t_typeTemplates },
+        m_Impls{ t_impls },
+        m_TemplatedImpls{ t_templatedImpls },
+        m_Functions{ t_functions },
+        m_FunctionTemplates{ t_functionTemplates },
+        m_Variables{ t_variables }
+    {
+    }
+
+    auto Module::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto Module::GetChildren() const -> std::vector<const Node::IBase*> 
     {
         std::vector<const Node::IBase*> children{};
@@ -35,65 +69,99 @@ namespace Ace::Node
         return children;
     }
 
-    auto Module::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Module>
+    auto Module::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Module>
     {
         const auto selfScope = t_scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const Node::Module>> clonedModules{};
-        std::transform(begin(m_Modules), end(m_Modules), back_inserter(clonedModules),
-        [&](const std::shared_ptr<const Node::Module>& t_module)
-        {
-            return t_module->CloneInScope(selfScope);
-        });
+        std::transform(
+            begin(m_Modules),
+            end  (m_Modules),
+            back_inserter(clonedModules),
+            [&](const std::shared_ptr<const Node::Module>& t_module)
+            {
+                return t_module->CloneInScope(selfScope);
+            }
+        );
 
         std::vector<std::shared_ptr<const Node::Type::IBase>> clonedTypes{};
-        std::transform(begin(m_Types), end(m_Types), back_inserter(clonedTypes),
-        [&](const std::shared_ptr<const Node::Type::IBase>& t_type)
-        {
-            return t_type->CloneInScopeType(selfScope);
-        });
+        std::transform(
+            begin(m_Types),
+            end  (m_Types),
+            back_inserter(clonedTypes),
+            [&](const std::shared_ptr<const Node::Type::IBase>& t_type)
+            {
+                return t_type->CloneInScopeType(selfScope);
+            }
+        );
 
         std::vector<std::shared_ptr<const Node::Template::Type>> clonedTypeTemplates{};
-        std::transform(begin(m_TypeTemplates), end(m_TypeTemplates), back_inserter(clonedTypeTemplates),
-        [&](const std::shared_ptr<const Node::Template::Type>& t_typeTemplate)
-        {
-            return t_typeTemplate->CloneInScope(selfScope);
-        });
+        std::transform(
+            begin(m_TypeTemplates),
+            end  (m_TypeTemplates),
+            back_inserter(clonedTypeTemplates),
+            [&](const std::shared_ptr<const Node::Template::Type>& t_typeTemplate)
+            {
+                return t_typeTemplate->CloneInScope(selfScope);
+            }
+        );
 
         std::vector<std::shared_ptr<const Node::Impl>> clonedImpls{};
-        std::transform(begin(m_Impls), end(m_Impls), back_inserter(clonedImpls),
-        [&](const std::shared_ptr<const Node::Impl>& t_impl)
-        {
-            return t_impl->CloneInScope(selfScope);
-        });
+        std::transform(
+            begin(m_Impls),
+            end  (m_Impls),
+            back_inserter(clonedImpls),
+            [&](const std::shared_ptr<const Node::Impl>& t_impl)
+            {
+                return t_impl->CloneInScope(selfScope);
+            }
+        );
 
         std::vector<std::shared_ptr<const Node::TemplatedImpl>> clonedTemplatedImpls{};
-        std::transform(begin(m_TemplatedImpls), end(m_TemplatedImpls), back_inserter(clonedTemplatedImpls),
-        [&](const std::shared_ptr<const Node::TemplatedImpl>& t_templatedImpl)
-        {
-            return t_templatedImpl->CloneInScope(selfScope);
-        });
+        std::transform(
+            begin(m_TemplatedImpls),
+            end  (m_TemplatedImpls),
+            back_inserter(clonedTemplatedImpls),
+            [&](const std::shared_ptr<const Node::TemplatedImpl>& t_templatedImpl)
+            {
+                return t_templatedImpl->CloneInScope(selfScope);
+            }
+        );
 
         std::vector<std::shared_ptr<const Node::Function>> clonedFunctions{};
-        std::transform(begin(m_Functions), end(m_Functions), back_inserter(clonedFunctions),
-        [&](const std::shared_ptr<const Node::Function>& t_function)
-        {
-            return t_function->CloneInScope(selfScope);
-        });
+        std::transform(
+            begin(m_Functions),
+            end  (m_Functions),
+            back_inserter(clonedFunctions),
+            [&](const std::shared_ptr<const Node::Function>& t_function)
+            {
+                return t_function->CloneInScope(selfScope);
+            }
+        );
 
         std::vector<std::shared_ptr<const Node::Template::Function>> clonedFunctionTemplates{};
-        std::transform(begin(m_FunctionTemplates), end(m_FunctionTemplates), back_inserter(clonedFunctionTemplates),
-        [&](const std::shared_ptr<const Node::Template::Function>& t_functionTemplate)
-        {
-            return t_functionTemplate->CloneInScope(selfScope);
-        });
+        std::transform(
+            begin(m_FunctionTemplates),
+            end  (m_FunctionTemplates),
+            back_inserter(clonedFunctionTemplates),
+            [&](const std::shared_ptr<const Node::Template::Function>& t_functionTemplate)
+            {
+                return t_functionTemplate->CloneInScope(selfScope);
+            }
+        );
 
         std::vector<std::shared_ptr<const Node::Variable::Normal::Static>> clonedVariables{};
-        std::transform(begin(m_Variables), end(m_Variables), back_inserter(clonedVariables),
-        [&](const std::shared_ptr<const Node::Variable::Normal::Static>& t_variable)
-        {
-            return t_variable->CloneInScope(selfScope);
-        });
+        std::transform(
+            begin(m_Variables),
+            end  (m_Variables),
+            back_inserter(clonedVariables),
+            [&](const std::shared_ptr<const Node::Variable::Normal::Static>& t_variable)
+            {
+                return t_variable->CloneInScope(selfScope);
+            }
+        );
 
         return std::make_shared<const Node::Module>(
             t_scope,
@@ -149,7 +217,8 @@ namespace Ace::Node
             return t_variable->CreateBound();
         }));
 
-        auto* const selfSymbol = GetSymbolScope()->ExclusiveResolveSymbol<Symbol::Module>(GetName()).Unwrap();
+        auto* const selfSymbol =
+            GetSymbolScope()->ExclusiveResolveSymbol<Symbol::Module>(GetName()).Unwrap();
 
         std::vector<std::shared_ptr<const BoundNode::Impl>> allBoundImpls{};
         allBoundImpls.insert(
@@ -176,6 +245,11 @@ namespace Ace::Node
     auto Module::GetSymbolScope() const -> std::shared_ptr<Scope>
     {
         return m_SelfScope->GetParent().value();
+    }
+
+    auto Module::GetSymbolKind() const -> SymbolKind
+    {
+        return SymbolKind::Module;
     }
 
     auto Module::GetSymbolCreationSuborder() const -> size_t
@@ -206,11 +280,13 @@ namespace Ace::Node
                 m_SelfScope,
                 GetName(),
                 m_AccessModifier
-                )
+            )
         };
     }
 
-    auto Module::ContinueCreatingSymbol(Symbol::IBase* const t_symbol) const -> Expected<void>
+    auto Module::ContinueCreatingSymbol(
+        Symbol::IBase* const t_symbol
+    ) const -> Expected<void>
     {
         auto* const moduleSymbol = dynamic_cast<Symbol::Module*>(t_symbol);
         ACE_ASSERT(moduleSymbol);

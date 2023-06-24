@@ -22,6 +22,21 @@
 
 namespace Ace::BoundNode::Statement
 {
+    If::If(
+        const std::shared_ptr<Scope>& t_scope,
+        const std::vector<std::shared_ptr<const BoundNode::Expression::IBase>>& t_conditions,
+        const std::vector<std::shared_ptr<const BoundNode::Statement::Block>>& t_bodies
+    ) : m_Scope{ t_scope },
+        m_Conditions{ t_conditions },
+        m_Bodies{ t_bodies }
+    {
+    }
+
+    auto If::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto If::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -32,7 +47,9 @@ namespace Ace::BoundNode::Statement
         return children;
     }
 
-    auto If::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::If>>>
+    auto If::GetOrCreateTypeChecked(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::If>>>
     {
         const TypeInfo typeInfo
         {
@@ -48,14 +65,18 @@ namespace Ace::BoundNode::Statement
         ACE_TRY(mchCheckedBodies, TransformExpectedMaybeChangedVector(m_Bodies,
         [&](const std::shared_ptr<const BoundNode::Statement::Block>& t_body)
         {
-            return t_body->GetOrCreateTypeChecked({ t_context.ParentFunctionTypeSymbol });
+            return t_body->GetOrCreateTypeChecked({
+                t_context.ParentFunctionTypeSymbol
+            });
         }));
 
         if (
             !mchConvertedAndCheckedConditions.IsChanged &&
             !mchCheckedBodies.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Statement::If>(
             m_Scope,
@@ -65,7 +86,16 @@ namespace Ace::BoundNode::Statement
         return CreateChanged(returnValue);
     }
 
-    auto If::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
+    auto If::GetOrCreateTypeCheckedStatement(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto If::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
     {
         // From:
         // if condition_0 {
@@ -161,5 +191,17 @@ namespace Ace::BoundNode::Statement
             statements
         );
         return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
+    }
+
+    auto If::GetOrCreateLoweredStatement(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
+    auto If::Emit(Emitter& t_emitter) const -> void
+    {
+        ACE_UNREACHABLE();
     }
 }

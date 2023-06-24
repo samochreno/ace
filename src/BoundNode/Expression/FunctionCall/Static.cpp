@@ -13,6 +13,21 @@
 
 namespace Ace::BoundNode::Expression::FunctionCall
 {
+    Static::Static(
+        const std::shared_ptr<Scope>& t_scope,
+        Symbol::Function* const t_functionSymbol,
+        const std::vector<std::shared_ptr<const BoundNode::Expression::IBase>>& t_arguments
+    ) : m_Scope{ t_scope },
+        m_FunctionSymbol{ t_functionSymbol },
+        m_Arguments{ t_arguments }
+    {
+    }
+
+    auto Static::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto Static::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -22,9 +37,12 @@ namespace Ace::BoundNode::Expression::FunctionCall
         return children;
     }
 
-    auto Static::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>>
+    auto Static::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>>
     {
-        const auto argumentTypeInfos = m_FunctionSymbol->CollectArgumentTypeInfos();
+        const auto argumentTypeInfos =
+            m_FunctionSymbol->CollectArgumentTypeInfos();
         ACE_TRY_ASSERT(m_Arguments.size() == argumentTypeInfos.size());
 
         ACE_TRY(mchConvertedAndCheckedArguments, CreateImplicitlyConvertedAndTypeCheckedVector(
@@ -33,7 +51,9 @@ namespace Ace::BoundNode::Expression::FunctionCall
         ));
 
         if (!mchConvertedAndCheckedArguments.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
             m_Scope,
@@ -43,7 +63,16 @@ namespace Ace::BoundNode::Expression::FunctionCall
         return CreateChanged(returnValue);
     }
 
-    auto Static::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>
+    auto Static::GetOrCreateTypeCheckedExpression(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto Static::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>
     {
         const auto mchLoweredArguments = TransformMaybeChangedVector(m_Arguments,
         [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
@@ -52,7 +81,9 @@ namespace Ace::BoundNode::Expression::FunctionCall
         });
 
         if (!mchLoweredArguments.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
             m_Scope,
@@ -62,18 +93,33 @@ namespace Ace::BoundNode::Expression::FunctionCall
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
+    auto Static::GetOrCreateLoweredExpression(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
     auto Static::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
     {
         std::vector<ExpressionDropData> temporaries{};
 
         std::vector<llvm::Value*> arguments{};
-        std::transform(begin(m_Arguments), end(m_Arguments), back_inserter(arguments),
-        [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
-        {
-            const auto argumentEmitResult = t_argument->Emit(t_emitter);
-            temporaries.insert(end(temporaries), begin(argumentEmitResult.Temporaries), end(argumentEmitResult.Temporaries));
-            return argumentEmitResult.Value;
-        });
+        std::transform(
+            begin(m_Arguments),
+            end  (m_Arguments),
+            back_inserter(arguments),
+            [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_argument)
+            {
+                const auto argumentEmitResult = t_argument->Emit(t_emitter);
+                temporaries.insert(
+                    end(temporaries),
+                    begin(argumentEmitResult.Temporaries),
+                    end(argumentEmitResult.Temporaries)
+                );
+                return argumentEmitResult.Value;
+            }
+        );
 
         auto* const callInst = t_emitter.GetBlockBuilder().Builder.CreateCall(
             t_emitter.GetFunctionMap().at(m_FunctionSymbol),
@@ -85,7 +131,8 @@ namespace Ace::BoundNode::Expression::FunctionCall
             return { nullptr, temporaries };
         }
 
-        auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(callInst->getType());
+        auto* const allocaInst =
+            t_emitter.GetBlockBuilder().Builder.CreateAlloca(callInst->getType());
         temporaries.emplace_back(allocaInst, m_FunctionSymbol->GetType());
 
         t_emitter.GetBlockBuilder().Builder.CreateStore(

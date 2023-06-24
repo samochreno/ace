@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include "Symbol/Type/Base.hpp"
 
 namespace Ace::Symbol::Type::Alias

@@ -16,6 +16,17 @@
 
 namespace Ace::BoundNode::Statement
 {
+    Assert::Assert(
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_condition
+    ) : m_Condition{ t_condition }
+    {
+    }
+
+    auto Assert::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Condition->GetScope();
+    }
+
     auto Assert::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -25,7 +36,9 @@ namespace Ace::BoundNode::Statement
         return children;
     }
 
-    auto Assert::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assert>>>
+    auto Assert::GetOrCreateTypeChecked(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assert>>>
     {
         const TypeInfo typeInfo
         {
@@ -39,14 +52,27 @@ namespace Ace::BoundNode::Statement
         ));
 
         if (!mchConvertedAndCheckedCondition.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
-        const auto returnValue = std::make_shared<const BoundNode::Statement::Assert>(mchConvertedAndCheckedCondition.Value);
+        const auto returnValue = std::make_shared<const BoundNode::Statement::Assert>(
+            mchConvertedAndCheckedCondition.Value
+        );
 
         return CreateChanged(returnValue);
     }
 
-    auto Assert::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
+    auto Assert::GetOrCreateTypeCheckedStatement(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto Assert::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
     {
         const auto mchLoweredCondition = m_Condition->GetOrCreateLoweredExpression({});
 
@@ -71,5 +97,17 @@ namespace Ace::BoundNode::Statement
             std::vector<std::shared_ptr<const BoundNode::Statement::Block>>{ bodyStatement }
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+    };
+
+    auto Assert::GetOrCreateLoweredStatement(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
+    auto Assert::Emit(Emitter& t_emitter) const -> void
+    {
+        ACE_UNREACHABLE();
     }
 }

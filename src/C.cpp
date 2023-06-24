@@ -4,7 +4,10 @@
 
 namespace Ace
 {
-    auto C::Type::Initialize(llvm::LLVMContext& t_context, llvm::Module& t_module) -> void
+    auto C::Type::Initialize(
+        llvm::LLVMContext& t_context,
+        llvm::Module& t_module
+    ) -> void
     {
         constexpr unsigned int intBitCount = sizeof(int) * CHAR_BIT;
         constexpr unsigned int charBitCount = sizeof(char) * CHAR_BIT;
@@ -18,18 +21,59 @@ namespace Ace
         m_VoidPointer   = llvm::Type::getInt8PtrTy(t_context);
     }
 
-    static auto LoadCFunction(llvm::Module& t_module, llvm::Function** const t_field, const char* const t_name, llvm::FunctionType* const t_type) -> void
+    auto C::Type::GetInt() const -> llvm::IntegerType*
+    {
+        return m_Int;
+    }
+
+    auto C::Type::GetChar() const -> llvm::IntegerType*
+    {
+        return m_Char;
+    }
+
+    auto C::Type::GetCharPointer() const -> llvm::PointerType*
+    {
+        return m_CharPointer;
+    }
+
+    auto C::Type::GetSize() const -> llvm::IntegerType*
+    {
+        return m_Size;
+    }
+
+    auto C::Type::GetVoid() const -> llvm::Type*    
+    {
+        return m_Void;
+    }
+
+    auto C::Type::GetVoidPointer() const -> llvm::PointerType*
+    {
+        return m_VoidPointer;
+    }
+
+    static auto LoadCFunction(
+        llvm::Module& t_module,
+        llvm::Function** const t_field,
+        const char* const t_name,
+        llvm::FunctionType* const t_type
+    ) -> void
     {
         auto functionCallee = t_module.getOrInsertFunction(
             t_name,
             t_type
         );
 
-        auto* const function = llvm::cast<llvm::Function>(functionCallee.getCallee());
+        auto* const function = llvm::cast<llvm::Function>(
+            functionCallee.getCallee()
+        );
         *t_field = function;
     }
 
-    auto C::Function::Initialize(llvm::LLVMContext& t_context, llvm::Module& t_module, const Ace::C::Type& t_types) -> void
+    auto C::Function::Initialize(
+        llvm::LLVMContext& t_context,
+        llvm::Module& t_module,
+        const Ace::C::Type& t_types
+    ) -> void
     {
         constexpr unsigned int intBitCount = sizeof(int) * CHAR_BIT;
         constexpr unsigned int charBitCount = sizeof(char) * CHAR_BIT;
@@ -123,9 +167,62 @@ namespace Ace
         }
     }
 
-    auto C::Initialize(llvm::LLVMContext& t_context, llvm::Module& t_module) -> void
+    auto C::Function::GetPrintf() const -> llvm::Function*
+    {
+        return m_Printf;
+    }
+
+    auto C::Function::GetMalloc() const -> llvm::Function*
+    {
+        return m_Malloc;
+    }
+
+    auto C::Function::GetCalloc() const -> llvm::Function*
+    {
+        return m_Calloc;
+    }
+
+    auto C::Function::GetRealloc() const -> llvm::Function*
+    {
+        return m_Realloc;
+    }
+
+    auto C::Function::GetFree() const -> llvm::Function*
+    {
+        return m_Free;
+    }
+
+    auto C::Function::GetMemset() const -> llvm::Function*
+    {
+        return m_Memset;
+    }
+
+    auto C::Function::GetMemcpy() const -> llvm::Function*
+    {
+        return m_Memcpy;
+    }
+
+    auto C::Function::GetExit() const -> llvm::Function*
+    {
+        return m_Exit;
+    }
+
+    auto C::Initialize(
+        llvm::LLVMContext& t_context,
+        llvm::Module& t_module
+    ) -> void
     {
         m_Types.Initialize(t_context, t_module);
         m_Functions.Initialize(t_context, t_module, m_Types);
+    }
+
+    auto C::GetTypes() const -> const Type&
+    {
+        return m_Types;
+    }
+
+    auto C::GetFunctions() const -> const Function&
+    {
+        return m_Functions;
     }
 }

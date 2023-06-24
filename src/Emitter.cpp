@@ -36,6 +36,35 @@
 
 namespace Ace
 {
+    LabelBlockMap::LabelBlockMap(
+        Emitter& t_emitter
+    ) : m_Emitter{ t_emitter }
+    {
+    }
+
+    auto LabelBlockMap::GetOrCreateAt(
+        const Symbol::Label* const t_labelSymbol
+    ) -> llvm::BasicBlock*
+    {
+        auto foundIt = m_Map.find(t_labelSymbol);
+        if (foundIt != end(m_Map))
+            return foundIt->second;
+
+        auto block = llvm::BasicBlock::Create(
+            *m_Emitter.GetCompilation()->LLVMContext,
+            "",
+            m_Emitter.GetFunction()
+        );
+
+        m_Map[t_labelSymbol] = block;
+        return block;
+    }
+
+    auto LabelBlockMap::Clear() -> void
+    {
+        m_Map.clear();
+    }
+
     Emitter::Emitter(
         const Compilation* const t_compilation
     ) : m_Compilation{ t_compilation },
@@ -55,6 +84,13 @@ namespace Ace
 
     Emitter::~Emitter()
     {
+    }
+
+    auto Emitter::SetASTs(
+        const std::vector<std::shared_ptr<const BoundNode::Module>>& t_asts
+    ) -> void
+    {
+        m_ASTs = t_asts;
     }
 
     auto Emitter::Emit() -> Result
@@ -530,12 +566,16 @@ namespace Ace
             rend(m_LocalVariableSymbolStatementIndexPairs),
             [&](const LocalVariableSymbolStatementIndexPair& t_symbolIndexPair)
             {
-                const auto variableStatementIndex = t_symbolIndexPair.StatementIndex;
+                const auto variableStatementIndex =
+                    t_symbolIndexPair.StatementIndex;
 
                 if (variableStatementIndex >= statementIndex)
+                {
                     return;
+                }
 
-                auto* const variableSymbol = t_symbolIndexPair.LocalVariableSymbol;
+                auto* const variableSymbol =
+                    t_symbolIndexPair.LocalVariableSymbol;
 
                 if (variableSymbol->GetScope() != scope)
                 {
@@ -543,7 +583,9 @@ namespace Ace
                         variableSymbol->GetScope()->GetNestLevel() >=
                         scope->GetNestLevel()
                         )
+                    {
                         return;
+                    }
 
                     scope = variableSymbol->GetScope();
                 }
@@ -571,9 +613,27 @@ namespace Ace
         });
     }
 
-    auto Emitter::GetIRType(const Symbol::Type::IBase* const t_typeSymbol) const -> llvm::Type*
+    auto Emitter::GetCompilation() const -> const Compilation*
     {
-        auto* const pureTypeSymbol = t_typeSymbol->GetWithoutReference()->GetUnaliased();
+        return m_Compilation;
+    }
+
+    auto Emitter::GetModule() const -> llvm::Module&
+    {
+        return *m_Module.get();
+    }
+
+    auto Emitter::GetC() const -> const C&
+    {
+        return m_C;
+    }
+
+    auto Emitter::GetIRType(
+        const Symbol::Type::IBase* const t_typeSymbol
+    ) const -> llvm::Type*
+    {
+        auto* const pureTypeSymbol =
+            t_typeSymbol->GetWithoutReference()->GetUnaliased();
         auto* const pureType = m_TypeMap.at(pureTypeSymbol);
 
         const bool isReference = t_typeSymbol->IsReference();
@@ -581,6 +641,43 @@ namespace Ace
         return isReference ?
             llvm::PointerType::get(pureType, 0) :
             pureType;
+    }
+
+    auto Emitter::GetStaticVariableMap() const -> const std::unordered_map<const Symbol::Variable::Normal::Static*, llvm::Constant*>&
+    {
+        return m_StaticVariableMap;
+    }
+
+    auto Emitter::GetFunctionMap() const -> const std::unordered_map<const Symbol::Function*, llvm::FunctionCallee>&
+    {
+        return m_FunctionMap;
+    }
+
+    auto Emitter::GetLocalVariableMap() const -> const std::unordered_map<const Symbol::Variable::IBase*, llvm::Value*>&
+    {
+        return m_LocalVariableMap;
+    }
+
+    auto Emitter::GetLabelBlockMap() -> LabelBlockMap&
+    {
+        return m_LabelBlockMap;
+    }
+
+    auto Emitter::GetFunction() const -> llvm::Function*
+    {
+        return m_Function;
+    }
+
+    auto Emitter::GetBlockBuilder() -> BlockBuilder&
+    {
+        return *m_BlockBuilder.get();
+    }
+
+    auto Emitter::SetBlockBuilder(
+        std::unique_ptr<BlockBuilder>&& t_value
+    ) -> void
+    {
+        m_BlockBuilder = std::move(t_value);
     }
 
     auto Emitter::EmitNativeTypes() -> void
@@ -651,7 +748,9 @@ namespace Ace
         });
     }
 
-    auto Emitter::EmitFunctions(const std::vector<Symbol::Function*>& t_functionSymbols) -> void
+    auto Emitter::EmitFunctions(
+        const std::vector<Symbol::Function*>& t_functionSymbols
+    ) -> void
     {
         struct FunctionSymbolBlockPair
         {
@@ -668,7 +767,8 @@ namespace Ace
             [&](Symbol::Function* const t_functionSymbol)
             {
                 std::vector<llvm::Type*> parameterTypes{};
-                const auto parameterSymbols = t_functionSymbol->CollectAllParameters();
+                const auto parameterSymbols =
+                    t_functionSymbol->CollectAllParameters();
                 std::transform(
                     begin(parameterSymbols), 
                     end  (parameterSymbols), 
@@ -746,7 +846,9 @@ namespace Ace
                 ACE_ASSERT(m_FunctionSymbol->GetBody().has_value());
                 t_functionSymbolBlockPair.Symbol->GetBody().value()->Emit(*this);
 
-                const bool isBodyTerminated = m_BlockBuilder->Block->back().isTerminator();
+                const bool isBodyTerminated =
+                    m_BlockBuilder->Block->back().isTerminator();
+
                 if (!isBodyTerminated)
                 {
                     m_BlockBuilder->Builder.CreateUnreachable();

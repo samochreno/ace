@@ -23,14 +23,14 @@ namespace Ace
         auto operator=(const CommandLineArgumentBuffer&) -> CommandLineArgumentBuffer& = delete;
         auto operator=(CommandLineArgumentBuffer&&) -> CommandLineArgumentBuffer& = default;
 
-        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
-        auto GetBuffer() const -> const std::string& final { return m_Buffer; }
+        auto GetCompilation() const -> const Compilation*;
+        auto GetBuffer() const -> const std::string& final;
 
         auto FormatLocation(
-            const SourceLocation& t_location
+            const SourceLocation& t_location 
         ) const -> std::string final;
 
-        auto GetArgs() const -> const std::vector<std::string_view>& { return m_Args; }
+        auto GetArgs() const -> const std::vector<std::string_view>&;
 
     private:
         const Compilation* m_Compilation{};

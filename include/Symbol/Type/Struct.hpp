@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <string>
 #include <optional>
@@ -21,29 +22,25 @@ namespace Ace::Symbol::Type
             const std::shared_ptr<Scope>& t_selfScope,
             const std::string& t_name,
             const AccessModifier& t_accessModifier
-        ) : m_SelfScope{ t_selfScope },
-            m_Name{ t_name },
-            m_AccessModifier{ t_accessModifier }
-        {
-        }
+        );
         virtual ~Struct() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_SelfScope->GetParent().value(); }
-        auto GetSelfScope() const -> std::shared_ptr<Scope> final { return m_SelfScope; }
-        auto GetName() const -> const std::string& final { return m_Name; }
-        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Struct; }
-        auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
-        auto GetAccessModifier() const -> AccessModifier final { return m_AccessModifier; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
+        auto GetSelfScope() const -> std::shared_ptr<Scope> final;
+        auto GetName() const -> const std::string& final;
+        auto GetSymbolKind() const -> SymbolKind final;
+        auto GetSymbolCategory() const -> SymbolCategory final;
+        auto GetAccessModifier() const -> AccessModifier final;
 
         auto GetSizeKind() const -> Expected<TypeSizeKind> final;
         auto SetAsUnsized() -> void final;
         auto SetAsPrimitivelyEmittable() -> void final;
         auto IsPrimitivelyEmittable() const -> bool final;
 
-        auto SetAsTriviallyCopyable() -> void final { m_IsTriviallyCopyable = true; }
-        auto IsTriviallyCopyable() const -> bool final { return m_IsTriviallyCopyable; }
-        auto SetAsTriviallyDroppable() -> void final { m_IsTriviallyDroppable = true; }
-        auto IsTriviallyDroppable() const -> bool final { return m_IsTriviallyDroppable; }
+        auto SetAsTriviallyCopyable() -> void final;
+        auto IsTriviallyCopyable() const -> bool final;
+        auto SetAsTriviallyDroppable() -> void final;
+        auto IsTriviallyDroppable() const -> bool final;
 
         auto CreateCopyGlueBody(
             Symbol::Function* const t_glueSymbol
@@ -57,8 +54,8 @@ namespace Ace::Symbol::Type
         auto BindDropGlue(Symbol::Function* const t_glue) -> void final;
         auto GetDropGlue() const -> std::optional<Symbol::Function*> final;
 
-        auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_SelfScope->CollectTemplateArguments(); }
-        auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final { return m_SelfScope->CollectImplTemplateArguments(); }
+        auto CollectTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
+        auto CollectImplTemplateArguments() const -> std::vector<Symbol::Type::IBase*> final;
 
         auto GetVariables() const -> std::vector<Symbol::Variable::Normal::Instance*>;
 

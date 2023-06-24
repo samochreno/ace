@@ -18,7 +18,7 @@ namespace Ace::Symbol
     public:
         virtual ~IBase() = default;
 
-        virtual auto GetCompilation() const -> const Compilation* { return GetScope()->GetCompilation(); }
+        virtual auto GetCompilation() const -> const Compilation* final;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetName() const -> const std::string& = 0;
         virtual auto GetSymbolKind() const -> SymbolKind = 0;

@@ -12,6 +12,19 @@
 
 namespace Ace::BoundNode::Expression
 {
+    And::And(
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_lhsExpression,
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_rhsExpression
+    ) : m_LHSExpression{ t_lhsExpression },
+        m_RHSExpression{ t_rhsExpression }
+    {
+    }
+
+    auto And::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_LHSExpression->GetScope();
+    }
+
     auto And::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -22,7 +35,9 @@ namespace Ace::BoundNode::Expression
         return children;
     }
 
-    auto And::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::And>>>
+    auto And::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::And>>>
     {
         const TypeInfo typeInfo
         {
@@ -44,7 +59,9 @@ namespace Ace::BoundNode::Expression
             !mchConvertedAndCheckedLHSExpression.IsChanged &&
             !mchConvertedAndCheckedRHSExpression.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::And>(
             mchConvertedAndCheckedLHSExpression.Value,
@@ -53,7 +70,17 @@ namespace Ace::BoundNode::Expression
         return CreateChanged(returnValue);
     }
 
-    auto And::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::And>>
+    auto And::GetOrCreateTypeCheckedExpression(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+
+    auto And::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::And>>
     {
         const auto mchLoweredLHSExpression = m_LHSExpression->GetOrCreateLoweredExpression({});
         const auto mchLoweredRHSExpression = m_RHSExpression->GetOrCreateLoweredExpression({});
@@ -62,7 +89,9 @@ namespace Ace::BoundNode::Expression
             !mchLoweredLHSExpression.IsChanged && 
             !mchLoweredRHSExpression.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::And>(
             mchLoweredLHSExpression.Value,
@@ -71,13 +100,21 @@ namespace Ace::BoundNode::Expression
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
+    auto And::GetOrCreateLoweredExpression(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
     auto And::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
     {
         std::vector<ExpressionDropData> temporaries{};
 
         auto* const boolType = GetCompilation()->Natives->Bool.GetIRType();
 
-        auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
+        auto* const allocaInst =
+            t_emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
 
         t_emitter.GetBlockBuilder().Builder.CreateStore(
             llvm::ConstantInt::get(boolType, 0),
@@ -85,7 +122,11 @@ namespace Ace::BoundNode::Expression
         );
 
         const auto lhsEmitResult = m_LHSExpression->Emit(t_emitter);
-        temporaries.insert(end(temporaries), begin(lhsEmitResult.Temporaries), end(lhsEmitResult.Temporaries));
+        temporaries.insert(
+            end(temporaries),
+            begin(lhsEmitResult.Temporaries),
+            end  (lhsEmitResult.Temporaries)
+        );
 
         auto* const lhsLoadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,
@@ -95,12 +136,12 @@ namespace Ace::BoundNode::Expression
         auto trueBlockBuilder = std::make_unique<BlockBuilder>(
             *GetCompilation()->LLVMContext,
             t_emitter.GetFunction()
-            );
+        );
 
         auto endBlockBuilder = std::make_unique<BlockBuilder>(
             *GetCompilation()->LLVMContext,
             t_emitter.GetFunction()
-            );
+        );
 
         t_emitter.GetBlockBuilder().Builder.CreateCondBr(
             lhsLoadInst,
@@ -111,7 +152,11 @@ namespace Ace::BoundNode::Expression
         t_emitter.SetBlockBuilder(std::move(trueBlockBuilder));
 
         const auto rhsEmitResult = m_RHSExpression->Emit(t_emitter);
-        temporaries.insert(end(temporaries), begin(rhsEmitResult.Temporaries), end(rhsEmitResult.Temporaries));
+        temporaries.insert(
+            end(temporaries),
+            begin(rhsEmitResult.Temporaries),
+            end  (rhsEmitResult.Temporaries)
+        );
 
         auto* const rhsLoadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,

@@ -18,6 +18,13 @@ namespace Ace
     {
     }
 
+    auto TemplateInstantiator::SetSymbols(
+        const std::vector<Symbol::Template::IBase*>& t_symbols
+    ) -> void
+    {
+        m_Symbols = t_symbols;
+    }
+
     auto TemplateInstantiator::InstantiatePlaceholderSymbols() -> Expected<void>
     {
         return TransformExpectedVector(m_Symbols,
@@ -94,9 +101,12 @@ namespace Ace
         if (dynamic_cast<Symbol::Type::TemplateParameter::Normal*>(t_argument))
             return true;
 
-        auto* const templatable = dynamic_cast<Symbol::ITemplatable*>(t_argument);
+        auto* const templatable =
+            dynamic_cast<Symbol::ITemplatable*>(t_argument);
         if (!templatable)
+        {
             return false;
+        }
 
         return AreArgumentsPlaceholders(
             templatable->CollectImplTemplateArguments(),

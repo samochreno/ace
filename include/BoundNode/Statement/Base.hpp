@@ -16,8 +16,9 @@ namespace Ace::BoundNode::Statement
 
         struct TypeChecking : public BoundNode::Context::TypeChecking
         {
-            TypeChecking(Symbol::Type::IBase* const t_parentFunctionType)
-                : ParentFunctionTypeSymbol{ t_parentFunctionType }
+            TypeChecking(
+                Symbol::Type::IBase* const t_parentFunctionType
+            ) : ParentFunctionTypeSymbol{ t_parentFunctionType }
             {
             }
 
@@ -32,7 +33,11 @@ namespace Ace::BoundNode::Statement
     public:
         virtual ~IBase() = default;
 
-        virtual auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> = 0;
-        virtual auto GetOrCreateLoweredStatement(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>> = 0;
+        virtual auto GetOrCreateTypeCheckedStatement(
+            const BoundNode::Statement::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> = 0;
+        virtual auto GetOrCreateLoweredStatement(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>> = 0;
     };
 }

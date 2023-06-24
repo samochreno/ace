@@ -19,7 +19,7 @@ namespace Ace::Node
     public:
         virtual ~IBase() = default;
 
-        virtual auto GetCompilation() const -> const Compilation* { return GetScope()->GetCompilation(); }
+        virtual auto GetCompilation() const -> const Compilation* final;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetChildren() const -> std::vector<const IBase*> = 0;
     };
@@ -30,7 +30,9 @@ namespace Ace::Node
     public:
         virtual ~ICloneable() = default;
 
-        virtual auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const T> = 0;
+        virtual auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const T> = 0;
     };
 
     template<typename T>

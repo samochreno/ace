@@ -40,7 +40,20 @@ namespace Ace
         OperatorAssociativity Associativity{};
     };
 
-    static auto IsCompoundAssignmentOperator(const TokenKind& t_tokenKind) -> bool
+    ParseToken::ParseToken(
+        const std::shared_ptr<const Token>& t_value
+    ) : m_Value{ t_value }
+    {
+    }
+
+    auto ParseToken::Unwrap() const -> const Token&
+    {
+        return *m_Value.get();
+    }
+
+    static auto IsCompoundAssignmentOperator(
+        const TokenKind& t_tokenKind
+    ) -> bool
     {
         switch (t_tokenKind)
         {
@@ -235,7 +248,6 @@ namespace Ace
         return {};
     }
 
-    // TODO: Turn this into a map maybe... std::unordered_map<TokenKind, std::map<size_t, const char*>>;
     auto Parser::GetOperatorFunctionName(
         const std::shared_ptr<const Token>& t_operatorToken,
         const size_t& t_parameterCount
@@ -243,154 +255,161 @@ namespace Ace
     {
         const auto& tokenKind = t_operatorToken->Kind;
         const auto& stringValue = t_operatorToken->String;
-        if (tokenKind == TokenKind::Asterisk)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::Multiplication;
-        }
 
-        if (tokenKind == TokenKind::Slash)
+        switch (tokenKind)
         {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::Division;
-        }
-
-        if (tokenKind == TokenKind::Percent)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::Remainder;
-        }
-
-        if (tokenKind == TokenKind::Plus)
-        {
-            if (t_parameterCount == 1)
-            {
-                return SpecialIdentifier::Operator::UnaryPlus;
-            }
-            else if (t_parameterCount == 2)
-            {
-                return SpecialIdentifier::Operator::Addition;
-            }
-
-            ACE_TRY_UNREACHABLE();
-        }
-
-        if (tokenKind == TokenKind::Minus)
-        {
-            if (t_parameterCount == 1)
-            {
-                return SpecialIdentifier::Operator::UnaryNegation;
-            }
-            else if (t_parameterCount == 2)
-            {
-                return SpecialIdentifier::Operator::Subtraction;
-            }
-
-            ACE_TRY_UNREACHABLE();
-        }
-
-        if (tokenKind == TokenKind::LessThan)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::LessThan;
-        }
-
-        if (tokenKind == TokenKind::GreaterThan)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::GreaterThan;
-        }
-
-        if (tokenKind == TokenKind::LessThanEquals)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::LessThanEquals;
-        }
-
-        if (tokenKind == TokenKind::GreaterThanEquals)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::GreaterThanEquals;
-        }
-
-        if (tokenKind == TokenKind::GreaterThanGreaterThan)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::RightShift;
-        }
-        
-        if (tokenKind == TokenKind::LessThanLessThan)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::LeftShift;
-        }
-
-        if (tokenKind == TokenKind::EqualsEquals)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::Equals;
-        }
-
-        if (tokenKind == TokenKind::ExclamationEquals)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::NotEquals;
-        }
-
-        if (tokenKind == TokenKind::Caret)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::XOR;
-        }
-
-        if (tokenKind == TokenKind::VerticalBar)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::OR;
-        }
-
-        if (tokenKind == TokenKind::Ampersand)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 2);
-            return SpecialIdentifier::Operator::AND;
-        }
-        
-        if (tokenKind == TokenKind::Tilde)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 1);
-            return SpecialIdentifier::Operator::OneComplement;
-        }
-        
-        if (tokenKind == TokenKind::ImplKeyword)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 1);
-            return SpecialIdentifier::Operator::ImplicitFrom;
-        }
-        
-        if (tokenKind == TokenKind::ExplKeyword)
-        {
-            ACE_TRY_ASSERT(t_parameterCount == 1);
-            return SpecialIdentifier::Operator::ExplicitFrom;
-        }
-
-        if (tokenKind == TokenKind::Identifier)
-        {
-            if (stringValue == SpecialIdentifier::Copy)
+            case TokenKind::Asterisk:
             {
                 ACE_TRY_ASSERT(t_parameterCount == 2);
-                return SpecialIdentifier::Operator::Copy;
+                return SpecialIdentifier::Operator::Multiplication;
+            }
+
+            case TokenKind::Slash:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::Division;
+            }
+
+            case TokenKind::Percent:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::Remainder;
+            }
+
+            case TokenKind::Plus:
+            {
+                if (t_parameterCount == 1)
+                {
+                    return SpecialIdentifier::Operator::UnaryPlus;
+                }
+                else if (t_parameterCount == 2)
+                {
+                    return SpecialIdentifier::Operator::Addition;
+                }
+
+                ACE_TRY_UNREACHABLE();
+            }
+
+            case TokenKind::Minus:
+            {
+                if (t_parameterCount == 1)
+                {
+                    return SpecialIdentifier::Operator::UnaryNegation;
+                }
+                else if (t_parameterCount == 2)
+                {
+                    return SpecialIdentifier::Operator::Subtraction;
+                }
+
+                ACE_TRY_UNREACHABLE();
+            }
+
+            case TokenKind::LessThan:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::LessThan;
+            }
+
+            case TokenKind::GreaterThan:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::GreaterThan;
+            }
+
+            case TokenKind::LessThanEquals:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::LessThanEquals;
+            }
+
+            case TokenKind::GreaterThanEquals:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::GreaterThanEquals;
+            }
+
+            case TokenKind::GreaterThanGreaterThan:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::RightShift;
             }
             
-            if (stringValue == SpecialIdentifier::Drop)
+            case TokenKind::LessThanLessThan:
             {
-                ACE_TRY_ASSERT(t_parameterCount == 1);
-                return SpecialIdentifier::Operator::Drop;
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::LeftShift;
             }
 
-            ACE_TRY_UNREACHABLE();
-        }
+            case TokenKind::EqualsEquals:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::Equals;
+            }
 
-        ACE_TRY_UNREACHABLE();
+            case TokenKind::ExclamationEquals:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::NotEquals;
+            }
+
+            case TokenKind::Caret:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::XOR;
+            }
+
+            case TokenKind::VerticalBar:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::OR;
+            }
+
+            case TokenKind::Ampersand:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 2);
+                return SpecialIdentifier::Operator::AND;
+            }
+            
+            case TokenKind::Tilde:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 1);
+                return SpecialIdentifier::Operator::OneComplement;
+            }
+            
+            case TokenKind::ImplKeyword:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 1);
+                return SpecialIdentifier::Operator::ImplicitFrom;
+            }
+            
+            case TokenKind::ExplKeyword:
+            {
+                ACE_TRY_ASSERT(t_parameterCount == 1);
+                return SpecialIdentifier::Operator::ExplicitFrom;
+            }
+
+            case TokenKind::Identifier:
+            {
+                if (stringValue == SpecialIdentifier::Copy)
+                {
+                    ACE_TRY_ASSERT(t_parameterCount == 2);
+                    return SpecialIdentifier::Operator::Copy;
+                }
+                
+                if (stringValue == SpecialIdentifier::Drop)
+                {
+                    ACE_TRY_ASSERT(t_parameterCount == 1);
+                    return SpecialIdentifier::Operator::Drop;
+                }
+
+                ACE_TRY_UNREACHABLE();
+            }
+
+            default:
+            {
+                ACE_TRY_UNREACHABLE();
+            }
+        }
     }
 
     auto Parser::ParseName(
@@ -2469,34 +2488,32 @@ namespace Ace
             {
                 const auto& tokenKind = operators.at(t_index).get();
 
-                if (tokenKind == TokenKind::AmpersandAmpersand)
+                switch (tokenKind)
                 {
-                    return std::make_shared<const Node::Expression::And>(
-                        lhsExpression,
-                        rhsExpression
-                    );
-                }
-                else if (tokenKind == TokenKind::AmpersandAmpersand)
-                {
-                    return std::make_shared<const Node::Expression::And>(
-                        lhsExpression,
-                        rhsExpression
-                    );
-                }
-                else if (tokenKind == TokenKind::VerticalBarVerticalBar)
-                {
-                    return std::make_shared<const Node::Expression::Or>(
-                        lhsExpression,
-                        rhsExpression
-                    );
-                }
-                else
-                {
-                    return std::make_shared<const Node::Expression::UserBinary>(
-                        lhsExpression,
-                        rhsExpression,
-                        tokenKind
-                    );
+                    case TokenKind::AmpersandAmpersand:
+                    {
+                        return std::make_shared<const Node::Expression::And>(
+                            lhsExpression,
+                            rhsExpression
+                        );
+                    }
+
+                    case TokenKind::VerticalBarVerticalBar:
+                    {
+                        return std::make_shared<const Node::Expression::Or>(
+                            lhsExpression,
+                            rhsExpression
+                        );
+                    }
+                     
+                    default:
+                    {
+                        return std::make_shared<const Node::Expression::UserBinary>(
+                            lhsExpression,
+                            rhsExpression,
+                            tokenKind
+                        );
+                    }
                 }
             }();
 
@@ -2658,24 +2675,36 @@ namespace Ace
 
             const auto collapsedExpression = [&]() -> std::shared_ptr<const Node::Expression::IBase>
             {
-                if (tokenKind == TokenKind::Exclamation)
+                switch (tokenKind)
                 {
-                    return std::make_shared<const Node::Expression::LogicalNegation>(expression);
-                }
-                else if (tokenKind == TokenKind::BoxKeyword)
-                {
-                    return std::make_shared<const Node::Expression::Box>(expression);
-                }
-                else if (tokenKind == TokenKind::UnboxKeyword)
-                {
-                    return std::make_shared<const Node::Expression::Unbox>(expression);
-                }
-                else
-                {
-                    return std::make_shared<const Node::Expression::UserUnary>(
-                        expression, 
-                        tokenKind
-                    );
+                    case TokenKind::Exclamation:
+                    {
+                        return std::make_shared<const Node::Expression::LogicalNegation>(
+                            expression
+                        );
+                    }
+
+                    case TokenKind::BoxKeyword:
+                    {
+                        return std::make_shared<const Node::Expression::Box>(
+                            expression
+                        );
+                    }
+
+                    case TokenKind::UnboxKeyword:
+                    {
+                        return std::make_shared<const Node::Expression::Unbox>(
+                            expression
+                        );
+                    }
+
+                    default:
+                    {
+                        return std::make_shared<const Node::Expression::UserUnary>(
+                            expression, 
+                            tokenKind
+                        );
+                    }
                 }
             }();
 
@@ -2914,22 +2943,28 @@ namespace Ace
         {
             const auto& tokenKind = t_context.Iterator->Unwrap().Kind;
 
-            if (tokenKind == TokenKind::Int8)           return LiteralKind::Int8;
-            if (tokenKind == TokenKind::Int16)          return LiteralKind::Int16;
-            if (tokenKind == TokenKind::Int32)          return LiteralKind::Int32;
-            if (tokenKind == TokenKind::Int64)          return LiteralKind::Int64;
-            if (tokenKind == TokenKind::UInt8)          return LiteralKind::UInt8;
-            if (tokenKind == TokenKind::UInt16)         return LiteralKind::UInt16;
-            if (tokenKind == TokenKind::UInt32)         return LiteralKind::UInt32;
-            if (tokenKind == TokenKind::UInt64)         return LiteralKind::UInt64;
-            if (tokenKind == TokenKind::Int)            return LiteralKind::Int;
-            if (tokenKind == TokenKind::Float32)        return LiteralKind::Float32;
-            if (tokenKind == TokenKind::Float64)        return LiteralKind::Float64;
-            if (tokenKind == TokenKind::String)         return LiteralKind::String;
-            if (tokenKind == TokenKind::TrueKeyword)    return LiteralKind::True;
-            if (tokenKind == TokenKind::FalseKeyword)   return LiteralKind::False;
+            switch (tokenKind)
+            {
+                case TokenKind::Int8:         return LiteralKind::Int8;
+                case TokenKind::Int16:        return LiteralKind::Int16;
+                case TokenKind::Int32:        return LiteralKind::Int32;
+                case TokenKind::Int64:        return LiteralKind::Int64;
+                case TokenKind::UInt8:        return LiteralKind::UInt8;
+                case TokenKind::UInt16:       return LiteralKind::UInt16;
+                case TokenKind::UInt32:       return LiteralKind::UInt32;
+                case TokenKind::UInt64:       return LiteralKind::UInt64;
+                case TokenKind::Int:          return LiteralKind::Int;
+                case TokenKind::Float32:      return LiteralKind::Float32;
+                case TokenKind::Float64:      return LiteralKind::Float64;
+                case TokenKind::String:       return LiteralKind::String;
+                case TokenKind::TrueKeyword:  return LiteralKind::True;
+                case TokenKind::FalseKeyword: return LiteralKind::False;
 
-            ACE_TRY_UNREACHABLE();
+                default:
+                {
+                    ACE_TRY_UNREACHABLE();
+                };
+            }
         }());
 
         return Measured

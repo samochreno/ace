@@ -21,18 +21,23 @@ namespace Ace::BoundNode::Statement::Assignment
         Normal(
             const std::shared_ptr<const BoundNode::Expression::IBase>& t_lhsExpression,
             const std::shared_ptr<const BoundNode::Expression::IBase>& t_rhsExpression
-        ) : m_LHSExpression{ t_lhsExpression },
-            m_RHSExpression{ t_rhsExpression }
-        {
-        }
+        );
         virtual ~Normal() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_LHSExpression->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assignment::Normal>>> final;
-        auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assignment::Normal>> final;
-        auto GetOrCreateLoweredStatement(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>> final { return GetOrCreateLowered(t_context); }
+        auto GetOrCreateTypeChecked(
+            const BoundNode::Statement::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assignment::Normal>>> final;
+        auto GetOrCreateTypeCheckedStatement(
+            const BoundNode::Statement::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final;
+        auto GetOrCreateLowered(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Assignment::Normal>> final;
+        auto GetOrCreateLoweredStatement(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>> final;
         auto Emit(Emitter& t_emitter) const -> void final;
 
     private:

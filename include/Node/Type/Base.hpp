@@ -20,7 +20,9 @@ namespace Ace::Node::Type
 
         virtual auto GetSelfScope() const -> std::shared_ptr<Scope> = 0;
 
-        virtual auto CloneInScopeType(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Type::IBase> = 0;
+        virtual auto CloneInScopeType(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Type::IBase> = 0;
 
         virtual auto CreateBoundType() const -> Expected<std::shared_ptr<const BoundNode::Type::IBase>> = 0;
 

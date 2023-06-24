@@ -112,23 +112,37 @@ namespace Ace::Core
             const Node::ISymbolCreatable* const t_rhs
         )
         {
-            const auto lhsCreationOrder = GetSymbolCreationOrder(t_lhs->GetSymbolKind());
-            const auto rhsCreationOrder = GetSymbolCreationOrder(t_rhs->GetSymbolKind());
+            const auto lhsCreationOrder =
+                GetSymbolCreationOrder(t_lhs->GetSymbolKind());
+
+            const auto rhsCreationOrder =
+                GetSymbolCreationOrder(t_rhs->GetSymbolKind());
 
             if (lhsCreationOrder < rhsCreationOrder)
+            {
                 return true;
+            }
 
             if (lhsCreationOrder > rhsCreationOrder)
+            {
                 return false;
+            }
 
-            const auto lhsKindSpecificCreationOrder = t_lhs->GetSymbolCreationSuborder();
-            const auto rhsKindSpecificCreationOrder = t_rhs->GetSymbolCreationSuborder();
+            const auto lhsKindSpecificCreationOrder =
+                t_lhs->GetSymbolCreationSuborder();
+
+            const auto rhsKindSpecificCreationOrder =
+                t_rhs->GetSymbolCreationSuborder();
 
             if (lhsKindSpecificCreationOrder < rhsKindSpecificCreationOrder)
+            {
                 return true;
+            }
 
             if (lhsKindSpecificCreationOrder > rhsKindSpecificCreationOrder)
+            {
                 return false;
+            }
 
             return false;
         });
@@ -166,7 +180,8 @@ namespace Ace::Core
         const std::vector<const BoundNode::IBase*>& t_nodes
     ) -> Expected<void>
     {
-        const auto functionNodes = DynamicCastFilter<const BoundNode::Function*>(t_nodes);
+        const auto functionNodes =
+            DynamicCastFilter<const BoundNode::Function*>(t_nodes);
 
         const bool didControlFlowAnalysisSucceed = std::find_if(
             begin(functionNodes), 
@@ -177,10 +192,14 @@ namespace Ace::Core
                     t_functionNode->GetSymbol()->GetType()->GetUnaliased() == 
                     t_compilation->Natives->Void.GetSymbol()
                     )
+                {
                     return false;
+                }
 
                 if (!t_functionNode->GetBody().has_value())
+                {
                     return false;
+                }
 
                 ControlFlowAnalysis controlFlowAnalysis
                 {
@@ -200,7 +219,9 @@ namespace Ace::Core
         const std::vector<const BoundNode::IBase*>& t_nodes
     ) -> void
     {
-        const auto functionNodes = DynamicCastFilter<const BoundNode::Function*>(t_nodes);
+        const auto functionNodes =
+            DynamicCastFilter<const BoundNode::Function*>(t_nodes);
+
         std::for_each(begin(functionNodes), end(functionNodes),
         [&](const BoundNode::Function* const t_functionNode)
         {
@@ -217,7 +238,8 @@ namespace Ace::Core
         const Compilation* const t_compilation
     ) -> Expected<void>
     {
-        const auto typeSymbols = t_compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<Symbol::Type::IBase>();
+        const auto typeSymbols =
+            t_compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<Symbol::Type::IBase>();
 
         const bool didValidateTypeSizes = std::find_if_not(
             begin(typeSymbols), 
@@ -228,7 +250,9 @@ namespace Ace::Core
                     t_typeSymbol
                 );
                 if (templatableSymbol && templatableSymbol->IsTemplatePlaceholder())
+                {
                     return true;
+                }
 
                 return t_typeSymbol->GetSizeKind();
             }
@@ -361,7 +385,8 @@ namespace Ace::Core
         const std::function<void(Symbol::Type::IBase* const, Symbol::Function* const)>& t_bindGlue
     ) -> void
     {
-        const auto typeSymbols = t_compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<Symbol::Type::IBase>();
+        const auto typeSymbols =
+            t_compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<Symbol::Type::IBase>();
 
         struct TypeGlueSymbolPair
         {
@@ -494,7 +519,9 @@ namespace Ace::Core
             Symbol::Type::IBase* m_TypeSymbol{};
         };
 
-        return std::make_shared<const TrivialCopyGlueBodyEmitter>(t_structSymbol);
+        return std::make_shared<const TrivialCopyGlueBodyEmitter>(
+            t_structSymbol
+        );
     }
 
     static auto CreateTrivialDropGlueBody(

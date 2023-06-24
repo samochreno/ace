@@ -25,21 +25,26 @@ namespace Ace::BoundNode::Statement
         Variable(
             Symbol::Variable::Local* const t_symbol,
             const std::optional<std::shared_ptr<const BoundNode::Expression::IBase>>& t_optAssignedExpression
-        ) : m_Symbol{ t_symbol },
-            m_OptAssignedExpression{ t_optAssignedExpression }
-        {
-        }
+        );
         virtual ~Variable() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Symbol->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>>> final;
-        auto GetOrCreateTypeCheckedStatement(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>> final;
-        auto GetOrCreateLoweredStatement(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>> final { return GetOrCreateLowered(t_context); }
+        auto GetOrCreateTypeChecked(
+            const BoundNode::Statement::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>>> final;
+        auto GetOrCreateTypeCheckedStatement(
+            const BoundNode::Statement::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>> final;
+        auto GetOrCreateLowered(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Variable>> final;
+        auto GetOrCreateLoweredStatement(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>> final;
         auto Emit(Emitter& t_emitter) const -> void final;
 
-        auto GetSymbol() const -> Symbol::Variable::Local* final { return m_Symbol; }
+        auto GetSymbol() const -> Symbol::Variable::Local* final;
         
     private:
         Symbol::Variable::Local* m_Symbol{};

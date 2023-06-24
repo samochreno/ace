@@ -12,6 +12,17 @@
 
 namespace Ace::BoundNode::Expression
 {
+    LogicalNegation::LogicalNegation(
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression
+    ) : m_Expression{ t_expression }
+    {
+    }
+
+    auto LogicalNegation::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Expression->GetScope();
+    }
+
     auto LogicalNegation::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -21,7 +32,9 @@ namespace Ace::BoundNode::Expression
         return children;
     }
 
-    auto LogicalNegation::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::LogicalNegation>>>
+    auto LogicalNegation::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::LogicalNegation>>>
     {
         const TypeInfo typeInfo
         {
@@ -35,7 +48,9 @@ namespace Ace::BoundNode::Expression
         ));
 
         if (mchConvertedAndCheckedExpression.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::LogicalNegation>(
             mchConvertedAndCheckedExpression.Value
@@ -43,17 +58,36 @@ namespace Ace::BoundNode::Expression
         return CreateChanged(returnValue);
     }
 
-    auto LogicalNegation::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::LogicalNegation>>
+    auto LogicalNegation::GetOrCreateTypeCheckedExpression(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>
     {
-        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto LogicalNegation::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::LogicalNegation>>
+    {
+        const auto mchLoweredExpression =
+            m_Expression->GetOrCreateLoweredExpression({});
 
         if (!mchLoweredExpression.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::LogicalNegation>(
             mchLoweredExpression.Value
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+    }
+
+    auto LogicalNegation::GetOrCreateLoweredExpression(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
     }
 
     auto LogicalNegation::Emit(Emitter& t_emitter) const -> ExpressionEmitResult

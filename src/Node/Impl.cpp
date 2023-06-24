@@ -15,6 +15,23 @@
 
 namespace Ace::Node
 {
+    Impl::Impl(
+        const std::shared_ptr<Scope>& t_selfScope,
+        const SymbolName& t_typeName,
+        const std::vector<std::shared_ptr<const Node::Function>>& t_functions,
+        const std::vector<std::shared_ptr<const Node::Template::Function>>& t_functionTemplates
+    ) : m_SelfScope{ t_selfScope },
+        m_TypeName{ t_typeName },
+        m_Functions{ t_functions },
+        m_FunctionTemplates{ t_functionTemplates }
+    {
+    }
+
+    auto Impl::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_SelfScope->GetParent().value();
+    }
+
     auto Impl::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -25,7 +42,9 @@ namespace Ace::Node
         return children;
     }
 
-    auto Impl::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Impl>
+    auto Impl::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Impl>
     {
         const auto selfScope = t_scope->GetOrCreateChild({});
 
@@ -88,7 +107,9 @@ namespace Ace::Node
 
                 auto& lastNameSection = typeName.Sections.back();
                 lastNameSection.TemplateArguments.clear();
-                lastNameSection.Name = SpecialIdentifier::CreateTemplate(lastNameSection.Name);
+                lastNameSection.Name = SpecialIdentifier::CreateTemplate(
+                    lastNameSection.Name
+                );
 
                 ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<Symbol::Template::Type>(typeName));
                 return templateSymbol->GetSelfScope();

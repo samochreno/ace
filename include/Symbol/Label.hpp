@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "Symbol/Base.hpp"
@@ -14,17 +15,14 @@ namespace Ace::Symbol
         Label(
             const std::shared_ptr<Scope>& t_scope,
             const std::string& t_name
-        ) : m_Scope{ t_scope },
-            m_Name{ t_name }
-        {
-        }
+        );
         virtual ~Label() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
-        auto GetName() const -> const std::string& final { return m_Name; }
-        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Label; }
-        auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
-        auto GetAccessModifier() const -> AccessModifier final { return AccessModifier::Public; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
+        auto GetName() const -> const std::string& final;
+        auto GetSymbolKind() const -> SymbolKind final;
+        auto GetSymbolCategory() const -> SymbolCategory final;
+        auto GetAccessModifier() const -> AccessModifier final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

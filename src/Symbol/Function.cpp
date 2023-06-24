@@ -9,6 +9,8 @@
 #include <iterator>
 
 #include "Asserts.hpp"
+#include "Scope.hpp"
+#include "AccessModifier.hpp"
 #include "Symbol/Variable/Parameter/Base.hpp"
 #include "Symbol/Variable/Parameter/Self.hpp"
 #include "Symbol/Variable/Parameter/Normal.hpp"
@@ -18,11 +20,59 @@
 #include "Symbol/Type/Alias/TemplateArgument/Impl.hpp"
 #include "Emittable.hpp"
 #include "TypeInfo.hpp"
-#include "Scope.hpp"
 #include "Utility.hpp"
 
 namespace Ace::Symbol
 {
+    Function::Function(
+        const std::shared_ptr<Scope>& t_selfScope,
+        const std::string& t_name,
+        const SymbolCategory& t_symbolCategory,
+        const AccessModifier& t_accessModifier,
+        Symbol::Type::IBase* const t_type
+    ) : m_SelfScope{ t_selfScope },
+        m_Name{ t_name },
+        m_SymbolCategory{ t_symbolCategory },
+        m_AccessModifier{ t_accessModifier },
+        m_Type{ t_type }
+    {
+    }
+
+    auto Function::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_SelfScope->GetParent().value();
+    }
+
+    auto Function::GetSelfScope() const -> std::shared_ptr<Scope>
+    {
+        return m_SelfScope;
+    }
+
+    auto Function::GetName() const -> const std::string&
+    {
+        return m_Name;
+    }
+
+    auto Function::GetSymbolKind() const -> SymbolKind
+    {
+        return SymbolKind::Function;
+    }
+
+    auto Function::GetSymbolCategory() const -> SymbolCategory
+    {
+        return m_SymbolCategory;
+    }
+
+    auto Function::GetAccessModifier() const -> AccessModifier
+    {
+        return m_AccessModifier;
+    }
+
+    auto Function::GetType() const -> Symbol::Type::IBase*
+    {
+        return m_Type;
+    }
+
     auto Function::CollectParameters() const -> std::vector<Symbol::Variable::Parameter::IBase*>
     {
         auto normalParameters = m_SelfScope->CollectSymbols<Symbol::Variable::Parameter::Normal>();

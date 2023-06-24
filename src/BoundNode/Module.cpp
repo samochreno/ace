@@ -12,6 +12,27 @@
 
 namespace Ace::BoundNode
 {
+    Module::Module(
+        Symbol::Module* const t_symbol,
+        const std::vector<std::shared_ptr<const BoundNode::Module>>& t_modules,
+        const std::vector<std::shared_ptr<const BoundNode::Type::IBase>>& t_types,
+        const std::vector<std::shared_ptr<const BoundNode::Impl>>& t_impls,
+        const std::vector<std::shared_ptr<const BoundNode::Function>>& t_functions,
+        const std::vector<std::shared_ptr<const BoundNode::Variable::Normal::Static>>& t_variables
+    ) : m_Symbol{ t_symbol },
+        m_Modules{ t_modules },
+        m_Types{ t_types },
+        m_Impls{ t_impls },
+        m_Functions{ t_functions },
+        m_Variables{ t_variables }
+    {
+    }
+
+    auto Module::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Symbol->GetScope();
+    }
+
     auto Module::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -25,7 +46,9 @@ namespace Ace::BoundNode
         return children;
     }
 
-    auto Module::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Module>>>
+    auto Module::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Module>>>
     {
         ACE_TRY(mchCheckedModules, TransformExpectedMaybeChangedVector(m_Modules,
         [](const std::shared_ptr<const BoundNode::Module>& t_module)
@@ -38,7 +61,6 @@ namespace Ace::BoundNode
         {
             return t_type->GetOrCreateTypeCheckedType({});
         }));
-
 
         ACE_TRY(mchCheckedImpls, TransformExpectedMaybeChangedVector(m_Impls,
         [](const std::shared_ptr<const BoundNode::Impl>& t_impl)
@@ -65,7 +87,9 @@ namespace Ace::BoundNode
             !mchCheckedFunctions.IsChanged && 
             !mchCheckedVariables.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Module>(
             m_Symbol,
@@ -78,7 +102,9 @@ namespace Ace::BoundNode
         return CreateChanged(returnValue);
     }
 
-    auto Module::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Module>>
+    auto Module::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Module>>
     {
         const auto mchLoweredModules = TransformMaybeChangedVector(m_Modules,
         [](const std::shared_ptr<const BoundNode::Module>& t_module)
@@ -117,7 +143,9 @@ namespace Ace::BoundNode
             !mchLoweredFunctions.IsChanged && 
             !mchLoweredVariables.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Module>(
             m_Symbol,

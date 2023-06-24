@@ -69,43 +69,20 @@ namespace Ace
             std::optional<std::function<llvm::Type*()>>&& t_irTypeGetter,
             const TypeSizeKind& t_sizeKind,
             const NativeCopyabilityKind& t_copyabilityKind
-        ) : m_Compilation{ t_compilation },
-            m_Name{ std::move(t_name) },
-            m_IRTypeGetter{ std::move(t_irTypeGetter) },
-            m_IsSized{ t_sizeKind == TypeSizeKind::Sized },
-            m_IsTriviallyCopyable{ t_copyabilityKind == NativeCopyabilityKind::Trivial }
-        {
-            ACE_ASSERT(
-                (t_sizeKind == TypeSizeKind::Sized) ||
-                (t_sizeKind == TypeSizeKind::Unsized)
-            );
-
-            ACE_ASSERT(
-                (t_copyabilityKind == NativeCopyabilityKind::Trivial) ||
-                (t_copyabilityKind == NativeCopyabilityKind::NonTrivial)
-            );
-        }
+        );
         ~NativeType() = default;
 
-        auto GetFullyQualifiedName() const -> const SymbolName& final { return m_Name; }
+        auto GetFullyQualifiedName() const -> const SymbolName& final;
 
-        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
+        auto GetCompilation() const -> const Compilation*;
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Type::IBase*
-        {
-            ACE_ASSERT(m_Symbol);
-            return m_Symbol;
-        }
+        auto GetSymbol() const -> Symbol::Type::IBase*;
 
-        auto HasIRType() const -> bool { return m_IRTypeGetter.has_value(); }
-        auto GetIRType() const -> llvm::Type*
-        {
-            ACE_ASSERT(HasIRType());
-            return m_IRTypeGetter.value()();
-        }
-
+        auto HasIRType() const -> bool;
+        auto GetIRType() const -> llvm::Type*;
+        
     private:
         const Compilation* m_Compilation{};
         SymbolName m_Name{};
@@ -122,23 +99,16 @@ namespace Ace
         NativeTypeTemplate(
             const Compilation* const t_compilation,
             SymbolName&& t_name
-        ) : m_Compilation{ t_compilation },
-            m_Name{ std::move(t_name) }
-        {
-        }
+        );
         ~NativeTypeTemplate() = default;
 
-        auto GetFullyQualifiedName() const -> const SymbolName& final { return m_Name; }
+        auto GetFullyQualifiedName() const -> const SymbolName& final;
 
-        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
+        auto GetCompilation() const -> const Compilation*;
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Template::Type*
-        {
-            ACE_ASSERT(m_Symbol);
-            return m_Symbol;
-        }
+        auto GetSymbol() const -> Symbol::Template::Type*;
 
     private:
         const Compilation* m_Compilation{};
@@ -154,23 +124,15 @@ namespace Ace
             const Compilation* const t_compilation,
             SymbolName&& t_name,
             FunctionBodyEmitter&& t_bodyEmitter
-        ) : m_Compilation{ t_compilation },
-            m_Name{ std::move(t_name) },
-            m_BodyEmitter{ std::move(t_bodyEmitter) }
-        {
-        }
+        );
         ~NativeFunction() = default;
 
-        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
+        auto GetCompilation() const -> const Compilation*;
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Function*
-        {
-            ACE_ASSERT(m_Symbol);
-            return m_Symbol;
-        }
-
+        auto GetSymbol() const -> Symbol::Function*;
+        
     private:
         const Compilation* m_Compilation{};
         SymbolName m_Name{};
@@ -185,21 +147,14 @@ namespace Ace
         NativeFunctionTemplate(
             const Compilation* const t_compilation,
             SymbolName&& t_name
-        ) : m_Compilation{ t_compilation },
-            m_Name{ std::move(t_name) }
-        {
-        }
+        );
         ~NativeFunctionTemplate() = default;
 
-        auto GetCompilation() const -> const Compilation* { return m_Compilation; }
+        auto GetCompilation() const -> const Compilation*;
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Template::Function*
-        {
-            ACE_ASSERT(m_Symbol);
-            return m_Symbol;
-        }
+        auto GetSymbol() const -> Symbol::Template::Function*;
 
     private:
         const Compilation* m_Compilation{};
@@ -215,22 +170,14 @@ namespace Ace
             const ITypeableNative& t_type,
             const char* const t_name,
             FunctionBodyEmitter&& t_bodyEmitter
-        ) : m_Type{ t_type },
-            m_Name{ t_name },
-            m_BodyEmitter{ std::move(t_bodyEmitter) }
-        {
-        }
+        );
         ~NativeAssociatedFunction() = default;
 
-        auto GetCompilation() const -> const Compilation* { return m_Type.GetCompilation(); }
+        auto GetCompilation() const -> const Compilation*;
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Function*
-        {
-            ACE_ASSERT(m_Symbol);
-            return m_Symbol;
-        }
+        auto GetSymbol() const -> Symbol::Function*;
 
     private:
         const ITypeableNative& m_Type;
@@ -246,21 +193,14 @@ namespace Ace
         NativeAssociatedFunctionTemplate(
             const ITypeableNative& t_type,
             const char* const t_name
-        ) : m_Type{ t_type },
-            m_Name{ t_name }
-        {
-        }
+        );
         ~NativeAssociatedFunctionTemplate() = default;
 
-        auto GetCompilation() const -> const Compilation* { return m_Type.GetCompilation(); }
+        auto GetCompilation() const -> const Compilation*;
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Template::Function*
-        {
-            ACE_ASSERT(m_Symbol);
-            return m_Symbol;
-        }
+        auto GetSymbol() const -> Symbol::Template::Function*;
 
     private:
         const ITypeableNative& m_Type;
@@ -277,9 +217,9 @@ namespace Ace
 
         auto Initialize() -> void;
 
-        auto GetIRTypeSymbolMap() const -> const std::unordered_map<Symbol::Type::IBase*, llvm::Type*>& { return m_IRTypeSymbolMap; }
-        auto GetImplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>& { return m_ImplicitFromOperatorMap; }
-        auto GetExplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>& { return m_ExplicitFromOperatorMap; }
+        auto GetIRTypeSymbolMap() const -> const std::unordered_map<Symbol::Type::IBase*, llvm::Type*>&;
+        auto GetImplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>&;
+        auto GetExplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>&;
 
         auto IsIntTypeSigned(const NativeType& t_intType) const -> bool;
 

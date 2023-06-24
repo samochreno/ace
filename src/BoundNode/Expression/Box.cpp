@@ -14,6 +14,17 @@
 
 namespace Ace::BoundNode::Expression
 {
+    Box::Box(
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression
+    ) : m_Expression{ t_expression }
+    {
+    }
+
+    auto Box::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Expression->GetScope();
+    }
+
     auto Box::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -23,22 +34,36 @@ namespace Ace::BoundNode::Expression
         return children;
     }
 
-    auto Box::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::Box>>> 
+    auto Box::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::Box>>> 
     {
         ACE_TRY(mchCheckedExpression, m_Expression->GetOrCreateTypeCheckedExpression({}));
 
         if (!mchCheckedExpression.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::Box>(
             mchCheckedExpression.Value
         );
         return CreateChanged(returnValue);
     }
-
-    auto Box::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>> 
+    
+    auto Box::GetOrCreateTypeCheckedExpression(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>
     {
-        const auto mchLoweredExpression = m_Expression->GetOrCreateLoweredExpression({});
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto Box::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>> 
+    {
+        const auto mchLoweredExpression =
+            m_Expression->GetOrCreateLoweredExpression({});
 
         const auto symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
@@ -57,6 +82,18 @@ namespace Ace::BoundNode::Expression
             std::vector{ mchLoweredExpression.Value }
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+    }
+
+    auto Box::GetOrCreateLoweredExpression(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
+    auto Box::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
+    {
+        ACE_UNREACHABLE();
     }
 
     auto Box::GetTypeInfo() const -> TypeInfo

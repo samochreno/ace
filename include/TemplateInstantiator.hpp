@@ -35,7 +35,7 @@ namespace Ace
 
         auto SetSymbols(
             const std::vector<Symbol::Template::IBase*>& t_symbols
-        ) -> void { m_Symbols = t_symbols; }
+        ) -> void;
 
         auto InstantiatePlaceholderSymbols() -> Expected<void>;
 

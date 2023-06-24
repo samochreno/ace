@@ -16,8 +16,12 @@ namespace Ace::BoundNode::Type
     public:
         virtual ~IBase() = default;
 
-        virtual auto GetOrCreateTypeCheckedType(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Type::IBase>>> = 0;
-        virtual auto GetOrCreateLoweredType(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Type::IBase>> = 0;
+        virtual auto GetOrCreateTypeCheckedType(
+            const BoundNode::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Type::IBase>>> = 0;
+        virtual auto GetOrCreateLoweredType(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Type::IBase>> = 0;
 
         virtual auto GetSymbol() const -> Symbol::Type::IBase* = 0;
     };

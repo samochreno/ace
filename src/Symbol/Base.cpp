@@ -14,6 +14,11 @@
 
 namespace Ace::Symbol
 {
+    auto IBase::GetCompilation() const -> const Compilation*
+    {
+        return GetScope()->GetCompilation();
+    }
+
     static auto UnwrapAlias(const Symbol::IBase* const t_symbol) -> const Symbol::IBase*
     {
         auto* const typeSymbol = dynamic_cast<const Symbol::Type::IBase*>(t_symbol);

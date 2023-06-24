@@ -23,19 +23,23 @@ namespace Ace::BoundNode::Expression::FunctionCall
             const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression,
             Symbol::Function* const t_functionSymbol,
             const std::vector<std::shared_ptr<const BoundNode::Expression::IBase>>& t_arguments
-        ) : m_Expression{ t_expression },
-            m_FunctionSymbol{ t_functionSymbol },
-            m_Arguments{ t_arguments }
-        {
-        }
+        );
         virtual ~Instance() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Expression->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Instance>>> final;
-        auto GetOrCreateTypeCheckedExpression(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final { return GetOrCreateTypeChecked(t_context); }
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Instance>> final;
-        auto GetOrCreateLoweredExpression(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>> final { return GetOrCreateLowered(t_context); }
+        auto GetOrCreateTypeChecked(
+            const BoundNode::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Instance>>> final;
+        auto GetOrCreateTypeCheckedExpression(
+            const BoundNode::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>> final;
+        auto GetOrCreateLowered(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Instance>> final;
+        auto GetOrCreateLoweredExpression(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>> final;
         auto Emit(Emitter& t_emitter) const -> ExpressionEmitResult final;
 
         auto GetTypeInfo() const -> TypeInfo final;

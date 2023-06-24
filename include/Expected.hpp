@@ -42,9 +42,7 @@ namespace Ace
     class Expected<void> : public IDiagnosed
     {
     public:
-        Expected()
-        {
-        }
+        Expected() = default;
         Expected(
             const Expected& t_other
         ) : m_IsFatal{ t_other.m_IsFatal },

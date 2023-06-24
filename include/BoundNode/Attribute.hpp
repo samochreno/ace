@@ -18,16 +18,19 @@ namespace Ace::BoundNode
         public virtual BoundNode::ILowerable<BoundNode::Attribute>
     {
     public:
-        Attribute(const std::shared_ptr<const BoundNode::Expression::StructConstruction>& t_structConstructionExpression) 
-            : m_StructConstructionExpression{ t_structConstructionExpression }
-        {
-        }
+        Attribute(
+            const std::shared_ptr<const BoundNode::Expression::StructConstruction>& t_structConstructionExpression
+        );
         virtual ~Attribute() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_StructConstructionExpression->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Attribute>>> final;
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Attribute>> final;
+        auto GetOrCreateTypeChecked(
+            const BoundNode::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Attribute>>> final;
+        auto GetOrCreateLowered(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Attribute>> final;
 
     private:
         std::shared_ptr<const BoundNode::Expression::StructConstruction> m_StructConstructionExpression{};

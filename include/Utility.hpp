@@ -11,47 +11,26 @@ namespace Ace
     {
         std::vector<TTarget> vec{};
 
-        std::for_each(begin(t_vec), end(t_vec), [&](const TOriginal& t_element)
+        std::for_each(begin(t_vec), end(t_vec),
+        [&](const TOriginal& t_element)
         {
             auto target = dynamic_cast<TTarget>(t_element);
 
             if (target)
+            {
                 vec.push_back(target);
+            }
         });
 
         return vec;
     }
 
-    inline auto IsInAlphabet(const char& t_character) -> bool
-    {
-        return
-            ((t_character >= 'a') && (t_character <= 'z')) ||
-            ((t_character >= 'A') && (t_character <= 'Z'));
-    }
+    auto IsInAlphabet(const char& t_character) -> bool;
+    auto IsNumber    (const char& t_character) -> bool;
 
-    inline auto IsNumber(const char& t_character) -> bool
-    {
-        return (t_character >= '0') && (t_character <= '9');
-    }
-
-    inline auto TrimRight(std::string& t_value) -> std::string&
-    {
-        t_value.erase(t_value.find_last_not_of(' ') + 1);
-        return t_value;
-    }
-
-    inline auto TrimLeft(std::string& t_value) -> std::string&
-    {
-        t_value.erase(0, t_value.find_first_not_of(' '));
-        return t_value;
-    }
-
-    inline auto Trim(std::string& t_value) -> std::string&
-    {
-        TrimLeft(t_value);
-        TrimRight(t_value);
-        return t_value;
-    }
+    auto TrimRight(std::string& t_value) -> std::string&;
+    auto TrimLeft (std::string& t_value) -> std::string&;
+    auto Trim     (std::string& t_value) -> std::string&;
 
     template<typename TIterator>
     auto Distance(TIterator t_begin, TIterator t_end) -> size_t

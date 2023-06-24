@@ -11,6 +11,19 @@
 
 namespace Ace::BoundNode::Statement
 {
+    Return::Return(
+        const std::shared_ptr<Scope>& t_scope,
+        const std::optional<std::shared_ptr<const BoundNode::Expression::IBase>>& t_optExpression
+    ) : m_Scope{ t_scope },
+        m_OptExpression{ t_optExpression }
+    {
+    }
+
+    auto Return::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto Return::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -23,7 +36,9 @@ namespace Ace::BoundNode::Statement
         return children;
     }
 
-    auto Return::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Return>>>
+    auto Return::GetOrCreateTypeChecked(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::Return>>>
     {
         const bool isFunctionTypeVoid = 
             t_context.ParentFunctionTypeSymbol == 
@@ -53,7 +68,9 @@ namespace Ace::BoundNode::Statement
         }));
 
         if (!mchCheckedOptExpression.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Statement::Return>(
             m_Scope,
@@ -63,7 +80,16 @@ namespace Ace::BoundNode::Statement
         return CreateChanged(returnValue);
     }
 
-    auto Return::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Return>>
+    auto Return::GetOrCreateTypeCheckedStatement(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto Return::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Return>>
     {
         const auto mchLoweredOptExpression = TransformMaybeChangedOptional(m_OptExpression,
         [&](const std::shared_ptr<const BoundNode::Expression::IBase>& t_expression)
@@ -72,7 +98,9 @@ namespace Ace::BoundNode::Statement
         });
 
         if (!mchLoweredOptExpression.IsChanged)
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Statement::Return>(
             m_Scope,
@@ -81,16 +109,25 @@ namespace Ace::BoundNode::Statement
         return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
     }
 
+    auto Return::GetOrCreateLoweredStatement(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
     auto Return::Emit(Emitter& t_emitter) const -> void
     {
         if (m_OptExpression.has_value())
         {
-            const auto expressionEmitResult = m_OptExpression.value()->Emit(t_emitter);
+            const auto expressionEmitResult =
+                m_OptExpression.value()->Emit(t_emitter);
             
             auto* const typeSymbol = m_OptExpression.value()->GetTypeInfo().Symbol;
             auto* const type = t_emitter.GetIRType(typeSymbol);
 
-            auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(type);
+            auto* const allocaInst =
+                t_emitter.GetBlockBuilder().Builder.CreateAlloca(type);
 
             t_emitter.EmitCopy(
                 allocaInst,

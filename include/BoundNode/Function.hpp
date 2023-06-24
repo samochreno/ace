@@ -31,23 +31,21 @@ namespace Ace::BoundNode
             const std::optional<const std::shared_ptr<const BoundNode::Variable::Parameter::Self>>& t_optSelf,
             const std::vector<std::shared_ptr<const BoundNode::Variable::Parameter::Normal>>& t_parameters,
             const std::optional<std::shared_ptr<const BoundNode::Statement::Block>>& t_optBody
-        ) : m_Symbol{ t_symbol },
-            m_Attributes{ t_attributes },
-            m_OptSelf{ t_optSelf },
-            m_Parameters{ t_parameters },
-            m_OptBody{ t_optBody }
-        {
-        }
+        );
         virtual ~Function() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Symbol->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const BoundNode::IBase*> final;
-        auto GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Function>>> final;
-        auto GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Function>> final;
+        auto GetOrCreateTypeChecked(
+            const BoundNode::Context::TypeChecking& t_context
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Function>>> final;
+        auto GetOrCreateLowered(
+            const BoundNode::Context::Lowering& t_context
+        ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Function>> final;
 
-        auto GetSymbol() const -> Symbol::Function* final { return m_Symbol; }
+        auto GetSymbol() const -> Symbol::Function* final;
 
-        auto GetBody() const -> std::optional<std::shared_ptr<const BoundNode::Statement::Block>> { return m_OptBody; }
+        auto GetBody() const -> std::optional<std::shared_ptr<const BoundNode::Statement::Block>>;
 
     private:
         Symbol::Function* m_Symbol{};

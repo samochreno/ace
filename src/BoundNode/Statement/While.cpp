@@ -19,6 +19,21 @@
 
 namespace Ace::BoundNode::Statement
 {
+    While::While(
+        const std::shared_ptr<Scope>& t_scope,
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_condition,
+        const std::shared_ptr<const BoundNode::Statement::Block>& t_body
+    ) : m_Scope{ t_scope },
+        m_Condition{ t_condition },
+        m_Body{ t_body }
+    {
+    }
+
+    auto While::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto While::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -29,7 +44,9 @@ namespace Ace::BoundNode::Statement
         return children;
     }
 
-    auto While::GetOrCreateTypeChecked(const BoundNode::Statement::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::While>>>
+    auto While::GetOrCreateTypeChecked(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::While>>>
     {
         const TypeInfo typeInfo
         {
@@ -42,13 +59,17 @@ namespace Ace::BoundNode::Statement
             typeInfo
         ));
 
-        ACE_TRY(mchCheckedBody, m_Body->GetOrCreateTypeChecked({ t_context.ParentFunctionTypeSymbol }));
+        ACE_TRY(mchCheckedBody, m_Body->GetOrCreateTypeChecked({
+            t_context.ParentFunctionTypeSymbol
+        }));
 
         if (
             !mchConvertedAndCheckedCondition.IsChanged &&
             !mchCheckedBody.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Statement::While>(
             m_Scope,
@@ -58,7 +79,16 @@ namespace Ace::BoundNode::Statement
         return CreateChanged(returnValue);
     }
 
-    auto While::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
+    auto While::GetOrCreateTypeCheckedStatement(
+        const BoundNode::Statement::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>>
+    {
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto While::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::Group>>
     {
         // From:
         // while condition {
@@ -117,5 +147,17 @@ namespace Ace::BoundNode::Statement
             statements
         );
         return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
+    }
+
+    auto While::GetOrCreateLoweredStatement(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Statement::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
+    auto While::Emit(Emitter& t_emitter) const -> void
+    {
+        ACE_UNREACHABLE();
     }
 }

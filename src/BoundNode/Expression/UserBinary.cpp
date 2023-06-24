@@ -11,6 +11,21 @@
 
 namespace Ace::BoundNode::Expression
 {
+    UserBinary::UserBinary(
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_lhsExpression,
+        const std::shared_ptr<const BoundNode::Expression::IBase>& t_rhsExpression,
+        Symbol::Function* const t_operatorSymbol
+    ) : m_LHSExpression{ t_lhsExpression },
+        m_RHSExpression{ t_rhsExpression },
+        m_OperatorSymbol{ t_operatorSymbol }
+    {
+    }
+
+    auto UserBinary::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_LHSExpression->GetScope();
+    }
+
     auto UserBinary::GetChildren() const -> std::vector<const BoundNode::IBase*>
     {
         std::vector<const BoundNode::IBase*> children{};
@@ -21,9 +36,12 @@ namespace Ace::BoundNode::Expression
         return children;
     }
 
-    auto UserBinary::GetOrCreateTypeChecked(const BoundNode::Context::TypeChecking& t_context) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::UserBinary>>>
+    auto UserBinary::GetOrCreateTypeChecked(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::UserBinary>>>
     {
-        const auto argumentTypeInfos = m_OperatorSymbol->CollectArgumentTypeInfos();
+        const auto argumentTypeInfos =
+            m_OperatorSymbol->CollectArgumentTypeInfos();
 
         ACE_TRY(mchConvertedAndCheckedLHSExpression, CreateImplicitlyConvertedAndTypeChecked(
             m_LHSExpression,
@@ -39,7 +57,9 @@ namespace Ace::BoundNode::Expression
             !mchConvertedAndCheckedLHSExpression.IsChanged &&
             !mchConvertedAndCheckedRHSExpression.IsChanged
             )
+        {
             return CreateUnchanged(shared_from_this());
+        }
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::UserBinary>(
             mchConvertedAndCheckedLHSExpression.Value,
@@ -49,10 +69,22 @@ namespace Ace::BoundNode::Expression
         return CreateChanged(returnValue);
     }
 
-    auto UserBinary::GetOrCreateLowered(const BoundNode::Context::Lowering& t_context) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>
+    auto UserBinary::GetOrCreateTypeCheckedExpression(
+        const BoundNode::Context::TypeChecking& t_context
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>>
     {
-        const auto mchLoweredLHSExpression = m_LHSExpression->GetOrCreateLoweredExpression({});
-        const auto mchLoweredRHSExpression = m_RHSExpression->GetOrCreateLoweredExpression({});
+        return GetOrCreateTypeChecked(t_context);
+    }
+
+    auto UserBinary::GetOrCreateLowered(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::FunctionCall::Static>>
+    {
+        const auto mchLoweredLHSExpression =
+            m_LHSExpression->GetOrCreateLoweredExpression({});
+
+        const auto mchLoweredRHSExpression =
+            m_RHSExpression->GetOrCreateLoweredExpression({});
 
         const auto returnValue = std::make_shared<const BoundNode::Expression::FunctionCall::Static>(
             GetScope(),
@@ -64,6 +96,18 @@ namespace Ace::BoundNode::Expression
             }
         );
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+    }
+
+    auto UserBinary::GetOrCreateLoweredExpression(
+        const BoundNode::Context::Lowering& t_context
+    ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Expression::IBase>>
+    {
+        return GetOrCreateLowered(t_context);
+    }
+
+    auto UserBinary::Emit(Emitter& t_emitter) const -> ExpressionEmitResult
+    {
+        ACE_UNREACHABLE();
     }
 
     auto UserBinary::GetTypeInfo() const -> TypeInfo

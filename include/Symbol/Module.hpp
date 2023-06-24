@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "Symbol/Base.hpp"
@@ -9,26 +10,24 @@
 
 namespace Ace::Symbol
 {
-    class Module : public virtual Symbol::IBase, public virtual Symbol::ISelfScoped
+    class Module :
+        public virtual Symbol::IBase,
+        public virtual Symbol::ISelfScoped
     {
     public:
         Module(
             const std::shared_ptr<Scope>& t_selfScope,
             const std::string& t_name,
             const AccessModifier& t_accessModifier
-        ) : m_SelfScope{ t_selfScope },
-            m_Name{ t_name },
-            m_AccessModifier{ t_accessModifier }
-        {
-        }
+        );
         virtual ~Module() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_SelfScope->GetParent().value(); }
-        auto GetSelfScope() const -> std::shared_ptr<Scope> final { return m_SelfScope; }
-        auto GetName() const -> const std::string& { return m_Name; }
-        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Module; }
-        auto GetSymbolCategory() const -> SymbolCategory final { return SymbolCategory::Static; }
-        auto GetAccessModifier() const -> AccessModifier final { return m_AccessModifier; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
+        auto GetSelfScope() const -> std::shared_ptr<Scope> final;
+        auto GetName() const -> const std::string& final;
+        auto GetSymbolKind() const -> SymbolKind final;
+        auto GetSymbolCategory() const -> SymbolCategory final;
+        auto GetAccessModifier() const -> AccessModifier final;
 
     private:
         std::shared_ptr<Scope> m_SelfScope{};

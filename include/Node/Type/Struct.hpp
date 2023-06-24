@@ -27,29 +27,27 @@ namespace Ace::Node::Type
             const std::vector<std::shared_ptr<const Node::Attribute>>& t_attributes,
             const AccessModifier& t_accessModifier,
             const std::vector<std::shared_ptr<const Node::Variable::Normal::Instance>>& t_variables
-        ) : m_SelfScope{ t_selfScope },
-            m_Name{ t_name },
-            m_Attributes{ t_attributes },
-            m_AccessModifier{ t_accessModifier },
-            m_Variables{ t_variables }
-        {
-        }
+        );
         virtual ~Struct() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_SelfScope->GetParent().value(); }
-        auto GetSelfScope() const -> std::shared_ptr<Scope> final { return m_SelfScope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
+        auto GetSelfScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Type::Struct> final;
-        auto CloneInScopeType(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Type::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Type::Struct> final;
+        auto CloneInScopeType(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Type::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Type::Struct>> final;
-        auto CreateBoundType() const -> Expected<std::shared_ptr<const BoundNode::Type::IBase>> final { return CreateBound(); }
+        auto CreateBoundType() const -> Expected<std::shared_ptr<const BoundNode::Type::IBase>> final;
 
-        auto GetName() const -> const std::string& final { return m_Name; }
-        auto GetAccessModifier() const -> AccessModifier final { return m_AccessModifier; }
+        auto GetName() const -> const std::string& final;
+        auto GetAccessModifier() const -> AccessModifier final;
 
-        auto GetSymbolScope() const -> std::shared_ptr<Scope> final { return GetScope(); }
-        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Struct; }
-        auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
+        auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
+        auto GetSymbolKind() const -> SymbolKind final;
+        auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
         
     private:

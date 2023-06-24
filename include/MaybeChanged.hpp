@@ -51,16 +51,21 @@ namespace Ace
 #define TOut typename std::decay_t<decltype(t_func(TIn{}).Value)>
 
     template<typename TIn, typename F>
-    auto TransformMaybeChangedVector(const std::vector<TIn>& t_vec, F&& t_func) -> MaybeChanged<std::vector<TOut>>
+    auto TransformMaybeChangedVector(
+        const std::vector<TIn>& t_vec,
+        F&& t_func
+    ) -> MaybeChanged<std::vector<TOut>>
     {
         std::vector<TOut> vec{};
         bool isChanged = false;
 
         for (size_t i = 0; i < t_vec.size(); i++)
         {
-            auto mchLowered = t_func(t_vec[i]);
+            auto mchLowered = t_func(t_vec.at(i));
             if (!mchLowered.IsChanged)
+            {
                 continue;
+            }
 
             if (!isChanged)
             {
@@ -68,11 +73,13 @@ namespace Ace
                 vec = t_vec;
             }
 
-            vec[i] = mchLowered.Value;
+            vec.at(i) = mchLowered.Value;
         }
 
         if (!isChanged)
+        {
             return CreateUnchanged(t_vec);
+        }
 
         return CreateChanged(vec);
     }
@@ -81,10 +88,15 @@ namespace Ace
 #define TOut typename std::decay_t<decltype(t_func(TIn{}).Value)>
 
     template<typename TIn, typename F>
-    auto TransformMaybeChangedOptional(const std::optional<TIn>& t_optNode, F&& t_func) -> MaybeChanged<std::optional<TOut>>
+    auto TransformMaybeChangedOptional(
+        const std::optional<TIn>& t_optNode,
+        F&& t_func
+    ) -> MaybeChanged<std::optional<TOut>>
     {
         if (!t_optNode)
+        {
             return CreateUnchanged(std::optional<TOut>{});
+        }
 
         auto mchNode = t_func(t_optNode.value());
         return { mchNode.IsChanged, std::optional<TOut>{ mchNode.Value } };

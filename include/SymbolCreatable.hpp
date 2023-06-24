@@ -27,6 +27,8 @@ namespace Ace
         virtual ~IPartiallySymbolCreatable() = default;
 
         virtual auto GetName() const -> const std::string& = 0;
-        virtual auto ContinueCreatingSymbol(Symbol::IBase* const t_symbol) const -> Expected<void> = 0;
+        virtual auto ContinueCreatingSymbol(
+            Symbol::IBase* const t_symbol
+        ) const -> Expected<void> = 0;
     };
 }
