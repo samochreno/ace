@@ -10,10 +10,14 @@ namespace Ace::Symbol
         t_arg = t_arg->GetUnaliased();
 
         if (dynamic_cast<Symbol::Type::TemplateParam::Impl*>(t_arg))
+        {
             return true;
+        }
 
         if (dynamic_cast<Symbol::Type::TemplateParam::Normal*>(t_arg))
+        {
             return true;
+        }
 
         return false;
     }
@@ -23,21 +27,25 @@ namespace Ace::Symbol
         const auto implTemplateArgs = CollectImplTemplateArgs();
         const auto     templateArgs = CollectTemplateArgs();
 
-        const auto implFoundIt = std::find_if(
+        const auto implParameterIt = std::find_if(
             begin(implTemplateArgs),
             end  (implTemplateArgs),
             IsParam
         );
-        if (implFoundIt != end(implTemplateArgs))
+        if (implParameterIt != end(implTemplateArgs))
+        {
             return true;
+        }
 
-        const auto foundIt = std::find_if(
+        const auto parameterIt = std::find_if(
             begin(templateArgs),
             end  (templateArgs),
             IsParam
         );
-        if (foundIt != end(templateArgs))
+        if (parameterIt != end(templateArgs))
+        {
             return true;
+        }
 
         return false;
     }
