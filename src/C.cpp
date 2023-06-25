@@ -4,7 +4,7 @@
 
 namespace Ace
 {
-    auto C::Type::Initialize(
+    auto CTypes::Initialize(
         llvm::LLVMContext& t_context,
         llvm::Module& t_module
     ) -> void
@@ -21,32 +21,32 @@ namespace Ace
         m_VoidPointer   = llvm::Type::getInt8PtrTy(t_context);
     }
 
-    auto C::Type::GetInt() const -> llvm::IntegerType*
+    auto CTypes::GetInt() const -> llvm::IntegerType*
     {
         return m_Int;
     }
 
-    auto C::Type::GetChar() const -> llvm::IntegerType*
+    auto CTypes::GetChar() const -> llvm::IntegerType*
     {
         return m_Char;
     }
 
-    auto C::Type::GetCharPointer() const -> llvm::PointerType*
+    auto CTypes::GetCharPointer() const -> llvm::PointerType*
     {
         return m_CharPointer;
     }
 
-    auto C::Type::GetSize() const -> llvm::IntegerType*
+    auto CTypes::GetSize() const -> llvm::IntegerType*
     {
         return m_Size;
     }
 
-    auto C::Type::GetVoid() const -> llvm::Type*    
+    auto CTypes::GetVoid() const -> llvm::Type*    
     {
         return m_Void;
     }
 
-    auto C::Type::GetVoidPointer() const -> llvm::PointerType*
+    auto CTypes::GetVoidPointer() const -> llvm::PointerType*
     {
         return m_VoidPointer;
     }
@@ -69,10 +69,10 @@ namespace Ace
         *t_field = function;
     }
 
-    auto C::Function::Initialize(
+    auto CFunctions::Initialize(
         llvm::LLVMContext& t_context,
         llvm::Module& t_module,
-        const Ace::C::Type& t_types
+        const Ace::CTypes& t_types
     ) -> void
     {
         constexpr unsigned int intBitCount = sizeof(int) * CHAR_BIT;
@@ -167,42 +167,42 @@ namespace Ace
         }
     }
 
-    auto C::Function::GetPrintf() const -> llvm::Function*
+    auto CFunctions::GetPrintf() const -> llvm::Function*
     {
         return m_Printf;
     }
 
-    auto C::Function::GetMalloc() const -> llvm::Function*
+    auto CFunctions::GetMalloc() const -> llvm::Function*
     {
         return m_Malloc;
     }
 
-    auto C::Function::GetCalloc() const -> llvm::Function*
+    auto CFunctions::GetCalloc() const -> llvm::Function*
     {
         return m_Calloc;
     }
 
-    auto C::Function::GetRealloc() const -> llvm::Function*
+    auto CFunctions::GetRealloc() const -> llvm::Function*
     {
         return m_Realloc;
     }
 
-    auto C::Function::GetFree() const -> llvm::Function*
+    auto CFunctions::GetFree() const -> llvm::Function*
     {
         return m_Free;
     }
 
-    auto C::Function::GetMemset() const -> llvm::Function*
+    auto CFunctions::GetMemset() const -> llvm::Function*
     {
         return m_Memset;
     }
 
-    auto C::Function::GetMemcpy() const -> llvm::Function*
+    auto CFunctions::GetMemcpy() const -> llvm::Function*
     {
         return m_Memcpy;
     }
 
-    auto C::Function::GetExit() const -> llvm::Function*
+    auto CFunctions::GetExit() const -> llvm::Function*
     {
         return m_Exit;
     }
@@ -216,12 +216,12 @@ namespace Ace
         m_Functions.Initialize(t_context, t_module, m_Types);
     }
 
-    auto C::GetTypes() const -> const Type&
+    auto C::GetTypes() const -> const CTypes&
     {
         return m_Types;
     }
 
-    auto C::GetFunctions() const -> const Function&
+    auto C::GetFunctions() const -> const CFunctions&
     {
         return m_Functions;
     }
