@@ -7,7 +7,7 @@
 #include "BoundNode/Stmt/Group.hpp"
 #include "BoundNode/Expr/Base.hpp"
 #include "Scope.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Asserts.hpp"
@@ -24,7 +24,7 @@ namespace Ace::BoundNode::Stmt::Assignment
         Compound(
             const std::shared_ptr<const BoundNode::Expr::IBase>& t_lhsExpr,
             const std::shared_ptr<const BoundNode::Expr::IBase>& t_rhsExpr,
-            Symbol::Function* const t_operatorSymbol
+            FunctionSymbol* const t_operatorSymbol
         );
         virtual ~Compound() = default;
 
@@ -47,6 +47,6 @@ namespace Ace::BoundNode::Stmt::Assignment
     private:
         std::shared_ptr<const BoundNode::Expr::IBase> m_LHSExpr{};
         std::shared_ptr<const BoundNode::Expr::IBase> m_RHSExpr{};
-        Symbol::Function* m_OperatorSymbol{};
+        FunctionSymbol* m_OperatorSymbol{};
     };
 }

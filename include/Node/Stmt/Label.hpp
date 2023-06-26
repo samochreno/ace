@@ -8,7 +8,7 @@
 #include "BoundNode/Stmt/Label.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "Symbol/Base.hpp"
+#include "Symbols/Symbol.hpp"
 
 namespace Ace::Node::Stmt
 {
@@ -38,7 +38,7 @@ namespace Ace::Node::Stmt
         auto GetSymbolScope() const -> std::shared_ptr<Scope> { return m_Scope; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::Label; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
-        auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
+        auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
 
         auto GetName() const -> const std::string& { return m_Name; }
 

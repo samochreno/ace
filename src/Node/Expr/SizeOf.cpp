@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Diagnostics.hpp"
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 
 namespace Ace::Node::Expr
 {
@@ -23,7 +23,7 @@ namespace Ace::Node::Expr
 
     auto SizeOf::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::SizeOf>>
     {
-        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(
+        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
 

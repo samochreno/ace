@@ -16,7 +16,7 @@
 #include "Emitter.hpp"
 #include "Node/All.hpp"
 #include "BoundNode/All.hpp"
-#include "Symbol/All.hpp"
+#include "Symbols/All.hpp"
 #include "Compilation.hpp"
 #include "FileBuffer.hpp"
 
@@ -71,7 +71,7 @@ namespace Ace
         ACE_LOG_INFO("Symbol creation success");
 
         ACE_LOG_INFO("Template placeholder symbols instantiation start");
-        const auto templateSymbols = globalScope->CollectSymbolsRecursive<Symbol::Template::IBase>();
+        const auto templateSymbols = globalScope->CollectSymbolsRecursive<ITemplateSymbol>();
         t_compilation->TemplateInstantiator->SetSymbols(templateSymbols);
         ACE_TRY_VOID(t_compilation->TemplateInstantiator->InstantiatePlaceholderSymbols());
         ACE_LOG_INFO("Template placeholder symbols instantiation success");

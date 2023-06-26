@@ -5,7 +5,7 @@
 
 #include "Diagnostics.hpp"
 #include "BoundNode/Expr/VarReference/Static.hpp"
-#include "Symbol/Var/Base.hpp"
+#include "Symbols/Vars/VarSymbol.hpp"
 
 namespace Ace::Node::Expr
 {
@@ -24,7 +24,7 @@ namespace Ace::Node::Expr
 
     auto LiteralSymbol::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::VarReference::Static>>
     {
-        ACE_TRY(variableSymbol, m_Scope->ResolveStaticSymbol<Symbol::Var::IBase>(m_Name));
+        ACE_TRY(variableSymbol, m_Scope->ResolveStaticSymbol<IVarSymbol>(m_Name));
         return std::make_shared<const BoundNode::Expr::VarReference::Static>(
             m_Scope,
             variableSymbol

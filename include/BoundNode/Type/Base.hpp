@@ -23,6 +23,6 @@ namespace Ace::BoundNode::Type
             const BoundNode::Context::Lowering& t_context
         ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Type::IBase>> = 0;
 
-        virtual auto GetSymbol() const -> Symbol::Type::IBase* = 0;
+        virtual auto GetSymbol() const -> ITypeSymbol* = 0;
     };
 }

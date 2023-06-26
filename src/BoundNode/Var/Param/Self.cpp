@@ -9,7 +9,7 @@
 namespace Ace::BoundNode::Var::Param
 {
     Self::Self(
-        Symbol::Var::Param::Self* const t_symbol
+        SelfParamVarSymbol* const t_symbol
     ) : m_Symbol{ t_symbol }
     {
     }
@@ -41,7 +41,7 @@ namespace Ace::BoundNode::Var::Param
         return CreateUnchanged(shared_from_this());
     }
 
-    auto Self::GetSymbol() const -> Symbol::Var::Param::Self*
+    auto Self::GetSymbol() const -> SelfParamVarSymbol*
     {
         return m_Symbol;
     }

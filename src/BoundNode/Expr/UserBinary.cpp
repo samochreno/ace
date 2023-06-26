@@ -14,7 +14,7 @@ namespace Ace::BoundNode::Expr
     UserBinary::UserBinary(
         const std::shared_ptr<const BoundNode::Expr::IBase>& t_lhsExpr,
         const std::shared_ptr<const BoundNode::Expr::IBase>& t_rhsExpr,
-        Symbol::Function* const t_operatorSymbol
+        FunctionSymbol* const t_operatorSymbol
     ) : m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr },
         m_OperatorSymbol{ t_operatorSymbol }

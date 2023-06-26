@@ -6,7 +6,7 @@
 #include "BoundNode/Expr/Base.hpp"
 #include "BoundNode/Expr/FunctionCall/Static.hpp"
 #include "Scope.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "TypeInfo.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -25,7 +25,7 @@ namespace Ace::BoundNode::Expr
         UserBinary(
             const std::shared_ptr<const BoundNode::Expr::IBase>& t_lhsExpr,
             const std::shared_ptr<const BoundNode::Expr::IBase>& t_rhsExpr,
-            Symbol::Function* const t_operatorSymbol
+            FunctionSymbol* const t_operatorSymbol
         );
         virtual ~UserBinary() = default;
 
@@ -50,6 +50,6 @@ namespace Ace::BoundNode::Expr
     private:
         std::shared_ptr<const BoundNode::Expr::IBase> m_LHSExpr{};
         std::shared_ptr<const BoundNode::Expr::IBase> m_RHSExpr{};
-        Symbol::Function* m_OperatorSymbol{};
+        FunctionSymbol* m_OperatorSymbol{};
     };
 }

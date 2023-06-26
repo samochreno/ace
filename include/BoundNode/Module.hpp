@@ -9,7 +9,7 @@
 #include "BoundNode/Function.hpp"
 #include "BoundNode/Var/Normal/Static.hpp"
 #include "Scope.hpp"
-#include "Symbol/Module.hpp"
+#include "Symbols/ModuleSymbol.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
@@ -23,7 +23,7 @@ namespace Ace::BoundNode
     {
     public:
         Module(
-            Symbol::Module* const t_symbol,
+            ModuleSymbol* const t_symbol,
             const std::vector<std::shared_ptr<const BoundNode::Module>>& t_modules,
             const std::vector<std::shared_ptr<const BoundNode::Type::IBase>>& t_types,
             const std::vector<std::shared_ptr<const BoundNode::Impl>>& t_impls,
@@ -42,7 +42,7 @@ namespace Ace::BoundNode
         ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Module>> final;
 
     private:
-        Symbol::Module* m_Symbol{};
+        ModuleSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const BoundNode::Module>> m_Modules{};
         std::vector<std::shared_ptr<const BoundNode::Type::IBase>> m_Types{};
         std::vector<std::shared_ptr<const BoundNode::Impl>> m_Impls{};

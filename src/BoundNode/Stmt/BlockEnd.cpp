@@ -6,7 +6,7 @@
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
-#include "Symbol/Var/Local.hpp"
+#include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "ExprDropData.hpp"
 
 namespace Ace::BoundNode::Stmt

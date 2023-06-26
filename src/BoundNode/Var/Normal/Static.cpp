@@ -10,7 +10,7 @@
 namespace Ace::BoundNode::Var::Normal
 {
     Static::Static(
-        Symbol::Var::Normal::Static* const t_symbol,
+        StaticVarSymbol* const t_symbol,
         const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes
     ) : m_Symbol{ t_symbol },
         m_Attributes{ t_attributes }
@@ -78,7 +78,7 @@ namespace Ace::BoundNode::Var::Normal
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
-    auto Static::GetSymbol() const -> Symbol::Var::Normal::Static*
+    auto Static::GetSymbol() const -> StaticVarSymbol*
     {
         return m_Symbol;
     }

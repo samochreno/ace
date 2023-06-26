@@ -8,9 +8,9 @@
 #include "Node/Template/Function.hpp"
 #include "BoundNode/Impl.hpp"
 #include "Diagnostics.hpp"
-#include "Symbol/Base.hpp"
-#include "Symbol/Type/Base.hpp"
-#include "Symbol/Template/Type.hpp"
+#include "Symbols/Symbol.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "SpecialIdentifier.hpp"
 
 namespace Ace::Node
@@ -98,7 +98,7 @@ namespace Ace::Node
         {
             if (m_TypeName.Sections.back().TemplateArgs.empty())
             {
-                ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<Symbol::Type::IBase>(m_TypeName));
+                ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<ITypeSymbol>(m_TypeName));
                 return typeSymbol->GetSelfScope();
             }
             else
@@ -111,7 +111,7 @@ namespace Ace::Node
                     lastNameSection.Name
                 );
 
-                ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<Symbol::Template::Type>(typeName));
+                ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(typeName));
                 return templateSymbol->GetSelfScope();
             }
         }());

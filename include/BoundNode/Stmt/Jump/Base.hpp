@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BoundNode/Stmt/Base.hpp"
-#include "Symbol/Label.hpp"
+#include "Symbols/LabelSymbol.hpp"
 
 namespace Ace::BoundNode::Stmt::Jump
 {
@@ -10,6 +10,6 @@ namespace Ace::BoundNode::Stmt::Jump
     public:
         virtual ~IBase() = default;
 
-        virtual auto GetLabelSymbol() const -> Symbol::Label* = 0;
+        virtual auto GetLabelSymbol() const -> LabelSymbol* = 0;
     };
 }

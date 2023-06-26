@@ -5,7 +5,7 @@
 
 #include "BoundNode/Stmt/Jump/Base.hpp"
 #include "Scope.hpp"
-#include "Symbol/Label.hpp"
+#include "Symbols/LabelSymbol.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 
@@ -20,7 +20,7 @@ namespace Ace::BoundNode::Stmt::Jump
     public:
         Normal(
             const std::shared_ptr<Scope>& t_scope,
-            Symbol::Label* const t_labelSymbol
+            LabelSymbol* const t_labelSymbol
         );
         virtual ~Normal() = default;
 
@@ -40,10 +40,10 @@ namespace Ace::BoundNode::Stmt::Jump
         ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
         auto Emit(Emitter& t_emitter) const -> void final;
 
-        auto GetLabelSymbol() const -> Symbol::Label* final;
+        auto GetLabelSymbol() const -> LabelSymbol* final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        Symbol::Label* m_LabelSymbol{};
+        LabelSymbol* m_LabelSymbol{};
     };
 }

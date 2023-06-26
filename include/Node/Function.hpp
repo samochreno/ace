@@ -15,7 +15,7 @@
 #include "AccessModifier.hpp"
 #include "Diagnostics.hpp"
 #include "Scope.hpp"
-#include "Symbol/Base.hpp"
+#include "Symbols/Symbol.hpp"
 #include "SpecialIdentifier.hpp"
 
 namespace Ace::Node
@@ -50,7 +50,7 @@ namespace Ace::Node
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCreationSuborder() const -> size_t final;
-        auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
+        auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
         
         auto GetSelfScope() const -> std::shared_ptr<Scope>;
         auto GetAccessModifier() const -> AccessModifier;

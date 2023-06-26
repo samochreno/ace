@@ -8,10 +8,10 @@
 #include "Node/Template/Function.hpp"
 #include "BoundNode/Impl.hpp"
 #include "Diagnostics.hpp"
-#include "Symbol/Base.hpp"
-#include "Symbol/TemplatedImpl.hpp"
-#include "Symbol/Type/Base.hpp"
-#include "Symbol/Template/Type.hpp"
+#include "Symbols/Symbol.hpp"
+#include "Symbols/TemplatedImplSymbol.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "SpecialIdentifier.hpp"
 
 namespace Ace::Node
@@ -108,14 +108,14 @@ namespace Ace::Node
         return 0;
     }
 
-    auto TemplatedImpl::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto TemplatedImpl::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
-        ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<Symbol::Template::Type>(m_TypeTemplateName));
+        ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(m_TypeTemplateName));
         templateSymbol->GetSelfScope()->DefineAssociation(m_SelfScope);
 
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::TemplatedImpl>(
+            std::make_unique<TemplatedImplSymbol>(
                 GetScope(),
                 m_SelfScope,
                 templateSymbol
@@ -125,7 +125,7 @@ namespace Ace::Node
 
     auto TemplatedImpl::DefineAssociations() const -> Expected<void>
     { 
-        ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<Symbol::Template::Type>(m_TypeTemplateName));
+        ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(m_TypeTemplateName));
         templateSymbol->GetSelfScope()->DefineAssociation(m_SelfScope);
         return Void;
     }

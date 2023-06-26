@@ -5,11 +5,11 @@
 
 #include "BoundNode/Expr/FunctionCall/Static.hpp"
 #include "BoundNode/Expr/Base.hpp"
-#include "Symbol/Var/Normal/Static.hpp"
-#include "Symbol/Var/Local.hpp"
-#include "Symbol/Var/Param/Base.hpp"
-#include "Symbol/Function.hpp"
-#include "Symbol/Var/Base.hpp"
+#include "Symbols/Vars/StaticVarSymbol.hpp"
+#include "Symbols/Vars/LocalVarSymbol.hpp"
+#include "Symbols/Vars/Params/ParamVarSymbol.hpp"
+#include "Symbols/FunctionSymbol.hpp"
+#include "Symbols/Vars/VarSymbol.hpp"
 #include "Asserts.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -38,13 +38,13 @@ namespace Ace::BoundNode::Expr::VarReference
     auto Static::Emit(Emitter& t_emitter) const -> ExprEmitResult
     {
         if (
-            dynamic_cast<Symbol::Var::Local*>(m_VarSymbol) || 
-            dynamic_cast<Symbol::Var::Param::IBase*>(m_VarSymbol)
+            dynamic_cast<LocalVarSymbol*>(m_VarSymbol) || 
+            dynamic_cast<IParamVarSymbol*>(m_VarSymbol)
             )
         {
             return { t_emitter.GetLocalVarMap().at(m_VarSymbol), {} };
         }
-        else if (auto variableSymbol = dynamic_cast<Symbol::Var::Normal::Static*>(m_VarSymbol))
+        else if (auto variableSymbol = dynamic_cast<StaticVarSymbol*>(m_VarSymbol))
         {
             return { t_emitter.GetStaticVarMap().at(variableSymbol), {} };
         }

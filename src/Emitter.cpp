@@ -24,7 +24,7 @@
 #include <llvm/Target/TargetMachine.h>
 
 #include "Scope.hpp"
-#include "Symbol/All.hpp"
+#include "Symbols/All.hpp"
 #include "BoundNode/All.hpp"
 #include "Log.hpp"
 #include "Asserts.hpp"
@@ -43,7 +43,7 @@ namespace Ace
     }
 
     auto LabelBlockMap::GetOrCreateAt(
-        const Symbol::Label* const t_labelSymbol
+        const LabelSymbol* const t_labelSymbol
     ) -> llvm::BasicBlock*
     {
         auto foundIt = m_Map.find(t_labelSymbol);
@@ -107,20 +107,20 @@ namespace Ace
 
         const auto symbols = globalScope->CollectAllDefinedSymbolsRecursive();
 
-        const auto allTypeSymbols = DynamicCastFilter<Symbol::Type::IBase*>(symbols);
-        std::vector<Symbol::Type::IBase*> typeSymbols{};
+        const auto allTypeSymbols = DynamicCastFilter<ITypeSymbol*>(symbols);
+        std::vector<ITypeSymbol*> typeSymbols{};
         std::copy_if(
             begin(allTypeSymbols),
             end  (allTypeSymbols),
             back_inserter(typeSymbols),
-            [](Symbol::Type::IBase* const t_typeSymbol)
+            [](ITypeSymbol* const t_typeSymbol)
             {
                 return !t_typeSymbol->IsTemplatePlaceholder();
             }
         );
 
-        const auto structSymbols   = DynamicCastFilter<Symbol::Type::Struct*>(typeSymbols);
-        const auto variableSymbols = DynamicCastFilter<Symbol::Var::Normal::Static*>(symbols);
+        const auto structSymbols   = DynamicCastFilter<StructTypeSymbol*>(typeSymbols);
+        const auto variableSymbols = DynamicCastFilter<StaticVarSymbol*>(symbols);
 
         std::vector<const BoundNode::IBase*> nodes{}; 
         std::for_each(begin(m_ASTs), end(m_ASTs),
@@ -136,20 +136,20 @@ namespace Ace
 
         EmitStaticVars(variableSymbols);
 
-        const auto allFunctionSymbols = globalScope->CollectSymbolsRecursive<Symbol::Function>();
-        std::vector<Symbol::Function*> functionSymbols{};
+        const auto allFunctionSymbols = globalScope->CollectSymbolsRecursive<FunctionSymbol>();
+        std::vector<FunctionSymbol*> functionSymbols{};
         std::copy_if(
             begin(allFunctionSymbols),
             end  (allFunctionSymbols),
             back_inserter(functionSymbols),
-            [](Symbol::Function* const t_functionSymbol)
+            [](FunctionSymbol* const t_functionSymbol)
             {
                 return !t_functionSymbol->IsTemplatePlaceholder();
             }
         );
         EmitFunctions(functionSymbols);
         
-        std::vector<const Symbol::Function*> mainFunctionSymbols{};
+        std::vector<const FunctionSymbol*> mainFunctionSymbols{};
         std::for_each(begin(functionNodes), end(functionNodes),
         [&](const BoundNode::Function* const t_functionNode)
         {
@@ -425,14 +425,14 @@ namespace Ace
                 {
                     const auto blockScope = blockEndStmt->GetSelfScope();
                     auto blockVarSymbols = 
-                        blockScope->CollectSymbols<Symbol::Var::Local>();
+                        blockScope->CollectSymbols<LocalVarSymbol>();
 
                     std::sort(
                         begin(blockVarSymbols),
                         end  (blockVarSymbols),
                         [&](
-                            const Symbol::Var::Local* const t_lhs,
-                            const Symbol::Var::Local* const t_rhs
+                            const LocalVarSymbol* const t_lhs,
+                            const LocalVarSymbol* const t_rhs
                             )
                         {
                             return
@@ -444,7 +444,7 @@ namespace Ace
                     std::for_each(
                         begin(blockVarSymbols),
                         end  (blockVarSymbols),
-                        [&](Symbol::Var::Local* const t_variableSymbol)
+                        [&](LocalVarSymbol* const t_variableSymbol)
                         {
                             EmitDrop({ 
                                 m_LocalVarMap.at(t_variableSymbol), 
@@ -484,7 +484,7 @@ namespace Ace
     auto Emitter::EmitCopy(
         llvm::Value* const t_lhsValue, 
         llvm::Value* const t_rhsValue, 
-        Symbol::Type::IBase* const t_typeSymbol
+        ITypeSymbol* const t_typeSymbol
     ) -> void
     {
         auto* const type = GetIRType(t_typeSymbol);
@@ -604,7 +604,7 @@ namespace Ace
     {
         const auto paramSymbols = m_FunctionSymbol->CollectAllParams();
         std::for_each(rbegin(paramSymbols), rend(paramSymbols),
-        [&](Symbol::Var::Param::IBase* const t_paramSymbol)
+        [&](IParamVarSymbol* const t_paramSymbol)
         {
             EmitDrop({
                 m_LocalVarMap.at(t_paramSymbol),
@@ -629,7 +629,7 @@ namespace Ace
     }
 
     auto Emitter::GetIRType(
-        const Symbol::Type::IBase* const t_typeSymbol
+        const ITypeSymbol* const t_typeSymbol
     ) const -> llvm::Type*
     {
         auto* const pureTypeSymbol =
@@ -643,17 +643,17 @@ namespace Ace
             pureType;
     }
 
-    auto Emitter::GetStaticVarMap() const -> const std::unordered_map<const Symbol::Var::Normal::Static*, llvm::Constant*>&
+    auto Emitter::GetStaticVarMap() const -> const std::unordered_map<const StaticVarSymbol*, llvm::Constant*>&
     {
         return m_StaticVarMap;
     }
 
-    auto Emitter::GetFunctionMap() const -> const std::unordered_map<const Symbol::Function*, llvm::FunctionCallee>&
+    auto Emitter::GetFunctionMap() const -> const std::unordered_map<const FunctionSymbol*, llvm::FunctionCallee>&
     {
         return m_FunctionMap;
     }
 
-    auto Emitter::GetLocalVarMap() const -> const std::unordered_map<const Symbol::Var::IBase*, llvm::Value*>&
+    auto Emitter::GetLocalVarMap() const -> const std::unordered_map<const IVarSymbol*, llvm::Value*>&
     {
         return m_LocalVarMap;
     }
@@ -689,11 +689,11 @@ namespace Ace
     }
 
     auto Emitter::EmitStructTypes(
-        const std::vector<Symbol::Type::Struct*>& t_structSymbols
+        const std::vector<StructTypeSymbol*>& t_structSymbols
     ) -> void
     {
         std::for_each(begin(t_structSymbols), end(t_structSymbols),
-        [&](const Symbol::Type::Struct* const t_structSymbol)
+        [&](const StructTypeSymbol* const t_structSymbol)
         {
             if (t_structSymbol->IsPrimitivelyEmittable())
                 return;
@@ -705,7 +705,7 @@ namespace Ace
         });
 
         std::for_each(begin(t_structSymbols), end(t_structSymbols),
-        [&](const Symbol::Type::Struct* const t_structSymbol)
+        [&](const StructTypeSymbol* const t_structSymbol)
         {
             if (t_structSymbol->IsPrimitivelyEmittable())
                 return;
@@ -714,7 +714,7 @@ namespace Ace
 
             const auto variableSymbols = t_structSymbol->GetVars();
             std::for_each(begin(variableSymbols), end(variableSymbols),
-            [&](const Symbol::Var::Normal::Instance* const t_variableSymbol)
+            [&](const InstanceVarSymbol* const t_variableSymbol)
             {
                 auto* const type = GetIRType(t_variableSymbol->GetType());
                 elements.push_back(type);
@@ -726,11 +726,11 @@ namespace Ace
     }
 
     auto Emitter::EmitStaticVars(
-        const std::vector<Symbol::Var::Normal::Static*>& t_variableSymbols
+        const std::vector<StaticVarSymbol*>& t_variableSymbols
     ) -> void
     {
         std::for_each(begin(t_variableSymbols), end(t_variableSymbols),
-        [&](const Symbol::Var::Normal::Static* const t_variableSymbol)
+        [&](const StaticVarSymbol* const t_variableSymbol)
         {
             const auto name = t_variableSymbol->CreateSignature();
             auto* const type = GetIRType(t_variableSymbol->GetType());
@@ -749,13 +749,13 @@ namespace Ace
     }
 
     auto Emitter::EmitFunctions(
-        const std::vector<Symbol::Function*>& t_functionSymbols
+        const std::vector<FunctionSymbol*>& t_functionSymbols
     ) -> void
     {
         struct FunctionSymbolBlockPair
         {
             llvm::Function* Function{};
-            Symbol::Function* Symbol{};
+            FunctionSymbol* Symbol{};
             llvm::BasicBlock* Block{};
         };
 
@@ -764,7 +764,7 @@ namespace Ace
             begin(t_functionSymbols), 
             end  (t_functionSymbols), 
             back_inserter(functionsSymbolBlockPairs), 
-            [&](Symbol::Function* const t_functionSymbol)
+            [&](FunctionSymbol* const t_functionSymbol)
             {
                 std::vector<llvm::Type*> paramTypes{};
                 const auto paramSymbols =
@@ -773,7 +773,7 @@ namespace Ace
                     begin(paramSymbols), 
                     end  (paramSymbols), 
                     back_inserter(paramTypes), 
-                    [&](Symbol::Var::Param::IBase* const t_paramSymbol)
+                    [&](IParamVarSymbol* const t_paramSymbol)
                     {
                         return llvm::PointerType::get(
                             GetIRType(t_paramSymbol->GetType()), 

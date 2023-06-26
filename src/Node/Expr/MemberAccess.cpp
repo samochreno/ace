@@ -5,8 +5,8 @@
 
 #include "BoundNode/Expr/VarReference/Instance.hpp"
 #include "Diagnostics.hpp"
-#include "Symbol/Var/Normal/Instance.hpp"
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Vars/InstanceVarSymbol.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 
 namespace Ace::Node::Expr
 {
@@ -32,7 +32,7 @@ namespace Ace::Node::Expr
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
 
         ACE_TRY_ASSERT(m_Name.TemplateArgs.empty());
-        ACE_TRY(memberSymbol, GetScope()->ResolveInstanceSymbol<Symbol::Var::Normal::Instance>(
+        ACE_TRY(memberSymbol, GetScope()->ResolveInstanceSymbol<InstanceVarSymbol>(
             boundExpr->GetTypeInfo().Symbol->GetWithoutReference(),
             m_Name
         ));

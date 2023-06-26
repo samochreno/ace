@@ -6,8 +6,8 @@
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNode/Stmt/Label.hpp"
-#include "Symbol/Label.hpp"
-#include "Symbol/Base.hpp"
+#include "Symbols/LabelSymbol.hpp"
+#include "Symbols/Symbol.hpp"
 
 namespace Ace::Node::Stmt
 {
@@ -26,15 +26,15 @@ namespace Ace::Node::Stmt
 
     auto Label::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Label>>
     {
-        auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<Symbol::Label>(m_Name).Unwrap();
+        auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<LabelSymbol>(m_Name).Unwrap();
         return std::make_shared<const BoundNode::Stmt::Label>(selfSymbol);
     }
 
-    auto Label::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto Label::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::Label>(
+            std::make_unique<LabelSymbol>(
                 m_Scope, 
                 m_Name
             )

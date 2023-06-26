@@ -16,7 +16,7 @@ namespace Ace::BoundNode::Expr::FunctionCall
 {
     Instance::Instance(
         const std::shared_ptr<const BoundNode::Expr::IBase>& t_expr,
-        Symbol::Function* const t_functionSymbol,
+        FunctionSymbol* const t_functionSymbol,
         const std::vector<std::shared_ptr<const BoundNode::Expr::IBase>>& t_args
     ) : m_Expr{ t_expr },
         m_FunctionSymbol{ t_functionSymbol },

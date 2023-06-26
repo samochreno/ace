@@ -12,7 +12,7 @@
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Diagnostics.hpp"
-#include "Symbol/Base.hpp"
+#include "Symbols/Symbol.hpp"
 
 namespace Ace::Node::Stmt
 {
@@ -48,7 +48,7 @@ namespace Ace::Node::Stmt
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
         auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::LocalVar; }
         auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
-        auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
+        auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

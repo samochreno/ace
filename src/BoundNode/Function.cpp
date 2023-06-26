@@ -14,7 +14,7 @@
 namespace Ace::BoundNode
 {
     Function::Function(
-        Symbol::Function* const t_symbol,
+        FunctionSymbol* const t_symbol,
         const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes,
         const std::optional<const std::shared_ptr<const BoundNode::Var::Param::Self>>& t_optSelf,
         const std::vector<std::shared_ptr<const BoundNode::Var::Param::Normal>>& t_params,
@@ -149,7 +149,7 @@ namespace Ace::BoundNode
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
-    auto Function::GetSymbol() const -> Symbol::Function*
+    auto Function::GetSymbol() const -> FunctionSymbol*
     {
         return m_Symbol;
     }

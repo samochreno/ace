@@ -10,23 +10,12 @@ namespace Ace::Node
     class IBase;
 }
 
-namespace Ace::Symbol
-{
-    class IBase;
-
-    namespace Type
-    {
-        class IBase;
-    }
-
-    namespace Template
-    {
-        class IBase;
-    }
-}
-
 namespace Ace
 {
+    class ISymbol;
+    class ITypeSymbol;
+    class ITemplateSymbol;
+
     class TemplateInstantiator
     {
     public:
@@ -34,20 +23,20 @@ namespace Ace
         ~TemplateInstantiator();
 
         auto SetSymbols(
-            const std::vector<Symbol::Template::IBase*>& t_symbols
+            const std::vector<ITemplateSymbol*>& t_symbols
         ) -> void;
 
         auto InstantiatePlaceholderSymbols() -> Expected<void>;
 
         auto InstantiateSymbols(
-            Symbol::Template::IBase* const t_templateSymbol,
-            const std::vector<Symbol::Type::IBase*>& t_implArgs,
-            const std::vector<Symbol::Type::IBase*>& t_args
-        ) -> Expected<Symbol::IBase*>;
+            ITemplateSymbol* const t_templateSymbol,
+            const std::vector<ITypeSymbol*>& t_implArgs,
+            const std::vector<ITypeSymbol*>& t_args
+        ) -> Expected<ISymbol*>;
         auto InstantiateSemanticsForSymbols() -> void;
 
     private:
-        std::vector<Symbol::Template::IBase*> m_Symbols;
-        std::map<Symbol::Template::IBase*, std::vector<std::shared_ptr<const Node::IBase>>> m_SymbolOnlyInstantiatedASTsMap;
+        std::vector<ITemplateSymbol*> m_Symbols;
+        std::map<ITemplateSymbol*, std::vector<std::shared_ptr<const Node::IBase>>> m_SymbolOnlyInstantiatedASTsMap;
     };
 }

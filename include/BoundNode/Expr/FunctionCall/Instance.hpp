@@ -5,7 +5,7 @@
 
 #include "BoundNode/Expr/Base.hpp"
 #include "Scope.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "ExprEmitResult.hpp"
@@ -21,7 +21,7 @@ namespace Ace::BoundNode::Expr::FunctionCall
     public:
         Instance(
             const std::shared_ptr<const BoundNode::Expr::IBase>& t_expr,
-            Symbol::Function* const t_functionSymbol,
+            FunctionSymbol* const t_functionSymbol,
             const std::vector<std::shared_ptr<const BoundNode::Expr::IBase>>& t_args
         );
         virtual ~Instance() = default;
@@ -46,7 +46,7 @@ namespace Ace::BoundNode::Expr::FunctionCall
 
     private:
         std::shared_ptr<const BoundNode::Expr::IBase> m_Expr{};
-        Symbol::Function* m_FunctionSymbol{};
+        FunctionSymbol* m_FunctionSymbol{};
         std::vector<std::shared_ptr<const BoundNode::Expr::IBase>> m_Args{};
     };
 }

@@ -11,7 +11,7 @@ namespace Ace::BoundNode::Stmt::Jump
 {
     Normal::Normal(
         const std::shared_ptr<Scope>& t_scope,
-        Symbol::Label* const t_labelSymbol
+        LabelSymbol* const t_labelSymbol
     ) : m_Scope{ t_scope },
         m_LabelSymbol{ t_labelSymbol }
     {
@@ -62,7 +62,7 @@ namespace Ace::BoundNode::Stmt::Jump
         );
     }
 
-    auto Normal::GetLabelSymbol() const -> Symbol::Label*
+    auto Normal::GetLabelSymbol() const -> LabelSymbol*
     {
         return m_LabelSymbol;
     }

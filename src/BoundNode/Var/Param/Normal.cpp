@@ -9,7 +9,7 @@
 namespace Ace::BoundNode::Var::Param
 {
     Normal::Normal(
-        Symbol::Var::Param::Normal* const t_symbol,
+        NormalParamVarSymbol* const t_symbol,
         const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes
     ) : m_Symbol{ t_symbol },
         m_Attributes{ t_attributes }
@@ -77,7 +77,7 @@ namespace Ace::BoundNode::Var::Param
         return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
     }
 
-    auto Normal::GetSymbol() const -> Symbol::Var::Param::Normal*
+    auto Normal::GetSymbol() const -> NormalParamVarSymbol*
     {
         return m_Symbol;
     }

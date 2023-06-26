@@ -15,8 +15,8 @@
 #include "Node/Var/Normal/Static.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNode/Module.hpp"
-#include "Symbol/Base.hpp"
-#include "Symbol/Module.hpp"
+#include "Symbols/Symbol.hpp"
+#include "Symbols/ModuleSymbol.hpp"
 
 namespace Ace::Node
 {
@@ -218,7 +218,7 @@ namespace Ace::Node
         }));
 
         auto* const selfSymbol =
-            GetSymbolScope()->ExclusiveResolveSymbol<Symbol::Module>(GetName()).Unwrap();
+            GetSymbolScope()->ExclusiveResolveSymbol<ModuleSymbol>(GetName()).Unwrap();
 
         std::vector<std::shared_ptr<const BoundNode::Impl>> allBoundImpls{};
         allBoundImpls.insert(
@@ -257,7 +257,7 @@ namespace Ace::Node
         return m_SelfScope->GetNestLevel();
     }
 
-    auto Module::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto Module::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
         if (m_Name.size() > 1)
         {
@@ -270,13 +270,13 @@ namespace Ace::Node
                 [&](){ scope = scope->GetParent().value(); nameIt++; }()
                 )
             {
-                ACE_TRY(symbol, scope->ExclusiveResolveSymbol<Symbol::Module>(*nameIt));
+                ACE_TRY(symbol, scope->ExclusiveResolveSymbol<ModuleSymbol>(*nameIt));
             }
         }
 
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::Module>(
+            std::make_unique<ModuleSymbol>(
                 m_SelfScope,
                 GetName(),
                 m_AccessModifier
@@ -285,10 +285,10 @@ namespace Ace::Node
     }
 
     auto Module::ContinueCreatingSymbol(
-        Symbol::IBase* const t_symbol
+        ISymbol* const t_symbol
     ) const -> Expected<void>
     {
-        auto* const moduleSymbol = dynamic_cast<Symbol::Module*>(t_symbol);
+        auto* const moduleSymbol = dynamic_cast<ModuleSymbol*>(t_symbol);
         ACE_ASSERT(moduleSymbol);
 
         ACE_TRY_ASSERT(moduleSymbol->GetAccessModifier() == m_AccessModifier);

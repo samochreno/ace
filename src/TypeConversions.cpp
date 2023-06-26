@@ -7,8 +7,8 @@
 
 #include "SpecialIdentifier.hpp"
 #include "Scope.hpp"
-#include "Symbol/Type/Base.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "TypeInfo.hpp"
 #include "BoundNode/Expr/Base.hpp"
 #include "BoundNode/Expr/ConversionPlaceholder.hpp"
@@ -16,10 +16,10 @@
 namespace Ace
 {
     static auto GetNativeConversionOperator(
-        Symbol::Type::IBase* t_fromType, 
-        Symbol::Type::IBase* t_toType, 
-        const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>& t_fromOperatorMap
-    ) -> std::optional<Symbol::Function*>
+        ITypeSymbol* t_fromType, 
+        ITypeSymbol* t_toType, 
+        const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>& t_fromOperatorMap
+    ) -> std::optional<FunctionSymbol*>
     {
         const auto foundTypeIt = t_fromOperatorMap.find(t_toType);
         if (foundTypeIt == end(t_fromOperatorMap))
@@ -38,9 +38,9 @@ namespace Ace
 
     auto GetImplicitConversionOperator(
         const std::shared_ptr<Scope>& t_scope,
-        Symbol::Type::IBase* t_fromType,
-        Symbol::Type::IBase* t_toType
-    ) -> Expected<Symbol::Function*>
+        ITypeSymbol* t_fromType,
+        ITypeSymbol* t_toType
+    ) -> Expected<FunctionSymbol*>
     {
         const auto optNativeOperator = GetNativeConversionOperator(
             t_fromType,
@@ -57,15 +57,15 @@ namespace Ace
             std::string{ SpecialIdentifier::Operator::ImplicitFrom }
         );
 
-        ACE_TRY(operatorSymbol, t_scope->ResolveStaticSymbol<Symbol::Function>(name));
+        ACE_TRY(operatorSymbol, t_scope->ResolveStaticSymbol<FunctionSymbol>(name));
         return operatorSymbol;
     }
 
     auto GetExplicitConversionOperator(
         const std::shared_ptr<Scope>& t_scope,
-        Symbol::Type::IBase* t_fromType,
-        Symbol::Type::IBase* t_toType
-    ) -> Expected<Symbol::Function*>
+        ITypeSymbol* t_fromType,
+        ITypeSymbol* t_toType
+    ) -> Expected<FunctionSymbol*>
     {
         const auto optNativeImplicitOperator = GetNativeConversionOperator(
             t_fromType,
@@ -92,7 +92,7 @@ namespace Ace
 
         name.Sections.back().Name = SpecialIdentifier::Operator::ExplicitFrom;
         const auto expExplicitOperatorSymbol =
-            t_scope->ResolveStaticSymbol<Symbol::Function>(name);
+            t_scope->ResolveStaticSymbol<FunctionSymbol>(name);
         if (expExplicitOperatorSymbol)
         {
             return expExplicitOperatorSymbol.Unwrap();
@@ -100,7 +100,7 @@ namespace Ace
 
         name.Sections.back().Name = SpecialIdentifier::Operator::ImplicitFrom;
         const auto expImplicitOperatorSymbol =
-            t_scope->ResolveStaticSymbol<Symbol::Function>(name);
+            t_scope->ResolveStaticSymbol<FunctionSymbol>(name);
         if (expImplicitOperatorSymbol)
         {
             return expImplicitOperatorSymbol.Unwrap();
@@ -110,8 +110,8 @@ namespace Ace
     }
 
     auto AreTypesSame(
-        const std::vector<Symbol::Type::IBase*>& t_typesA,
-        const std::vector<Symbol::Type::IBase*>& t_typesB
+        const std::vector<ITypeSymbol*>& t_typesA,
+        const std::vector<ITypeSymbol*>& t_typesB
     ) -> bool
     {
         if (t_typesA.size() != t_typesB.size())

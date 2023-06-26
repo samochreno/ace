@@ -3,25 +3,25 @@
 #include <memory>
 #include <vector>
 
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "TypeInfo.hpp"
 
 namespace Ace
 {
     auto GetImplicitConversionOperator(
         const std::shared_ptr<Scope>& t_scope,
-        Symbol::Type::IBase* t_fromType,
-        Symbol::Type::IBase* t_targetType
-    ) -> Expected<Symbol::Function*>;
+        ITypeSymbol* t_fromType,
+        ITypeSymbol* t_targetType
+    ) -> Expected<FunctionSymbol*>;
     auto GetExplicitConversionOperator(
         const std::shared_ptr<Scope>& t_scope,
-        Symbol::Type::IBase* t_fromType,
-        Symbol::Type::IBase* t_targetType
-    ) -> Expected<Symbol::Function*>;
+        ITypeSymbol* t_fromType,
+        ITypeSymbol* t_targetType
+    ) -> Expected<FunctionSymbol*>;
 
     auto AreTypesSame(
-        const std::vector<Symbol::Type::IBase*>& t_typesA,
-        const std::vector<Symbol::Type::IBase*>& t_typesB
+        const std::vector<ITypeSymbol*>& t_typesA,
+        const std::vector<ITypeSymbol*>& t_typesB
     ) -> bool;
     auto AreTypesConvertible(
         const std::shared_ptr<Scope>& t_scope,

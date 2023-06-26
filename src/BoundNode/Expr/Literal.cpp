@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "TypeInfo.hpp"
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "ValueKind.hpp"
 #include "Asserts.hpp"
 #include "MaybeChanged.hpp"
@@ -131,7 +131,7 @@ namespace Ace::BoundNode::Expr
     {
         auto& natives = GetCompilation()->Natives;
 
-        auto* const typeSymbol = [&]() -> Symbol::Type::IBase*
+        auto* const typeSymbol = [&]() -> ITypeSymbol*
         {
             if      (m_Kind == LiteralKind::Int8)       return natives->Int8.GetSymbol();
             else if (m_Kind == LiteralKind::Int16)      return natives->Int16.GetSymbol();

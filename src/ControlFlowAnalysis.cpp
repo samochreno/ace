@@ -73,7 +73,7 @@ namespace Ace
     }
 
     auto ControlFlowAnalysis::FindLabelStmt(
-        const Symbol::Label* const t_labelSymbol
+        const LabelSymbol* const t_labelSymbol
     ) const -> std::vector<ControlFlowStmt>::const_iterator
     {
         const auto foundIt = std::find_if(

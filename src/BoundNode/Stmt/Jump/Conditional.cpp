@@ -14,7 +14,7 @@ namespace Ace::BoundNode::Stmt::Jump
 {
     Conditional::Conditional(
         const std::shared_ptr<const BoundNode::Expr::IBase>& t_condition,
-        Symbol::Label* const t_labelSymbol
+        LabelSymbol* const t_labelSymbol
     ) : m_Condition{ t_condition },
         m_LabelSymbol{ t_labelSymbol }
     {
@@ -119,7 +119,7 @@ namespace Ace::BoundNode::Stmt::Jump
         t_emitter.SetBlockBuilder(std::move(blockBuilder));
     }
 
-    auto Conditional::GetLabelSymbol() const -> Symbol::Label*
+    auto Conditional::GetLabelSymbol() const -> LabelSymbol*
     {
         return m_LabelSymbol;
     }

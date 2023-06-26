@@ -3,7 +3,7 @@
 ## 💥 High Priority
 
 - Consider splitting `Core.hpp` into multiple files, especially glue generation
-- Un-nest names for example `Node::...`, `BoundNode::...`, `C::`
+- Un-nest names for example `Node::...`, `BoundNode::...`
 - Refactor expression parsing
 - Refactor compound assignment lowering
 - Refactor emitting of variable references

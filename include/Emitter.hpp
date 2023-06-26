@@ -9,7 +9,7 @@
 #include "LLVM.hpp"
 #include "C.hpp"
 #include "Scope.hpp"
-#include "Symbol/All.hpp"
+#include "Symbols/All.hpp"
 #include "BoundNode/All.hpp"
 #include "ExprDropData.hpp"
 #include "Emittable.hpp"
@@ -43,13 +43,13 @@ namespace Ace
         LabelBlockMap(Emitter& t_emitter);
 
         auto GetOrCreateAt(
-            const Symbol::Label* const t_labelSymbol
+            const LabelSymbol* const t_labelSymbol
         ) -> llvm::BasicBlock*;
         auto Clear() -> void;
 
     private:
         Emitter& m_Emitter;
-        std::unordered_map<const Symbol::Label*, llvm::BasicBlock*> m_Map{};
+        std::unordered_map<const LabelSymbol*, llvm::BasicBlock*> m_Map{};
     };
 
     class Emitter
@@ -68,7 +68,7 @@ namespace Ace
 
         struct LocalVarSymbolStmtIndexPair
         {
-            Symbol::Var::Local* LocalVarSymbol{};
+            LocalVarSymbol* LocalVarSymbol{};
             size_t StmtIndex{};
         };
 
@@ -91,7 +91,7 @@ namespace Ace
         auto EmitCopy(
             llvm::Value* const t_lhsValue, 
             llvm::Value* const t_rhsValue, 
-            Symbol::Type::IBase* const t_typeSymbol
+            ITypeSymbol* const t_typeSymbol
         ) -> void;
         auto EmitDrop(const ExprDropData& t_dropData) -> void;
         auto EmitDropTemporaries(
@@ -107,13 +107,13 @@ namespace Ace
         auto GetC() const -> const C&;
 
         auto GetIRType(
-            const Symbol::Type::IBase* const t_typeSymbol
+            const ITypeSymbol* const t_typeSymbol
         ) const -> llvm::Type*;
 
-        auto GetStaticVarMap() const -> const std::unordered_map<const Symbol::Var::Normal::Static*, llvm::Constant*>&;
-        auto GetFunctionMap() const -> const std::unordered_map<const Symbol::Function*, llvm::FunctionCallee>&;
+        auto GetStaticVarMap() const -> const std::unordered_map<const StaticVarSymbol*, llvm::Constant*>&;
+        auto GetFunctionMap() const -> const std::unordered_map<const FunctionSymbol*, llvm::FunctionCallee>&;
 
-        auto GetLocalVarMap() const -> const std::unordered_map<const Symbol::Var::IBase*, llvm::Value*>&;
+        auto GetLocalVarMap() const -> const std::unordered_map<const IVarSymbol*, llvm::Value*>&;
         auto GetLabelBlockMap() -> LabelBlockMap&;
         auto GetFunction() const -> llvm::Function*;
 
@@ -124,17 +124,17 @@ namespace Ace
 
     private:
         auto EmitTypes(
-            const std::vector<Symbol::Type::IBase*>& t_typeSymbols
+            const std::vector<ITypeSymbol*>& t_typeSymbols
         ) -> void;
         auto EmitNativeTypes() -> void;
         auto EmitStructTypes(
-            const std::vector<Symbol::Type::Struct*>& t_structSymbols
+            const std::vector<StructTypeSymbol*>& t_structSymbols
         ) -> void;
         auto EmitStaticVars(
-            const std::vector<Symbol::Var::Normal::Static*>& t_variableSymbols
+            const std::vector<StaticVarSymbol*>& t_variableSymbols
         ) -> void;
         auto EmitFunctions(
-            const std::vector<Symbol::Function*>& t_functionSymbols
+            const std::vector<FunctionSymbol*>& t_functionSymbols
         ) -> void;
 
         const Compilation* m_Compilation{};
@@ -143,18 +143,18 @@ namespace Ace
 
         std::unique_ptr<llvm::Module> m_Module{};
 
-        std::unordered_map<const Symbol::Type::IBase*, llvm::Type*> m_TypeMap{};
-        std::unordered_map<const Symbol::Var::Normal::Static*, llvm::Constant*> m_StaticVarMap{};
-        std::unordered_map<const Symbol::Function*, llvm::FunctionCallee> m_FunctionMap{};
+        std::unordered_map<const ITypeSymbol*, llvm::Type*> m_TypeMap{};
+        std::unordered_map<const StaticVarSymbol*, llvm::Constant*> m_StaticVarMap{};
+        std::unordered_map<const FunctionSymbol*, llvm::FunctionCallee> m_FunctionMap{};
 
-        std::unordered_map<const Symbol::Var::IBase*, llvm::Value*> m_LocalVarMap{};
+        std::unordered_map<const IVarSymbol*, llvm::Value*> m_LocalVarMap{};
         LabelBlockMap m_LabelBlockMap;
         std::unordered_map<const BoundNode::Stmt::IBase*, size_t> m_StmtIndexMap{};
-        std::unordered_map<const Symbol::Var::Local*, size_t> m_LocalVarSymbolStmtIndexMap{};
+        std::unordered_map<const LocalVarSymbol*, size_t> m_LocalVarSymbolStmtIndexMap{};
         std::vector<LocalVarSymbolStmtIndexPair> m_LocalVarSymbolStmtIndexPairs{};
 
         llvm::Function* m_Function{};
-        Symbol::Function* m_FunctionSymbol{};
+        FunctionSymbol* m_FunctionSymbol{};
         std::unique_ptr<BlockBuilder> m_BlockBuilder{};
 
         C m_C{};

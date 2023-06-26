@@ -7,10 +7,10 @@
 #include "Node/Attribute.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNode/Var/Normal/Static.hpp"
-#include "Symbol/Var/Normal/Static.hpp"
-#include "Symbol/Base.hpp"
-#include "Symbol/Type/Base.hpp"
-#include "Symbol/Var/Normal/Static.hpp"
+#include "Symbols/Vars/StaticVarSymbol.hpp"
+#include "Symbols/Symbol.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Vars/StaticVarSymbol.hpp"
 
 namespace Ace::Node::Var::Normal
 {
@@ -75,7 +75,7 @@ namespace Ace::Node::Var::Normal
         }));
 
         auto* const selfSymbol =
-            m_Scope->ExclusiveResolveSymbol<Symbol::Var::Normal::Static>(m_Name).Unwrap();
+            m_Scope->ExclusiveResolveSymbol<StaticVarSymbol>(m_Name).Unwrap();
 
         return std::make_shared<const BoundNode::Var::Normal::Static>(
             selfSymbol,
@@ -103,15 +103,15 @@ namespace Ace::Node::Var::Normal
         return 0;
     }
 
-    auto Static::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto Static::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
-        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(
+        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
 
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::Var::Normal::Static>(
+            std::make_unique<StaticVarSymbol>(
                 m_Scope,
                 m_Name,
                 m_AccessModifier,

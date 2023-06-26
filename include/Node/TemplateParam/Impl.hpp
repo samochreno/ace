@@ -30,7 +30,7 @@ namespace Ace::Node::TemplateParam
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCreationSuborder() const -> size_t final;
-        auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
+        auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
 
         auto GetName() const -> const std::string&;
 

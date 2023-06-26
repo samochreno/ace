@@ -7,8 +7,8 @@
 #include "BoundNode/Expr/FunctionCall/Instance.hpp"
 #include "BoundNode/Expr/Base.hpp"
 #include "BoundNode/Expr/DerefAs.hpp"
-#include "Symbol/Var/Normal/Instance.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/Vars/InstanceVarSymbol.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "Asserts.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -21,7 +21,7 @@ namespace Ace::BoundNode::Expr::VarReference
 {
     Instance::Instance(
         const std::shared_ptr<const BoundNode::Expr::IBase>& t_expr,
-        Symbol::Var::Normal::Instance* const t_variableSymbol
+        InstanceVarSymbol* const t_variableSymbol
     ) : m_Expr{ t_expr },
         m_VarSymbol{ t_variableSymbol }
     {
@@ -97,7 +97,7 @@ namespace Ace::BoundNode::Expr::VarReference
         std::vector<ExprDropData> temporaries{};
 
         auto* const variableSymbol =
-            dynamic_cast<Symbol::Var::Normal::Instance*>(m_VarSymbol);
+            dynamic_cast<InstanceVarSymbol*>(m_VarSymbol);
         ACE_ASSERT(variableSymbol);
 
         const std::function<std::shared_ptr<const BoundNode::Expr::IBase>(const std::shared_ptr<const BoundNode::Expr::IBase>& t_expr)>
@@ -176,7 +176,7 @@ namespace Ace::BoundNode::Expr::VarReference
         return m_Expr;
     }
 
-    auto Instance::GetVarSymbol() const -> Symbol::Var::Normal::Instance*
+    auto Instance::GetVarSymbol() const -> InstanceVarSymbol*
     {
         return m_VarSymbol;
     }

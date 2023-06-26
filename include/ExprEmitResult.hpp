@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "ExprDropData.hpp"
 
 namespace llvm

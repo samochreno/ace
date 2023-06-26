@@ -11,7 +11,7 @@
 namespace Ace::BoundNode::Type
 {
     Struct::Struct(
-        Symbol::Type::Struct* const t_symbol,
+        StructTypeSymbol* const t_symbol,
         const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes,
         const std::vector<std::shared_ptr<const BoundNode::Var::Normal::Instance>>& t_variables
     ) : m_Symbol{ t_symbol },
@@ -111,7 +111,7 @@ namespace Ace::BoundNode::Type
         return GetOrCreateLowered(t_context);
     }
 
-    auto Struct::GetSymbol() const -> Symbol::Type::Struct*
+    auto Struct::GetSymbol() const -> StructTypeSymbol*
     {
         return m_Symbol;
     }

@@ -13,7 +13,7 @@
 namespace Ace::BoundNode
 {
     Module::Module(
-        Symbol::Module* const t_symbol,
+        ModuleSymbol* const t_symbol,
         const std::vector<std::shared_ptr<const BoundNode::Module>>& t_modules,
         const std::vector<std::shared_ptr<const BoundNode::Type::IBase>>& t_types,
         const std::vector<std::shared_ptr<const BoundNode::Impl>>& t_impls,

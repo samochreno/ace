@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNode/Expr/Base.hpp"
-#include "Symbol/Var/Normal/Instance.hpp"
+#include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -22,7 +22,7 @@ namespace Ace::BoundNode::Expr::VarReference
     public:
         Instance(
             const std::shared_ptr<const BoundNode::Expr::IBase>& t_expr,
-            Symbol::Var::Normal::Instance* const t_variableSymbol
+            InstanceVarSymbol* const t_variableSymbol
         );
         virtual ~Instance() = default;
 
@@ -45,10 +45,10 @@ namespace Ace::BoundNode::Expr::VarReference
         auto GetTypeInfo() const -> TypeInfo final;
 
         auto GetExpr() const -> std::shared_ptr<const BoundNode::Expr::IBase>;
-        auto GetVarSymbol() const -> Symbol::Var::Normal::Instance*;
+        auto GetVarSymbol() const -> InstanceVarSymbol*;
 
     private:
         std::shared_ptr<const BoundNode::Expr::IBase> m_Expr{};
-        Symbol::Var::Normal::Instance* m_VarSymbol{};
+        InstanceVarSymbol* m_VarSymbol{};
     };
 }

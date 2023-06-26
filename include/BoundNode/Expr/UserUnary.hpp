@@ -6,7 +6,7 @@
 #include "BoundNode/Expr/Base.hpp"
 #include "BoundNode/Expr/FunctionCall/Static.hpp"
 #include "Scope.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "TypeInfo.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -24,7 +24,7 @@ namespace Ace::BoundNode::Expr
     public:
         UserUnary(
             const std::shared_ptr<const BoundNode::Expr::IBase>& t_expr,
-            Symbol::Function* const t_operatorSymbol
+            FunctionSymbol* const t_operatorSymbol
         );
         virtual ~UserUnary() = default;
 
@@ -48,6 +48,6 @@ namespace Ace::BoundNode::Expr
 
     private:
         std::shared_ptr<const BoundNode::Expr::IBase> m_Expr{};
-        Symbol::Function* m_OperatorSymbol{};
+        FunctionSymbol* m_OperatorSymbol{};
     };
 }

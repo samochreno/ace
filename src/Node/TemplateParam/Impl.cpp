@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "Diagnostics.hpp"
-#include "Symbol/Base.hpp"
-#include "Symbol/Type/TemplateParam/Impl.hpp"
+#include "Symbols/Symbol.hpp"
+#include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 
 namespace Ace::Node::TemplateParam
 {
@@ -52,11 +52,11 @@ namespace Ace::Node::TemplateParam
         return 0;
     }
 
-    auto Impl::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto Impl::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::Type::TemplateParam::Impl>(
+            std::make_unique<ImplTemplateParamTypeSymbol>(
                 m_Scope,
                 m_Name
             )

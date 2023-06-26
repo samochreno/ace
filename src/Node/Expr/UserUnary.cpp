@@ -8,7 +8,7 @@
 #include "Diagnostics.hpp"
 #include "BoundNode/Expr/UserUnary.hpp"
 #include "SpecialIdentifier.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 
 namespace Ace::Node::Expr
 {
@@ -41,7 +41,7 @@ namespace Ace::Node::Expr
         auto operatorFullName = typeSymbol->CreateFullyQualifiedName();
         operatorFullName.Sections.emplace_back(operatorNameIt->second);
 
-        ACE_TRY(operatorSymbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(
+        ACE_TRY(operatorSymbol, GetScope()->ResolveStaticSymbol<FunctionSymbol>(
             operatorFullName,
             Scope::CreateArgTypes(typeSymbol)
         ));

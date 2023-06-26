@@ -7,8 +7,8 @@
 #include "Node/Attribute.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNode/Var/Param/Normal.hpp"
-#include "Symbol/Var/Param/Normal.hpp"
-#include "Symbol/Base.hpp"
+#include "Symbols/Vars/Params/NormalParamVarSymbol.hpp"
+#include "Symbols/Symbol.hpp"
 
 namespace Ace::Node::Var::Param
 {
@@ -73,7 +73,7 @@ namespace Ace::Node::Var::Param
         }));
 
         auto* const selfSymbol =
-            m_Scope->ExclusiveResolveSymbol<Symbol::Var::Param::Normal>(m_Name).Unwrap();
+            m_Scope->ExclusiveResolveSymbol<NormalParamVarSymbol>(m_Name).Unwrap();
 
         return std::make_shared<const BoundNode::Var::Param::Normal>(
             selfSymbol,
@@ -101,14 +101,14 @@ namespace Ace::Node::Var::Param
         return 0;
     }
 
-    auto Normal::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto Normal::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
-        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(
+        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::Var::Param::Normal>(
+            std::make_unique<NormalParamVarSymbol>(
                 m_Scope,
                 m_Name,
                 typeSymbol,

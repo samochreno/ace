@@ -11,8 +11,8 @@
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Scope.hpp"
-#include "Symbol/Type/Base.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "Asserts.hpp"
 #include "TypeConversions.hpp"
 
@@ -35,7 +35,7 @@ namespace Ace::BoundNode::Expr
         virtual auto GetTypeInfo() const -> TypeInfo = 0;
     };
 
-    typedef Expected<Symbol::Function*>(*ConversionOperatorGetterFunction)(const std::shared_ptr<Scope>&, Symbol::Type::IBase*, Symbol::Type::IBase*);
+    typedef Expected<FunctionSymbol*>(*ConversionOperatorGetterFunction)(const std::shared_ptr<Scope>&, ITypeSymbol*, ITypeSymbol*);
     auto CreateConverted(
         std::shared_ptr<const BoundNode::Expr::IBase> t_expr,
         TypeInfo t_targetTypeInfo,

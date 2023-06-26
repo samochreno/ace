@@ -15,7 +15,7 @@ namespace Ace::BoundNode::Expr
 {
     SizeOf::SizeOf(
         const std::shared_ptr<Scope>& t_scope,
-        Symbol::Type::IBase* const t_typeSymbol
+        ITypeSymbol* const t_typeSymbol
     ) : m_Scope{ t_scope },
         m_TypeSymbol{ t_typeSymbol }
     {

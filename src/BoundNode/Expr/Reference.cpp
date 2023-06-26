@@ -8,7 +8,7 @@
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "ExprEmitResult.hpp"
 
 namespace Ace::BoundNode::Expr

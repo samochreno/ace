@@ -5,8 +5,8 @@
 
 #include "BoundNode/Expr/Base.hpp"
 #include "Scope.hpp"
-#include "Symbol/Var/Normal/Instance.hpp"
-#include "Symbol/Type/Struct.hpp"
+#include "Symbols/Vars/InstanceVarSymbol.hpp"
+#include "Symbols/Types/StructTypeSymbol.hpp"
 #include "TypeInfo.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -23,13 +23,13 @@ namespace Ace::BoundNode::Expr
     public:
         struct Arg
         {
-            Symbol::Var::Normal::Instance* Symbol{};
+            InstanceVarSymbol* Symbol{};
             std::shared_ptr<const BoundNode::Expr::IBase> Value{};
         };
 
         StructConstruction(
             const std::shared_ptr<Scope>& t_scope,
-            Symbol::Type::Struct* const t_structSymbol,
+            StructTypeSymbol* const t_structSymbol,
             const std::vector<Arg>& t_args
         );
         virtual ~StructConstruction() = default;
@@ -54,7 +54,7 @@ namespace Ace::BoundNode::Expr
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        Symbol::Type::Struct* m_StructSymbol{};
+        StructTypeSymbol* m_StructSymbol{};
         std::vector<Arg> m_Args{};
     };
 }

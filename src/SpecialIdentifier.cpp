@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Symbol/Base.hpp"
+#include "Symbols/Symbol.hpp"
 #include "Asserts.hpp"
 
 namespace Ace::SpecialIdentifier

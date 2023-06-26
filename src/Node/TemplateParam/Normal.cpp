@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "Diagnostics.hpp"
-#include "Symbol/Base.hpp"
-#include "Symbol/Type/TemplateParam/Normal.hpp"
+#include "Symbols/Symbol.hpp"
+#include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
 
 namespace Ace::Node::TemplateParam
 {
@@ -53,11 +53,11 @@ namespace Ace::Node::TemplateParam
         return 0;
     }
 
-    auto Normal::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto Normal::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::Type::TemplateParam::Normal>(
+            std::make_unique<NormalTemplateParamTypeSymbol>(
                 m_Scope,
                 m_Name
             )

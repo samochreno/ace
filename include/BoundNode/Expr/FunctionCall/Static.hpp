@@ -5,7 +5,7 @@
 
 #include "BoundNode/Expr/Base.hpp"
 #include "Scope.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "ExprEmitResult.hpp"
@@ -21,7 +21,7 @@ namespace Ace::BoundNode::Expr::FunctionCall
     public:
         Static(
             const std::shared_ptr<Scope>& t_scope,
-            Symbol::Function* const t_functionSymbol,
+            FunctionSymbol* const t_functionSymbol,
             const std::vector<std::shared_ptr<const BoundNode::Expr::IBase>>& t_args
         );
         virtual ~Static() = default;
@@ -46,7 +46,7 @@ namespace Ace::BoundNode::Expr::FunctionCall
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        Symbol::Function* m_FunctionSymbol{};
+        FunctionSymbol* m_FunctionSymbol{};
         std::vector<std::shared_ptr<const BoundNode::Expr::IBase>> m_Args{};
     };
 }

@@ -7,7 +7,7 @@
 #include "Diagnostics.hpp"
 #include "BoundNode/Expr/UserBinary.hpp"
 #include "SpecialIdentifier.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 
 namespace Ace::Node::Expr
 {
@@ -53,7 +53,7 @@ namespace Ace::Node::Expr
             boundRHSExpr->GetTypeInfo(),
         };
 
-        std::vector<Symbol::Type::IBase*> argTypeSymbols{};
+        std::vector<ITypeSymbol*> argTypeSymbols{};
         std::transform(
             begin(argTypeInfos),
             end  (argTypeInfos),
@@ -61,9 +61,9 @@ namespace Ace::Node::Expr
             [](const TypeInfo& t_typeInfo) { return t_typeInfo.Symbol; }
         );
 
-        const auto expLHSOperatorSymbol = [&]() -> Expected<Symbol::Function*>
+        const auto expLHSOperatorSymbol = [&]() -> Expected<FunctionSymbol*>
         {
-            ACE_TRY(symbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(
+            ACE_TRY(symbol, GetScope()->ResolveStaticSymbol<FunctionSymbol>(
                 lhsName,
                 Scope::CreateArgTypes(argTypeSymbols)
             ));
@@ -76,9 +76,9 @@ namespace Ace::Node::Expr
 
             return symbol;
         }();
-        const auto expRHSOperatorSymbol = [&]() -> Expected<Symbol::Function*>
+        const auto expRHSOperatorSymbol = [&]() -> Expected<FunctionSymbol*>
         {
-            ACE_TRY(symbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(
+            ACE_TRY(symbol, GetScope()->ResolveStaticSymbol<FunctionSymbol>(
                 rhsName,
                 Scope::CreateArgTypes(argTypeSymbols)
             ));

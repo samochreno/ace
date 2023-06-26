@@ -6,7 +6,7 @@
 #include "BoundNode/Base.hpp"
 #include "BoundNode/Typed.hpp"
 #include "BoundNode/Attribute.hpp"
-#include "Symbol/Var/Normal/Instance.hpp"
+#include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -16,13 +16,13 @@ namespace Ace::BoundNode::Var::Normal
     class Instance : 
         public std::enable_shared_from_this<BoundNode::Var::Normal::Instance>,
         public virtual BoundNode::IBase,
-        public virtual BoundNode::ITyped<Symbol::Var::Normal::Instance>,
+        public virtual BoundNode::ITyped<InstanceVarSymbol>,
         public virtual BoundNode::ITypeCheckable<BoundNode::Var::Normal::Instance>,
         public virtual BoundNode::ILowerable<BoundNode::Var::Normal::Instance>
     {
     public:
         Instance(
-            Symbol::Var::Normal::Instance* const t_symbol,
+            InstanceVarSymbol* const t_symbol,
             const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes
         );
         virtual ~Instance() = default;
@@ -36,10 +36,10 @@ namespace Ace::BoundNode::Var::Normal
             const BoundNode::Context::Lowering& t_context
         ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Var::Normal::Instance>> final;
 
-        auto GetSymbol() const -> Symbol::Var::Normal::Instance* final;
+        auto GetSymbol() const -> InstanceVarSymbol* final;
 
     private:
-        Symbol::Var::Normal::Instance* m_Symbol{};
+        InstanceVarSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const BoundNode::Attribute>> m_Attributes{};
     };
 }

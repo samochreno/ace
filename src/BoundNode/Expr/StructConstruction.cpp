@@ -15,7 +15,7 @@ namespace Ace::BoundNode::Expr
 {
     StructConstruction::StructConstruction(
         const std::shared_ptr<Scope>& t_scope,
-        Symbol::Type::Struct* const t_structSymbol,
+        StructTypeSymbol* const t_structSymbol,
         const std::vector<Arg>& t_args
     ) : m_Scope{ t_scope },
         m_StructSymbol{ t_structSymbol },

@@ -9,7 +9,7 @@
 #include "Node/TemplateParam/Impl.hpp"
 #include "Node/TemplateParam/Normal.hpp"
 #include "Scope.hpp"
-#include "Symbol/Base.hpp"
+#include "Symbols/Symbol.hpp"
 
 namespace Ace::Node::Template
 {
@@ -34,7 +34,7 @@ namespace Ace::Node::Template
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCreationSuborder() const -> size_t final;
-        auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
+        auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
 
         auto CollectImplParamNames() const -> std::vector<std::string> final;
         auto CollectParamNames()     const -> std::vector<std::string> final;

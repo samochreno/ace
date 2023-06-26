@@ -10,20 +10,20 @@
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
-#include "Symbol/Var/Local.hpp"
+#include "Symbols/Vars/LocalVarSymbol.hpp"
 
 namespace Ace::BoundNode::Stmt
 {
     class Var :
         public std::enable_shared_from_this<BoundNode::Stmt::Var>,
         public virtual BoundNode::Stmt::IBase,
-        public virtual BoundNode::ITyped<Symbol::Var::Local>,
+        public virtual BoundNode::ITyped<LocalVarSymbol>,
         public virtual BoundNode::ITypeCheckable<BoundNode::Stmt::Var, BoundNode::Stmt::Context::TypeChecking>,
         public virtual BoundNode::ILowerable<BoundNode::Stmt::Var>
     {
     public:
         Var(
-            Symbol::Var::Local* const t_symbol,
+            LocalVarSymbol* const t_symbol,
             const std::optional<std::shared_ptr<const BoundNode::Expr::IBase>>& t_optAssignedExpr
         );
         virtual ~Var() = default;
@@ -44,10 +44,10 @@ namespace Ace::BoundNode::Stmt
         ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
         auto Emit(Emitter& t_emitter) const -> void final;
 
-        auto GetSymbol() const -> Symbol::Var::Local* final;
+        auto GetSymbol() const -> LocalVarSymbol* final;
         
     private:
-        Symbol::Var::Local* m_Symbol{};
+        LocalVarSymbol* m_Symbol{};
         std::optional<std::shared_ptr<const BoundNode::Expr::IBase>> m_OptAssignedExpr{};
     };
 }

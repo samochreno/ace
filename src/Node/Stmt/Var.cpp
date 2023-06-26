@@ -7,7 +7,7 @@
 #include "Node/Expr/Base.hpp"
 #include "BoundNode/Stmt/Var.hpp"
 #include "Diagnostics.hpp"
-#include "Symbol/Var/Local.hpp"
+#include "Symbols/Vars/LocalVarSymbol.hpp"
 
 namespace Ace::Node::Stmt
 {
@@ -43,7 +43,7 @@ namespace Ace::Node::Stmt
 
     auto Var::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Var>>
     {
-        auto* selfSymbol = m_Scope->ExclusiveResolveSymbol<Symbol::Var::Local>(m_Name).Unwrap();
+        auto* selfSymbol = m_Scope->ExclusiveResolveSymbol<LocalVarSymbol>(m_Name).Unwrap();
 
         ACE_TRY(boundOptAssignedExpr, TransformExpectedOptional(m_OptAssignedExpr,
         [](const std::shared_ptr<const Node::Expr::IBase>& t_expr)
@@ -57,14 +57,14 @@ namespace Ace::Node::Stmt
             );
     }
 
-    auto Var::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto Var::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
-        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::IBase>(
+        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::Var::Local>(
+            std::make_unique<LocalVarSymbol>(
                 m_Scope,
                 m_Name,
                 typeSymbol

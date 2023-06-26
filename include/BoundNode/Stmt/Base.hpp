@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "BoundNode/Base.hpp"
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "Emittable.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -17,12 +17,12 @@ namespace Ace::BoundNode::Stmt
         struct TypeChecking : public BoundNode::Context::TypeChecking
         {
             TypeChecking(
-                Symbol::Type::IBase* const t_parentFunctionType
+                ITypeSymbol* const t_parentFunctionType
             ) : ParentFunctionTypeSymbol{ t_parentFunctionType }
             {
             }
 
-            Symbol::Type::IBase* ParentFunctionTypeSymbol{};
+            ITypeSymbol* ParentFunctionTypeSymbol{};
         };
     };
 

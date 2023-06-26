@@ -15,7 +15,7 @@
 #include "BoundNode/Stmt/Expr.hpp"
 #include "BoundNode/Stmt/Assignment/Normal.hpp"
 #include "BoundNode/Stmt/Var.hpp"
-#include "Symbol/Var/Local.hpp"
+#include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "SpecialIdentifier.hpp"
 
 namespace Ace::BoundNode::Stmt::Assignment
@@ -23,7 +23,7 @@ namespace Ace::BoundNode::Stmt::Assignment
     Compound::Compound(
         const std::shared_ptr<const BoundNode::Expr::IBase>& t_lhsExpr,
         const std::shared_ptr<const BoundNode::Expr::IBase>& t_rhsExpr,
-        Symbol::Function* const t_operatorSymbol
+        FunctionSymbol* const t_operatorSymbol
     ) : m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr },
         m_OperatorSymbol{ t_operatorSymbol }
@@ -167,13 +167,13 @@ namespace Ace::BoundNode::Stmt::Assignment
                     {
                         ACE_ASSERT(!expr->GetTypeInfo().Symbol->IsReference());
 
-                        auto tmpVarSymbolOwned = std::make_unique<Symbol::Var::Local>(
+                        auto tmpVarSymbolOwned = std::make_unique<LocalVarSymbol>(
                             blockScope,
                             SpecialIdentifier::CreateAnonymous(),
                             expr->GetTypeInfo().Symbol
                         );
 
-                        auto* const tmpVarSymbol = dynamic_cast<Symbol::Var::Local*>(
+                        auto* const tmpVarSymbol = dynamic_cast<LocalVarSymbol*>(
                             blockScope->DefineSymbol(std::move(tmpVarSymbolOwned)).Unwrap()
                         );
                         ACE_ASSERT(tmpVarSymbol);
@@ -199,13 +199,13 @@ namespace Ace::BoundNode::Stmt::Assignment
                 }
             }();
 
-            auto tmpRefVarSymbolOwned = std::make_unique<Symbol::Var::Local>(
+            auto tmpRefVarSymbolOwned = std::make_unique<LocalVarSymbol>(
                 blockScope,
                 SpecialIdentifier::CreateAnonymous(),
                 tmpRefExpr->GetTypeInfo().Symbol
             );
 
-            auto* const tmpRefVarSymbol = dynamic_cast<Symbol::Var::Local*>(
+            auto* const tmpRefVarSymbol = dynamic_cast<LocalVarSymbol*>(
                 blockScope->DefineSymbol(std::move(tmpRefVarSymbolOwned)).Unwrap()
             );
             ACE_ASSERT(tmpRefVarSymbol);

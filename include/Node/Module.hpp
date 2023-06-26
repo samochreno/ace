@@ -13,7 +13,7 @@
 #include "Node/Template/Function.hpp"
 #include "Node/Var/Normal/Static.hpp"
 #include "BoundNode/Module.hpp"
-#include "Symbol/Base.hpp"
+#include "Symbols/Symbol.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostics.hpp"
@@ -53,9 +53,9 @@ namespace Ace::Node
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCreationSuborder() const -> size_t final;
-        auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> final;
+        auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
         auto ContinueCreatingSymbol(
-            Symbol::IBase* const t_symbol
+            ISymbol* const t_symbol
         ) const -> Expected<void> final;
         auto GetName() const -> const std::string& final;
 

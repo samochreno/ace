@@ -7,7 +7,7 @@
 #include "BoundNode/Attribute.hpp"
 #include "Node/Var/Normal/Instance.hpp"
 #include "Scope.hpp"
-#include "Symbol/Type/Struct.hpp"
+#include "Symbols/Types/StructTypeSymbol.hpp"
 
 namespace Ace::BoundNode::Type
 {
@@ -19,7 +19,7 @@ namespace Ace::BoundNode::Type
     {
     public:
         Struct(
-            Symbol::Type::Struct* const t_symbol,
+            StructTypeSymbol* const t_symbol,
             const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes,
             const std::vector<std::shared_ptr<const BoundNode::Var::Normal::Instance>>& t_variables
         );
@@ -40,10 +40,10 @@ namespace Ace::BoundNode::Type
             const BoundNode::Context::Lowering& t_context
         ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Type::IBase>> final;
 
-        auto GetSymbol() const -> Symbol::Type::Struct* final;
+        auto GetSymbol() const -> StructTypeSymbol* final;
 
     private:
-        Symbol::Type::Struct* m_Symbol{};
+        StructTypeSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const BoundNode::Attribute>> m_Attributes{};
         std::vector<std::shared_ptr<const BoundNode::Var::Normal::Instance>> m_Vars{};
     };

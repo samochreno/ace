@@ -10,7 +10,7 @@
 #include "BoundNode/Stmt/Jump/Conditional.hpp"
 #include "BoundNode/Stmt/Label.hpp"
 #include "Scope.hpp"
-#include "Symbol/Label.hpp"
+#include "Symbols/LabelSymbol.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -102,21 +102,21 @@ namespace Ace::BoundNode::Stmt
         // continue:
         // gotoif condition start;
 
-        auto startLabelSymbolOwned = std::make_unique<Symbol::Label>(
+        auto startLabelSymbolOwned = std::make_unique<LabelSymbol>(
             m_Scope,
             SpecialIdentifier::CreateAnonymous()
         );
 
-        auto* const startLabelSymbol = dynamic_cast<Symbol::Label*>(
+        auto* const startLabelSymbol = dynamic_cast<LabelSymbol*>(
             m_Scope->DefineSymbol(std::move(startLabelSymbolOwned)).Unwrap()
         );
 
-        auto continueLabelSymbolOwned = std::make_unique<Symbol::Label>(
+        auto continueLabelSymbolOwned = std::make_unique<LabelSymbol>(
             m_Scope,
             SpecialIdentifier::CreateAnonymous()
         );
 
-        auto* const continueLabelSymbol = dynamic_cast<Symbol::Label*>(
+        auto* const continueLabelSymbol = dynamic_cast<LabelSymbol*>(
             m_Scope->DefineSymbol(std::move(continueLabelSymbolOwned)).Unwrap()
         );
 

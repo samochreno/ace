@@ -6,7 +6,7 @@
 #include "BoundNode/Base.hpp"
 #include "BoundNode/Typed.hpp"
 #include "BoundNode/Attribute.hpp"
-#include "Symbol/Var/Normal/Static.hpp"
+#include "Symbols/Vars/StaticVarSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -16,13 +16,13 @@ namespace Ace::BoundNode::Var::Normal
     class Static :
         public std::enable_shared_from_this<BoundNode::Var::Normal::Static>,
         public virtual BoundNode::IBase,
-        public virtual BoundNode::ITyped<Symbol::Var::Normal::Static>,
+        public virtual BoundNode::ITyped<StaticVarSymbol>,
         public virtual BoundNode::ITypeCheckable<BoundNode::Var::Normal::Static>,
         public virtual BoundNode::ILowerable<BoundNode::Var::Normal::Static>
     {
     public:
         Static(
-            Symbol::Var::Normal::Static* const t_symbol,
+            StaticVarSymbol* const t_symbol,
             const std::vector<std::shared_ptr<const BoundNode::Attribute>>& t_attributes
         );
         virtual ~Static() = default;
@@ -36,10 +36,10 @@ namespace Ace::BoundNode::Var::Normal
             const BoundNode::Context::Lowering& t_context
         ) const -> MaybeChanged<std::shared_ptr<const BoundNode::Var::Normal::Static>> final;
 
-        auto GetSymbol() const -> Symbol::Var::Normal::Static* final;
+        auto GetSymbol() const -> StaticVarSymbol* final;
 
     private:
-        Symbol::Var::Normal::Static* m_Symbol{};
+        StaticVarSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const BoundNode::Attribute>> m_Attributes{};
     };
 }

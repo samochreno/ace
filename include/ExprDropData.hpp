@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 
 namespace llvm
 {
@@ -13,13 +13,13 @@ namespace Ace
     {
         ExprDropData(
             llvm::Value* const t_value,
-            Symbol::Type::IBase* const t_typeSymbol
+            ITypeSymbol* const t_typeSymbol
         ) : Value{ t_value },
             TypeSymbol{ t_typeSymbol }
         {
         }
 
         llvm::Value* Value{};
-        Symbol::Type::IBase* TypeSymbol{};
+        ITypeSymbol* TypeSymbol{};
     };
 }

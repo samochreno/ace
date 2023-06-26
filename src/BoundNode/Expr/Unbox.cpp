@@ -8,8 +8,8 @@
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "BoundNode/Expr/FunctionCall/Static.hpp"
-#include "Symbol/Function.hpp"
-#include "Symbol/Template/Function.hpp"
+#include "Symbols/FunctionSymbol.hpp"
+#include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "ExprEmitResult.hpp"
 
 namespace Ace::BoundNode::Expr
@@ -75,7 +75,7 @@ namespace Ace::BoundNode::Expr
             {}
         ).Unwrap();
 
-        auto* const functionSymbol = dynamic_cast<Symbol::Function*>(symbol);
+        auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
         ACE_ASSERT(functionSymbol);
 
         const auto returnValue = std::make_shared<const BoundNode::Expr::FunctionCall::Static>(

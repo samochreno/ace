@@ -6,7 +6,7 @@
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNode/Expr/StructConstruction.hpp"
-#include "Symbol/Type/Struct.hpp"
+#include "Symbols/Types/StructTypeSymbol.hpp"
 #include "Node/Expr/LiteralSymbol.hpp"
 #include "Name.hpp"
 
@@ -54,7 +54,7 @@ namespace Ace::Node::Expr
 
     auto StructConstruction::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::StructConstruction>>
     {
-        ACE_TRY(structSymbol, m_Scope->ResolveStaticSymbol<Symbol::Type::Struct>(m_TypeName));
+        ACE_TRY(structSymbol, m_Scope->ResolveStaticSymbol<StructTypeSymbol>(m_TypeName));
 
         const auto variables = structSymbol->GetVars();
         ACE_TRY_ASSERT(variables.size() == m_Args.size());
@@ -63,7 +63,7 @@ namespace Ace::Node::Expr
         [&](const Arg& t_arg) -> Expected<BoundNode::Expr::StructConstruction::Arg>
         {
             const auto symbolFoundIt = std::find_if(begin(variables), end(variables),
-            [&](const Symbol::Var::Normal::Instance* const t_variable)
+            [&](const InstanceVarSymbol* const t_variable)
             {
                 return t_variable->GetName() == t_arg.Name;
             });

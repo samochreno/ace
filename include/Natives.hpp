@@ -13,24 +13,13 @@
 #include "Diagnostics.hpp"
 #include "TypeSizeKind.hpp"
 
-namespace Ace::Symbol
-{
-    class Function;
-
-    namespace Type
-    {
-        class IBase;
-    }
-
-    namespace Template
-    {
-        class Type;
-        class Function;
-    }
-}
-
 namespace Ace
 {
+    class FunctionSymbol;
+    class ITypeSymbol;
+    class TypeTemplateSymbol;
+    class FunctionTemplateSymbol;
+
     class Emitter;
 
     using FunctionBodyEmitter = std::function<void(Emitter&)>;
@@ -78,7 +67,7 @@ namespace Ace
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Type::IBase*;
+        auto GetSymbol() const -> ITypeSymbol*;
 
         auto HasIRType() const -> bool;
         auto GetIRType() const -> llvm::Type*;
@@ -90,7 +79,7 @@ namespace Ace
         bool m_IsSized{};
         bool m_IsTriviallyCopyable{};
 
-        Symbol::Type::IBase* m_Symbol{};
+        ITypeSymbol* m_Symbol{};
     };
 
     class NativeTypeTemplate : public virtual ITypeableNative
@@ -108,13 +97,13 @@ namespace Ace
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Template::Type*;
+        auto GetSymbol() const -> TypeTemplateSymbol*;
 
     private:
         const Compilation* m_Compilation{};
         SymbolName m_Name{};
 
-        Symbol::Template::Type* m_Symbol{};
+        TypeTemplateSymbol* m_Symbol{};
     };
     
     class NativeFunction : public virtual INative
@@ -131,14 +120,14 @@ namespace Ace
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Function*;
+        auto GetSymbol() const -> FunctionSymbol*;
         
     private:
         const Compilation* m_Compilation{};
         SymbolName m_Name{};
         FunctionBodyEmitter m_BodyEmitter{};
 
-        Symbol::Function* m_Symbol{};
+        FunctionSymbol* m_Symbol{};
     };
 
     class NativeFunctionTemplate : public virtual INative
@@ -154,13 +143,13 @@ namespace Ace
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Template::Function*;
+        auto GetSymbol() const -> FunctionTemplateSymbol*;
 
     private:
         const Compilation* m_Compilation{};
         SymbolName m_Name{};
 
-        Symbol::Template::Function* m_Symbol{};
+        FunctionTemplateSymbol* m_Symbol{};
     };
 
     class NativeAssociatedFunction : public virtual INative
@@ -177,14 +166,14 @@ namespace Ace
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Function*;
+        auto GetSymbol() const -> FunctionSymbol*;
 
     private:
         const ITypeableNative& m_Type;
         const char* m_Name{};
         FunctionBodyEmitter m_BodyEmitter{};
 
-        Symbol::Function* m_Symbol{};
+        FunctionSymbol* m_Symbol{};
     };
 
     class NativeAssociatedFunctionTemplate : public virtual INative
@@ -200,13 +189,13 @@ namespace Ace
 
         auto Initialize() -> void final;
 
-        auto GetSymbol() const -> Symbol::Template::Function*;
+        auto GetSymbol() const -> FunctionTemplateSymbol*;
 
     private:
         const ITypeableNative& m_Type;
         const char* m_Name{};
 
-        Symbol::Template::Function* m_Symbol{};
+        FunctionTemplateSymbol* m_Symbol{};
     };
 
     class Natives
@@ -217,9 +206,9 @@ namespace Ace
 
         auto Initialize() -> void;
 
-        auto GetIRTypeSymbolMap() const -> const std::unordered_map<Symbol::Type::IBase*, llvm::Type*>&;
-        auto GetImplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>&;
-        auto GetExplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>&;
+        auto GetIRTypeSymbolMap() const -> const std::unordered_map<ITypeSymbol*, llvm::Type*>&;
+        auto GetImplicitFromOperatorMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
+        auto GetExplicitFromOperatorMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
 
         auto IsIntTypeSigned(const NativeType& t_intType) const -> bool;
 
@@ -594,10 +583,10 @@ namespace Ace
         std::vector<NativeAssociatedFunction*> m_AssociatedFunctions{};
         std::vector<NativeAssociatedFunctionTemplate*> m_AssociatedFunctionTemplates{};
 
-        std::unordered_map<Symbol::Type::IBase*, llvm::Type*> m_IRTypeSymbolMap{};
+        std::unordered_map<ITypeSymbol*, llvm::Type*> m_IRTypeSymbolMap{};
 
-        std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>> m_ImplicitFromOperatorMap{};
-        std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>> m_ExplicitFromOperatorMap{};
+        std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_ImplicitFromOperatorMap{};
+        std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_ExplicitFromOperatorMap{};
 
         std::unordered_set<const NativeType*> m_SignedIntTypesSet{};
     };

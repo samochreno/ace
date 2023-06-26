@@ -14,7 +14,7 @@ namespace Ace::BoundNode::Expr
 {
     UserUnary::UserUnary(
         const std::shared_ptr<const BoundNode::Expr::IBase>& t_expr,
-        Symbol::Function* const t_operatorSymbol
+        FunctionSymbol* const t_operatorSymbol
     ) : m_Expr{ t_expr },
         m_OperatorSymbol{ t_operatorSymbol }
     {

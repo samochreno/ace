@@ -9,7 +9,7 @@
 
 namespace Ace::BoundNode::Stmt
 {
-    Label::Label(Symbol::Label* const t_symbol) 
+    Label::Label(LabelSymbol* const t_symbol) 
         : m_Symbol{ t_symbol }
     {
     }
@@ -56,7 +56,7 @@ namespace Ace::BoundNode::Stmt
     {
     }
 
-    auto Label::GetLabelSymbol() const -> Symbol::Label*
+    auto Label::GetLabelSymbol() const -> LabelSymbol*
     {
         return m_Symbol;
     }

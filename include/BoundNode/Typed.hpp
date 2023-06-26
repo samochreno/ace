@@ -4,7 +4,7 @@
 
 #include "BoundNode/Base.hpp"
 #include "Asserts.hpp"
-#include "Symbol/Typed.hpp"
+#include "Symbols/TypedSymbol.hpp"
 
 namespace Ace::BoundNode
 {
@@ -12,7 +12,7 @@ namespace Ace::BoundNode
     class ITyped : public virtual BoundNode::IBase
     {
     public:
-        static_assert(std::is_base_of_v<Symbol::ITyped, TSymbol>);
+        static_assert(std::is_base_of_v<ITypedSymbol, TSymbol>);
 
         virtual ~ITyped() = default;
 

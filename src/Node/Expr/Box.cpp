@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Diagnostics.hpp"
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "BoundNode/Expr/Box.hpp"
 
 namespace Ace::Node::Expr

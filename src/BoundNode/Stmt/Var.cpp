@@ -16,7 +16,7 @@
 namespace Ace::BoundNode::Stmt
 {
     Var::Var(
-        Symbol::Var::Local* const t_symbol,
+        LocalVarSymbol* const t_symbol,
         const std::optional<std::shared_ptr<const BoundNode::Expr::IBase>>& t_optAssignedExpr
     ) : m_Symbol{ t_symbol },
         m_OptAssignedExpr{ t_optAssignedExpr }
@@ -121,7 +121,7 @@ namespace Ace::BoundNode::Stmt
         assignmentStmt->Emit(t_emitter);
     }
 
-    auto Var::GetSymbol() const -> Symbol::Var::Local*
+    auto Var::GetSymbol() const -> LocalVarSymbol*
     {
         return m_Symbol;
     }

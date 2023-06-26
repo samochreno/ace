@@ -6,8 +6,8 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "Symbol/Base.hpp"
-#include "Symbol/Template/Function.hpp"
+#include "Symbols/Symbol.hpp"
+#include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "Node/TemplateParam/Impl.hpp"
 #include "Node/TemplateParam/Normal.hpp"
 
@@ -86,11 +86,11 @@ namespace Ace::Node::Template
         return 0;
     }
 
-    auto Function::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto Function::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::Template::Function>(this)
+            std::make_unique<FunctionTemplateSymbol>(this)
         };
     }
 

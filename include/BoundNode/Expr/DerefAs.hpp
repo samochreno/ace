@@ -5,7 +5,7 @@
 
 #include "BoundNode/Expr/Base.hpp"
 #include "Scope.hpp"
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "TypeInfo.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -22,7 +22,7 @@ namespace Ace::BoundNode::Expr
     public:
         DerefAs(
             const std::shared_ptr<const BoundNode::Expr::IBase>& t_expr,
-            Symbol::Type::IBase* const t_typeSymbol
+            ITypeSymbol* const t_typeSymbol
         );
         virtual ~DerefAs() = default;
 
@@ -46,6 +46,6 @@ namespace Ace::BoundNode::Expr
 
     private:
         std::shared_ptr<const BoundNode::Expr::IBase> m_Expr{};
-        Symbol::Type::IBase* m_TypeSymbol{};
+        ITypeSymbol* m_TypeSymbol{};
     };
 }

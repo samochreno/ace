@@ -15,7 +15,7 @@ namespace Ace::BoundNode::Expr
 {
     DerefAs::DerefAs(
         const std::shared_ptr<const BoundNode::Expr::IBase>& t_expr,
-        Symbol::Type::IBase* const t_typeSymbol
+        ITypeSymbol* const t_typeSymbol
     ) : m_TypeSymbol{ t_typeSymbol },
         m_Expr{ t_expr }
     {

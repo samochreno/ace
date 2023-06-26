@@ -12,7 +12,7 @@
 #include "BoundNode/Stmt/Label.hpp"
 #include "BoundNode/Stmt/Jump/Conditional.hpp"
 #include "BoundNode/Stmt/Jump/Normal.hpp"
-#include "Symbol/Label.hpp"
+#include "Symbols/LabelSymbol.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Asserts.hpp"
 #include "Diagnostics.hpp"
@@ -123,16 +123,16 @@ namespace Ace::BoundNode::Stmt
 
         const bool hasElse = m_Bodies.size() > m_Conditions.size();
 
-        std::vector<Symbol::Label*> labelSymbols{};
+        std::vector<LabelSymbol*> labelSymbols{};
         const size_t labelCount = m_Conditions.size() + (hasElse ? 1 : 0);
         for (size_t i = 0; i < labelCount; i++)
         {
-            auto labelSymbolOwned = std::make_unique<Symbol::Label>(
+            auto labelSymbolOwned = std::make_unique<LabelSymbol>(
                 m_Scope,
                 SpecialIdentifier::CreateAnonymous()
             );
 
-            auto* const labelSymbol = dynamic_cast<Symbol::Label*>(
+            auto* const labelSymbol = dynamic_cast<LabelSymbol*>(
                 m_Scope->DefineSymbol(std::move(labelSymbolOwned)).Unwrap()
             );
 

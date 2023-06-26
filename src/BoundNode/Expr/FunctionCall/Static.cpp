@@ -15,7 +15,7 @@ namespace Ace::BoundNode::Expr::FunctionCall
 {
     Static::Static(
         const std::shared_ptr<Scope>& t_scope,
-        Symbol::Function* const t_functionSymbol,
+        FunctionSymbol* const t_functionSymbol,
         const std::vector<std::shared_ptr<const BoundNode::Expr::IBase>>& t_args
     ) : m_Scope{ t_scope },
         m_FunctionSymbol{ t_functionSymbol },

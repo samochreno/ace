@@ -13,9 +13,9 @@
 #include "Node/Stmt/Block.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNode/Function.hpp"
-#include "Symbol/Type/Base.hpp"
-#include "Symbol/Function.hpp"
-#include "Symbol/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/FunctionSymbol.hpp"
+#include "Symbols/Symbol.hpp"
 
 namespace Ace::Node
 {
@@ -154,11 +154,11 @@ namespace Ace::Node
             return t_body->CreateBound();
         }));
 
-        ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<Symbol::Type::IBase>(
+        ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
 
-        auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<Symbol::Function>(
+        auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<FunctionSymbol>(
             m_Name,
             m_SelfScope->CollectImplTemplateArgs(),
             m_SelfScope->CollectTemplateArgs()
@@ -193,15 +193,15 @@ namespace Ace::Node
         return 0;
     }
 
-    auto Function::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto Function::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
-        ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<Symbol::Type::IBase>(
+        ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
 
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::Function>(
+            std::make_unique<FunctionSymbol>(
                 m_SelfScope,
                 m_Name,
                 m_OptSelf.has_value() ?

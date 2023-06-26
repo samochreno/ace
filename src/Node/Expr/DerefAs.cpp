@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Diagnostics.hpp"
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "BoundNode/Expr/DerefAs.hpp"
 
 namespace Ace::Node::Expr
@@ -29,7 +29,7 @@ namespace Ace::Node::Expr
     auto DerefAs::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::DerefAs>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
-        ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<Symbol::Type::IBase>(
+        ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
         return std::make_shared<const BoundNode::Expr::DerefAs>(

@@ -4,7 +4,7 @@
 #include <string>
 
 #include "Diagnostics.hpp"
-#include "Symbol/Base.hpp"
+#include "Symbols/Symbol.hpp"
 
 namespace Ace
 {
@@ -18,7 +18,7 @@ namespace Ace
         virtual auto GetSymbolScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetSymbolKind() const -> SymbolKind = 0;
         virtual auto GetSymbolCreationSuborder() const -> size_t = 0;
-        virtual auto CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>> = 0;
+        virtual auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> = 0;
     };
 
     class IPartiallySymbolCreatable : public virtual ISymbolCreatable
@@ -28,7 +28,7 @@ namespace Ace
 
         virtual auto GetName() const -> const std::string& = 0;
         virtual auto ContinueCreatingSymbol(
-            Symbol::IBase* const t_symbol
+            ISymbol* const t_symbol
         ) const -> Expected<void> = 0;
     };
 }

@@ -6,7 +6,7 @@
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNode/Expr/Base.hpp"
-#include "Symbol/Type/Base.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "TypeInfo.hpp"
 
 namespace Ace::Node::Expr
@@ -32,7 +32,7 @@ namespace Ace::Node::Expr
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
 
-        ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<Symbol::Type::IBase>(
+        ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
 

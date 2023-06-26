@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "Symbol/Base.hpp"
+#include "Symbols/Symbol.hpp"
 #include "Token.hpp"
 
 namespace Ace::SpecialIdentifier

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BoundNode/Stmt/Block.hpp"
-#include "Symbol/Label.hpp"
+#include "Symbols/LabelSymbol.hpp"
 #include "Diagnostics.hpp"
 
 namespace Ace
@@ -18,7 +18,7 @@ namespace Ace
     struct ControlFlowStmt
     {
         ControlFlowStmtKind Kind{};
-        Symbol::Label* LabelSymbol{};
+        LabelSymbol* LabelSymbol{};
     };
 
     class ControlFlowAnalysis
@@ -33,7 +33,7 @@ namespace Ace
 
     private:
         auto FindLabelStmt(
-            const Symbol::Label* const t_labelSymbol
+            const LabelSymbol* const t_labelSymbol
         ) const -> std::vector<ControlFlowStmt>::const_iterator;
 
         auto IsEndReachableWithoutReturn(

@@ -5,10 +5,10 @@
 #include <algorithm>
 
 #include "Diagnostics.hpp"
-#include "Symbol/Type/Base.hpp"
-#include "Symbol/Function.hpp"
-#include "Symbol/Template/Type.hpp"
-#include "Symbol/Template/Function.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/FunctionSymbol.hpp"
+#include "Symbols/Templates/TypeTemplateSymbol.hpp"
+#include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "Emittable.hpp"
 #include "Scope.hpp"
 #include "Emitter.hpp"
@@ -68,7 +68,7 @@ namespace Ace
         return m_Compilation;
     }
 
-    auto NativeType::GetSymbol() const -> Symbol::Type::IBase*
+    auto NativeType::GetSymbol() const -> ITypeSymbol*
     {
         ACE_ASSERT(m_Symbol);
         return m_Symbol;
@@ -88,7 +88,7 @@ namespace Ace
     auto NativeType::Initialize() -> void
     {
         auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Type::IBase>(m_Name).Unwrap();
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<ITypeSymbol>(m_Name).Unwrap();
 
         if (m_IRTypeGetter.has_value())
         {
@@ -116,7 +116,7 @@ namespace Ace
         );
 
         auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Template::Type>(name).Unwrap();
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<TypeTemplateSymbol>(name).Unwrap();
 
         m_Symbol = symbol;
     }
@@ -139,7 +139,7 @@ namespace Ace
         return m_Compilation;
     }
 
-    auto NativeTypeTemplate::GetSymbol() const -> Symbol::Template::Type*
+    auto NativeTypeTemplate::GetSymbol() const -> TypeTemplateSymbol*
     {
         ACE_ASSERT(m_Symbol);
         return m_Symbol;
@@ -160,7 +160,7 @@ namespace Ace
         return m_Compilation;
     }
 
-    auto NativeFunction::GetSymbol() const -> Symbol::Function*
+    auto NativeFunction::GetSymbol() const -> FunctionSymbol*
     {
         ACE_ASSERT(m_Symbol);
         return m_Symbol;
@@ -169,7 +169,7 @@ namespace Ace
     auto NativeFunction::Initialize() -> void
     {
         auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Function>(m_Name).Unwrap();
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(m_Name).Unwrap();
 
         symbol->BindBody(std::make_shared<FunctionEmittableBody>(
             m_BodyEmitter
@@ -189,7 +189,7 @@ namespace Ace
     auto NativeFunctionTemplate::Initialize() -> void
     {
         auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Template::Function>(m_Name).Unwrap();
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionTemplateSymbol>(m_Name).Unwrap();
 
         m_Symbol = symbol;
     }
@@ -220,7 +220,7 @@ namespace Ace
         name.Sections.emplace_back(m_Name);
 
         auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Function>(name).Unwrap();
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(name).Unwrap();
 
         symbol->BindBody(std::make_shared<FunctionEmittableBody>(
             m_BodyEmitter
@@ -229,7 +229,7 @@ namespace Ace
         m_Symbol = symbol;
     }
 
-    auto NativeAssociatedFunction::GetSymbol() const -> Symbol::Function*
+    auto NativeAssociatedFunction::GetSymbol() const -> FunctionSymbol*
     {
         ACE_ASSERT(m_Symbol);
         return m_Symbol;
@@ -254,12 +254,12 @@ namespace Ace
         name.Sections.emplace_back(m_Name);
 
         auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<Symbol::Template::Function>(name).Unwrap();
+            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionTemplateSymbol>(name).Unwrap();
 
         m_Symbol = symbol;
     }
 
-    auto NativeAssociatedFunctionTemplate::GetSymbol() const -> Symbol::Template::Function*
+    auto NativeAssociatedFunctionTemplate::GetSymbol() const -> FunctionTemplateSymbol*
     {
         ACE_ASSERT(m_Symbol);
         return m_Symbol;
@@ -2157,17 +2157,17 @@ namespace Ace
         InitializeSignedIntTypesSet();
     }
 
-    auto Natives::GetIRTypeSymbolMap() const -> const std::unordered_map<Symbol::Type::IBase*, llvm::Type*>&
+    auto Natives::GetIRTypeSymbolMap() const -> const std::unordered_map<ITypeSymbol*, llvm::Type*>&
     {
         return m_IRTypeSymbolMap;
     }
 
-    auto Natives::GetImplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>&
+    auto Natives::GetImplicitFromOperatorMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
     {
         return m_ImplicitFromOperatorMap;
     }
 
-    auto Natives::GetExplicitFromOperatorMap() const -> const std::unordered_map<Symbol::Type::IBase*, std::unordered_map<Symbol::Type::IBase*, Symbol::Function*>>&
+    auto Natives::GetExplicitFromOperatorMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
     {
         return m_ExplicitFromOperatorMap;
     }

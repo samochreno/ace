@@ -5,8 +5,8 @@
 
 #include "BoundNode/Type/Struct.hpp"
 #include "Diagnostics.hpp"
-#include "Symbol/Type/Struct.hpp"
-#include "Symbol/Base.hpp"
+#include "Symbols/Types/StructTypeSymbol.hpp"
+#include "Symbols/Symbol.hpp"
 
 namespace Ace::Node::Type
 {
@@ -102,7 +102,7 @@ namespace Ace::Node::Type
             return t_variable->CreateBound();
         }));
 
-        auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<Symbol::Type::Struct>(
+        auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<StructTypeSymbol>(
             m_Name,
             m_SelfScope->CollectImplTemplateArgs(),
             m_SelfScope->CollectTemplateArgs()
@@ -145,11 +145,11 @@ namespace Ace::Node::Type
         return 0;
     }
 
-    auto Struct::CreateSymbol() const -> Expected<std::unique_ptr<Symbol::IBase>>
+    auto Struct::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
     {
-        return std::unique_ptr<Symbol::IBase>
+        return std::unique_ptr<ISymbol>
         {
-            std::make_unique<Symbol::Type::Struct>(
+            std::make_unique<StructTypeSymbol>(
                 m_SelfScope,
                 m_Name,
                 m_AccessModifier

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNode/Expr/Base.hpp"
-#include "Symbol/Var/Base.hpp"
+#include "Symbols/Vars/VarSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
@@ -22,7 +22,7 @@ namespace Ace::BoundNode::Expr::VarReference
     public:
         Static(
             const std::shared_ptr<Scope>& t_scope,
-            Symbol::Var::IBase* const t_variableSymbol
+            IVarSymbol* const t_variableSymbol
         ) : m_Scope{ t_scope },
             m_VarSymbol{ t_variableSymbol }
         {
@@ -39,10 +39,10 @@ namespace Ace::BoundNode::Expr::VarReference
 
         auto GetTypeInfo() const -> TypeInfo final;
 
-        auto GetVarSymbol() const -> Symbol::Var::IBase* { return m_VarSymbol; }
+        auto GetVarSymbol() const -> IVarSymbol* { return m_VarSymbol; }
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        Symbol::Var::IBase* m_VarSymbol{};
+        IVarSymbol* m_VarSymbol{};
     };
 }

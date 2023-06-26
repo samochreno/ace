@@ -12,8 +12,8 @@
 #include "BoundNode/Expr/Base.hpp"
 #include "BoundNode/Expr/FunctionCall/Static.hpp"
 #include "BoundNode/Expr/FunctionCall/Instance.hpp"
-#include "Symbol/Type/Base.hpp"
-#include "Symbol/Function.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 
 namespace Ace::Node::Expr
 {
@@ -50,7 +50,7 @@ namespace Ace::Node::Expr
             return t_arg->CreateBoundExpr();
         }));
 
-        std::vector<Symbol::Type::IBase*> argTypeSymbols{};
+        std::vector<ITypeSymbol*> argTypeSymbols{};
         std::transform(begin(boundArgs), end(boundArgs), back_inserter(argTypeSymbols),
         [](const std::shared_ptr<const BoundNode::Expr::IBase>& t_arg)
         {
@@ -59,7 +59,7 @@ namespace Ace::Node::Expr
 
         if (const auto* const literalSymbol = dynamic_cast<const Node::Expr::LiteralSymbol*>(m_Expr.get()))
         {
-            ACE_TRY(functionSymbol, GetScope()->ResolveStaticSymbol<Symbol::Function>(
+            ACE_TRY(functionSymbol, GetScope()->ResolveStaticSymbol<FunctionSymbol>(
                 literalSymbol->GetName(),
                 Scope::CreateArgTypes(argTypeSymbols)
             ));
@@ -77,7 +77,7 @@ namespace Ace::Node::Expr
         {
             ACE_TRY(boundExpr, memberAccess->GetExpr()->CreateBoundExpr());
 
-            ACE_TRY(functionSymbol, GetScope()->ResolveInstanceSymbol<Symbol::Function>(
+            ACE_TRY(functionSymbol, GetScope()->ResolveInstanceSymbol<FunctionSymbol>(
                 boundExpr->GetTypeInfo().Symbol->GetWithoutReference(),
                 memberAccess->GetName(),
                 Scope::CreateArgTypes(argTypeSymbols)

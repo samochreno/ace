@@ -14,14 +14,10 @@
 #include "Emittable.hpp"
 #include "Compilation.hpp"
 
-namespace Ace::Symbol
+namespace Ace
 {
-    class Function;
-
-    namespace Type
-    {
-        class IBase;
-    }
+    class FunctionSymbol;
+    class ITypeSymbol;
 }
 
 namespace Ace::Core
@@ -85,13 +81,13 @@ namespace Ace::Core
 
     auto CreateCopyGlueBody(
         const Compilation* const t_compilation,
-        Symbol::Type::Struct* const t_structSymbol,
-        Symbol::Function* const t_glueSymbol
+        StructTypeSymbol* const t_structSymbol,
+        FunctionSymbol* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>;
     auto CreateDropGlueBody(
         const Compilation* const t_compilation,
-        Symbol::Type::Struct* const t_structSymbol,
-        Symbol::Function* const t_glueSymbol
+        StructTypeSymbol* const t_structSymbol,
+        FunctionSymbol* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>;
 
 #define TTypeChecked        std::remove_reference_t<decltype(t_getOrCreateTypeCheckedFunc(TBound{}).Unwrap().Value)>
