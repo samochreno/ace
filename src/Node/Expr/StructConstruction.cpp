@@ -12,6 +12,21 @@
 
 namespace Ace::Node::Expr
 {
+    StructConstruction::StructConstruction(
+        const std::shared_ptr<Scope>& t_scope,
+        const SymbolName& t_typeName,
+        std::vector<Arg>&& t_args
+    ) : m_Scope{ t_scope },
+        m_TypeName{ t_typeName },
+        m_Args{ t_args }
+    {
+    }
+
+    auto StructConstruction::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto StructConstruction::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -28,7 +43,9 @@ namespace Ace::Node::Expr
         return children;
     }
 
-    auto StructConstruction::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::StructConstruction>
+    auto StructConstruction::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::StructConstruction>
     {
         std::vector<Arg> clonedArgs{};
         std::transform(begin(m_Args), end(m_Args), back_inserter(clonedArgs),
@@ -37,7 +54,9 @@ namespace Ace::Node::Expr
             auto clonedOptValue = [&]() -> std::optional<std::shared_ptr<const Node::Expr::IBase>>
             {
                 if (!t_arg.OptValue.has_value())
+                {
                     return std::nullopt;
+                }
 
                 return t_arg.OptValue.value()->CloneInScopeExpr(t_scope);
             }();
@@ -52,6 +71,13 @@ namespace Ace::Node::Expr
         );
     }
 
+    auto StructConstruction::CloneInScopeExpr(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::IBase>
+    {
+        return CloneInScope(t_scope);
+    }
+
     auto StructConstruction::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::StructConstruction>>
     {
         ACE_TRY(structSymbol, m_Scope->ResolveStaticSymbol<StructTypeSymbol>(m_TypeName));
@@ -62,11 +88,14 @@ namespace Ace::Node::Expr
         ACE_TRY(boundArgs, TransformExpectedVector(m_Args,
         [&](const Arg& t_arg) -> Expected<BoundNode::Expr::StructConstruction::Arg>
         {
-            const auto symbolFoundIt = std::find_if(begin(variables), end(variables),
-            [&](const InstanceVarSymbol* const t_variable)
-            {
-                return t_variable->GetName() == t_arg.Name;
-            });
+            const auto symbolFoundIt = std::find_if(
+                begin(variables),
+                end  (variables),
+                [&](const InstanceVarSymbol* const t_variable)
+                {
+                    return t_variable->GetName() == t_arg.Name;
+                }
+            );
 
             ACE_TRY_ASSERT(symbolFoundIt != end(variables));
             auto* const variableSymbol = *symbolFoundIt;
@@ -103,6 +132,11 @@ namespace Ace::Node::Expr
             m_Scope,
             structSymbol,
             boundArgs
-            );
+        );
+    }
+
+    auto StructConstruction::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    {
+        return CreateBound();
     }
 }

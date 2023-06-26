@@ -22,20 +22,19 @@ namespace Ace::Node::Stmt::Assignment
             const std::shared_ptr<const Node::Expr::IBase>& t_lhsExpr,
             const std::shared_ptr<const Node::Expr::IBase>& t_rhsExpr,
             const TokenKind& t_operator
-        ) : m_Scope{ t_scope },
-            m_LHSExpr{ t_lhsExpr },
-            m_RHSExpr{ t_rhsExpr },
-            m_Operator{ t_operator }
-        {
-        }
+        );
         virtual ~Compound() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::Assignment::Compound> final;
-        auto CloneInScopeStmt(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Stmt::Assignment::Compound> final;
+        auto CloneInScopeStmt(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Stmt::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Assignment::Compound>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final { return CreateBound(); }
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

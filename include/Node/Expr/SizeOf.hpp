@@ -20,18 +20,19 @@ namespace Ace::Node::Expr
         SizeOf(
             const std::shared_ptr<Scope>& t_scope,
             const TypeName& t_typeName
-        ) : m_Scope{ t_scope}, 
-            m_TypeName{ t_typeName }
-        {
-        }
+        );
         virtual ~SizeOf() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::SizeOf> final;
-        auto CloneInScopeExpr(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Expr::SizeOf> final;
+        auto CloneInScopeExpr(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Expr::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::SizeOf>> final;
-        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final { return CreateBound(); }
+        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

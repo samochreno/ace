@@ -16,18 +16,19 @@ namespace Ace::Node::Expr
         public virtual Node::IBindable<BoundNode::Expr::AddressOf>
     {
     public:
-        AddressOf(const std::shared_ptr<const Node::Expr::IBase>& t_expr) 
-            : m_Expr{ t_expr }
-        {
-        }
+        AddressOf(const std::shared_ptr<const Node::Expr::IBase>& t_expr);
         virtual ~AddressOf() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Expr->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::AddressOf> final;
-        auto CloneInScopeExpr(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Expr::AddressOf> final;
+        auto CloneInScopeExpr(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Expr::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::AddressOf>> final;
-        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final { return CreateBound(); }
+        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final;
 
     private:
         std::shared_ptr<const Node::Expr::IBase> m_Expr{};

@@ -17,6 +17,19 @@
 
 namespace Ace::Node::Expr
 {
+    FunctionCall::FunctionCall(
+        const std::shared_ptr<const Node::Expr::IBase>& t_expr,
+        const std::vector<std::shared_ptr<const Node::Expr::IBase>>& t_args
+    ) : m_Expr{ t_expr },
+        m_Args{ t_args }
+    {
+    }
+
+    auto FunctionCall::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Expr->GetScope();
+    }
+
     auto FunctionCall::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -27,7 +40,9 @@ namespace Ace::Node::Expr
         return children;
     }
 
-    auto FunctionCall::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::FunctionCall>
+    auto FunctionCall::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::FunctionCall>
     {
         std::vector<std::shared_ptr<const Node::Expr::IBase>> clonedArgs{};
         std::transform(begin(m_Args), end(m_Args), back_inserter(clonedArgs),
@@ -40,6 +55,13 @@ namespace Ace::Node::Expr
             m_Expr->CloneInScopeExpr(t_scope),
             clonedArgs
         );
+    }
+
+    auto FunctionCall::CloneInScopeExpr(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::IBase>
+    {
+        return CloneInScope(t_scope);
     }
 
     auto FunctionCall::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
@@ -94,5 +116,10 @@ namespace Ace::Node::Expr
         }
 
         ACE_TRY_UNREACHABLE();
+    }
+
+    auto FunctionCall::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    {
+        return CreateBound();
     }
 }

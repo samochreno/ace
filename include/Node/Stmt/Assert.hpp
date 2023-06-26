@@ -20,18 +20,19 @@ namespace Ace::Node::Stmt
         Assert(
             const std::shared_ptr<Scope>& t_scope,
             const std::shared_ptr<const Node::Expr::IBase>& t_condition
-        ) : m_Scope{ t_scope },
-            m_Condition{ t_condition }
-        {
-        }
+        );
         virtual ~Assert() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::Assert> final;
-        auto CloneInScopeStmt(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Stmt::Assert> final;
+        auto CloneInScopeStmt(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Stmt::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Assert>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final { return CreateBound(); }
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

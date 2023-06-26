@@ -11,6 +11,21 @@
 
 namespace Ace::Node::Expr
 {
+    UserBinary::UserBinary(
+        const std::shared_ptr<const Node::Expr::IBase>& t_lhsExpr,
+        const std::shared_ptr<const Node::Expr::IBase>& t_rhsExpr,
+        const TokenKind& t_operator
+    ) : m_LHSExpr{ t_lhsExpr },
+        m_RHSExpr{ t_rhsExpr },
+        m_Operator{ t_operator }
+    {
+    }
+
+    auto UserBinary::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_LHSExpr->GetScope();
+    }
+
     auto UserBinary::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -21,13 +36,22 @@ namespace Ace::Node::Expr
         return children;
     }
 
-    auto UserBinary::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::UserBinary>
+    auto UserBinary::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::UserBinary>
     {
         return std::make_shared<const Node::Expr::UserBinary>(
             m_LHSExpr->CloneInScopeExpr(t_scope),
             m_RHSExpr->CloneInScopeExpr(t_scope),
             m_Operator
         );
+    }
+
+    auto UserBinary::CloneInScopeExpr(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::IBase>
+    {
+        return CloneInScope(t_scope);
     }
 
     auto UserBinary::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::UserBinary>>
@@ -38,8 +62,11 @@ namespace Ace::Node::Expr
         auto* const lhsTypeSymbol = boundLHSExpr->GetTypeInfo().Symbol;
         auto* const rhsTypeSymbol = boundRHSExpr->GetTypeInfo().Symbol;
 
-        const auto operatorNameIt = SpecialIdentifier::Operator::BinaryNameMap.find(m_Operator);
-        ACE_TRY_ASSERT(operatorNameIt != end(SpecialIdentifier::Operator::BinaryNameMap));
+        const auto operatorNameIt =
+            SpecialIdentifier::Operator::BinaryNameMap.find(m_Operator);
+        ACE_TRY_ASSERT(
+            operatorNameIt != end(SpecialIdentifier::Operator::BinaryNameMap)
+        );
 
         auto lhsName = lhsTypeSymbol->CreateFullyQualifiedName();
         lhsName.Sections.emplace_back(operatorNameIt->second);
@@ -111,5 +138,10 @@ namespace Ace::Node::Expr
             boundRHSExpr,
             operatorSymbol
         );
+    }
+
+    auto UserBinary::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    {
+        return CreateBound();
     }
 }

@@ -21,18 +21,19 @@ namespace Ace::Node::Stmt
         Return(
             const std::shared_ptr<Scope>& t_scope,
             const std::optional<std::shared_ptr<const Node::Expr::IBase>>& t_optExpr
-        ) : m_Scope{ t_scope },
-            m_OptExpr{ t_optExpr }
-        {
-        }
+        );
         virtual ~Return() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::Return> final;
-        auto CloneInScopeStmt(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Stmt::Return> final;
+        auto CloneInScopeStmt(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Stmt::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Return>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final { return CreateBound(); }
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

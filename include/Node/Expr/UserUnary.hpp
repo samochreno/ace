@@ -20,18 +20,19 @@ namespace Ace::Node::Expr
         UserUnary(
             const std::shared_ptr<const Node::Expr::IBase>& t_expr,
             const TokenKind& t_operator
-        ) : m_Expr{ t_expr },
-            m_Operator{ t_operator }
-        {
-        }
+        );
         virtual ~UserUnary() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Expr->GetScope(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::UserUnary> final;
-        auto CloneInScopeExpr(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Expr::UserUnary> final;
+        auto CloneInScopeExpr(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Expr::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::UserUnary>> final;
-        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final { return CreateBound(); }
+        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final;
             
     private:
         std::shared_ptr<const Node::Expr::IBase> m_Expr{};

@@ -99,7 +99,8 @@ namespace Ace::BoundNode::Expr
             0
         );
 
-        auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(type);
+        auto* const allocaInst =
+            t_emitter.GetBlockBuilder().Builder.CreateAlloca(type);
         temporaries.emplace_back(
             allocaInst, 
             GetCompilation()->Natives->Pointer.GetSymbol()

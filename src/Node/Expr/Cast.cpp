@@ -11,6 +11,19 @@
 
 namespace Ace::Node::Expr
 {
+    Cast::Cast(
+        const TypeName& t_typeName,
+        const std::shared_ptr<const Node::Expr::IBase>& t_expr
+    ) : m_TypeName{ t_typeName },
+        m_Expr{ t_expr }
+    {
+    }
+
+    auto Cast::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Expr->GetScope();
+    }
+
     auto Cast::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -20,12 +33,21 @@ namespace Ace::Node::Expr
         return children;
     }
 
-    auto Cast::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::Cast>
+    auto Cast::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::Cast>
     {
         return std::make_shared<const Node::Expr::Cast>(
             m_TypeName,
             m_Expr->CloneInScopeExpr(t_scope)
         );
+    }
+
+    auto Cast::CloneInScopeExpr(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::IBase>
+    {
+        return CloneInScope(t_scope);
     }
 
     auto Cast::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
@@ -42,5 +64,10 @@ namespace Ace::Node::Expr
         ));
 
         return mchConvertedBoundExpr.Value;
+    }
+
+    auto Cast::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    {
+        return CreateBound();
     }
 }

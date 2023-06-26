@@ -19,18 +19,19 @@ namespace Ace::Node::Stmt
         Block(
             const std::shared_ptr<Scope>& t_selfScope,
             const std::vector<std::shared_ptr<const Node::Stmt::IBase>>& t_stmts
-        ) : m_SelfScope{ t_selfScope },
-            m_Stmts{ t_stmts }
-        {
-        }
+        );
         virtual ~Block() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_SelfScope->GetParent().value(); }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::Block> final;
-        auto CloneInScopeStmt(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Stmt::Block> final;
+        auto CloneInScopeStmt(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Stmt::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Block>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final { return CreateBound(); }
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
 
     private:
         std::shared_ptr<Scope> m_SelfScope{};

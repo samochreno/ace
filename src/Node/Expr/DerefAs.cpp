@@ -9,6 +9,19 @@
 
 namespace Ace::Node::Expr
 {
+    DerefAs::DerefAs(
+        const TypeName& t_typeName, 
+        const std::shared_ptr<const Node::Expr::IBase>& t_expr
+    ) : m_TypeName{ t_typeName },
+        m_Expr{ t_expr }
+    {
+    }
+
+    auto DerefAs::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Expr->GetScope();
+    }
+
     auto DerefAs::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -18,12 +31,21 @@ namespace Ace::Node::Expr
         return children;
     }
 
-    auto DerefAs::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::DerefAs>
+    auto DerefAs::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::DerefAs>
     {
         return std::make_shared<const Node::Expr::DerefAs>(
             m_TypeName,
             m_Expr->CloneInScopeExpr(t_scope)
         );
+    }
+
+    auto DerefAs::CloneInScopeExpr(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::IBase>
+    {
+        return CloneInScope(t_scope);
     }
 
     auto DerefAs::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::DerefAs>>
@@ -36,5 +58,10 @@ namespace Ace::Node::Expr
             boundExpr,
             typeSymbol
         );
+    }
+
+    auto DerefAs::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    {
+        return CreateBound();
     }
 }

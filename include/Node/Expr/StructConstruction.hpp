@@ -29,19 +29,19 @@ namespace Ace::Node::Expr
             const std::shared_ptr<Scope>& t_scope,
             const SymbolName& t_typeName,
             std::vector<Arg>&& t_args
-        ) : m_Scope{ t_scope },
-            m_TypeName{ t_typeName },
-            m_Args{ t_args }
-        {
-        }
+        );
         virtual ~StructConstruction() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::StructConstruction> final;
-        auto CloneInScopeExpr(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Expr::StructConstruction> final;
+        auto CloneInScopeExpr(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Expr::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::StructConstruction>> final;
-        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final { return CreateBound(); }
+        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

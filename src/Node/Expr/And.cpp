@@ -9,6 +9,19 @@
 
 namespace Ace::Node::Expr
 {
+    And::And(
+        const std::shared_ptr<const Node::Expr::IBase>& t_lhsExpr,
+        const std::shared_ptr<const Node::Expr::IBase>& t_rhsExpr
+    ) : m_LHSExpr{ t_lhsExpr },
+        m_RHSExpr{ t_rhsExpr }
+    {
+    }
+
+    auto And::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_LHSExpr->GetScope();
+    }
+
     auto And::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -19,12 +32,21 @@ namespace Ace::Node::Expr
         return children;
     }
 
-    auto And::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::And>
+    auto And::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::And>
     {
         return std::make_shared<const Node::Expr::And>(
             m_LHSExpr->CloneInScopeExpr(t_scope),
             m_RHSExpr->CloneInScopeExpr(t_scope)
         );
+    }
+
+    auto And::CloneInScopeExpr(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::IBase>
+    {
+        return CloneInScope(t_scope);
     }
 
     auto And::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::And>>
@@ -35,5 +57,10 @@ namespace Ace::Node::Expr
             boundLHSExpr,
             boundRHSExpr
             );
+    }
+
+    auto And::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    {
+        return CreateBound();
     }
 }

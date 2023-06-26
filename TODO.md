@@ -2,6 +2,7 @@
 
 ## 💥 High Priority
 
+- Remove double slashes in include paths
 - Consider splitting `Core.hpp` into multiple files, especially glue generation
 - Un-nest names for example `Node::...`, `BoundNode::...`
 - Refactor expression parsing

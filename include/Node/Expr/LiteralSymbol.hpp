@@ -20,20 +20,21 @@ namespace Ace::Node::Expr
         LiteralSymbol(
             const std::shared_ptr<Scope>& t_scope,
             const SymbolName& t_name
-        ) : m_Scope{ t_scope },
-            m_Name{ t_name }
-        {
-        }
+        );
         virtual ~LiteralSymbol() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::LiteralSymbol> final;
-        auto CloneInScopeExpr(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Expr::LiteralSymbol> final;
+        auto CloneInScopeExpr(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Expr::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::VarReference::Static>> final;
-        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final { return CreateBound(); }
+        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final;
 
-        auto GetName() const -> const SymbolName& { return m_Name; }
+        auto GetName() const -> const SymbolName&;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

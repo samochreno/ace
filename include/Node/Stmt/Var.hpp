@@ -28,26 +28,25 @@ namespace Ace::Node::Stmt
             const std::string& t_name,
             const TypeName& t_typeName,
             const std::optional<std::shared_ptr<const Node::Expr::IBase>>& t_optAssignedExpr
-        ) : m_Scope{ t_scope },
-            m_Name{ t_name },
-            m_TypeName{ t_typeName },
-            m_OptAssignedExpr{ t_optAssignedExpr }
-        {
-        }
+        );
         virtual ~Var() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
+        auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const Node::IBase*> final;
-        auto CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::Var> final;
-        auto CloneInScopeStmt(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::IBase> final { return CloneInScope(t_scope); }
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Stmt::Var> final;
+        auto CloneInScopeStmt(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const Node::Stmt::IBase> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Var>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final { return CreateBound(); }
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
 
-        auto GetName() const -> const std::string & final { return m_Name; }
+        auto GetName() const -> const std::string & final;
 
-        auto GetSymbolScope() const -> std::shared_ptr<Scope> final { return m_Scope; }
-        auto GetSymbolKind() const -> SymbolKind final { return SymbolKind::LocalVar; }
-        auto GetSymbolCreationSuborder() const -> size_t final { return 0; }
+        auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
+        auto GetSymbolKind() const -> SymbolKind final;
+        auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
 
     private:

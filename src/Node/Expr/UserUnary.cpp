@@ -12,6 +12,19 @@
 
 namespace Ace::Node::Expr
 {
+    UserUnary::UserUnary(
+        const std::shared_ptr<const Node::Expr::IBase>& t_expr,
+        const TokenKind& t_operator
+    ) : m_Expr{ t_expr },
+        m_Operator{ t_operator }
+    {
+    }
+
+    auto UserUnary::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Expr->GetScope();
+    }
+
     auto UserUnary::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -21,7 +34,9 @@ namespace Ace::Node::Expr
         return children;
     }
 
-    auto UserUnary::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Expr::UserUnary>
+    auto UserUnary::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::UserUnary>
     {
         return std::make_unique<Node::Expr::UserUnary>(
             m_Expr->CloneInScopeExpr(t_scope),
@@ -29,12 +44,22 @@ namespace Ace::Node::Expr
         );
     }
 
+    auto UserUnary::CloneInScopeExpr(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Expr::IBase>
+    {
+        return CloneInScope(t_scope);
+    }
+
     auto UserUnary::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::UserUnary>>
     {
         ACE_TRY(boundExpresssion, m_Expr->CreateBoundExpr());
 
-        const auto operatorNameIt = SpecialIdentifier::Operator::UnaryNameMap.find(m_Operator);
-        ACE_TRY_ASSERT(operatorNameIt != end(SpecialIdentifier::Operator::UnaryNameMap));
+        const auto operatorNameIt =
+            SpecialIdentifier::Operator::UnaryNameMap.find(m_Operator);
+        ACE_TRY_ASSERT(
+            operatorNameIt != end(SpecialIdentifier::Operator::UnaryNameMap)
+        );
 
         auto* const typeSymbol = boundExpresssion->GetTypeInfo().Symbol;
 
@@ -50,5 +75,10 @@ namespace Ace::Node::Expr
             boundExpresssion,
             operatorSymbol
         );
+    }
+
+    auto UserUnary::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    {
+        return CreateBound();
     }
 }

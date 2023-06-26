@@ -12,6 +12,21 @@
 
 namespace Ace::Node::Stmt
 {
+    While::While(
+        const std::shared_ptr<Scope>& t_scope,
+        const std::shared_ptr<const Node::Expr::IBase>& t_condition,
+        const std::shared_ptr<const Node::Stmt::Block>& t_body
+    ) : m_Scope{ t_scope },
+        m_Condition{ t_condition },
+        m_Body{ t_body }
+    {
+    }
+
+    auto While::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Scope;
+    }
+
     auto While::GetChildren() const -> std::vector<const Node::IBase*>
     {
         std::vector<const Node::IBase*> children{};
@@ -22,13 +37,22 @@ namespace Ace::Node::Stmt
         return children;
     }
 
-    auto While::CloneInScope(const std::shared_ptr<Scope>& t_scope) const -> std::shared_ptr<const Node::Stmt::While>
+    auto While::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Stmt::While>
     {
         return std::make_shared<const Node::Stmt::While>(
             t_scope,
             m_Condition->CloneInScopeExpr(t_scope),
             m_Body->CloneInScope(t_scope)
         );
+    }
+
+    auto While::CloneInScopeStmt(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const Node::Stmt::IBase>
+    {
+        return CloneInScope(t_scope);
     }
 
     auto While::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::While>>
@@ -39,6 +63,11 @@ namespace Ace::Node::Stmt
             m_Scope,
             boundCondition,
             boundBody
-            );
+        );
+    }
+
+    auto While::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    {
+        return CreateBound();
     }
 }
