@@ -20,7 +20,7 @@
 namespace Ace
 {
     FunctionTemplateSymbol::FunctionTemplateSymbol(
-        const Node::Template::Function* const t_templateNode
+        const FunctionTemplateNode* const t_templateNode
     ) : m_Name{ SpecialIdentifier::CreateTemplate(t_templateNode->GetAST()->GetName()) },
         m_TemplateNode{ t_templateNode }
     {
@@ -115,15 +115,15 @@ namespace Ace
     }
 
     auto FunctionTemplateSymbol::InstantiateSemanticsForSymbols(
-        const std::shared_ptr<const Node::IBase>& t_ast
+        const std::shared_ptr<const INode>& t_ast
     ) -> void
     {
-        const auto ast = std::dynamic_pointer_cast<const Node::Function>(t_ast);
+        const auto ast = std::dynamic_pointer_cast<const FunctionNode>(t_ast);
 
         const auto boundAST = Core::CreateBoundTransformedAndVerifiedAST(
             GetCompilation(),
             ast,
-            [](const std::shared_ptr<const Node::Function>& t_ast) { return t_ast->CreateBound(); },
+            [](const std::shared_ptr<const FunctionNode>& t_ast) { return t_ast->CreateBound(); },
             [](const std::shared_ptr<const BoundNode::Function>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); },
             [](const std::shared_ptr<const BoundNode::Function>& t_ast) { return t_ast->GetOrCreateLowered({}); },
             [](const std::shared_ptr<const BoundNode::Function>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); }

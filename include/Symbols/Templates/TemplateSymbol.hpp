@@ -21,7 +21,7 @@ namespace Ace
     struct TemplateSymbolsInstantationResult
     {
         ISymbol* const Symbol{};
-        std::shared_ptr<const Node::IBase> AST{};
+        std::shared_ptr<const INode> AST{};
     };
 
     class ITemplateSymbol : public virtual ISymbol
@@ -44,7 +44,7 @@ namespace Ace
             const std::vector<ITypeSymbol*>& t_args
         ) -> Expected<TemplateSymbolsInstantationResult> = 0;
         virtual auto InstantiateSemanticsForSymbols(
-            const std::shared_ptr<const Node::IBase>& t_ast
+            const std::shared_ptr<const INode>& t_ast
         ) -> void = 0;
     };
 }

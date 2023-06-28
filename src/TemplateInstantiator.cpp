@@ -160,7 +160,7 @@ namespace Ace
                 std::for_each(
                     begin(templateASTsPair.second),
                     end  (templateASTsPair.second),
-                    [&](const std::shared_ptr<const Node::IBase>& t_ast)
+                    [&](const std::shared_ptr<const INode>& t_ast)
                     {
                         templateASTsPair.first->InstantiateSemanticsForSymbols(t_ast);
                     }

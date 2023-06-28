@@ -1,0 +1,45 @@
+#pragma once
+
+#include <memory>
+#include <vector>
+
+#include "Nodes/Node.hpp"
+#include "Nodes/FunctionNode.hpp"
+#include "Nodes/Templates/FunctionTemplateNode.hpp"
+#include "BoundNode/Impl.hpp"
+#include "Scope.hpp"
+#include "Name.hpp"
+#include "Diagnostics.hpp"
+
+namespace Ace
+{
+    class ImplNode :
+        public virtual INode,
+        public virtual ICloneableNode<ImplNode>,
+        public virtual IBindableNode<BoundNode::Impl>
+    {
+    public:
+        ImplNode(
+            const std::shared_ptr<Scope>& t_selfScope,
+            const SymbolName& t_typeName,
+            const std::vector<std::shared_ptr<const FunctionNode>>& t_functions,
+            const std::vector<std::shared_ptr<const FunctionTemplateNode>>& t_functionTemplates
+        );
+        virtual ~ImplNode() = default;
+
+        auto GetScope() const -> std::shared_ptr<Scope> final;
+        auto GetChildren() const -> std::vector<const INode*> final;
+        auto CloneInScope(
+            const std::shared_ptr<Scope>& t_scope
+        ) const -> std::shared_ptr<const ImplNode> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Impl>> final;
+
+        auto DefineAssociations() const -> Expected<void>;
+
+    private:
+        std::shared_ptr<Scope> m_SelfScope{};
+        SymbolName m_TypeName{};
+        std::vector<std::shared_ptr<const FunctionNode>> m_Functions{};
+        std::vector<std::shared_ptr<const FunctionTemplateNode>> m_FunctionTemplates{};
+    };
+}

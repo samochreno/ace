@@ -8,8 +8,8 @@
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
-#include "Node/Template/Function.hpp"
-#include "Node/Function.hpp"
+#include "Nodes/Templates/FunctionTemplateNode.hpp"
+#include "Nodes/FunctionNode.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostics.hpp"
@@ -21,7 +21,7 @@ namespace Ace
     {
     public:
         FunctionTemplateSymbol(
-            const Node::Template::Function* const t_templateNode
+            const FunctionTemplateNode* const t_templateNode
         );
         virtual ~FunctionTemplateSymbol() = default;
 
@@ -43,14 +43,14 @@ namespace Ace
             const std::vector<ITypeSymbol*>& t_implArgs,
             const std::vector<ITypeSymbol*>& t_args
         ) -> Expected<TemplateSymbolsInstantationResult> final; auto InstantiateSemanticsForSymbols(
-            const std::shared_ptr<const Node::IBase>& t_ast
+            const std::shared_ptr<const INode>& t_ast
         ) -> void final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};
         std::string m_Name{};
-        const Node::Template::Function* m_TemplateNode{};
+        const FunctionTemplateNode* m_TemplateNode{};
         ISymbol* m_PlaceholderSymbol{};
-        std::vector<std::shared_ptr<const Node::Function>> m_InstantiatedOnlySymbolsASTs{};
+        std::vector<std::shared_ptr<const FunctionNode>> m_InstantiatedOnlySymbolsASTs{};
     };
 }

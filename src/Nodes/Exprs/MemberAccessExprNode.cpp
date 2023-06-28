@@ -1,0 +1,82 @@
+#include "Nodes/Exprs/MemberAccessExprNode.hpp"
+
+#include <memory>
+#include <vector>
+
+#include "BoundNode/Expr/VarReference/Instance.hpp"
+#include "Diagnostics.hpp"
+#include "Symbols/Vars/InstanceVarSymbol.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+
+namespace Ace
+{
+    MemberAccessExprNode::MemberAccessExprNode(
+        const std::shared_ptr<const IExprNode>& t_expr,
+        const SymbolNameSection& t_name
+    ) : m_Expr{ t_expr },
+        m_Name{ t_name }
+    {
+    }
+
+    auto MemberAccessExprNode::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Expr->GetScope();
+    }
+
+    auto MemberAccessExprNode::GetChildren() const -> std::vector<const INode*>
+    {
+        std::vector<const INode*> children{};
+
+        AddChildren(children, m_Expr);
+
+        return children;
+    }
+
+    auto MemberAccessExprNode::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const MemberAccessExprNode>
+    {
+        return std::make_shared<const MemberAccessExprNode>(
+            m_Expr->CloneInScopeExpr(t_scope),
+            m_Name
+        );
+    }
+
+    auto MemberAccessExprNode::CloneInScopeExpr(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const IExprNode>
+    {
+        return CloneInScope(t_scope);
+    }
+
+    auto MemberAccessExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::VarReference::Instance>>
+    {
+        ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
+
+        ACE_TRY_ASSERT(m_Name.TemplateArgs.empty());
+        ACE_TRY(memberSymbol, GetScope()->ResolveInstanceSymbol<InstanceVarSymbol>(
+            boundExpr->GetTypeInfo().Symbol->GetWithoutReference(),
+            m_Name
+        ));
+
+        return std::make_shared<const BoundNode::Expr::VarReference::Instance>(
+            boundExpr,
+            memberSymbol
+        );
+    }
+
+    auto MemberAccessExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    {
+        return CreateBound();
+    }
+
+    auto MemberAccessExprNode::GetExpr() const -> const IExprNode*
+    {
+        return m_Expr.get();
+    }
+
+    auto MemberAccessExprNode::GetName() const -> const SymbolNameSection&
+    {
+        return m_Name;
+    }
+}

@@ -5,7 +5,7 @@
 
 #include "BoundNode/Type/Base.hpp"
 #include "BoundNode/Attribute.hpp"
-#include "Node/Var/Normal/Instance.hpp"
+#include "Nodes/Vars/InstanceVarNode.hpp"
 #include "Scope.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
 

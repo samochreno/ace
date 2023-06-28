@@ -14,7 +14,7 @@
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
-#include "Node/All.hpp"
+#include "Nodes/All.hpp"
 #include "BoundNode/All.hpp"
 #include "Symbols/All.hpp"
 #include "Compilation.hpp"
@@ -40,7 +40,7 @@ namespace Ace
         const auto timeParsingStart = now();
         ACE_LOG_INFO("Parsing start");
 
-        std::vector<std::shared_ptr<const Node::Module>> asts{};
+        std::vector<std::shared_ptr<const ModuleNode>> asts{};
         std::transform(
             begin(t_compilation->Package.SourceFileBuffers),
             end  (t_compilation->Package.SourceFileBuffers),
@@ -87,7 +87,7 @@ namespace Ace
         ACE_TRY(boundASTs, Core::CreateBoundTransformedAndVerifiedASTs(
             t_compilation,
             asts,
-            [](const std::shared_ptr<const Node::Module>& t_ast)
+            [](const std::shared_ptr<const ModuleNode>& t_ast)
             {
                 return t_ast->CreateBound(); 
             },

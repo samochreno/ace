@@ -4,7 +4,7 @@
 
 - Remove double slashes in include paths
 - Consider splitting `Core.hpp` into multiple files, especially glue generation
-- Un-nest names for example `Node::...`, `BoundNode::...`
+- Un-nest names for example `BoundNode::...`
 - Refactor expression parsing
 - Refactor compound assignment lowering
 - Refactor emitting of variable references

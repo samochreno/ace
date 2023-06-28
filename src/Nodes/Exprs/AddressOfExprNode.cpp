@@ -1,0 +1,57 @@
+#include "Nodes/Exprs/AddressOfExprNode.hpp"
+
+#include <memory>
+#include <vector>
+
+#include "Diagnostics.hpp"
+#include "BoundNode/Expr/AddressOf.hpp"
+
+namespace Ace
+{
+    AddressOfExprNode::AddressOfExprNode(
+        const std::shared_ptr<const IExprNode>& t_expr
+    ) : m_Expr{ t_expr }
+    {
+    }
+
+    auto AddressOfExprNode::GetScope() const -> std::shared_ptr<Scope>
+    {
+        return m_Expr->GetScope();
+    }
+
+    auto AddressOfExprNode::GetChildren() const -> std::vector<const INode*>
+    {
+        std::vector<const INode*> children{};
+
+        AddChildren(children, m_Expr);
+
+        return children;
+    }
+
+    auto AddressOfExprNode::CloneInScope(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const AddressOfExprNode>
+    {
+        return std::make_shared<const AddressOfExprNode>(
+            m_Expr->CloneInScopeExpr(t_scope)
+        );
+    }
+
+    auto AddressOfExprNode::CloneInScopeExpr(
+        const std::shared_ptr<Scope>& t_scope
+    ) const -> std::shared_ptr<const IExprNode>
+    {
+        return CloneInScope(t_scope);
+    }
+
+    auto AddressOfExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::AddressOf>>
+    {
+        ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
+        return std::make_shared<const BoundNode::Expr::AddressOf>(boundExpr);
+    }
+
+    auto AddressOfExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    {
+        return CreateBound();
+    }
+}

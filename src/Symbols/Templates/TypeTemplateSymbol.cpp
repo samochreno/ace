@@ -14,7 +14,7 @@
 namespace Ace
 {
     TypeTemplateSymbol::TypeTemplateSymbol(
-        const Node::Template::Type* const t_templateNode
+        const TypeTemplateNode* const t_templateNode
     ) : m_Name{ SpecialIdentifier::CreateTemplate(t_templateNode->GetAST()->GetName()) },
         m_TemplateNode{ t_templateNode }
     {
@@ -110,15 +110,15 @@ namespace Ace
     }
 
     auto TypeTemplateSymbol::InstantiateSemanticsForSymbols(
-        const std::shared_ptr<const Node::IBase>& t_ast
+        const std::shared_ptr<const INode>& t_ast
     ) -> void
     {
-        const auto ast = std::dynamic_pointer_cast<const Node::Type::IBase>(t_ast);
+        const auto ast = std::dynamic_pointer_cast<const ITypeNode>(t_ast);
 
         const auto boundAST = Core::CreateBoundTransformedAndVerifiedAST(
             GetCompilation(),
             ast,
-            [](const std::shared_ptr<const Node::Type::IBase>& t_ast) { return t_ast->CreateBoundType(); },
+            [](const std::shared_ptr<const ITypeNode>& t_ast) { return t_ast->CreateBoundType(); },
             [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); },
             [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateLoweredType({}); },
             [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); }

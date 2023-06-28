@@ -7,9 +7,9 @@
 
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
-#include "Node/Base.hpp"
-#include "Node/Module.hpp"
-#include "Node/Impl.hpp"
+#include "Nodes/Node.hpp"
+#include "Nodes/ModuleNode.hpp"
+#include "Nodes/ImplNode.hpp"
 #include "BoundNode/Base.hpp"
 #include "BoundNode/Function.hpp"
 #include "Symbols/Symbol.hpp"
@@ -78,7 +78,7 @@ namespace Ace::Core
     auto ParseAST(
         const Compilation* const t_compilation,
         const FileBuffer* const t_fileBuffer
-    ) -> Diagnosed<std::shared_ptr<const Node::Module>>
+    ) -> Diagnosed<std::shared_ptr<const ModuleNode>>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -102,14 +102,14 @@ namespace Ace::Core
 
     auto CreateAndDefineSymbols(
         const Compilation* const t_compilation,
-        const std::vector<const Node::IBase*>& t_nodes
+        const std::vector<const INode*>& t_nodes
     ) -> Expected<void>
     {
-        auto symbolCreatableNodes = DynamicCastFilter<const Node::ISymbolCreatable*>(t_nodes);
+        auto symbolCreatableNodes = DynamicCastFilter<const ISymbolCreatableNode*>(t_nodes);
         std::sort(begin(symbolCreatableNodes), end(symbolCreatableNodes),
         [](
-            const Node::ISymbolCreatable* const t_lhs,
-            const Node::ISymbolCreatable* const t_rhs
+            const ISymbolCreatableNode* const t_lhs,
+            const ISymbolCreatableNode* const t_rhs
         )
         {
             const auto lhsCreationOrder =
@@ -148,7 +148,7 @@ namespace Ace::Core
         });
 
         ACE_TRY_VOID(TransformExpectedVector(symbolCreatableNodes,
-        [](const Node::ISymbolCreatable* const t_symbolCreatableNode) -> Expected<void>
+        [](const ISymbolCreatableNode* const t_symbolCreatableNode) -> Expected<void>
         {
             ACE_TRY(symbol, Scope::DefineSymbol(t_symbolCreatableNode));
             return Void;
@@ -159,13 +159,13 @@ namespace Ace::Core
 
     auto DefineAssociations(
         const Compilation* const t_compilation,
-        const std::vector<const Node::IBase*>& t_nodes
+        const std::vector<const INode*>& t_nodes
     ) -> Expected<void>
     {
-        const auto implNodes = DynamicCastFilter<const Node::Impl*>(t_nodes);
+        const auto implNodes = DynamicCastFilter<const ImplNode*>(t_nodes);
 
         const auto didCreateAssociations = TransformExpectedVector(implNodes,
-        [](const Node::Impl* const t_implNode) -> Expected<void>
+        [](const ImplNode* const t_implNode) -> Expected<void>
         {
             ACE_TRY_VOID(t_implNode->DefineAssociations());
             return Void;

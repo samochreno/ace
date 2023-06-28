@@ -5,13 +5,9 @@
 
 #include "Diagnostics.hpp"
 
-namespace Ace::Node
-{
-    class IBase;
-}
-
 namespace Ace
 {
+    class INode;
     class ISymbol;
     class ITypeSymbol;
     class ITemplateSymbol;
@@ -37,6 +33,6 @@ namespace Ace
 
     private:
         std::vector<ITemplateSymbol*> m_Symbols;
-        std::map<ITemplateSymbol*, std::vector<std::shared_ptr<const Node::IBase>>> m_SymbolOnlyInstantiatedASTsMap;
+        std::map<ITemplateSymbol*, std::vector<std::shared_ptr<const INode>>> m_SymbolOnlyInstantiatedASTsMap;
     };
 }

@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "Token.hpp"
-#include "Node/All.hpp"
+#include "Nodes/All.hpp"
 #include "Diagnostics.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Scope.hpp"
@@ -51,9 +51,9 @@ namespace Ace
         static auto ParseAST(
             const FileBuffer* const t_fileBuffer,
             const std::vector<std::shared_ptr<const Token>>& t_tokens
-        ) -> Expected<std::shared_ptr<const Node::Module>>;
+        ) -> Expected<std::shared_ptr<const ModuleNode>>;
 
-        static auto CreateEmptyAttributes() -> std::vector<std::shared_ptr<const Node::Attribute>>;
+        static auto CreateEmptyAttributes() -> std::vector<std::shared_ptr<const AttributeNode>>;
 
         static auto GetOperatorFunctionName(
             const std::shared_ptr<const Token>& t_operatorToken,
@@ -81,155 +81,155 @@ namespace Ace
         ) -> Expected<Measured<std::vector<std::string>>>;
         static auto ParseImplTemplateParams(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::vector<std::shared_ptr<const Node::TemplateParam::Impl>>>>;
+        ) -> Expected<Measured<std::vector<std::shared_ptr<const ImplTemplateParamNode>>>>;
         static auto ParseTemplateParams(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::vector<std::shared_ptr<const Node::TemplateParam::Normal>>>>;
+        ) -> Expected<Measured<std::vector<std::shared_ptr<const NormalTemplateParamNode>>>>;
         static auto ParseTemplateArgs(
             const ParseContext& t_context
         ) -> Expected<Measured<std::vector<SymbolName>>>;
         static auto ParseModule(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Module>>>;
+        ) -> Expected<Measured<std::shared_ptr<const ModuleNode>>>;
         static auto ParseImpl(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Impl>>>;
+        ) -> Expected<Measured<std::shared_ptr<const ImplNode>>>;
         static auto ParseImplFunction(
             const ParseContext& t_context,
             const SymbolName& t_selfTypeName
-        ) -> Expected<Measured<std::shared_ptr<const Node::Function>>>;
+        ) -> Expected<Measured<std::shared_ptr<const FunctionNode>>>;
         static auto ParseImplFunctionTemplate(
             const ParseContext& t_context,
             const SymbolName& t_selfTypeName
-        ) -> Expected<Measured<std::shared_ptr<const Node::Template::Function>>>;
+        ) -> Expected<Measured<std::shared_ptr<const FunctionTemplateNode>>>;
         static auto ParseTemplatedImpl(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::TemplatedImpl>>>;
+        ) -> Expected<Measured<std::shared_ptr<const TemplatedImplNode>>>;
         static auto ParseTemplatedImplFunction(
             const ParseContext& t_context,
             const SymbolName& t_selfTypeName,
-            const std::vector<std::shared_ptr<const Node::TemplateParam::Impl>>& t_implTemplateParams
-        ) -> Expected<Measured<std::shared_ptr<const Node::Template::Function>>>;
+            const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& t_implTemplateParams
+        ) -> Expected<Measured<std::shared_ptr<const FunctionTemplateNode>>>;
         static auto ParseFunction(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Function>>>;
+        ) -> Expected<Measured<std::shared_ptr<const FunctionNode>>>;
         static auto ParseFunctionTemplate(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Template::Function>>>;
+        ) -> Expected<Measured<std::shared_ptr<const FunctionTemplateNode>>>;
         static auto ParseParams(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::vector<std::shared_ptr<const Node::Var::Param::Normal>>>>;
+        ) -> Expected<Measured<std::vector<std::shared_ptr<const NormalParamVarNode>>>>;
         static auto ParseVar(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Var::Normal::Static>>>;
+        ) -> Expected<Measured<std::shared_ptr<const StaticVarNode>>>;
         static auto ParseMemberVar(
             const ParseContext& t_context,
             const size_t& t_index
-        ) -> Expected<Measured<std::shared_ptr<const Node::Var::Normal::Instance>>>;
+        ) -> Expected<Measured<std::shared_ptr<const InstanceVarNode>>>;
         static auto ParseType(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Type::IBase>>>;
+        ) -> Expected<Measured<std::shared_ptr<const ITypeNode>>>;
         static auto ParseTypeTemplate(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Template::Type>>>;
+        ) -> Expected<Measured<std::shared_ptr<const TypeTemplateNode>>>;
         static auto ParseStruct(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Type::Struct>>>;
+        ) -> Expected<Measured<std::shared_ptr<const StructTypeNode>>>;
         static auto ParseStructBody(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::vector<std::shared_ptr<const Node::Var::Normal::Instance>>>>;
+        ) -> Expected<Measured<std::vector<std::shared_ptr<const InstanceVarNode>>>>;
         static auto ParseStructTemplate(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Template::Type>>>;
+        ) -> Expected<Measured<std::shared_ptr<const TypeTemplateNode>>>;
         static auto ParseStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::IBase>>>;
+        ) -> Expected<Measured<std::shared_ptr<const IStmtNode>>>;
         static auto ParseExprStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::Expr>>>;
+        ) -> Expected<Measured<std::shared_ptr<const ExprStmtNode>>>;
         static auto ParseAssignmentStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::Assignment::Normal>>>;
+        ) -> Expected<Measured<std::shared_ptr<const AssignmentStmtNode>>>;
         static auto ParseCompoundAssignmentStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::Assignment::Compound>>>;
+        ) -> Expected<Measured<std::shared_ptr<const CompoundAssignmentStmtNode>>>;
         static auto ParseVarStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::Var>>>;
+        ) -> Expected<Measured<std::shared_ptr<const VarStmtNode>>>;
         static auto ParseKeywordStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::IBase>>>;
+        ) -> Expected<Measured<std::shared_ptr<const IStmtNode>>>;
         static auto ParseIfStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::If>>>;
+        ) -> Expected<Measured<std::shared_ptr<const IfStmtNode>>>;
         static auto ParseIfBlock(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::pair<std::shared_ptr<const Node::Expr::IBase>, std::shared_ptr<const Node::Stmt::Block>>>>;
+        ) -> Expected<Measured<std::pair<std::shared_ptr<const IExprNode>, std::shared_ptr<const BlockStmtNode>>>>;
         static auto ParseElifBlock(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::pair<std::shared_ptr<const Node::Expr::IBase>, std::shared_ptr<const Node::Stmt::Block>>>>;
+        ) -> Expected<Measured<std::pair<std::shared_ptr<const IExprNode>, std::shared_ptr<const BlockStmtNode>>>>;
         static auto ParseElseBlock(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::Block>>>;
+        ) -> Expected<Measured<std::shared_ptr<const BlockStmtNode>>>;
         static auto ParseWhileStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::While>>>;
+        ) -> Expected<Measured<std::shared_ptr<const WhileStmtNode>>>;
         static auto ParseReturnStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::Return>>>;
+        ) -> Expected<Measured<std::shared_ptr<const ReturnStmtNode>>>;
         static auto ParseExitStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::Exit>>>;
+        ) -> Expected<Measured<std::shared_ptr<const ExitStmtNode>>>;
         static auto ParseAssertStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::Assert>>>;
+        ) -> Expected<Measured<std::shared_ptr<const AssertStmtNode>>>;
         static auto ParseBlockStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Stmt::Block>>>;
+        ) -> Expected<Measured<std::shared_ptr<const BlockStmtNode>>>;
         static auto ParseExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::IBase>>>;
+        ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>;
         static auto ParseSimpleExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::IBase>>>;
+        ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>;
         static auto ParseMemberAccessExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::MemberAccess>>>;
+        ) -> Expected<Measured<std::shared_ptr<const MemberAccessExprNode>>>;
         static auto ParseArgs(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::vector<std::shared_ptr<const Node::Expr::IBase>>>>;
+        ) -> Expected<Measured<std::vector<std::shared_ptr<const IExprNode>>>>;
         static auto ParsePrimaryExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::IBase>>>;
+        ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>;
         static auto ParseExprExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::Expr>>>;
+        ) -> Expected<Measured<std::shared_ptr<const ExprExprNode>>>;
         static auto ParseLiteralExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::Literal>>>;
+        ) -> Expected<Measured<std::shared_ptr<const LiteralExprNode>>>;
         static auto ParseLiteralSymbolExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::LiteralSymbol>>>;
+        ) -> Expected<Measured<std::shared_ptr<const LiteralSymbolExprNode>>>;
         static auto ParseStructConstructionExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::StructConstruction>>>;
+        ) -> Expected<Measured<std::shared_ptr<const StructConstructionExprNode>>>;
         static auto ParseCastExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::Cast>>>;
+        ) -> Expected<Measured<std::shared_ptr<const CastExprNode>>>;
         static auto ParseAddressOfExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::AddressOf>>>;
+        ) -> Expected<Measured<std::shared_ptr<const AddressOfExprNode>>>;
         static auto ParseSizeOfExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::SizeOf>>>;
+        ) -> Expected<Measured<std::shared_ptr<const SizeOfExprNode>>>;
         static auto ParseDerefAsExpr(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Expr::DerefAs>>>;
+        ) -> Expected<Measured<std::shared_ptr<const DerefAsExprNode>>>;
         static auto ParseAttribute(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const Node::Attribute>>>;
+        ) -> Expected<Measured<std::shared_ptr<const AttributeNode>>>;
         static auto ParseAttributes(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::vector<std::shared_ptr<const Node::Attribute>>>>;
+        ) -> Expected<Measured<std::vector<std::shared_ptr<const AttributeNode>>>>;
     };
 }

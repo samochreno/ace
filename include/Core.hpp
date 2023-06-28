@@ -8,8 +8,8 @@
 
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
-#include "Node/Base.hpp"
-#include "Node/Module.hpp"
+#include "Nodes/Node.hpp"
+#include "Nodes/ModuleNode.hpp"
 #include "BoundNode/Base.hpp"
 #include "Emittable.hpp"
 #include "Compilation.hpp"
@@ -55,14 +55,14 @@ namespace Ace::Core
     auto ParseAST(
         const Compilation* const t_compilation,
         const FileBuffer* const t_fileBuffer
-    ) -> Diagnosed<std::shared_ptr<const Node::Module>>;
+    ) -> Diagnosed<std::shared_ptr<const ModuleNode>>;
     auto CreateAndDefineSymbols(
         const Compilation* const t_compilation,
-        const std::vector<const Node::IBase*>& t_nodes
+        const std::vector<const INode*>& t_nodes
     ) -> Expected<void>;
     auto DefineAssociations(
         const Compilation* const t_compilation,
-        const std::vector<const Node::IBase*>& t_nodes
+        const std::vector<const INode*>& t_nodes
     ) -> Expected<void>;
     auto ValidateControlFlow(
         const Compilation* const t_compilation,

@@ -9,8 +9,8 @@
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
-#include "Node/Template/Type.hpp"
-#include "Node/Type/Base.hpp"
+#include "Nodes/Templates/TypeTemplateNode.hpp"
+#include "Nodes/Types/TypeNode.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "SpecialIdentifier.hpp"
@@ -22,7 +22,7 @@ namespace Ace
         public virtual ISelfScopedSymbol
     {
     public:
-        TypeTemplateSymbol(const Node::Template::Type* const t_templateNode);
+        TypeTemplateSymbol(const TypeTemplateNode* const t_templateNode);
         virtual ~TypeTemplateSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
@@ -45,13 +45,13 @@ namespace Ace
             const std::vector<ITypeSymbol*>& t_args
         ) -> Expected<TemplateSymbolsInstantationResult> final;
         auto InstantiateSemanticsForSymbols(
-            const std::shared_ptr<const Node::IBase>& t_ast
+            const std::shared_ptr<const INode>& t_ast
         ) -> void final;
 
     private:
         std::string m_Name{};
         AccessModifier m_AccessModifier{};
-        const Node::Template::Type* m_TemplateNode{};
+        const TypeTemplateNode* m_TemplateNode{};
         ISymbol* m_PlaceholderSymbol{};
     };
 }
