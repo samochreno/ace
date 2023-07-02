@@ -16,7 +16,7 @@ namespace Ace
     StructConstructionExprBoundNode::StructConstructionExprBoundNode(
         const std::shared_ptr<Scope>& t_scope,
         StructTypeSymbol* const t_structSymbol,
-        const std::vector<Arg>& t_args
+        const std::vector<StructConstructionExprBoundArg>& t_args
     ) : m_Scope{ t_scope },
         m_StructSymbol{ t_structSymbol },
         m_Args{ t_args }
@@ -33,7 +33,7 @@ namespace Ace
         std::vector<const IBoundNode*> children{};
 
         std::for_each(begin(m_Args), end(m_Args),
-        [&](const Arg& t_arg)
+        [&](const StructConstructionExprBoundArg& t_arg)
         {
             AddChildren(children, t_arg.Value);
         });
@@ -46,7 +46,7 @@ namespace Ace
     ) const -> Expected<MaybeChanged<std::shared_ptr<const StructConstructionExprBoundNode>>>
     {
         ACE_TRY(mchCheckedArgs, TransformExpectedMaybeChangedVector(m_Args,
-        [](const Arg& t_arg) -> Expected<MaybeChanged<Arg>>
+        [](const StructConstructionExprBoundArg& t_arg) -> Expected<MaybeChanged<StructConstructionExprBoundArg>>
         {
             ACE_TRY(mchCheckedValue, t_arg.Value->GetOrCreateTypeCheckedExpr({}));
 
@@ -55,7 +55,10 @@ namespace Ace
                 return CreateUnchanged(t_arg);
             }
 
-            return CreateChanged(Arg{ t_arg.Symbol, mchCheckedValue.Value });
+            return CreateChanged(StructConstructionExprBoundArg{
+                t_arg.Symbol,
+                mchCheckedValue.Value,
+            });
         }));
 
         if (!mchCheckedArgs.IsChanged)
@@ -83,7 +86,7 @@ namespace Ace
     ) const -> MaybeChanged<std::shared_ptr<const StructConstructionExprBoundNode>>
     {
         const auto mchLoweredArgs = TransformMaybeChangedVector(m_Args,
-        [&](const Arg& t_arg) -> MaybeChanged<Arg>
+        [&](const StructConstructionExprBoundArg& t_arg) -> MaybeChanged<StructConstructionExprBoundArg>
         {
             const auto mchLoweredValue =
                 t_arg.Value->GetOrCreateLoweredExpr({});
@@ -93,7 +96,10 @@ namespace Ace
                 return CreateUnchanged(t_arg);
             }
 
-            return CreateChanged(Arg{ t_arg.Symbol, mchLoweredValue.Value });
+            return CreateChanged(StructConstructionExprBoundArg{
+                t_arg.Symbol,
+                mchLoweredValue.Value,
+            });
         });
 
         if (!mchLoweredArgs.IsChanged)
@@ -129,7 +135,7 @@ namespace Ace
         temporaries.emplace_back(allocaInst, m_StructSymbol);
 
         std::for_each(begin(m_Args), end(m_Args),
-        [&](const StructConstructionExprBoundNode::Arg& t_arg)
+        [&](const StructConstructionExprBoundArg& t_arg)
         {
             auto* const argTypeSymbol =
                 t_arg.Value->GetTypeInfo().Symbol;

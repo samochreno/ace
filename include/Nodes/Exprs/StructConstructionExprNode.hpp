@@ -13,22 +13,22 @@
 
 namespace Ace
 {
+    struct StructConstructionExprArg
+    {
+        std::string Name{};
+        std::optional<std::shared_ptr<const IExprNode>> OptValue{};
+    };
+
     class StructConstructionExprNode :
         public virtual IExprNode,
         public virtual ICloneableNode<StructConstructionExprNode>,
         public virtual IBindableNode<StructConstructionExprBoundNode>
     {
     public:
-        struct Arg
-        {
-            std::string Name{};
-            std::optional<std::shared_ptr<const IExprNode>> OptValue{};
-        };
-
         StructConstructionExprNode(
             const std::shared_ptr<Scope>& t_scope,
             const SymbolName& t_typeName,
-            std::vector<Arg>&& t_args
+            std::vector<StructConstructionExprArg>&& t_args
         );
         virtual ~StructConstructionExprNode() = default;
 
@@ -46,6 +46,6 @@ namespace Ace
     private:
         std::shared_ptr<Scope> m_Scope{};
         SymbolName m_TypeName{};
-        std::vector<Arg> m_Args{};
+        std::vector<StructConstructionExprArg> m_Args{};
     };
 }

@@ -14,6 +14,12 @@
 
 namespace Ace
 {
+    struct StructConstructionExprBoundArg
+    {
+        InstanceVarSymbol* Symbol{};
+        std::shared_ptr<const IExprBoundNode> Value{};
+    };
+
     class StructConstructionExprBoundNode :
         public std::enable_shared_from_this<StructConstructionExprBoundNode>,
         public virtual IExprBoundNode,
@@ -21,16 +27,10 @@ namespace Ace
         public virtual ILowerableBoundNode<StructConstructionExprBoundNode>
     {
     public:
-        struct Arg
-        {
-            InstanceVarSymbol* Symbol{};
-            std::shared_ptr<const IExprBoundNode> Value{};
-        };
-
         StructConstructionExprBoundNode(
             const std::shared_ptr<Scope>& t_scope,
             StructTypeSymbol* const t_structSymbol,
-            const std::vector<Arg>& t_args
+            const std::vector<StructConstructionExprBoundArg>& t_args
         );
         virtual ~StructConstructionExprBoundNode() = default;
 
@@ -55,6 +55,6 @@ namespace Ace
     private:
         std::shared_ptr<Scope> m_Scope{};
         StructTypeSymbol* m_StructSymbol{};
-        std::vector<Arg> m_Args{};
+        std::vector<StructConstructionExprBoundArg> m_Args{};
     };
 }

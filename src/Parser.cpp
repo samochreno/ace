@@ -3010,7 +3010,7 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
         ++it;
 
-        std::vector<StructConstructionExprNode::Arg> args{};
+        std::vector<StructConstructionExprArg> args{};
         while (it->Unwrap().Kind != TokenKind::CloseBrace)
         {
             if (args.size() != 0)
@@ -3035,7 +3035,7 @@ namespace Ace
                 it += value.Length;
             }
             
-            args.push_back(StructConstructionExprNode::Arg{
+            args.push_back(StructConstructionExprArg{
                 name.Value,
                 optValue
             });

@@ -15,7 +15,7 @@ namespace Ace
     StructConstructionExprNode::StructConstructionExprNode(
         const std::shared_ptr<Scope>& t_scope,
         const SymbolName& t_typeName,
-        std::vector<Arg>&& t_args
+        std::vector<StructConstructionExprArg>&& t_args
     ) : m_Scope{ t_scope },
         m_TypeName{ t_typeName },
         m_Args{ t_args }
@@ -32,7 +32,7 @@ namespace Ace
         std::vector<const INode*> children{};
 
         std::for_each(begin(m_Args), end(m_Args),
-        [&](const Arg& t_arg)
+        [&](const StructConstructionExprArg& t_arg)
         {
             if (t_arg.OptValue.has_value())
             {
@@ -47,9 +47,9 @@ namespace Ace
         const std::shared_ptr<Scope>& t_scope
     ) const -> std::shared_ptr<const StructConstructionExprNode>
     {
-        std::vector<Arg> clonedArgs{};
+        std::vector<StructConstructionExprArg> clonedArgs{};
         std::transform(begin(m_Args), end(m_Args), back_inserter(clonedArgs),
-        [&](const Arg& t_arg)
+        [&](const StructConstructionExprArg& t_arg)
         {
             const auto clonedOptValue = [&]() -> std::optional<std::shared_ptr<const IExprNode>>
             {
@@ -61,7 +61,11 @@ namespace Ace
                 return t_arg.OptValue.value()->CloneInScopeExpr(t_scope);
             }();
 
-            return Arg{ t_arg.Name, clonedOptValue };
+            return StructConstructionExprArg
+            {
+                t_arg.Name,
+                clonedOptValue,
+            };
         });
 
         return std::make_shared<const StructConstructionExprNode>(
@@ -86,7 +90,7 @@ namespace Ace
         ACE_TRY_ASSERT(variables.size() == m_Args.size());
 
         ACE_TRY(boundArgs, TransformExpectedVector(m_Args,
-        [&](const Arg& t_arg) -> Expected<StructConstructionExprBoundNode::Arg>
+        [&](const StructConstructionExprArg& t_arg) -> Expected<StructConstructionExprBoundArg>
         {
             const auto symbolFoundIt = std::find_if(
                 begin(variables),
@@ -121,10 +125,10 @@ namespace Ace
 
             ACE_TRY_ASSERT(IsSymbolVisibleFromScope(variableSymbol, m_Scope));
 
-            return StructConstructionExprBoundNode::Arg
+            return StructConstructionExprBoundArg
             {
                 variableSymbol,
-                boundValue
+                boundValue,
             };
         }));
 
