@@ -64,7 +64,7 @@ namespace Ace
         const std::vector<ITypeSymbol*>& t_args
     ) -> bool
     {
-        const auto foundImplIt = std::find_if(
+        const auto placeholderImplArgIt = std::find_if(
             begin(t_implArgs),
             end  (t_implArgs),
             [](ITypeSymbol* const t_implArg)
@@ -72,12 +72,12 @@ namespace Ace
                 return IsArgPlaceholder(t_implArg);
             }
         );
-        if (foundImplIt != end(t_implArgs))
+        if (placeholderImplArgIt != end(t_implArgs))
         {
             return true;
         }
 
-        const auto argPlaceholderIt = std::find_if(
+        const auto placeholderArgIt = std::find_if(
             begin(t_args),
             end  (t_args),
             [](ITypeSymbol* const t_arg)
@@ -85,7 +85,7 @@ namespace Ace
                 return IsArgPlaceholder(t_arg);
             }
         );
-        if (argPlaceholderIt != end(t_args))
+        if (placeholderArgIt != end(t_args))
         {
             return true;
         }

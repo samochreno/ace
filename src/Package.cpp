@@ -226,10 +226,10 @@ namespace Ace
 
         const std::string pathMacro = t_part.substr(1);
 
-        const auto foundIt = t_pathMacroMap.find(pathMacro);
-        ACE_TRY_ASSERT(foundIt != end(t_pathMacroMap));
+        const auto macroValueIt = t_pathMacroMap.find(pathMacro);
+        ACE_TRY_ASSERT(macroValueIt != end(t_pathMacroMap));
 
-        return foundIt->second;
+        return macroValueIt->second;
     }
 
     static auto ExpandFilePathParts(

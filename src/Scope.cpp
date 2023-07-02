@@ -284,20 +284,22 @@ namespace Ace
         {
             const auto parent = optParent.value();
 
-            const auto foundIt = parent->m_SymbolMap.find(child->GetName());
+            const auto matchingNameSymbolsIt =
+                parent->m_SymbolMap.find(child->GetName());
+            const auto& matchingNameSymbols = matchingNameSymbolsIt->second;
 
-            if (foundIt == end(parent->m_SymbolMap))
+            if (matchingNameSymbolsIt == end(parent->m_SymbolMap))
             {
                 continue;
             }
 
-            if (foundIt->second.size() != 1)
+            if (matchingNameSymbols.size() != 1)
             {
                 continue;
             }
 
             auto* const moduleSymbol = dynamic_cast<ModuleSymbol*>(
-                foundIt->second.front().get()
+                matchingNameSymbols.front().get()
             );
             if (!moduleSymbol)
             {
@@ -316,7 +318,7 @@ namespace Ace
     {
         if (t_optName)
         {
-            const auto foundIt = std::find_if(
+            const auto matchingNameChildIt = std::find_if(
                 begin(m_Children),
                 end  (m_Children),
                 [&](const std::weak_ptr<Scope>& t_child)
@@ -325,9 +327,9 @@ namespace Ace
                 }
             );
 
-            if (foundIt != end(m_Children))
+            if (matchingNameChildIt != end(m_Children))
             {
-                return foundIt->lock();
+                return matchingNameChildIt->lock();
             }
         }
 
@@ -338,7 +340,7 @@ namespace Ace
         const std::shared_ptr<const Scope>& t_scope
     ) const -> bool
     {
-        const auto foundIt = std::find_if(
+        const auto childOrChildsParentIt = std::find_if(
             begin(m_Children),
             end  (m_Children),
             [&](const std::weak_ptr<Scope>& t_child)
@@ -359,7 +361,7 @@ namespace Ace
             }
         );
 
-        return foundIt != end(m_Children);
+        return childOrChildsParentIt != end(m_Children);
     }
 
     auto Scope::DefineSymbol(
@@ -544,7 +546,7 @@ namespace Ace
         return finalDeductionResults;
     }
 
-    static auto DeduceAlgorithm(
+    static auto TemplateArgumentDeducingAlgorithm(
         const std::vector<ITypeSymbol*>& t_templateArgs,
         const std::vector<NormalTemplateParamTypeSymbol*>& t_templateParams,
         const std::vector<ITypeSymbol*>& t_argTypes,
@@ -591,9 +593,9 @@ namespace Ace
         ACE_TRY(templateArgs, TransformExpectedVector(t_templateParams,
         [&](NormalTemplateParamTypeSymbol* const t_templateParam) -> Expected<ITypeSymbol*>
         {
-            const auto foundIt = templateArgMap.find(t_templateParam);
-            ACE_TRY_ASSERT(foundIt != end(templateArgMap));
-            return foundIt->second;
+            const auto matchingTemplateArgIt = templateArgMap.find(t_templateParam);
+            ACE_TRY_ASSERT(matchingTemplateArgIt != end(templateArgMap));
+            return matchingTemplateArgIt->second;
         }));
 
         return templateArgs;
@@ -621,7 +623,7 @@ namespace Ace
         const auto paramTypes = parametrized->CollectParamTypes();
         ACE_TRY_ASSERT(!paramTypes.empty());
 
-        return DeduceAlgorithm(
+        return TemplateArgumentDeducingAlgorithm(
             t_templateArgs,
             templateParams,
             t_optArgTypes.value(),

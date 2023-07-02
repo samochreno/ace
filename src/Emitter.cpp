@@ -46,9 +46,11 @@ namespace Ace
         const LabelSymbol* const t_labelSymbol
     ) -> llvm::BasicBlock*
     {
-        auto foundIt = m_Map.find(t_labelSymbol);
-        if (foundIt != end(m_Map))
-            return foundIt->second;
+        const auto matchingBlockIt = m_Map.find(t_labelSymbol);
+        if (matchingBlockIt != end(m_Map))
+        {
+            return matchingBlockIt->second;
+        }
 
         auto block = llvm::BasicBlock::Create(
             *m_Emitter.GetCompilation()->LLVMContext,

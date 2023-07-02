@@ -86,23 +86,23 @@ namespace Ace
     {
         ACE_TRY(structSymbol, m_Scope->ResolveStaticSymbol<StructTypeSymbol>(m_TypeName));
 
-        const auto variables = structSymbol->GetVars();
-        ACE_TRY_ASSERT(variables.size() == m_Args.size());
+        const auto variableSymbols = structSymbol->GetVars();
+        ACE_TRY_ASSERT(variableSymbols.size() == m_Args.size());
 
         ACE_TRY(boundArgs, TransformExpectedVector(m_Args,
         [&](const StructConstructionExprArg& t_arg) -> Expected<StructConstructionExprBoundArg>
         {
-            const auto symbolFoundIt = std::find_if(
-                begin(variables),
-                end  (variables),
-                [&](const InstanceVarSymbol* const t_variable)
+            const auto matchingVariableSymbolIt = std::find_if(
+                begin(variableSymbols),
+                end  (variableSymbols),
+                [&](const InstanceVarSymbol* const t_variableSymbol)
                 {
-                    return t_variable->GetName() == t_arg.Name;
+                    return t_variableSymbol->GetName() == t_arg.Name;
                 }
             );
 
-            ACE_TRY_ASSERT(symbolFoundIt != end(variables));
-            auto* const variableSymbol = *symbolFoundIt;
+            ACE_TRY_ASSERT(matchingVariableSymbolIt != end(variableSymbols));
+            auto* const variableSymbol = *matchingVariableSymbolIt;
 
             ACE_TRY(boundValue, ([&]() -> Expected<std::shared_ptr<const IExprBoundNode>>
             {

@@ -76,7 +76,7 @@ namespace Ace
         const LabelSymbol* const t_labelSymbol
     ) const -> std::vector<ControlFlowStmt>::const_iterator
     {
-        const auto foundIt = std::find_if(
+        const auto matchingLabelStmtIt = std::find_if(
             begin(m_Stmts),
             end  (m_Stmts),
             [&](const ControlFlowStmt& t_stmt)
@@ -87,8 +87,8 @@ namespace Ace
             }
         );
 
-        ACE_ASSERT(foundIt != end(m_Stmts));
-        return foundIt;
+        ACE_ASSERT(matchingLabelStmtIt != end(m_Stmts));
+        return matchingLabelStmtIt;
     }
 
     static auto IsEnd(
@@ -96,15 +96,13 @@ namespace Ace
         const std::vector<ControlFlowStmt>::const_iterator& t_stmtIt
     ) -> bool
     {
-        const auto foundEndIt = std::find_if(begin(t_ends), end(t_ends),
+        const auto matchingEndIt = std::find_if(begin(t_ends), end(t_ends),
         [&](const std::vector<ControlFlowStmt>::const_iterator& t_end)
         {
             return t_stmtIt == t_end;
         });
-        if (foundEndIt != end(t_ends))
-            return true;
 
-        return false;
+        return matchingEndIt != end(t_ends);
     }
 
     auto ControlFlowAnalysis::IsEndReachableWithoutReturn(

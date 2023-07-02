@@ -21,14 +21,14 @@ namespace Ace
         const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>& t_fromOperatorMap
     ) -> std::optional<FunctionSymbol*>
     {
-        const auto foundTypeIt = t_fromOperatorMap.find(t_toType);
-        if (foundTypeIt == end(t_fromOperatorMap))
+        const auto fromOperatorMapIt = t_fromOperatorMap.find(t_toType);
+        if (fromOperatorMapIt == end(t_fromOperatorMap))
         {
             return std::nullopt;
         }
 
-        const auto foundOperatorIt = foundTypeIt->second.find(t_fromType);
-        if (foundOperatorIt == end(foundTypeIt->second))
+        const auto foundOperatorIt = fromOperatorMapIt->second.find(t_fromType);
+        if (foundOperatorIt == end(fromOperatorMapIt->second))
         {
             return std::nullopt;
         }
