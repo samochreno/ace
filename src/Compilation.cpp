@@ -9,6 +9,7 @@
 
 #include <llvm/IR/LLVMContext.h>
 
+#include "SourceBuffer.hpp"
 #include "CommandLineArgBuffer.hpp"
 #include "FileBuffer.hpp"
 #include "SourceLocation.hpp"
@@ -451,6 +452,7 @@ namespace Ace
     }
 
     auto Compilation::Parse(
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
         const std::vector<std::string_view>& t_args
     ) -> Expected<std::unique_ptr<const Compilation>>
     {
@@ -458,11 +460,14 @@ namespace Ace
 
         auto self = std::make_unique<Compilation>();
 
-        self->CommandLineArgBuffer = { self.get(), t_args };
-
-        const auto dgnOptionMap = ParseOptions(
-            &self->CommandLineArgBuffer
+        const auto commandLineArgBuffer = std::make_shared<const Ace::CommandLineArgBuffer>(
+            self.get(),
+            t_args
         );
+        self->CommandLineArgBuffer = commandLineArgBuffer.get();
+        t_sourceBuffers->push_back(std::move(commandLineArgBuffer));
+
+        const auto dgnOptionMap = ParseOptions(self->CommandLineArgBuffer);
         diagnosticBag.Add(dgnOptionMap);
 
         const auto optPackagePath = dgnOptionMap.Unwrap().at(
@@ -483,9 +488,13 @@ namespace Ace
             return diagnosticBag;
         }
 
-        self->PackageFileBuffer = std::move(expPackageFileBuffer.Unwrap());
+        self->PackageFileBuffer = expPackageFileBuffer.Unwrap().get();
+        t_sourceBuffers->push_back(std::move(expPackageFileBuffer.Unwrap()));
 
-        auto expPackage = Package::Parse(&self->PackageFileBuffer);
+        auto expPackage = Package::Parse(
+            t_sourceBuffers,
+            self->PackageFileBuffer
+        );
         diagnosticBag.Add(expPackage);
         if (!expPackage)
         {

@@ -12,6 +12,8 @@
 
 namespace Ace
 {
+    class FileBuffer;
+
     class MissingPackagePathArgError : public virtual IDiagnostic
     {
     public:
@@ -106,7 +108,10 @@ namespace Ace
     class JsonError : public virtual IDiagnostic
     {
     public:
-        JsonError(const nlohmann::json::exception& t_jsonException);
+        JsonError(
+            const FileBuffer* const t_fileBuffer,
+            const nlohmann::json::exception& t_jsonException
+        );
         virtual ~JsonError() = default;
 
         auto GetSeverity() const -> DiagnosticSeverity final;
@@ -114,7 +119,8 @@ namespace Ace
         auto CreateMessage() const -> std::string final;
 
     private:
-        const char* m_Message{};
+        std::optional<SourceLocation> m_OptSourceLocation{};
+        std::string m_Message{};
     };
 
     class FileNotFoundError : public virtual IDiagnostic

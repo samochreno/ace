@@ -45,11 +45,11 @@ namespace Ace
             begin(t_compilation->Package.SourceFileBuffers),
             end  (t_compilation->Package.SourceFileBuffers),
             back_inserter(asts),
-            [&](const FileBuffer& t_sourceFileBuffer)
+            [&](const FileBuffer* const t_sourceFileBuffer)
             {
                 const auto dgnAST = Core::ParseAST(
                     t_compilation,
-                    &t_sourceFileBuffer
+                    t_sourceFileBuffer
                 );
                 diagnosticBag.Add(dgnAST.GetDiagnosticBag());
                 return dgnAST.Unwrap();
@@ -178,12 +178,16 @@ namespace Ace
     }
 
     static auto Compile(
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
         const std::vector<std::string_view>& t_args
     ) -> Expected<void>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto expCompilation = Compilation::Parse(t_args);
+        const auto expCompilation = Compilation::Parse(
+            t_sourceBuffers,
+            t_args
+        );
         diagnosticBag.Add(expCompilation);
 
         const auto hasCompilationError =
@@ -214,10 +218,16 @@ namespace Ace
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
 
-        const auto expDidCompile = Compile(std::vector<std::string_view>{
-            { "-oace/build" },
-            { "ace/package.json" },
-        });
+        std::vector<std::shared_ptr<const ISourceBuffer>> sourceBuffers{};
+
+        const auto expDidCompile = Compile(
+            &sourceBuffers,
+            std::vector<std::string_view>
+            {
+                { "-oace/build" },
+                { "ace/package.json" },
+            }
+        );
         if (!expDidCompile)
         {
             Core::LogDiagnosticBag(expDidCompile.GetDiagnosticBag());

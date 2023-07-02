@@ -1,5 +1,14 @@
 #include "Diagnostics.hpp"
 
+#include <string>
+#include <optional>
+#include <filesystem>
+#include <nlohmann/json.hpp>
+
+#include "SourceLocation.hpp"
+#include "FileBuffer.hpp"
+#include "Utility.hpp"
+
 namespace Ace
 {
     auto MissingPackagePathArgError::GetSeverity() const -> DiagnosticSeverity
@@ -98,7 +107,7 @@ namespace Ace
 
     auto MissingCommandLineOptionValueError::CreateMessage() const -> std::string
     {
-        return "Missing option arg";
+        return "Missing option argument";
     }
 
     UnexpectedCommandLineOptionValueError::UnexpectedCommandLineOptionValueError(
@@ -119,13 +128,73 @@ namespace Ace
 
     auto UnexpectedCommandLineOptionValueError::CreateMessage() const -> std::string
     {
-        return "Unexpected option argumet";
+        return "Unexpected option argument";
     }
 
     JsonError::JsonError(
+        const FileBuffer* const t_fileBuffer,
         const nlohmann::json::exception& t_jsonException
-    ) : m_Message{ t_jsonException.what() }
+    )
     {
+        const std::string_view originalMessage = t_jsonException.what();
+
+        const auto closingBracketIt = std::find(
+            begin(originalMessage),
+            end  (originalMessage),
+            ']'
+        );
+        ACE_ASSERT(closingBracketIt != end(originalMessage));
+
+        m_Message = std::string
+        {
+            closingBracketIt + 2,
+            end(originalMessage),
+        };
+
+        const auto atLinePos = m_Message.find("at line");
+        if (atLinePos != std::string::npos)
+        {
+            auto it = begin(m_Message) + atLinePos + 8;
+
+            std::string lineString{};
+            while (IsNumber(*it))
+            {
+                lineString += *it;
+                ++it;
+            }
+
+            it += 9;
+
+            std::string columnString{};
+            while (IsNumber(*it))
+            {
+                columnString += *it;
+                ++it;
+            }
+
+            const auto lineIndex =
+                static_cast<size_t>(std::stoi(lineString) - 1);
+
+            const auto characterIndex =
+                static_cast<size_t>(std::stoi(columnString));
+
+            const auto& line = t_fileBuffer->GetLines().at(lineIndex);
+            m_OptSourceLocation = SourceLocation
+            {
+                t_fileBuffer,
+                begin(line) + characterIndex,
+                begin(line) + characterIndex + 1,
+            };
+
+            m_Message = std::string
+            {
+                std::find(begin(m_Message), end(m_Message), ':') + 2,
+                end(m_Message),
+            };
+        }
+
+        m_Message.at(0) = std::toupper(m_Message.at(0));
+        m_Message = "Json error: " + m_Message;
     }
 
     auto JsonError::GetSeverity() const -> DiagnosticSeverity
@@ -135,12 +204,12 @@ namespace Ace
 
     auto JsonError::GetSourceLocation() const -> std::optional<SourceLocation>
     {
-        return std::nullopt;
+        return m_OptSourceLocation;
     }
 
     auto JsonError::CreateMessage() const -> std::string
     {
-        return "Unexpected option argument";
+        return m_Message;
     }
 
     FileNotFoundError::FileNotFoundError(

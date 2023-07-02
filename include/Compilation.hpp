@@ -6,6 +6,7 @@
 #include <filesystem>
 
 #include "Diagnostics.hpp"
+#include "SourceBuffer.hpp"
 #include "CommandLineArgBuffer.hpp"
 #include "FileBuffer.hpp"
 #include "Package.hpp"
@@ -23,11 +24,12 @@ namespace Ace
     struct Compilation
     {
         static auto Parse(
+            std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
             const std::vector<std::string_view>& t_args
         ) -> Expected<std::unique_ptr<const Compilation>>;
 
-        CommandLineArgBuffer CommandLineArgBuffer{};
-        FileBuffer PackageFileBuffer{};
+        const CommandLineArgBuffer* CommandLineArgBuffer{};
+        const FileBuffer* PackageFileBuffer{};
         Package Package{};
         std::filesystem::path OutputPath{};
         std::unique_ptr<Natives> Natives{};

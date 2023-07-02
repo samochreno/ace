@@ -1,5 +1,6 @@
 #include "FileBuffer.hpp"
 
+#include <memory>
 #include <string>
 #include <string_view>
 #include <filesystem>
@@ -12,7 +13,7 @@ namespace Ace
     auto FileBuffer::Read(
         const Compilation* const t_compilation,
         const std::filesystem::path& t_path
-    ) -> Expected<FileBuffer>
+    ) -> Expected<std::shared_ptr<const FileBuffer>>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -66,14 +67,13 @@ namespace Ace
 
         return
         {
-            FileBuffer
-            {
+            std::shared_ptr<const FileBuffer>(new FileBuffer{
                 t_compilation,
                 t_path,
                 std::move(buffer),
                 std::move(lines),
                 std::move(lineBeginIterators),
-            },
+            }),
             diagnosticBag,
         };
     }

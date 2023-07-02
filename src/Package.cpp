@@ -387,7 +387,35 @@ namespace Ace
         return finalFilePaths;
     }
 
+    static auto ReadFilePath(
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
+        const FileBuffer* const t_fileBuffer,
+        const std::filesystem::path& t_filePath
+    ) -> Expected<const FileBuffer*>
+    {
+        DiagnosticBag diagnosticBag{};
+
+        const auto expFileBuffer = FileBuffer::Read(
+            t_fileBuffer->GetCompilation(),
+            t_filePath
+        );
+        diagnosticBag.Add(expFileBuffer);
+        if (!expFileBuffer)
+        {
+            return diagnosticBag;
+        }
+
+        t_sourceBuffers->push_back(expFileBuffer.Unwrap());
+
+        return
+        {
+            expFileBuffer.Unwrap().get(),
+            diagnosticBag,
+        };
+    }
+
     static auto ParsePackage(
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
         const FileBuffer* const t_fileBuffer
     ) -> Expected<Package>
     {
@@ -412,7 +440,7 @@ namespace Ace
 
             const std::string value = pathMacro[Property::Name];
             ACE_TRY_ASSERT(!value.empty());
-
+        
             std::string path = pathMacro[Property::Value];
             pathMacroMap[pathMacro[Property::Name]] = std::move(Trim(path));
         }
@@ -430,10 +458,11 @@ namespace Ace
             pathMacroMap
         ));
         ACE_TRY(sourceFileBuffers, TransformExpectedVector(finalSourceFilePaths,
-        [&](const std::filesystem::path& t_filePath)
+        [&](const std::filesystem::path& t_filePath) -> Expected<const FileBuffer*>
         {
-            return FileBuffer::Read(
-                t_fileBuffer->GetCompilation(),
+            return ReadFilePath(
+                t_sourceBuffers,
+                t_fileBuffer,
                 t_filePath
             );
         }));
@@ -464,6 +493,7 @@ namespace Ace
     }
 
     auto Package::Parse(
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
         const FileBuffer* const t_fileBuffer
     ) -> Expected<Package>
     {
@@ -471,7 +501,7 @@ namespace Ace
 
         try
         {
-            auto expPackage = ParsePackage(t_fileBuffer);
+            auto expPackage = ParsePackage(t_sourceBuffers, t_fileBuffer);
             diagnosticBag.Add(expPackage);
             if (!expPackage)
             {
@@ -486,7 +516,7 @@ namespace Ace
         }
         catch (const nlohmann::json::exception& exception)
         {
-            return diagnosticBag.Add<JsonError>(exception);
+            return diagnosticBag.Add<JsonError>(t_fileBuffer, exception);
         }
     }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <string>
 #include <string_view>
@@ -24,7 +25,7 @@ namespace Ace
         static auto Read(
             const Compilation* const t_compilation,
             const std::filesystem::path& t_path
-        ) -> Expected<FileBuffer>;
+        ) -> Expected<std::shared_ptr<const FileBuffer>>;
 
         auto GetCompilation() const -> const Compilation* final;
         auto GetBuffer() const -> const std::string& final;
