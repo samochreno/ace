@@ -1,16 +1,18 @@
 # ✅ Ace To-Do List
 
+## 🛠️ Refactor
+
+- Expression parsing
+- `CompoundAssignmentStmtBoundNode` lowering
+- ❓ Split `Core.hpp` into multiple files, especially glue generation
+- Variable referennce emitting
+
 ## 💥 High Priority
 
-- Consider splitting `Core.hpp` into multiple files, especially glue generation
-- Refactor expression parsing
-- Refactor compound assignment lowering
-- Refactor emitting of variable references
-- Use `Measured` in lexer
-- ❓ Remove `ACE_TRY` macros, make opening braces on the same line
+- ❓ Remove `ACE_TRY` macros
 - Add error messages to make debugging easier:
-  - Remove second typechecking pass
   - `Compilation` parsing and verification errors
+  - Remove second typechecking pass
   - Parsing errors:
     - Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
   - Error printing
