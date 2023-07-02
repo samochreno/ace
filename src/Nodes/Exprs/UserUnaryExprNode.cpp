@@ -6,7 +6,7 @@
 #include "SpecialIdentifier.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Expr/UserUnary.hpp"
+#include "BoundNodes/Exprs/UserUnaryExprBoundNode.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 
@@ -51,7 +51,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto UserUnaryExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::UserUnary>>
+    auto UserUnaryExprNode::CreateBound() const -> Expected<std::shared_ptr<const UserUnaryExprBoundNode>>
     {
         ACE_TRY(boundExpresssion, m_Expr->CreateBoundExpr());
 
@@ -71,13 +71,13 @@ namespace Ace
             Scope::CreateArgTypes(typeSymbol)
         ));
 
-        return std::make_shared<const BoundNode::Expr::UserUnary>(
+        return std::make_shared<const UserUnaryExprBoundNode>(
             boundExpresssion,
             operatorSymbol
         );
     }
 
-    auto UserUnaryExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto UserUnaryExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

@@ -10,7 +10,7 @@
 #include "Nodes/Vars/Params/SelfParamVarNode.hpp"
 #include "Nodes/Vars/Params/NormalParamVarNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
-#include "BoundNode/Function.hpp"
+#include "BoundNodes/FunctionBoundNode.hpp"
 #include "Name.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostics.hpp"
@@ -23,7 +23,7 @@ namespace Ace
     class FunctionNode :
         public virtual ITypedNode,
         public virtual ICloneableNode<FunctionNode>,
-        public virtual IBindableNode<BoundNode::Function>
+        public virtual IBindableNode<FunctionBoundNode>
     {
     public:
         FunctionNode(
@@ -43,7 +43,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const FunctionNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Function>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const FunctionBoundNode>> final;
 
         auto GetName() const -> const std::string& final;
 

@@ -5,7 +5,7 @@
 
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNode/Stmt/Assignment/Compound.hpp"
+#include "BoundNodes/Stmts/Assignments/CompoundAssignmentStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -14,7 +14,7 @@ namespace Ace
     class CompoundAssignmentStmtNode :
         public virtual IStmtNode,
         public virtual ICloneableNode<CompoundAssignmentStmtNode>,
-        public virtual IBindableNode<BoundNode::Stmt::Assignment::Compound>
+        public virtual IBindableNode<CompoundAssignmentStmtBoundNode>
     {
     public:
         CompoundAssignmentStmtNode(
@@ -33,8 +33,8 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Assignment::Compound>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const CompoundAssignmentStmtBoundNode>> final;
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

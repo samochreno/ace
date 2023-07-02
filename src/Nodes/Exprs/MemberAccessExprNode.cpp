@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "BoundNode/Expr/VarReference/Instance.hpp"
+#include "BoundNodes/Exprs/VarReferences/InstanceVarReferenceExprBoundNode.hpp"
 #include "Diagnostics.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -49,7 +49,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto MemberAccessExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::VarReference::Instance>>
+    auto MemberAccessExprNode::CreateBound() const -> Expected<std::shared_ptr<const InstanceVarReferenceExprBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
 
@@ -59,13 +59,13 @@ namespace Ace
             m_Name
         ));
 
-        return std::make_shared<const BoundNode::Expr::VarReference::Instance>(
+        return std::make_shared<const InstanceVarReferenceExprBoundNode>(
             boundExpr,
             memberSymbol
         );
     }
 
-    auto MemberAccessExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto MemberAccessExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

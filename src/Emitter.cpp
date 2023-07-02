@@ -25,7 +25,7 @@
 
 #include "Scope.hpp"
 #include "Symbols/All.hpp"
-#include "BoundNode/All.hpp"
+#include "BoundNodes/All.hpp"
 #include "Log.hpp"
 #include "Asserts.hpp"
 #include "Utility.hpp"
@@ -87,7 +87,7 @@ namespace Ace
     }
 
     auto Emitter::SetASTs(
-        const std::vector<std::shared_ptr<const BoundNode::Module>>& t_asts
+        const std::vector<std::shared_ptr<const ModuleBoundNode>>& t_asts
     ) -> void
     {
         m_ASTs = t_asts;
@@ -122,14 +122,14 @@ namespace Ace
         const auto structSymbols   = DynamicCastFilter<StructTypeSymbol*>(typeSymbols);
         const auto variableSymbols = DynamicCastFilter<StaticVarSymbol*>(symbols);
 
-        std::vector<const BoundNode::IBase*> nodes{}; 
+        std::vector<const IBoundNode*> nodes{}; 
         std::for_each(begin(m_ASTs), end(m_ASTs),
-        [&](const std::shared_ptr<const BoundNode::Module>& t_ast)
+        [&](const std::shared_ptr<const ModuleBoundNode>& t_ast)
         {
             const auto children = t_ast->GetChildren();
             nodes.insert(end(nodes), begin(children), end(children));
         });
-        const auto functionNodes = DynamicCastFilter<const BoundNode::Function*>(nodes);
+        const auto functionNodes = DynamicCastFilter<const FunctionBoundNode*>(nodes);
        
         EmitNativeTypes();
         EmitStructTypes(structSymbols);
@@ -151,7 +151,7 @@ namespace Ace
         
         std::vector<const FunctionSymbol*> mainFunctionSymbols{};
         std::for_each(begin(functionNodes), end(functionNodes),
-        [&](const BoundNode::Function* const t_functionNode)
+        [&](const FunctionBoundNode* const t_functionNode)
         {
             if (
                 t_functionNode->GetSymbol()->GetName() != 
@@ -285,7 +285,7 @@ namespace Ace
     }
 
     auto Emitter::EmitFunctionBodyStmts(
-        const std::vector<std::shared_ptr<const BoundNode::Stmt::IBase>>& t_stmts
+        const std::vector<std::shared_ptr<const IStmtBoundNode>>& t_stmts
     ) -> void
     {
         const auto paramSymbols = m_FunctionSymbol->CollectAllParams();
@@ -317,7 +317,7 @@ namespace Ace
             m_StmtIndexMap[stmt] = i;
         
             auto* const variableStmt = 
-                dynamic_cast<const BoundNode::Stmt::Var*>(stmt);
+                dynamic_cast<const VarStmtBoundNode*>(stmt);
 
             if (variableStmt)
             {
@@ -361,7 +361,7 @@ namespace Ace
             {
                 auto* const stmt = t_stmts.at(i).get();
                 auto* const labelStmt =
-                    dynamic_cast<const BoundNode::Stmt::Label*>(stmt);
+                    dynamic_cast<const LabelStmtBoundNode*>(stmt);
 
                 if (labelStmt)
                 {
@@ -382,12 +382,12 @@ namespace Ace
                                           begin(t_stmts) + blockStartIndicies.at(i + 1);
 
             std::for_each(beginStmtIt, endStmtIt,
-            [&](const std::shared_ptr<const BoundNode::Stmt::IBase>& t_stmt)
+            [&](const std::shared_ptr<const IStmtBoundNode>& t_stmt)
             {
                 if (t_stmt.get() == beginStmtIt->get())
                 {
                     auto* const labelStmt =
-                        dynamic_cast<const BoundNode::Stmt::Label*>(t_stmt.get());
+                        dynamic_cast<const LabelStmtBoundNode*>(t_stmt.get());
 
                     if (labelStmt)
                     {
@@ -419,7 +419,7 @@ namespace Ace
                 t_stmt->Emit(*this);
                 
                 auto* const blockEndStmt = 
-                    dynamic_cast<const BoundNode::Stmt::BlockEnd*>(t_stmt.get());
+                    dynamic_cast<const BlockEndStmtBoundNode*>(t_stmt.get());
 
                 if (blockEndStmt)
                 {
@@ -555,7 +555,7 @@ namespace Ace
     }
 
     auto Emitter::EmitDropLocalVarsBeforeStmt(
-        const BoundNode::Stmt::IBase* const t_stmt
+        const IStmtBoundNode* const t_stmt
     ) -> void
     {
         const auto stmtIndex = m_StmtIndexMap.at(t_stmt);

@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Expr/Literal.hpp"
+#include "BoundNodes/Exprs/LiteralExprBoundNode.hpp"
 
 namespace Ace
 {
@@ -47,16 +47,16 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto LiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::Literal>>
+    auto LiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const LiteralExprBoundNode>>
     {
-        return std::make_shared<const BoundNode::Expr::Literal>(
+        return std::make_shared<const LiteralExprBoundNode>(
             m_Scope, 
             m_Kind,
             m_String
         );
     }
 
-    auto LiteralExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto LiteralExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

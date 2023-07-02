@@ -7,7 +7,7 @@
 #include "Nodes/Types/TypeNode.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Nodes/Vars/InstanceVarNode.hpp"
-#include "BoundNode/Type/Struct.hpp"
+#include "BoundNodes/Types/StructTypeBoundNode.hpp"
 #include "Diagnostics.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
@@ -18,7 +18,7 @@ namespace Ace
     class StructTypeNode :
         public virtual ITypeNode,
         public virtual ICloneableNode<StructTypeNode>,
-        public virtual IBindableNode<BoundNode::Type::Struct>
+        public virtual IBindableNode<StructTypeBoundNode>
     {
     public:
         StructTypeNode(
@@ -39,8 +39,8 @@ namespace Ace
         auto CloneInScopeType(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const ITypeNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Type::Struct>> final;
-        auto CreateBoundType() const -> Expected<std::shared_ptr<const BoundNode::Type::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const StructTypeBoundNode>> final;
+        auto CreateBoundType() const -> Expected<std::shared_ptr<const ITypeBoundNode>> final;
 
         auto GetName() const -> const std::string& final;
         auto GetAccessModifier() const -> AccessModifier final;

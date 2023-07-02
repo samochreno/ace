@@ -6,7 +6,7 @@
 #include "Scope.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Var/Param/Self.hpp"
+#include "BoundNodes/Vars/Params/SelfParamVarBoundNode.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Symbols/Symbol.hpp"
 
@@ -42,12 +42,12 @@ namespace Ace
         );
     }
 
-    auto SelfParamVarNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Var::Param::Self>>
+    auto SelfParamVarNode::CreateBound() const -> Expected<std::shared_ptr<const SelfParamVarBoundNode>>
     {
         auto* const selfSymbol =
             m_Scope->ExclusiveResolveSymbol<SelfParamVarSymbol>(m_Name).Unwrap();
 
-        return std::make_shared<const BoundNode::Var::Param::Self>(
+        return std::make_shared<const SelfParamVarBoundNode>(
             selfSymbol
         );
     }

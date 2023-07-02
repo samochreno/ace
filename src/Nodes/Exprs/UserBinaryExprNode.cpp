@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Expr/UserBinary.hpp"
+#include "BoundNodes/Exprs/UserBinaryExprBoundNode.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 
@@ -54,7 +54,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto UserBinaryExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::UserBinary>>
+    auto UserBinaryExprNode::CreateBound() const -> Expected<std::shared_ptr<const UserBinaryExprBoundNode>>
     {
         ACE_TRY(boundLHSExpr, m_LHSExpr->CreateBoundExpr());
         ACE_TRY(boundRHSExpr, m_RHSExpr->CreateBoundExpr());
@@ -133,14 +133,14 @@ namespace Ace
             expLHSOperatorSymbol.Unwrap() :
             expRHSOperatorSymbol.Unwrap();
 
-        return std::make_shared<const BoundNode::Expr::UserBinary>(
+        return std::make_shared<const UserBinaryExprBoundNode>(
             boundLHSExpr,
             boundRHSExpr,
             operatorSymbol
         );
     }
 
-    auto UserBinaryExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto UserBinaryExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

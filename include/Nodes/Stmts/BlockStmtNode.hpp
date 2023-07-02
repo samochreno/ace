@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Nodes/Stmts/StmtNode.hpp"
-#include "BoundNode/Stmt/Block.hpp"
+#include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -13,7 +13,7 @@ namespace Ace
     class BlockStmtNode :
         public virtual IStmtNode,
         public virtual ICloneableNode<BlockStmtNode>,
-        public virtual IBindableNode<BoundNode::Stmt::Block>
+        public virtual IBindableNode<BlockStmtBoundNode>
     {
     public:
         BlockStmtNode(
@@ -30,8 +30,8 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Block>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const BlockStmtBoundNode>> final;
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
     private:
         std::shared_ptr<Scope> m_SelfScope{};

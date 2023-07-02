@@ -9,9 +9,9 @@
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Nodes/Exprs/LiteralSymbolExprNode.hpp"
 #include "Nodes/Exprs/MemberAccessExprNode.hpp"
-#include "BoundNode/Expr/Base.hpp"
-#include "BoundNode/Expr/FunctionCall/Static.hpp"
-#include "BoundNode/Expr/FunctionCall/Instance.hpp"
+#include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
+#include "BoundNodes/Exprs/FunctionCalls/InstanceFunctionCallExprBoundNode.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 
@@ -64,7 +64,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto FunctionCallExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto FunctionCallExprNode::CreateBound() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         ACE_TRY(boundArgs, TransformExpectedVector(m_Args,
         [](const std::shared_ptr<const IExprNode>& t_arg)
@@ -77,7 +77,7 @@ namespace Ace
             begin(boundArgs),
             end  (boundArgs),
             back_inserter(argTypeSymbols),
-            [](const std::shared_ptr<const BoundNode::Expr::IBase>& t_arg)
+            [](const std::shared_ptr<const IExprBoundNode>& t_arg)
             {
                 return t_arg->GetTypeInfo().Symbol;
             }
@@ -90,9 +90,9 @@ namespace Ace
                 Scope::CreateArgTypes(argTypeSymbols)
             ));
 
-            return std::shared_ptr<const BoundNode::Expr::IBase>
+            return std::shared_ptr<const IExprBoundNode>
             {
-                std::make_shared<const BoundNode::Expr::FunctionCall::Static>(
+                std::make_shared<const StaticFunctionCallExprBoundNode>(
                     GetScope(),
                     functionSymbol,
                     boundArgs
@@ -109,9 +109,9 @@ namespace Ace
                 Scope::CreateArgTypes(argTypeSymbols)
             ));
 
-            return std::shared_ptr<const BoundNode::Expr::IBase>
+            return std::shared_ptr<const IExprBoundNode>
             {
-                std::make_shared<const BoundNode::Expr::FunctionCall::Instance>(
+                std::make_shared<const InstanceFunctionCallExprBoundNode>(
                     boundExpr,
                     functionSymbol,
                     boundArgs
@@ -122,7 +122,7 @@ namespace Ace
         ACE_TRY_UNREACHABLE();
     }
 
-    auto FunctionCallExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto FunctionCallExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNode/Expr//LogicalNegation.hpp"
+#include "BoundNodes/Exprs/LogicalNegationExprBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -13,7 +13,7 @@ namespace Ace
     class LogicalNegationExprNode :
         public virtual IExprNode,
         public virtual ICloneableNode<LogicalNegationExprNode>, 
-        public virtual IBindableNode<BoundNode::Expr::LogicalNegation>
+        public virtual IBindableNode<LogicalNegationExprBoundNode>
     {
     public:
         LogicalNegationExprNode(
@@ -29,8 +29,8 @@ namespace Ace
         auto CloneInScopeExpr(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IExprNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::LogicalNegation>> final;
-        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const LogicalNegationExprBoundNode>> final;
+        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
     private:
         std::shared_ptr<const IExprNode> m_Expr{};

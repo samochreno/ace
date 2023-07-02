@@ -6,7 +6,7 @@
 #include <optional>
 
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNode/Expr/StructConstruction.hpp"
+#include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Diagnostics.hpp"
@@ -16,7 +16,7 @@ namespace Ace
     class StructConstructionExprNode :
         public virtual IExprNode,
         public virtual ICloneableNode<StructConstructionExprNode>,
-        public virtual IBindableNode<BoundNode::Expr::StructConstruction>
+        public virtual IBindableNode<StructConstructionExprBoundNode>
     {
     public:
         struct Arg
@@ -40,8 +40,8 @@ namespace Ace
         auto CloneInScopeExpr(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IExprNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::StructConstruction>> final;
-        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const StructConstructionExprBoundNode>> final;
+        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

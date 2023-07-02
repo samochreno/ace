@@ -4,7 +4,7 @@
 #include "Scope.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Expr//LogicalNegation.hpp"
+#include "BoundNodes/Exprs/LogicalNegationExprBoundNode.hpp"
 
 namespace Ace
 {
@@ -44,16 +44,16 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto LogicalNegationExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::LogicalNegation>>
+    auto LogicalNegationExprNode::CreateBound() const -> Expected<std::shared_ptr<const LogicalNegationExprBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
 
-        return std::make_shared<const BoundNode::Expr::LogicalNegation>(
+        return std::make_shared<const LogicalNegationExprBoundNode>(
             boundExpr
         );
     }
 
-    auto LogicalNegationExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto LogicalNegationExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

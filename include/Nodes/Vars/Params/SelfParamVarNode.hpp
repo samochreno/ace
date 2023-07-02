@@ -7,7 +7,7 @@
 #include "Nodes/Node.hpp"
 #include "Nodes/TypedNode.hpp"
 #include "Nodes/AttributeNode.hpp"
-#include "BoundNode/Var/Param/Self.hpp"
+#include "BoundNodes/Vars/Params/SelfParamVarBoundNode.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "SpecialIdentifier.hpp"
@@ -20,7 +20,7 @@ namespace Ace
         public virtual INode,
         public virtual ITypedNode,
         public virtual ICloneableNode<SelfParamVarNode>,
-        public virtual IBindableNode<BoundNode::Var::Param::Self>
+        public virtual IBindableNode<SelfParamVarBoundNode>
     {
     public:
         SelfParamVarNode(
@@ -34,7 +34,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const SelfParamVarNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Var::Param::Self>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const SelfParamVarBoundNode>> final;
 
         auto GetName() const -> const std::string& final;
 

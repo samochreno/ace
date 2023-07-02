@@ -10,7 +10,7 @@
 #include "C.hpp"
 #include "Scope.hpp"
 #include "Symbols/All.hpp"
-#include "BoundNode/All.hpp"
+#include "BoundNodes/All.hpp"
 #include "ExprDropData.hpp"
 #include "Emittable.hpp"
 #include "Compilation.hpp"
@@ -76,13 +76,13 @@ namespace Ace
         ~Emitter();
 
         auto SetASTs(
-            const std::vector<std::shared_ptr<const BoundNode::Module>>& t_asts
+            const std::vector<std::shared_ptr<const ModuleBoundNode>>& t_asts
         ) -> void;
 
         auto Emit() -> Result;
 
         auto EmitFunctionBodyStmts(
-            const std::vector<std::shared_ptr<const BoundNode::Stmt::IBase>>& t_stmts
+            const std::vector<std::shared_ptr<const IStmtBoundNode>>& t_stmts
         ) -> void;
         auto EmitLoadArg(
             const size_t& t_index, 
@@ -98,7 +98,7 @@ namespace Ace
             const std::vector<ExprDropData>& t_temporaries
         ) -> void;
         auto EmitDropLocalVarsBeforeStmt(
-            const BoundNode::Stmt::IBase* const t_stmt
+            const IStmtBoundNode* const t_stmt
         ) -> void;
         auto EmitDropArgs() -> void;
 
@@ -139,7 +139,7 @@ namespace Ace
 
         const Compilation* m_Compilation{};
 
-        std::vector<std::shared_ptr<const BoundNode::Module>> m_ASTs{};
+        std::vector<std::shared_ptr<const ModuleBoundNode>> m_ASTs{};
 
         std::unique_ptr<llvm::Module> m_Module{};
 
@@ -149,7 +149,7 @@ namespace Ace
 
         std::unordered_map<const IVarSymbol*, llvm::Value*> m_LocalVarMap{};
         LabelBlockMap m_LabelBlockMap;
-        std::unordered_map<const BoundNode::Stmt::IBase*, size_t> m_StmtIndexMap{};
+        std::unordered_map<const IStmtBoundNode*, size_t> m_StmtIndexMap{};
         std::unordered_map<const LocalVarSymbol*, size_t> m_LocalVarSymbolStmtIndexMap{};
         std::vector<LocalVarSymbolStmtIndexPair> m_LocalVarSymbolStmtIndexPairs{};
 

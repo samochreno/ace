@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Nodes/Stmts/StmtNode.hpp"
-#include "BoundNode/Stmt/Label.hpp"
+#include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "Symbols/Symbol.hpp"
@@ -15,7 +15,7 @@ namespace Ace
     class LabelStmtNode :
         public virtual IStmtNode,
         public virtual ICloneableNode<LabelStmtNode>,
-        public virtual IBindableNode<BoundNode::Stmt::Label>,
+        public virtual IBindableNode<LabelStmtBoundNode>,
         public virtual ISymbolCreatableNode
     {
     public:
@@ -33,8 +33,8 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Label>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const LabelStmtBoundNode>> final;
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope>;
         auto GetSymbolKind() const -> SymbolKind final;

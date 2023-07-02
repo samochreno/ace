@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Expr/Base.hpp"
+#include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "TypeInfo.hpp"
 
@@ -50,7 +50,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto CastExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto CastExprNode::CreateBound() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
 
@@ -58,7 +58,7 @@ namespace Ace
             m_TypeName.ToSymbolName(GetCompilation())
         ));
 
-        ACE_TRY(mchConvertedBoundExpr, BoundNode::Expr::CreateExplicitlyConverted(
+        ACE_TRY(mchConvertedBoundExpr, CreateExplicitlyConverted(
             boundExpr, 
             TypeInfo{ typeSymbol, ValueKind::R }
         ));
@@ -66,7 +66,7 @@ namespace Ace
         return mchConvertedBoundExpr.Value;
     }
 
-    auto CastExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto CastExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

@@ -15,7 +15,7 @@
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "Nodes/All.hpp"
-#include "BoundNode/All.hpp"
+#include "BoundNodes/All.hpp"
 #include "Symbols/All.hpp"
 #include "Compilation.hpp"
 #include "FileBuffer.hpp"
@@ -91,15 +91,15 @@ namespace Ace
             {
                 return t_ast->CreateBound(); 
             },
-            [](const std::shared_ptr<const BoundNode::Module>& t_ast)
+            [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
             { 
                 return t_ast->GetOrCreateTypeChecked({});
             },
-            [](const std::shared_ptr<const BoundNode::Module>& t_ast)
+            [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
             {
                 return t_ast->GetOrCreateLowered({});
             },
-            [](const std::shared_ptr<const BoundNode::Module>& t_ast)
+            [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
             {
                 return t_ast->GetOrCreateTypeChecked({});
             }

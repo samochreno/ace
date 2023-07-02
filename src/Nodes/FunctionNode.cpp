@@ -12,7 +12,7 @@
 #include "Nodes/Vars/Params/NormalParamVarNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Function.hpp"
+#include "BoundNodes/FunctionBoundNode.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Symbol.hpp"
@@ -123,7 +123,7 @@ namespace Ace
         );
     }
 
-    auto FunctionNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Function>>
+    auto FunctionNode::CreateBound() const -> Expected<std::shared_ptr<const FunctionBoundNode>>
     {
         ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
         [](const std::shared_ptr<const AttributeNode>& t_attribute)
@@ -159,7 +159,7 @@ namespace Ace
             m_SelfScope->CollectTemplateArgs()
         ).Unwrap();
 
-        return std::make_shared<const BoundNode::Function>(
+        return std::make_shared<const FunctionBoundNode>(
             selfSymbol,
             boundAttributes,
             boundOptSelf,

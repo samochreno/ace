@@ -5,7 +5,7 @@
 
 #include "Diagnostics.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
-#include "BoundNode/Expr/DerefAs.hpp"
+#include "BoundNodes/Exprs/DerefAsExprBoundNode.hpp"
 
 namespace Ace
 {
@@ -48,20 +48,20 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto DerefAsExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::DerefAs>>
+    auto DerefAsExprNode::CreateBound() const -> Expected<std::shared_ptr<const DerefAsExprBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
         ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
 
-        return std::make_shared<const BoundNode::Expr::DerefAs>(
+        return std::make_shared<const DerefAsExprBoundNode>(
             boundExpr,
             typeSymbol
         );
     }
 
-    auto DerefAsExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto DerefAsExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

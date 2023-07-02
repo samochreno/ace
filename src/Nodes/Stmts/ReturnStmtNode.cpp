@@ -6,7 +6,7 @@
 
 #include "Scope.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNode/Stmt/Return.hpp"
+#include "BoundNodes/Stmts/ReturnStmtBoundNode.hpp"
 #include "Diagnostics.hpp"
 
 namespace Ace
@@ -63,7 +63,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto ReturnStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Return>>
+    auto ReturnStmtNode::CreateBound() const -> Expected<std::shared_ptr<const ReturnStmtBoundNode>>
     {
         ACE_TRY(boundOptExpr, TransformExpectedOptional(m_OptExpr,
         [](const std::shared_ptr<const IExprNode>& t_expr)
@@ -71,13 +71,13 @@ namespace Ace
             return t_expr->CreateBoundExpr();
         }));
 
-        return std::make_shared<const BoundNode::Stmt::Return>(
+        return std::make_shared<const ReturnStmtBoundNode>(
             m_Scope,
             boundOptExpr
         );
     }
 
-    auto ReturnStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto ReturnStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

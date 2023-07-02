@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Nodes/Stmts/StmtNode.hpp"
-#include "BoundNode/Stmt/Exit.hpp"
+#include "BoundNodes/Stmts/ExitStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -13,7 +13,7 @@ namespace Ace
     class ExitStmtNode :
         public virtual IStmtNode,
         public virtual ICloneableNode<ExitStmtNode>,
-        public virtual IBindableNode<BoundNode::Stmt::Exit>
+        public virtual IBindableNode<ExitStmtBoundNode>
     {
     public:
         ExitStmtNode(const std::shared_ptr<Scope>& t_scope);
@@ -27,8 +27,8 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Exit>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const ExitStmtBoundNode>> final;
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

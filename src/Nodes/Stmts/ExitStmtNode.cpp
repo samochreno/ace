@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Stmt/Exit.hpp"
+#include "BoundNodes/Stmts/ExitStmtBoundNode.hpp"
 
 namespace Ace
 {
@@ -39,12 +39,12 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto ExitStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Exit>>
+    auto ExitStmtNode::CreateBound() const -> Expected<std::shared_ptr<const ExitStmtBoundNode>>
     {
-        return std::make_shared<const BoundNode::Stmt::Exit>(m_Scope);
+        return std::make_shared<const ExitStmtBoundNode>(m_Scope);
     }
 
-    auto ExitStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto ExitStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

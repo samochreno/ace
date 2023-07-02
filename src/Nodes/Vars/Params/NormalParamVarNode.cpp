@@ -6,7 +6,7 @@
 #include "Scope.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Var/Param/Normal.hpp"
+#include "BoundNodes/Vars/Params/NormalParamVarBoundNode.hpp"
 #include "Symbols/Vars/Params/NormalParamVarSymbol.hpp"
 #include "Symbols/Symbol.hpp"
 
@@ -64,7 +64,7 @@ namespace Ace
         );
     }
 
-    auto NormalParamVarNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Var::Param::Normal>>
+    auto NormalParamVarNode::CreateBound() const -> Expected<std::shared_ptr<const ParamVarBoundNode>>
     {
         ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
         [](const std::shared_ptr<const AttributeNode>& t_attribute)
@@ -75,7 +75,7 @@ namespace Ace
         auto* const selfSymbol =
             m_Scope->ExclusiveResolveSymbol<NormalParamVarSymbol>(m_Name).Unwrap();
 
-        return std::make_shared<const BoundNode::Var::Param::Normal>(
+        return std::make_shared<const ParamVarBoundNode>(
             selfSymbol,
             boundAttributes
         );

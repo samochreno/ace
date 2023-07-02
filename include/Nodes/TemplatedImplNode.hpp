@@ -6,7 +6,7 @@
 #include "Nodes/Node.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
-#include "BoundNode/Impl.hpp"
+#include "BoundNodes/ImplBoundNode.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Symbols/Symbol.hpp"
@@ -17,7 +17,7 @@ namespace Ace
     class TemplatedImplNode :
         public virtual INode,
         public virtual ICloneableNode<TemplatedImplNode>,
-        public virtual IBindableNode<BoundNode::Impl>,
+        public virtual IBindableNode<ImplBoundNode>,
         public virtual ISymbolCreatableNode
     {
     public:
@@ -34,7 +34,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const TemplatedImplNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Impl>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>> final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;

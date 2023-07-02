@@ -6,7 +6,7 @@
 #include "Scope.hpp"
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Stmt/Block.hpp"
+#include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 
 namespace Ace
 {
@@ -62,7 +62,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto BlockStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Block>>
+    auto BlockStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BlockStmtBoundNode>>
     {
         ACE_TRY(boundStmts, TransformExpectedVector(m_Stmts,
         [](const std::shared_ptr<const IStmtNode>& t_stmt)
@@ -70,13 +70,13 @@ namespace Ace
             return t_stmt->CreateBoundStmt();
         }));
 
-        return std::make_shared<const BoundNode::Stmt::Block>(
+        return std::make_shared<const BlockStmtBoundNode>(
             m_SelfScope,
             boundStmts
         );
     }
 
-    auto BlockStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto BlockStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

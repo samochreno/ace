@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "BoundNode/Stmt/Expr.hpp"
+#include "BoundNodes/Stmts/ExprStmtBoundNode.hpp"
 #include "Diagnostics.hpp"
 
 namespace Ace
@@ -44,13 +44,13 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto ExprStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Expr>>
+    auto ExprStmtNode::CreateBound() const -> Expected<std::shared_ptr<const ExprStmtBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
-        return std::make_shared<const BoundNode::Stmt::Expr>(boundExpr);
+        return std::make_shared<const ExprStmtBoundNode>(boundExpr);
     }
 
-    auto ExprStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto ExprStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

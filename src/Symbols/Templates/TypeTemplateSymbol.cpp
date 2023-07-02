@@ -119,9 +119,9 @@ namespace Ace
             GetCompilation(),
             ast,
             [](const std::shared_ptr<const ITypeNode>& t_ast) { return t_ast->CreateBoundType(); },
-            [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); },
-            [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateLoweredType({}); },
-            [](const std::shared_ptr<const BoundNode::Type::IBase>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); }
+            [](const std::shared_ptr<const ITypeBoundNode>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); },
+            [](const std::shared_ptr<const ITypeBoundNode>& t_ast) { return t_ast->GetOrCreateLoweredType({}); },
+            [](const std::shared_ptr<const ITypeBoundNode>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); }
         ).Unwrap();
 
         Core::BindFunctionSymbolsBodies(

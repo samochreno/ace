@@ -8,7 +8,7 @@
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Nodes/TypedNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNode/Stmt/Var.hpp"
+#include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Diagnostics.hpp"
@@ -20,7 +20,7 @@ namespace Ace
         public virtual IStmtNode,
         public virtual ITypedNode,
         public virtual ICloneableNode<VarStmtNode>,
-        public virtual IBindableNode<BoundNode::Stmt::Var>
+        public virtual IBindableNode<VarStmtBoundNode>
     {
     public:
         VarStmtNode(
@@ -39,8 +39,8 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Var>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const VarStmtBoundNode>> final;
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
         auto GetName() const -> const std::string & final;
 

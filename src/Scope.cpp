@@ -16,8 +16,8 @@
 #include "SpecialIdentifier.hpp"
 #include "Symbols/All.hpp"
 #include "SymbolCreatable.hpp"
-#include "BoundNode/Expr/Base.hpp"
-#include "BoundNode/Expr/ConversionPlaceholder.hpp"
+#include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "BoundNodes/Exprs/ConversionPlaceholderExprBoundNode.hpp"
 #include "Compilation.hpp"
 #include "TypeConversions.hpp"
 

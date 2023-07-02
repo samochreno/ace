@@ -5,7 +5,7 @@
 
 #include "Nodes/Node.hpp"
 #include "Nodes/Exprs/StructConstructionExprNode.hpp"
-#include "BoundNode/Attribute.hpp"
+#include "BoundNodes/AttributeBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -14,7 +14,7 @@ namespace Ace
     class AttributeNode :
         public virtual INode,
         public virtual ICloneableNode<AttributeNode>,
-        public virtual IBindableNode<BoundNode::Attribute>
+        public virtual IBindableNode<AttributeBoundNode>
     {
     public:
         AttributeNode(
@@ -27,7 +27,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const AttributeNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Attribute>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const AttributeBoundNode>> final;
 
     private:
         std::shared_ptr<const StructConstructionExprNode> m_StructConstructionExpr{};

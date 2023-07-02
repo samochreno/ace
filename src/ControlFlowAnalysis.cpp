@@ -1,44 +1,44 @@
 #include "ControlFlowAnalysis.hpp"
 
 #include "Asserts.hpp"
-#include "BoundNode/Stmt/Base.hpp"
-#include "BoundNode/Stmt/Block.hpp"
-#include "BoundNode/Stmt/Label.hpp"
-#include "BoundNode/Stmt/Jump/Normal.hpp"
-#include "BoundNode/Stmt/Jump/Conditional.hpp"
-#include "BoundNode/Stmt/Return.hpp"
-#include "BoundNode/Stmt/Exit.hpp"
+#include "BoundNodes/Stmts/StmtBoundNode.hpp"
+#include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/Jumps/NormalJumpStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/Jumps/ConditionalJumpStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/ReturnStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/ExitStmtBoundNode.hpp"
 
 namespace Ace
 {
     static auto CreateStmt(
-        const std::shared_ptr<const BoundNode::Stmt::IBase>& t_stmtNode
+        const std::shared_ptr<const IStmtBoundNode>& t_stmtNode
     ) -> Expected<ControlFlowStmt>
     {
         auto* const stmtNode = t_stmtNode.get();
 
         ControlFlowStmt self{};
 
-        if (const auto* const labelStmt = dynamic_cast<const BoundNode::Stmt::Label*>(stmtNode))
+        if (const auto* const labelStmt = dynamic_cast<const LabelStmtBoundNode*>(stmtNode))
         {
             self.Kind = ControlFlowStmtKind::Label;
             self.LabelSymbol = labelStmt->GetLabelSymbol();
         }
-        else if (const auto* const normalJumpStmt = dynamic_cast<const BoundNode::Stmt::Jump::Normal*>(stmtNode))
+        else if (const auto* const normalJumpStmt = dynamic_cast<const NormalJumpStmtBoundNode*>(stmtNode))
         {
             self.Kind = ControlFlowStmtKind::NormalJump;
             self.LabelSymbol = normalJumpStmt->GetLabelSymbol();
         }
-        else if (const auto* const conditionalJumpStmt = dynamic_cast<const BoundNode::Stmt::Jump::Conditional*>(stmtNode))
+        else if (const auto* const conditionalJumpStmt = dynamic_cast<const ConditionalJumpStmtBoundNode*>(stmtNode))
         {
             self.Kind = ControlFlowStmtKind::ConditionalJump;
             self.LabelSymbol = conditionalJumpStmt->GetLabelSymbol();
         }
-        else if (const auto* const returnStmt = dynamic_cast<const BoundNode::Stmt::Return*>(stmtNode))
+        else if (const auto* const returnStmt = dynamic_cast<const ReturnStmtBoundNode*>(stmtNode))
         {
             self.Kind = ControlFlowStmtKind::Return;
         }
-        else if (const auto* const exitStmt = dynamic_cast<const BoundNode::Stmt::Exit*>(stmtNode))
+        else if (const auto* const exitStmt = dynamic_cast<const ExitStmtBoundNode*>(stmtNode))
         {
             self.Kind = ControlFlowStmtKind::Exit;
         }
@@ -51,13 +51,13 @@ namespace Ace
     }
 
     ControlFlowAnalysis::ControlFlowAnalysis(
-        const std::shared_ptr<const BoundNode::Stmt::Block>& t_blockStmtNode
+        const std::shared_ptr<const BlockStmtBoundNode>& t_blockStmtNode
     )
     {
         const auto stmtNodes = t_blockStmtNode->CreateExpanded();
 
         std::for_each(begin(stmtNodes), end(stmtNodes),
-        [&](const std::shared_ptr<const BoundNode::Stmt::IBase>& t_stmtNode)
+        [&](const std::shared_ptr<const IStmtBoundNode>& t_stmtNode)
         {
             const auto expStmt = CreateStmt(t_stmtNode);
             if (!expStmt)

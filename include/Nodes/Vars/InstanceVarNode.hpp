@@ -7,7 +7,7 @@
 #include "Nodes/Node.hpp"
 #include "Nodes/TypedNode.hpp"
 #include "Nodes/AttributeNode.hpp"
-#include "BoundNode/Var/Normal/Instance.hpp"
+#include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "AccessModifier.hpp"
@@ -20,7 +20,7 @@ namespace Ace
         public virtual INode,
         public virtual ITypedNode,
         public virtual ICloneableNode<InstanceVarNode>,
-        public virtual IBindableNode<BoundNode::Var::Normal::Instance>
+        public virtual IBindableNode<InstanceVarBoundNode>
     {
     public:
         InstanceVarNode(
@@ -38,7 +38,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const InstanceVarNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Var::Normal::Instance>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const InstanceVarBoundNode>> final;
 
         auto GetName() const -> const std::string& final;
 

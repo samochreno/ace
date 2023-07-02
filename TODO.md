@@ -2,9 +2,9 @@
 
 ## 💥 High Priority
 
-- Remove double slashes in include paths
+- Put common things (even without an interface) into a folder 
 - Consider splitting `Core.hpp` into multiple files, especially glue generation
-- Un-nest names for example `BoundNode::...`
+- Un-nest names for example `StructConstructionExprNode::Arg`
 - Refactor expression parsing
 - Refactor compound assignment lowering
 - Refactor emitting of variable references

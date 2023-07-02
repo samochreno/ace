@@ -5,7 +5,7 @@
 
 #include "Diagnostics.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
-#include "BoundNode/Expr/Box.hpp"
+#include "BoundNodes/Exprs/BoxExprBoundNode.hpp"
 
 namespace Ace
 {
@@ -45,13 +45,13 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto BoxExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::Box>>
+    auto BoxExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoxExprBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
-        return std::make_shared<const BoundNode::Expr::Box>(boundExpr);
+        return std::make_shared<const BoxExprBoundNode>(boundExpr);
     }
 
-    auto BoxExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto BoxExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

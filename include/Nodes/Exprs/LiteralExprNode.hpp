@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNode/Expr/Literal.hpp"
+#include "BoundNodes/Exprs/LiteralExprBoundNode.hpp"
 #include "Scope.hpp"
 #include "LiteralKind.hpp"
 #include "Diagnostics.hpp"
@@ -15,7 +15,7 @@ namespace Ace
     class LiteralExprNode :
         public virtual IExprNode,
         public virtual ICloneableNode<LiteralExprNode>, 
-        public virtual IBindableNode<BoundNode::Expr::Literal>
+        public virtual IBindableNode<LiteralExprBoundNode>
     {
     public:
         LiteralExprNode(
@@ -33,8 +33,8 @@ namespace Ace
         auto CloneInScopeExpr(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IExprNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::Literal>> final;
-        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const LiteralExprBoundNode>> final;
+        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

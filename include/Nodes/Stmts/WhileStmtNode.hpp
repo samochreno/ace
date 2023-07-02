@@ -6,7 +6,7 @@
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
-#include "BoundNode/Stmt/While.hpp"
+#include "BoundNodes/Stmts/WhileStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -15,7 +15,7 @@ namespace Ace
     class WhileStmtNode :
         public virtual IStmtNode,
         public virtual ICloneableNode<WhileStmtNode>,
-        public virtual IBindableNode<BoundNode::Stmt::While>
+        public virtual IBindableNode<WhileStmtBoundNode>
     {
     public:
         WhileStmtNode(
@@ -33,8 +33,8 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::While>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const WhileStmtBoundNode>> final;
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

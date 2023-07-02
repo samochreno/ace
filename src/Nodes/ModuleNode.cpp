@@ -14,7 +14,7 @@
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "Nodes/Vars/StaticVarNode.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Module.hpp"
+#include "BoundNodes/ModuleBoundNode.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/ModuleSymbol.hpp"
 
@@ -179,7 +179,7 @@ namespace Ace
         );
     }
 
-    auto ModuleNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Module>>
+    auto ModuleNode::CreateBound() const -> Expected<std::shared_ptr<const ModuleBoundNode>>
     {
         ACE_TRY(boundModules, TransformExpectedVector(m_Modules,
         [](const std::shared_ptr<const ModuleNode>& t_module)
@@ -220,7 +220,7 @@ namespace Ace
         auto* const selfSymbol =
             GetSymbolScope()->ExclusiveResolveSymbol<ModuleSymbol>(GetName()).Unwrap();
 
-        std::vector<std::shared_ptr<const BoundNode::Impl>> allBoundImpls{};
+        std::vector<std::shared_ptr<const ImplBoundNode>> allBoundImpls{};
         allBoundImpls.insert(
             end(allBoundImpls),
             begin(boundImpls),
@@ -232,7 +232,7 @@ namespace Ace
             end  (boundTemplateImpls)
         );
 
-        return std::make_shared<const BoundNode::Module>(
+        return std::make_shared<const ModuleBoundNode>(
             selfSymbol,
             boundModules,
             boundTypes,

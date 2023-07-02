@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Stmt/Assert.hpp"
+#include "BoundNodes/Stmts/AssertStmtBoundNode.hpp"
 
 namespace Ace
 {
@@ -48,13 +48,13 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto AssertStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Assert>>
+    auto AssertStmtNode::CreateBound() const -> Expected<std::shared_ptr<const AssertStmtBoundNode>>
     {
         ACE_TRY(boundCondition, m_Condition->CreateBoundExpr());
-        return std::make_shared<const BoundNode::Stmt::Assert>(boundCondition);
+        return std::make_shared<const AssertStmtBoundNode>(boundCondition);
     }
 
-    auto AssertStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto AssertStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

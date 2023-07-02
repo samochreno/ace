@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "BoundNode/Type/Struct.hpp"
+#include "BoundNodes/Types/StructTypeBoundNode.hpp"
 #include "Diagnostics.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
 #include "Symbols/Symbol.hpp"
@@ -88,7 +88,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto StructTypeNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Type::Struct>>
+    auto StructTypeNode::CreateBound() const -> Expected<std::shared_ptr<const StructTypeBoundNode>>
     {
         ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
         [](const std::shared_ptr<const AttributeNode>& t_attribute)
@@ -108,14 +108,14 @@ namespace Ace
             m_SelfScope->CollectTemplateArgs()
         ).Unwrap();
 
-        return std::make_shared<const BoundNode::Type::Struct>(
+        return std::make_shared<const StructTypeBoundNode>(
             selfSymbol,
             boundAttributes,
             boundVars
         );
     }
 
-    auto StructTypeNode::CreateBoundType() const -> Expected<std::shared_ptr<const BoundNode::Type::IBase>>
+    auto StructTypeNode::CreateBoundType() const -> Expected<std::shared_ptr<const ITypeBoundNode>>
     {
         return CreateBound();
     }

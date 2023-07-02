@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Stmt/Assignment/Compound.hpp"
+#include "BoundNodes/Stmts/Assignments/CompoundAssignmentStmtBoundNode.hpp"
 #include "SpecialIdentifier.hpp"
 
 namespace Ace
@@ -56,7 +56,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto CompoundAssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Assignment::Compound>>
+    auto CompoundAssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>
     {
         ACE_TRY(boundLHSExpr, m_LHSExpr->CreateBoundExpr());
         ACE_TRY(boundRHSExpr, m_RHSExpr->CreateBoundExpr());
@@ -79,14 +79,14 @@ namespace Ace
             Scope::CreateArgTypes({ lhsTypeSymbol, rhsTypeSymbol })
         ));
 
-        return std::make_shared<const BoundNode::Stmt::Assignment::Compound>(
+        return std::make_shared<const CompoundAssignmentStmtBoundNode>(
             boundLHSExpr,
             boundRHSExpr,
             operatorSymbol
         );
     }
 
-    auto CompoundAssignmentStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto CompoundAssignmentStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

@@ -8,7 +8,7 @@
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Stmt/If.hpp"
+#include "BoundNodes/Stmts/IfStmtBoundNode.hpp"
 
 namespace Ace
 {
@@ -78,7 +78,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto IfStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::If>>
+    auto IfStmtNode::CreateBound() const -> Expected<std::shared_ptr<const IfStmtBoundNode>>
     {
         ACE_TRY(boundConditions, TransformExpectedVector(m_Conditions,
         [](const std::shared_ptr<const IExprNode>& t_condition)
@@ -92,14 +92,14 @@ namespace Ace
             return t_body->CreateBound();
         }));
 
-        return std::make_shared<const BoundNode::Stmt::If>(
+        return std::make_shared<const IfStmtBoundNode>(
             m_Scope,
             boundConditions,
             boundBodies
         );
     }
 
-    auto IfStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto IfStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Diagnostics.hpp"
-#include "BoundNode/Expr/AddressOf.hpp"
+#include "BoundNodes/Exprs/AddressOfExprBoundNode.hpp"
 
 namespace Ace
 {
@@ -44,13 +44,13 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto AddressOfExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::AddressOf>>
+    auto AddressOfExprNode::CreateBound() const -> Expected<std::shared_ptr<const AddressOfExprBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
-        return std::make_shared<const BoundNode::Expr::AddressOf>(boundExpr);
+        return std::make_shared<const AddressOfExprBoundNode>(boundExpr);
     }
 
-    auto AddressOfExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto AddressOfExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

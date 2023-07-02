@@ -10,8 +10,8 @@
 #include "Nodes/Node.hpp"
 #include "Nodes/ModuleNode.hpp"
 #include "Nodes/ImplNode.hpp"
-#include "BoundNode/Base.hpp"
-#include "BoundNode/Function.hpp"
+#include "BoundNodes/BoundNode.hpp"
+#include "BoundNodes/FunctionBoundNode.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Log.hpp"
@@ -177,16 +177,16 @@ namespace Ace::Core
 
     auto ValidateControlFlow(
         const Compilation* const t_compilation,
-        const std::vector<const BoundNode::IBase*>& t_nodes
+        const std::vector<const IBoundNode*>& t_nodes
     ) -> Expected<void>
     {
         const auto functionNodes =
-            DynamicCastFilter<const BoundNode::Function*>(t_nodes);
+            DynamicCastFilter<const FunctionBoundNode*>(t_nodes);
 
         const bool didControlFlowAnalysisSucceed = std::find_if(
             begin(functionNodes), 
             end  (functionNodes),
-            [&](const BoundNode::Function* const t_functionNode)
+            [&](const FunctionBoundNode* const t_functionNode)
             {
                 if (
                     t_functionNode->GetSymbol()->GetType()->GetUnaliased() == 
@@ -216,14 +216,14 @@ namespace Ace::Core
 
     auto BindFunctionSymbolsBodies(
         const Compilation* const t_compilation,
-        const std::vector<const BoundNode::IBase*>& t_nodes
+        const std::vector<const IBoundNode*>& t_nodes
     ) -> void
     {
         const auto functionNodes =
-            DynamicCastFilter<const BoundNode::Function*>(t_nodes);
+            DynamicCastFilter<const FunctionBoundNode*>(t_nodes);
 
         std::for_each(begin(functionNodes), end(functionNodes),
-        [&](const BoundNode::Function* const t_functionNode)
+        [&](const FunctionBoundNode* const t_functionNode)
         {
             if (!t_functionNode->GetBody().has_value())
                 return;
@@ -563,11 +563,11 @@ namespace Ace::Core
         const auto bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
         const auto paramSymbols = t_glueSymbol->CollectParams();
-        const auto selfParamReferenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Static>(
+        const auto selfParamReferenceExprNode = std::make_shared<const StaticVarReferenceExprBoundNode>(
             bodyScope,
             paramSymbols.at(0)
         );
-        const auto otherParamReferenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Static>(
+        const auto otherParamReferenceExprNode = std::make_shared<const StaticVarReferenceExprBoundNode>(
             bodyScope,
             paramSymbols.at(1)
         );
@@ -577,20 +577,20 @@ namespace Ace::Core
         const auto expOperatorSymbol = 
             t_compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(operatorName);
 
-        std::vector<std::shared_ptr<const BoundNode::Stmt::IBase>> stmts{};
+        std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
         if (expOperatorSymbol)
         {
-            std::vector<std::shared_ptr<const BoundNode::Expr::IBase>> args{};
+            std::vector<std::shared_ptr<const IExprBoundNode>> args{};
             args.push_back(selfParamReferenceExprNode);
             args.push_back(otherParamReferenceExprNode);
 
-            const auto functionCallExprNode = std::make_shared<const BoundNode::Expr::FunctionCall::Static>(
+            const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                 bodyScope,
                 expOperatorSymbol.Unwrap(),
                 args
             );
 
-            const auto exprStmtNode = std::make_shared<const BoundNode::Stmt::Expr>(
+            const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
                 functionCallExprNode
             );
 
@@ -608,26 +608,26 @@ namespace Ace::Core
                     SpecialIdentifier::CreateCopyGlue(variableTypeSymbol->CreatePartialSignature())
                 ).Unwrap();
                 
-                const auto selfParamVarRerefenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Instance>(
+                const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
                     selfParamReferenceExprNode,
                     t_variableSymbol
                 );
-                const auto otherParamVarRerefenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Instance>(
+                const auto otherParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
                     otherParamReferenceExprNode,
                     t_variableSymbol
                 );
 
-                std::vector<std::shared_ptr<const BoundNode::Expr::IBase>> args{};
+                std::vector<std::shared_ptr<const IExprBoundNode>> args{};
                 args.push_back(selfParamVarRerefenceExprNode);
                 args.push_back(otherParamVarRerefenceExprNode);
 
-                const auto functionCallExprNode = std::make_shared<const BoundNode::Expr::FunctionCall::Static>(
+                const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                     bodyScope,
                     variableTypeGlueSymbol,
                     args
                 );
 
-                const auto exprStmtNode = std::make_shared<const BoundNode::Stmt::Expr>(
+                const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
                     functionCallExprNode
                 );
 
@@ -635,7 +635,7 @@ namespace Ace::Core
             });
         }
 
-        const auto bodyNode = std::make_shared<const BoundNode::Stmt::Block>(
+        const auto bodyNode = std::make_shared<const BlockStmtBoundNode>(
             bodyScope->GetParent().value(),
             stmts
         );
@@ -643,17 +643,17 @@ namespace Ace::Core
         return CreateTransformedAndVerifiedAST(
             t_compilation,
             bodyNode,
-            [&](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
+            [&](const std::shared_ptr<const BlockStmtBoundNode>& t_bodyNode)
             { 
                 return t_bodyNode->GetOrCreateTypeChecked(
                     { t_compilation->Natives->Void.GetSymbol() }
                 ); 
             },
-            [](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
+            [](const std::shared_ptr<const BlockStmtBoundNode>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateLowered({});
             },
-            [&](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
+            [&](const std::shared_ptr<const BlockStmtBoundNode>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateTypeChecked(
                     { t_compilation->Natives->Void.GetSymbol() }
@@ -680,12 +680,12 @@ namespace Ace::Core
         const auto bodyScope = t_glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
         const auto paramSymbols = t_glueSymbol->CollectParams();
-        const auto selfParamReferenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Static>(
+        const auto selfParamReferenceExprNode = std::make_shared<const StaticVarReferenceExprBoundNode>(
             bodyScope,
             paramSymbols.at(0)
         );
 
-        std::vector<std::shared_ptr<const BoundNode::Stmt::IBase>> stmts{};
+        std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
 
         auto operatorName = t_structSymbol->CreateFullyQualifiedName();
         operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Drop);
@@ -694,16 +694,16 @@ namespace Ace::Core
 
         if (expOperatorSymbol)
         {
-            std::vector<std::shared_ptr<const BoundNode::Expr::IBase>> args{};
+            std::vector<std::shared_ptr<const IExprBoundNode>> args{};
             args.push_back(selfParamReferenceExprNode);
 
-            const auto functionCallExprNode = std::make_shared<const BoundNode::Expr::FunctionCall::Static>(
+            const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                 bodyScope,
                 expOperatorSymbol.Unwrap(),
                 args
             );
 
-            const auto exprStmtNode = std::make_shared<const BoundNode::Stmt::Expr>(
+            const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
                 functionCallExprNode
             );
 
@@ -720,28 +720,28 @@ namespace Ace::Core
                 SpecialIdentifier::CreateDropGlue(variableTypeSymbol->CreatePartialSignature())
             ).Unwrap();
             
-            const auto selfParamVarRerefenceExprNode = std::make_shared<const BoundNode::Expr::VarReference::Instance>(
+            const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
                 selfParamReferenceExprNode,
                 t_variableSymbol
             );
 
-            std::vector<std::shared_ptr<const BoundNode::Expr::IBase>> args{};
+            std::vector<std::shared_ptr<const IExprBoundNode>> args{};
             args.push_back(selfParamVarRerefenceExprNode);
 
-            const auto functionCallExprNode = std::make_shared<const BoundNode::Expr::FunctionCall::Static>(
+            const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                 bodyScope,
                 variableTypeGlueSymbol,
                 args
             );
 
-            const auto exprStmtNode = std::make_shared<const BoundNode::Stmt::Expr>(
+            const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
                 functionCallExprNode
             );
 
             stmts.push_back(exprStmtNode);
         });
 
-        const auto bodyNode = std::make_shared<const BoundNode::Stmt::Block>(
+        const auto bodyNode = std::make_shared<const BlockStmtBoundNode>(
             bodyScope->GetParent().value(),
             stmts
         );
@@ -749,17 +749,17 @@ namespace Ace::Core
         return Core::CreateTransformedAndVerifiedAST(
             t_compilation,
             bodyNode,
-            [&](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
+            [&](const std::shared_ptr<const BlockStmtBoundNode>& t_bodyNode)
             { 
                 return t_bodyNode->GetOrCreateTypeChecked(
                     { t_compilation->Natives->Void.GetSymbol() }
                 ); 
             },
-            [](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
+            [](const std::shared_ptr<const BlockStmtBoundNode>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateLowered({});
             },
-            [&](const std::shared_ptr<const BoundNode::Stmt::Block>& t_bodyNode)
+            [&](const std::shared_ptr<const BlockStmtBoundNode>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateTypeChecked(
                     { t_compilation->Natives->Void.GetSymbol() }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BoundNode/Stmt/Block.hpp"
+#include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Diagnostics.hpp"
 
@@ -25,7 +25,7 @@ namespace Ace
     {
     public:
         ControlFlowAnalysis(
-            const std::shared_ptr<const BoundNode::Stmt::Block>& t_blockStmtNode
+            const std::shared_ptr<const BlockStmtBoundNode>& t_blockStmtNode
         );
         ~ControlFlowAnalysis() = default;
 

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNode/Expr/VarReference/Instance.hpp"
+#include "BoundNodes/Exprs/VarReferences/InstanceVarReferenceExprBoundNode.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Diagnostics.hpp"
@@ -14,7 +14,7 @@ namespace Ace
     class MemberAccessExprNode :
         public virtual IExprNode,
         public virtual ICloneableNode<MemberAccessExprNode>,
-        public virtual IBindableNode<BoundNode::Expr::VarReference::Instance>
+        public virtual IBindableNode<InstanceVarReferenceExprBoundNode>
     {
     public:
         MemberAccessExprNode(
@@ -31,8 +31,8 @@ namespace Ace
         auto CloneInScopeExpr(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IExprNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::VarReference::Instance>> final;
-        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const InstanceVarReferenceExprBoundNode>> final;
+        auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
         auto GetExpr() const -> const IExprNode*;
         auto GetName() const -> const SymbolNameSection&;

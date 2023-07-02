@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Diagnostics.hpp"
-#include "BoundNode/Expr/VarReference/Static.hpp"
+#include "BoundNodes/Exprs/VarReferences/StaticVarReferenceExprBoundNode.hpp"
 #include "Symbols/Vars/VarSymbol.hpp"
 
 namespace Ace
@@ -45,16 +45,16 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto LiteralSymbolExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::VarReference::Static>>
+    auto LiteralSymbolExprNode::CreateBound() const -> Expected<std::shared_ptr<const StaticVarReferenceExprBoundNode>>
     {
         ACE_TRY(variableSymbol, m_Scope->ResolveStaticSymbol<IVarSymbol>(m_Name));
-        return std::make_shared<const BoundNode::Expr::VarReference::Static>(
+        return std::make_shared<const StaticVarReferenceExprBoundNode>(
             m_Scope,
             variableSymbol
         );
     }
 
-    auto LiteralSymbolExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto LiteralSymbolExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

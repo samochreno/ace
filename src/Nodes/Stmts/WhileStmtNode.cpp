@@ -7,7 +7,7 @@
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
-#include "BoundNode/Stmt/While.hpp"
+#include "BoundNodes/Stmts/WhileStmtBoundNode.hpp"
 #include "Diagnostics.hpp"
 
 namespace Ace
@@ -55,19 +55,19 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto WhileStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::While>>
+    auto WhileStmtNode::CreateBound() const -> Expected<std::shared_ptr<const WhileStmtBoundNode>>
     {
         ACE_TRY(boundCondition, m_Condition->CreateBoundExpr());
         ACE_TRY(boundBody, m_Body->CreateBound());
 
-        return std::make_shared<const BoundNode::Stmt::While>(
+        return std::make_shared<const WhileStmtBoundNode>(
             m_Scope,
             boundCondition,
             boundBody
         );
     }
 
-    auto WhileStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto WhileStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

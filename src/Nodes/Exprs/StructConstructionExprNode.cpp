@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Expr/StructConstruction.hpp"
+#include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
 #include "Nodes/Exprs/LiteralSymbolExprNode.hpp"
 #include "Name.hpp"
@@ -78,7 +78,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto StructConstructionExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::StructConstruction>>
+    auto StructConstructionExprNode::CreateBound() const -> Expected<std::shared_ptr<const StructConstructionExprBoundNode>>
     {
         ACE_TRY(structSymbol, m_Scope->ResolveStaticSymbol<StructTypeSymbol>(m_TypeName));
 
@@ -86,7 +86,7 @@ namespace Ace
         ACE_TRY_ASSERT(variables.size() == m_Args.size());
 
         ACE_TRY(boundArgs, TransformExpectedVector(m_Args,
-        [&](const Arg& t_arg) -> Expected<BoundNode::Expr::StructConstruction::Arg>
+        [&](const Arg& t_arg) -> Expected<StructConstructionExprBoundNode::Arg>
         {
             const auto symbolFoundIt = std::find_if(
                 begin(variables),
@@ -100,7 +100,7 @@ namespace Ace
             ACE_TRY_ASSERT(symbolFoundIt != end(variables));
             auto* const variableSymbol = *symbolFoundIt;
 
-            ACE_TRY(boundValue, ([&]() -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+            ACE_TRY(boundValue, ([&]() -> Expected<std::shared_ptr<const IExprBoundNode>>
             {
                 if (t_arg.OptValue.has_value())
                 {
@@ -121,21 +121,21 @@ namespace Ace
 
             ACE_TRY_ASSERT(IsSymbolVisibleFromScope(variableSymbol, m_Scope));
 
-            return BoundNode::Expr::StructConstruction::Arg
+            return StructConstructionExprBoundNode::Arg
             {
                 variableSymbol,
                 boundValue
             };
         }));
 
-        return std::make_shared<const BoundNode::Expr::StructConstruction>(
+        return std::make_shared<const StructConstructionExprBoundNode>(
             m_Scope,
             structSymbol,
             boundArgs
         );
     }
 
-    auto StructConstructionExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto StructConstructionExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

@@ -6,7 +6,7 @@
 
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNode/Stmt/Return.hpp"
+#include "BoundNodes/Stmts/ReturnStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -15,7 +15,7 @@ namespace Ace
     class ReturnStmtNode :
         public virtual IStmtNode,
         public virtual ICloneableNode<ReturnStmtNode>,
-        public virtual IBindableNode<BoundNode::Stmt::Return>
+        public virtual IBindableNode<ReturnStmtBoundNode>
     {
     public:
         ReturnStmtNode(
@@ -32,8 +32,8 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Return>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const ReturnStmtBoundNode>> final;
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};

@@ -43,19 +43,19 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto SizeOfExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::SizeOf>>
+    auto SizeOfExprNode::CreateBound() const -> Expected<std::shared_ptr<const SizeOfExprBoundNode>>
     {
         ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
 
-        return std::make_shared<const BoundNode::Expr::SizeOf>(
+        return std::make_shared<const SizeOfExprBoundNode>(
             m_Scope,
             typeSymbol
         );
     }
 
-    auto SizeOfExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto SizeOfExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

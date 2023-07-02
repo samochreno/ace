@@ -12,7 +12,7 @@
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "Nodes/Vars/StaticVarNode.hpp"
-#include "BoundNode/Module.hpp"
+#include "BoundNodes/ModuleBoundNode.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
@@ -23,7 +23,7 @@ namespace Ace
     class ModuleNode :
         public virtual INode,
         public virtual ICloneableNode<ModuleNode>,
-        public virtual IBindableNode<BoundNode::Module>,
+        public virtual IBindableNode<ModuleBoundNode>,
         public virtual IPartiallySymbolCreatableNode
     {
     public:
@@ -48,7 +48,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const ModuleNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Module>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const ModuleBoundNode>> final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;

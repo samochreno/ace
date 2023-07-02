@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Attribute.hpp"
+#include "BoundNodes/AttributeBoundNode.hpp"
 
 namespace Ace
 {
@@ -38,11 +38,11 @@ namespace Ace
         );
     }
 
-    auto AttributeNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Attribute>>
+    auto AttributeNode::CreateBound() const -> Expected<std::shared_ptr<const AttributeBoundNode>>
     {
         ACE_TRY(boundStructConstructionExpr, m_StructConstructionExpr->CreateBound());
 
-        return std::make_shared<const BoundNode::Attribute>(
+        return std::make_shared<const AttributeBoundNode>(
             boundStructConstructionExpr
         );
     }

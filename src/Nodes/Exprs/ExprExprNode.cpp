@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Expr/Expr.hpp"
+#include "BoundNodes/Exprs/ExprExprBoundNode.hpp"
 
 namespace Ace
 {
@@ -45,13 +45,13 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto ExprExprNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Expr::Expr>>
+    auto ExprExprNode::CreateBound() const -> Expected<std::shared_ptr<const ExprExprBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
-        return std::make_shared<const BoundNode::Expr::Expr>(boundExpr);
+        return std::make_shared<const ExprExprBoundNode>(boundExpr);
     }
 
-    auto ExprExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const BoundNode::Expr::IBase>>
+    auto ExprExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

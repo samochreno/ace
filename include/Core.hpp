@@ -10,7 +10,7 @@
 #include "MaybeChanged.hpp"
 #include "Nodes/Node.hpp"
 #include "Nodes/ModuleNode.hpp"
-#include "BoundNode/Base.hpp"
+#include "BoundNodes/BoundNode.hpp"
 #include "Emittable.hpp"
 #include "Compilation.hpp"
 
@@ -66,11 +66,11 @@ namespace Ace::Core
     ) -> Expected<void>;
     auto ValidateControlFlow(
         const Compilation* const t_compilation,
-        const std::vector<const BoundNode::IBase*>& t_nodes
+        const std::vector<const IBoundNode*>& t_nodes
     ) -> Expected<void>;
     auto BindFunctionSymbolsBodies(
         const Compilation* const t_compilation,
-        const std::vector<const BoundNode::IBase*>& t_nodes
+        const std::vector<const IBoundNode*>& t_nodes
     ) -> void;
     auto ValidateTypeSizes(
         const Compilation* const t_compilation

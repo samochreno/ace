@@ -6,7 +6,7 @@
 #include "Scope.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Var/Normal/Static.hpp"
+#include "BoundNodes/Vars/StaticVarBoundNode.hpp"
 #include "Symbols/Vars/StaticVarSymbol.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -66,7 +66,7 @@ namespace Ace
         );
     }
 
-    auto StaticVarNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Var::Normal::Static>>
+    auto StaticVarNode::CreateBound() const -> Expected<std::shared_ptr<const StaticVarBoundNode>>
     {
         ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
         [](const std::shared_ptr<const AttributeNode>& t_attribute)
@@ -77,7 +77,7 @@ namespace Ace
         auto* const selfSymbol =
             m_Scope->ExclusiveResolveSymbol<StaticVarSymbol>(m_Name).Unwrap();
 
-        return std::make_shared<const BoundNode::Var::Normal::Static>(
+        return std::make_shared<const StaticVarBoundNode>(
             selfSymbol,
             boundAttributes
         );

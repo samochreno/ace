@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNode/Stmt/Var.hpp"
+#include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
 #include "Diagnostics.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 
@@ -69,7 +69,7 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto VarStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Var>>
+    auto VarStmtNode::CreateBound() const -> Expected<std::shared_ptr<const VarStmtBoundNode>>
     {
         auto* selfSymbol =
             m_Scope->ExclusiveResolveSymbol<LocalVarSymbol>(m_Name).Unwrap();
@@ -80,13 +80,13 @@ namespace Ace
             return t_expr->CreateBoundExpr();
         }));
 
-        return std::make_shared<const BoundNode::Stmt::Var>(
+        return std::make_shared<const VarStmtBoundNode>(
             selfSymbol,
             boundOptAssignedExpr
         );
     }
 
-    auto VarStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto VarStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

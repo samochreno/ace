@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Stmt/Label.hpp"
+#include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Symbols/Symbol.hpp"
 
@@ -46,15 +46,15 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto LabelStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Label>>
+    auto LabelStmtNode::CreateBound() const -> Expected<std::shared_ptr<const LabelStmtBoundNode>>
     {
         auto* const selfSymbol =
             m_Scope->ExclusiveResolveSymbol<LabelSymbol>(m_Name).Unwrap();
 
-        return std::make_shared<const BoundNode::Stmt::Label>(selfSymbol);
+        return std::make_shared<const LabelStmtBoundNode>(selfSymbol);
     }
 
-    auto LabelStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto LabelStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

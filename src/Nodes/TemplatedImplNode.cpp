@@ -6,7 +6,7 @@
 #include "Scope.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
-#include "BoundNode/Impl.hpp"
+#include "BoundNodes/ImplBoundNode.hpp"
 #include "Diagnostics.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/TemplatedImplSymbol.hpp"
@@ -79,7 +79,7 @@ namespace Ace
         );
     }
 
-    auto TemplatedImplNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Impl>>
+    auto TemplatedImplNode::CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>>
     {
         ACE_TRY(boundFunctions, TransformExpectedVector(m_Functions,
         [](const std::shared_ptr<const FunctionNode>& t_function)
@@ -87,7 +87,7 @@ namespace Ace
             return t_function->CreateBound();
         }));
 
-        return std::make_shared<const BoundNode::Impl>(
+        return std::make_shared<const ImplBoundNode>(
             GetScope(),
             boundFunctions
         );

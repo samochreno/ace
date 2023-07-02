@@ -5,7 +5,7 @@
 
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
-#include "BoundNode/Stmt/Assignment/Normal.hpp"
+#include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
 
 namespace Ace
 {
@@ -52,18 +52,18 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto AssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Assignment::Normal>>
+    auto AssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const AssignmentStmtBoundNode>>
     {
         ACE_TRY(boundLHSExpr, m_LHSExpr->CreateBoundExpr());
         ACE_TRY(boundRHSExpr, m_RHSExpr->CreateBoundExpr());
 
-        return std::make_shared<const BoundNode::Stmt::Assignment::Normal>(
+        return std::make_shared<const AssignmentStmtBoundNode>(
             boundLHSExpr,
             boundRHSExpr
         );
     }
 
-    auto AssignmentStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>>
+    auto AssignmentStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

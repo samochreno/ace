@@ -5,7 +5,7 @@
 
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNode/Stmt/Assert.hpp"
+#include "BoundNodes/Stmts/AssertStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -14,7 +14,7 @@ namespace Ace
     class AssertStmtNode :
         public virtual IStmtNode,
         public virtual ICloneableNode<AssertStmtNode>,
-        public virtual IBindableNode<BoundNode::Stmt::Assert>
+        public virtual IBindableNode<AssertStmtBoundNode>
     {
     public:
         AssertStmtNode(
@@ -31,8 +31,8 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const BoundNode::Stmt::Assert>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const BoundNode::Stmt::IBase>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const AssertStmtBoundNode>> final;
+        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};
