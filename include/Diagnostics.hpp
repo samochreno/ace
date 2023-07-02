@@ -18,18 +18,9 @@ namespace Ace
         MissingPackagePathArgError() = default;
         virtual ~MissingPackagePathArgError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return std::nullopt;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Missing package path arg";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
     };
 
     class MultiplePackagePathArgsError : public virtual IDiagnostic
@@ -37,23 +28,12 @@ namespace Ace
     public:
         MultiplePackagePathArgsError(
             const SourceLocation& t_sourceLocation
-        ) : m_SourceLocation{ t_sourceLocation }
-        {
-        }
+        );
         virtual ~MultiplePackagePathArgsError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return m_SourceLocation;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Multiple package path args";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         SourceLocation m_SourceLocation{};
@@ -64,23 +44,12 @@ namespace Ace
     public:
         MissingCommandLineOptionNameError(
             const SourceLocation& t_sourceLocation
-        ) : m_SourceLocation{ t_sourceLocation }
-        {
-        }
+        );
         virtual ~MissingCommandLineOptionNameError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return m_SourceLocation;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Missing option name";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         SourceLocation m_SourceLocation{};
@@ -91,23 +60,12 @@ namespace Ace
     public:
         UnknownCommandLineOptionNameError(
             const SourceLocation& t_sourceLocation
-        ) : m_SourceLocation{ t_sourceLocation }
-        {
-        }
+        );
         virtual ~UnknownCommandLineOptionNameError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return m_SourceLocation;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Unknown option name";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         SourceLocation m_SourceLocation{};
@@ -118,23 +76,12 @@ namespace Ace
     public:
         MissingCommandLineOptionValueError(
             const SourceLocation& t_sourceLocation
-        ) : m_SourceLocation{ t_sourceLocation }
-        {
-        }
+        );
         virtual ~MissingCommandLineOptionValueError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return m_SourceLocation;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Missing option arg";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         SourceLocation m_SourceLocation{};
@@ -145,23 +92,12 @@ namespace Ace
     public:
         UnexpectedCommandLineOptionValueError(
             const SourceLocation& t_sourceLocation
-        ) : m_SourceLocation{ t_sourceLocation }
-        {
-        }
+        );
         virtual ~UnexpectedCommandLineOptionValueError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return m_SourceLocation;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Unexpected option arg";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         SourceLocation m_SourceLocation{};
@@ -170,25 +106,12 @@ namespace Ace
     class JsonError : public virtual IDiagnostic
     {
     public:
-        JsonError(
-            const nlohmann::json::exception& t_jsonException
-        ) : m_Message{ t_jsonException.what() }
-        {
-        }
+        JsonError(const nlohmann::json::exception& t_jsonException);
         virtual ~JsonError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return std::nullopt;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Unexpected option arg";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         const char* m_Message{};
@@ -197,25 +120,12 @@ namespace Ace
     class FileNotFoundError : public virtual IDiagnostic
     {
     public:
-        FileNotFoundError(
-            const std::filesystem::path& t_path
-        ) : m_Path{ t_path }
-        {
-        }
+        FileNotFoundError(const std::filesystem::path& t_path);
         virtual ~FileNotFoundError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return std::nullopt;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "File not found: " + m_Path.string();
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         std::filesystem::path m_Path{};
@@ -224,25 +134,12 @@ namespace Ace
     class FileOpenError : public virtual IDiagnostic
     {
     public:
-        FileOpenError(
-            const std::filesystem::path& t_path
-        ) : m_Path{ t_path }
-        {
-        }
+        FileOpenError(const std::filesystem::path& t_path);
         virtual ~FileOpenError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return std::nullopt;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Unable to open file: " + m_Path.string();
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         std::filesystem::path m_Path{};
@@ -253,23 +150,12 @@ namespace Ace
     public:
         UnterminatedMultiLineCommentError(
             const SourceLocation& t_sourceLocation
-        ) : m_SourceLocation{ t_sourceLocation }
-        {
-        }
+        );
         virtual ~UnterminatedMultiLineCommentError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return m_SourceLocation;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Unterminated multiline comment";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         SourceLocation m_SourceLocation{};
@@ -280,23 +166,12 @@ namespace Ace
     public:
         UnterminatedStringLiteralError(
             const SourceLocation& t_sourceLocation
-        ) : m_SourceLocation{ t_sourceLocation }
-        {
-        }
+        );
         virtual ~UnterminatedStringLiteralError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return m_SourceLocation;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Unterminated string literal";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         SourceLocation m_SourceLocation{};
@@ -307,23 +182,12 @@ namespace Ace
     public:
         UnexpectedCharacterError(
             const SourceLocation& t_sourceLocation
-        ) : m_SourceLocation{ t_sourceLocation } 
-        {
-        }
+        );
         virtual ~UnexpectedCharacterError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return m_SourceLocation;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Unexpected character";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         SourceLocation m_SourceLocation{};
@@ -334,23 +198,12 @@ namespace Ace
     public:
         UnknownNumericLiteralTypeSuffixError(
             const SourceLocation& t_sourceLocation
-        ) : m_SourceLocation{ t_sourceLocation } 
-        {
-        }
+        );
         virtual ~UnknownNumericLiteralTypeSuffixError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return m_SourceLocation;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Unknown numeric literal type suffix";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         SourceLocation m_SourceLocation{};
@@ -361,23 +214,12 @@ namespace Ace
     public:
         DecimalPointInNonFloatNumericLiteralError(
             const SourceLocation& t_sourceLocation
-        ) : m_SourceLocation{ t_sourceLocation } 
-        {
-        }
+        );
         virtual ~DecimalPointInNonFloatNumericLiteralError() = default;
 
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return m_SourceLocation;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "Decimal point in non-float numeric literal";
-        }
+        auto GetSeverity() const -> DiagnosticSeverity final;
+        auto GetSourceLocation() const -> std::optional<SourceLocation> final;
+        auto CreateMessage() const -> std::string final;
 
     private:
         SourceLocation m_SourceLocation{};
