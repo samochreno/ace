@@ -1,4 +1,4 @@
-#include "Nodes/Stmts/CompoundAssignmentStmtNode.hpp"
+#include "Nodes/Stmts/Assignments/CompoundAssignmentStmtNode.hpp"
 
 #include <memory>
 #include <vector>

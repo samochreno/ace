@@ -149,7 +149,7 @@ namespace Ace
         ) -> Expected<Measured<std::shared_ptr<const ExprStmtNode>>>;
         static auto ParseAssignmentStmt(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::shared_ptr<const AssignmentStmtNode>>>;
+        ) -> Expected<Measured<std::shared_ptr<const NormalAssignmentStmtNode>>>;
         static auto ParseCompoundAssignmentStmt(
             const ParseContext& t_context
         ) -> Expected<Measured<std::shared_ptr<const CompoundAssignmentStmtNode>>>;

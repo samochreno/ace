@@ -1955,7 +1955,7 @@ namespace Ace
 
     auto Parser::ParseAssignmentStmt(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const AssignmentStmtNode>>>
+    ) -> Expected<Measured<std::shared_ptr<const NormalAssignmentStmtNode>>>
     {
         auto it = t_context.Iterator;
 
@@ -1973,7 +1973,7 @@ namespace Ace
 
         return Measured
         {
-            std::make_shared<const AssignmentStmtNode>(
+            std::make_shared<const NormalAssignmentStmtNode>(
                 t_context.Scope,
                 lhsExpr.Value,
                 rhsExpr.Value

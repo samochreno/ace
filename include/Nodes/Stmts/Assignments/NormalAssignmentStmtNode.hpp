@@ -11,24 +11,24 @@
 
 namespace Ace
 {
-    class AssignmentStmtNode :
+    class NormalAssignmentStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<AssignmentStmtNode>,
+        public virtual ICloneableNode<NormalAssignmentStmtNode>,
         public virtual IBindableNode<AssignmentStmtBoundNode>
     {
     public:
-        AssignmentStmtNode(
+        NormalAssignmentStmtNode(
             const std::shared_ptr<Scope>& t_scope,
             const std::shared_ptr<const IExprNode>& t_lhsExpr,
             const std::shared_ptr<const IExprNode>& t_rhsExpr
         );
-        virtual ~AssignmentStmtNode() = default;
+        virtual ~NormalAssignmentStmtNode() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
             const std::shared_ptr<Scope>& t_scope
-        ) const -> std::shared_ptr<const AssignmentStmtNode> final;
+        ) const -> std::shared_ptr<const NormalAssignmentStmtNode> final;
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IStmtNode> final;

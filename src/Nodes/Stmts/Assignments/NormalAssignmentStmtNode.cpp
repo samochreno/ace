@@ -1,4 +1,4 @@
-#include "Nodes/Stmts/AssignmentStmtNode.hpp"
+#include "Nodes/Stmts/Assignments/NormalAssignmentStmtNode.hpp"
 
 #include <memory>
 #include <vector>
@@ -9,7 +9,7 @@
 
 namespace Ace
 {
-    AssignmentStmtNode::AssignmentStmtNode(
+    NormalAssignmentStmtNode::NormalAssignmentStmtNode(
         const std::shared_ptr<Scope>& t_scope,
         const std::shared_ptr<const IExprNode>& t_lhsExpr,
         const std::shared_ptr<const IExprNode>& t_rhsExpr
@@ -19,12 +19,12 @@ namespace Ace
     {
     }
 
-    auto AssignmentStmtNode::GetScope() const -> std::shared_ptr<Scope>
+    auto NormalAssignmentStmtNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;
     }
 
-    auto AssignmentStmtNode::GetChildren() const -> std::vector<const INode*>
+    auto NormalAssignmentStmtNode::GetChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 
@@ -34,25 +34,25 @@ namespace Ace
         return children;
     }
 
-    auto AssignmentStmtNode::CloneInScope(
+    auto NormalAssignmentStmtNode::CloneInScope(
         const std::shared_ptr<Scope>& t_scope
-    ) const -> std::shared_ptr<const AssignmentStmtNode>
+    ) const -> std::shared_ptr<const NormalAssignmentStmtNode>
     {
-        return std::make_shared<const AssignmentStmtNode>(
+        return std::make_shared<const NormalAssignmentStmtNode>(
             m_Scope,
             m_LHSExpr->CloneInScopeExpr(t_scope),
             m_RHSExpr->CloneInScopeExpr(t_scope)
         );
     }
 
-    auto AssignmentStmtNode::CloneInScopeStmt(
+    auto NormalAssignmentStmtNode::CloneInScopeStmt(
         const std::shared_ptr<Scope>& t_scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
         return CloneInScope(t_scope);
     }
 
-    auto AssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const AssignmentStmtBoundNode>>
+    auto NormalAssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const AssignmentStmtBoundNode>>
     {
         ACE_TRY(boundLHSExpr, m_LHSExpr->CreateBoundExpr());
         ACE_TRY(boundRHSExpr, m_RHSExpr->CreateBoundExpr());
@@ -63,7 +63,7 @@ namespace Ace
         );
     }
 
-    auto AssignmentStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
+    auto NormalAssignmentStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

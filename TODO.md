@@ -2,7 +2,6 @@
 
 ## 💥 High Priority
 
-- Put common things (even without an interface) into a folder 
 - Consider splitting `Core.hpp` into multiple files, especially glue generation
 - Refactor expression parsing
 - Refactor compound assignment lowering
