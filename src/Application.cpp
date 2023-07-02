@@ -214,12 +214,13 @@ namespace Ace
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
 
-        const auto didCompile = Compile(std::vector<std::string_view>{
+        const auto expDidCompile = Compile(std::vector<std::string_view>{
             { "-oace/build" },
             { "ace/package.json" },
         });
-        if (!didCompile)
+        if (!expDidCompile)
         {
+            Core::LogDiagnosticBag(expDidCompile.GetDiagnosticBag());
             return;
         }
     }
