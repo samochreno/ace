@@ -6,17 +6,16 @@
 - `CompoundAssignmentStmtBoundNode` lowering
 - ❓ Split `Core.hpp` into multiple files, especially glue generation
 - Variable referennce emitting
+- Remove `t_` prefix from parameter names
+- ❓ Remove `ACE_TRY` macros
 
 ## 💥 High Priority
 
-- ❓ Remove `ACE_TRY` macros
 - Add error messages to make debugging easier:
   - `Compilation` parsing and verification errors
   - Remove second typechecking pass
-  - Parsing errors:
-    - Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
+  - Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
   - Error printing
-  - ❓ Make errors just enums, not full types
 - Add strong pointer self
 - Traits:
   - Implement parsing
@@ -31,11 +30,11 @@
   - Default template arguments
 - Conversion operators with traits:
   - Implement
-  -  Change `__deref_as[T](...)` to take any type convertible to `std::Pointer` and remove `std::Reference[T]::ptr(...)`
+  - Change `__deref_as[T](...)` to take any type convertible to `std::Pointer` and remove `std::Reference[T]::ptr(...)`
 - Strings
 - Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; This could maybe be fixed by forcing the copy trait to also implement default trait)
 - Add lifetime trait: default, copy, drop
-- ] Check if there is any better way to not use external programs like `llc` and `clang`
+- Check if there is any better way to not use external programs like `llc` and `clang`
 
 ## 🔔 Medium Priority
 
@@ -43,8 +42,7 @@
   ```rs
   import std::build::*;
 
-  package(): Package 
-  {
+  package(): Package {
       ret new Package {
           name: "ace",
           path_macros: [
@@ -103,33 +101,6 @@
 ## 💡 Ideas
 
 - Memory safe temporary references for things like Rc::...::unwrap()
-- Binary operators on enums return `int`, so you cant have an arbitrary enum + safe switch:
-  ```rs
-  node_type: auto = NodeType::Expression;
-  
-  switch(node_type) # If all cases are not included, compile error.
-  {
-      NodeType::None | NodeType::Statement 
-      { 
-          ret m_dn; 
-      }
-      
-      NodeType::Expression
-      { 
-          ret deez; 
-      }
-  }
-  ```
-- Inline struct:
-  ```rs
-  impl JSON
-  {
-      try_parse(value_to_parse: &String): { did_parse: bool, value: i32 } -> pub
-      {
-          ret new { did_parse: true, value: value_to_parse };
-      }
-  }
-  ```
 - Do block (it could be named something different, I'm not sure about the syntax either): https://www.youtube.com/watch?v=QM1iUe6IofM&ab_channel=BrianWill `41:51`
   ```rs
   start_scope: auto = do -> Scope 
@@ -200,11 +171,9 @@
   var i = 2
   
   while (i <= 10) {
-  
     // Guard condition to check the even number.
     guard i % 2 == 0 else {
-  
-       i = i + 1
+      i = i + 1
       continue
     }
   
