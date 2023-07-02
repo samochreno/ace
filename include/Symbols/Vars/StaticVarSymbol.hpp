@@ -16,7 +16,7 @@ namespace Ace
         StaticVarSymbol(
             const std::shared_ptr<Scope>& t_scope,
             const std::string& t_name,
-            const AccessModifier& t_accessModifier,
+            const AccessModifier t_accessModifier,
             ITypeSymbol* const t_type
         );
         virtual ~StaticVarSymbol() = default;

@@ -31,7 +31,7 @@ namespace Ace
             const std::string& t_name,
             const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-            const AccessModifier& t_accessModifier,
+            const AccessModifier t_accessModifier,
             const std::optional<std::shared_ptr<const SelfParamVarNode>>& t_optSelf,
             const std::vector<std::shared_ptr<const NormalParamVarNode>>& t_params,
             const std::optional<std::shared_ptr<const BlockStmtNode>>& t_optBody

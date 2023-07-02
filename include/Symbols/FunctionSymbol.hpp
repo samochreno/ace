@@ -33,8 +33,8 @@ namespace Ace
         FunctionSymbol(
             const std::shared_ptr<Scope>& t_selfScope,
             const std::string& t_name,
-            const SymbolCategory& t_symbolCategory,
-            const AccessModifier& t_accessModifier,
+            const SymbolCategory t_symbolCategory,
+            const AccessModifier t_accessModifier,
             ITypeSymbol* const t_type
         );
         virtual ~FunctionSymbol() = default;

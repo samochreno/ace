@@ -29,6 +29,12 @@ namespace Ace
         std::shared_ptr<const Token> m_Value{};
     };
 
+    enum class ReferenceParsingKind
+    {
+        Allow,
+        Disallow,
+    };
+
     struct ParseContext
     {
         ParseContext(
@@ -57,7 +63,7 @@ namespace Ace
 
         static auto GetOperatorFunctionName(
             const std::shared_ptr<const Token>& t_operatorToken,
-            const size_t& t_params
+            const size_t t_params
         ) -> Expected<const char*>;
 
         static auto ParseName(
@@ -74,7 +80,7 @@ namespace Ace
         ) -> Expected<Measured<SymbolNameSection>>;
         static auto ParseTypeName(
             const ParseContext& t_context,
-            const bool& t_doAllowReferences
+            const ReferenceParsingKind t_referenceParsingKind
         ) -> Expected<Measured<TypeName>>;
         static auto ParseTemplateParamNames(
             const ParseContext& t_context
@@ -124,7 +130,7 @@ namespace Ace
         ) -> Expected<Measured<std::shared_ptr<const StaticVarNode>>>;
         static auto ParseMemberVar(
             const ParseContext& t_context,
-            const size_t& t_index
+            const size_t t_index
         ) -> Expected<Measured<std::shared_ptr<const InstanceVarNode>>>;
         static auto ParseType(
             const ParseContext& t_context

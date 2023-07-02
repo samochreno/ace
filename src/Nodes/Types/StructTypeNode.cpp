@@ -14,7 +14,7 @@ namespace Ace
         const std::shared_ptr<Scope>& t_selfScope,
         const std::string& t_name,
         const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-        const AccessModifier& t_accessModifier,
+        const AccessModifier t_accessModifier,
         const std::vector<std::shared_ptr<const InstanceVarNode>>& t_variables
     ) : m_SelfScope{ t_selfScope },
         m_Name{ t_name },

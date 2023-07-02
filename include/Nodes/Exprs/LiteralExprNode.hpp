@@ -20,7 +20,7 @@ namespace Ace
     public:
         LiteralExprNode(
             const std::shared_ptr<Scope>& t_scope,
-            const LiteralKind& t_kind,
+            const LiteralKind t_kind,
             const std::string& t_string
         );
         virtual ~LiteralExprNode() = default;

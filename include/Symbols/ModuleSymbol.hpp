@@ -18,7 +18,7 @@ namespace Ace
         ModuleSymbol(
             const std::shared_ptr<Scope>& t_selfScope,
             const std::string& t_name,
-            const AccessModifier& t_accessModifier
+            const AccessModifier t_accessModifier
         );
         virtual ~ModuleSymbol() = default;
 

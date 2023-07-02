@@ -28,7 +28,7 @@ namespace Ace
             const std::string& t_name,
             const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-            const AccessModifier& t_accessModifier
+            const AccessModifier t_accessModifier
         );
         virtual ~StaticVarNode() = default;
 

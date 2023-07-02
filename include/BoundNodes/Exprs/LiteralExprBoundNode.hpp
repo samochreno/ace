@@ -23,7 +23,7 @@ namespace Ace
     public:
         LiteralExprBoundNode(
             const std::shared_ptr<Scope>& t_scope,
-            const LiteralKind& t_kind,
+            const LiteralKind t_kind,
             const std::string& t_string
         );
         virtual ~LiteralExprBoundNode() = default;

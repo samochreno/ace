@@ -14,7 +14,7 @@ namespace Ace
         const std::shared_ptr<Scope>& t_scope,
         const std::shared_ptr<const IExprNode>& t_lhsExpr,
         const std::shared_ptr<const IExprNode>& t_rhsExpr,
-        const TokenKind& t_operator
+        const TokenKind t_operator
     ) : m_Scope{ t_scope },
         m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr },

@@ -6,7 +6,6 @@
 - Refactor expression parsing
 - Refactor compound assignment lowering
 - Refactor emitting of variable references
-- Remove primitive references
 - Use `Measured` in lexer
 - ❓ Remove `ACE_TRY` macros, make opening braces on the same line
 - Add error messages to make debugging easier:

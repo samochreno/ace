@@ -56,8 +56,8 @@ namespace Ace
             const Compilation* const t_compilation,
             SymbolName&& t_name,
             std::optional<std::function<llvm::Type*()>>&& t_irTypeGetter,
-            const TypeSizeKind& t_sizeKind,
-            const NativeCopyabilityKind& t_copyabilityKind
+            const TypeSizeKind t_sizeKind,
+            const NativeCopyabilityKind t_copyabilityKind
         );
         ~NativeType() = default;
 

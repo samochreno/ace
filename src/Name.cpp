@@ -84,7 +84,7 @@ namespace Ace
 
     static auto GetModifierFullyQualifiedName(
         const Compilation* const t_compilation,
-        const TypeNameModifier& t_modifier
+        const TypeNameModifier t_modifier
     ) -> const SymbolName&
     {
         const auto& natives = t_compilation->Natives;
@@ -124,7 +124,7 @@ namespace Ace
 
         auto name = SymbolName;
         std::for_each(rbegin(Modifiers), rend(Modifiers),
-        [&](const TypeNameModifier& t_modifier)
+        [&](const TypeNameModifier t_modifier)
         {
             auto modifiedName = GetModifierFullyQualifiedName(
                 t_compilation,

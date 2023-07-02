@@ -18,8 +18,8 @@ namespace Ace
         const std::string& t_name,
         const TypeName& t_typeName,
         const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-        const AccessModifier& t_accessModifier,
-        const size_t& t_index
+        const AccessModifier t_accessModifier,
+        const size_t t_index
     ) : m_Scope{ t_scope },
         m_Name{ t_name },
         m_TypeName{ t_typeName },

@@ -20,7 +20,7 @@ namespace Ace
         UserBinaryExprNode(
             const std::shared_ptr<const IExprNode>& t_lhsExpr,
             const std::shared_ptr<const IExprNode>& t_rhsExpr,
-            const TokenKind& t_operator
+            const TokenKind t_operator
         );
         virtual ~UserBinaryExprNode() = default;
 

@@ -28,8 +28,8 @@ namespace Ace
             const std::string& t_name,
             const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-            const AccessModifier& t_accessModifier,
-            const size_t& t_index
+            const AccessModifier t_accessModifier,
+            const size_t t_index
         );
         virtual ~InstanceVarNode() = default;
 

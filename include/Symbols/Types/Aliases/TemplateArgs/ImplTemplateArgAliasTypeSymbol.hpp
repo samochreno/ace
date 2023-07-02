@@ -22,7 +22,7 @@ namespace Ace
             const std::shared_ptr<Scope>& t_scope,
             const std::string& t_name,
             ITypeSymbol* const t_aliasedType,
-            const size_t& t_index
+            const size_t t_index
         );
         virtual ~ImplTemplateArgAliasTypeSymbol() = default;
 

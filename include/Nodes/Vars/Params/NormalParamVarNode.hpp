@@ -27,7 +27,7 @@ namespace Ace
             const std::string& t_name,
             const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-            const size_t& t_index
+            const size_t t_index
         );
         virtual ~NormalParamVarNode() = default;
 

@@ -16,7 +16,7 @@ namespace Ace
 {
     LiteralExprBoundNode::LiteralExprBoundNode(
         const std::shared_ptr<Scope>& t_scope,
-        const LiteralKind& t_kind,
+        const LiteralKind t_kind,
         const std::string& t_string
     ) : m_Scope{ t_scope },
         m_Kind{ t_kind },
@@ -72,16 +72,16 @@ namespace Ace
             {
                 std::string numberString{};
                 (void)std::find_if_not(begin(m_String), end(m_String),
-                [&](const char& t_char)
+                [&](const char t_character)
                 {
-                    if (IsInAlphabet(t_char))
+                    if (IsInAlphabet(t_character))
                     {
                         return false;
                     }
 
-                    if (IsNumber(t_char) || (t_char == '.'))
+                    if (IsNumber(t_character) || (t_character == '.'))
                     {
-                        numberString += t_char;
+                        numberString += t_character;
                     }
 
                     return true;

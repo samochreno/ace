@@ -19,7 +19,7 @@ namespace Ace
     public:
         UserUnaryExprNode(
             const std::shared_ptr<const IExprNode>& t_expr,
-            const TokenKind& t_operator
+            const TokenKind t_operator
         );
         virtual ~UserUnaryExprNode() = default;
 

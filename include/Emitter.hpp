@@ -85,7 +85,7 @@ namespace Ace
             const std::vector<std::shared_ptr<const IStmtBoundNode>>& t_stmts
         ) -> void;
         auto EmitLoadArg(
-            const size_t& t_index, 
+            const size_t t_index, 
             llvm::Type* const t_type
         ) const -> llvm::Value*;
         auto EmitCopy(

@@ -112,7 +112,7 @@ namespace Ace
         }
         Token(
             const SourceLocation& t_sourceLocation,
-            const TokenKind& t_kind
+            const TokenKind t_kind
         ) : SourceLocation{ t_sourceLocation },
             Kind{ t_kind },
             String{}
@@ -121,7 +121,7 @@ namespace Ace
         }
         Token(
             const SourceLocation& t_sourceLocation,
-            const TokenKind& t_kind,
+            const TokenKind t_kind,
             const std::string& t_string
         ) : SourceLocation{ t_sourceLocation },
             Kind{ t_kind },

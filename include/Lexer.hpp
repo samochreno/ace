@@ -21,7 +21,7 @@ namespace Ace
 
     private:
         auto EatCharacter() -> void;
-        auto EatCharacters(const size_t& t_count) -> void;
+        auto EatCharacters(const size_t t_count) -> void;
         auto EatCharactersUntil(
             const std::string_view::const_iterator& t_it
         ) -> void;
@@ -36,7 +36,7 @@ namespace Ace
         auto ScanTokenSequence() const -> Expected<Measured<std::vector<std::shared_ptr<const Token>>>>;
 
         auto GetCharacter()                       const -> char;
-        auto GetCharacter(const size_t& t_offset) const -> char;
+        auto GetCharacter(const size_t t_offset) const -> char;
         auto GetLine() const -> const std::string_view&;
 
         auto IsEndOfLine()    const -> bool;

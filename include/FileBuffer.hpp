@@ -49,7 +49,7 @@ namespace Ace
             const std::string_view::const_iterator& t_characterIt
         ) const -> size_t;
         auto FindCharacterIndex(
-            const size_t& t_lineIndex,
+            const size_t t_lineIndex,
             const std::string_view::const_iterator& t_characterIt
         ) const -> size_t;
 

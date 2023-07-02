@@ -24,21 +24,27 @@ namespace Ace
         static const std::string DependencyFiles     = "dependency_files";
     }
 
+    enum class Recursiveness
+    {
+        Recursive,
+        NonRecursive,
+    };
+
     struct FilteredDirectory
     {
         FilteredDirectory(
             const std::filesystem::path& t_path, 
             const std::optional<std::string>& t_optExtensionFilter, 
-            const bool& t_isRecursive
+            const Recursiveness t_recursiveness
         ) : Path{ t_path }, 
             OptExtensionFilter{ t_optExtensionFilter }, 
-            IsRecursive{ t_isRecursive }
+            Recursiveness{ t_recursiveness }
         {
         }
 
         std::filesystem::path Path{};
         std::optional<std::string> OptExtensionFilter{};
-        bool IsRecursive{};
+        Recursiveness Recursiveness{};
     };
 
     static auto DoesDirectoryEntryMatchFilter(
@@ -71,7 +77,7 @@ namespace Ace
 
         std::vector<std::filesystem::path> filePaths{};
 
-        if (t_directory.IsRecursive)
+        if (t_directory.Recursiveness == Recursiveness::Recursive)
         {
             for (
                 const auto& directoryEntry :
@@ -83,7 +89,9 @@ namespace Ace
                     t_directory.OptExtensionFilter
                 );
                 if (!doesMatch)
+                {
                     continue;
+                }
 
                 filePaths.push_back(directoryEntry.path());
             }
@@ -100,7 +108,9 @@ namespace Ace
                     t_directory.OptExtensionFilter
                 );
                 if (!doesMatch)
+                {
                     continue;
+                }
 
                 filePaths.push_back(directoryEntry.path());
             }
@@ -113,7 +123,7 @@ namespace Ace
     {
         std::optional<std::string> OptPath{};
         std::optional<std::string> OptExtension{};
-        bool IsRecursive{};
+        Recursiveness Recursiveness{};
     };
 
     static auto ExpandLastFilePathPart(
@@ -153,25 +163,27 @@ namespace Ace
             {
                 part,
                 optExtension,
-                false
+                Recursiveness::NonRecursive,
             };
         }
 
-        ACE_TRY(isRecursive, [&]() -> Expected<bool>
+        ACE_TRY(recursiveness, [&]() -> Expected<Recursiveness>
         {
             if (beforeExtension.size() <= 1)
-                return false;
+            {
+                return Recursiveness::NonRecursive;
+            }
 
             ACE_TRY_ASSERT(beforeExtension[1] == '*');
             ACE_TRY_ASSERT(beforeExtension.size() == 2);
-            return true;
+            return Recursiveness::Recursive;
         }());
 
         return ExpandedLastFilePathPart
         {
             std::nullopt,
             optExtension,
-            isRecursive
+            recursiveness,
         };
     }
 
@@ -254,7 +266,7 @@ namespace Ace
             {
                 path,
                 lastFilePathPartData.OptExtension,
-                lastFilePathPartData.IsRecursive
+                lastFilePathPartData.Recursiveness
             }
         };
     }
@@ -263,9 +275,9 @@ namespace Ace
         const std::string& t_filePath
     ) -> Expected<std::vector<std::string>>
     {
-        auto isPathSeparator = [](const char& t_char) -> bool
+        auto isPathSeparator = [](const char& t_character) -> bool
         {
-            return (t_char == '/') || (t_char == '\\');
+            return (t_character == '/') || (t_character == '\\');
         };
 
         std::vector<std::string> parts{};

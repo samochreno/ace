@@ -14,7 +14,7 @@ namespace Ace
     public:
         TypeInfo(
             ITypeSymbol* const t_symbol,
-            const ValueKind& t_valueKind
+            const ValueKind t_valueKind
         ) : Symbol{ t_symbol },
             ValueKind{ t_valueKind }
         {

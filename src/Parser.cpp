@@ -52,7 +52,7 @@ namespace Ace
     }
 
     static auto IsCompoundAssignmentOperator(
-        const TokenKind& t_tokenKind
+        const TokenKind t_tokenKind
     ) -> bool
     {
         switch (t_tokenKind)
@@ -74,7 +74,7 @@ namespace Ace
         }
     }
 
-    static auto IsUserPrefixOperator(const TokenKind& t_tokenKind) -> bool
+    static auto IsUserPrefixOperator(const TokenKind t_tokenKind) -> bool
     {
         switch (t_tokenKind)
         {
@@ -88,7 +88,7 @@ namespace Ace
         }
     }
 
-    static auto IsPrefixOperator(const TokenKind& t_tokenKind) -> bool
+    static auto IsPrefixOperator(const TokenKind t_tokenKind) -> bool
     {
         if (IsUserPrefixOperator(t_tokenKind))
             return true;
@@ -105,7 +105,7 @@ namespace Ace
         }
     }
 
-    static auto IsPostfixOperator(const TokenKind& t_tokenKind) -> bool
+    static auto IsPostfixOperator(const TokenKind t_tokenKind) -> bool
     {
         switch (t_tokenKind)
         {
@@ -117,7 +117,7 @@ namespace Ace
         }
     }
 
-    static auto IsUserBinaryOperator(const TokenKind& t_tokenKind) -> bool
+    static auto IsUserBinaryOperator(const TokenKind t_tokenKind) -> bool
     {
         switch (t_tokenKind)
         {
@@ -144,23 +144,29 @@ namespace Ace
         }
     }
 
-    static auto IsBinaryOperator(const TokenKind& t_tokenKind) -> bool
+    static auto IsBinaryOperator(const TokenKind t_tokenKind) -> bool
     {
         if (IsUserBinaryOperator(t_tokenKind))
+        {
             return true;
+        }
 
         switch (t_tokenKind)
         {
             case TokenKind::VerticalBarVerticalBar:
             case TokenKind::AmpersandAmpersand:
+            {
                 return true;
+            }
 
             default:
+            {
                 return false;
+            }
         }
     }
 
-    static auto IsUserOperator(const TokenKind& t_tokenKind) -> bool
+    static auto IsUserOperator(const TokenKind t_tokenKind) -> bool
     {
         return
             IsUserPrefixOperator(t_tokenKind) ||
@@ -250,7 +256,7 @@ namespace Ace
 
     auto Parser::GetOperatorFunctionName(
         const std::shared_ptr<const Token>& t_operatorToken,
-        const size_t& t_paramCount
+        const size_t t_paramCount
     ) -> Expected<const char*>
     {
         const auto& tokenKind = t_operatorToken->Kind;
@@ -524,14 +530,14 @@ namespace Ace
 
     auto Parser::ParseTypeName(
         const ParseContext& t_context,
-        const bool& t_doAllowReferences
+        const ReferenceParsingKind t_referenceParsingKind
     ) -> Expected<Measured<TypeName>>
     {
         auto it = t_context.Iterator;
 
         std::vector<TypeNameModifier> modifiers{};
 
-        if (t_doAllowReferences)
+        if (t_referenceParsingKind == ReferenceParsingKind::Allow)
         {
             if (it->Unwrap().Kind == TokenKind::Ampersand)
             {
@@ -942,7 +948,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, false));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
@@ -1067,7 +1076,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, false));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
@@ -1292,7 +1304,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, false));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
@@ -1408,7 +1423,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, false));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
@@ -1504,7 +1522,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, false));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
@@ -1580,7 +1601,10 @@ namespace Ace
             ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
             ++it;
 
-            ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, true));
+            ACE_TRY(typeName, ParseTypeName(
+                { it, t_context.Scope },
+                ReferenceParsingKind::Allow
+            ));
             it += typeName.Length;
 
             params.push_back(std::make_shared<const NormalParamVarNode>(
@@ -1616,7 +1640,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, false));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
@@ -1653,7 +1680,7 @@ namespace Ace
 
     auto Parser::ParseMemberVar(
         const ParseContext& t_context,
-        const size_t& t_index
+        const size_t t_index
     ) -> Expected<Measured<std::shared_ptr<const InstanceVarNode>>>
     {
         auto it = t_context.Iterator;
@@ -1667,7 +1694,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, false));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
@@ -2025,7 +2055,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, true));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Allow
+        ));
         it += typeName.Length;
 
         ACE_TRY(optAssignment, [&]() -> Expected<std::optional<std::shared_ptr<const IExprNode>>>
@@ -2368,7 +2401,7 @@ namespace Ace
     ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>
     {
         static constexpr size_t binaryOperatorPrecedenceMin = 9;
-        static const auto getBinaryOperatorPrecedence = [](const TokenKind& t_tokenKind) -> size_t
+        static const auto getBinaryOperatorPrecedence = [](const TokenKind t_tokenKind) -> size_t
         {
             if (
                 (t_tokenKind == TokenKind::Asterisk) ||
@@ -2440,7 +2473,7 @@ namespace Ace
 
             ACE_UNREACHABLE();
         };
-        static const auto getBinaryOperatorPrecedencesAssociativity = [](const size_t& t_precedence) -> OperatorAssociativity
+        static const auto getBinaryOperatorPrecedencesAssociativity = [](const size_t t_precedence) -> OperatorAssociativity
         {
             switch (t_precedence)
             {
@@ -2479,7 +2512,7 @@ namespace Ace
             it += simpleExpr.Length;
         }
 
-        const auto collapseOperator = [&](const size_t& t_index)
+        const auto collapseOperator = [&](const size_t t_index)
         {
             const auto& lhsExpr = exprs.at(t_index);
             const auto& rhsExpr = exprs.at(t_index + 1);
@@ -2595,7 +2628,7 @@ namespace Ace
     ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>
     {
         static constexpr size_t unaryOperatorPrecedenceMin = 1;
-        static const auto getUnaryOperatorPrecedence = [](const TokenKind& t_tokenKind) -> size_t
+        static const auto getUnaryOperatorPrecedence = [](const TokenKind t_tokenKind) -> size_t
         {
             if (t_tokenKind == TokenKind::OpenParen)
             {
@@ -3066,7 +3099,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, true));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Allow
+        ));
         it += typeName.Length;
 
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
@@ -3128,7 +3164,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, true));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Allow
+        ));
         it += typeName.Length;
 
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
@@ -3156,7 +3195,10 @@ namespace Ace
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName({ it, t_context.Scope }, true));
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Allow
+        ));
         it += typeName.Length;
 
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);

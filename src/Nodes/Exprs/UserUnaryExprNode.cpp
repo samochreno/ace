@@ -14,7 +14,7 @@ namespace Ace
 {
     UserUnaryExprNode::UserUnaryExprNode(
         const std::shared_ptr<const IExprNode>& t_expr,
-        const TokenKind& t_operator
+        const TokenKind t_operator
     ) : m_Expr{ t_expr },
         m_Operator{ t_operator }
     {

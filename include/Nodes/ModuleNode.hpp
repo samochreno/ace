@@ -31,7 +31,7 @@ namespace Ace
             const std::shared_ptr<Scope>& t_scope,
             const std::shared_ptr<Scope>& t_selfScope,
             const std::vector<std::string>& t_name,
-            const AccessModifier& t_accessModifier,
+            const AccessModifier t_accessModifier,
             const std::vector<std::shared_ptr<const ModuleNode>>& t_modules,
             const std::vector<std::shared_ptr<const ITypeNode>>& t_types,
             const std::vector<std::shared_ptr<const TypeTemplateNode>>& t_typeTemplates,

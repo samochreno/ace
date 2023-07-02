@@ -16,7 +16,7 @@ namespace Ace
     StructTypeSymbol::StructTypeSymbol(
         const std::shared_ptr<Scope>& t_selfScope,
         const std::string& t_name,
-        const AccessModifier& t_accessModifier
+        const AccessModifier t_accessModifier
     ) : m_SelfScope{ t_selfScope },
         m_Name{ t_name },
         m_AccessModifier{ t_accessModifier }

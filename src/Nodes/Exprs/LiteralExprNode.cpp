@@ -11,7 +11,7 @@ namespace Ace
 {
     LiteralExprNode::LiteralExprNode(
         const std::shared_ptr<Scope>& t_scope,
-        const LiteralKind& t_kind,
+        const LiteralKind t_kind,
         const std::string& t_string
     ) : m_Scope{ t_scope },
         m_Kind{ t_kind },

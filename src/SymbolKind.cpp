@@ -28,15 +28,15 @@ namespace Ace
     };
 
     constexpr auto operator&(
-        const SymbolKind& t_lhs,
-        const SymbolKind& t_rhs
+        const SymbolKind t_lhs,
+        const SymbolKind t_rhs
     ) -> bool
     {
         return
             (static_cast<uint16_t>(t_lhs) & static_cast<uint16_t>(t_rhs)) != 0;
     }
 
-    auto GetSymbolCreationOrder(const SymbolKind& t_kind) -> int8_t
+    auto GetSymbolCreationOrder(const SymbolKind t_kind) -> int8_t
     {
         auto it = CreationOrderMap.find(t_kind);
         ACE_ASSERT(it != end(CreationOrderMap));

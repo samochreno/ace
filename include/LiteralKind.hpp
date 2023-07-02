@@ -34,8 +34,8 @@ namespace Ace
     };
 
     inline constexpr auto operator&(
-        const LiteralKind& t_lhs,
-        const LiteralKind& t_rhs
+        const LiteralKind t_lhs,
+        const LiteralKind t_rhs
     ) -> bool
     {
         return

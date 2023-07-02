@@ -471,7 +471,7 @@ namespace Ace
     }
 
     auto Emitter::EmitLoadArg(
-        const size_t& t_index, 
+        const size_t t_index, 
         llvm::Type* const t_type
     ) const -> llvm::Value*
     {

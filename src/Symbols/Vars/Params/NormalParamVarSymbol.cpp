@@ -13,7 +13,7 @@ namespace Ace
         const std::shared_ptr<Scope>& t_scope,
         const std::string& t_name,
         ITypeSymbol* const t_type,
-        const size_t& t_index
+        const size_t t_index
     ) : m_Scope{ t_scope },
         m_Name{ t_name },
         m_Type{ t_type },

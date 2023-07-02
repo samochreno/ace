@@ -904,7 +904,7 @@ namespace Ace
         };
     }
 
-    static auto IsWhitespace(const char& t_character) -> bool
+    static auto IsWhitespace(const char t_character) -> bool
     {
         return 
             (t_character == ' ') ||
@@ -918,7 +918,7 @@ namespace Ace
         EatCharacters(1);
     }
 
-    auto Lexer::EatCharacters(const size_t& t_count) -> void
+    auto Lexer::EatCharacters(const size_t t_count) -> void
     {
         m_CharacterIterator += t_count;
     }
@@ -1033,7 +1033,7 @@ namespace Ace
         return *m_CharacterIterator;
     }
 
-    auto Lexer::GetCharacter(const size_t& t_offset) const -> char
+    auto Lexer::GetCharacter(const size_t t_offset) const -> char
     {
         const auto remainingCharactersCount = std::distance(
             m_CharacterIterator,
