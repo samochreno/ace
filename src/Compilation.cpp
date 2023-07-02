@@ -485,7 +485,7 @@ namespace Ace
 
         self->PackageFileBuffer = std::move(expPackageFileBuffer.Unwrap());
 
-        auto expPackage = Package::New(&self->PackageFileBuffer);
+        auto expPackage = Package::Parse(&self->PackageFileBuffer);
         diagnosticBag.Add(expPackage);
         if (!expPackage)
         {

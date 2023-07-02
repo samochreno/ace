@@ -13,7 +13,7 @@ namespace Ace
 
     struct Package
     {
-        static auto New(
+        static auto Parse(
             const FileBuffer* const t_fileBuffer
         ) -> Expected<Package>;
 

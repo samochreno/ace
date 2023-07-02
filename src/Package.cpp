@@ -377,7 +377,7 @@ namespace Ace
         return finalFilePaths;
     }
 
-    static auto New(
+    static auto ParsePackage(
         const FileBuffer* const t_fileBuffer
     ) -> Expected<Package>
     {
@@ -453,7 +453,7 @@ namespace Ace
         };
     }
 
-    auto Package::New(
+    auto Package::Parse(
         const FileBuffer* const t_fileBuffer
     ) -> Expected<Package>
     {
@@ -461,7 +461,7 @@ namespace Ace
 
         try
         {
-            auto expPackage = Ace::New(t_fileBuffer);
+            auto expPackage = ParsePackage(t_fileBuffer);
             diagnosticBag.Add(expPackage);
             if (!expPackage)
             {
