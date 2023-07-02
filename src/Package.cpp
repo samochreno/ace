@@ -53,17 +53,25 @@ namespace Ace
     ) -> bool
     {
         if (!t_directoryEntry.is_regular_file())
+        {
             return false;
+        }
 
         if (!t_optExtensionFilter.has_value())
+        {
             return true;
+        }
 
         const auto& path = t_directoryEntry.path();
         if (!path.has_extension())
+        {
             return false;
+        }
 
         if (path.extension() != t_optExtensionFilter.value())
+        {
             return false;
+        }
 
         return true;
     }
@@ -73,7 +81,9 @@ namespace Ace
     ) -> std::vector<std::filesystem::path>
     {
         if (!std::filesystem::exists(t_directory.Path))
+        {
             return {};
+        }
 
         std::vector<std::filesystem::path> filePaths{};
 
