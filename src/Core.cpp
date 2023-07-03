@@ -64,11 +64,6 @@ namespace Ace::Core
                         ACE_LOG_ERROR(message);
                         break;
                     }
-
-                    default:
-                    {
-                        ACE_UNREACHABLE();
-                    }
                 }
             }
         );

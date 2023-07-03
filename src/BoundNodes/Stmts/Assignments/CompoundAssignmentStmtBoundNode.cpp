@@ -193,11 +193,6 @@ namespace Ace
                             tmpVarReferenceExpr
                         );
                     }
-
-                    default:
-                    {
-                        ACE_UNREACHABLE();
-                    }
                 }
             }();
 

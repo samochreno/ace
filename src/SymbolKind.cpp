@@ -10,21 +10,20 @@ namespace Ace
 {
     static const std::unordered_map<SymbolKind, int8_t> CreationOrderMap
     {
-        { SymbolKind::None,                  0 },
-        { SymbolKind::Module,                0 },
-        { SymbolKind::Struct,                0 },
-        { SymbolKind::TypeTemplate,          0 },
-        { SymbolKind::Label,                 0 },
+        { SymbolKind::Module,            0 },
+        { SymbolKind::Struct,            0 },
+        { SymbolKind::TypeTemplate,      0 },
+        { SymbolKind::Label,             0 },
         { SymbolKind::ImplTemplateParam, 0 },
         { SymbolKind::TemplateParam,     0 },
-        { SymbolKind::TypeAlias,             1 },
-        { SymbolKind::TemplatedImpl,         1 },
-        { SymbolKind::Function,              3 },
-        { SymbolKind::FunctionTemplate,      3 },
-        { SymbolKind::StaticVar,        3 },
-        { SymbolKind::InstanceVar,      3 },
-        { SymbolKind::ParamVar,     2 },
-        { SymbolKind::LocalVar,         3 },
+        { SymbolKind::TypeAlias,         1 },
+        { SymbolKind::TemplatedImpl,     1 },
+        { SymbolKind::Function,          3 },
+        { SymbolKind::FunctionTemplate,  3 },
+        { SymbolKind::StaticVar,         3 },
+        { SymbolKind::InstanceVar,       3 },
+        { SymbolKind::ParamVar,          2 },
+        { SymbolKind::LocalVar,          3 },
     };
 
     constexpr auto operator&(

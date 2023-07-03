@@ -159,11 +159,6 @@ namespace Ace
 
                 return false;
             }
-
-            default:
-            {
-                ACE_UNREACHABLE();
-            }
         }
     }
 

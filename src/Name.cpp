@@ -105,11 +105,6 @@ namespace Ace
             {
                 return natives->WeakPointer.GetFullyQualifiedName();
             }
-
-            default:
-            {
-                ACE_UNREACHABLE();
-            }
         }
     }
 

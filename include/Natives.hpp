@@ -44,7 +44,6 @@ namespace Ace
 
     enum class NativeCopyabilityKind
     {
-        None,
         Trivial,
         NonTrivial,
     };

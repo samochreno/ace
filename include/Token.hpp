@@ -8,7 +8,6 @@ namespace Ace
 {
     enum class TokenKind
     {
-        None,
         EndOfFile,
 
         Colon,

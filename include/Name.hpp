@@ -25,7 +25,6 @@ namespace Ace
 
     enum class SymbolNameResolutionScope
     {
-        None,
         Local,
         Global,
     };
@@ -49,7 +48,6 @@ namespace Ace
 
     enum class TypeNameModifier
     {
-        None,
         Reference,
         StrongPointer,
         WeakPointer,

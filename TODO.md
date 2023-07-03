@@ -2,7 +2,6 @@
 
 ## 🛠️ Refactor
 
-- Remove `None` variants in enums
 - Expression parsing
 - `CompoundAssignmentStmtBoundNode` lowering
 - ❓ Split `Core.hpp` into multiple files, especially glue generation

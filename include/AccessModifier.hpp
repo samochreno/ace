@@ -8,7 +8,6 @@ namespace Ace
 {
     enum class AccessModifier
     {
-        None,
         Private,
         Public,
     };

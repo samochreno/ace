@@ -8,7 +8,6 @@ namespace Ace
 {
     enum class SymbolKind
     {
-        None,
         Module,
         Struct,
         Label,

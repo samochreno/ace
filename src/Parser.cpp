@@ -67,10 +67,14 @@ namespace Ace
             case TokenKind::CaretEquals:
             case TokenKind::VerticalBarEquals:
             case TokenKind::AmpersandEquals:
+            {
                 return true;
+            }
 
             default:
+            {
                 return false;
+            }
         }
     }
 
@@ -81,27 +85,37 @@ namespace Ace
             case TokenKind::Plus:
             case TokenKind::Minus:
             case TokenKind::Tilde:
+            {
                 return true;
+            }
 
             default:
+            {
                 return false;
+            }
         }
     }
 
     static auto IsPrefixOperator(const TokenKind t_tokenKind) -> bool
     {
         if (IsUserPrefixOperator(t_tokenKind))
+        {
             return true;
+        }
 
         switch (t_tokenKind)
         {
             case TokenKind::Exclamation:
             case TokenKind::BoxKeyword:
             case TokenKind::UnboxKeyword:
+            {
                 return true;
+            }
 
             default:
+            {
                 return false;
+            }
         }
     }
 
@@ -110,10 +124,14 @@ namespace Ace
         switch (t_tokenKind)
         {
             case TokenKind::OpenParen:
+            {
                 return true;
+            }
 
             default:
+            {
                 return false;
+            }
         }
     }
 
@@ -137,10 +155,14 @@ namespace Ace
             case TokenKind::Caret:
             case TokenKind::VerticalBar:
             case TokenKind::Ampersand:
+            {
                 return true;
+            }
 
             default:
+            {
                 return false;
+            }
         }
     }
 
@@ -2587,11 +2609,6 @@ namespace Ace
                                 -1,
                                 -1,
                             };
-                        }
-
-                        default: 
-                        {
-                            ACE_UNREACHABLE();
                         }
                     }
                 }();

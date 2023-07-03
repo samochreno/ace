@@ -38,7 +38,6 @@ namespace Ace
 {
     enum class DiagnosticSeverity
     {
-        None,
         Info,
         Warning,
         Error,

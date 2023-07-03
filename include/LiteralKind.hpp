@@ -6,8 +6,6 @@ namespace Ace
 {
     enum class LiteralKind : uint16_t
     {
-        None    = 0,
-
         Int8    = 1 << 0,
         Int16   = 1 << 1,
         Int32   = 1 << 2,

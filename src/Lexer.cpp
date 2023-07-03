@@ -79,7 +79,7 @@ namespace Ace
         Token token
         {
             t_sourceLocation,
-            TokenKind::None,
+            TokenKind::Identifier,
         };
 
         if      (t_string == Keyword::If)        token.Kind = TokenKind::IfKeyword;
@@ -237,7 +237,7 @@ namespace Ace
             Token
             {
                 sourceLocation,
-                TokenKind::None,
+                TokenKind::Int,
                 string,
             },
             Distance(t_context.CharacterIterator, it),
@@ -267,7 +267,7 @@ namespace Ace
 
         const auto token = std::make_shared<const Token>(
             sourceLocation,
-            TokenKind::None,
+            TokenKind::Identifier,
             std::string{ t_context.CharacterIterator, it }
         );
 
