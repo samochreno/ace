@@ -15,11 +15,19 @@ namespace Ace
 {
     auto CreateEmptyError() -> std::shared_ptr<const Diagnostic>;
 
+    struct Void
+    {
+        Void() = default;
+        Void(const DiagnosticBag& t_diagnosticBag)
+            : DiagnosticBag{ t_diagnosticBag }
+        {
+        }
+
+        DiagnosticBag DiagnosticBag{};
+    };
+
     template<typename TValue>
     class Expected;
-
-    class ExpectedVoidType {};
-    inline constexpr const ExpectedVoidType Void{};
 
     template<>
     class Expected<void> : public IDiagnosed
@@ -38,13 +46,9 @@ namespace Ace
         {
             t_other.m_IsFatal = false;
         }
-        Expected(const ExpectedVoidType& t_value)
-        {
-        }
         Expected(
-            const ExpectedVoidType& t_value,
-            const DiagnosticBag& t_diagnosticBag
-        ) : m_DiagnosticBag{ t_diagnosticBag }
+            Void&& t_value
+        ) : m_DiagnosticBag{ std::move(t_value.DiagnosticBag) }
         {
         }
         Expected(const std::shared_ptr<const Diagnostic>& t_diagnostic)
@@ -295,7 +299,7 @@ namespace Ace
             return t_func(t_element);
         }) == end(t_inVec));
 
-        return Void;
+        return Void{};
     }
 
 #undef TOut

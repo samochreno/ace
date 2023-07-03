@@ -381,7 +381,7 @@ namespace Ace
                 );
             }
 
-            return Void;
+            return Void{};
         }));
 
         return finalFilePaths;

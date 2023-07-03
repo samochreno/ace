@@ -1180,7 +1180,7 @@ namespace Ace
                 ACE_TRY_ASSERT(!templateParamSet.contains(templateParamName));
                 templateParamSet.insert(templateParamName);
 
-                return Void;
+                return Void{};
             }));
             
             ACE_TRY_VOID(TransformExpectedVector(templateArgs,
@@ -1193,7 +1193,7 @@ namespace Ace
                 ACE_TRY_ASSERT(templateParamSet.contains(templateArgName));
                 templateParamSet.erase(templateArgName);
 
-                return Void;
+                return Void{};
             }));
         }
 

@@ -127,6 +127,6 @@ namespace Ace
     { 
         ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(m_TypeTemplateName));
         templateSymbol->GetSelfScope()->DefineAssociation(m_SelfScope);
-        return Void;
+        return Void{};
     }
 }

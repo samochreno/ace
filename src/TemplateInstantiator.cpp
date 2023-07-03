@@ -51,7 +51,7 @@ namespace Ace
             ));
             t_symbol->SetPlaceholderSymbol(placeholderSymbol);
 
-            return Void;
+            return Void{};
         });
     }
 

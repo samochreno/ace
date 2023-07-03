@@ -83,7 +83,7 @@ namespace Ace
             {
                 ACE_TRY(sizeKind, t_variable->GetType()->GetSizeKind());
                 ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
-                return Void;
+                return Void{};
             });
             
             m_IsResolvingSize = false;

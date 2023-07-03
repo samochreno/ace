@@ -117,6 +117,6 @@ namespace Ace
         }());
 
         scope->DefineAssociation(m_SelfScope);
-        return Void;
+        return Void{};
     }
 }

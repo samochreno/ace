@@ -170,11 +170,7 @@ namespace Ace
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.LLC)                                       << " - Backend | llc");
         ACE_LOG_INFO(getFormattedDuration(emitterResult.Durations.Clang)                                     << " - Backend | clang");
 
-        return
-        {
-            Void,
-            diagnosticBag,
-        };
+        return Void{ diagnosticBag };
     }
 
     static auto Compile(
@@ -206,11 +202,7 @@ namespace Ace
             return diagnosticBag;
         }
 
-        return
-        {
-            Void,
-            diagnosticBag,
-        };
+        return Void{ diagnosticBag };
     }
 
     auto Main(const std::vector<std::string_view>& t_args) -> void
