@@ -11,130 +11,76 @@
 
 namespace Ace
 {
-    auto MissingPackagePathArgError::GetSeverity() const -> DiagnosticSeverity
+    
+
+    auto CreateMissingPackagePathArgError() -> std::shared_ptr<const Diagnostic>
     {
-        return DiagnosticSeverity::Error;
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            std::nullopt,
+            "Missing package path argument"
+        );
     }
 
-    auto MissingPackagePathArgError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return std::nullopt;
-    }
-
-    auto MissingPackagePathArgError::CreateMessage() const -> std::string
-    {
-        return "Missing package path argument";
-    }
-
-    MultiplePackagePathArgsError::MultiplePackagePathArgsError(
+    auto CreateMultiplePackagePathArgsError(
         const SourceLocation& t_sourceLocation
-    ) : m_SourceLocation{ t_sourceLocation }
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "Multiple package path arguments"
+        );
     }
 
-    auto MultiplePackagePathArgsError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto MultiplePackagePathArgsError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_SourceLocation;
-    }
-
-    auto MultiplePackagePathArgsError::CreateMessage() const -> std::string
-    {
-        return "Multiple package path arguments";
-    }
-
-    MissingCommandLineOptionNameError::MissingCommandLineOptionNameError(
+    auto CreateMissingCommandLineOptionNameError(
         const SourceLocation& t_sourceLocation
-    ) : m_SourceLocation{ t_sourceLocation }
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "Missing option name"
+        );
     }
 
-    auto MissingCommandLineOptionNameError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto MissingCommandLineOptionNameError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_SourceLocation;
-    }
-
-    auto MissingCommandLineOptionNameError::CreateMessage() const -> std::string
-    {
-        return "Missing option name";
-    }
-
-    UnknownCommandLineOptionNameError::UnknownCommandLineOptionNameError(
+    auto CreateUnknownCommandLineOptionNameError(
         const SourceLocation& t_sourceLocation
-    ) : m_SourceLocation{ t_sourceLocation }
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "Unknown option name"
+        );
     }
 
-    auto UnknownCommandLineOptionNameError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto UnknownCommandLineOptionNameError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_SourceLocation;
-    }
-
-    auto UnknownCommandLineOptionNameError::CreateMessage() const -> std::string
-    {
-        return "Unknown option name";
-    }
-
-    MissingCommandLineOptionValueError::MissingCommandLineOptionValueError(
+    auto CreateMissingCommandLineOptionValueError(
         const SourceLocation& t_sourceLocation
-    ) : m_SourceLocation{ t_sourceLocation }
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "Missing option argument"
+        );
     }
 
-    auto MissingCommandLineOptionValueError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto MissingCommandLineOptionValueError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_SourceLocation;
-    }
-
-    auto MissingCommandLineOptionValueError::CreateMessage() const -> std::string
-    {
-        return "Missing option argument";
-    }
-
-    UnexpectedCommandLineOptionValueError::UnexpectedCommandLineOptionValueError(
+    auto CreateUnexpectedCommandLineOptionValueError(
         const SourceLocation& t_sourceLocation
-    ) : m_SourceLocation{ t_sourceLocation }
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "Unexpected option argument"
+        );
     }
 
-    auto UnexpectedCommandLineOptionValueError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto UnexpectedCommandLineOptionValueError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_SourceLocation;
-    }
-
-    auto UnexpectedCommandLineOptionValueError::CreateMessage() const -> std::string
-    {
-        return "Unexpected option argument";
-    }
-
-    JsonError::JsonError(
+    auto CreateJsonError(
         const FileBuffer* const t_fileBuffer,
         const nlohmann::json::exception& t_jsonException
-    )
+    ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string_view originalMessage = t_jsonException.what();
 
@@ -145,16 +91,33 @@ namespace Ace
         );
         ACE_ASSERT(closingBracketIt != end(originalMessage));
 
-        m_Message = std::string
+        auto [message, optSourceLocation] = [&]() -> std::tuple<std::string, std::optional<SourceLocation>>
         {
-            closingBracketIt + 2,
-            end(originalMessage),
-        };
+            const auto atLinePos = originalMessage.find("at line");
+            if (atLinePos == std::string::npos)
+            {
+                const std::string message
+                {
+                    closingBracketIt + 2,
+                    end(originalMessage),
+                };
 
-        const auto atLinePos = m_Message.find("at line");
-        if (atLinePos != std::string::npos)
-        {
-            auto it = begin(m_Message) + atLinePos + 8;
+                return { message, std::optional<SourceLocation>{} };
+            }
+
+            const auto colonIt = std::find(
+                begin(originalMessage),
+                end  (originalMessage),
+                ':'
+            );
+
+            const std::string message
+            {
+                colonIt + 2,
+                end(originalMessage),
+            };
+
+            auto it = begin(originalMessage) + atLinePos + 8;
 
             std::string lineString{};
             while (IsNumber(*it))
@@ -179,183 +142,104 @@ namespace Ace
                 static_cast<size_t>(std::stoi(columnString));
 
             const auto& line = t_fileBuffer->GetLines().at(lineIndex);
-            m_OptSourceLocation = SourceLocation
+            const SourceLocation sourceLocation
             {
                 t_fileBuffer,
                 begin(line) + characterIndex,
                 begin(line) + characterIndex + 1,
             };
 
-            m_Message = std::string
+            return
             {
-                std::find(begin(m_Message), end(m_Message), ':') + 2,
-                end(m_Message),
+                message,
+                sourceLocation,
             };
-        }
+        }();
 
-        m_Message.at(0) = std::toupper(m_Message.at(0));
-        m_Message = "Json error: " + m_Message;
+        message.at(0) = std::toupper(message.at(0));
+        message = "Json error: " + message;
+
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            optSourceLocation,
+            message
+        );
     }
 
-    auto JsonError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto JsonError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_OptSourceLocation;
-    }
-
-    auto JsonError::CreateMessage() const -> std::string
-    {
-        return m_Message;
-    }
-
-    FileNotFoundError::FileNotFoundError(
+    auto CreateFileNotFoundError(
         const std::filesystem::path& t_path
-    ) : m_Path{ t_path }
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            std::nullopt,
+            "File not found: " + t_path.string()
+        );
     }
 
-    auto FileNotFoundError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto FileNotFoundError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return std::nullopt;
-    }
-
-    auto FileNotFoundError::CreateMessage() const -> std::string
-    {
-        return "File not found: " + m_Path.string();
-    }
-
-    FileOpenError::FileOpenError(
+    auto CreateFileOpenError(
         const std::filesystem::path& t_path
-    ) : m_Path{ t_path }
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            std::nullopt,
+            "Unable to open file: " + t_path.string()
+        );
     }
 
-    auto FileOpenError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto FileOpenError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return std::nullopt;
-    }
-
-    auto FileOpenError::CreateMessage() const -> std::string
-    {
-        return "Unable to open file: " + m_Path.string();
-    }
-
-    UnterminatedMultiLineCommentError::UnterminatedMultiLineCommentError(
+    auto CreateUnterminatedMultiLineCommentError(
         const SourceLocation& t_sourceLocation
-    ) : m_SourceLocation{ t_sourceLocation }
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "Unterminated multiline comment"
+        );
     }
 
-    auto UnterminatedMultiLineCommentError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto UnterminatedMultiLineCommentError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_SourceLocation;
-    }
-
-    auto UnterminatedMultiLineCommentError::CreateMessage() const -> std::string
-    {
-        return "Unterminated multiline comment";
-    }
-
-    UnterminatedStringLiteralError::UnterminatedStringLiteralError(
+    auto CreateUnterminatedStringLiteralError(
         const SourceLocation& t_sourceLocation
-    ) : m_SourceLocation{ t_sourceLocation }
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "Unterminated string literal"
+        );
     }
 
-    auto UnterminatedStringLiteralError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto UnterminatedStringLiteralError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_SourceLocation;
-    }
-
-    auto UnterminatedStringLiteralError::CreateMessage() const -> std::string
-    {
-        return "Unterminated string literal";
-    }
-
-    UnexpectedCharacterError::UnexpectedCharacterError(
+    auto CreateUnexpectedCharacterError(
         const SourceLocation& t_sourceLocation
-    ) : m_SourceLocation{ t_sourceLocation } 
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "Unexpected character"
+        );
     }
 
-    auto UnexpectedCharacterError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto UnexpectedCharacterError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_SourceLocation;
-    }
-
-    auto UnexpectedCharacterError::CreateMessage() const -> std::string
-    {
-        return "Unexpected character";
-    }
-
-    UnknownNumericLiteralTypeSuffixError::UnknownNumericLiteralTypeSuffixError(
+    auto CreateUnknownNumericLiteralTypeSuffixError(
         const SourceLocation& t_sourceLocation
-    ) : m_SourceLocation{ t_sourceLocation } 
+    ) -> std::shared_ptr<const Diagnostic>
     {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "Unknown numeric literal type suffix"
+        );
     }
 
-    auto UnknownNumericLiteralTypeSuffixError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto UnknownNumericLiteralTypeSuffixError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_SourceLocation;
-    }
-
-    auto UnknownNumericLiteralTypeSuffixError::CreateMessage() const -> std::string
-    {
-        return "Unknown numeric literal type suffix";
-    }
-
-    DecimalPointInNonFloatNumericLiteralError::DecimalPointInNonFloatNumericLiteralError(
+    auto CreateDecimalPointInNonFloatNumericLiteralError(
         const SourceLocation& t_sourceLocation
-    ) : m_SourceLocation{ t_sourceLocation } 
+    ) -> std::shared_ptr<const Diagnostic>
     {
-    }
-
-    auto DecimalPointInNonFloatNumericLiteralError::GetSeverity() const -> DiagnosticSeverity
-    {
-        return DiagnosticSeverity::Error;
-    }
-
-    auto DecimalPointInNonFloatNumericLiteralError::GetSourceLocation() const -> std::optional<SourceLocation>
-    {
-        return m_SourceLocation;
-    }
-
-    auto DecimalPointInNonFloatNumericLiteralError::CreateMessage() const -> std::string
-    {
-        return "Decimal point in non-float numeric literal";
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "Decimal point in non-float numeric literal"
+        );
     }
 }

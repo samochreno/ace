@@ -2,6 +2,8 @@
 
 ## 🛠️ Refactor
 
+- Remove `None` variants in enums
+- Change `return Expected{ Void, diagnosticBag }` to `return ExpectedVoid{ diagnosticBag }`
 - Expression parsing
 - `CompoundAssignmentStmtBoundNode` lowering
 - ❓ Split `Core.hpp` into multiple files, especially glue generation

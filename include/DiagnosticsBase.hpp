@@ -19,11 +19,11 @@ auto t_resultVarName = std::move(ACE_MACRO_CONCAT(_exp_, t_resultVarName).Unwrap
 #define ACE_TRY_ASSERT(t_boolExpr) \
 if (!(t_boolExpr)) \
 { \
-    return std::make_shared<const NoneError>(); \
+    return CreateEmptyError(); \
 }
 
 #define ACE_TRY_UNREACHABLE() \
-return std::make_shared<const NoneError>();
+return CreateEmptyError();
 
 #define ACE_TRY_VOID(t_expExpr) \
 { \
@@ -44,14 +44,21 @@ namespace Ace
         Error,
     };
 
-    class IDiagnostic
+    struct Diagnostic
     {
-    public:
-        virtual ~IDiagnostic() = default;
+        Diagnostic(
+            const DiagnosticSeverity t_severity,
+            const std::optional<SourceLocation>& t_optSourceLocation,
+            const std::string& t_message
+        ) : Severity{ t_severity },
+            OptSourceLocation{ t_optSourceLocation },
+            Message{ t_message }
+        {
+        }
 
-        virtual auto GetSeverity() const -> DiagnosticSeverity = 0;
-        virtual auto GetSourceLocation() const -> std::optional<SourceLocation> = 0;
-        virtual auto CreateMessage() const -> std::string = 0;
+        DiagnosticSeverity Severity{};
+        std::optional<SourceLocation> OptSourceLocation{};
+        std::string Message{};
     };
 
     class DiagnosticBag;

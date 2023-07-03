@@ -13,24 +13,7 @@
 
 namespace Ace
 {
-    class NoneError : public virtual IDiagnostic
-    {
-    public:
-        virtual ~NoneError() = default;
-
-        auto GetSeverity() const -> DiagnosticSeverity final
-        {
-            return DiagnosticSeverity::Error;
-        }
-        auto GetSourceLocation() const -> std::optional<SourceLocation> final
-        {
-            return std::nullopt;
-        }
-        auto CreateMessage() const -> std::string final
-        {
-            return "<Empty error message>";
-        }
-    };
+    auto CreateEmptyError() -> std::shared_ptr<const Diagnostic>;
 
     template<typename TValue>
     class Expected;
@@ -64,7 +47,7 @@ namespace Ace
         ) : m_DiagnosticBag{ t_diagnosticBag }
         {
         }
-        Expected(const std::shared_ptr<const NoneError>& t_diagnostic)
+        Expected(const std::shared_ptr<const Diagnostic>& t_diagnostic)
             : m_IsFatal{ true }
         {
             m_DiagnosticBag.Add(t_diagnostic);
@@ -101,7 +84,9 @@ namespace Ace
         auto Unwrap() -> void
         {
             if (!m_IsFatal)
+            {
                 return;
+            }
 
             ACE_UNREACHABLE();
         }
@@ -158,7 +143,7 @@ namespace Ace
             m_DiagnosticBag{ t_bag }
         {
         }
-        Expected(const std::shared_ptr<const NoneError>& t_diagnostic)
+        Expected(const std::shared_ptr<const Diagnostic>& t_diagnostic)
         {
             m_DiagnosticBag.Add(t_diagnostic);
         }
@@ -238,7 +223,9 @@ namespace Ace
         {
             auto expOut = t_func(t_element);
             if (!expOut)
+            {
                 return false;
+            }
 
             if constexpr (std::is_move_constructible_v<TOut>)
             {
@@ -273,7 +260,9 @@ namespace Ace
         {
             auto expOut = t_func(t_element);
             if (!expOut)
+            {
                 return false;
+            }
 
             if constexpr (std::is_move_constructible_v<TOut>)
             {
@@ -319,7 +308,9 @@ namespace Ace
     ) -> Expected<std::optional<TOut>>
     {
         if (!t_optIn.has_value())
+        {
             return std::optional<TOut>{};
+        }
 
         ACE_TRY(out, t_func(t_optIn.value()));
         return std::optional{ out };
@@ -343,7 +334,9 @@ namespace Ace
         {
             auto expMchElement = t_func(t_element);
             if (!expMchElement)
+            {
                 return false;
+            }
 
             if (expMchElement.Unwrap().IsChanged)
             {
@@ -364,7 +357,9 @@ namespace Ace
         }) == end(t_inVec));
 
         if (!isChanged)
+        {
             return CreateUnchanged(t_inVec);
+        }
 
         return CreateChanged(outVec);
     }
@@ -381,12 +376,16 @@ namespace Ace
         bool isChanged = false;
 
         if (!t_optIn.has_value())
+        {
             return CreateUnchanged(t_optIn);
+        }
 
         ACE_TRY(mchOut, t_func(t_optIn.value()));
 
         if (!mchOut.IsChanged)
+        {
             return CreateUnchanged(t_optIn);
+        }
 
         return CreateChanged(std::optional{ mchOut.Value });
     }

@@ -32,21 +32,20 @@ namespace Ace::Core
         std::for_each(
             begin(t_diagnosticBag.GetDiagnostics()),
             end  (t_diagnosticBag.GetDiagnostics()),
-            [](const std::shared_ptr<const IDiagnostic>& t_diagnostic)
+            [](const std::shared_ptr<const Diagnostic>& t_diagnostic)
             {
                 std::string message{};
 
-                const auto optSourceLocation = t_diagnostic->GetSourceLocation();
-                if (optSourceLocation)
+                if (t_diagnostic->OptSourceLocation.has_value())
                 {
-                    message += optSourceLocation.value().Buffer->FormatLocation(
-                        optSourceLocation.value()
+                    message += t_diagnostic->OptSourceLocation.value().Buffer->FormatLocation(
+                        t_diagnostic->OptSourceLocation.value()
                     );
                 }
 
-                message += t_diagnostic->CreateMessage();
+                message += t_diagnostic->Message;
 
-                switch (t_diagnostic->GetSeverity())
+                switch (t_diagnostic->Severity)
                 {
                     case DiagnosticSeverity::Info:
                     {

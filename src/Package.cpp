@@ -516,7 +516,10 @@ namespace Ace
         }
         catch (const nlohmann::json::exception& exception)
         {
-            return diagnosticBag.Add<JsonError>(t_fileBuffer, exception);
+            return diagnosticBag.Add(CreateJsonError(
+                t_fileBuffer,
+                exception
+            ));
         }
     }
 }

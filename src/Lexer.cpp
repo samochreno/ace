@@ -196,9 +196,9 @@ namespace Ace
         if (t_suffix->String == "f32") return TokenKind::Float32;
         if (t_suffix->String == "f64") return TokenKind::Float64;
 
-        return diagnosticBag.Add<UnknownNumericLiteralTypeSuffixError>(
+        return diagnosticBag.Add(CreateUnknownNumericLiteralTypeSuffixError(
             t_suffix->SourceLocation
-        );
+        ));
     }
 
     static auto ScanNumericLiteralNumber(
@@ -347,9 +347,9 @@ namespace Ace
                     t_context.CharacterIterator + decimalPointPos + 1,
                 };
 
-                diagnosticBag.Add<DecimalPointInNonFloatNumericLiteralError>(
+                diagnosticBag.Add(CreateDecimalPointInNonFloatNumericLiteralError(
                     sourceLocation
-                );
+                ));
 
                 numberToken.Value.String.erase(decimalPointPos);
             } 
@@ -668,9 +668,9 @@ namespace Ace
                     it + 1,
                 };
 
-                return diagnosticBag.Add<UnexpectedCharacterError>(
+                return diagnosticBag.Add(CreateUnexpectedCharacterError(
                     sourceLocation
-                );
+                ));
             }
         }
     }
@@ -736,9 +736,9 @@ namespace Ace
                     it,
                 };
 
-                diagnosticBag.Add<UnterminatedStringLiteralError>(
+                diagnosticBag.Add(CreateUnterminatedStringLiteralError(
                     sourceLocation
-                );
+                ));
 
                 break;
             }
@@ -996,9 +996,9 @@ namespace Ace
                     m_CharacterIterator,
                 };
 
-                return diagnosticBag.Add<UnterminatedMultiLineCommentError>(
+                return diagnosticBag.Add(CreateUnterminatedMultiLineCommentError(
                     sourceLocation
-                );
+                ));
             }
 
             EatCharacter();

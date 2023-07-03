@@ -106,8 +106,9 @@ namespace Ace
             end  (t_context.Arg),
         };
 
-        diagnosticBag.Add<MissingCommandLineOptionNameError>(sourceLocation);
-        return diagnosticBag;
+        return diagnosticBag.Add(CreateMissingCommandLineOptionNameError(
+            sourceLocation
+        ));
     }
 
     static auto ErrorIfMissingOrUnexpectedOptionValue(
@@ -130,10 +131,9 @@ namespace Ace
                 end  (t_context.Arg),
             };
 
-            diagnosticBag.Add<MissingCommandLineOptionValueError>(
+            return diagnosticBag.Add(CreateMissingCommandLineOptionValueError(
                 sourceLocation
-            );
-            return diagnosticBag;
+            ));
         }
 
         if (
@@ -148,10 +148,9 @@ namespace Ace
                 end  (t_optValue.value()),
             };
 
-            diagnosticBag.Add<UnexpectedCommandLineOptionValueError>(
+            return diagnosticBag.Add(CreateUnexpectedCommandLineOptionValueError(
                 sourceLocation
-            );
-            return diagnosticBag;
+            ));
         }
 
         return diagnosticBag;
@@ -194,9 +193,9 @@ namespace Ace
                 end  (name),
             };
 
-            diagnosticBag.Add<UnknownCommandLineOptionNameError>(
+            diagnosticBag.Add(CreateUnknownCommandLineOptionNameError(
                 sourceLocation
-            );
+            ));
         }
 
         const auto* const definition =
@@ -296,9 +295,9 @@ namespace Ace
                 end  (name),
             };
 
-            diagnosticBag.Add<UnknownCommandLineOptionNameError>(
+            diagnosticBag.Add(CreateUnknownCommandLineOptionNameError(
                 sourceLocation
-            );
+            ));
         }
 
         const auto* const definition =
@@ -419,7 +418,7 @@ namespace Ace
 
         if (packagePathArgIts.empty())
         {
-            diagnosticBag.Add<MissingPackagePathArgError>();
+            diagnosticBag.Add(CreateMissingPackagePathArgError());
         }
         else if (packagePathArgIts.size() == 1)
         {
@@ -438,9 +437,9 @@ namespace Ace
                     end  (*t_packagePathArgIt),
                 };
 
-                diagnosticBag.Add<MultiplePackagePathArgsError>(
+                diagnosticBag.Add(CreateMultiplePackagePathArgsError(
                     sourceLocation
-                );
+                ));
             });
         }
 

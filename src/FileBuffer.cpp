@@ -19,13 +19,15 @@ namespace Ace
 
         if (!std::filesystem::exists(t_path))
         {
-            return diagnosticBag.Add<FileNotFoundError>(t_path);
+            return diagnosticBag.Add(CreateFileNotFoundError(
+                t_path
+            ));
         }
 
         std::ifstream fileStream{ t_path };
         if (!fileStream.is_open())
         {
-            return diagnosticBag.Add<FileOpenError>(t_path);
+            return diagnosticBag.Add(CreateFileOpenError(t_path));
         }
 
         std::string buffer{};
