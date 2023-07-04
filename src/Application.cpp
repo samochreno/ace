@@ -22,7 +22,9 @@
 
 namespace Ace
 {
-    static auto Compile(const Compilation* const t_compilation) -> Expected<void>
+    static auto Compile(
+        const Compilation* const t_compilation
+    ) -> Expected<void>
     {
         DiagnosticBag diagnosticBag{};
 
