@@ -11,6 +11,9 @@
 
 ## 💥 High Priority
 
+- Fix `std::filesystem::status` false positive when iterating root in `src/Package.cpp`
+- Add ability to add errors to compilation, print them as soon as they are added
+- Remove value-only constructor from `Diagnosed`
 - Add error messages to make debugging easier:
   - `Compilation` parsing and verification errors
   - Remove second typechecking pass

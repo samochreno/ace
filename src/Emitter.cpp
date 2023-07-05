@@ -204,7 +204,7 @@ namespace Ace
         llvm::raw_string_ostream originalModuleOStream{ originalModuleString };
         originalModuleOStream << *m_Module;
         originalModuleOStream.flush();
-        ACE_LOG_INFO(originalModuleString);
+        Log(DiagnosticSeverity::Info, originalModuleString);
         originalModuleString.clear();
 
         const auto timeIREmittingEnd = now();
@@ -840,9 +840,9 @@ namespace Ace
                     t_functionSymbolBlockPair.Block
                 );
 
-                ACE_LOG_INFO(
-                    "Emitting function: " << 
-                    m_FunctionSymbol->CreateSignature()
+                Log(
+                    DiagnosticSeverity::Info,
+                    "emitting function: " + m_FunctionSymbol->CreateSignature()
                 );
 
                 ACE_ASSERT(m_FunctionSymbol->GetBody().has_value());

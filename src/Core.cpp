@@ -34,37 +34,11 @@ namespace Ace::Core
             end  (t_diagnosticBag.GetDiagnostics()),
             [](const std::shared_ptr<const Diagnostic>& t_diagnostic)
             {
-                std::string message{};
-
-                if (t_diagnostic->OptSourceLocation.has_value())
-                {
-                    message += t_diagnostic->OptSourceLocation.value().Buffer->FormatLocation(
-                        t_diagnostic->OptSourceLocation.value()
-                    );
-                }
-
-                message += t_diagnostic->Message;
-
-                switch (t_diagnostic->Severity)
-                {
-                    case DiagnosticSeverity::Info:
-                    {
-                        ACE_LOG_INFO(message);
-                        break;
-                    }
-
-                    case DiagnosticSeverity::Warning:
-                    {
-                        ACE_LOG_WARNING(message);
-                        break;
-                    }
-
-                    case DiagnosticSeverity::Error:
-                    {
-                        ACE_LOG_ERROR(message);
-                        break;
-                    }
-                }
+                Log(
+                    DiagnosticSeverity::Info,
+                    t_diagnostic->Message,
+                    t_diagnostic->OptSourceLocation
+                );
             }
         );
     }

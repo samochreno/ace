@@ -41,6 +41,7 @@ namespace Ace
         Info,
         Warning,
         Error,
+        Debug,
     };
 
     struct Diagnostic
