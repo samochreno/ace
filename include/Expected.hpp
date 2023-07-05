@@ -209,60 +209,24 @@ namespace Ace
         DiagnosticBag m_DiagnosticBag{};
     };
 
-#define TIn typename std::decay_t<decltype(*TIt{})>
+#define TIn  typename std::decay_t<decltype(*TBegin{})>
 #define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
 
-    template<typename TIt, typename F>
+    template<typename TBegin, typename TEnd, typename F>
     auto TransformExpected(
-        TIt t_begin,
-        TIt t_end,
-        F&& t_func
-    ) -> Expected<std::vector<TOut>>
-    {
-        std::vector<TOut> vec{};
-        vec.reserve(std::distance(t_begin, t_end));
-
-        ACE_TRY_ASSERT(std::find_if_not(t_begin, t_end,
-        [&](const TIn& t_element)
-        {
-            auto expOut = t_func(t_element);
-            if (!expOut)
-            {
-                return false;
-            }
-
-            if constexpr (std::is_move_constructible_v<TOut>)
-            {
-                vec.push_back(std::move(expOut.Unwrap()));
-            }
-            else
-            {
-                vec.push_back(expOut.Unwrap());
-            }
-
-            return true;
-        }) == t_end);
-
-        return vec;
-    }
-
-#undef TIn
-#undef TOut
-#define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
-
-    template<typename TIn, typename F>
-    auto TransformExpectedVector(
-        const std::vector<TIn>& t_inVec,
+        const TBegin t_begin,
+        const TEnd t_end,
         F&& t_func
     ) -> std::enable_if_t<!std::is_same_v<TOut, void>, Expected<std::vector<TOut>>>
     {
-        std::vector<TOut> outVec{};
-        outVec.reserve(t_inVec.size());
+        DiagnosticBag diagnosticBag{};
 
-        ACE_TRY_ASSERT(std::find_if_not(begin(t_inVec), end(t_inVec),
+        std::vector<TOut> outVec{};
+        const auto unexpectedIt = std::find_if_not(t_begin, t_end,
         [&](const TIn& t_element)
         {
             auto expOut = t_func(t_element);
+            diagnosticBag.Add(expOut);
             if (!expOut)
             {
                 return false;
@@ -278,10 +242,96 @@ namespace Ace
             }
 
             return true;
+        });
 
-        }) == end(t_inVec));
+        if (unexpectedIt != t_end)
+        {
+            return diagnosticBag;
+        }
 
-        return outVec;
+        return { outVec, diagnosticBag };
+    }
+
+#undef TOut
+#define TIn  typename std::decay_t<decltype(*TBegin{})>
+#define TOut typename std::decay_t<decltype(t_func(*TIn{}).Unwrap())>
+
+    template<typename TBegin, typename TEnd, typename F>
+    auto TransformExpected(
+        const TBegin t_begin,
+        const TEnd t_end,
+        F&& t_func
+    ) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
+    {
+        DiagnosticBag diagnosticBag{};
+
+        const auto unexpectedIt = std::find_if_not(t_begin, t_end,
+        [&](const TIn& t_element)
+        {
+            const auto expOut = t_func(t_element);
+            diagnosticBag.Add(expOut);
+            if (!expOut)
+            {
+                return false;
+            }
+
+            return true;
+        });
+
+        if (unexpectedIt != t_end)
+        {
+            return diagnosticBag;
+        }
+
+        return Void{ diagnosticBag };
+    }
+
+#undef TIn
+#undef TOut
+#define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
+
+    template<typename TIn, typename F>
+    auto TransformExpectedVector(
+        const std::vector<TIn>& t_inVec,
+        F&& t_func
+    ) -> std::enable_if_t<!std::is_same_v<TOut, void>, Expected<std::vector<TOut>>>
+    {
+        DiagnosticBag diagnosticBag{};
+
+        std::vector<TOut> outVec{};
+        outVec.reserve(t_inVec.size());
+
+        const auto unexpectedIt = std::find_if_not(
+            begin(t_inVec),
+            end  (t_inVec),
+            [&](const TIn& t_element)
+            {
+                auto expOut = t_func(t_element);
+                diagnosticBag.Add(expOut);
+                if (!expOut)
+                {
+                    return false;
+                }
+
+                if constexpr (std::is_move_constructible_v<TOut>)
+                {
+                    outVec.push_back(std::move(expOut.Unwrap()));
+                }
+                else
+                {
+                    outVec.push_back(expOut.Unwrap());
+                }
+
+                return true;
+            }
+        );
+
+        if (unexpectedIt != end(t_inVec))
+        {
+            return diagnosticBag;
+        }
+
+        return { outVec, diagnosticBag };
     }
 
 #undef TOut
@@ -293,13 +343,30 @@ namespace Ace
         F&& t_func
     ) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
     {
-        ACE_TRY_ASSERT(std::find_if_not(begin(t_inVec), end(t_inVec),
-        [&](const TIn& t_element)
-        {
-            return t_func(t_element);
-        }) == end(t_inVec));
+        DiagnosticBag diagnosticBag{};
 
-        return Void{};
+        const auto unexpectedIt = std::find_if_not(
+            begin(t_inVec),
+            end  (t_inVec),
+            [&](const TIn& t_element)
+            {
+                const auto expOut = t_func(t_element);
+                diagnosticBag.Add(expOut);
+                if (!expOut)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        );
+
+        if (unexpectedIt != end(t_inVec))
+        {
+            return diagnosticBag;
+        }
+
+        return Void{ diagnosticBag };
     }
 
 #undef TOut
@@ -329,36 +396,46 @@ namespace Ace
         F&& t_func
     ) -> Expected<MaybeChanged<std::vector<TOut>>>
     {
+        DiagnosticBag diagnosticBag{};
+
         bool isChanged = false;
         std::vector<TOut> outVec{};
         outVec.reserve(t_inVec.size());
 
-        ACE_TRY_ASSERT(std::find_if_not(begin(t_inVec), end(t_inVec),
-        [&](const TIn& t_element)
+        const auto unexpectedIt = std::find_if_not(
+            begin(t_inVec),
+            end  (t_inVec),
+            [&](const TIn& t_element)
+            {
+                auto expMchElement = t_func(t_element);
+                diagnosticBag.Add(expMchElement);
+                if (!expMchElement)
+                {
+                    return false;
+                }
+
+                if (expMchElement.Unwrap().IsChanged)
+                {
+                    isChanged = true;
+                }
+
+                if constexpr (std::is_move_constructible_v<TOut>)
+                {
+                    outVec.push_back(std::move(expMchElement.Unwrap().Value));
+                }
+                else
+                {
+                    outVec.push_back(expMchElement.Unwrap().Value);
+                }
+
+                return true;
+            }
+        );
+
+        if (unexpectedIt != end(t_inVec))
         {
-            auto expMchElement = t_func(t_element);
-            if (!expMchElement)
-            {
-                return false;
-            }
-
-            if (expMchElement.Unwrap().IsChanged)
-            {
-                isChanged = true;
-            }
-
-            if constexpr (std::is_move_constructible_v<TOut>)
-            {
-                outVec.push_back(std::move(expMchElement.Unwrap().Value));
-            }
-            else
-            {
-                outVec.push_back(expMchElement.Unwrap().Value);
-            }
-
-            return true;
-
-        }) == end(t_inVec));
+            return diagnosticBag;
+        }
 
         if (!isChanged)
         {
