@@ -1,15 +1,25 @@
 #include "Utility.hpp"
 
+#include <cctype>
+
 namespace Ace
 {
-    auto IsInAlphabet(const char& t_character) -> bool
+    static auto IsLowercase(const char t_character) -> bool
     {
-        return
-            ((t_character >= 'a') && (t_character <= 'z')) ||
-            ((t_character >= 'A') && (t_character <= 'Z'));
+        return islower(t_character);
     }
 
-    auto IsNumber(const char& t_character) -> bool
+    static auto IsUppercase(const char t_character) -> bool
+    {
+        return isupper(t_character);
+    }
+
+    auto IsInAlphabet(const char t_character) -> bool
+    {
+        return IsLowercase(t_character) || IsUppercase(t_character);
+    }
+
+    auto IsNumber(const char t_character) -> bool
     {
         return (t_character >= '0') && (t_character <= '9');
     }
@@ -30,6 +40,34 @@ namespace Ace
     {
         TrimLeft(t_value);
         TrimRight(t_value);
+        return t_value;
+    }
+
+    auto MakeLowercase(std::string& t_value) -> std::string&
+    {
+        std::for_each(begin(t_value), end(t_value),
+        [](char& t_value)
+        {
+            if (IsUppercase(t_value))
+            {
+                t_value = tolower(t_value);
+            }
+        });
+
+        return t_value;
+    }
+
+    auto MakeUppercase(std::string& t_value) -> std::string&
+    {
+        std::for_each(begin(t_value), end(t_value),
+        [](char& t_value)
+        {
+            if (IsLowercase(t_value))
+            {
+                t_value = toupper(t_value);
+            }
+        });
+
         return t_value;
     }
 }

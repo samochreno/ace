@@ -25,12 +25,15 @@ namespace Ace
         return vec;
     }
 
-    auto IsInAlphabet(const char& t_character) -> bool;
-    auto IsNumber    (const char& t_character) -> bool;
+    auto IsInAlphabet(const char t_character) -> bool;
+    auto IsNumber    (const char t_character) -> bool;
 
     auto TrimRight(std::string& t_value) -> std::string&;
     auto TrimLeft (std::string& t_value) -> std::string&;
     auto Trim     (std::string& t_value) -> std::string&;
+
+    auto MakeLowercase(std::string& t_value) -> std::string&;
+    auto MakeUppercase(std::string& t_value) -> std::string&;
 
     template<typename TIterator>
     auto Distance(TIterator t_begin, TIterator t_end) -> size_t
