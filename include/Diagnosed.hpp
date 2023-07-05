@@ -37,11 +37,6 @@ namespace Ace
     {
     public:
         Diagnosed(
-            const TValue& t_value
-        ) : m_Value{ t_value }
-        {
-        }
-        Diagnosed(
             const TValue& t_value,
             const DiagnosticBag& t_diagnosticBag
         ) : m_Value{ t_value },
