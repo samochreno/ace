@@ -35,7 +35,7 @@ namespace Ace::Core
             [](const std::shared_ptr<const Diagnostic>& t_diagnostic)
             {
                 Log(
-                    DiagnosticSeverity::Info,
+                    t_diagnostic->Severity,
                     t_diagnostic->Message,
                     t_diagnostic->OptSourceLocation
                 );
