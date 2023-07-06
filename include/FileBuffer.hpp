@@ -37,6 +37,8 @@ namespace Ace
         auto GetPath() const -> const std::filesystem::path&;
         auto GetLines() const -> const std::vector<std::string_view>&;
 
+        auto CreateFirstLocation() const -> SourceLocation;
+
     private:
         FileBuffer(
             const Compilation* const t_compilation,

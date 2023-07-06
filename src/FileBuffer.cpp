@@ -100,6 +100,17 @@ namespace Ace
         return m_Lines;
     }
 
+
+    auto FileBuffer::CreateFirstLocation() const -> SourceLocation
+    {
+        return
+        {
+            this,
+            begin(m_Lines.front()),
+            begin(m_Lines.front()) + 1,
+        };
+    }
+
     auto FileBuffer::FormatLocation(
         const SourceLocation& t_location
     ) const -> std::string
