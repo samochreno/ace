@@ -19,6 +19,7 @@
   - Remove second typechecking pass
   - Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
   - Error printing
+- String interning to improve compile times
 - Add strong pointer self
 - Traits:
   - Implement parsing

@@ -22,6 +22,13 @@
 
 namespace Ace
 {
+    static size_t IndentLevel = 3;
+
+    static auto CreateIndent() -> std::string
+    {
+        return std::string(IndentLevel, ' ');
+    }
+
     static auto Compile(
         const Compilation* const t_compilation
     ) -> Expected<void>
@@ -34,13 +41,8 @@ namespace Ace
         const auto& now = std::chrono::steady_clock::now;
 
         const auto timeStart = now();
-        Log(DiagnosticSeverity::Info, "build start");
-
         const auto timeFrontendStart = now();
-        Log(DiagnosticSeverity::Info, "frontend start");
-
         const auto timeParsingStart = now();
-        Log(DiagnosticSeverity::Info, "parsing start");
 
         std::vector<std::shared_ptr<const ModuleNode>> asts{};
         std::transform(
@@ -53,54 +55,32 @@ namespace Ace
                     t_compilation,
                     t_sourceFileBuffer
                 );
+
+                t_compilation->GlobalDiagnosticBag->Add(dgnAST.GetDiagnosticBag());
                 diagnosticBag.Add(dgnAST.GetDiagnosticBag());
                 return dgnAST.Unwrap();
             }
         );
 
         const auto timeParsingEnd = now();
-        Log(DiagnosticSeverity::Info, "parsing success");
 
         const auto nodes = Core::GetAllNodes(begin(asts), end(asts));
 
         const auto timeSymbolCreationStart = now();
-        Log(DiagnosticSeverity::Info, "symbol creation start");
 
         ACE_TRY_VOID(Core::CreateAndDefineSymbols(t_compilation, nodes));
         ACE_TRY_VOID(Core::DefineAssociations(t_compilation, nodes));
 
         const auto timeSymbolCreationEnd = now();
-        Log(DiagnosticSeverity::Info, "symbol creation success");
 
-        Log(
-            DiagnosticSeverity::Info,
-            "template placeholder symbols instantiation start"
-        );
         const auto templateSymbols = globalScope->CollectSymbolsRecursive<ITemplateSymbol>();
         t_compilation->TemplateInstantiator->SetSymbols(templateSymbols);
         ACE_TRY_VOID(t_compilation->TemplateInstantiator->InstantiatePlaceholderSymbols());
-        Log(
-            DiagnosticSeverity::Info,
-            "template placeholder symbols instantiation success"
-        );
 
         const auto timeBindingAndVerificationStart = now();
-        Log(DiagnosticSeverity::Info, "binding and verification start");
 
-        Log(
-            DiagnosticSeverity::Info,
-            "native symbol initialization start"
-        );
         t_compilation->Natives->Initialize();
-        Log(
-            DiagnosticSeverity::Info,
-            "native symbol initialization success"
-        );
 
-        Log(
-            DiagnosticSeverity::Info,
-            "ast binding and verification start"
-        );
         ACE_TRY(boundASTs, Core::CreateBoundTransformedAndVerifiedASTs(
             t_compilation,
             asts,
@@ -121,58 +101,31 @@ namespace Ace
                 return t_ast->GetOrCreateTypeChecked({});
             }
         ));
-        Log(
-            DiagnosticSeverity::Info,
-            "ast binding and verification success"
-        );
 
-        Log(
-            DiagnosticSeverity::Info,
-            "function symbol body binding start"
-        );
         Core::BindFunctionSymbolsBodies(
             t_compilation,
             Core::GetAllNodes(begin(boundASTs), end(boundASTs))
         );
-        Log(
-            DiagnosticSeverity::Info,
-            "function symbol body binding success"
-        );
 
-        Log(
-            DiagnosticSeverity::Info,
-            "template semantics instantiation start"
-        );
         t_compilation->TemplateInstantiator->InstantiateSemanticsForSymbols();
-        Log(
-            DiagnosticSeverity::Info,
-            "template semantics instantiation success"
-        );
 
-        Log(DiagnosticSeverity::Info, "glue generation start");
         Core::GenerateAndBindGlue(t_compilation);
-        Log(DiagnosticSeverity::Info, "glue generation success");
 
         const auto timeBindingAndVerificationEnd = now();
-        Log(DiagnosticSeverity::Info, "binding and verification success");
 
         ACE_TRY_VOID(Core::ValidateTypeSizes(t_compilation));
 
         const auto timeFrontendEnd = now();
-        Log(DiagnosticSeverity::Info, "frontend success");
 
         const auto timeBackendStart = now();
-        Log(DiagnosticSeverity::Info, "backend start");
 
         Emitter emitter{ t_compilation };
         emitter.SetASTs(boundASTs);
         const auto emitterResult = emitter.Emit();
 
         const auto timeBackendEnd = now();
-        Log(DiagnosticSeverity::Info, "backend success");
         
         const auto timeEnd = now();
-        Log(DiagnosticSeverity::Info, "build success");
 
         const auto getFormattedDuration = [](std::chrono::nanoseconds t_duration) -> std::string
         {
@@ -191,46 +144,16 @@ namespace Ace
             return value;
         };
 
-        Log(
-            DiagnosticSeverity::Info,
-            getFormattedDuration(timeEnd - timeStart) + " - total"
-        );
-        Log(
-            DiagnosticSeverity::Info,
-            getFormattedDuration(timeFrontendEnd - timeFrontendStart) + " - frontend"
-        );
-        Log(
-            DiagnosticSeverity::Info,
-            getFormattedDuration(timeParsingEnd - timeParsingStart) + " - frontend | parsing"
-        );
-        Log(
-            DiagnosticSeverity::Info,
-            getFormattedDuration(timeSymbolCreationEnd - timeSymbolCreationStart) + " - frontend | symbol creation"
-        );
-        Log(
-            DiagnosticSeverity::Info,
-            getFormattedDuration(timeBindingAndVerificationEnd - timeBindingAndVerificationStart) + " - frontend | binding and verification"
-        );
-        Log(
-            DiagnosticSeverity::Info,
-            getFormattedDuration(timeBackendEnd - timeBackendStart) + " - backend"
-        );
-        Log(
-            DiagnosticSeverity::Info,
-            getFormattedDuration(emitterResult.Durations.IREmitting) + " - backend | ir emitting"
-        );
-        Log(
-            DiagnosticSeverity::Info,
-            getFormattedDuration(emitterResult.Durations.Analyses) + " - backend | analyses"
-        );
-        Log(
-            DiagnosticSeverity::Info,
-            getFormattedDuration(emitterResult.Durations.LLC) + " - backend | llc"
-        );
-        Log(
-            DiagnosticSeverity::Info,
-            getFormattedDuration(emitterResult.Durations.Clang) + " - backend | clang"
-        );
+        LogDebug << getFormattedDuration(timeEnd - timeStart) + " - total\n";
+        LogDebug << getFormattedDuration(timeFrontendEnd - timeFrontendStart) + " - frontend\n";
+        LogDebug << getFormattedDuration(timeParsingEnd - timeParsingStart) + " - frontend | parsing\n";
+        LogDebug << getFormattedDuration(timeSymbolCreationEnd - timeSymbolCreationStart) + " - frontend | symbol creation\n";
+        LogDebug << getFormattedDuration(timeBindingAndVerificationEnd - timeBindingAndVerificationStart) + " - frontend | binding and verification\n";
+        LogDebug << getFormattedDuration(timeBackendEnd - timeBackendStart) + " - backend\n";
+        LogDebug << getFormattedDuration(emitterResult.Durations.IREmitting) + " - backend | ir emitting\n";
+        LogDebug << getFormattedDuration(emitterResult.Durations.Analyses) + " - backend | analyses\n";
+        LogDebug << getFormattedDuration(emitterResult.Durations.LLC) + " - backend | llc\n";
+        LogDebug << getFormattedDuration(emitterResult.Durations.Clang) + " - backend | clang\n";
 
         return Void{ diagnosticBag };
     }
@@ -247,22 +170,35 @@ namespace Ace
             t_args
         );
         diagnosticBag.Add(expCompilation);
-
-        const auto hasCompilationError =
-            expCompilation.GetDiagnosticBag().GetSeverity() ==
-            DiagnosticSeverity::Error;
-
-        if (!expCompilation || hasCompilationError)
+        if (
+            !expCompilation ||
+            (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error)
+            )
         {
+            GlobalDiagnosticBag{}.Add(expCompilation);
             return diagnosticBag;
         }
+
+        Log << CreateIndent() << termcolor::bright_green << "Compiling ";
+        Log << termcolor::reset;
+        Log << expCompilation.Unwrap()->Package.Name << "\n";
+        IndentLevel++;
 
         const auto expDidCompile = Compile(expCompilation.Unwrap().get());
         diagnosticBag.Add(expDidCompile);
-        if (!expDidCompile)
+        if (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error)
         {
+            Log << CreateIndent() << termcolor::bright_red << "Failed";
+            Log << termcolor::reset << " to compile\n";
+            IndentLevel++;
+
             return diagnosticBag;
         }
+
+
+        Log << CreateIndent() << termcolor::bright_green << "Finished";
+        Log << termcolor::reset << " compilation\n";
+        IndentLevel++;
 
         return Void{ diagnosticBag };
     }
@@ -284,7 +220,6 @@ namespace Ace
         );
         if (!expDidCompile)
         {
-            Core::LogDiagnosticBag(expDidCompile.GetDiagnosticBag());
             return;
         }
     }

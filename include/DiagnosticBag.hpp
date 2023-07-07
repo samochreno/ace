@@ -18,16 +18,6 @@ namespace Ace
         auto Add(
             const std::shared_ptr<const Diagnostic>& t_diagnostic
         ) -> DiagnosticBag&;
-        
-        template<typename TDiagnosticNew, typename... A>
-        auto Add(A&&... args) -> DiagnosticBag&
-        {
-            Add(std::make_shared<TDiagnosticNew>(
-                std::forward<A>(args)...
-            ));
-
-            return *this;
-        }
         template<typename TDiagnosed, typename = std::enable_if_t<std::is_base_of_v<IDiagnosed, TDiagnosed>>>
         auto Add(const TDiagnosed& t_diagnosed) -> DiagnosticBag&
         {

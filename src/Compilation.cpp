@@ -19,6 +19,7 @@
 #include "Natives.hpp"
 #include "Scope.hpp"
 #include "TemplateInstantiator.hpp"
+#include "GlobalDiagnosticBag.hpp"
 #include "Utility.hpp"
 
 namespace Ace
@@ -524,6 +525,7 @@ namespace Ace
         self->GlobalScope = { self.get() };
         self->TemplateInstantiator = std::make_unique<Ace::TemplateInstantiator>();
         self->LLVMContext = std::make_unique<llvm::LLVMContext>();
+        self->GlobalDiagnosticBag = std::make_unique<Ace::GlobalDiagnosticBag>();
 
         return
         {

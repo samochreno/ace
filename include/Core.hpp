@@ -50,7 +50,9 @@ namespace Ace::Core
 #undef TASTSmartPointer
 #undef TNodeIBase
 
-    auto LogDiagnosticBag(const DiagnosticBag& t_diagnosticBag) -> void;
+    auto LogDiagnostic(
+        const std::shared_ptr<const Diagnostic>& t_diagnostic
+    ) -> void;
 
     auto ParseAST(
         const Compilation* const t_compilation,

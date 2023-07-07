@@ -73,11 +73,6 @@ namespace Ace
                 m_Severity = DiagnosticSeverity::Error;
                 break;
             }
-
-            case DiagnosticSeverity::Debug:
-            {
-                break;
-            }
         }
     }
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <exception>
 #include <termcolor/termcolor.hpp>
 
@@ -9,22 +8,13 @@
 #define ACE_ASSERT(t_condition) \
     if (!(t_condition)) \
     { \
-        Log( \
-            DiagnosticSeverity::Debug, \
-            std::string{} + \
-            "Assertion failed in file " + __FILE__ + " at line " + \
-            std::to_string(__LINE__) + ": " + #t_condition \
-        ); \
-        LogFlush(); \
+        Log << termcolor::bright_red << "Assertion failed in file"; \
+        Log << __FILE__ << " at line " << __LINE__ << ": " << #t_condition; \
+        Log << "\n" << std::flush; \
         std::terminate(); \
     } static_assert(true, "Semicolon required.")
 
 #define ACE_UNREACHABLE() \
-    Log( \
-        DiagnosticSeverity::Debug, \
-        std::string{} + \
-        "Reached unreachable location in file " + \
-        __FILE__ + " at line " + std::to_string(__LINE__) \
-    ); \
-    LogFlush(); \
+    Log << termcolor::bright_red << "Reached unreachable location in file"; \
+    Log << __FILE__ << " at line " << __LINE__ << "\n" << std::flush; \
     std::terminate()

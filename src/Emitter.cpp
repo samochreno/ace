@@ -204,7 +204,6 @@ namespace Ace
         llvm::raw_string_ostream originalModuleOStream{ originalModuleString };
         originalModuleOStream << *m_Module;
         originalModuleOStream.flush();
-        Log(DiagnosticSeverity::Info, originalModuleString);
         originalModuleString.clear();
 
         const auto timeIREmittingEnd = now();
@@ -838,11 +837,6 @@ namespace Ace
                 m_FunctionSymbol = t_functionSymbolBlockPair.Symbol;
                 m_BlockBuilder = std::make_unique<BlockBuilder>(
                     t_functionSymbolBlockPair.Block
-                );
-
-                Log(
-                    DiagnosticSeverity::Info,
-                    "emitting function: " + m_FunctionSymbol->CreateSignature()
                 );
 
                 ACE_ASSERT(m_FunctionSymbol->GetBody().has_value());

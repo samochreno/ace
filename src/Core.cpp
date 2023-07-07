@@ -27,20 +27,41 @@
 
 namespace Ace::Core
 {
-    auto LogDiagnosticBag(const DiagnosticBag& t_diagnosticBag) -> void
+    auto LogDiagnostic(
+        const std::shared_ptr<const Diagnostic>& t_diagnostic
+    ) -> void
     {
-        std::for_each(
-            begin(t_diagnosticBag.GetDiagnostics()),
-            end  (t_diagnosticBag.GetDiagnostics()),
-            [](const std::shared_ptr<const Diagnostic>& t_diagnostic)
+        switch (t_diagnostic->Severity)
+        {
+            case DiagnosticSeverity::Info:
             {
-                Log(
-                    t_diagnostic->Severity,
-                    t_diagnostic->Message,
-                    t_diagnostic->OptSourceLocation
-                );
+                Log << "info";
+                break;
             }
-        );
+
+            case DiagnosticSeverity::Warning:
+            {
+                Log << termcolor::bright_yellow << "warning";
+            }
+
+            case DiagnosticSeverity::Error:
+            {
+                Log << termcolor::bright_red << "error";
+            }
+        }
+
+        Log << termcolor::reset << ": ";
+        Log << t_diagnostic->Message << "\n";
+        
+        if (t_diagnostic->OptSourceLocation.has_value())
+        {
+            Log << termcolor::bright_blue << " --> ";
+            Log << termcolor::reset;
+            Log << t_diagnostic->OptSourceLocation.value().Buffer->FormatLocation(
+                t_diagnostic->OptSourceLocation.value()
+            );
+            Log << "\n";
+        }
     }
 
     auto ParseAST(
@@ -53,8 +74,6 @@ namespace Ace::Core
         Lexer lexer{ t_fileBuffer };
         auto dgnTokens = lexer.EatTokens();
         diagnosticBag.Add(dgnTokens.GetDiagnosticBag());
-
-        LogDiagnosticBag(diagnosticBag);
 
         const auto ast = Parser::ParseAST(
             t_fileBuffer,

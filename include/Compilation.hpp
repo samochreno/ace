@@ -13,6 +13,7 @@
 #include "Scope.hpp"
 #include "Natives.hpp"
 #include "TemplateInstantiator.hpp"
+#include "GlobalDiagnosticBag.hpp"
 
 namespace llvm
 {
@@ -36,5 +37,6 @@ namespace Ace
         GlobalScope GlobalScope{};
         std::unique_ptr<TemplateInstantiator> TemplateInstantiator{};
         std::unique_ptr<llvm::LLVMContext> LLVMContext{};
+        std::unique_ptr<GlobalDiagnosticBag> GlobalDiagnosticBag{};
     };
 }

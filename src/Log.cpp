@@ -1,64 +1,50 @@
 #include "Log.hpp"
 
 #include <iostream>
-#include <string_view>
-#include <termcolor/termcolor.hpp>
-#include <optional>
-
-#include "SourceBuffer.hpp"
-
-#define ACE_LOG_COLOR_WARNING     243, 156,  18
-#define ACE_LOG_COLOR_ERROR       192,  57,  43
-#define ACE_LOG_COLOR_DEBUG       235, 108, 240
 
 namespace Ace
 {
-    static auto LogSeverityColor(const DiagnosticSeverity t_severity) -> void
+    static constexpr enum class LogLevelKind
     {
-        switch (t_severity)
-        {
-            case DiagnosticSeverity::Info:    std::cout << termcolor::reset;                        break;
-            case DiagnosticSeverity::Warning: std::cout << termcolor::color<ACE_LOG_COLOR_WARNING>; break;
-            case DiagnosticSeverity::Error:   std::cout << termcolor::color<ACE_LOG_COLOR_ERROR>;   break;
-            case DiagnosticSeverity::Debug:   std::cout << termcolor::color<ACE_LOG_COLOR_DEBUG>;   break;
-        }
-    }
+        Normal,
+        Debug,
+    } LogLevel = LogLevelKind::Normal;
 
-    static auto GetSeverityString(
-        const DiagnosticSeverity t_severity
-    ) -> const char*
+    static class NullStream : public std::ostream
     {
-        switch (t_severity)
+    public:
+        NullStream(
+        ) : std::ostream{ &m_Buffer }
         {
-            case DiagnosticSeverity::Info:    return "info";
-            case DiagnosticSeverity::Warning: return "warning";
-            case DiagnosticSeverity::Error:   return "error";
-            case DiagnosticSeverity::Debug:   return "debug";
-        }
-    }
-
-    auto Log(
-        const DiagnosticSeverity t_severity,
-        const std::string_view t_message,
-        const std::optional<SourceLocation>& t_optSourceLocation
-    ) -> void
-    {
-        if (t_optSourceLocation.has_value())
-        {
-            LogSeverityColor(DiagnosticSeverity::Info);
-            std::cout << t_optSourceLocation.value().Buffer->FormatLocation(
-                t_optSourceLocation.value()
-            );
         }
 
-        LogSeverityColor(t_severity);
-        std::cout << GetSeverityString(t_severity);
-        LogSeverityColor(DiagnosticSeverity::Info);
-        std::cout << ": " << t_message << '\n';
-    }
+    private:
+        class NullBuffer : public std::streambuf
+        {
+        public:
+            auto overflow(int t_c) -> int
+            {
+               return t_c;
+            }
+        } m_Buffer;
+    
+    } NullStream{};
 
-    auto LogFlush() -> void
+    Logger Log{ LoggerConfiguration{ std::cout } };
+    Logger LogDebug
     {
-        std::cout << std::flush;
-    }
+        LoggerConfiguration
+        {
+            []() -> std::ostream&
+            {
+                switch (LogLevel)
+                {
+                    case LogLevelKind::Normal: return NullStream;
+                    case LogLevelKind::Debug:  return std::cout;
+                }
+            }()
+        }
+    };
+
+    
 }
