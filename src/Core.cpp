@@ -66,7 +66,7 @@ namespace Ace::Core
 
     auto ParseAST(
         const Compilation* const t_compilation,
-        const FileBuffer* const t_fileBuffer
+    const FileBuffer* const t_fileBuffer
     ) -> Diagnosed<std::shared_ptr<const ModuleNode>>
     {
         DiagnosticBag diagnosticBag{};

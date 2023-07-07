@@ -88,10 +88,10 @@ namespace Ace
         &OutputPathOptionDefinition,
     };
 
-    static auto ErrorIfMissingOptionName(
+    static auto DiagnoseMissingOptionName(
         const CompilationParseContext& t_context,
         const std::string_view& t_name
-    ) -> DiagnosticBag
+    ) -> Diagnosed<void>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -112,11 +112,11 @@ namespace Ace
         ));
     }
 
-    static auto ErrorIfMissingOrUnexpectedOptionValue(
+    static auto DiagnoseMissingOrUnexpectedOptionValue(
         const CompilationParseContext& t_context,
         const OptionDefinition* const t_definition,
         const std::optional<std::string_view>& t_optValue
-    ) -> DiagnosticBag
+    ) -> Diagnosed<void>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -172,7 +172,7 @@ namespace Ace
             std::find(begin(t_context.Arg), end(t_context.Arg), '='),
         };
 
-        diagnosticBag.Add(ErrorIfMissingOptionName(
+        diagnosticBag.Add(DiagnoseMissingOptionName(
             t_context,
             name
         ));
@@ -233,7 +233,7 @@ namespace Ace
             return t_context.OptNextArg;
         }();
 
-        diagnosticBag.Add(ErrorIfMissingOrUnexpectedOptionValue(
+        diagnosticBag.Add(DiagnoseMissingOrUnexpectedOptionValue(
             t_context,
             definition,
             optValue
@@ -274,7 +274,7 @@ namespace Ace
             begin(t_context.Arg) + 2,
         };
 
-        diagnosticBag.Add(ErrorIfMissingOptionName(
+        diagnosticBag.Add(DiagnoseMissingOptionName(
             t_context,
             name
         ));
@@ -327,7 +327,7 @@ namespace Ace
             return t_context.OptNextArg;
         }();
 
-        diagnosticBag.Add(ErrorIfMissingOrUnexpectedOptionValue(
+        diagnosticBag.Add(DiagnoseMissingOrUnexpectedOptionValue(
             t_context,
             definition,
             optValue

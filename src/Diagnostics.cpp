@@ -11,14 +11,12 @@
 
 namespace Ace
 {
-    
-
     auto CreateMissingPackagePathArgError() -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             std::nullopt,
-            "Missing package path argument"
+            "missing package path argument"
         );
     }
 
@@ -29,7 +27,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_sourceLocation,
-            "Multiple package path arguments"
+            "multiple package path arguments"
         );
     }
 
@@ -40,7 +38,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_sourceLocation,
-            "Missing option name"
+            "missing option name"
         );
     }
 
@@ -51,7 +49,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_sourceLocation,
-            "Unknown option name"
+            "unknown option name"
         );
     }
 
@@ -62,7 +60,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_sourceLocation,
-            "Missing option argument"
+            "missing option argument"
         );
     }
 
@@ -73,7 +71,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_sourceLocation,
-            "Unexpected option argument"
+            "unexpected option argument"
         );
     }
 
@@ -82,42 +80,43 @@ namespace Ace
         const nlohmann::json::exception& t_jsonException
     ) -> std::shared_ptr<const Diagnostic>
     {
-        const std::string_view originalMessage = t_jsonException.what();
+        std::string what = t_jsonException.what();
+        MakeLowercase(what);
 
         const auto closingBracketIt = std::find(
-            begin(originalMessage),
-            end  (originalMessage),
+            begin(what),
+            end  (what),
             ']'
         );
-        ACE_ASSERT(closingBracketIt != end(originalMessage));
+        ACE_ASSERT(closingBracketIt != end(what));
 
-        auto [message, optSourceLocation] = [&]() -> std::tuple<std::string, std::optional<SourceLocation>>
+        auto [message, sourceLocation] = [&]() -> std::tuple<std::string, std::optional<SourceLocation>>
         {
-            const auto atLinePos = originalMessage.find("at line");
+            const auto atLinePos = what.find("at line");
             if (atLinePos == std::string::npos)
             {
                 const std::string message
                 {
                     closingBracketIt + 2,
-                    end(originalMessage),
+                    end(what),
                 };
 
-                return { message, std::optional<SourceLocation>{} };
+                return { message, t_fileBuffer->CreateFirstLocation() };
             }
 
             const auto colonIt = std::find(
-                begin(originalMessage),
-                end  (originalMessage),
+                begin(what),
+                end  (what),
                 ':'
             );
 
             const std::string message
             {
                 colonIt + 2,
-                end(originalMessage),
+                end(what),
             };
 
-            auto it = begin(originalMessage) + atLinePos + 8;
+            auto it = begin(what) + atLinePos + 8;
 
             std::string lineString{};
             while (IsNumber(*it))
@@ -157,12 +156,102 @@ namespace Ace
         }();
 
         message.at(0) = std::toupper(message.at(0));
-        message = "Json error: " + message;
+        message = "json: " + message;
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            optSourceLocation,
+            sourceLocation,
             message
+        );
+    }
+
+    auto CreateUnexpectedPackagePropertyWarning(
+        const FileBuffer* const t_packageFileBuffer,
+        const std::string& t_propertyName
+    ) -> std::shared_ptr<const Diagnostic>
+    {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Warning,
+            t_packageFileBuffer->CreateFirstLocation(),
+            "unexpected property `" + t_propertyName + "`"
+        );
+    }
+
+    auto CreateMissingPackagePropertyError(
+        const FileBuffer* const t_packageFileBuffer,
+        const std::string& t_propertyName
+    ) -> std::shared_ptr<const Diagnostic>
+    {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_packageFileBuffer->CreateFirstLocation(),
+            "missing property `" + t_propertyName + "`"
+        );
+    }
+
+    static auto CreateJsonTypeString(
+        const nlohmann::json::value_t t_type
+    ) -> const char* 
+    {
+        switch (t_type)
+        {
+            case nlohmann::json::value_t::null:            return "null";
+            case nlohmann::json::value_t::object:          return "object";
+            case nlohmann::json::value_t::array:           return "array";
+            case nlohmann::json::value_t::string:          return "string";
+            case nlohmann::json::value_t::boolean:         return "boolean";
+            case nlohmann::json::value_t::number_integer:  return "signed integer";
+            case nlohmann::json::value_t::number_unsigned: return "unsigned integer";
+            case nlohmann::json::value_t::number_float:    return "float";
+            case nlohmann::json::value_t::binary:          return "binary array";
+
+            case nlohmann::json::value_t::discarded:       ACE_UNREACHABLE();
+        }
+    }
+
+    auto CreateUnexpectedPackagePropertyTypeError(
+        const FileBuffer* const t_packageFileBuffer,
+        const std::string& t_propertyName,
+        const nlohmann::json::value_t t_type,
+        const nlohmann::json::value_t t_expectedType
+    ) -> std::shared_ptr<const Diagnostic>
+    {
+        const std::string message = std::string{} +
+            "unexpected type `" + CreateJsonTypeString(t_type) + 
+            "` of property `" + t_propertyName +  "`, expected `" +
+            CreateJsonTypeString(t_expectedType) + "`";
+
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_packageFileBuffer->CreateFirstLocation(),
+            message
+        );
+    }
+
+    auto CreateUndefinedReferenceToPackagePathMacroError(
+        const FileBuffer* const t_packageFileBuffer,
+        const std::string& t_macro
+    ) -> std::shared_ptr<const Diagnostic>
+    {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_packageFileBuffer->CreateFirstLocation(),
+            "undefined reference to macro `" + t_macro + "`"
+        );
+    }
+
+    auto CreateFileSystemError(
+        const std::filesystem::path& t_path,
+        const std::filesystem::filesystem_error& t_error
+    ) -> std::shared_ptr<const Diagnostic>
+    {
+        std::string what{ std::string_view{ t_error.what() }.substr(18) };
+        MakeLowercase(what);
+
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            std::nullopt,
+            "file system: " + what + ": " + t_path.string()
         );
     }
 
@@ -173,7 +262,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             std::nullopt,
-            "File not found: " + t_path.string()
+            "file not found: " + t_path.string()
         );
     }
 
@@ -184,7 +273,18 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             std::nullopt,
-            "Unable to open file: " + t_path.string()
+            "unable to open file: " + t_path.string()
+        );
+    }
+
+    auto CreateFilePathEndsWithSeparatorError(
+        const std::filesystem::path& t_path
+    ) -> std::shared_ptr<const Diagnostic>
+    {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            std::nullopt,
+            "file path ends with separator: " + t_path.string()
         );
     }
 
@@ -195,7 +295,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_sourceLocation,
-            "Unterminated multiline comment"
+            "unterminated multiline comment"
         );
     }
 
@@ -206,7 +306,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_sourceLocation,
-            "Unterminated string literal"
+            "unterminated string literal"
         );
     }
 
@@ -217,7 +317,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_sourceLocation,
-            "Unexpected character"
+            "unexpected character"
         );
     }
 
@@ -228,7 +328,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_sourceLocation,
-            "Unknown numeric literal type suffix"
+            "unknown numeric literal type suffix"
         );
     }
 
@@ -239,7 +339,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_sourceLocation,
-            "Decimal point in non-float numeric literal"
+            "decimal point in non-float numeric literal"
         );
     }
 }

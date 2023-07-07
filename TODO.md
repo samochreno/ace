@@ -8,14 +8,11 @@
 - Variable referennce emitting
 - Remove `t_` prefix from parameter names
 - ❓ Remove `ACE_TRY` macros
+- Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
 
 ## 💥 High Priority
 
-- Fix `std::filesystem::status` false positive when iterating root in `src/Package.cpp`
-- Add ability to add errors to compilation, print them as soon as they are added
-- Remove value-only constructor from `Diagnosed`
 - Add error messages to make debugging easier:
-  - `Compilation` parsing and verification errors
   - Remove second typechecking pass
   - Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
   - Error printing
@@ -64,7 +61,6 @@
       };
   }
   ```
-- Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
 - Check out LLVM attributes
 - Struct update constructor syntax
 - Mutability/Immutability:

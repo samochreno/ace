@@ -9,7 +9,7 @@
             "name": "dependencies",
             "value": "lib"
         }
-    ],
+    ],   
     "source_files": [
         "$sources/**.ace"
     ],
