@@ -15,7 +15,12 @@ namespace Ace
 {
     TypeTemplateSymbol::TypeTemplateSymbol(
         const TypeTemplateNode* const t_templateNode
-    ) : m_Name{ SpecialIdentifier::CreateTemplate(t_templateNode->GetAST()->GetName()) },
+    ) : m_Name
+        {
+            SpecialIdentifier::CreateTemplate(
+                t_templateNode->GetAST()->GetName()
+            )
+        },
         m_TemplateNode{ t_templateNode }
     {
     }
@@ -65,7 +70,9 @@ namespace Ace
         return m_TemplateNode->GetAST()->GetName();
     }
 
-    auto TypeTemplateSymbol::SetPlaceholderSymbol(ISymbol* const t_symbol) -> void
+    auto TypeTemplateSymbol::SetPlaceholderSymbol(
+        ISymbol* const t_symbol
+    ) -> void
     {
         m_PlaceholderSymbol = t_symbol;
     }
@@ -84,7 +91,9 @@ namespace Ace
 
         ACE_TRY_ASSERT(t_args.size() == paramNames.size());
 
-        const auto ast = m_TemplateNode->GetAST()->CloneInScopeType(m_TemplateNode->GetScope());
+        const auto ast = m_TemplateNode->GetAST()->CloneInScopeType(
+            m_TemplateNode->GetScope()
+        );
 
         ACE_TRY_VOID(ast->GetSelfScope()->DefineTemplateArgAliases(
             {},
@@ -118,25 +127,40 @@ namespace Ace
         const auto boundAST = Core::CreateBoundTransformedAndVerifiedAST(
             GetCompilation(),
             ast,
-            [](const std::shared_ptr<const ITypeNode>& t_ast) { return t_ast->CreateBoundType(); },
-            [](const std::shared_ptr<const ITypeBoundNode>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); },
-            [](const std::shared_ptr<const ITypeBoundNode>& t_ast) { return t_ast->GetOrCreateLoweredType({}); },
-            [](const std::shared_ptr<const ITypeBoundNode>& t_ast) { return t_ast->GetOrCreateTypeCheckedType({}); }
+            [](const std::shared_ptr<const ITypeNode>& t_ast)
+            {
+                return t_ast->CreateBoundType();
+            },
+            [](const std::shared_ptr<const ITypeBoundNode>& t_ast)
+            {
+                return t_ast->GetOrCreateTypeCheckedType({});
+            },
+            [](const std::shared_ptr<const ITypeBoundNode>& t_ast)
+            {
+                return t_ast->GetOrCreateLoweredType({});
+            },
+            [](const std::shared_ptr<const ITypeBoundNode>& t_ast)
+            {
+                return t_ast->GetOrCreateTypeCheckedType({});
+            }
         ).Unwrap();
-
-        Core::BindFunctionSymbolsBodies(
-            GetCompilation(),
-            Core::GetAllNodes(boundAST)
-        );
 
         auto* const selfSymbol = boundAST->GetSymbol();
 
         auto copyOperatorName = selfSymbol->CreateFullyQualifiedName();
-        copyOperatorName.Sections.push_back(SymbolNameSection{ SpecialIdentifier::Operator::Copy });
-        selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(copyOperatorName);
+        copyOperatorName.Sections.push_back(
+            SymbolNameSection{ SpecialIdentifier::Operator::Copy }
+        );
+        selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
+            copyOperatorName
+        );
 
         auto dropOperatorName = selfSymbol->CreateFullyQualifiedName();
-        dropOperatorName.Sections.push_back(SymbolNameSection{ SpecialIdentifier::Operator::Drop });
-        selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(dropOperatorName);
+        dropOperatorName.Sections.push_back(
+            SymbolNameSection{ SpecialIdentifier::Operator::Drop }
+        );
+        selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
+            dropOperatorName
+        );
     }
 }

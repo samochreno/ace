@@ -81,31 +81,39 @@ namespace Ace
 
         t_compilation->Natives->Initialize();
 
-        ACE_TRY(boundASTs, Core::CreateBoundTransformedAndVerifiedASTs(
-            t_compilation,
-            asts,
-            [](const std::shared_ptr<const ModuleNode>& t_ast)
+        std::vector<std::shared_ptr<const ModuleBoundNode>> boundASTs{};
+        std::for_each(begin(asts), end(asts),
+        [&](const std::shared_ptr<const ModuleNode>& t_ast)
+        {
+            const auto expBoundAST = Core::CreateBoundTransformedAndVerifiedAST(
+                t_compilation,
+                t_ast,
+                [](const std::shared_ptr<const ModuleNode>& t_ast)
+                {
+                    return t_ast->CreateBound(); 
+                },
+                [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
+                { 
+                    return t_ast->GetOrCreateTypeChecked({});
+                },
+                [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
+                {
+                    return t_ast->GetOrCreateLowered({});
+                },
+                [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
+                {
+                    return t_ast->GetOrCreateTypeChecked({});
+                }
+            );
+            if (!expBoundAST)
             {
-                return t_ast->CreateBound(); 
-            },
-            [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
-            { 
-                return t_ast->GetOrCreateTypeChecked({});
-            },
-            [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
-            {
-                return t_ast->GetOrCreateLowered({});
-            },
-            [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
-            {
-                return t_ast->GetOrCreateTypeChecked({});
+                diagnosticBag.Add(expBoundAST);
+                t_compilation->GlobalDiagnosticBag->Add(expBoundAST);
+                return;
             }
-        ));
 
-        Core::BindFunctionSymbolsBodies(
-            t_compilation,
-            Core::GetAllNodes(begin(boundASTs), end(boundASTs))
-        );
+            boundASTs.push_back(expBoundAST.Unwrap());
+        });
 
         t_compilation->TemplateInstantiator->InstantiateSemanticsForSymbols();
 

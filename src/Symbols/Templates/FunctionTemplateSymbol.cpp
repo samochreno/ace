@@ -21,7 +21,12 @@ namespace Ace
 {
     FunctionTemplateSymbol::FunctionTemplateSymbol(
         const FunctionTemplateNode* const t_templateNode
-    ) : m_Name{ SpecialIdentifier::CreateTemplate(t_templateNode->GetAST()->GetName()) },
+    ) : m_Name
+        {
+            SpecialIdentifier::CreateTemplate(
+                t_templateNode->GetAST()->GetName()
+            ) 
+        },
         m_TemplateNode{ t_templateNode }
     {
     }
@@ -89,7 +94,9 @@ namespace Ace
         ACE_TRY_ASSERT(t_implArgs.size() == implParamNames.size());
         ACE_TRY_ASSERT(t_args.size() == paramNames.size());
 
-        const auto ast = m_TemplateNode->GetAST()->CloneInScope(m_TemplateNode->GetScope());
+        const auto ast = m_TemplateNode->GetAST()->CloneInScope(
+            m_TemplateNode->GetScope()
+        );
 
         ACE_TRY_VOID(ast->GetSelfScope()->DefineTemplateArgAliases(
             implParamNames,
@@ -123,15 +130,22 @@ namespace Ace
         const auto boundAST = Core::CreateBoundTransformedAndVerifiedAST(
             GetCompilation(),
             ast,
-            [](const std::shared_ptr<const FunctionNode>& t_ast) { return t_ast->CreateBound(); },
-            [](const std::shared_ptr<const FunctionBoundNode>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); },
-            [](const std::shared_ptr<const FunctionBoundNode>& t_ast) { return t_ast->GetOrCreateLowered({}); },
-            [](const std::shared_ptr<const FunctionBoundNode>& t_ast) { return t_ast->GetOrCreateTypeChecked({}); }
+            [](const std::shared_ptr<const FunctionNode>& t_ast)
+            {
+                return t_ast->CreateBound();
+            },
+            [](const std::shared_ptr<const FunctionBoundNode>& t_ast)
+            {
+                return t_ast->GetOrCreateTypeChecked({});
+            },
+            [](const std::shared_ptr<const FunctionBoundNode>& t_ast)
+            {
+                return t_ast->GetOrCreateLowered({});
+            },
+            [](const std::shared_ptr<const FunctionBoundNode>& t_ast)
+            {
+                return t_ast->GetOrCreateTypeChecked({});
+            }
         ).Unwrap();
-
-        Core::BindFunctionSymbolsBodies(
-            GetCompilation(),
-            Core::GetAllNodes(boundAST)
-        );
     }
 }

@@ -118,48 +118,9 @@ namespace Ace::Core
         const auto nodes = GetAllNodes(finalAST);
         
         ACE_TRY_VOID(ValidateControlFlow(t_compilation, nodes));
+        BindFunctionSymbolsBodies(t_compilation, nodes);
 
         return finalAST;
-    }
-
-    template<
-        typename TBound,
-        typename TGetOrCreateTypeCheckedFunc,
-        typename TGetOrCreateLoweredFunc,
-        typename TGetOrCreateLoweredTypeCheckedFunc
-    >
-    auto CreateTransformedAndVerifiedASTs(
-        const Compilation* const t_compilation,
-        const std::vector<TBound>& t_boundASTs,
-        TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
-        TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc,
-        TGetOrCreateLoweredTypeCheckedFunc&& t_getOrCreateLoweredTypeCheckedFunc
-    ) -> Expected<std::vector<TLoweredTypeChecked>>
-    {
-        ACE_TRY(mchTypeCheckedASTs, TransformExpectedMaybeChangedVector(t_boundASTs,
-        [&](const TBound& t_ast)
-        {
-            return t_getOrCreateTypeCheckedFunc(t_ast);
-        }));
-
-        const auto mchLoweredASTs = TransformMaybeChangedVector(mchTypeCheckedASTs.Value,
-        [&](const TTypeChecked& t_ast)
-        {
-            return t_getOrCreateLoweredFunc(t_ast);
-        });
-
-        ACE_TRY(mchLoweredTypeCheckedASTs, TransformExpectedMaybeChangedVector(mchLoweredASTs.Value,
-        [&](const TLoweredTypeChecked& t_ast)
-        {
-            return t_getOrCreateLoweredTypeCheckedFunc(t_ast);
-        }));
-
-        auto& finalASTs = mchLoweredTypeCheckedASTs.Value;
-        const auto nodes = GetAllNodes(finalASTs.begin(), finalASTs.end());
-
-        ACE_TRY_VOID(ValidateControlFlow(t_compilation, nodes));
-
-        return finalASTs;
     }
 
 #define TBound std::remove_reference_t<decltype(t_createBoundFunc(T{}).Unwrap())>
@@ -189,43 +150,6 @@ namespace Ace::Core
             t_getOrCreateLoweredTypeCheckedFunc
         ));
         return finalAST;
-    }
-
-    template<
-        typename T,
-        typename TCreateBoundFunc,
-        typename TGetOrCreateTypeCheckedFunc,
-        typename TGetOrCreateLoweredFunc,
-        typename TGetOrCreateLoweredTypeCheckedFunc
-    >
-    auto CreateBoundTransformedAndVerifiedASTs(
-        const Compilation* const t_compilation,
-        const std::vector<T>& t_asts,
-        TCreateBoundFunc&& t_createBoundFunc,
-        TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
-        TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc,
-        TGetOrCreateLoweredTypeCheckedFunc&& t_getOrCreateLoweredTypeCheckedFunc
-    ) -> Expected<std::vector<TLoweredTypeChecked>>
-    {
-        ACE_TRY(boundASTs, TransformExpectedVector(t_asts,
-        [&](const T& t_ast)
-        {
-            return t_createBoundFunc(t_ast);
-        }));
-
-        ACE_TRY(finalASTs, CreateTransformedAndVerifiedASTs(
-            t_compilation,
-            boundASTs,
-            t_getOrCreateTypeCheckedFunc,
-            t_getOrCreateLoweredFunc,
-            t_getOrCreateLoweredTypeCheckedFunc
-        ));
-
-        const auto nodes = GetAllNodes(finalASTs.begin(), finalASTs.end());
-
-        ACE_TRY_VOID(ValidateControlFlow(t_compilation, nodes));
-
-        return finalASTs;
     }
 
 #undef TBound
