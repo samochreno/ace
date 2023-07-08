@@ -49,7 +49,7 @@ namespace Ace
 
         if (!mchCheckedExpr.IsChanged)
         {
-            CreateUnchanged(shared_from_this());
+            return CreateUnchanged(shared_from_this());
         }
 
         const auto returnValue = std::make_shared<const InstanceVarReferenceExprBoundNode>(
