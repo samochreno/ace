@@ -11,13 +11,10 @@
 #include "AccessModifier.hpp"
 #include "SpecialIdentifier.hpp"
 
-namespace Ace::Node
-{
-    class IBase;
-}
-
 namespace Ace
 {
+    class INode;
+
     struct TemplateSymbolsInstantationResult
     {
         ISymbol* const Symbol{};

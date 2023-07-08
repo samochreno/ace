@@ -2,13 +2,10 @@
 
 #include "ValueKind.hpp"
 
-namespace Ace::Symbol::Type
-{
-    class IBase;
-}
-
 namespace Ace
 {
+    class ITypeSymbol;
+
     struct TypeInfo
     {
     public:
@@ -21,6 +18,6 @@ namespace Ace
         }
 
         ITypeSymbol* Symbol{};
-        Ace::ValueKind ValueKind{};
+        ValueKind ValueKind{};
     };
 }
