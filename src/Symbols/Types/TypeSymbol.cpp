@@ -157,6 +157,8 @@ namespace Ace
             SpecialIdentifier::CreateTemplate(self->GetName())
         );
         
-        return expTemplate ? expTemplate.Unwrap() : std::optional<TypeTemplateSymbol*>{};
+        return expTemplate ?
+            expTemplate.Unwrap() :
+            std::optional<TypeTemplateSymbol*>{};
     }
 }
