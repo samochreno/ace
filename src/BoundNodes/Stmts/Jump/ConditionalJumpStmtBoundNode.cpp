@@ -54,11 +54,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ConditionalJumpStmtBoundNode>(
+        return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
             mchConvertedAndCheckedCondition.Value,
             m_LabelSymbol
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto ConditionalJumpStmtBoundNode::GetOrCreateTypeCheckedStmt(
@@ -80,11 +79,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ConditionalJumpStmtBoundNode>(
+        return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
             mchLoweredCondition.Value,
             m_LabelSymbol
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(t_context).Value);
     }
 
     auto ConditionalJumpStmtBoundNode::GetOrCreateLoweredStmt(

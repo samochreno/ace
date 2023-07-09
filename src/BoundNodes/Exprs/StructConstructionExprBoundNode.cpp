@@ -66,12 +66,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const StructConstructionExprBoundNode>(
+        return CreateChanged(std::make_shared<const StructConstructionExprBoundNode>(
             m_Scope,
             m_StructSymbol,
             mchCheckedArgs.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto StructConstructionExprBoundNode::GetOrCreateTypeCheckedExpr(
@@ -107,12 +106,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const StructConstructionExprBoundNode>(
+        return CreateChanged(std::make_shared<const StructConstructionExprBoundNode>(
             m_Scope,
             m_StructSymbol,
             mchLoweredArgs.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto StructConstructionExprBoundNode::GetOrCreateLoweredExpr(

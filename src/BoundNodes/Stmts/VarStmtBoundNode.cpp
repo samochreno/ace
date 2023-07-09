@@ -57,11 +57,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const VarStmtBoundNode>(
+        return CreateChanged(std::make_shared<const VarStmtBoundNode>(
             m_Symbol,
             mchConvertedAndCheckedOptAssignedExpr.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto VarStmtBoundNode::GetOrCreateTypeCheckedStmt(
@@ -86,11 +85,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const VarStmtBoundNode>(
+        return CreateChanged(std::make_shared<const VarStmtBoundNode>(
             m_Symbol,
             mchLoweredOptAssignedExpr.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(t_context).Value);
     }
 
     auto VarStmtBoundNode::GetOrCreateLoweredStmt(

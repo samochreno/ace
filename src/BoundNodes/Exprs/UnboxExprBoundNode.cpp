@@ -66,10 +66,9 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const UnboxExprBoundNode>(
+        return CreateChanged(std::make_shared<const UnboxExprBoundNode>(
             mchCheckedAndConvertedExpr.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto UnboxExprBoundNode::GetOrCreateTypeCheckedExpr(
@@ -95,12 +94,11 @@ namespace Ace
         auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
         ACE_ASSERT(functionSymbol);
 
-        const auto returnValue = std::make_shared<const StaticFunctionCallExprBoundNode>(
+        return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
             GetScope(),
             functionSymbol,
             std::vector{ mchLoweredExpr.Value }
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto UnboxExprBoundNode::GetOrCreateLoweredExpr(

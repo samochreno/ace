@@ -39,10 +39,9 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const AttributeBoundNode>(
+        return CreateChanged(std::make_shared<const AttributeBoundNode>(
             mchCheckedStructureConstructionExpr.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto AttributeBoundNode::GetOrCreateLowered(
@@ -57,9 +56,8 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const AttributeBoundNode>(
+        return CreateChanged(std::make_shared<const AttributeBoundNode>(
             mchLowewredStructConstructionExpr.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 }

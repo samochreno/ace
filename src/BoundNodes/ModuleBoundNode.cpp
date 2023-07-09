@@ -91,15 +91,14 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ModuleBoundNode>(
+        return CreateChanged(std::make_shared<const ModuleBoundNode>(
             m_Symbol,
             mchCheckedModules.Value,
             mchCheckedTypes.Value,
             mchCheckedImpls.Value,
             mchCheckedFunctions.Value,
             mchCheckedVars.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto ModuleBoundNode::GetOrCreateLowered(
@@ -147,14 +146,13 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ModuleBoundNode>(
+        return CreateChanged(std::make_shared<const ModuleBoundNode>(
             m_Symbol,
             mchLoweredModules.Value,
             mchLoweredTypes.Value,
             mchLoweredImpls.Value,
             mchLoweredFunctions.Value,
             mchLoweredVars.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 }

@@ -54,12 +54,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const StaticFunctionCallExprBoundNode>(
+        return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
             m_Scope,
             m_FunctionSymbol,
             mchConvertedAndCheckedArgs.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto StaticFunctionCallExprBoundNode::GetOrCreateTypeCheckedExpr(
@@ -84,12 +83,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const StaticFunctionCallExprBoundNode>(
+        return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
             m_Scope,
             m_FunctionSymbol,
             mchLoweredArgs.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto StaticFunctionCallExprBoundNode::GetOrCreateLoweredExpr(

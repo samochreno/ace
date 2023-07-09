@@ -78,12 +78,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const IfStmtBoundNode>(
+        return CreateChanged(std::make_shared<const IfStmtBoundNode>(
             m_Scope,
             mchConvertedAndCheckedConditions.Value,
             mchCheckedBodies.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto IfStmtBoundNode::GetOrCreateTypeCheckedStmt(
@@ -186,11 +185,10 @@ namespace Ace
             labelSymbols.back()
         ));
 
-        const auto returnValue = std::make_shared<const GroupStmtBoundNode>(
+        return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
             m_Scope,
             stmts
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(t_context).Value);
     }
 
     auto IfStmtBoundNode::GetOrCreateLoweredStmt(

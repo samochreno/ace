@@ -59,12 +59,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const StructTypeBoundNode>(
+        return CreateChanged(std::make_shared<const StructTypeBoundNode>(
             m_Symbol,
             mchCheckedAttributes.Value,
             mchCheckedVars.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto StructTypeBoundNode::GetOrCreateTypeCheckedType(
@@ -98,12 +97,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const StructTypeBoundNode>(
+        return CreateChanged(std::make_shared<const StructTypeBoundNode>(
             m_Symbol,
             mchLoweredAttributes.Value,
             mchLoweredVars.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto StructTypeBoundNode::GetOrCreateLoweredType(

@@ -45,10 +45,9 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const DereferenceExprBoundNode>(
+        return CreateChanged(std::make_shared<const DereferenceExprBoundNode>(
             mchCheckedExpr.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
     auto DereferenceExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& t_context
@@ -68,10 +67,9 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const DereferenceExprBoundNode>(
+        return CreateChanged(std::make_shared<const DereferenceExprBoundNode>(
             mchLoweredExpr.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto DereferenceExprBoundNode::GetOrCreateLoweredExpr(

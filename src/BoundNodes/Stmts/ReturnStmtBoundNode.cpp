@@ -72,11 +72,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ReturnStmtBoundNode>(
+        return CreateChanged(std::make_shared<const ReturnStmtBoundNode>(
             m_Scope,
             mchCheckedOptExpr.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto ReturnStmtBoundNode::GetOrCreateTypeCheckedStmt(
@@ -101,11 +100,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ReturnStmtBoundNode>(
+        return CreateChanged(std::make_shared<const ReturnStmtBoundNode>(
             m_Scope,
             mchLoweredOptExpr.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(t_context).Value);
     }
 
     auto ReturnStmtBoundNode::GetOrCreateLoweredStmt(

@@ -49,11 +49,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const StaticVarBoundNode>(
+        return CreateChanged(std::make_shared<const StaticVarBoundNode>(
             m_Symbol,
             mchCheckedAttributes.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto StaticVarBoundNode::GetOrCreateLowered(
@@ -71,11 +70,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const StaticVarBoundNode>(
+        return CreateChanged(std::make_shared<const StaticVarBoundNode>(
             m_Symbol,
             mchLoweredAttributes.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto StaticVarBoundNode::GetSymbol() const -> StaticVarSymbol*

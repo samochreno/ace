@@ -61,12 +61,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const InstanceFunctionCallExprBoundNode>(
+        return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
             mchCheckedExpr.Value,
             m_FunctionSymbol,
             mchConvertedAndCheckedArgs.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto InstanceFunctionCallExprBoundNode::GetOrCreateTypeCheckedExpr(
@@ -96,12 +95,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const InstanceFunctionCallExprBoundNode>(
+        return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
             mchLoweredExpr.Value,
             m_FunctionSymbol,
             mchLoweredArgs.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
 

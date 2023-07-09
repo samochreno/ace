@@ -91,14 +91,13 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const FunctionBoundNode>(
+        return CreateChanged(std::make_shared<const FunctionBoundNode>(
             m_Symbol,
             mchCheckedAttributes.Value,
             mchCheckedOptSelf.Value,
             mchCheckedParams.Value,
             mchCheckedOptBody.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto FunctionBoundNode::GetOrCreateLowered(
@@ -139,14 +138,13 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const FunctionBoundNode>(
+        return CreateChanged(std::make_shared<const FunctionBoundNode>(
             m_Symbol,
             mchLoweredAttributes.Value,
             mchLoweredOptSelf.Value,
             mchLoweredParams.Value,
             mchLoweredOptBody.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto FunctionBoundNode::GetSymbol() const -> FunctionSymbol*

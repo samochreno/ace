@@ -47,11 +47,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const GroupStmtBoundNode>(
+        return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
             m_Scope,
             mchCheckedContent.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto GroupStmtBoundNode::GetOrCreateTypeCheckedStmt(
@@ -76,11 +75,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const GroupStmtBoundNode>(
+        return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
             m_Scope,
             mchLoweredStmts.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(t_context).Value);
     }
 
     auto GroupStmtBoundNode::GetOrCreateLoweredStmt(

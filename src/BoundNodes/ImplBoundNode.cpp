@@ -47,11 +47,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ImplBoundNode>(
+        return CreateChanged(std::make_shared<const ImplBoundNode>(
             m_Scope,
             mchCheckedFunctions.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto ImplBoundNode::GetOrCreateLowered(
@@ -69,10 +68,9 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ImplBoundNode>(
+        return CreateChanged(std::make_shared<const ImplBoundNode>(
             m_Scope,
             mchLoweredFunctions.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 }

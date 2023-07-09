@@ -45,11 +45,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const UserUnaryExprBoundNode>(
+        return CreateChanged(std::make_shared<const UserUnaryExprBoundNode>(
             mchCheckedExpr.Value,
             m_OperatorSymbol
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto UserUnaryExprBoundNode::GetOrCreateTypeCheckedExpr(
@@ -65,12 +64,11 @@ namespace Ace
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
-        const auto returnValue = std::make_shared<const StaticFunctionCallExprBoundNode>(
+        return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
             GetScope(),
             m_OperatorSymbol,
             std::vector{ mchLoweredExpr.Value }
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto UserUnaryExprBoundNode::GetOrCreateLoweredExpr(

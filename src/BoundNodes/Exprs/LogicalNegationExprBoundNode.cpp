@@ -52,10 +52,9 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const LogicalNegationExprBoundNode>(
+        return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
             mchConvertedAndCheckedExpr.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto LogicalNegationExprBoundNode::GetOrCreateTypeCheckedExpr(
@@ -76,10 +75,9 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const LogicalNegationExprBoundNode>(
+        return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
             mchLoweredExpr.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto LogicalNegationExprBoundNode::GetOrCreateLoweredExpr(

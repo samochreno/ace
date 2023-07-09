@@ -56,10 +56,9 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const AssertStmtBoundNode>(
+        return CreateChanged(std::make_shared<const AssertStmtBoundNode>(
             mchConvertedAndCheckedCondition.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto AssertStmtBoundNode::GetOrCreateTypeCheckedStmt(
@@ -91,12 +90,11 @@ namespace Ace
             std::vector<std::shared_ptr<const IStmtBoundNode>>{ exitStmt }
         );
 
-        const auto returnValue = std::make_shared<const IfStmtBoundNode>(
+        return CreateChanged(std::make_shared<const IfStmtBoundNode>(
             GetScope(),
             std::vector<std::shared_ptr<const IExprBoundNode>>{ condition },
             std::vector<std::shared_ptr<const BlockStmtBoundNode>>{ bodyStmt }
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     };
 
     auto AssertStmtBoundNode::GetOrCreateLoweredStmt(

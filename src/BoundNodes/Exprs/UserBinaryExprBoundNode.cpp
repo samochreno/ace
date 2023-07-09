@@ -60,12 +60,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const UserBinaryExprBoundNode>(
+        return CreateChanged(std::make_shared<const UserBinaryExprBoundNode>(
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value,
             m_OperatorSymbol
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto UserBinaryExprBoundNode::GetOrCreateTypeCheckedExpr(
@@ -82,7 +81,7 @@ namespace Ace
         const auto mchLoweredLHSExpr = m_LHSExpr->GetOrCreateLoweredExpr({});
         const auto mchLoweredRHSExpr = m_RHSExpr->GetOrCreateLoweredExpr({});
 
-        const auto returnValue = std::make_shared<const StaticFunctionCallExprBoundNode>(
+        return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
             GetScope(),
             m_OperatorSymbol,
             std::vector
@@ -90,8 +89,7 @@ namespace Ace
                 mchLoweredLHSExpr.Value,
                 mchLoweredRHSExpr.Value
             }
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto UserBinaryExprBoundNode::GetOrCreateLoweredExpr(

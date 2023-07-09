@@ -40,10 +40,9 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ExprStmtBoundNode>(
+        return CreateChanged(std::make_shared<const ExprStmtBoundNode>(
             mchCheckedExpr.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto ExprStmtBoundNode::GetOrCreateTypeCheckedStmt(
@@ -64,10 +63,9 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ExprStmtBoundNode>(
+        return CreateChanged(std::make_shared<const ExprStmtBoundNode>(
             mchLoweredExpr.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(t_context).Value);
     }
 
     auto ExprStmtBoundNode::GetOrCreateLoweredStmt(

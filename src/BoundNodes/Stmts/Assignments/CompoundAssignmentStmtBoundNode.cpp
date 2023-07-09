@@ -70,12 +70,11 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const CompoundAssignmentStmtBoundNode>(
+        return CreateChanged(std::make_shared<const CompoundAssignmentStmtBoundNode>(
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value,
             m_OperatorSymbol
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto CompoundAssignmentStmtBoundNode::GetOrCreateTypeCheckedStmt(
@@ -246,11 +245,10 @@ namespace Ace
             ACE_UNREACHABLE();
         }
 
-        const auto returnValue = std::make_shared<const GroupStmtBoundNode>(
+        return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
             GetScope(),
             stmts
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto CompoundAssignmentStmtBoundNode::GetOrCreateLoweredStmt(

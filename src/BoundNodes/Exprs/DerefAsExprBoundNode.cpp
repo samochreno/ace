@@ -53,11 +53,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const DerefAsExprBoundNode>(
+        return CreateChanged(std::make_shared<const DerefAsExprBoundNode>(
             m_Expr,
             m_TypeSymbol
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto DerefAsExprBoundNode::GetOrCreateTypeCheckedExpr(
@@ -79,11 +78,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const DerefAsExprBoundNode>(
+        return CreateChanged(std::make_shared<const DerefAsExprBoundNode>(
             m_Expr,
             m_TypeSymbol
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto DerefAsExprBoundNode::GetOrCreateLoweredExpr(

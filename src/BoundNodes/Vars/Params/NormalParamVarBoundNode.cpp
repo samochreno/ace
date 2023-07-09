@@ -48,11 +48,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ParamVarBoundNode>(
+        return CreateChanged(std::make_shared<const ParamVarBoundNode>(
             m_Symbol,
             mchCheckedAttributes.Value
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto ParamVarBoundNode::GetOrCreateLowered(
@@ -70,11 +69,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const ParamVarBoundNode>(
+        return CreateChanged(std::make_shared<const ParamVarBoundNode>(
             m_Symbol,
             mchLoweredAttributes.Value
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto ParamVarBoundNode::GetSymbol() const -> NormalParamVarSymbol*

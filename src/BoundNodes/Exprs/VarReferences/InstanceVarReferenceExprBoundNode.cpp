@@ -52,11 +52,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const InstanceVarReferenceExprBoundNode>(
+        return CreateChanged(std::make_shared<const InstanceVarReferenceExprBoundNode>(
             mchCheckedExpr.Value,
             m_VarSymbol
-        );
-        return CreateChanged(returnValue);
+        ));
     }
 
     auto InstanceVarReferenceExprBoundNode::GetOrCreateTypeCheckedExpr(
@@ -77,11 +76,10 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        const auto returnValue = std::make_shared<const InstanceVarReferenceExprBoundNode>(
+        return CreateChanged(std::make_shared<const InstanceVarReferenceExprBoundNode>(
             mchLoweredExpr.Value,
             m_VarSymbol
-        );
-        return CreateChanged(returnValue->GetOrCreateLowered({}).Value);
+        )->GetOrCreateLowered({}).Value);
     }
 
     auto InstanceVarReferenceExprBoundNode::GetOrCreateLoweredExpr(
