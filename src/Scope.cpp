@@ -1135,7 +1135,9 @@ namespace Ace
                 t_templateArgs
             );
             if (!expTemplateInstance)
+            {
                 return {};
+            }
             
             symbols.push_back(expTemplateInstance.Unwrap());
         }
