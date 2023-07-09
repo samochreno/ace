@@ -93,11 +93,11 @@ namespace Ace
 
     static auto IsEnd(
         const std::vector<std::vector<ControlFlowStmt>::const_iterator>& t_ends,
-        const std::vector<ControlFlowStmt>::const_iterator& t_stmtIt
+        const std::vector<ControlFlowStmt>::const_iterator t_stmtIt
     ) -> bool
     {
         const auto matchingEndIt = std::find_if(begin(t_ends), end(t_ends),
-        [&](const std::vector<ControlFlowStmt>::const_iterator& t_end)
+        [&](const std::vector<ControlFlowStmt>::const_iterator t_end)
         {
             return t_stmtIt == t_end;
         });
@@ -106,7 +106,7 @@ namespace Ace
     }
 
     auto ControlFlowAnalysis::IsEndReachableWithoutReturn(
-        const std::vector<ControlFlowStmt>::const_iterator& t_begin,
+        const std::vector<ControlFlowStmt>::const_iterator t_begin,
         const std::vector<std::vector<ControlFlowStmt>::const_iterator>& t_ends
     ) const -> bool
     {

@@ -38,7 +38,7 @@ namespace Ace
     struct ParseContext
     {
         ParseContext(
-            const std::vector<ParseToken>::const_iterator& t_iterator,
+            const std::vector<ParseToken>::const_iterator t_iterator,
             const std::shared_ptr<Scope>& t_scope
         ) : Iterator{ t_iterator },
             Scope{ t_scope }

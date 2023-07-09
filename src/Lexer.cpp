@@ -19,8 +19,8 @@ namespace Ace
     {
         ScanContext(
             const FileBuffer* const t_fileBuffer,
-            const std::vector<std::string_view>::const_iterator& t_lineIt,
-            const std::string_view::const_iterator& t_characterIt
+            const std::vector<std::string_view>::const_iterator t_lineIt,
+            const std::string_view::const_iterator t_characterIt
         ) : FileBuffer{ t_fileBuffer },
             LineIterator{ t_lineIt },
             CharacterIterator{ t_characterIt }
@@ -924,7 +924,7 @@ namespace Ace
     }
 
     auto Lexer::EatCharactersUntil(
-        const std::string_view::const_iterator& t_it
+        const std::string_view::const_iterator t_it
     ) -> void
     {
         while (m_CharacterIterator != t_it)

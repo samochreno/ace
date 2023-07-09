@@ -37,7 +37,7 @@ namespace Ace
         ) const -> std::vector<ControlFlowStmt>::const_iterator;
 
         auto IsEndReachableWithoutReturn(
-            const std::vector<ControlFlowStmt>::const_iterator& t_begin,
+            const std::vector<ControlFlowStmt>::const_iterator t_begin,
             const std::vector<std::vector<ControlFlowStmt>::const_iterator>& t_ends
         ) const -> bool;
 

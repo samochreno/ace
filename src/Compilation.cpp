@@ -428,7 +428,7 @@ namespace Ace
         else
         {
             std::for_each(begin(packagePathArgIts), end(packagePathArgIts),
-            [&](const std::vector<std::string_view>::const_iterator& t_packagePathArgIt)
+            [&](const std::vector<std::string_view>::const_iterator t_packagePathArgIt)
             {
                 SourceLocation sourceLocation
                 {

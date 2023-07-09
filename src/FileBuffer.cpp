@@ -146,7 +146,7 @@ namespace Ace
     }
 
     auto FileBuffer::FindLineIndex(
-        const std::string_view::const_iterator& t_characterIt
+        const std::string_view::const_iterator t_characterIt
     ) const -> size_t
     {
         const auto lineIt = std::upper_bound(
@@ -163,7 +163,7 @@ namespace Ace
 
     auto FileBuffer::FindCharacterIndex(
         const size_t t_lineIndex,
-        const std::string_view::const_iterator& t_characterIt
+        const std::string_view::const_iterator t_characterIt
     ) const -> size_t
     {
         return std::distance(

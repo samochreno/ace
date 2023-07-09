@@ -169,8 +169,8 @@ namespace Ace
 
     SymbolResolutionData::SymbolResolutionData(
         const std::shared_ptr<const Scope>& t_resolvingFromScope,
-        const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsBegin,
-        const std::vector<SymbolNameSection>::const_iterator& t_nameSectionsEnd,
+        const std::vector<SymbolNameSection>::const_iterator t_nameSectionsBegin,
+        const std::vector<SymbolNameSection>::const_iterator t_nameSectionsEnd,
         const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes,
         const std::function<bool(const ISymbol* const)>& t_isCorrectSymbolType,
         const std::vector<std::shared_ptr<const Scope>>& t_scopes,

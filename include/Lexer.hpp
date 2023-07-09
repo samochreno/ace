@@ -23,7 +23,7 @@ namespace Ace
         auto EatCharacter() -> void;
         auto EatCharacters(const size_t t_count) -> void;
         auto EatCharactersUntil(
-            const std::string_view::const_iterator& t_it
+            const std::string_view::const_iterator t_it
         ) -> void;
         auto EatWhitespace() -> void;
         auto EatComment() -> Diagnosed<void>;

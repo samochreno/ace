@@ -11,8 +11,8 @@ namespace Ace
         SourceLocation() = default;
         SourceLocation(
             const ISourceBuffer* const t_buffer,
-            const std::string_view::const_iterator& t_characterBeginIt,
-            const std::string_view::const_iterator& t_characterEndIt
+            const std::string_view::const_iterator t_characterBeginIt,
+            const std::string_view::const_iterator t_characterEndIt
         ) : Buffer{ t_buffer },
             CharacterBeginIterator{ t_characterBeginIt },
             CharacterEndIterator{ t_characterEndIt }
