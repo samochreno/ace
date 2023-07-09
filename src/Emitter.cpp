@@ -28,7 +28,7 @@
 #include "BoundNodes/All.hpp"
 #include "Log.hpp"
 #include "Assert.hpp"
-#include "Utility.hpp"
+#include "DynamicCastFilter.hpp"
 #include "Name.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Core.hpp"

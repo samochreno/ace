@@ -7,7 +7,7 @@
 #include "Token.hpp"
 #include "Diagnostics.hpp"
 #include "Keyword.hpp"
-#include "Utility.hpp"
+#include "String.hpp"
 #include "FileBuffer.hpp"
 #include "Compilation.hpp"
 #include "SourceLocation.hpp"
@@ -172,7 +172,7 @@ namespace Ace
         return
         {
             tokens,
-            Distance(t_context.CharacterIterator, it),
+            std::distance(t_context.CharacterIterator, it),
         };
     }
 
@@ -240,7 +240,7 @@ namespace Ace
                 TokenKind::Int,
                 string,
             },
-            Distance(t_context.CharacterIterator, it),
+            std::distance(t_context.CharacterIterator, it),
         };
     }
 
@@ -274,7 +274,7 @@ namespace Ace
         return
         {
             token,
-            Distance(t_context.CharacterIterator, it),
+            std::distance(t_context.CharacterIterator, it),
         };
     }
 
@@ -373,7 +373,7 @@ namespace Ace
             Measured
             {
                 token,
-                Distance(t_context.CharacterIterator, it),
+                std::distance(t_context.CharacterIterator, it),
             },
             diagnosticBag,
         };
@@ -395,11 +395,11 @@ namespace Ace
 
                 if (*it == '=')
                 {
-                    return Measured{ TokenKind::EqualsEquals, 2 };
+                    return Measured{ TokenKind::EqualsEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::Equals, 1 };
+                    return Measured{ TokenKind::Equals, size_t{ 1 } };
                 }
             }
 
@@ -409,11 +409,11 @@ namespace Ace
 
                 if (*it == '=')
                 {
-                    return Measured{ TokenKind::PlusEquals, 2 };
+                    return Measured{ TokenKind::PlusEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::Plus, 1 };
+                    return Measured{ TokenKind::Plus, size_t{ 1 } };
                 }
             }
 
@@ -423,15 +423,15 @@ namespace Ace
 
                 if (*it == '=')
                 {
-                    return Measured{ TokenKind::MinusEquals, 2 };
+                    return Measured{ TokenKind::MinusEquals, size_t{ 2 } };
                 }
                 else if (*it == '>')
                 {
-                    return Measured{ TokenKind::MinusGreaterThan, 2 };
+                    return Measured{ TokenKind::MinusGreaterThan, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::Minus, 1 };
+                    return Measured{ TokenKind::Minus, size_t{ 1 } };
                 }
             }
 
@@ -441,11 +441,11 @@ namespace Ace
 
                 if (*it == '=')
                 {
-                    return Measured{ TokenKind::AsteriskEquals, 2 };
+                    return Measured{ TokenKind::AsteriskEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::Asterisk, 1 };
+                    return Measured{ TokenKind::Asterisk, size_t{ 1 } };
                 }
             }
 
@@ -455,11 +455,11 @@ namespace Ace
 
                 if (*it == '=')
                 {
-                    return Measured{ TokenKind::SlashEquals, 2 };
+                    return Measured{ TokenKind::SlashEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::Slash, 1 };
+                    return Measured{ TokenKind::Slash, size_t{ 1 } };
                 }
             }
 
@@ -469,11 +469,11 @@ namespace Ace
 
                 if (*it == '=')
                 {
-                    return Measured{ TokenKind::PercentEquals, 2 };
+                    return Measured{ TokenKind::PercentEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::Percent, 1 };
+                    return Measured{ TokenKind::Percent, size_t{ 1 } };
                 }
             }
 
@@ -487,20 +487,20 @@ namespace Ace
 
                     if (*it == '=')
                     {
-                        return Measured{ TokenKind::LessThanLessThanEquals, 3 };
+                        return Measured{ TokenKind::LessThanLessThanEquals, size_t{ 3 } };
                     }
                     else
                     {
-                        return Measured{ TokenKind::LessThanLessThan, 2 };
+                        return Measured{ TokenKind::LessThanLessThan, size_t{ 2 } };
                     }
                 }
                 else if (*it == '=')
                 {
-                    return Measured{ TokenKind::LessThanEquals, 2 };
+                    return Measured{ TokenKind::LessThanEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::LessThan, 1 };
+                    return Measured{ TokenKind::LessThan, size_t{ 1 } };
                 }
             }
 
@@ -514,20 +514,20 @@ namespace Ace
 
                     if (*it == '=')
                     {
-                        return Measured{ TokenKind::GreaterThanGreaterThanEquals, 3 };
+                        return Measured{ TokenKind::GreaterThanGreaterThanEquals, size_t{ 3 } };
                     }
                     else
                     {
-                        return Measured{ TokenKind::GreaterThanGreaterThan, 2 };
+                        return Measured{ TokenKind::GreaterThanGreaterThan, size_t{ 2 } };
                     }
                 }
                 else if (*it == '=')
                 {
-                    return Measured{ TokenKind::GreaterThanEquals, 2 };
+                    return Measured{ TokenKind::GreaterThanEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::GreaterThan, 1 };
+                    return Measured{ TokenKind::GreaterThan, size_t{ 1 } };
                 }
             }
 
@@ -537,15 +537,15 @@ namespace Ace
 
                 if (*it == '&')
                 {
-                    return Measured{ TokenKind::AmpersandAmpersand, 2 };
+                    return Measured{ TokenKind::AmpersandAmpersand, size_t{ 2 } };
                 }
                 else if (*it == '=')
                 {
-                    return Measured{ TokenKind::AmpersandEquals, 2 };
+                    return Measured{ TokenKind::AmpersandEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::Ampersand, 1 };
+                    return Measured{ TokenKind::Ampersand, size_t{ 1 } };
                 }
             }
 
@@ -555,11 +555,11 @@ namespace Ace
 
                 if (*it == '=')
                 {
-                    return Measured{ TokenKind::CaretEquals, 2 };
+                    return Measured{ TokenKind::CaretEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::Caret, 1 };
+                    return Measured{ TokenKind::Caret, size_t{ 1 } };
                 }
             }
 
@@ -569,15 +569,15 @@ namespace Ace
 
                 if (*it == '|')
                 {
-                    return Measured{ TokenKind::VerticalBarVerticalBar, 2 };
+                    return Measured{ TokenKind::VerticalBarVerticalBar, size_t{ 2 } };
                 }
                 else if (*it == '=')
                 {
-                    return Measured{ TokenKind::VerticalBarEquals, 2 };
+                    return Measured{ TokenKind::VerticalBarEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::VerticalBar, 1 };
+                    return Measured{ TokenKind::VerticalBar, size_t{ 1 } };
                 }
             }
 
@@ -587,27 +587,27 @@ namespace Ace
 
                 if (*it == ':')
                 {
-                    return Measured{ TokenKind::ColonColon, 2 };
+                    return Measured{ TokenKind::ColonColon, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::Colon, 1 };
+                    return Measured{ TokenKind::Colon, size_t{ 1 } };
                 }
             }
 
             case '.':
             {
-                return Measured{ TokenKind::Dot, 1 };
+                return Measured{ TokenKind::Dot, size_t{ 1 } };
             }
 
             case ',':
             {
-                return Measured{ TokenKind::Comma, 1 };
+                return Measured{ TokenKind::Comma, size_t{ 1 } };
             }
 
             case ';':
             {
-                return Measured{ TokenKind::Semicolon, 1 };
+                return Measured{ TokenKind::Semicolon, size_t{ 1 } };
             }
 
             case '!':
@@ -616,47 +616,47 @@ namespace Ace
 
                 if (*it == '=')
                 {
-                    return Measured{ TokenKind::ExclamationEquals, 2 };
+                    return Measured{ TokenKind::ExclamationEquals, size_t{ 2 } };
                 }
                 else
                 {
-                    return Measured{ TokenKind::Exclamation, 1 };
+                    return Measured{ TokenKind::Exclamation, size_t{ 1 } };
                 }
             }
 
             case '~':
             {
-                return Measured{ TokenKind::Tilde, 1 };
+                return Measured{ TokenKind::Tilde, size_t{ 1 } };
             }
 
             case '(':
             {
-                return Measured{ TokenKind::OpenParen, 1 };
+                return Measured{ TokenKind::OpenParen, size_t{ 1 } };
             }
 
             case ')':
             {
-                return Measured{ TokenKind::CloseParen, 1 };
+                return Measured{ TokenKind::CloseParen, size_t{ 1 } };
             }
 
             case '{':
             {
-                return Measured{ TokenKind::OpenBrace, 1 };
+                return Measured{ TokenKind::OpenBrace, size_t{ 1 } };
             }
 
             case '}':
             {
-                return Measured{ TokenKind::CloseBrace, 1 };
+                return Measured{ TokenKind::CloseBrace, size_t{ 1 } };
             }
 
             case '[':
             {
-                return Measured{ TokenKind::OpenBracket, 1 };
+                return Measured{ TokenKind::OpenBracket, size_t{ 1 } };
             }
 
             case ']':
             {
-                return Measured{ TokenKind::CloseBracket, 1 };
+                return Measured{ TokenKind::CloseBracket, size_t{ 1 } };
             }
 
             default:
@@ -708,7 +708,7 @@ namespace Ace
             Measured
             {
                 token,
-                Distance(t_context.CharacterIterator, it),
+                std::distance(t_context.CharacterIterator, it),
             },
             diagnosticBag,
         };
@@ -769,7 +769,7 @@ namespace Ace
             Measured
             {
                 token,
-                Distance(t_context.CharacterIterator, it),
+                std::distance(t_context.CharacterIterator, it),
             },
             diagnosticBag,
         };

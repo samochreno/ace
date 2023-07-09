@@ -12,7 +12,7 @@
 #include <nlohmann/json.hpp>
 
 #include "Diagnostics.hpp"
-#include "Utility.hpp"
+#include "String.hpp"
 #include "Compilation.hpp"
 
 namespace Ace

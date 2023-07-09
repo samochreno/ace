@@ -20,7 +20,6 @@
 #include "Symbols/Types/Aliases/TemplateArgs/ImplTemplateArgAliasTypeSymbol.hpp"
 #include "Emittable.hpp"
 #include "TypeInfo.hpp"
-#include "Utility.hpp"
 
 namespace Ace
 {

@@ -15,7 +15,7 @@
 #include "Symbols/Symbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Log.hpp"
-#include "Utility.hpp"
+#include "DynamicCastFilter.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include "SpecialIdentifier.hpp"

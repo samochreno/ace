@@ -7,7 +7,7 @@
 
 #include "SourceLocation.hpp"
 #include "FileBuffer.hpp"
-#include "Utility.hpp"
+#include "String.hpp"
 
 namespace Ace
 {

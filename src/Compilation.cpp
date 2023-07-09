@@ -20,7 +20,6 @@
 #include "Scope.hpp"
 #include "TemplateInstantiator.hpp"
 #include "GlobalDiagnosticBag.hpp"
-#include "Utility.hpp"
 
 namespace Ace
 {

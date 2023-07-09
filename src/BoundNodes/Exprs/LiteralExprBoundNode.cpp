@@ -10,7 +10,7 @@
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
-#include "Utility.hpp"
+#include "String.hpp"
 
 namespace Ace
 {

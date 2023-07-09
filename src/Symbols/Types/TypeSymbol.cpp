@@ -10,7 +10,6 @@
 #include "Scope.hpp"
 #include "Assert.hpp"
 #include "Diagnostics.hpp"
-#include "Utility.hpp"
 
 namespace Ace
 {

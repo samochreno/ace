@@ -20,7 +20,6 @@
 #include "AccessModifier.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Scope.hpp"
-#include "Utility.hpp"
 #include "Name.hpp"
 #include "FileBuffer.hpp"
 #include "Compilation.hpp"
@@ -449,7 +448,7 @@ namespace Ace
         return Measured
         {
             t_context.Iterator->Unwrap().String,
-            1,
+            size_t{ 1 },
         };
     }
 
@@ -476,7 +475,7 @@ namespace Ace
         return Measured
         {
             std::move(name),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -515,7 +514,7 @@ namespace Ace
                 sections,
                 resolutionScope,
             },
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -546,7 +545,7 @@ namespace Ace
                 name,
                 templateArgs,
             },
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -594,7 +593,7 @@ namespace Ace
                 symbolName.Value,
                 modifiers,
             },
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -627,7 +626,7 @@ namespace Ace
         return Measured
         {
             std::move(names),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -714,7 +713,7 @@ namespace Ace
         return Measured
         {
             std::move(args),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -854,7 +853,7 @@ namespace Ace
                 functionTemplates,
                 variables
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -918,7 +917,7 @@ namespace Ace
                 functions,
                 functionTemplates
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1071,7 +1070,7 @@ namespace Ace
                 params.Value,
                 optBody
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1162,7 +1161,7 @@ namespace Ace
                 templateParams.Value,
                 function
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1260,7 +1259,7 @@ namespace Ace
                 std::vector<std::shared_ptr<const FunctionNode>>{},
                 functionTemplates
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1422,7 +1421,7 @@ namespace Ace
                 templateParams,
                 function
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1504,7 +1503,7 @@ namespace Ace
                 params.Value,
                 optBody
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1587,7 +1586,7 @@ namespace Ace
                 templateParams,
                 function
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1643,7 +1642,7 @@ namespace Ace
         return Measured
         {
             params,
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1696,7 +1695,7 @@ namespace Ace
                 attributes.Value,
                 accessModifier
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1748,7 +1747,7 @@ namespace Ace
                 accessModifier,
                 t_index
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1827,7 +1826,7 @@ namespace Ace
                 accessModifier,
                 body.Value
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1862,7 +1861,7 @@ namespace Ace
         return Measured<std::vector<std::shared_ptr<const InstanceVarNode>>>
         {
             variables,
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -1921,7 +1920,7 @@ namespace Ace
                 templateParams.Value,
                 type
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2001,7 +2000,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const ExprStmtNode>(expr.Value),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2030,7 +2029,7 @@ namespace Ace
                 lhsExpr.Value,
                 rhsExpr.Value
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2061,7 +2060,7 @@ namespace Ace
                 rhsExpr.Value,
                 op
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2114,7 +2113,7 @@ namespace Ace
                 typeName.Value,
                 optAssignment
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2207,7 +2206,7 @@ namespace Ace
                 conditions,
                 bodies
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2233,7 +2232,7 @@ namespace Ace
                 condition.Value,
                 body.Value
             },
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2259,7 +2258,7 @@ namespace Ace
                 condition.Value,
                 body.Value
             },
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2278,7 +2277,7 @@ namespace Ace
         return Measured
         {
             body.Value,
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2304,7 +2303,7 @@ namespace Ace
                 condition.Value,
                 body.Value
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2340,7 +2339,7 @@ namespace Ace
                 t_context.Scope,
                 optExpr
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2359,7 +2358,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const ExitStmtNode>(t_context.Scope),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2384,7 +2383,7 @@ namespace Ace
                 t_context.Scope,
                 condition.Value
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2414,7 +2413,7 @@ namespace Ace
                 scope,
                 stmts
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2636,7 +2635,7 @@ namespace Ace
         return Measured
         {
             exprs.front(),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2818,7 +2817,7 @@ namespace Ace
         return Measured
         {
             expr,
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2843,7 +2842,7 @@ namespace Ace
                 expr.Value,
                 name.Value
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2880,7 +2879,7 @@ namespace Ace
         return Measured
         {
             args,
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -2981,7 +2980,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const ExprExprNode>(expr.Value),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -3024,7 +3023,7 @@ namespace Ace
                 literalKind,
                 t_context.Iterator->Unwrap().String
             ),
-            1,
+            size_t{ 1 },
         };
     }
 
@@ -3100,7 +3099,7 @@ namespace Ace
                 typeName.Value,
                 std::move(args)
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -3140,7 +3139,7 @@ namespace Ace
                 typeName.Value,
                 expr.Value
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -3165,7 +3164,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const AddressOfExprNode>(expr.Value),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -3196,7 +3195,7 @@ namespace Ace
                 t_context.Scope,
                 typeName.Value
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -3236,7 +3235,7 @@ namespace Ace
                 typeName.Value,
                 expr.Value
             ),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -3255,7 +3254,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const AttributeNode>(structConstructionExpr.Value),
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -3275,7 +3274,7 @@ namespace Ace
         return Measured
         {
             attributes,
-            Distance(t_context.Iterator, it),
+            std::distance(t_context.Iterator, it),
         };
     }
 }
