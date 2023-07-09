@@ -47,7 +47,7 @@ namespace Ace
             typeInfo
         ));
 
-        if (mchConvertedAndCheckedExpr.IsChanged)
+        if (!mchConvertedAndCheckedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }

@@ -40,7 +40,7 @@ namespace Ace
     {
         ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
 
-        if (mchCheckedExpr.IsChanged)
+        if (!mchCheckedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
