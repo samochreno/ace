@@ -99,10 +99,6 @@ namespace Ace
                 [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
                 {
                     return t_ast->GetOrCreateLowered({});
-                },
-                [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
-                {
-                    return t_ast->GetOrCreateTypeChecked({});
                 }
             );
             if (!expBoundAST)

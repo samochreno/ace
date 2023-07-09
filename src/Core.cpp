@@ -639,12 +639,6 @@ namespace Ace::Core
             [](const std::shared_ptr<const BlockStmtBoundNode>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateLowered({});
-            },
-            [&](const std::shared_ptr<const BlockStmtBoundNode>& t_bodyNode)
-            {
-                return t_bodyNode->GetOrCreateTypeChecked(
-                    { t_compilation->Natives->Void.GetSymbol() }
-                );
             }
         ).Unwrap();
     }
@@ -745,12 +739,6 @@ namespace Ace::Core
             [](const std::shared_ptr<const BlockStmtBoundNode>& t_bodyNode)
             {
                 return t_bodyNode->GetOrCreateLowered({});
-            },
-            [&](const std::shared_ptr<const BlockStmtBoundNode>& t_bodyNode)
-            {
-                return t_bodyNode->GetOrCreateTypeChecked(
-                    { t_compilation->Natives->Void.GetSymbol() }
-                );
             }
         ).Unwrap();
     }

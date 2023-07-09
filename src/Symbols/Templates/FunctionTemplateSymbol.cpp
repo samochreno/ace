@@ -141,10 +141,6 @@ namespace Ace
             [](const std::shared_ptr<const FunctionBoundNode>& t_ast)
             {
                 return t_ast->GetOrCreateLowered({});
-            },
-            [](const std::shared_ptr<const FunctionBoundNode>& t_ast)
-            {
-                return t_ast->GetOrCreateTypeChecked({});
             }
         ).Unwrap();
     }

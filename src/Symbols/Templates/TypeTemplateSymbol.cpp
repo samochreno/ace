@@ -138,10 +138,6 @@ namespace Ace
             [](const std::shared_ptr<const ITypeBoundNode>& t_ast)
             {
                 return t_ast->GetOrCreateLoweredType({});
-            },
-            [](const std::shared_ptr<const ITypeBoundNode>& t_ast)
-            {
-                return t_ast->GetOrCreateTypeCheckedType({});
             }
         ).Unwrap();
 

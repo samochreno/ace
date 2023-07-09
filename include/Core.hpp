@@ -94,27 +94,25 @@ namespace Ace::Core
 
 #define TTypeChecked        std::remove_reference_t<decltype(t_getOrCreateTypeCheckedFunc(TBound{}).Unwrap().Value)>
 #define TLowered            std::remove_reference_t<decltype(t_getOrCreateLoweredFunc(TTypeChecked{}).Value)>
-#define TLoweredTypeChecked std::remove_reference_t<decltype(t_getOrCreateLoweredTypeCheckedFunc(TLowered{}).Unwrap().Value)>
 
     template<
         typename TBound, 
         typename TGetOrCreateTypeCheckedFunc, 
-        typename TGetOrCreateLoweredFunc, 
-        typename TGetOrCreateLoweredTypeCheckedFunc
+        typename TGetOrCreateLoweredFunc
     >
     auto CreateTransformedAndVerifiedAST(
         const Compilation* const t_compilation,
         const TBound& t_boundAST,
         TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
-        TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc,
-        TGetOrCreateLoweredTypeCheckedFunc&& t_getOrCreateLoweredTypeCheckedFunc
-    ) -> Expected<TLoweredTypeChecked>
+        TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc
+    ) -> Expected<TLowered>
     {
         ACE_TRY(mchTypeCheckedAST, t_getOrCreateTypeCheckedFunc(t_boundAST));
-        const auto mchLoweredAST = t_getOrCreateLoweredFunc(mchTypeCheckedAST.Value);
-        ACE_TRY(mchLoweredTypeCheckedAST, t_getOrCreateLoweredTypeCheckedFunc(mchLoweredAST.Value));
+        const auto mchLoweredAST = t_getOrCreateLoweredFunc(
+            mchTypeCheckedAST.Value
+        );
 
-        auto& finalAST = mchLoweredTypeCheckedAST.Value;
+        auto& finalAST = mchLoweredAST.Value;
         const auto nodes = GetAllNodes(finalAST);
         
         ACE_TRY_VOID(ValidateControlFlow(t_compilation, nodes));
@@ -129,26 +127,25 @@ namespace Ace::Core
         typename T, 
         typename TCreateBoundFunc, 
         typename TGetOrCreateTypeCheckedFunc, 
-        typename TGetOrCreateLoweredFunc, 
-        typename TGetOrCreateLoweredTypeCheckedFunc
+        typename TGetOrCreateLoweredFunc
     >
     auto CreateBoundTransformedAndVerifiedAST(
         const Compilation* const t_compilation,
         const T& t_ast,
         TCreateBoundFunc&& t_createBoundFunc,
         TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
-        TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc,
-        TGetOrCreateLoweredTypeCheckedFunc&& t_getOrCreateLoweredTypeCheckedFunc
-    ) -> Expected<TLoweredTypeChecked>
+        TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc
+    ) -> Expected<TLowered>
     {
         ACE_TRY(boundAST, t_createBoundFunc(t_ast));
+
         ACE_TRY(finalAST, CreateTransformedAndVerifiedAST(
             t_compilation,
             boundAST,
             t_getOrCreateTypeCheckedFunc,
-            t_getOrCreateLoweredFunc,
-            t_getOrCreateLoweredTypeCheckedFunc
+            t_getOrCreateLoweredFunc
         ));
+
         return finalAST;
     }
 
