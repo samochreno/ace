@@ -9,7 +9,7 @@
 #include "Symbols/FunctionSymbol.hpp"
 #include "Diagnostics.hpp"
 #include "Emittable.hpp"
-#include "Core.hpp"
+#include "GlueGeneration.hpp"
 
 namespace Ace
 {
@@ -135,10 +135,10 @@ namespace Ace
         FunctionSymbol* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>> 
     {
-        return Core::CreateCopyGlueBody(
+        return GlueGeneration::CreateCopyGlueBody(
             GetCompilation(),
-            this,
-            t_glueSymbol
+            t_glueSymbol,
+            this
         );
     }
 
@@ -146,10 +146,10 @@ namespace Ace
         FunctionSymbol* const t_glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
-        return Core::CreateDropGlueBody(
+        return GlueGeneration::CreateDropGlueBody(
             GetCompilation(),
-            this,
-            t_glueSymbol
+            t_glueSymbol,
+            this
         );
     }
 

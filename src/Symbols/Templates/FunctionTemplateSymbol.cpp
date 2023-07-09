@@ -14,7 +14,7 @@
 #include "Symbols/Types/Aliases/TemplateArgs/ImplTemplateArgAliasTypeSymbol.hpp"
 #include "Symbols/Types/Aliases/TemplateArgs/NormalTemplateArgAliasTypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
-#include "Core.hpp"
+#include "Application.hpp"
 #include "Name.hpp"
 
 namespace Ace
@@ -105,10 +105,10 @@ namespace Ace
             t_args
         ));
 
-        const auto nodes = Core::GetAllNodes(ast);
+        const auto nodes = Application::GetAllNodes(ast);
 
-        ACE_TRY_VOID(Core::CreateAndDefineSymbols(GetCompilation(), nodes));
-        ACE_TRY_VOID(Core::DefineAssociations(GetCompilation(), nodes));
+        ACE_TRY_VOID(Application::CreateAndDefineSymbols(GetCompilation(), nodes));
+        ACE_TRY_VOID(Application::DefineAssociations(GetCompilation(), nodes));
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
@@ -127,7 +127,7 @@ namespace Ace
     {
         const auto ast = std::dynamic_pointer_cast<const FunctionNode>(t_ast);
 
-        const auto boundAST = Core::CreateBoundTransformedAndVerifiedAST(
+        const auto boundAST = Application::CreateBoundTransformedAndVerifiedAST(
             GetCompilation(),
             ast,
             [](const std::shared_ptr<const FunctionNode>& t_ast)

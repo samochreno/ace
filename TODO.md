@@ -4,7 +4,6 @@
 
 - Expression parsing
 - `CompoundAssignmentStmtBoundNode` lowering
-- ❓ Split `Core.hpp` into multiple files, especially glue generation
 - Variable reference emitting
 - Remove `t_` prefix from parameter names
 - ❓ Remove `ACE_TRY` macros

@@ -31,7 +31,6 @@
 #include "DynamicCastFilter.hpp"
 #include "Name.hpp"
 #include "SpecialIdentifier.hpp"
-#include "Core.hpp"
 #include "Compilation.hpp"
 
 namespace Ace

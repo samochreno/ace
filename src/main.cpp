@@ -11,6 +11,6 @@ auto main(const int t_argc, const char* t_argv[]) -> int
         args.emplace_back(t_argv[i]);
     }
 
-    Ace::Main(args);
+    Ace::Application::Main(args);
     return 0;
 }

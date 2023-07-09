@@ -4,11 +4,48 @@
 #include <vector>
 
 #include "DiagnosticBag.hpp"
+#include "SourceBuffer.hpp"
 #include "Log.hpp"
-#include "Core.hpp"
 
 namespace Ace
 {
+    auto LogDiagnostic(
+        const std::shared_ptr<const Diagnostic>& t_diagnostic
+    ) -> void
+    {
+        switch (t_diagnostic->Severity)
+        {
+            case DiagnosticSeverity::Info:
+            {
+                Log << "info";
+                break;
+            }
+
+            case DiagnosticSeverity::Warning:
+            {
+                Log << termcolor::bright_yellow << "warning";
+            }
+
+            case DiagnosticSeverity::Error:
+            {
+                Log << termcolor::bright_red << "error";
+            }
+        }
+
+        Log << termcolor::reset << ": ";
+        Log << t_diagnostic->Message << "\n";
+        
+        if (t_diagnostic->OptSourceLocation.has_value())
+        {
+            Log << termcolor::bright_blue << " --> ";
+            Log << termcolor::reset;
+            Log << t_diagnostic->OptSourceLocation.value().Buffer->FormatLocation(
+                t_diagnostic->OptSourceLocation.value()
+            );
+            Log << "\n";
+        }
+    }
+
     auto LogGlobalDiagnostics(
         const DiagnosticBag& t_diagnosticBag,
         const size_t t_lastLogSize
@@ -24,7 +61,7 @@ namespace Ace
                     Log << "\n";
                 }
 
-                Core::LogDiagnostic(t_diagnostic);
+                LogDiagnostic(t_diagnostic);
             }
         );
     }
