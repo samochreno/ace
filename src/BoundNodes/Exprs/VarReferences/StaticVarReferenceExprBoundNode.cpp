@@ -10,7 +10,7 @@
 #include "Symbols/Vars/Params/ParamVarSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Vars/VarSymbol.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"

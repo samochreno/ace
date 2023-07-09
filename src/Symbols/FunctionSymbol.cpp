@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/Vars/Params/ParamVarSymbol.hpp"

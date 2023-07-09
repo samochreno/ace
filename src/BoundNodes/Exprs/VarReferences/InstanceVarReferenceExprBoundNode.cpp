@@ -9,7 +9,7 @@
 #include "BoundNodes/Exprs/DerefAsExprBoundNode.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"

@@ -10,7 +10,7 @@
 #include "Scope.hpp"
 #include "SymbolCreatable.hpp"
 #include "Diagnostics.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 
 namespace Ace
 {

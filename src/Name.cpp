@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Compilation.hpp"
 

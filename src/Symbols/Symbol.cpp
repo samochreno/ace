@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <optional>
 
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/TemplatableSymbol.hpp"

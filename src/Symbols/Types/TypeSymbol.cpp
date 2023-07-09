@@ -8,7 +8,7 @@
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "Scope.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Diagnostics.hpp"
 #include "Utility.hpp"
 

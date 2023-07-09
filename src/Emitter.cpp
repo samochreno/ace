@@ -27,7 +27,7 @@
 #include "Symbols/All.hpp"
 #include "BoundNodes/All.hpp"
 #include "Log.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Utility.hpp"
 #include "Name.hpp"
 #include "SpecialIdentifier.hpp"

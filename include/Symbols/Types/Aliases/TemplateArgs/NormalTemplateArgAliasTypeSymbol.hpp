@@ -5,7 +5,7 @@
 #include <string>
 #include <optional>
 
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Symbols/Types/Aliases/TemplateArgs/TemplateArgAliasTypeSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Scope.hpp"

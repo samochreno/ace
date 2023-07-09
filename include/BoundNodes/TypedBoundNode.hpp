@@ -3,7 +3,7 @@
 #include <type_traits>
 
 #include "BoundNodes/BoundNode.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Symbols/TypedSymbol.hpp"
 
 namespace Ace

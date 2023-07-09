@@ -14,7 +14,7 @@
 #include "BoundNodes/Stmts/Jumps/NormalJumpStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "SpecialIdentifier.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"

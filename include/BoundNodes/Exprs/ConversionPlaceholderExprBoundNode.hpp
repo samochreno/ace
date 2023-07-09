@@ -6,7 +6,7 @@
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "ExprEmitResult.hpp"

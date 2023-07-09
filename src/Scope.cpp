@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <map>
 
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Diagnostics.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Symbols/All.hpp"

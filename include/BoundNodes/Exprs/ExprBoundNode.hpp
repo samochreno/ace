@@ -13,7 +13,7 @@
 #include "Scope.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "TypeConversions.hpp"
 
 namespace Ace

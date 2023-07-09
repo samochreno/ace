@@ -4,35 +4,34 @@
 
 - Expression parsing
 - `CompoundAssignmentStmtBoundNode` lowering
-- ❓ Split `Core.hpp` into multiple files, especially glue generation
-- Variable referennce emitting
+- ❓ Split `Core.hpp` and `Utility.hpp` into multiple files, especially glue generation
+- Variable reference emitting
 - Remove `t_` prefix from parameter names
 - ❓ Remove `ACE_TRY` macros
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
 
 ## 💥 High Priority
 
-- Add error messages to make debugging easier:
+- Error messages to make debugging easier:
   - Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
 - String interning to improve compile times
-- Add strong pointer self
+- Strong pointer self
 - Traits:
-  - Implement parsing
-  - Implement symbols
-  - Implement binding
-  - ❓ Implement Rust's orphan rule
+  - Parsing
+  - Symbols
+  - Binding
+  - ❓ Rust's orphan rule
 - Templates:
-  - Implement constraints
+  - Constraints
   - When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first
   - After compilation, do semantic analysis on templates that have never been instantiated
   - ❓ Create unique signatures for template instances
   - Default template arguments
 - Conversion operators with traits:
-  - Implement
   - Change `__deref_as[T](...)` to take any type convertible to `std::Pointer` and remove `std::Reference[T]::ptr(...)`
 - Strings
 - Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; This could maybe be fixed by forcing the copy trait to also implement default trait)
-- Add lifetime trait: default, copy, drop
+- Lifetime trait: default, copy, drop
 - Check if there is any better way to not use external programs like `llc` and `clang`
 
 ## 🔔 Medium Priority
@@ -62,14 +61,13 @@
 - Check out LLVM attributes
 - Struct update constructor syntax
 - Mutability/Immutability:
-  - Implement
   - Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`
 - Dont allow private types to leak in public interface
 - Struct construction syntax:
   - New syntax for struct construction. The current `new Struct { ... }` and `Struct::new(...)` are too similiar
-  - Add struct update constructor syntax
+  - Struct update constructor syntax
 - Full and partial template specialization
-- Add associated variables
+- Associated variables
 -  Remove duplicate module filepaths: `./dawg/../dawg/` is the same as `./dawg/`
 - Operator verification:
   - Operators must be public and static (this can be implemented in the parser)

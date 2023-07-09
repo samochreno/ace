@@ -6,7 +6,7 @@
 #include "TypeInfo.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "ValueKind.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"

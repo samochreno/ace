@@ -1,6 +1,6 @@
 #include "ControlFlowAnalysis.hpp"
 
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"

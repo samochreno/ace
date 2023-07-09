@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Scope.hpp"
 #include "SpecialIdentifier.hpp"
 #include "AccessModifier.hpp"

@@ -14,7 +14,7 @@
 #include "Token.hpp"
 #include "Nodes/All.hpp"
 #include "Diagnostics.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "AccessModifier.hpp"

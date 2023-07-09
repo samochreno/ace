@@ -8,7 +8,7 @@
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
-#include "Asserts.hpp"
+#include "Assert.hpp"
 #include "ExprEmitResult.hpp"
 
 namespace Ace
