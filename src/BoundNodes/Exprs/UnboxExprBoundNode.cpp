@@ -40,15 +40,34 @@ namespace Ace
     {
         ACE_TRY_ASSERT(m_Expr->GetTypeInfo().Symbol->IsStrongPointer());
 
-        ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
+        auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
+            GetCompilation(),
+            GetCompilation()->Natives->StrongPointer__value.GetSymbol(),
+            std::nullopt,
+            { m_Expr->GetTypeInfo().Symbol->GetWithoutReference()->GetWithoutStrongPointer() },
+            {}
+        ).Unwrap();
+        auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
+        ACE_ASSERT(functionSymbol);
 
-        if (!mchCheckedExpr.IsChanged)
+        const TypeInfo typeInfo
+        {
+            functionSymbol->CollectParams().front()->GetType(),
+            ValueKind::R,
+        };
+
+        ACE_TRY(mchCheckedAndConvertedExpr, CreateImplicitlyConvertedAndTypeChecked(
+            m_Expr,
+            typeInfo
+        ));
+
+        if (!mchCheckedAndConvertedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
 
         const auto returnValue = std::make_shared<const UnboxExprBoundNode>(
-            mchCheckedExpr.Value
+            mchCheckedAndConvertedExpr.Value
         );
         return CreateChanged(returnValue);
     }
@@ -70,10 +89,9 @@ namespace Ace
             GetCompilation(),
             GetCompilation()->Natives->StrongPointer__value.GetSymbol(),
             std::nullopt,
-            { mchLoweredExpr.Value->GetTypeInfo().Symbol->GetWithoutStrongPointer() },
+            { mchLoweredExpr.Value->GetTypeInfo().Symbol->GetWithoutReference()->GetWithoutStrongPointer() },
             {}
         ).Unwrap();
-
         auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
         ACE_ASSERT(functionSymbol);
 
@@ -101,7 +119,7 @@ namespace Ace
     {
         return
         {
-            m_Expr->GetTypeInfo().Symbol->GetWithoutStrongPointer(),
+            m_Expr->GetTypeInfo().Symbol->GetWithoutReference()->GetWithoutStrongPointer(),
             ValueKind::R,
         };
     }

@@ -38,15 +38,34 @@ namespace Ace
         const TypeCheckingContext& t_context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const BoxExprBoundNode>>> 
     {
-        ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
+        auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
+            GetCompilation(),
+            GetCompilation()->Natives->StrongPointer__new.GetSymbol(),
+            std::nullopt,
+            { m_Expr->GetTypeInfo().Symbol->GetWithoutReference() },
+            {}
+        ).Unwrap();
+        auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
+        ACE_ASSERT(functionSymbol);
 
-        if (!mchCheckedExpr.IsChanged)
+        const TypeInfo typeInfo
+        {
+            functionSymbol->CollectParams().front()->GetType(),
+            ValueKind::R,
+        };
+
+        ACE_TRY(mchCheckedAndConvertedExpr, CreateImplicitlyConvertedAndTypeChecked(
+            m_Expr,
+            typeInfo
+        ));
+
+        if (!mchCheckedAndConvertedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
 
         const auto returnValue = std::make_shared<const BoxExprBoundNode>(
-            mchCheckedExpr.Value
+            mchCheckedAndConvertedExpr.Value
         );
         return CreateChanged(returnValue);
     }
@@ -64,14 +83,13 @@ namespace Ace
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
-        const auto symbol = Scope::ResolveOrInstantiateTemplateInstance(
+        auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
             GetCompilation()->Natives->StrongPointer__new.GetSymbol(),
             std::nullopt,
-            { mchLoweredExpr.Value->GetTypeInfo().Symbol },
+            { mchLoweredExpr.Value->GetTypeInfo().Symbol->GetWithoutReference() },
             {}
         ).Unwrap();
-        
         auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
         ACE_ASSERT(functionSymbol);
 
@@ -99,7 +117,7 @@ namespace Ace
     {
         return
         { 
-            m_Expr->GetTypeInfo().Symbol->GetWithStrongPointer(),
+            m_Expr->GetTypeInfo().Symbol->GetWithoutReference()->GetWithStrongPointer(),
             ValueKind::R
         };
     }
