@@ -3,7 +3,9 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
 #include "Diagnostics.hpp"
@@ -12,15 +14,22 @@
 namespace Ace
 {
     VarStmtNode::VarStmtNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name,
+        const Identifier& t_name,
         const TypeName& t_typeName,
         const std::optional<std::shared_ptr<const IExprNode>>& t_optAssignedExpr
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_Name{ t_name },
         m_TypeName{ t_typeName },
         m_OptAssignedExpr{ t_optAssignedExpr }
     {
+    }
+
+    auto VarStmtNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto VarStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -55,6 +64,7 @@ namespace Ace
         }();
 
         return std::make_shared<const VarStmtNode>(
+            m_SourceLocation,
             t_scope,
             m_Name,
             m_TypeName,
@@ -71,8 +81,9 @@ namespace Ace
 
     auto VarStmtNode::CreateBound() const -> Expected<std::shared_ptr<const VarStmtBoundNode>>
     {
-        auto* selfSymbol =
-            m_Scope->ExclusiveResolveSymbol<LocalVarSymbol>(m_Name).Unwrap();
+        auto* selfSymbol = m_Scope->ExclusiveResolveSymbol<LocalVarSymbol>(
+            m_Name.String
+        ).Unwrap();
 
         ACE_TRY(boundOptAssignedExpr, TransformExpectedOptional(m_OptAssignedExpr,
         [](const std::shared_ptr<const IExprNode>& t_expr)
@@ -91,7 +102,7 @@ namespace Ace
         return CreateBound();
     }
 
-    auto VarStmtNode::GetName() const -> const std::string&
+    auto VarStmtNode::GetName() const -> const Identifier&
     {
         return m_Name;
     }
@@ -121,7 +132,7 @@ namespace Ace
         {
             std::make_unique<LocalVarSymbol>(
                 m_Scope,
-                m_Name,
+                m_Name.String,
                 typeSymbol
             )
         };

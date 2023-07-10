@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 #include <optional>
 
 #include "Nodes/TypedNode.hpp"
@@ -11,10 +10,12 @@
 #include "Nodes/Vars/Params/NormalParamVarNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
 #include "BoundNodes/FunctionBoundNode.hpp"
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
+#include "Identifier.hpp"
 #include "Name.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostics.hpp"
-#include "Scope.hpp"
 #include "Symbols/Symbol.hpp"
 #include "SpecialIdentifier.hpp"
 
@@ -27,8 +28,9 @@ namespace Ace
     {
     public:
         FunctionNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_selfScope,
-            const std::string& t_name,
+            const Identifier& t_name,
             const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
             const AccessModifier t_accessModifier,
@@ -38,6 +40,7 @@ namespace Ace
         );
         virtual ~FunctionNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation&;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -45,7 +48,7 @@ namespace Ace
         ) const -> std::shared_ptr<const FunctionNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const FunctionBoundNode>> final;
 
-        auto GetName() const -> const std::string& final;
+        auto GetName() const -> const Identifier& final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
@@ -57,8 +60,9 @@ namespace Ace
         auto GetParams() const -> const std::vector<std::shared_ptr<const NormalParamVarNode>>&;
 
     protected:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_SelfScope{};
-        std::string m_Name{};
+        Identifier m_Name{};
         TypeName m_TypeName{};
         std::vector<std::shared_ptr<const AttributeNode>> m_Attributes{};
         SymbolCategory m_SymbolCategory{};

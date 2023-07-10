@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNodes/Exprs/UserBinaryExprBoundNode.hpp"
@@ -12,13 +13,20 @@
 namespace Ace
 {
     UserBinaryExprNode::UserBinaryExprNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_lhsExpr,
         const std::shared_ptr<const IExprNode>& t_rhsExpr,
         const TokenKind t_operator
-    ) : m_LHSExpr{ t_lhsExpr },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr },
         m_Operator{ t_operator }
     {
+    }
+
+    auto UserBinaryExprNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto UserBinaryExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -41,6 +49,7 @@ namespace Ace
     ) const -> std::shared_ptr<const UserBinaryExprNode>
     {
         return std::make_shared<const UserBinaryExprNode>(
+            m_SourceLocation,
             m_LHSExpr->CloneInScopeExpr(t_scope),
             m_RHSExpr->CloneInScopeExpr(t_scope),
             m_Operator

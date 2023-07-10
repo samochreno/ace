@@ -3,10 +3,11 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 
 #include "Nodes/Node.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 
 namespace Ace
 {
@@ -17,11 +18,13 @@ namespace Ace
     {
     public:
         NormalTemplateParamNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
-            const std::string& t_name
+            const Identifier& t_name
         );
         virtual ~NormalTemplateParamNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -33,10 +36,11 @@ namespace Ace
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
 
-        auto GetName() const -> const std::string&;
+        auto GetName() const -> const Identifier&;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
-        std::string m_Name{};
+        Identifier m_Name{};
     };
 }

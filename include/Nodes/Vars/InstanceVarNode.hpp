@@ -2,13 +2,14 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 
 #include "Nodes/Node.hpp"
 #include "Nodes/TypedNode.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "Name.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostics.hpp"
@@ -24,8 +25,9 @@ namespace Ace
     {
     public:
         InstanceVarNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
-            const std::string& t_name,
+            const Identifier& t_name,
             const TypeName& t_typeName,
             const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
             const AccessModifier t_accessModifier,
@@ -33,6 +35,7 @@ namespace Ace
         );
         virtual ~InstanceVarNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -40,7 +43,7 @@ namespace Ace
         ) const -> std::shared_ptr<const InstanceVarNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const InstanceVarBoundNode>> final;
 
-        auto GetName() const -> const std::string& final;
+        auto GetName() const -> const Identifier& final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
@@ -48,8 +51,9 @@ namespace Ace
         auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
     
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
-        std::string m_Name{};
+        Identifier m_Name{};
         TypeName m_TypeName{};
         std::vector<std::shared_ptr<const AttributeNode>> m_Attributes{};
         AccessModifier m_AccessModifier{};

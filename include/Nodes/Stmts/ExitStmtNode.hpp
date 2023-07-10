@@ -5,6 +5,7 @@
 
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "BoundNodes/Stmts/ExitStmtBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -16,9 +17,13 @@ namespace Ace
         public virtual IBindableNode<ExitStmtBoundNode>
     {
     public:
-        ExitStmtNode(const std::shared_ptr<Scope>& t_scope);
+        ExitStmtNode(
+            const SourceLocation& t_sourceLocation,
+            const std::shared_ptr<Scope>& t_scope
+        );
         virtual ~ExitStmtNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -31,6 +36,7 @@ namespace Ace
         auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
     };
 }

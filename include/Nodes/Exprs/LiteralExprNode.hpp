@@ -6,6 +6,7 @@
 
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Exprs/LiteralExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "LiteralKind.hpp"
 #include "Diagnostics.hpp"
@@ -19,12 +20,14 @@ namespace Ace
     {
     public:
         LiteralExprNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
             const LiteralKind t_kind,
             const std::string& t_string
         );
         virtual ~LiteralExprNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -37,6 +40,7 @@ namespace Ace
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
         LiteralKind m_Kind{};
         std::string m_String{};

@@ -3,9 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include "SpecialIdentifier.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
+#include "SpecialIdentifier.hpp"
 #include "BoundNodes/Exprs/UserUnaryExprBoundNode.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Symbols/FunctionSymbol.hpp"
@@ -13,11 +14,18 @@
 namespace Ace
 {
     UserUnaryExprNode::UserUnaryExprNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_expr,
         const TokenKind t_operator
-    ) : m_Expr{ t_expr },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr },
         m_Operator{ t_operator }
     {
+    }
+
+    auto UserUnaryExprNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto UserUnaryExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -39,6 +47,7 @@ namespace Ace
     ) const -> std::shared_ptr<const UserUnaryExprNode>
     {
         return std::make_unique<UserUnaryExprNode>(
+            m_SourceLocation,
             m_Expr->CloneInScopeExpr(t_scope),
             m_Operator
         );

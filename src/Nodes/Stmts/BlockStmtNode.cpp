@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Diagnostics.hpp"
@@ -11,11 +12,18 @@
 namespace Ace
 {
     BlockStmtNode::BlockStmtNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_selfScope,
         const std::vector<std::shared_ptr<const IStmtNode>>& t_stmts
-    ) : m_SelfScope{ t_selfScope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_SelfScope{ t_selfScope },
         m_Stmts{ t_stmts }
     {
+    }
+
+    auto BlockStmtNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto BlockStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -50,6 +58,7 @@ namespace Ace
         );
 
         return std::make_shared<const BlockStmtNode>(
+            m_SourceLocation,
             selfScope,
             clonedStmts
         );

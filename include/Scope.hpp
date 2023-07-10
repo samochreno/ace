@@ -12,6 +12,7 @@
 #include "Diagnostics.hpp"
 #include "Name.hpp"
 #include "SymbolCategory.hpp"
+#include "Identifier.hpp"
 
 namespace Ace
 {
@@ -374,9 +375,9 @@ namespace Ace
         auto CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*>;
 
         auto DefineTemplateArgAliases(
-            const std::vector<std::string>& t_implTemplateParamNames,
+            const std::vector<Identifier>& t_implTemplateParamNames,
             const std::vector<ITypeSymbol*> t_implTemplateArgs,
-            const std::vector<std::string>& t_templateParamNames,
+            const std::vector<Identifier>& t_templateParamNames,
             const std::vector<ITypeSymbol*> t_templateArgs
         ) -> Expected<void>;
 

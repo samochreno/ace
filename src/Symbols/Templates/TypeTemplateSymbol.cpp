@@ -15,14 +15,9 @@ namespace Ace
 {
     TypeTemplateSymbol::TypeTemplateSymbol(
         const TypeTemplateNode* const t_templateNode
-    ) : m_Name
-        {
-            SpecialIdentifier::CreateTemplate(
-                t_templateNode->GetAST()->GetName()
-            )
-        },
-        m_TemplateNode{ t_templateNode }
+    ) : m_TemplateNode{ t_templateNode }
     {
+        m_Name = SpecialIdentifier::CreateTemplate(GetASTName());
     }
 
     auto TypeTemplateSymbol::GetScope() const -> std::shared_ptr<Scope>
@@ -67,7 +62,7 @@ namespace Ace
 
     auto TypeTemplateSymbol::GetASTName() const -> const std::string&
     {
-        return m_TemplateNode->GetAST()->GetName();
+        return m_TemplateNode->GetAST()->GetName().String;
     }
 
     auto TypeTemplateSymbol::SetPlaceholderSymbol(

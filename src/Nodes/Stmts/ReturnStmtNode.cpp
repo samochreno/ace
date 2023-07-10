@@ -4,6 +4,7 @@
 #include <vector>
 #include <optional>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Stmts/ReturnStmtBoundNode.hpp"
@@ -12,11 +13,18 @@
 namespace Ace
 {
     ReturnStmtNode::ReturnStmtNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const std::optional<std::shared_ptr<const IExprNode>>& t_optExpr
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_OptExpr{ t_optExpr }
     {
+    }
+
+    auto ReturnStmtNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto ReturnStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -51,6 +59,7 @@ namespace Ace
         }();
 
         return std::make_shared<const ReturnStmtNode>(
+            m_SourceLocation,
             t_scope,
             clonedOptExpr
         );

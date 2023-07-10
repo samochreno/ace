@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
@@ -13,13 +14,20 @@
 namespace Ace
 {
     WhileStmtNode::WhileStmtNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const std::shared_ptr<const IExprNode>& t_condition,
         const std::shared_ptr<const BlockStmtNode>& t_body
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_Condition{ t_condition },
         m_Body{ t_body }
     {
+    }
+
+    auto WhileStmtNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto WhileStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -42,6 +50,7 @@ namespace Ace
     ) const -> std::shared_ptr<const WhileStmtNode>
     {
         return std::make_shared<const WhileStmtNode>(
+            m_SourceLocation,
             t_scope,
             m_Condition->CloneInScopeExpr(t_scope),
             m_Body->CloneInScope(t_scope)

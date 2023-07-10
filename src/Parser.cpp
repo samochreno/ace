@@ -24,6 +24,7 @@
 #include "FileBuffer.hpp"
 #include "Compilation.hpp"
 #include "Measured.hpp"
+#include "Identifier.hpp"
 
 namespace Ace
 {
@@ -48,6 +49,25 @@ namespace Ace
     auto ParseToken::Unwrap() const -> const Token&
     {
         return *m_Value.get();
+    }
+
+    static auto CreateSourceLocationRange(
+        const std::vector<ParseToken>::const_iterator t_begin,
+        const std::vector<ParseToken>::const_iterator t_end
+    ) -> SourceLocation
+    {
+        const auto* const sourceBuffer =
+            t_begin->Unwrap().SourceLocation.Buffer;
+
+        const auto& firstToken = t_begin->Unwrap();
+        const auto& lastToken = (t_end - 1)->Unwrap();
+
+        return
+        {
+            sourceBuffer,
+            firstToken.SourceLocation.CharacterBeginIterator,
+            lastToken.SourceLocation.CharacterEndIterator,
+        };
     }
 
     static auto IsCompoundAssignmentOperator(
@@ -280,7 +300,7 @@ namespace Ace
         const size_t t_paramCount
     ) -> Expected<const char*>
     {
-        const auto& tokenKind = t_operatorToken->Kind;
+        const auto tokenKind = t_operatorToken->Kind;
         const auto& stringValue = t_operatorToken->String;
 
         switch (tokenKind)
@@ -441,40 +461,46 @@ namespace Ace
 
     auto Parser::ParseName(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::string>>
+    ) -> Expected<Measured<Identifier>>
     {
-        ACE_TRY_ASSERT(t_context.Iterator->Unwrap().Kind == TokenKind::Identifier);
+        ACE_TRY_ASSERT(
+            t_context.Iterator->Unwrap().Kind == TokenKind::Identifier
+        );
 
         return Measured
         {
-            t_context.Iterator->Unwrap().String,
+            Identifier
+            {
+                t_context.Iterator->Unwrap().SourceLocation,
+                t_context.Iterator->Unwrap().String,
+            },
             size_t{ 1 },
         };
     }
 
     auto Parser::ParseNestedName(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::vector<std::string>>>
+    ) -> Expected<Measured<std::vector<Identifier>>>
     {
-        std::vector<std::string> name{};
+        std::vector<Identifier> nestedName{};
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
-        name.push_back(it->Unwrap().String);
-        ++it;
+        ACE_TRY(name, ParseName({ it, t_context.Scope }));
+        nestedName.push_back(std::move(name.Value));
+        it += name.Length;
 
         while (it->Unwrap().Kind == TokenKind::ColonColon)
         {
             ++it;
 
-            ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
-            name.push_back(it->Unwrap().String);
-            ++it;
+            ACE_TRY(name, ParseName({ it, t_context.Scope }));
+            nestedName.push_back(std::move(name.Value));
+            it += name.Length;
         }
 
         return Measured
         {
-            std::move(name),
+            std::move(nestedName),
             std::distance(t_context.Iterator, it),
         };
     }
@@ -599,17 +625,17 @@ namespace Ace
 
     auto Parser::ParseTemplateParamNames(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::vector<std::string>>>
+    ) -> Expected<Measured<std::vector<Identifier>>>
     {
         auto it = t_context.Iterator;
 
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
         ++it;
 
-        std::vector<std::string> names{};
+        std::vector<Identifier> names{};
         while (it->Unwrap().Kind != TokenKind::CloseBracket)
         {
-            if (names.size() != 0)
+            if (!names.empty())
             {
                 ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
                 ++it;
@@ -620,7 +646,7 @@ namespace Ace
             it += name.Length;
         }
 
-        ACE_TRY_ASSERT(names.size() != 0);
+        ACE_TRY_ASSERT(!names.empty());
         ++it;
 
         return Measured
@@ -641,9 +667,10 @@ namespace Ace
             begin(names.Value),
             end  (names.Value),
             back_inserter(params),
-            [&](const std::string& t_name)
+            [&](const Identifier& t_name)
             {
                 return std::make_shared<const ImplTemplateParamNode>(
+                    t_name.SourceLocation,
                     t_context.Scope,
                     t_name
                 );
@@ -668,9 +695,10 @@ namespace Ace
             begin(names.Value),
             end  (names.Value),
             back_inserter(params),
-            [&](const std::string& t_name)
+            [&](const Identifier& t_name)
             {
                 return std::make_shared<const NormalTemplateParamNode>(
+                    t_name.SourceLocation,
                     t_context.Scope,
                     t_name
                 );
@@ -696,7 +724,7 @@ namespace Ace
         std::vector<SymbolName> args{};
         while (it->Unwrap().Kind != TokenKind::CloseBracket)
         {
-            if (args.size() != 0)
+            if (!args.empty())
             {
                 ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
                 ++it;
@@ -754,9 +782,9 @@ namespace Ace
             begin(name.Value),
             end  (name.Value),
             back_inserter(scopes),
-            [&](const std::string& t_name)
+            [&](const Identifier& t_name)
             {
-                return scopes.back()->GetOrCreateChild(t_name);
+                return scopes.back()->GetOrCreateChild(t_name.String);
             }
         );
 
@@ -840,6 +868,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const ModuleNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 scopes.front(),
                 scopes.back(),
                 name.Value,
@@ -871,11 +900,14 @@ namespace Ace
 
         // TODO: Remove this block after impl template specialization.
         {
-            const bool foundTemplatedSection = std::find_if(begin(typeName.Value.Sections), end(typeName.Value.Sections),
-            [](const SymbolNameSection& t_section)
-            {
-                return t_section.TemplateArgs.empty();
-            }) == end(typeName.Value.Sections);
+            const bool foundTemplatedSection = std::find_if(
+                begin(typeName.Value.Sections),
+                end  (typeName.Value.Sections),
+                [](const SymbolNameSection& t_section)
+                {
+                    return t_section.TemplateArgs.empty();
+                }
+            ) == end(typeName.Value.Sections);
 
             ACE_TRY_ASSERT(!foundTemplatedSection);
         }
@@ -912,6 +944,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const ImplNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 scope,
                 typeName.Value,
                 functions,
@@ -976,7 +1009,7 @@ namespace Ace
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
-        bool hasSelfModifier = false;
+        std::optional<std::shared_ptr<const Token>> optSelfToken{};
         bool hasExternModifier = false;
 
         if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
@@ -993,25 +1026,29 @@ namespace Ace
             if (it->Unwrap().Kind == TokenKind::Identifier)
             {
                 ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
-                hasSelfModifier = true;
+                optSelfToken = *it;
                 ++it;
             }
 
             if (it->Unwrap().Kind == TokenKind::ExternKeyword)
             {
                 hasExternModifier = true;
-                ACE_TRY_ASSERT(!hasSelfModifier);
+                ACE_TRY_ASSERT(!optSelfToken.has_value());
                 ++it;
             }
 
             ACE_TRY_ASSERT(it != startIt);
         }
 
-        ACE_TRY(name, [&]() -> Expected<std::string>
+        ACE_TRY(name, ([&]() -> Expected<Identifier>
         {
             if (nameToken->Kind == TokenKind::Identifier)
             {
-                return nameToken->String;
+                return Identifier
+                {
+                    nameToken->SourceLocation,
+                    nameToken->String,
+                };
             }
             else
             {
@@ -1021,11 +1058,15 @@ namespace Ace
                 ));
 
                 ACE_TRY_ASSERT(accessModifier == AccessModifier::Public);
-                ACE_TRY_ASSERT(!hasSelfModifier);
+                ACE_TRY_ASSERT(!optSelfToken.has_value());
 
-                return std::string{ name };
+                return Identifier
+                {
+                    nameToken->SourceLocation,
+                    name,
+                };
             }
-        }());
+        }()));
 
         ACE_TRY(optBody, [&]() -> Expected<std::optional<std::shared_ptr<const BlockStmtNode>>>
         {
@@ -1047,12 +1088,13 @@ namespace Ace
 
         const auto selfParam = [&]() -> std::optional<std::shared_ptr<const SelfParamVarNode>>
         {
-            if (!hasSelfModifier)
+            if (!optSelfToken.has_value())
             {
                 return std::nullopt;
             }
 
             return std::make_shared<const SelfParamVarNode>(
+                optSelfToken.value()->SourceLocation,
                 scope,
                 t_selfTypeName
             );
@@ -1061,6 +1103,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const FunctionNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 scope,
                 name,
                 typeName.Value,
@@ -1104,7 +1147,7 @@ namespace Ace
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
-        bool hasSelfModifier = false;
+        std::optional<std::shared_ptr<const Token>> optSelfToken{};
 
         if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
         {
@@ -1120,7 +1163,7 @@ namespace Ace
             if (it->Unwrap().Kind == TokenKind::Identifier)
             {
                 ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
-                hasSelfModifier = true;
+                optSelfToken = *it;
                 ++it;
             }
 
@@ -1132,18 +1175,20 @@ namespace Ace
 
         const auto selfParam = [&]() -> std::optional<std::shared_ptr<const SelfParamVarNode>>
         {
-            if (!hasSelfModifier)
+            if (!optSelfToken.has_value())
             {
                 return std::nullopt;
             }
 
             return std::make_shared<const SelfParamVarNode>(
+                optSelfToken.value()->SourceLocation,
                 scope,
                 t_selfTypeName
             );
         }();
 
         const auto function = std::make_shared<const FunctionNode>(
+            CreateSourceLocationRange(t_context.Iterator, it),
             scope,
             name.Value,
             typeName.Value,
@@ -1157,6 +1202,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const FunctionTemplateNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 std::vector<std::shared_ptr<const ImplTemplateParamNode>>{},
                 templateParams.Value,
                 function
@@ -1197,7 +1243,9 @@ namespace Ace
             ACE_TRY_VOID(TransformExpectedVector(templateParams.Value,
             [&](const std::shared_ptr<const ImplTemplateParamNode>& t_templateParam) -> Expected<void>
             {
-                const std::string& templateParamName = t_templateParam->GetName();
+                const std::string& templateParamName =
+                    t_templateParam->GetName().String;
+
                 ACE_TRY_ASSERT(!templateParamSet.contains(templateParamName));
                 templateParamSet.insert(templateParamName);
 
@@ -1254,6 +1302,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const TemplatedImplNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 scope,
                 typeTemplateName,
                 std::vector<std::shared_ptr<const FunctionNode>>{},
@@ -1332,7 +1381,7 @@ namespace Ace
         it += typeName.Length;
 
         auto accessModifier = AccessModifier::Private;
-        bool hasSelfModifier = false;
+        std::optional<std::shared_ptr<const Token>> optSelfToken{};
 
         if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
         {
@@ -1348,18 +1397,22 @@ namespace Ace
             if (it->Unwrap().Kind == TokenKind::Identifier)
             {
                 ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
-                hasSelfModifier = true;
+                optSelfToken = *it;
                 ++it;
             }
 
             ACE_TRY_ASSERT(it != startIt);
         }
 
-        ACE_TRY(name, [&]() -> Expected<std::string>
+        ACE_TRY(name, ([&]() -> Expected<Identifier>
         {
             if (nameToken->Kind == TokenKind::Identifier)
             {
-                return nameToken->String;
+                return Identifier
+                {
+                    nameToken->SourceLocation,
+                    nameToken->String,
+                };
             }
             else
             {
@@ -1369,29 +1422,35 @@ namespace Ace
                 ));
 
                 ACE_TRY_ASSERT(accessModifier == AccessModifier::Public);
-                ACE_TRY_ASSERT(!hasSelfModifier);
+                ACE_TRY_ASSERT(!optSelfToken.has_value());
 
-                return std::string{ name };
+                return Identifier
+                {
+                    nameToken->SourceLocation,
+                    name,
+                };
             }
-        }());
+        }()));
 
         ACE_TRY(body, ParseBlockStmt({ it, scope }));
         it += body.Length;
 
         const auto selfParam = [&]() -> std::optional<std::shared_ptr<const SelfParamVarNode>>
         {
-            if (!hasSelfModifier)
+            if (!optSelfToken.has_value())
             {
                 return std::nullopt;
             }
 
             return std::make_shared<const SelfParamVarNode>(
+                optSelfToken.value()->SourceLocation,
                 scope,
                 t_selfTypeName
             );
         }();
 
         const auto function = std::make_shared<const FunctionNode>(
+            CreateSourceLocationRange(t_context.Iterator, it),
             scope,
             name,
             typeName.Value,
@@ -1417,6 +1476,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const FunctionTemplateNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 clonedImplTemplateParams,
                 templateParams,
                 function
@@ -1494,6 +1554,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const FunctionNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 scope,
                 name.Value,
                 typeName.Value,
@@ -1569,6 +1630,7 @@ namespace Ace
         it += body.Length;
 
         const auto function = std::make_shared<const FunctionNode>(
+            CreateSourceLocationRange(t_context.Iterator, it),
             scope,
             name.Value,
             typeName.Value,
@@ -1582,9 +1644,46 @@ namespace Ace
         return Measured
         {
             std::make_shared<const FunctionTemplateNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 std::vector<std::shared_ptr<const ImplTemplateParamNode>>{},
                 templateParams,
                 function
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    auto Parser::ParseParam(
+        const ParseContext& t_context,
+        const size_t t_index
+    ) -> Expected<Measured<std::shared_ptr<const NormalParamVarNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
+        it += attributes.Length;
+
+        ACE_TRY(name, ParseName({ it, t_context.Scope }));
+        it += name.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Allow
+        ));
+        it += typeName.Length;
+
+        return Measured
+        {
+            std::make_shared<const NormalParamVarNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                name.Value,
+                typeName.Value,
+                attributes.Value,
+                t_index
             ),
             std::distance(t_context.Iterator, it),
         };
@@ -1613,28 +1712,12 @@ namespace Ace
                 ++it;
             }
 
-            ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
-            it += attributes.Length;
-
-            ACE_TRY(name, ParseName({ it, t_context.Scope }));
-            it += name.Length;
-
-            ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
-            ++it;
-
-            ACE_TRY(typeName, ParseTypeName(
+            ACE_TRY(param, ParseParam(
                 { it, t_context.Scope },
-                ReferenceParsingKind::Allow
-            ));
-            it += typeName.Length;
-
-            params.push_back(std::make_shared<const NormalParamVarNode>(
-                t_context.Scope,
-                name.Value,
-                typeName.Value,
-                attributes.Value,
                 params.size()
             ));
+            params.push_back(param.Value);
+            it += param.Length;
         }
 
         ++it;
@@ -1689,6 +1772,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const StaticVarNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 name.Value,
                 typeName.Value,
@@ -1740,6 +1824,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const InstanceVarNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 name.Value,
                 typeName.Value,
@@ -1820,6 +1905,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const StructTypeNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 scope,
                 name.Value,
                 attributes.Value,
@@ -1907,6 +1993,7 @@ namespace Ace
         it += body.Length;
 
         const auto type = std::make_shared<const StructTypeNode>(
+            CreateSourceLocationRange(t_context.Iterator, it),
             scope,
             name.Value,
             attributes.Value,
@@ -1917,6 +2004,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const TypeTemplateNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 templateParams.Value,
                 type
             ),
@@ -1999,7 +2087,10 @@ namespace Ace
 
         return Measured
         {
-            std::make_shared<const ExprStmtNode>(expr.Value),
+            std::make_shared<const ExprStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                expr.Value
+            ),
             std::distance(t_context.Iterator, it),
         };
     }
@@ -2025,6 +2116,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const NormalAssignmentStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 lhsExpr.Value,
                 rhsExpr.Value
@@ -2055,6 +2147,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const CompoundAssignmentStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 lhsExpr.Value,
                 rhsExpr.Value,
@@ -2108,6 +2201,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const VarStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 name.Value,
                 typeName.Value,
@@ -2202,6 +2296,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const IfStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 conditions,
                 bodies
@@ -2299,6 +2394,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const WhileStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 condition.Value,
                 body.Value
@@ -2336,6 +2432,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const ReturnStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 optExpr
             ),
@@ -2357,7 +2454,10 @@ namespace Ace
 
         return Measured
         {
-            std::make_shared<const ExitStmtNode>(t_context.Scope),
+            std::make_shared<const ExitStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope
+            ),
             std::distance(t_context.Iterator, it),
         };
     }
@@ -2380,6 +2480,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const AssertStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 condition.Value
             ),
@@ -2410,6 +2511,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const BlockStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 scope,
                 stmts
             ),
@@ -2540,13 +2642,14 @@ namespace Ace
 
             const auto collapsedExpr = [&]() -> std::shared_ptr<const IExprNode>
             {
-                const auto& tokenKind = operators.at(t_index).get();
+                const auto tokenKind = operators.at(t_index).get();
 
                 switch (tokenKind)
                 {
                     case TokenKind::AmpersandAmpersand:
                     {
                         return std::make_shared<const AndExprNode>(
+                            CreateSourceLocationRange(t_context.Iterator, it),
                             lhsExpr,
                             rhsExpr
                         );
@@ -2555,6 +2658,7 @@ namespace Ace
                     case TokenKind::VerticalBarVerticalBar:
                     {
                         return std::make_shared<const OrExprNode>(
+                            CreateSourceLocationRange(t_context.Iterator, it),
                             lhsExpr,
                             rhsExpr
                         );
@@ -2563,6 +2667,7 @@ namespace Ace
                     default:
                     {
                         return std::make_shared<const UserBinaryExprNode>(
+                            CreateSourceLocationRange(t_context.Iterator, it),
                             lhsExpr,
                             rhsExpr,
                             tokenKind
@@ -2673,7 +2778,7 @@ namespace Ace
 
         while (IsPrefixOperator(it->Unwrap().Kind))
         {
-            const auto& tokenKind = it->Unwrap().Kind;
+            const auto tokenKind = it->Unwrap().Kind;
             ++it;
 
             prefixOperators.emplace_back(tokenKind);
@@ -2698,7 +2803,7 @@ namespace Ace
 
         while (IsPostfixOperator(it->Unwrap().Kind))
         {
-            const auto& tokenKind = it->Unwrap().Kind;
+            const auto tokenKind = it->Unwrap().Kind;
 
             ACE_TRY(args, [&]() -> Expected<std::vector<std::shared_ptr<const IExprNode>>>
             {
@@ -2720,7 +2825,7 @@ namespace Ace
 
         const auto collapseLHS = [&]()
         {
-            const auto& tokenKind = prefixOperators.front();
+            const auto tokenKind = prefixOperators.front();
 
             const auto collapsedExpr = [&]() -> std::shared_ptr<const IExprNode>
             {
@@ -2729,6 +2834,7 @@ namespace Ace
                     case TokenKind::Exclamation:
                     {
                         return std::make_shared<const LogicalNegationExprNode>(
+                            CreateSourceLocationRange(t_context.Iterator, it),
                             expr
                         );
                     }
@@ -2736,6 +2842,7 @@ namespace Ace
                     case TokenKind::BoxKeyword:
                     {
                         return std::make_shared<const BoxExprNode>(
+                            CreateSourceLocationRange(t_context.Iterator, it),
                             expr
                         );
                     }
@@ -2743,6 +2850,7 @@ namespace Ace
                     case TokenKind::UnboxKeyword:
                     {
                         return std::make_shared<const UnboxExprNode>(
+                            CreateSourceLocationRange(t_context.Iterator, it),
                             expr
                         );
                     }
@@ -2750,6 +2858,7 @@ namespace Ace
                     default:
                     {
                         return std::make_shared<const UserUnaryExprNode>(
+                            CreateSourceLocationRange(t_context.Iterator, it),
                             expr, 
                             tokenKind
                         );
@@ -2763,13 +2872,16 @@ namespace Ace
 
         const auto collapseRHS = [&]()
         {
-            const auto& [tokenKind, args] = postfixOperators.front();
+            const auto& postfixOperator = postfixOperators.front();
+            const auto tokenKind = postfixOperator.first;
+            const auto& args = postfixOperator.second;
 
-            const auto collapsedExpr = [&tokenKind=tokenKind, &expr=expr, &args=args]() -> std::shared_ptr<const IExprNode>
+            const auto collapsedExpr = [&]() -> std::shared_ptr<const IExprNode>
             {
                 if (tokenKind == TokenKind::OpenParen)
                 {
                     return std::make_shared<const FunctionCallExprNode>(
+                        CreateSourceLocationRange(t_context.Iterator, it),
                         expr,
                         args
                     );
@@ -2839,6 +2951,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const MemberAccessExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 expr.Value,
                 name.Value
             ),
@@ -2979,7 +3092,10 @@ namespace Ace
 
         return Measured
         {
-            std::make_shared<const ExprExprNode>(expr.Value),
+            std::make_shared<const ExprExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                expr.Value
+            ),
             std::distance(t_context.Iterator, it),
         };
     }
@@ -2990,7 +3106,7 @@ namespace Ace
     {
         ACE_TRY(literalKind, [&]() -> Expected<LiteralKind>
         {
-            const auto& tokenKind = t_context.Iterator->Unwrap().Kind;
+            const auto tokenKind = t_context.Iterator->Unwrap().Kind;
 
             switch (tokenKind)
             {
@@ -3019,6 +3135,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const LiteralExprNode>(
+                t_context.Iterator->Unwrap().SourceLocation,
                 t_context.Scope,
                 literalKind,
                 t_context.Iterator->Unwrap().String
@@ -3031,15 +3148,19 @@ namespace Ace
         const ParseContext& t_context
     ) -> Expected<Measured<std::shared_ptr<const LiteralSymbolExprNode>>>
     {
+        auto it = t_context.Iterator;
+
         ACE_TRY(name, ParseSymbolName({ t_context.Iterator, t_context.Scope }));
+        it += name.Length;
 
         return Measured
         {
             std::make_shared<const LiteralSymbolExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 name.Value
             ),
-            name.Length,
+            std::distance(t_context.Iterator, it),
         };
     }
 
@@ -3095,6 +3216,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const StructConstructionExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 typeName.Value,
                 std::move(args)
@@ -3136,6 +3258,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const CastExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 typeName.Value,
                 expr.Value
             ),
@@ -3163,7 +3286,10 @@ namespace Ace
 
         return Measured
         {
-            std::make_shared<const AddressOfExprNode>(expr.Value),
+            std::make_shared<const AddressOfExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                expr.Value
+            ),
             std::distance(t_context.Iterator, it),
         };
     }
@@ -3192,6 +3318,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const SizeOfExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
                 typeName.Value
             ),
@@ -3232,6 +3359,7 @@ namespace Ace
         return Measured
         {
             std::make_shared<const DerefAsExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
                 typeName.Value,
                 expr.Value
             ),
@@ -3253,7 +3381,10 @@ namespace Ace
 
         return Measured
         {
-            std::make_shared<const AttributeNode>(structConstructionExpr.Value),
+            std::make_shared<const AttributeNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                structConstructionExpr.Value
+            ),
             std::distance(t_context.Iterator, it),
         };
     }

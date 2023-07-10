@@ -716,9 +716,9 @@ namespace Ace
     }
 
     auto Scope::DefineTemplateArgAliases(
-        const std::vector<std::string>& t_implTemplateParamNames, 
+        const std::vector<Identifier>& t_implTemplateParamNames, 
         const std::vector<ITypeSymbol*> t_implTemplateArgs, 
-        const std::vector<std::string>& t_templateParamNames, 
+        const std::vector<Identifier>& t_templateParamNames, 
         const std::vector<ITypeSymbol*> t_templateArgs
     ) -> Expected<void>
     {
@@ -735,7 +735,7 @@ namespace Ace
         {
             auto aliasSymbol = std::make_unique<ImplTemplateArgAliasTypeSymbol>(
                 shared_from_this(),
-                t_implTemplateParamNames.at(i),
+                t_implTemplateParamNames.at(i).String,
                 t_implTemplateArgs.at(i),
                 i
             );
@@ -747,7 +747,7 @@ namespace Ace
         {
             auto aliasSymbol = std::make_unique<NormalTemplateArgAliasTypeSymbol>(
                 shared_from_this(),
-                t_templateParamNames.at(i),
+                t_templateParamNames.at(i).String,
                 t_templateArgs.at(i),
                 i
             );

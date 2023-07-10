@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNodes/Exprs/ExprExprBoundNode.hpp"
@@ -10,9 +11,16 @@
 namespace Ace
 {
     ExprExprNode::ExprExprNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_expr
-    ) : m_Expr{ t_expr }
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr }
     {
+    }
+
+    auto ExprExprNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto ExprExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -34,6 +42,7 @@ namespace Ace
     ) const -> std::shared_ptr<const ExprExprNode>
     {
         return std::make_shared<const ExprExprNode>(
+            m_SourceLocation,
             m_Expr->CloneInScopeExpr(t_scope)
         );
     }

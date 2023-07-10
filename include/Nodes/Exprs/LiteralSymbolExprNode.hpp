@@ -6,6 +6,7 @@
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Exprs/VarReferences/StaticVarReferenceExprBoundNode.hpp"
 #include "Name.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -18,11 +19,13 @@ namespace Ace
     {
     public:
         LiteralSymbolExprNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
             const SymbolName& t_name
         );
         virtual ~LiteralSymbolExprNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -37,6 +40,7 @@ namespace Ace
         auto GetName() const -> const SymbolName&;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
         SymbolName m_Name;
     };

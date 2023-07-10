@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
@@ -17,15 +18,22 @@
 namespace Ace
 {
     TemplatedImplNode::TemplatedImplNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_selfScope,
         const SymbolName& t_typeTemplateName,
         const std::vector<std::shared_ptr<const FunctionNode>>& t_functions,
         const std::vector<std::shared_ptr<const FunctionTemplateNode>>& t_functionTemplates
-    ) : m_SelfScope{ t_selfScope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_SelfScope{ t_selfScope },
         m_TypeTemplateName{ t_typeTemplateName },
         m_Functions{ t_functions },
         m_FunctionTemplates{ t_functionTemplates }
     {
+    }
+
+    auto TemplatedImplNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto TemplatedImplNode::GetScope() const -> std::shared_ptr<Scope>
@@ -72,6 +80,7 @@ namespace Ace
         );
 
         return std::make_shared<const TemplatedImplNode>(
+            m_SourceLocation,
             selfScope,
             m_TypeTemplateName,
             clonedFunctions,

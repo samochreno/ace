@@ -1,6 +1,8 @@
 #include "Nodes/Exprs/LogicalNegationExprNode.hpp"
 
 #include <memory>
+
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Diagnostics.hpp"
@@ -9,9 +11,16 @@
 namespace Ace
 {
     LogicalNegationExprNode::LogicalNegationExprNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_expr
-    ) : m_Expr{ t_expr }
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr }
     {
+    }
+
+    auto LogicalNegationExprNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto LogicalNegationExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -33,6 +42,7 @@ namespace Ace
     ) const -> std::shared_ptr<const LogicalNegationExprNode>
     {
         return std::make_shared<const LogicalNegationExprNode>(
+            m_SourceLocation,
             m_Expr->CloneInScopeExpr(t_scope)
         );
     }

@@ -21,14 +21,9 @@ namespace Ace
 {
     FunctionTemplateSymbol::FunctionTemplateSymbol(
         const FunctionTemplateNode* const t_templateNode
-    ) : m_Name
-        {
-            SpecialIdentifier::CreateTemplate(
-                t_templateNode->GetAST()->GetName()
-            ) 
-        },
-        m_TemplateNode{ t_templateNode }
+    ) : m_TemplateNode{ t_templateNode }
     {
+        m_Name = SpecialIdentifier::CreateTemplate(GetASTName());
     }
 
     auto FunctionTemplateSymbol::GetScope() const -> std::shared_ptr<Scope>
@@ -68,7 +63,7 @@ namespace Ace
 
     auto FunctionTemplateSymbol::GetASTName() const -> const std::string&
     {
-        return m_TemplateNode->GetAST()->GetName();
+        return m_TemplateNode->GetAST()->GetName().String;
     }
 
     auto FunctionTemplateSymbol::SetPlaceholderSymbol(

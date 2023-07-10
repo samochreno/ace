@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "BoundNodes/Exprs/VarReferences/InstanceVarReferenceExprBoundNode.hpp"
 #include "Diagnostics.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
@@ -11,11 +13,18 @@
 namespace Ace
 {
     MemberAccessExprNode::MemberAccessExprNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_expr,
         const SymbolNameSection& t_name
-    ) : m_Expr{ t_expr },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr },
         m_Name{ t_name }
     {
+    }
+
+    auto MemberAccessExprNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto MemberAccessExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -37,6 +46,7 @@ namespace Ace
     ) const -> std::shared_ptr<const MemberAccessExprNode>
     {
         return std::make_shared<const MemberAccessExprNode>(
+            m_SourceLocation,
             m_Expr->CloneInScopeExpr(t_scope),
             m_Name
         );

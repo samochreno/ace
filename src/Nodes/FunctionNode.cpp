@@ -3,9 +3,10 @@
 #include <memory>
 #include <vector>
 #include <optional>
-#include <string>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Nodes/Vars/Params/SelfParamVarNode.hpp"
@@ -20,15 +21,17 @@
 namespace Ace
 {
     FunctionNode::FunctionNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_selfScope,
-        const std::string& t_name,
+        const Identifier& t_name,
         const TypeName& t_typeName,
         const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
         const AccessModifier t_accessModifier,
         const std::optional<std::shared_ptr<const SelfParamVarNode>>& t_optSelf,
         const std::vector<std::shared_ptr<const NormalParamVarNode>>& t_params,
         const std::optional<std::shared_ptr<const BlockStmtNode>>& t_optBody
-    ) : m_SelfScope{ t_selfScope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_SelfScope{ t_selfScope },
         m_Name{ t_name },
         m_TypeName{ t_typeName },
         m_Attributes{ t_attributes },
@@ -37,6 +40,11 @@ namespace Ace
         m_Params{ t_params },
         m_OptBody{ t_optBody }
     {
+    }
+
+    auto FunctionNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto FunctionNode::GetScope() const -> std::shared_ptr<Scope>
@@ -85,7 +93,9 @@ namespace Ace
         const auto clonedOptSelf = [&]() -> std::optional<std::shared_ptr<const SelfParamVarNode>>
         {
             if (!m_OptSelf.has_value())
+            {
                 return std::nullopt;
+            }
 
             return m_OptSelf.value()->CloneInScope(selfScope);
         }();
@@ -112,6 +122,7 @@ namespace Ace
         }();
 
         return std::make_shared<const FunctionNode>(
+            m_SourceLocation,
             selfScope,
             m_Name,
             m_TypeName,
@@ -154,7 +165,7 @@ namespace Ace
         ));
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<FunctionSymbol>(
-            m_Name,
+            m_Name.String,
             m_SelfScope->CollectImplTemplateArgs(),
             m_SelfScope->CollectTemplateArgs()
         ).Unwrap();
@@ -168,7 +179,7 @@ namespace Ace
         );
     }
 
-    auto FunctionNode::GetName() const -> const std::string&
+    auto FunctionNode::GetName() const -> const Identifier&
     {
         return m_Name;
     }
@@ -198,7 +209,7 @@ namespace Ace
         {
             std::make_unique<FunctionSymbol>(
                 m_SelfScope,
-                m_Name,
+                m_Name.String,
                 m_OptSelf.has_value() ?
                     SymbolCategory::Instance :
                     SymbolCategory::Static,

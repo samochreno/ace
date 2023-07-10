@@ -4,7 +4,9 @@
 #include <vector>
 #include <string>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "Nodes/Types/TypeNode.hpp"
 #include "Nodes/Templates/TypeTemplateNode.hpp"
@@ -21,9 +23,10 @@
 namespace Ace
 {
     ModuleNode::ModuleNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const std::shared_ptr<Scope>& t_selfScope,
-        const std::vector<std::string>& t_name,
+        const std::vector<Identifier>& t_name,
         const AccessModifier t_accessModifier,
         const std::vector<std::shared_ptr<const ModuleNode>>& t_modules,
         const std::vector<std::shared_ptr<const ITypeNode>>& t_types,
@@ -33,7 +36,8 @@ namespace Ace
         const std::vector<std::shared_ptr<const FunctionNode>>& t_functions,
         const std::vector<std::shared_ptr<const FunctionTemplateNode>>& t_functionTemplates,
         const std::vector<std::shared_ptr<const StaticVarNode>>& t_variables
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_SelfScope{ t_selfScope },
         m_Name{ t_name },
         m_AccessModifier{ t_accessModifier },
@@ -46,6 +50,11 @@ namespace Ace
         m_FunctionTemplates{ t_functionTemplates },
         m_Vars{ t_variables }
     {
+    }
+
+    auto ModuleNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto ModuleNode::GetScope() const -> std::shared_ptr<Scope>
@@ -164,6 +173,7 @@ namespace Ace
         );
 
         return std::make_shared<const ModuleNode>(
+            m_SourceLocation,
             t_scope,
             selfScope,
             m_Name,
@@ -270,7 +280,9 @@ namespace Ace
                 [&](){ scope = scope->GetParent().value(); nameIt++; }()
                 )
             {
-                ACE_TRY(symbol, scope->ExclusiveResolveSymbol<ModuleSymbol>(*nameIt));
+                ACE_TRY(symbol, scope->ExclusiveResolveSymbol<ModuleSymbol>(
+                    nameIt->String
+                ));
             }
         }
 
@@ -298,6 +310,6 @@ namespace Ace
 
     auto ModuleNode::GetName() const -> const std::string&
     {
-        return m_Name.back();
+        return m_Name.back().String;
     }
 }

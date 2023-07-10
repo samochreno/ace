@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNodes/Stmts/Assignments/CompoundAssignmentStmtBoundNode.hpp"
@@ -11,15 +12,22 @@
 namespace Ace
 {
     CompoundAssignmentStmtNode::CompoundAssignmentStmtNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const std::shared_ptr<const IExprNode>& t_lhsExpr,
         const std::shared_ptr<const IExprNode>& t_rhsExpr,
         const TokenKind t_operator
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr },
         m_Operator{ t_operator }
     {
+    }
+
+    auto CompoundAssignmentStmtNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto CompoundAssignmentStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -42,6 +50,7 @@ namespace Ace
     ) const -> std::shared_ptr<const CompoundAssignmentStmtNode>
     {
         return std::make_shared<const CompoundAssignmentStmtNode>(
+            m_SourceLocation,
             m_Scope,
             m_LHSExpr->CloneInScopeExpr(t_scope),
             m_RHSExpr->CloneInScopeExpr(t_scope),

@@ -3,7 +3,9 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
@@ -14,19 +16,26 @@
 namespace Ace
 {
     InstanceVarNode::InstanceVarNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name,
+        const Identifier& t_name,
         const TypeName& t_typeName,
         const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
         const AccessModifier t_accessModifier,
         const size_t t_index
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_Name{ t_name },
         m_TypeName{ t_typeName },
         m_Attributes{ t_attributes },
         m_AccessModifier{ t_accessModifier },
         m_Index{ t_index }
     {
+    }
+
+    auto InstanceVarNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto InstanceVarNode::GetScope() const -> std::shared_ptr<Scope>
@@ -59,6 +68,7 @@ namespace Ace
         );
 
         return std::make_shared<const InstanceVarNode>(
+            m_SourceLocation,
             t_scope,
             m_Name,
             m_TypeName,
@@ -76,8 +86,9 @@ namespace Ace
             return t_attribute->CreateBound();
         }));
 
-        auto* const selfSymbol =
-            m_Scope->ExclusiveResolveSymbol<InstanceVarSymbol>(m_Name).Unwrap();
+        auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<InstanceVarSymbol>(
+            m_Name.String
+        ).Unwrap();
 
         return std::make_shared<const InstanceVarBoundNode>(
             selfSymbol,
@@ -85,7 +96,7 @@ namespace Ace
         );
     }
 
-    auto InstanceVarNode::GetName() const -> const std::string&
+    auto InstanceVarNode::GetName() const -> const Identifier&
     {
         return m_Name;
     }
@@ -115,7 +126,7 @@ namespace Ace
         {
             std::make_unique<InstanceVarSymbol>(
                 m_Scope,
-                m_Name,
+                m_Name.String,
                 m_AccessModifier,
                 typeSymbol,
                 m_Index

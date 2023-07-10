@@ -1,12 +1,12 @@
 #pragma once
 
 #include <memory>
-#include <string>
 
 #include "Nodes/Node.hpp"
 #include "BoundNodes/Types/TypeBoundNode.hpp"
 #include "Diagnostics.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
@@ -26,7 +26,7 @@ namespace Ace
 
         virtual auto CreateBoundType() const -> Expected<std::shared_ptr<const ITypeBoundNode>> = 0;
 
-        virtual auto GetName() const -> const std::string& = 0;
+        virtual auto GetName() const -> const Identifier& = 0;
         virtual auto GetAccessModifier() const -> AccessModifier = 0;
     };
 }

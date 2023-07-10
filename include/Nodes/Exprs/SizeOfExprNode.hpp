@@ -5,6 +5,7 @@
 
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Exprs/SizeOfExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Diagnostics.hpp"
@@ -18,11 +19,13 @@ namespace Ace
     {
     public:
         SizeOfExprNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
             const TypeName& t_typeName
         );
         virtual ~SizeOfExprNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -35,6 +38,7 @@ namespace Ace
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
         TypeName m_TypeName{};
     };

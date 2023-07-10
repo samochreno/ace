@@ -2,25 +2,33 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "Nodes/TemplateParams/ImplTemplateParamNode.hpp"
 #include "Nodes/TemplateParams/NormalTemplateParamNode.hpp"
+#include "Identifier.hpp"
 
 namespace Ace
 {
     FunctionTemplateNode::FunctionTemplateNode(
+        const SourceLocation& t_sourceLocation,
         const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& t_implParams,
         const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& t_params,
         const std::shared_ptr<const FunctionNode>& t_ast
-    ) : m_ImplParams{ t_implParams },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_ImplParams{ t_implParams },
         m_Params{ t_params },
         m_AST{ t_ast }
     {
+    }
+
+    auto FunctionTemplateNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto FunctionTemplateNode::GetScope() const -> std::shared_ptr<Scope>
@@ -65,6 +73,7 @@ namespace Ace
         );
 
         return std::make_shared<const FunctionTemplateNode>(
+            m_SourceLocation,
             clonedImplParams,
             clonedParams,
             m_AST->CloneInScope(t_scope)
@@ -94,9 +103,9 @@ namespace Ace
         };
     }
 
-    auto FunctionTemplateNode::CollectImplParamNames() const -> std::vector<std::string>
+    auto FunctionTemplateNode::CollectImplParamNames() const -> std::vector<Identifier>
     {
-        std::vector<std::string> names{};
+        std::vector<Identifier> names{};
         std::transform(
             begin(m_ImplParams),
             end  (m_ImplParams),
@@ -110,9 +119,9 @@ namespace Ace
         return names;
     }
 
-    auto FunctionTemplateNode::CollectParamNames() const -> std::vector<std::string>
+    auto FunctionTemplateNode::CollectParamNames() const -> std::vector<Identifier>
     {
-        std::vector<std::string> names{};
+        std::vector<Identifier> names{};
         std::transform(
             begin(m_Params),
             end  (m_Params),

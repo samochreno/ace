@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
@@ -10,9 +11,16 @@
 namespace Ace
 {
     AttributeNode::AttributeNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const StructConstructionExprNode>& t_structConstructionExpr
-    ) : m_StructConstructionExpr{ t_structConstructionExpr }
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_StructConstructionExpr{ t_structConstructionExpr }
     {
+    }
+
+    auto AttributeNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto AttributeNode::GetScope() const -> std::shared_ptr<Scope>
@@ -34,6 +42,7 @@ namespace Ace
     ) const -> std::shared_ptr<const AttributeNode>
     {
         return std::make_shared<const AttributeNode>(
+            m_SourceLocation,
             m_StructConstructionExpr->CloneInScope(t_scope)
         );
     }

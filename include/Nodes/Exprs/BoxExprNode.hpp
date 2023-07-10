@@ -5,6 +5,7 @@
 
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Exprs/BoxExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 
@@ -16,9 +17,13 @@ namespace Ace
         public virtual IBindableNode<BoxExprBoundNode>
     {
     public:
-        BoxExprNode(const std::shared_ptr<const IExprNode>& t_expr);
+        BoxExprNode(
+            const SourceLocation& t_sourceLocation,
+            const std::shared_ptr<const IExprNode>& t_expr
+        );
         virtual ~BoxExprNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -31,6 +36,7 @@ namespace Ace
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
     
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprNode> m_Expr{};
     };
 }

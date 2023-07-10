@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "BoundNodes/Exprs/BoxExprBoundNode.hpp"
@@ -10,9 +12,16 @@
 namespace Ace
 {
     BoxExprNode::BoxExprNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_expr
-    ) : m_Expr{ t_expr }
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr }
     {
+    }
+
+    auto BoxExprNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto BoxExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -34,6 +43,7 @@ namespace Ace
     ) const -> std::shared_ptr<const BoxExprNode>
     {
         return std::make_shared<const BoxExprNode>(
+            m_SourceLocation,
             m_Expr->CloneInScopeExpr(t_scope)
         );
     }

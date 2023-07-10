@@ -14,7 +14,9 @@
 #include "Nodes/Vars/StaticVarNode.hpp"
 #include "BoundNodes/ModuleBoundNode.hpp"
 #include "Symbols/Symbol.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostics.hpp"
 
@@ -28,9 +30,10 @@ namespace Ace
     {
     public:
         ModuleNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
             const std::shared_ptr<Scope>& t_selfScope,
-            const std::vector<std::string>& t_name,
+            const std::vector<Identifier>& t_name,
             const AccessModifier t_accessModifier,
             const std::vector<std::shared_ptr<const ModuleNode>>& t_modules,
             const std::vector<std::shared_ptr<const ITypeNode>>& t_types,
@@ -43,6 +46,7 @@ namespace Ace
         );
         virtual ~ModuleNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -60,9 +64,10 @@ namespace Ace
         auto GetName() const -> const std::string& final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
         std::shared_ptr<Scope> m_SelfScope{};
-        std::vector<std::string> m_Name{};
+        std::vector<Identifier> m_Name{};
         AccessModifier m_AccessModifier{};
         std::vector<std::shared_ptr<const ModuleNode>> m_Modules{};
         std::vector<std::shared_ptr<const ITypeNode>> m_Types{};

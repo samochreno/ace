@@ -4,6 +4,7 @@
 #include <vector>
 #include <iterator>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
@@ -18,11 +19,18 @@
 namespace Ace
 {
     FunctionCallExprNode::FunctionCallExprNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_expr,
         const std::vector<std::shared_ptr<const IExprNode>>& t_args
-    ) : m_Expr{ t_expr },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr },
         m_Args{ t_args }
     {
+    }
+
+    auto FunctionCallExprNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto FunctionCallExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -52,6 +60,7 @@ namespace Ace
         });
 
         return std::make_shared<const FunctionCallExprNode>(
+            m_SourceLocation,
             m_Expr->CloneInScopeExpr(t_scope),
             clonedArgs
         );

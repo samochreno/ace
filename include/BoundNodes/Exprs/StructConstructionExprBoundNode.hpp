@@ -3,10 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "Scope.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
+#include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "Diagnostics.hpp"
 #include "MaybeChanged.hpp"

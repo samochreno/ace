@@ -13,6 +13,7 @@
 #include "Name.hpp"
 #include "FileBuffer.hpp"
 #include "Measured.hpp"
+#include "Identifier.hpp"
 
 namespace Ace
 {
@@ -23,7 +24,10 @@ namespace Ace
         ~ParseToken() = default;
 
         auto Unwrap() const -> const Token&;
-        operator const std::shared_ptr<const Token>&() const { return m_Value; }
+        operator const std::shared_ptr<const Token>&() const
+        {
+            return m_Value;
+        }
 
     private:
         std::shared_ptr<const Token> m_Value{};
@@ -68,10 +72,10 @@ namespace Ace
 
         static auto ParseName(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::string>>;
+        ) -> Expected<Measured<Identifier>>;
         static auto ParseNestedName(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::vector<std::string>>>;
+        ) -> Expected<Measured<std::vector<Identifier>>>;
         static auto ParseSymbolName(
             const ParseContext& t_context
         ) -> Expected<Measured<SymbolName>>;
@@ -84,7 +88,7 @@ namespace Ace
         ) -> Expected<Measured<TypeName>>;
         static auto ParseTemplateParamNames(
             const ParseContext& t_context
-        ) -> Expected<Measured<std::vector<std::string>>>;
+        ) -> Expected<Measured<std::vector<Identifier>>>;
         static auto ParseImplTemplateParams(
             const ParseContext& t_context
         ) -> Expected<Measured<std::vector<std::shared_ptr<const ImplTemplateParamNode>>>>;
@@ -122,6 +126,10 @@ namespace Ace
         static auto ParseFunctionTemplate(
             const ParseContext& t_context
         ) -> Expected<Measured<std::shared_ptr<const FunctionTemplateNode>>>;
+        static auto ParseParam(
+            const ParseContext& t_context,
+            const size_t t_index
+        ) -> Expected<Measured<std::shared_ptr<const NormalParamVarNode>>>;
         static auto ParseParams(
             const ParseContext& t_context
         ) -> Expected<Measured<std::vector<std::shared_ptr<const NormalParamVarNode>>>>;

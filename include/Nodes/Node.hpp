@@ -2,10 +2,10 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 #include <algorithm>
 #include <functional>
 
+#include "SourceLocation.hpp"
 #include "Compilation.hpp"
 #include "Scope.hpp"
 #include "SymbolCreatable.hpp"
@@ -19,13 +19,14 @@ namespace Ace
     public:
         virtual ~INode() = default;
 
+        virtual auto GetSourceLocation() const -> const SourceLocation& = 0;
         virtual auto GetCompilation() const -> const Compilation* final;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetChildren() const -> std::vector<const INode*> = 0;
     };
 
     template<typename T>
-    class ICloneableNode
+    class ICloneableNode : public virtual INode
     {
     public:
         virtual ~ICloneableNode() = default;
@@ -36,7 +37,7 @@ namespace Ace
     };
 
     template<typename T>
-    class IBindableNode
+    class IBindableNode : public virtual INode
     {
     public:
         virtual ~IBindableNode() = default;

@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "BoundNodes/Exprs/DerefAsExprBoundNode.hpp"
@@ -10,11 +12,18 @@
 namespace Ace
 {
     DerefAsExprNode::DerefAsExprNode(
+        const SourceLocation& t_sourceLocation,
         const TypeName& t_typeName, 
         const std::shared_ptr<const IExprNode>& t_expr
-    ) : m_TypeName{ t_typeName },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_TypeName{ t_typeName },
         m_Expr{ t_expr }
     {
+    }
+
+    auto DerefAsExprNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto DerefAsExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -36,6 +45,7 @@ namespace Ace
     ) const -> std::shared_ptr<const DerefAsExprNode>
     {
         return std::make_shared<const DerefAsExprNode>(
+            m_SourceLocation,
             m_TypeName,
             m_Expr->CloneInScopeExpr(t_scope)
         );

@@ -5,6 +5,7 @@
 
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Exprs/UserBinaryExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Token.hpp"
 #include "Diagnostics.hpp"
@@ -18,12 +19,14 @@ namespace Ace
     {
     public:
         UserBinaryExprNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprNode>& t_lhsExpr,
             const std::shared_ptr<const IExprNode>& t_rhsExpr,
             const TokenKind t_operator
         );
         virtual ~UserBinaryExprNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -36,6 +39,7 @@ namespace Ace
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprNode> m_LHSExpr{};
         std::shared_ptr<const IExprNode> m_RHSExpr{};
         TokenKind m_Operator{};

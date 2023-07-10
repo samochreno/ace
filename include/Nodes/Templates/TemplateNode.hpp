@@ -1,9 +1,9 @@
 #pragma once
 
 #include <vector>
-#include <string>
 
 #include "Nodes/Node.hpp"
+#include "Identifier.hpp"
 
 namespace Ace
 {
@@ -14,7 +14,7 @@ namespace Ace
     public:
         virtual ~ITemplateNode() = default;
 
-        virtual auto CollectImplParamNames() const -> std::vector<std::string> = 0;
-        virtual auto CollectParamNames()     const -> std::vector<std::string> = 0;
+        virtual auto CollectImplParamNames() const -> std::vector<Identifier> = 0;
+        virtual auto CollectParamNames()     const -> std::vector<Identifier> = 0;
     };
 }

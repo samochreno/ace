@@ -3,6 +3,11 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
+#include "Identifier.hpp"
+#include "Nodes/AttributeNode.hpp"
+#include "Nodes/Vars/InstanceVarNode.hpp"
 #include "BoundNodes/Types/StructTypeBoundNode.hpp"
 #include "Diagnostics.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
@@ -11,17 +16,24 @@
 namespace Ace
 {
     StructTypeNode::StructTypeNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_selfScope,
-        const std::string& t_name,
+        const Identifier& t_name,
         const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
         const AccessModifier t_accessModifier,
         const std::vector<std::shared_ptr<const InstanceVarNode>>& t_variables
-    ) : m_SelfScope{ t_selfScope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_SelfScope{ t_selfScope },
         m_Name{ t_name },
         m_Attributes{ t_attributes },
         m_AccessModifier{ t_accessModifier },
         m_Vars{ t_variables }
     {
+    }
+
+    auto StructTypeNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto StructTypeNode::GetScope() const -> std::shared_ptr<Scope>
@@ -73,6 +85,7 @@ namespace Ace
         );
 
         return std::make_shared<const StructTypeNode>(
+            m_SourceLocation,
             selfScope,
             m_Name,
             clonedAttributes,
@@ -103,7 +116,7 @@ namespace Ace
         }));
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<StructTypeSymbol>(
-            m_Name,
+            m_Name.String,
             m_SelfScope->CollectImplTemplateArgs(),
             m_SelfScope->CollectTemplateArgs()
         ).Unwrap();
@@ -120,7 +133,7 @@ namespace Ace
         return CreateBound();
     }
 
-    auto StructTypeNode::GetName() const -> const std::string&
+    auto StructTypeNode::GetName() const -> const Identifier&
     {
         return m_Name;
     }
@@ -151,7 +164,7 @@ namespace Ace
         {
             std::make_unique<StructTypeSymbol>(
                 m_SelfScope,
-                m_Name,
+                m_Name.String,
                 m_AccessModifier
             )
         };

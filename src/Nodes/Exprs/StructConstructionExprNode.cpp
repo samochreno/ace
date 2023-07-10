@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
@@ -13,13 +14,20 @@
 namespace Ace
 {
     StructConstructionExprNode::StructConstructionExprNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const SymbolName& t_typeName,
         std::vector<StructConstructionExprArg>&& t_args
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_TypeName{ t_typeName },
         m_Args{ t_args }
     {
+    }
+
+    auto StructConstructionExprNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto StructConstructionExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -69,6 +77,7 @@ namespace Ace
         });
 
         return std::make_shared<const StructConstructionExprNode>(
+            m_SourceLocation,
             t_scope,
             m_TypeName,
             std::move(clonedArgs)
@@ -97,7 +106,7 @@ namespace Ace
                 end  (variableSymbols),
                 [&](const InstanceVarSymbol* const t_variableSymbol)
                 {
-                    return t_variableSymbol->GetName() == t_arg.Name;
+                    return t_variableSymbol->GetName() == t_arg.Name.String;
                 }
             );
 
@@ -113,11 +122,12 @@ namespace Ace
 
                 const SymbolName symbolName
                 {
-                    SymbolNameSection{ t_arg.Name },
+                    SymbolNameSection{ t_arg.Name.String },
                     SymbolNameResolutionScope::Local,
                 };
 
                 return std::make_shared<const LiteralSymbolExprNode>(
+                    t_arg.Name.SourceLocation,
                     m_Scope,
                     symbolName
                 )->CreateBoundExpr();

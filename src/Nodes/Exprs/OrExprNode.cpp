@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "BoundNodes/Exprs/OrExprBoundNode.hpp"
@@ -10,11 +11,18 @@
 namespace Ace
 {
     OrExprNode::OrExprNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_lhsExpr,
         const std::shared_ptr<const IExprNode>& t_rhsExpr
-    ) : m_LHSExpr{ t_lhsExpr },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr }
     {
+    }
+
+    auto OrExprNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto OrExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -37,6 +45,7 @@ namespace Ace
     ) const -> std::shared_ptr<const OrExprNode>
     {
         return std::make_shared<const OrExprNode>(
+            m_SourceLocation,
             m_LHSExpr->CloneInScopeExpr(t_scope),
             m_RHSExpr->CloneInScopeExpr(t_scope)
         );
