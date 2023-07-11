@@ -2,6 +2,7 @@
 
 ## 🛠️ Refactor
 
+- Pass `std::string_view` by value
 - Expression parsing
 - `CompoundAssignmentStmtBoundNode` lowering
 - Variable reference emitting

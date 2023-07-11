@@ -182,19 +182,19 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_suffix->String == "i8")  return TokenKind::Int8;
-        if (t_suffix->String == "i16") return TokenKind::Int16;
-        if (t_suffix->String == "i32") return TokenKind::Int32;
-        if (t_suffix->String == "i64") return TokenKind::Int64;
+        if (t_suffix == "i8")  return TokenKind::Int8;
+        if (t_suffix == "i16") return TokenKind::Int16;
+        if (t_suffix == "i32") return TokenKind::Int32;
+        if (t_suffix == "i64") return TokenKind::Int64;
         
-        if (t_suffix->String == "u8")  return TokenKind::UInt8;
-        if (t_suffix->String == "u16") return TokenKind::UInt16;
-        if (t_suffix->String == "u32") return TokenKind::UInt32;
-        if (t_suffix->String == "u64") return TokenKind::UInt64;
-        if (t_suffix->String == "u64") return TokenKind::UInt64;
+        if (t_suffix == "u8")  return TokenKind::UInt8;
+        if (t_suffix == "u16") return TokenKind::UInt16;
+        if (t_suffix == "u32") return TokenKind::UInt32;
+        if (t_suffix == "u64") return TokenKind::UInt64;
+        if (t_suffix == "u64") return TokenKind::UInt64;
 
-        if (t_suffix->String == "f32") return TokenKind::Float32;
-        if (t_suffix->String == "f64") return TokenKind::Float64;
+        if (t_suffix == "f32") return TokenKind::Float32;
+        if (t_suffix == "f64") return TokenKind::Float64;
 
         return diagnosticBag.Add(CreateUnknownNumericLiteralTypeSuffixError(
             t_suffix->SourceLocation
@@ -265,15 +265,13 @@ namespace Ace
             it,
         };
 
-        const auto token = std::make_shared<const Token>(
-            sourceLocation,
-            TokenKind::Identifier,
-            std::string{ t_context.CharacterIterator, it }
-        );
-
         return
         {
-            token,
+            std::make_shared<const Token>(
+                sourceLocation,
+                TokenKind::Identifier,
+                std::string{ t_context.CharacterIterator, it }
+            ),
             std::distance(t_context.CharacterIterator, it),
         };
     }

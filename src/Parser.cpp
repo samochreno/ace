@@ -26,41 +26,17 @@
 
 namespace Ace
 {
-    class ParseToken
-    {
-    public:
-        ParseToken(
-            const std::shared_ptr<const Token>& t_value
-        ) : m_Value{ t_value }
-        {
-        }
-        ~ParseToken() = default;
-
-        auto Unwrap() const -> const Token&
-        {
-            return *m_Value.get();
-        }
-
-        operator const std::shared_ptr<const Token>&() const
-        {
-            return m_Value;
-        }
-
-    private:
-        std::shared_ptr<const Token> m_Value{};
-    };
-
     struct ParseContext
     {
         ParseContext(
-            const std::vector<ParseToken>::const_iterator t_iterator,
+            const std::vector<std::shared_ptr<const Token>>::const_iterator t_iterator,
             const std::shared_ptr<Scope>& t_scope
         ) : Iterator{ t_iterator },
             Scope{ t_scope }
         {
         }
 
-        const std::vector<ParseToken>::const_iterator Iterator{};
+        const std::vector<std::shared_ptr<const Token>>::const_iterator Iterator{};
         std::shared_ptr<Ace::Scope> Scope{};
     };
 
@@ -83,21 +59,20 @@ namespace Ace
     };
 
     static auto CreateSourceLocationRange(
-        const std::vector<ParseToken>::const_iterator t_begin,
-        const std::vector<ParseToken>::const_iterator t_end
+        const std::vector<std::shared_ptr<const Token>>::const_iterator t_begin,
+        const std::vector<std::shared_ptr<const Token>>::const_iterator t_end
     ) -> SourceLocation
     {
-        const auto* const sourceBuffer =
-            t_begin->Unwrap().SourceLocation.Buffer;
+        const auto* const sourceBuffer = (*t_begin)->SourceLocation.Buffer;
 
-        const auto& firstToken = t_begin->Unwrap();
-        const auto& lastToken = (t_end - 1)->Unwrap();
+        const auto& firstToken = *(t_begin);
+        const auto&  lastToken = *(t_end - 1);
 
         return
         {
             sourceBuffer,
-            firstToken.SourceLocation.CharacterBeginIterator,
-            lastToken.SourceLocation.CharacterEndIterator,
+            firstToken->SourceLocation.CharacterBeginIterator,
+             lastToken->SourceLocation.CharacterEndIterator,
         };
     }
 
@@ -434,16 +409,14 @@ namespace Ace
         const ParseContext& t_context
     ) -> Expected<Measured<Identifier>>
     {
-        ACE_TRY_ASSERT(
-            t_context.Iterator->Unwrap().Kind == TokenKind::Identifier
-        );
+        ACE_TRY_ASSERT(*t_context.Iterator == TokenKind::Identifier);
 
         return Measured
         {
             Identifier
             {
-                t_context.Iterator->Unwrap().SourceLocation,
-                t_context.Iterator->Unwrap().String,
+                (*t_context.Iterator)->SourceLocation,
+                (*t_context.Iterator)->String,
             },
             size_t{ 1 },
         };
@@ -460,7 +433,7 @@ namespace Ace
         nestedName.push_back(std::move(name.Value));
         it += name.Length;
 
-        while (it->Unwrap().Kind == TokenKind::ColonColon)
+        while (*it == TokenKind::ColonColon)
         {
             ++it;
 
@@ -486,8 +459,8 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
-        const std::string& name = it->Unwrap().String;
+        ACE_TRY_ASSERT(*it == TokenKind::Identifier);
+        const std::string& name = (*it)->String;
         ++it;
 
         auto templateArgs = [&]() -> std::vector<SymbolName>
@@ -520,7 +493,7 @@ namespace Ace
         auto it = t_context.Iterator;
 
         auto resolutionScope = SymbolNameResolutionScope::Local;
-        if (it->Unwrap().Kind == TokenKind::ColonColon)
+        if (*it == TokenKind::ColonColon)
         {
             resolutionScope = SymbolNameResolutionScope::Global;
             ++it;
@@ -532,7 +505,7 @@ namespace Ace
         sections.push_back(std::move(section.Value));
         it += section.Length;
 
-        while (it->Unwrap().Kind == TokenKind::ColonColon)
+        while (*it == TokenKind::ColonColon)
         {
             ++it;
 
@@ -563,7 +536,7 @@ namespace Ace
 
         if (t_referenceParsingKind == ReferenceParsingKind::Allow)
         {
-            if (it->Unwrap().Kind == TokenKind::Ampersand)
+            if (*it == TokenKind::Ampersand)
             {
                 modifiers.push_back(TypeNameModifier::Reference);
                 ++it;
@@ -572,11 +545,11 @@ namespace Ace
 
         for (; true; ++it)
         {
-            if (it->Unwrap().Kind == TokenKind::Asterisk)
+            if (*it == TokenKind::Asterisk)
             {
                 modifiers.push_back(TypeNameModifier::StrongPointer);
             }
-            else if (it->Unwrap().Kind == TokenKind::Tilde)
+            else if (*it == TokenKind::Tilde)
             {
                 modifiers.push_back(TypeNameModifier::WeakPointer);
             }
@@ -606,15 +579,15 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBracket);
         ++it;
 
         std::vector<Identifier> names{};
-        while (it->Unwrap().Kind != TokenKind::CloseBracket)
+        while (*it != TokenKind::CloseBracket)
         {
             if (!names.empty())
             {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
+                ACE_TRY_ASSERT(*it == TokenKind::Comma);
                 ++it;
             }
 
@@ -695,15 +668,15 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBracket);
         ++it;
 
         std::vector<SymbolName> args{};
-        while (it->Unwrap().Kind != TokenKind::CloseBracket)
+        while (*it != TokenKind::CloseBracket)
         {
             if (!args.empty())
             {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
+                ACE_TRY_ASSERT(*it == TokenKind::Comma);
                 ++it;
             }
 
@@ -728,7 +701,7 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBracket);
         ++it;
 
         ACE_TRY(structConstructionExpr, ParseStructConstructionExpr({
@@ -780,7 +753,7 @@ namespace Ace
         ACE_TRY(name, ParseName({ it, t_context.Scope }));
         it += name.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -810,11 +783,11 @@ namespace Ace
         std::vector<std::shared_ptr<const NormalParamVarNode>> params{};
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenParen);
         ++it;
 
         bool isFirstParam = true;
-        while (it->Unwrap().Kind != TokenKind::CloseParen)
+        while (*it != TokenKind::CloseParen)
         {
             if (isFirstParam)
             {
@@ -822,7 +795,7 @@ namespace Ace
             }
             else
             {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
+                ACE_TRY_ASSERT(*it == TokenKind::Comma);
                 ++it;
             }
 
@@ -849,12 +822,12 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenParen);
         ++it;
 
         bool isFirstArg = true;
         std::vector<std::shared_ptr<const IExprNode>> args{};
-        while (it->Unwrap().Kind != TokenKind::CloseParen)
+        while (*it != TokenKind::CloseParen)
         {
             if (isFirstArg)
             {
@@ -862,7 +835,7 @@ namespace Ace
             }
             else
             {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
+                ACE_TRY_ASSERT(*it == TokenKind::Comma);
                 ++it;
             }
 
@@ -886,13 +859,13 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenParen);
         ++it;
 
         ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
         it += expr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
+        ACE_TRY_ASSERT(*it == TokenKind::CloseParen);
         ++it;
 
         return Measured
@@ -914,7 +887,7 @@ namespace Ace
         ACE_TRY(expr, ParsePrimaryExpr({ it, t_context.Scope }));
         it += expr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Dot);
+        ACE_TRY_ASSERT(*it == TokenKind::Dot);
         ++it;
 
         ACE_TRY(name, ParseSymbolNameSection({ it, t_context.Scope }));
@@ -937,9 +910,7 @@ namespace Ace
     {
         ACE_TRY(literalKind, [&]() -> Expected<LiteralKind>
         {
-            const auto tokenKind = t_context.Iterator->Unwrap().Kind;
-
-            switch (tokenKind)
+            switch ((*t_context.Iterator)->Kind)
             {
                 case TokenKind::Int8:         return LiteralKind::Int8;
                 case TokenKind::Int16:        return LiteralKind::Int16;
@@ -966,10 +937,10 @@ namespace Ace
         return Measured
         {
             std::make_shared<const LiteralExprNode>(
-                t_context.Iterator->Unwrap().SourceLocation,
+                (*t_context.Iterator)->SourceLocation,
                 t_context.Scope,
                 literalKind,
-                t_context.Iterator->Unwrap().String
+                (*t_context.Iterator)->String
             ),
             size_t{ 1 },
         };
@@ -1004,25 +975,24 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
-        ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::New);
+        ACE_TRY_ASSERT(*it == SpecialIdentifier::New);
         ++it;
 
         ACE_TRY(typeName, ParseSymbolName({ it, t_context.Scope }));
         it += typeName.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBrace);
         ++it;
 
         std::vector<StructConstructionExprArg> args{};
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        while (*it != TokenKind::CloseBrace)
         {
             if (!args.empty())
             {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
+                ACE_TRY_ASSERT(*it == TokenKind::Comma);
                 ++it;
 
-                if (it->Unwrap().Kind == TokenKind::CloseBrace)
+                if (*it == TokenKind::CloseBrace)
                 {
                     break;
                 }
@@ -1032,7 +1002,7 @@ namespace Ace
             it += name.Length;
 
             std::optional<std::shared_ptr<const IExprNode>> optValue{};
-            if (it->Unwrap().Kind == TokenKind::Colon)
+            if (*it == TokenKind::Colon)
             {
                 ++it;
 
@@ -1067,10 +1037,10 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CastKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::CastKeyword);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBracket);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -1079,16 +1049,16 @@ namespace Ace
         ));
         it += typeName.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
+        ACE_TRY_ASSERT(*it == TokenKind::CloseBracket);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenParen);
         ++it;
 
         ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
         it += expr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
+        ACE_TRY_ASSERT(*it == TokenKind::CloseParen);
         ++it;
 
         return Measured
@@ -1108,16 +1078,16 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::AddressOfKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::AddressOfKeyword);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenParen);
         ++it;
 
         ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
         it += expr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
+        ACE_TRY_ASSERT(*it == TokenKind::CloseParen);
         ++it;
 
         return Measured
@@ -1136,10 +1106,10 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::SizeOfKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::SizeOfKeyword);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBracket);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -1148,7 +1118,7 @@ namespace Ace
         ));
         it += typeName.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
+        ACE_TRY_ASSERT(*it == TokenKind::CloseBracket);
         ++it;
 
         return Measured
@@ -1168,10 +1138,10 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::DerefAsKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::DerefAsKeyword);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBracket);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -1180,16 +1150,16 @@ namespace Ace
         ));
         it += typeName.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
+        ACE_TRY_ASSERT(*it == TokenKind::CloseBracket);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenParen);
         ++it;
 
         ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
         it += expr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
+        ACE_TRY_ASSERT(*it == TokenKind::CloseParen);
         ++it;
 
         return Measured
@@ -1235,9 +1205,9 @@ namespace Ace
         std::vector<std::reference_wrapper<const TokenKind>> prefixOperators{};
         std::vector<std::pair<std::reference_wrapper<const TokenKind>, std::vector<std::shared_ptr<const IExprNode>>>> postfixOperators{};
 
-        while (IsPrefixOperator(it->Unwrap().Kind))
+        while (IsPrefixOperator((*it)->Kind))
         {
-            const auto tokenKind = it->Unwrap().Kind;
+            const auto tokenKind = (*it)->Kind;
             ++it;
 
             prefixOperators.emplace_back(tokenKind);
@@ -1260,13 +1230,13 @@ namespace Ace
             return primaryExpr.Value;
         }());
 
-        while (IsPostfixOperator(it->Unwrap().Kind))
+        while (IsPostfixOperator((*it)->Kind))
         {
-            const auto tokenKind = it->Unwrap().Kind;
+            const auto tokenKind = (*it)->Kind;
 
             ACE_TRY(args, [&]() -> Expected<std::vector<std::shared_ptr<const IExprNode>>>
             {
-                if (it->Unwrap().Kind != TokenKind::OpenParen)
+                if (*it != TokenKind::OpenParen)
                 {
                     ++it;
                     return std::vector<std::shared_ptr<const IExprNode>>{};
@@ -1577,9 +1547,9 @@ namespace Ace
 
         exprs.push_back(simpleExpr.Value);
         
-        while (IsBinaryOperator(it->Unwrap().Kind))
+        while (IsBinaryOperator((*it)->Kind))
         {
-            operators.push_back(it->Unwrap().Kind);
+            operators.push_back((*it)->Kind);
             ++it;
 
             ACE_TRY(simpleExpr, ParseSimpleExpr({ it, t_context.Scope }));
@@ -1703,11 +1673,11 @@ namespace Ace
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBrace);
         ++it;
 
         std::vector<std::shared_ptr<const IStmtNode>> stmts{};
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        while (*it != TokenKind::CloseBrace)
         {
             ACE_TRY(stmt, ParseStmt({ it, scope }));
             stmts.push_back(stmt.Value);
@@ -1736,7 +1706,7 @@ namespace Ace
         ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
         it += expr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ACE_TRY_ASSERT(*it == TokenKind::Semicolon);
         ++it;
 
         return Measured
@@ -1758,13 +1728,13 @@ namespace Ace
         ACE_TRY(lhsExpr, ParseExpr({ it, t_context.Scope }));
         it += lhsExpr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Equals);
+        ACE_TRY_ASSERT(*it == TokenKind::Equals);
         ++it;
 
         ACE_TRY(rhsExpr, ParseExpr({ it, t_context.Scope }));
         it += rhsExpr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ACE_TRY_ASSERT(*it == TokenKind::Semicolon);
         ++it;
 
         return Measured
@@ -1788,14 +1758,14 @@ namespace Ace
         ACE_TRY(lhsExpr, ParseExpr({ it, t_context.Scope }));
         it += lhsExpr.Length;
 
-        const auto op = it->Unwrap().Kind;
+        const auto op = (*it)->Kind;
         ACE_TRY_ASSERT(IsCompoundAssignmentOperator(op));
         ++it;
 
         ACE_TRY(rhsExpr, ParseExpr({ it, t_context.Scope }));
         it += rhsExpr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ACE_TRY_ASSERT(*it == TokenKind::Semicolon);
         ++it;
 
         return Measured
@@ -1820,7 +1790,7 @@ namespace Ace
         ACE_TRY(name, ParseName(t_context));
         it += name.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -1831,19 +1801,19 @@ namespace Ace
 
         ACE_TRY(optAssignment, [&]() -> Expected<std::optional<std::shared_ptr<const IExprNode>>>
         {
-            if (it->Unwrap().Kind == TokenKind::Semicolon)
+            if (*it == TokenKind::Semicolon)
             {
                 ++it;
                 return std::optional<std::shared_ptr<const IExprNode>>{};
             }
-            else if (it->Unwrap().Kind == TokenKind::Equals)
+            else if (*it == TokenKind::Equals)
             {
                 ++it;
 
                 ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
                 it += expr.Length;
 
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+                ACE_TRY_ASSERT(*it == TokenKind::Semicolon);
                 ++it;
 
                 return std::optional{ expr.Value };
@@ -1871,7 +1841,7 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::IfKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::IfKeyword);
         ++it;
 
         ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
@@ -1897,7 +1867,7 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ElifKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::ElifKeyword);
         ++it;
 
         ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
@@ -1923,7 +1893,7 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ElseKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::ElseKeyword);
         ++it;
 
         ACE_TRY(body, ParseBlockStmt({ it, t_context.Scope }));
@@ -1951,7 +1921,7 @@ namespace Ace
         conditions.push_back(ifBlock.Value.first);
         bodies.push_back(ifBlock.Value.second);
 
-        while (it->Unwrap().Kind == TokenKind::ElifKeyword)
+        while (*it == TokenKind::ElifKeyword)
         {
             ACE_TRY(elifBlock, ParseElifBlock({ it, t_context.Scope }));
 
@@ -1984,7 +1954,7 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::WhileKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::WhileKeyword);
         ++it;
 
         ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
@@ -2011,12 +1981,12 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ReturnKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::ReturnKeyword);
         ++it;
 
         ACE_TRY(optExpr, [&]() -> Expected<std::optional<std::shared_ptr<const IExprNode>>>
         {
-            if (it->Unwrap().Kind == TokenKind::Semicolon)
+            if (*it == TokenKind::Semicolon)
             {
                 ++it;
                 return std::optional<std::shared_ptr<const IExprNode>>{};
@@ -2025,7 +1995,7 @@ namespace Ace
             ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
             it += expr.Length;
 
-            ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+            ACE_TRY_ASSERT(*it == TokenKind::Semicolon);
             ++it;
 
             return std::optional{ expr.Value };
@@ -2048,10 +2018,10 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ExitKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::ExitKeyword);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ACE_TRY_ASSERT(*it == TokenKind::Semicolon);
         ++it;
 
         return Measured
@@ -2070,13 +2040,13 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::AssertKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::AssertKeyword);
         ++it;
 
         ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
         it += condition.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ACE_TRY_ASSERT(*it == TokenKind::Semicolon);
         ++it;
 
         return Measured
@@ -2216,7 +2186,7 @@ namespace Ace
 
         ACE_TRY(nameToken, [&]() -> Expected<std::shared_ptr<const Token>>
         {
-            if (it->Unwrap().Kind == TokenKind::OperatorKeyword) 
+            if (*it == TokenKind::OperatorKeyword) 
             {
                 ++it;
 
@@ -2225,9 +2195,9 @@ namespace Ace
                 if (!IsUserOperator(operatorToken->Kind))
                 {
                     ACE_TRY_ASSERT(
-                        operatorToken->Kind == TokenKind::ImplKeyword ||
-                        operatorToken->Kind == TokenKind::ExplKeyword ||
-                        operatorToken->Kind == TokenKind::Identifier 
+                        operatorToken == TokenKind::ImplKeyword ||
+                        operatorToken == TokenKind::ExplKeyword ||
+                        operatorToken == TokenKind::Identifier 
                     );
                 }
 
@@ -2237,7 +2207,7 @@ namespace Ace
             }
             else
             {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
+                ACE_TRY_ASSERT(*it == TokenKind::Identifier);
                 const std::shared_ptr<const Token> nameToken = *it;
                 ++it;
 
@@ -2248,7 +2218,7 @@ namespace Ace
         ACE_TRY(params, ParseParams({ it, scope }));
         it += params.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -2261,25 +2231,25 @@ namespace Ace
         std::optional<std::shared_ptr<const Token>> optSelfToken{};
         bool hasExternModifier = false;
 
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        if (*it == TokenKind::MinusGreaterThan)
         {
             ++it;
             const auto startIt = it;
 
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (*it == TokenKind::PublicKeyword)
             {
                 accessModifier = AccessModifier::Public;
                 ++it;
             }
 
-            if (it->Unwrap().Kind == TokenKind::Identifier)
+            if (*it == TokenKind::Identifier)
             {
-                ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
+                ACE_TRY_ASSERT(*it == SpecialIdentifier::Self);
                 optSelfToken = *it;
                 ++it;
             }
 
-            if (it->Unwrap().Kind == TokenKind::ExternKeyword)
+            if (*it == TokenKind::ExternKeyword)
             {
                 hasExternModifier = true;
                 ACE_TRY_ASSERT(!optSelfToken.has_value());
@@ -2291,7 +2261,7 @@ namespace Ace
 
         ACE_TRY(name, ([&]() -> Expected<Identifier>
         {
-            if (nameToken->Kind == TokenKind::Identifier)
+            if (nameToken == TokenKind::Identifier)
             {
                 return Identifier
                 {
@@ -2321,7 +2291,7 @@ namespace Ace
         {
             if (hasExternModifier)
             {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+                ACE_TRY_ASSERT(*it == TokenKind::Semicolon);
                 ++it;
 
                 return std::optional<std::shared_ptr<const BlockStmtNode>>{};
@@ -2386,7 +2356,7 @@ namespace Ace
         ACE_TRY(params, ParseParams({ it, scope }));
         it += params.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -2398,20 +2368,20 @@ namespace Ace
         auto accessModifier = AccessModifier::Private;
         std::optional<std::shared_ptr<const Token>> optSelfToken{};
 
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        if (*it == TokenKind::MinusGreaterThan)
         {
             ++it;
             const auto startIt = it;
 
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (*it == TokenKind::PublicKeyword)
             {
                 accessModifier = AccessModifier::Public;
                 ++it;
             }
 
-            if (it->Unwrap().Kind == TokenKind::Identifier)
+            if (*it == TokenKind::Identifier)
             {
-                ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
+                ACE_TRY_ASSERT(*it == SpecialIdentifier::Self);
                 optSelfToken = *it;
                 ++it;
             }
@@ -2467,7 +2437,7 @@ namespace Ace
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ImplKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::ImplKeyword);
         ++it;
 
         ACE_TRY(typeName, ParseSymbolName({ it, t_context.Scope }));
@@ -2488,13 +2458,13 @@ namespace Ace
 
         it += typeName.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBrace);
         ++it;
 
         std::vector<std::shared_ptr<const FunctionNode>> functions{};
         std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
 
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        while (*it != TokenKind::CloseBrace)
         {
             if (const auto expFunction = ParseImplFunction({ it, scope }, typeName.Value))
             {
@@ -2542,7 +2512,7 @@ namespace Ace
 
         ACE_TRY(nameToken, [&]() -> Expected<std::shared_ptr<const Token>>
         {
-            if (it->Unwrap().Kind == TokenKind::OperatorKeyword)
+            if (*it == TokenKind::OperatorKeyword)
             {
                 ++it;
 
@@ -2551,9 +2521,9 @@ namespace Ace
                 if (!IsUserOperator(operatorToken->Kind))
                 {
                     ACE_TRY_ASSERT(
-                        operatorToken->Kind == TokenKind::ImplKeyword ||
-                        operatorToken->Kind == TokenKind::ExplKeyword ||
-                        operatorToken->Kind == TokenKind::Identifier
+                        operatorToken == TokenKind::ImplKeyword ||
+                        operatorToken == TokenKind::ExplKeyword ||
+                        operatorToken == TokenKind::Identifier
                     );
                 }
 
@@ -2563,7 +2533,7 @@ namespace Ace
             }
             else
             {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
+                ACE_TRY_ASSERT(*it == TokenKind::Identifier);
                 const std::shared_ptr<const Token> nameToken = *it;
                 ++it;
 
@@ -2587,7 +2557,7 @@ namespace Ace
         ACE_TRY(params, ParseParams({ it, scope }));
         it += params.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -2599,20 +2569,20 @@ namespace Ace
         auto accessModifier = AccessModifier::Private;
         std::optional<std::shared_ptr<const Token>> optSelfToken{};
 
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        if (*it == TokenKind::MinusGreaterThan)
         {
             ++it;
             const auto startIt = it;
 
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (*it == TokenKind::PublicKeyword)
             {
                 accessModifier = AccessModifier::Public;
                 ++it;
             }
 
-            if (it->Unwrap().Kind == TokenKind::Identifier)
+            if (*it == TokenKind::Identifier)
             {
-                ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
+                ACE_TRY_ASSERT(*it == SpecialIdentifier::Self);
                 optSelfToken = *it;
                 ++it;
             }
@@ -2622,7 +2592,7 @@ namespace Ace
 
         ACE_TRY(name, ([&]() -> Expected<Identifier>
         {
-            if (nameToken->Kind == TokenKind::Identifier)
+            if (nameToken == TokenKind::Identifier)
             {
                 return Identifier
                 {
@@ -2688,7 +2658,6 @@ namespace Ace
             }
         );
 
-
         return Measured
         {
             std::make_shared<const FunctionTemplateNode>(
@@ -2708,7 +2677,7 @@ namespace Ace
         const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ImplKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::ImplKeyword);
         ++it;
 
         ACE_TRY(templateParams, ParseImplTemplateParams({ it, scope }));
@@ -2718,11 +2687,14 @@ namespace Ace
 
         // TODO: Remove this block after impl template specialization.
         {
-            const bool foundTemplatedSection = std::find_if(begin(typeName.Value.Sections), end(typeName.Value.Sections) - 1,
-            [](const SymbolNameSection& t_section)
-            {
-                return t_section.TemplateArgs.empty();
-            }) == end(typeName.Value.Sections);
+            const bool foundTemplatedSection = std::find_if(
+                begin(typeName.Value.Sections),
+                end  (typeName.Value.Sections) - 1,
+                [](const SymbolNameSection& t_section)
+                {
+                    return t_section.TemplateArgs.empty();
+                }
+            ) == end(typeName.Value.Sections);
 
             ACE_TRY_ASSERT(!foundTemplatedSection);
 
@@ -2758,12 +2730,12 @@ namespace Ace
 
         it += typeName.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBrace);
         ++it;
 
         std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
 
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        while (*it != TokenKind::CloseBrace)
         {
             auto expFunctionTemplate = ParseTemplatedImplFunction(
                 { it, scope },
@@ -2818,7 +2790,7 @@ namespace Ace
         ACE_TRY(params, ParseParams({ it, scope }));
         it += params.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -2830,18 +2802,18 @@ namespace Ace
         auto accessModifier = AccessModifier::Private;
         bool hasExternModifier = false;
 
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        if (*it == TokenKind::MinusGreaterThan)
         {
             ++it;
             const auto startIt = it;
 
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (*it == TokenKind::PublicKeyword)
             {
                 accessModifier = AccessModifier::Public;
                 ++it;
             }
 
-            if (it->Unwrap().Kind == TokenKind::ExternKeyword)
+            if (*it == TokenKind::ExternKeyword)
             {
                 hasExternModifier = true;
                 ++it;
@@ -2854,7 +2826,7 @@ namespace Ace
         {
             if (hasExternModifier)
             {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+                ACE_TRY_ASSERT(*it == TokenKind::Semicolon);
                 ++it;
 
                 return std::optional<std::shared_ptr<const BlockStmtNode>>{};
@@ -2918,7 +2890,7 @@ namespace Ace
         ACE_TRY(params, ParseParams({ it, scope }));
         it += params.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -2929,12 +2901,12 @@ namespace Ace
 
         auto accessModifier = AccessModifier::Private;
 
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        if (*it == TokenKind::MinusGreaterThan)
         {
             ++it;
             const auto startIt = it;
 
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (*it == TokenKind::PublicKeyword)
             {
                 accessModifier = AccessModifier::Public;
                 ++it;
@@ -2982,7 +2954,7 @@ namespace Ace
         ACE_TRY(name, ParseName({ it, t_context.Scope }));
         it += name.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -2993,12 +2965,12 @@ namespace Ace
 
         auto accessModifier = AccessModifier::Private;
 
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        if (*it == TokenKind::MinusGreaterThan)
         {
             ++it;
             const auto startIt = it;
 
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (*it == TokenKind::PublicKeyword)
             {
                 accessModifier = AccessModifier::Public;
                 ++it;
@@ -3007,7 +2979,7 @@ namespace Ace
             ACE_TRY_ASSERT(it != startIt);
         }
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ACE_TRY_ASSERT(*it == TokenKind::Semicolon);
         ++it;
 
         return Measured
@@ -3037,7 +3009,7 @@ namespace Ace
         ACE_TRY(name, ParseName({ it, t_context.Scope }));
         it += name.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -3048,12 +3020,12 @@ namespace Ace
 
         auto accessModifier = AccessModifier::Private;
 
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        if (*it == TokenKind::MinusGreaterThan)
         {
             ++it;
             const auto startIt = it;
 
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (*it == TokenKind::PublicKeyword)
             {
                 accessModifier = AccessModifier::Public;
                 ++it;
@@ -3083,18 +3055,18 @@ namespace Ace
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBrace);
         ++it;
 
         std::vector<std::shared_ptr<const InstanceVarNode>> variables{};
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        while (*it != TokenKind::CloseBrace)
         {
             if (!variables.empty())
             {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
+                ACE_TRY_ASSERT(*it == TokenKind::Comma);
                 ++it;
 
-                if (it->Unwrap().Kind == TokenKind::CloseBrace)
+                if (*it == TokenKind::CloseBrace)
                 {
                     break;
                 }
@@ -3130,20 +3102,20 @@ namespace Ace
         ACE_TRY(name, ParseName({ it, t_context.Scope }));
         it += name.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::StructKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::StructKeyword);
         ++it;
 
         auto accessModifier = AccessModifier::Private;
 
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        if (*it == TokenKind::MinusGreaterThan)
         {
             ++it;
             const auto startIt = it;
 
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (*it == TokenKind::PublicKeyword)
             {
                 accessModifier = AccessModifier::Public;
                 ++it;
@@ -3185,20 +3157,20 @@ namespace Ace
         ACE_TRY(templateParams, ParseTemplateParams({ it, scope }));
         it += templateParams.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::StructKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::StructKeyword);
         ++it;
 
         auto accessModifier = AccessModifier::Private;
 
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        if (*it == TokenKind::MinusGreaterThan)
         {
             ++it;
             const auto startIt = it;
 
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (*it == TokenKind::PublicKeyword)
             {
                 accessModifier = AccessModifier::Public;
                 ++it;
@@ -3267,20 +3239,20 @@ namespace Ace
         ACE_TRY(name, ParseNestedName({ it, t_context.Scope }));
         it += name.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(*it == TokenKind::Colon);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ModuleKeyword);
+        ACE_TRY_ASSERT(*it == TokenKind::ModuleKeyword);
         ++it;
 
         auto accessModifier = AccessModifier::Private;
 
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        if (*it == TokenKind::MinusGreaterThan)
         {
             ++it;
             const auto startIt = it;
 
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (*it == TokenKind::PublicKeyword)
             {
                 accessModifier = AccessModifier::Public;
                 ++it;
@@ -3301,7 +3273,7 @@ namespace Ace
             }
         );
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
+        ACE_TRY_ASSERT(*it == TokenKind::OpenBrace);
         ++it;
 
         std::vector<std::shared_ptr<const ModuleNode>> modules{};
@@ -3313,7 +3285,7 @@ namespace Ace
         std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
         std::vector<std::shared_ptr<const StaticVarNode>> variables{};
 
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        while (*it != TokenKind::CloseBrace)
         {
             const auto selfScope = scopes.back();
 
@@ -3404,7 +3376,7 @@ namespace Ace
         const std::vector<std::shared_ptr<const Token>>& t_tokens
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
-        std::vector<ParseToken> tokens{};
+        std::vector<std::shared_ptr<const Token>> tokens{};
 
         const auto firstLineIt = begin(t_fileBuffer->GetLines());
         const auto  lastLineIt =   end(t_fileBuffer->GetLines()) - 1;
@@ -3469,7 +3441,7 @@ namespace Ace
         }));
         it += module.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::EndOfFile);
+        ACE_TRY_ASSERT(*it == TokenKind::EndOfFile);
         ++it;
 
         ACE_TRY_ASSERT(it == end(tokens));
