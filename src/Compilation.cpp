@@ -89,7 +89,7 @@ namespace Ace
 
     static auto DiagnoseMissingOptionName(
         const CompilationParseContext& t_context,
-        const std::string_view& t_name
+        const std::string_view t_name
     ) -> Diagnosed<void>
     {
         DiagnosticBag diagnosticBag{};
@@ -422,7 +422,7 @@ namespace Ace
         }
         else if (packagePathArgIts.size() == 1)
         {
-            const std::string_view& packagePath = *packagePathArgIts.front();
+            const std::string_view packagePath = *packagePathArgIts.front();
             optionMap[&PackagePathOptionDefinition] = packagePath;
         }
         else

@@ -14,7 +14,7 @@ namespace Ace
     {
         std::vector<std::pair<size_t, size_t>> argIndexLengthPairs{};
         std::for_each(begin(t_args), end(t_args),
-        [&](const std::string_view& t_arg)
+        [&](const std::string_view t_arg)
         {
             const auto index = m_Buffer.size();
 

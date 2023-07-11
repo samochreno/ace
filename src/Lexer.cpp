@@ -1045,7 +1045,7 @@ namespace Ace
         return *(m_CharacterIterator + t_offset);
     }
 
-    auto Lexer::GetLine() const -> const std::string_view&
+    auto Lexer::GetLine() const -> const std::string_view
     {
         return *m_LineIterator;
     }

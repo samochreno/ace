@@ -37,7 +37,7 @@ namespace Ace
 
         auto GetCharacter()                       const -> char;
         auto GetCharacter(const size_t t_offset) const -> char;
-        auto GetLine() const -> const std::string_view&;
+        auto GetLine() const -> const std::string_view;
 
         auto IsEndOfLine()    const -> bool;
         auto IsEndOfFile()    const -> bool;

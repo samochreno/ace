@@ -64,7 +64,10 @@ namespace Ace
             begin(lines),
             end  (lines),
             back_inserter(lineBeginIterators),
-            [&](const std::string_view& t_line) { return begin(t_line); }
+            [&](const std::string_view t_line)
+            {
+                return begin(t_line);
+            }
         );
 
         return
