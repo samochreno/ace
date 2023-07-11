@@ -11,24 +11,66 @@
 #include <functional>
 #include <tuple>
 
+#include "Diagnostics.hpp"
+#include "Measured.hpp"
 #include "Token.hpp"
 #include "Nodes/All.hpp"
-#include "Diagnostics.hpp"
-#include "Assert.hpp"
+#include "Compilation.hpp"
+#include "FileBuffer.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Assert.hpp"
 #include "AccessModifier.hpp"
 #include "SpecialIdentifier.hpp"
-#include "Scope.hpp"
 #include "Name.hpp"
-#include "FileBuffer.hpp"
-#include "Compilation.hpp"
-#include "Measured.hpp"
 #include "Identifier.hpp"
 
 namespace Ace
 {
-    enum class OperatorAssociativity
+    class ParseToken
+    {
+    public:
+        ParseToken(
+            const std::shared_ptr<const Token>& t_value
+        ) : m_Value{ t_value }
+        {
+        }
+        ~ParseToken() = default;
+
+        auto Unwrap() const -> const Token&
+        {
+            return *m_Value.get();
+        }
+
+        operator const std::shared_ptr<const Token>&() const
+        {
+            return m_Value;
+        }
+
+    private:
+        std::shared_ptr<const Token> m_Value{};
+    };
+
+    struct ParseContext
+    {
+        ParseContext(
+            const std::vector<ParseToken>::const_iterator t_iterator,
+            const std::shared_ptr<Scope>& t_scope
+        ) : Iterator{ t_iterator },
+            Scope{ t_scope }
+        {
+        }
+
+        const std::vector<ParseToken>::const_iterator Iterator{};
+        std::shared_ptr<Ace::Scope> Scope{};
+    };
+
+    enum class ReferenceParsingKind
+    {
+        Allow,
+        Disallow,
+    };
+
+    enum class OperatorAssociativityKind
     {
         LeftToRight,
         RightToLeft,
@@ -37,19 +79,8 @@ namespace Ace
     struct OperatorPrecedenceAndAssociativity
     {
         size_t Precedence{};
-        OperatorAssociativity Associativity{};
+        OperatorAssociativityKind Associativity{};
     };
-
-    ParseToken::ParseToken(
-        const std::shared_ptr<const Token>& t_value
-    ) : m_Value{ t_value }
-    {
-    }
-
-    auto ParseToken::Unwrap() const -> const Token&
-    {
-        return *m_Value.get();
-    }
 
     static auto CreateSourceLocationRange(
         const std::vector<ParseToken>::const_iterator t_begin,
@@ -214,88 +245,12 @@ namespace Ace
             IsUserBinaryOperator(t_tokenKind);
     }
 
-    auto Parser::ParseAST(
-        const FileBuffer* const t_fileBuffer,
-        const std::vector<std::shared_ptr<const Token>>& t_tokens
-    ) -> Expected<std::shared_ptr<const ModuleNode>>
-    {
-        std::vector<ParseToken> tokens{};
-
-        const auto firstLineIt = begin(t_fileBuffer->GetLines());
-        const auto  lastLineIt =   end(t_fileBuffer->GetLines()) - 1;
-
-        const auto& firstLine = *firstLineIt;
-        const auto&  lastLine = * lastLineIt;
-
-        const SourceLocation leadingSourceLocation
-        {
-            t_fileBuffer,
-            begin(firstLine),
-            begin(firstLine) + 1,
-        };
-        const SourceLocation trailingSourceLocation
-        {
-            t_fileBuffer,
-            end(lastLine) - 1,
-            end(lastLine),
-        };
-
-        tokens.emplace_back(std::make_shared<const Token>(
-            leadingSourceLocation,
-            TokenKind::Identifier,
-            t_fileBuffer->GetCompilation()->Package.Name
-        ));
-        tokens.emplace_back(std::make_shared<const Token>(
-            leadingSourceLocation,
-            TokenKind::Colon
-        ));
-        tokens.emplace_back(std::make_shared<const Token>(
-            leadingSourceLocation,
-            TokenKind::ModuleKeyword
-        ));
-        tokens.emplace_back(std::make_shared<const Token>(
-            leadingSourceLocation,
-            TokenKind::OpenBrace
-        ));
-
-        std::transform(
-            begin(t_tokens),
-            end  (t_tokens),
-            back_inserter(tokens),
-            [](const std::shared_ptr<const Token>& t_token) { return t_token; }
-        );
-
-        tokens.insert(
-            end(tokens) - 1,
-            std::make_shared<const Token>(
-                trailingSourceLocation,
-                TokenKind::CloseBrace
-            )
-        );
-
-        auto it = begin(tokens);
-
-        ACE_TRY(module, ParseModule({
-            it,
-            t_fileBuffer->GetCompilation()->GlobalScope.Unwrap()
-        }));
-
-        it += module.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::EndOfFile);
-        ++it;
-
-        ACE_TRY_ASSERT(it == end(tokens));
-
-        return module.Value;
-    }
-
-    auto Parser::CreateEmptyAttributes() -> std::vector<std::shared_ptr<const AttributeNode>>
+    static auto CreateEmptyAttributes() -> std::vector<std::shared_ptr<const AttributeNode>>
     {
         return {};
     }
 
-    auto Parser::GetOperatorFunctionName(
+    static auto GetOperatorFunctionName(
         const std::shared_ptr<const Token>& t_operatorToken,
         const size_t t_paramCount
     ) -> Expected<const char*>
@@ -459,7 +414,23 @@ namespace Ace
         }
     }
 
-    auto Parser::ParseName(
+    static auto ParseExpr(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>;
+
+    static auto ParsePrimaryExpr(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>;
+
+    static auto ParseStructConstructionExpr(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const StructConstructionExprNode>>>;
+
+    static auto ParseStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const IStmtNode>>>;
+
+    static auto ParseName(
         const ParseContext& t_context
     ) -> Expected<Measured<Identifier>>
     {
@@ -478,7 +449,7 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseNestedName(
+    static auto ParseNestedName(
         const ParseContext& t_context
     ) -> Expected<Measured<std::vector<Identifier>>>
     {
@@ -505,7 +476,44 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseSymbolName(
+    static auto ParseTemplateArgs(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::vector<SymbolName>>>;
+
+    static auto ParseSymbolNameSection(
+        const ParseContext& t_context
+    ) -> Expected<Measured<SymbolNameSection>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
+        const std::string& name = it->Unwrap().String;
+        ++it;
+
+        auto templateArgs = [&]() -> std::vector<SymbolName>
+        {
+            auto expTemplateArgs = ParseTemplateArgs({ it, t_context.Scope });
+            if (!expTemplateArgs)
+            {
+                return {};
+            }
+
+            it += expTemplateArgs.Unwrap().Length;
+            return expTemplateArgs.Unwrap().Value;
+        }();
+
+        return Measured
+        {
+            SymbolNameSection 
+            {
+                name,
+                templateArgs,
+            },
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseSymbolName(
         const ParseContext& t_context
     ) -> Expected<Measured<SymbolName>>
     {
@@ -544,38 +552,7 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseSymbolNameSection(
-        const ParseContext& t_context
-    ) -> Expected<Measured<SymbolNameSection>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
-        const std::string& name = it->Unwrap().String;
-        ++it;
-
-        auto templateArgs = [&]() -> std::vector<SymbolName>
-        {
-            auto expTemplateArgs = ParseTemplateArgs({ it, t_context.Scope });
-            if (!expTemplateArgs)
-                return {};
-
-            it += expTemplateArgs.Unwrap().Length;
-            return expTemplateArgs.Unwrap().Value;
-        }();
-
-        return Measured
-        {
-            SymbolNameSection 
-            {
-                name,
-                templateArgs,
-            },
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseTypeName(
+    static auto ParseTypeName(
         const ParseContext& t_context,
         const ReferenceParsingKind t_referenceParsingKind
     ) -> Expected<Measured<TypeName>>
@@ -623,7 +600,7 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseTemplateParamNames(
+    static auto ParseTemplateParamNames(
         const ParseContext& t_context
     ) -> Expected<Measured<std::vector<Identifier>>>
     {
@@ -656,7 +633,7 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseImplTemplateParams(
+    static auto ParseImplTemplateParams(
         const ParseContext& t_context
     ) -> Expected<Measured<std::vector<std::shared_ptr<const ImplTemplateParamNode>>>>
     {
@@ -684,7 +661,7 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseTemplateParams(
+    static auto ParseTemplateParams(
         const ParseContext& t_context
     ) -> Expected<Measured<std::vector<std::shared_ptr<const NormalTemplateParamNode>>>>
     {
@@ -712,7 +689,7 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseTemplateArgs(
+    static auto ParseTemplateArgs(
         const ParseContext& t_context
     ) -> Expected<Measured<std::vector<SymbolName>>>
     {
@@ -735,7 +712,7 @@ namespace Ace
             it += arg.Length;
         }
 
-        ACE_TRY_ASSERT(args.size() != 0);
+        ACE_TRY_ASSERT(!args.empty());
         ++it;
 
         return Measured
@@ -745,915 +722,52 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseModule(
+    static auto ParseAttribute(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const ModuleNode>>>
+    ) -> Expected<Measured<std::shared_ptr<const AttributeNode>>>
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY(name, ParseNestedName({ it, t_context.Scope }));
-        it += name.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ModuleKeyword);
-        ++it;
-
-        auto accessModifier = AccessModifier::Private;
-
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
-        {
-            ++it;
-            const auto startIt = it;
-
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
-            {
-                accessModifier = AccessModifier::Public;
-                ++it;
-            }
-
-            ACE_TRY_ASSERT(it != startIt);
-        }
-
-        std::vector<std::shared_ptr<Scope>> scopes{};
-        scopes.push_back(t_context.Scope);
-        std::transform(
-            begin(name.Value),
-            end  (name.Value),
-            back_inserter(scopes),
-            [&](const Identifier& t_name)
-            {
-                return scopes.back()->GetOrCreateChild(t_name.String);
-            }
-        );
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
-        ++it;
-
-        std::vector<std::shared_ptr<const ModuleNode>> modules{};
-        std::vector<std::shared_ptr<const ITypeNode>> types{};
-        std::vector<std::shared_ptr<const TypeTemplateNode>> typeTemplates{};
-        std::vector<std::shared_ptr<const ImplNode>> impls{};
-        std::vector<std::shared_ptr<const TemplatedImplNode>> templatedImpls{};
-        std::vector<std::shared_ptr<const FunctionNode>> functions{};
-        std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
-        std::vector<std::shared_ptr<const StaticVarNode>> variables{};
-
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
-        {
-            const auto selfScope = scopes.back();
-
-            if (const auto expModule = Parser::ParseModule({ it, selfScope }))
-            {
-                modules.push_back(expModule.Unwrap().Value);
-                it += expModule.Unwrap().Length;
-                continue;
-            }
-
-            if (const auto expType = ParseType({ it, selfScope }))
-            {
-                types.push_back(expType.Unwrap().Value);
-                it += expType.Unwrap().Length;
-                continue;
-            }
-
-            if (const auto expTypeTemplate = ParseTypeTemplate({ it, selfScope }))
-            {
-                typeTemplates.push_back(expTypeTemplate.Unwrap().Value);
-                it += expTypeTemplate.Unwrap().Length;
-                continue;
-            }
-
-            if (const auto expImpl = ParseImpl({ it, selfScope }))
-            {
-                impls.push_back(expImpl.Unwrap().Value);
-                it += expImpl.Unwrap().Length;
-                continue;
-            }
-
-            if (const auto expTemplatedImpl = ParseTemplatedImpl({ it, selfScope }))
-            {
-                templatedImpls.push_back(expTemplatedImpl.Unwrap().Value);
-                it += expTemplatedImpl.Unwrap().Length;
-                continue;
-            }
-
-            if (const auto expFunction = ParseFunction({ it, selfScope }))
-            {
-                functions.push_back(expFunction.Unwrap().Value);
-                it += expFunction.Unwrap().Length;
-                continue;
-            }
-
-            if (const auto expFunctionTemplate = ParseFunctionTemplate({ it, selfScope }))
-            {
-                functionTemplates.push_back(expFunctionTemplate.Unwrap().Value);
-                it += expFunctionTemplate.Unwrap().Length;
-                continue;
-            }
-
-            if (const auto expVar = ParseVar({ it, selfScope }))
-            {
-                variables.push_back(expVar.Unwrap().Value);
-                it += expVar.Unwrap().Length;
-                continue;
-            }
-
-            ACE_TRY_UNREACHABLE();
-        }
-
-        ++it;
+        ACE_TRY(structConstructionExpr, ParseStructConstructionExpr({
+            it,
+            t_context.Scope
+        }));
+        it += structConstructionExpr.Length;
 
         return Measured
         {
-            std::make_shared<const ModuleNode>(
+            std::make_shared<const AttributeNode>(
                 CreateSourceLocationRange(t_context.Iterator, it),
-                scopes.front(),
-                scopes.back(),
-                name.Value,
-                accessModifier,
-                modules,
-                types,
-                typeTemplates,
-                impls,
-                templatedImpls,
-                functions,
-                functionTemplates,
-                variables
+                structConstructionExpr.Value
             ),
             std::distance(t_context.Iterator, it),
         };
     }
 
-    auto Parser::ParseImpl(
+    static auto ParseAttributes(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const ImplNode>>>
+    ) -> Expected<Measured<std::vector<std::shared_ptr<const AttributeNode>>>>
     {
-        const auto scope = t_context.Scope->GetOrCreateChild({});
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ImplKeyword);
-        ++it;
-
-        ACE_TRY(typeName, ParseSymbolName({ it, t_context.Scope }));
-
-        // TODO: Remove this block after impl template specialization.
+        std::vector<std::shared_ptr<const AttributeNode>> attributes{};
+        while (const auto expAttribute = ParseAttribute({ it, t_context.Scope }))
         {
-            const bool foundTemplatedSection = std::find_if(
-                begin(typeName.Value.Sections),
-                end  (typeName.Value.Sections),
-                [](const SymbolNameSection& t_section)
-                {
-                    return t_section.TemplateArgs.empty();
-                }
-            ) == end(typeName.Value.Sections);
-
-            ACE_TRY_ASSERT(!foundTemplatedSection);
+            attributes.push_back(expAttribute.Unwrap().Value);
+            it += expAttribute.Unwrap().Length;
         }
-
-        it += typeName.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
-        ++it;
-
-        std::vector<std::shared_ptr<const FunctionNode>> functions{};
-        std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
-
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
-        {
-            if (const auto expFunction = ParseImplFunction({ it, scope }, typeName.Value))
-            {
-                functions.push_back(expFunction.Unwrap().Value);
-                it += expFunction.Unwrap().Length;
-                continue;
-            }
-
-            if (const auto expFunctionTemplate = ParseImplFunctionTemplate({ it, scope }, typeName.Value))
-            {
-                functionTemplates.push_back(expFunctionTemplate.Unwrap().Value);
-                it += expFunctionTemplate.Unwrap().Length;
-                continue;
-            }
-
-            ACE_TRY_UNREACHABLE();
-        }
-
-        ++it;
 
         return Measured
         {
-            std::make_shared<const ImplNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                scope,
-                typeName.Value,
-                functions,
-                functionTemplates
-            ),
+            attributes,
             std::distance(t_context.Iterator, it),
         };
     }
 
-    auto Parser::ParseImplFunction(
-        const ParseContext& t_context,
-        const SymbolName& t_selfTypeName
-    ) -> Expected<Measured<std::shared_ptr<const FunctionNode>>>
-    {
-        const auto scope = t_context.Scope->GetOrCreateChild({});
-        auto it = t_context.Iterator;
-
-        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
-        it += attributes.Length;
-
-        ACE_TRY(nameToken, [&]() -> Expected<std::shared_ptr<const Token>>
-        {
-            if (it->Unwrap().Kind == TokenKind::OperatorKeyword) 
-            {
-                ++it;
-
-                const std::shared_ptr<const Token> operatorToken = *it;
-
-                if (!IsUserOperator(operatorToken->Kind))
-                {
-                    ACE_TRY_ASSERT(
-                        operatorToken->Kind == TokenKind::ImplKeyword ||
-                        operatorToken->Kind == TokenKind::ExplKeyword ||
-                        operatorToken->Kind == TokenKind::Identifier 
-                    );
-                }
-
-                ++it;
-
-                return operatorToken;
-            }
-            else
-            {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
-                const std::shared_ptr<const Token> nameToken = *it;
-                ++it;
-
-                return nameToken;
-            }
-        }());
-
-        ACE_TRY(params, ParseParams({ it, scope }));
-        it += params.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
-        ++it;
-
-        ACE_TRY(typeName, ParseTypeName(
-            { it, t_context.Scope },
-            ReferenceParsingKind::Disallow
-        ));
-        it += typeName.Length;
-
-        auto accessModifier = AccessModifier::Private;
-        std::optional<std::shared_ptr<const Token>> optSelfToken{};
-        bool hasExternModifier = false;
-
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
-        {
-            ++it;
-            const auto startIt = it;
-
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
-            {
-                accessModifier = AccessModifier::Public;
-                ++it;
-            }
-
-            if (it->Unwrap().Kind == TokenKind::Identifier)
-            {
-                ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
-                optSelfToken = *it;
-                ++it;
-            }
-
-            if (it->Unwrap().Kind == TokenKind::ExternKeyword)
-            {
-                hasExternModifier = true;
-                ACE_TRY_ASSERT(!optSelfToken.has_value());
-                ++it;
-            }
-
-            ACE_TRY_ASSERT(it != startIt);
-        }
-
-        ACE_TRY(name, ([&]() -> Expected<Identifier>
-        {
-            if (nameToken->Kind == TokenKind::Identifier)
-            {
-                return Identifier
-                {
-                    nameToken->SourceLocation,
-                    nameToken->String,
-                };
-            }
-            else
-            {
-                ACE_TRY(name, GetOperatorFunctionName(
-                    nameToken,
-                    params.Value.size()
-                ));
-
-                ACE_TRY_ASSERT(accessModifier == AccessModifier::Public);
-                ACE_TRY_ASSERT(!optSelfToken.has_value());
-
-                return Identifier
-                {
-                    nameToken->SourceLocation,
-                    name,
-                };
-            }
-        }()));
-
-        ACE_TRY(optBody, [&]() -> Expected<std::optional<std::shared_ptr<const BlockStmtNode>>>
-        {
-            if (hasExternModifier)
-            {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
-                ++it;
-
-                return std::optional<std::shared_ptr<const BlockStmtNode>>{};
-            }
-            else
-            {
-                ACE_TRY(body, ParseBlockStmt({ it, scope }));
-                it += body.Length;
-
-                return std::optional{ body.Value };
-            }
-        }());
-
-        const auto selfParam = [&]() -> std::optional<std::shared_ptr<const SelfParamVarNode>>
-        {
-            if (!optSelfToken.has_value())
-            {
-                return std::nullopt;
-            }
-
-            return std::make_shared<const SelfParamVarNode>(
-                optSelfToken.value()->SourceLocation,
-                scope,
-                t_selfTypeName
-            );
-        }();
-
-        return Measured
-        {
-            std::make_shared<const FunctionNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                scope,
-                name,
-                typeName.Value,
-                attributes.Value,
-                accessModifier,
-                selfParam,
-                params.Value,
-                optBody
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseImplFunctionTemplate(
-        const ParseContext& t_context,
-        const SymbolName& t_selfTypeName
-    ) -> Expected<Measured<std::shared_ptr<const FunctionTemplateNode>>>
-    {
-        const auto scope = t_context.Scope->GetOrCreateChild({});
-        auto it = t_context.Iterator;
-
-        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
-        it += attributes.Length;
-
-        ACE_TRY(name, ParseName({ it, t_context.Scope }));
-        it += name.Length;
-
-        ACE_TRY(templateParams, ParseTemplateParams({ it, scope }));
-        it += templateParams.Length;
-
-        ACE_TRY(params, ParseParams({ it, scope }));
-        it += params.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
-        ++it;
-
-        ACE_TRY(typeName, ParseTypeName(
-            { it, t_context.Scope },
-            ReferenceParsingKind::Disallow
-        ));
-        it += typeName.Length;
-
-        auto accessModifier = AccessModifier::Private;
-        std::optional<std::shared_ptr<const Token>> optSelfToken{};
-
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
-        {
-            ++it;
-            const auto startIt = it;
-
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
-            {
-                accessModifier = AccessModifier::Public;
-                ++it;
-            }
-
-            if (it->Unwrap().Kind == TokenKind::Identifier)
-            {
-                ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
-                optSelfToken = *it;
-                ++it;
-            }
-
-            ACE_TRY_ASSERT(it != startIt);
-        }
-
-        ACE_TRY(body, ParseBlockStmt({ it, scope }));
-        it += body.Length;
-
-        const auto selfParam = [&]() -> std::optional<std::shared_ptr<const SelfParamVarNode>>
-        {
-            if (!optSelfToken.has_value())
-            {
-                return std::nullopt;
-            }
-
-            return std::make_shared<const SelfParamVarNode>(
-                optSelfToken.value()->SourceLocation,
-                scope,
-                t_selfTypeName
-            );
-        }();
-
-        const auto function = std::make_shared<const FunctionNode>(
-            CreateSourceLocationRange(t_context.Iterator, it),
-            scope,
-            name.Value,
-            typeName.Value,
-            attributes.Value,
-            accessModifier,
-            selfParam,
-            params.Value,
-            body.Value
-        );
-
-        return Measured
-        {
-            std::make_shared<const FunctionTemplateNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                std::vector<std::shared_ptr<const ImplTemplateParamNode>>{},
-                templateParams.Value,
-                function
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseTemplatedImpl(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const TemplatedImplNode>>>
-    {
-        const auto scope = t_context.Scope->GetOrCreateChild({});
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ImplKeyword);
-        ++it;
-
-        ACE_TRY(templateParams, ParseImplTemplateParams({ it, scope }));
-        it += templateParams.Length;
-
-        ACE_TRY(typeName, ParseSymbolName({ it, t_context.Scope }));
-
-        // TODO: Remove this block after impl template specialization.
-        {
-            const bool foundTemplatedSection = std::find_if(begin(typeName.Value.Sections), end(typeName.Value.Sections) - 1,
-            [](const SymbolNameSection& t_section)
-            {
-                return t_section.TemplateArgs.empty();
-            }) == end(typeName.Value.Sections);
-
-            ACE_TRY_ASSERT(!foundTemplatedSection);
-
-            const auto& templateArgs = typeName.Value.Sections.back().TemplateArgs;
-            ACE_TRY_ASSERT(templateParams.Value.size() == templateArgs.size());
-
-            std::unordered_set<std::string> templateParamSet{};
-            ACE_TRY_VOID(TransformExpectedVector(templateParams.Value,
-            [&](const std::shared_ptr<const ImplTemplateParamNode>& t_templateParam) -> Expected<void>
-            {
-                const std::string& templateParamName =
-                    t_templateParam->GetName().String;
-
-                ACE_TRY_ASSERT(!templateParamSet.contains(templateParamName));
-                templateParamSet.insert(templateParamName);
-
-                return Void{};
-            }));
-            
-            ACE_TRY_VOID(TransformExpectedVector(templateArgs,
-            [&](const SymbolName& t_arg) -> Expected<void>
-            {
-                ACE_TRY_ASSERT(t_arg.Sections.size() == 1);
-                ACE_TRY_ASSERT(t_arg.Sections.back().TemplateArgs.empty());
-
-                const std::string& templateArgName = t_arg.Sections.front().Name;
-                ACE_TRY_ASSERT(templateParamSet.contains(templateArgName));
-                templateParamSet.erase(templateArgName);
-
-                return Void{};
-            }));
-        }
-
-        it += typeName.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
-        ++it;
-
-        std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
-
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
-        {
-            auto expFunctionTemplate = ParseTemplatedImplFunction(
-                { it, scope },
-                typeName.Value,
-                templateParams.Value
-            );
-            if (expFunctionTemplate)
-            {
-                functionTemplates.push_back(expFunctionTemplate.Unwrap().Value);
-                it += expFunctionTemplate.Unwrap().Length;
-                continue;
-            }
-
-            ACE_TRY_UNREACHABLE();
-        }
-
-        ++it;
-
-        auto typeTemplateName = typeName.Value;
-        auto& typeTemplateNameLastSection = typeTemplateName.Sections.back();
-        typeTemplateNameLastSection.TemplateArgs.clear();
-        typeTemplateNameLastSection.Name = SpecialIdentifier::CreateTemplate(
-            typeTemplateNameLastSection.Name
-        );
-
-        return Measured
-        {
-            std::make_shared<const TemplatedImplNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                scope,
-                typeTemplateName,
-                std::vector<std::shared_ptr<const FunctionNode>>{},
-                functionTemplates
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseTemplatedImplFunction(
-        const ParseContext& t_context,
-        const SymbolName& t_selfTypeName,
-        const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& t_implTemplateParams
-    ) -> Expected<Measured<std::shared_ptr<const FunctionTemplateNode>>>
-    {
-        const auto scope = t_context.Scope->GetOrCreateChild({});
-        auto it = t_context.Iterator;
-
-        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
-        it += attributes.Length;
-
-        ACE_TRY(nameToken, [&]() -> Expected<std::shared_ptr<const Token>>
-        {
-            if (it->Unwrap().Kind == TokenKind::OperatorKeyword)
-            {
-                ++it;
-
-                const std::shared_ptr<const Token> operatorToken = *it;
-
-                if (!IsUserOperator(operatorToken->Kind))
-                {
-                    ACE_TRY_ASSERT(
-                        operatorToken->Kind == TokenKind::ImplKeyword ||
-                        operatorToken->Kind == TokenKind::ExplKeyword ||
-                        operatorToken->Kind == TokenKind::Identifier
-                    );
-                }
-
-                ++it;
-
-                return operatorToken;
-            }
-            else
-            {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
-                const std::shared_ptr<const Token> nameToken = *it;
-                ++it;
-
-                return nameToken;
-            }
-        }());
-
-        ACE_TRY(templateParams, [&]() -> Expected<std::vector<std::shared_ptr<const NormalTemplateParamNode>>>
-        {
-            if (const auto expTemplateParams = ParseTemplateParams({ it, scope }))
-            {
-                it += expTemplateParams.Unwrap().Length;
-                return expTemplateParams.Unwrap().Value;
-            }
-            else
-            {
-                return std::vector<std::shared_ptr<const NormalTemplateParamNode>>{};
-            }
-        }());
-
-        ACE_TRY(params, ParseParams({ it, scope }));
-        it += params.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
-        ++it;
-
-        ACE_TRY(typeName, ParseTypeName(
-            { it, t_context.Scope },
-            ReferenceParsingKind::Disallow
-        ));
-        it += typeName.Length;
-
-        auto accessModifier = AccessModifier::Private;
-        std::optional<std::shared_ptr<const Token>> optSelfToken{};
-
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
-        {
-            ++it;
-            const auto startIt = it;
-
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
-            {
-                accessModifier = AccessModifier::Public;
-                ++it;
-            }
-
-            if (it->Unwrap().Kind == TokenKind::Identifier)
-            {
-                ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
-                optSelfToken = *it;
-                ++it;
-            }
-
-            ACE_TRY_ASSERT(it != startIt);
-        }
-
-        ACE_TRY(name, ([&]() -> Expected<Identifier>
-        {
-            if (nameToken->Kind == TokenKind::Identifier)
-            {
-                return Identifier
-                {
-                    nameToken->SourceLocation,
-                    nameToken->String,
-                };
-            }
-            else
-            {
-                ACE_TRY(name, GetOperatorFunctionName(
-                    nameToken,
-                    params.Value.size()
-                ));
-
-                ACE_TRY_ASSERT(accessModifier == AccessModifier::Public);
-                ACE_TRY_ASSERT(!optSelfToken.has_value());
-
-                return Identifier
-                {
-                    nameToken->SourceLocation,
-                    name,
-                };
-            }
-        }()));
-
-        ACE_TRY(body, ParseBlockStmt({ it, scope }));
-        it += body.Length;
-
-        const auto selfParam = [&]() -> std::optional<std::shared_ptr<const SelfParamVarNode>>
-        {
-            if (!optSelfToken.has_value())
-            {
-                return std::nullopt;
-            }
-
-            return std::make_shared<const SelfParamVarNode>(
-                optSelfToken.value()->SourceLocation,
-                scope,
-                t_selfTypeName
-            );
-        }();
-
-        const auto function = std::make_shared<const FunctionNode>(
-            CreateSourceLocationRange(t_context.Iterator, it),
-            scope,
-            name,
-            typeName.Value,
-            attributes.Value,
-            accessModifier,
-            selfParam,
-            params.Value,
-            body.Value
-        );
-
-        std::vector<std::shared_ptr<const ImplTemplateParamNode>> clonedImplTemplateParams{};
-        std::transform(
-            begin(t_implTemplateParams),
-            end  (t_implTemplateParams),
-            back_inserter(clonedImplTemplateParams),
-            [&](const std::shared_ptr<const ImplTemplateParamNode>& t_implTemplateParam)
-            {
-                return t_implTemplateParam->CloneInScope(scope);
-            }
-        );
-
-
-        return Measured
-        {
-            std::make_shared<const FunctionTemplateNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                clonedImplTemplateParams,
-                templateParams,
-                function
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseFunction(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const FunctionNode>>>
-    {
-        const auto scope = t_context.Scope->GetOrCreateChild({});
-        auto it = t_context.Iterator;
-
-        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
-        it += attributes.Length;
-
-        ACE_TRY(name, ParseName({ it, t_context.Scope }));
-        it += name.Length;
-
-        ACE_TRY(params, ParseParams({ it, scope }));
-        it += params.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
-        ++it;
-
-        ACE_TRY(typeName, ParseTypeName(
-            { it, t_context.Scope },
-            ReferenceParsingKind::Disallow
-        ));
-        it += typeName.Length;
-
-        auto accessModifier = AccessModifier::Private;
-        bool hasExternModifier = false;
-
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
-        {
-            ++it;
-            const auto startIt = it;
-
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
-            {
-                accessModifier = AccessModifier::Public;
-                ++it;
-            }
-
-            if (it->Unwrap().Kind == TokenKind::ExternKeyword)
-            {
-                hasExternModifier = true;
-                ++it;
-            }
-
-            ACE_TRY_ASSERT(it != startIt);
-        }
-
-        ACE_TRY(optBody, [&]() -> Expected<std::optional<std::shared_ptr<const BlockStmtNode>>>
-        {
-            if (hasExternModifier)
-            {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
-                ++it;
-
-                return std::optional<std::shared_ptr<const BlockStmtNode>>{};
-            }
-            else
-            {
-                ACE_TRY(body, ParseBlockStmt({ it, scope }));
-                it += body.Length;
-
-                return std::optional{ body.Value };
-            }
-        }());
-
-        return Measured
-        {
-            std::make_shared<const FunctionNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                scope,
-                name.Value,
-                typeName.Value,
-                attributes.Value,
-                accessModifier,
-                std::nullopt,
-                params.Value,
-                optBody
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseFunctionTemplate(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const FunctionTemplateNode>>>
-    {
-        const auto scope = t_context.Scope->GetOrCreateChild({});
-        auto it = t_context.Iterator;
-
-        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
-        it += attributes.Length;
-
-        ACE_TRY(name, ParseName({ it, t_context.Scope }));
-        it += name.Length;
-
-        ACE_TRY(templateParams, [&]() -> Expected<std::vector<std::shared_ptr<const NormalTemplateParamNode>>>
-        {
-            const auto expTemplateParams = ParseTemplateParams({
-                it,
-                scope,
-            });
-            if (expTemplateParams)
-            {
-                it += expTemplateParams.Unwrap().Length;
-                return expTemplateParams.Unwrap().Value;
-            }
-            else
-            {
-                return std::vector<std::shared_ptr<const NormalTemplateParamNode>>{};
-            }
-        }());
-
-        ACE_TRY(params, ParseParams({ it, scope }));
-        it += params.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
-        ++it;
-
-        ACE_TRY(typeName, ParseTypeName(
-            { it, t_context.Scope },
-            ReferenceParsingKind::Disallow
-        ));
-        it += typeName.Length;
-
-        auto accessModifier = AccessModifier::Private;
-
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
-        {
-            ++it;
-            const auto startIt = it;
-
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
-            {
-                accessModifier = AccessModifier::Public;
-                ++it;
-            }
-
-            ACE_TRY_ASSERT(it != startIt);
-        }
-
-        ACE_TRY(body, ParseBlockStmt({ it, scope }));
-        it += body.Length;
-
-        const auto function = std::make_shared<const FunctionNode>(
-            CreateSourceLocationRange(t_context.Iterator, it),
-            scope,
-            name.Value,
-            typeName.Value,
-            attributes.Value,
-            accessModifier,
-            std::nullopt,
-            params.Value,
-            body.Value
-        );
-
-        return Measured
-        {
-            std::make_shared<const FunctionTemplateNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                std::vector<std::shared_ptr<const ImplTemplateParamNode>>{},
-                templateParams,
-                function
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseParam(
+    static auto ParseParam(
         const ParseContext& t_context,
         const size_t t_index
     ) -> Expected<Measured<std::shared_ptr<const NormalParamVarNode>>>
@@ -1689,7 +803,7 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseParams(
+    static auto ParseParams(
         const ParseContext& t_context
     ) -> Expected<Measured<std::vector<std::shared_ptr<const NormalParamVarNode>>>>
     {
@@ -1729,365 +843,61 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseVar(
+    static auto ParseArgs(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const StaticVarNode>>>
+    ) -> Expected<Measured<std::vector<std::shared_ptr<const IExprNode>>>>
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
-        it += attributes.Length;
-
-        ACE_TRY(name, ParseName({ it, t_context.Scope }));
-        it += name.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
         ++it;
 
-        ACE_TRY(typeName, ParseTypeName(
-            { it, t_context.Scope },
-            ReferenceParsingKind::Disallow
-        ));
-        it += typeName.Length;
-
-        auto accessModifier = AccessModifier::Private;
-
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        bool isFirstArg = true;
+        std::vector<std::shared_ptr<const IExprNode>> args{};
+        while (it->Unwrap().Kind != TokenKind::CloseParen)
         {
-            ++it;
-            const auto startIt = it;
-
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            if (isFirstArg)
             {
-                accessModifier = AccessModifier::Public;
-                ++it;
+                isFirstArg = false;
             }
-
-            ACE_TRY_ASSERT(it != startIt);
-        }
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
-        ++it;
-
-        return Measured
-        {
-            std::make_shared<const StaticVarNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope,
-                name.Value,
-                typeName.Value,
-                attributes.Value,
-                accessModifier
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseMemberVar(
-        const ParseContext& t_context,
-        const size_t t_index
-    ) -> Expected<Measured<std::shared_ptr<const InstanceVarNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
-        it += attributes.Length;
-
-        ACE_TRY(name, ParseName({ it, t_context.Scope }));
-        it += name.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
-        ++it;
-
-        ACE_TRY(typeName, ParseTypeName(
-            { it, t_context.Scope },
-            ReferenceParsingKind::Disallow
-        ));
-        it += typeName.Length;
-
-        auto accessModifier = AccessModifier::Private;
-
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
-        {
-            ++it;
-            const auto startIt = it;
-
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
-            {
-                accessModifier = AccessModifier::Public;
-                ++it;
-            }
-
-            ACE_TRY_ASSERT(it != startIt);
-        }
-
-        return Measured
-        {
-            std::make_shared<const InstanceVarNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope,
-                name.Value,
-                typeName.Value,
-                attributes.Value,
-                accessModifier,
-                t_index
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseType(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const ITypeNode>>>
-    {
-        if (const auto expStruct = ParseStruct({ t_context.Iterator, t_context.Scope }))
-        {
-            return Measured<std::shared_ptr<const ITypeNode>>
-            {
-                expStruct.Unwrap().Value,
-                expStruct.Unwrap().Length,
-            };
-        }
-
-        ACE_TRY_UNREACHABLE();
-    }
-
-    auto Parser::ParseTypeTemplate(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const TypeTemplateNode>>>
-    {
-        if (const auto expStructTemplate = ParseStructTemplate({ t_context.Iterator, t_context.Scope }))
-        {
-            return expStructTemplate;
-        }
-
-        ACE_TRY_UNREACHABLE();
-    }
-
-    auto Parser::ParseStruct(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const StructTypeNode>>>
-    {
-        const auto scope = t_context.Scope->GetOrCreateChild({});
-        auto it = t_context.Iterator;
-
-        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
-        it += attributes.Length;
-
-        ACE_TRY(name, ParseName({ it, t_context.Scope }));
-        it += name.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
-        ++it;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::StructKeyword);
-        ++it;
-
-        auto accessModifier = AccessModifier::Private;
-
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
-        {
-            ++it;
-            const auto startIt = it;
-
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
-            {
-                accessModifier = AccessModifier::Public;
-                ++it;
-            }
-
-            ACE_TRY_ASSERT(it != startIt);
-        }
-
-        ACE_TRY(body, ParseStructBody({ it, scope }));
-        it += body.Length;
-
-        return Measured
-        {
-            std::make_shared<const StructTypeNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                scope,
-                name.Value,
-                attributes.Value,
-                accessModifier,
-                body.Value
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseStructBody(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::vector<std::shared_ptr<const InstanceVarNode>>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
-        ++it;
-
-        std::vector<std::shared_ptr<const InstanceVarNode>> variables{};
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
-        {
-            if (variables.size() != 0)
+            else
             {
                 ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
                 ++it;
-
-                if (it->Unwrap().Kind == TokenKind::CloseBrace)
-                    break;
             }
 
-            ACE_TRY(variable, ParseMemberVar({ it, t_context.Scope }, variables.size()));
-            variables.push_back(variable.Value);
-            it += variable.Length;
+            ACE_TRY(arg, ParseExpr({ it, t_context.Scope }));
+            args.push_back(arg.Value);
+            it += arg.Length;
         }
 
         ++it;
-
-        return Measured<std::vector<std::shared_ptr<const InstanceVarNode>>>
-        {
-            variables,
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseStructTemplate(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const TypeTemplateNode>>>
-    {
-        const auto scope = t_context.Scope->GetOrCreateChild({});
-        auto it = t_context.Iterator;
-
-        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
-        it += attributes.Length;
-
-        ACE_TRY(name, ParseName({ it, t_context.Scope }));
-        it += name.Length;
-
-        ACE_TRY(templateParams, ParseTemplateParams({ it, scope }));
-        it += templateParams.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
-        ++it;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::StructKeyword);
-        ++it;
-
-        auto accessModifier = AccessModifier::Private;
-
-        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
-        {
-            ++it;
-            const auto startIt = it;
-
-            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
-            {
-                accessModifier = AccessModifier::Public;
-                ++it;
-            }
-
-            ACE_TRY_ASSERT(it != startIt);
-        }
-
-        ACE_TRY(body, ParseStructBody({ it, scope }));
-        it += body.Length;
-
-        const auto type = std::make_shared<const StructTypeNode>(
-            CreateSourceLocationRange(t_context.Iterator, it),
-            scope,
-            name.Value,
-            attributes.Value,
-            accessModifier,
-            body.Value
-        );
 
         return Measured
         {
-            std::make_shared<const TypeTemplateNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                templateParams.Value,
-                type
-            ),
+            args,
             std::distance(t_context.Iterator, it),
         };
     }
 
-    auto Parser::ParseStmt(
+    static auto ParseExprExpr(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const IStmtNode>>>
-    {
-        if (const auto expExprStatemment = ParseExprStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expExprStatemment.Unwrap().Value,
-                expExprStatemment.Unwrap().Length,
-            };
-        }
-
-        if (const auto expAssignmentStmt = ParseAssignmentStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expAssignmentStmt.Unwrap().Value,
-                expAssignmentStmt.Unwrap().Length,
-            };
-        }
-
-        if (const auto expCompoundAssignmentStmt = ParseCompoundAssignmentStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expCompoundAssignmentStmt.Unwrap().Value,
-                expCompoundAssignmentStmt.Unwrap().Length,
-            };
-        }
-
-        if (const auto expVarStmt = ParseVarStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expVarStmt.Unwrap().Value,
-                expVarStmt.Unwrap().Length,
-            };
-        }
-
-        if (const auto expKeywordStmt = ParseKeywordStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expKeywordStmt.Unwrap().Value,
-                expKeywordStmt.Unwrap().Length,
-            };
-        }
-
-        if (const auto expCompoundStmt = ParseBlockStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expCompoundStmt.Unwrap().Value,
-                expCompoundStmt.Unwrap().Length,
-            };
-        }
-
-        ACE_TRY_UNREACHABLE();
-    }
-
-    auto Parser::ParseExprStmt(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const ExprStmtNode>>>
+    ) -> Expected<Measured<std::shared_ptr<const ExprExprNode>>>
     {
         auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ++it;
 
         ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
         it += expr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
         ++it;
 
         return Measured
         {
-            std::make_shared<const ExprStmtNode>(
+            std::make_shared<const ExprExprNode>(
                 CreateSourceLocationRange(t_context.Iterator, it),
                 expr.Value
             ),
@@ -2095,78 +905,172 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseAssignmentStmt(
+    static auto ParseMemberAccessExpr(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const NormalAssignmentStmtNode>>>
+    ) -> Expected<Measured<std::shared_ptr<const MemberAccessExprNode>>>
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY(lhsExpr, ParseExpr({ it, t_context.Scope }));
-        it += lhsExpr.Length;
+        ACE_TRY(expr, ParsePrimaryExpr({ it, t_context.Scope }));
+        it += expr.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Equals);
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Dot);
         ++it;
 
-        ACE_TRY(rhsExpr, ParseExpr({ it, t_context.Scope }));
-        it += rhsExpr.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
-        ++it;
-
-        return Measured
-        {
-            std::make_shared<const NormalAssignmentStmtNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope,
-                lhsExpr.Value,
-                rhsExpr.Value
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseCompoundAssignmentStmt(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const CompoundAssignmentStmtNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY(lhsExpr, ParseExpr({ it, t_context.Scope }));
-        it += lhsExpr.Length;
-
-        const auto op = it->Unwrap().Kind;
-        ACE_TRY_ASSERT(IsCompoundAssignmentOperator(op));
-        ++it;
-
-        ACE_TRY(rhsExpr, ParseExpr({ it, t_context.Scope }));
-        it += rhsExpr.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
-        ++it;
-
-        return Measured
-        {
-            std::make_shared<const CompoundAssignmentStmtNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope,
-                lhsExpr.Value,
-                rhsExpr.Value,
-                op
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseVarStmt(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const VarStmtNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY(name, ParseName(t_context));
+        ACE_TRY(name, ParseSymbolNameSection({ it, t_context.Scope }));
         it += name.Length;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        return Measured
+        {
+            std::make_shared<const MemberAccessExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                expr.Value,
+                name.Value
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseLiteralExpr(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const LiteralExprNode>>>
+    {
+        ACE_TRY(literalKind, [&]() -> Expected<LiteralKind>
+        {
+            const auto tokenKind = t_context.Iterator->Unwrap().Kind;
+
+            switch (tokenKind)
+            {
+                case TokenKind::Int8:         return LiteralKind::Int8;
+                case TokenKind::Int16:        return LiteralKind::Int16;
+                case TokenKind::Int32:        return LiteralKind::Int32;
+                case TokenKind::Int64:        return LiteralKind::Int64;
+                case TokenKind::UInt8:        return LiteralKind::UInt8;
+                case TokenKind::UInt16:       return LiteralKind::UInt16;
+                case TokenKind::UInt32:       return LiteralKind::UInt32;
+                case TokenKind::UInt64:       return LiteralKind::UInt64;
+                case TokenKind::Int:          return LiteralKind::Int;
+                case TokenKind::Float32:      return LiteralKind::Float32;
+                case TokenKind::Float64:      return LiteralKind::Float64;
+                case TokenKind::String:       return LiteralKind::String;
+                case TokenKind::TrueKeyword:  return LiteralKind::True;
+                case TokenKind::FalseKeyword: return LiteralKind::False;
+
+                default:
+                {
+                    ACE_TRY_UNREACHABLE();
+                };
+            }
+        }());
+
+        return Measured
+        {
+            std::make_shared<const LiteralExprNode>(
+                t_context.Iterator->Unwrap().SourceLocation,
+                t_context.Scope,
+                literalKind,
+                t_context.Iterator->Unwrap().String
+            ),
+            size_t{ 1 },
+        };
+    }
+
+    static auto ParseLiteralSymbolExpr(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const LiteralSymbolExprNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY(name, ParseSymbolName({
+            t_context.Iterator,
+            t_context.Scope
+        }));
+        it += name.Length;
+
+        return Measured
+        {
+            std::make_shared<const LiteralSymbolExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                name.Value
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseStructConstructionExpr(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const StructConstructionExprNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
+        ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::New);
+        ++it;
+
+        ACE_TRY(typeName, ParseSymbolName({ it, t_context.Scope }));
+        it += typeName.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
+        ++it;
+
+        std::vector<StructConstructionExprArg> args{};
+        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        {
+            if (!args.empty())
+            {
+                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
+                ++it;
+
+                if (it->Unwrap().Kind == TokenKind::CloseBrace)
+                {
+                    break;
+                }
+            }
+
+            ACE_TRY(name, ParseName({ it, t_context.Scope }));
+            it += name.Length;
+
+            std::optional<std::shared_ptr<const IExprNode>> optValue{};
+            if (it->Unwrap().Kind == TokenKind::Colon)
+            {
+                ++it;
+
+                ACE_TRY(value, ParseExpr({ it, t_context.Scope }));
+                optValue = value.Value;
+                it += value.Length;
+            }
+            
+            args.push_back(StructConstructionExprArg{
+                name.Value,
+                optValue
+            });
+        }
+
+        ++it;
+
+        return Measured
+        {
+            std::make_shared<const StructConstructionExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                typeName.Value,
+                std::move(args)
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseCastExpr(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const CastExprNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CastKeyword);
+        ++it;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
         ++it;
 
         ACE_TRY(typeName, ParseTypeName(
@@ -2175,576 +1079,131 @@ namespace Ace
         ));
         it += typeName.Length;
 
-        ACE_TRY(optAssignment, [&]() -> Expected<std::optional<std::shared_ptr<const IExprNode>>>
-        {
-            if (it->Unwrap().Kind == TokenKind::Semicolon)
-            {
-                ++it;
-                return std::optional<std::shared_ptr<const IExprNode>>{};
-            }
-            else if (it->Unwrap().Kind == TokenKind::Equals)
-            {
-                ++it;
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
+        ++it;
 
-                ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
-                it += expr.Length;
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ++it;
 
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
-                ++it;
+        ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
+        it += expr.Length;
 
-                return std::optional{ expr.Value };
-            }
-
-            ACE_TRY_UNREACHABLE();
-        }());
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
+        ++it;
 
         return Measured
         {
-            std::make_shared<const VarStmtNode>(
+            std::make_shared<const CastExprNode>(
                 CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope,
-                name.Value,
                 typeName.Value,
-                optAssignment
+                expr.Value
             ),
             std::distance(t_context.Iterator, it),
         };
     }
 
-    auto Parser::ParseKeywordStmt(
+    static auto ParseAddressOfExpr(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const IStmtNode>>>
-    {
-        if (const auto expIfStmt = ParseIfStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expIfStmt.Unwrap().Value,
-                expIfStmt.Unwrap().Length,
-            };
-        }
-
-        if (const auto expWhileStmt = ParseWhileStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expWhileStmt.Unwrap().Value,
-                expWhileStmt.Unwrap().Length,
-            };
-        }
-
-        if (const auto expReturnStmt = ParseReturnStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expReturnStmt.Unwrap().Value,
-                expReturnStmt.Unwrap().Length,
-            };
-        }
-
-        if (const auto expExitStmt = ParseExitStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expExitStmt.Unwrap().Value,
-                expExitStmt.Unwrap().Length,
-            };
-        }
-
-        if (const auto expAssertStmt = ParseAssertStmt(t_context))
-        {
-            return Measured<std::shared_ptr<const IStmtNode>>
-            {
-                expAssertStmt.Unwrap().Value,
-                expAssertStmt.Unwrap().Length,
-            };
-        }
-
-        ACE_TRY_UNREACHABLE();
-    }
-
-    auto Parser::ParseIfStmt(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const IfStmtNode>>>
+    ) -> Expected<Measured<std::shared_ptr<const AddressOfExprNode>>>
     {
         auto it = t_context.Iterator;
 
-        std::vector<std::shared_ptr<const IExprNode>> conditions{};
-        std::vector<std::shared_ptr<const BlockStmtNode>> bodies{};
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::AddressOfKeyword);
+        ++it;
 
-        ACE_TRY(ifBlock, ParseIfBlock({ it, t_context.Scope }));
-        it += ifBlock.Length;
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ++it;
 
-        conditions.push_back(ifBlock.Value.first);
-        bodies.push_back(ifBlock.Value.second);
+        ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
+        it += expr.Length;
 
-        while (it->Unwrap().Kind == TokenKind::ElifKeyword)
-        {
-            ACE_TRY(elifBlock, ParseElifBlock({ it, t_context.Scope }));
-
-            conditions.push_back(elifBlock.Value.first);
-            bodies.push_back(elifBlock.Value.second);
-            it += elifBlock.Length;
-        }
-
-        if (const auto expElseBlock = ParseElseBlock({ it, t_context.Scope }))
-        {
-            bodies.push_back(expElseBlock.Unwrap().Value);
-            it += expElseBlock.Unwrap().Length;
-        }
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
+        ++it;
 
         return Measured
         {
-            std::make_shared<const IfStmtNode>(
+            std::make_shared<const AddressOfExprNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                expr.Value
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseSizeOfExpr(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const SizeOfExprNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::SizeOfKeyword);
+        ++it;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
+        ++it;
+
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Allow
+        ));
+        it += typeName.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
+        ++it;
+
+        return Measured
+        {
+            std::make_shared<const SizeOfExprNode>(
                 CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
-                conditions,
-                bodies
+                typeName.Value
             ),
             std::distance(t_context.Iterator, it),
         };
     }
 
-    auto Parser::ParseIfBlock(
+    static auto ParseDerefAsExpr(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::pair<std::shared_ptr<const IExprNode>, std::shared_ptr<const BlockStmtNode>>>>
+    ) -> Expected<Measured<std::shared_ptr<const DerefAsExprNode>>>
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::IfKeyword);
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::DerefAsKeyword);
         ++it;
 
-        ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
-        it += condition.Length;
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
+        ++it;
 
-        ACE_TRY(body, ParseBlockStmt({ it, t_context.Scope }));
-        it += body.Length;
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Allow
+        ));
+        it += typeName.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
+        ++it;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ++it;
+
+        ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
+        it += expr.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
+        ++it;
 
         return Measured
         {
-            std::pair
-            {
-                condition.Value,
-                body.Value
-            },
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseElifBlock(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::pair<std::shared_ptr<const IExprNode>, std::shared_ptr<const BlockStmtNode>>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ElifKeyword);
-        ++it;
-
-        ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
-        it += condition.Length;
-
-        ACE_TRY(body, ParseBlockStmt({ it, t_context.Scope }));
-        it += body.Length;
-
-        return Measured
-        {
-            std::pair
-            {
-                condition.Value,
-                body.Value
-            },
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseElseBlock(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const BlockStmtNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ElseKeyword);
-        ++it;
-
-        ACE_TRY(body, ParseBlockStmt({ it, t_context.Scope }));
-        it += body.Length;
-
-        return Measured
-        {
-            body.Value,
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseWhileStmt(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const WhileStmtNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::WhileKeyword);
-        ++it;
-
-        ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
-        it += condition.Length;
-
-        ACE_TRY(body, ParseBlockStmt({ it, t_context.Scope }));
-        it += body.Length;
-
-        return Measured
-        {
-            std::make_shared<const WhileStmtNode>(
+            std::make_shared<const DerefAsExprNode>(
                 CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope,
-                condition.Value,
-                body.Value
+                typeName.Value,
+                expr.Value
             ),
             std::distance(t_context.Iterator, it),
         };
     }
 
-    auto Parser::ParseReturnStmt(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const ReturnStmtNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ReturnKeyword);
-        ++it;
-
-        ACE_TRY(optExpr, [&]() -> Expected<std::optional<std::shared_ptr<const IExprNode>>>
-        {
-            if (it->Unwrap().Kind == TokenKind::Semicolon)
-            {
-                ++it;
-                return std::optional<std::shared_ptr<const IExprNode>>{};
-            }
-
-            ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
-            it += expr.Length;
-
-            ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
-            ++it;
-
-            return std::optional{ expr.Value };
-        }());
-
-        return Measured
-        {
-            std::make_shared<const ReturnStmtNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope,
-                optExpr
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseExitStmt(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const ExitStmtNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ExitKeyword);
-        ++it;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
-        ++it;
-
-        return Measured
-        {
-            std::make_shared<const ExitStmtNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseAssertStmt(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const AssertStmtNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::AssertKeyword);
-        ++it;
-
-        ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
-        it += condition.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
-        ++it;
-
-        return Measured
-        {
-            std::make_shared<const AssertStmtNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope,
-                condition.Value
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseBlockStmt(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const BlockStmtNode>>>
-    {
-        const auto scope = t_context.Scope->GetOrCreateChild({});
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
-        ++it;
-
-        std::vector<std::shared_ptr<const IStmtNode>> stmts{};
-        while (it->Unwrap().Kind != TokenKind::CloseBrace)
-        {
-            ACE_TRY(stmt, ParseStmt({ it, scope }));
-            stmts.push_back(stmt.Value);
-            it += stmt.Length;
-        }
-
-        ++it;
-
-        return Measured
-        {
-            std::make_shared<const BlockStmtNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                scope,
-                stmts
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseExpr(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>
-    {
-        static constexpr size_t binaryOperatorPrecedenceMin = 9;
-        static const auto getBinaryOperatorPrecedence = [](const TokenKind t_tokenKind) -> size_t
-        {
-            if (
-                (t_tokenKind == TokenKind::Asterisk) ||
-                (t_tokenKind == TokenKind::Slash) ||
-                (t_tokenKind == TokenKind::Percent)
-                )
-            {
-                return 0;
-            }
-
-            if (
-                (t_tokenKind == TokenKind::Plus) ||
-                (t_tokenKind == TokenKind::Minus)
-                )
-            {
-                return 1;
-            }
-
-            if (
-                (t_tokenKind == TokenKind::LessThanLessThan) ||
-                (t_tokenKind == TokenKind::GreaterThanGreaterThan)
-                )
-            {
-                return 2;
-            }
-
-            if (
-                (t_tokenKind == TokenKind::LessThan) ||
-                (t_tokenKind == TokenKind::LessThanEquals) ||
-                (t_tokenKind == TokenKind::GreaterThan) ||
-                (t_tokenKind == TokenKind::GreaterThanEquals)
-                )
-            {
-                return 3;
-            }
-
-            if (
-                (t_tokenKind == TokenKind::EqualsEquals) ||
-                (t_tokenKind == TokenKind::ExclamationEquals)
-                )
-            {
-                return 4;
-            }
-
-            if (t_tokenKind == TokenKind::Ampersand)
-            {
-                return 5;
-            }
-
-            if (t_tokenKind == TokenKind::Caret)
-            {
-                return 6;
-            }
-
-            if (t_tokenKind == TokenKind::VerticalBar)
-            {
-                return 7;
-            }
-
-            if (t_tokenKind == TokenKind::AmpersandAmpersand)
-            {
-                return 8;
-            }
-
-            if (t_tokenKind == TokenKind::VerticalBarVerticalBar)
-            {
-                return binaryOperatorPrecedenceMin;
-            }
-
-            ACE_UNREACHABLE();
-        };
-        static const auto getBinaryOperatorPrecedencesAssociativity = [](const size_t t_precedence) -> OperatorAssociativity
-        {
-            switch (t_precedence)
-            {
-                case 0: return OperatorAssociativity::LeftToRight;
-                case 1: return OperatorAssociativity::LeftToRight;
-                case 2: return OperatorAssociativity::LeftToRight;
-                case 3: return OperatorAssociativity::LeftToRight;
-                case 4: return OperatorAssociativity::LeftToRight;
-                case 5: return OperatorAssociativity::LeftToRight;
-                case 6: return OperatorAssociativity::LeftToRight;
-                case 7: return OperatorAssociativity::LeftToRight;
-                case 8: return OperatorAssociativity::LeftToRight;
-                case 9: return OperatorAssociativity::LeftToRight;
-            }
-
-            ACE_UNREACHABLE();
-        };
-
-        auto it = t_context.Iterator;
-
-        ACE_TRY(simpleExpr, ParseSimpleExpr({ it, t_context.Scope }));
-        it += simpleExpr.Length;
-
-        std::vector<std::shared_ptr<const IExprNode>> exprs{};
-        std::vector<std::reference_wrapper<const TokenKind>> operators{};
-
-        exprs.push_back(simpleExpr.Value);
-        
-        while (IsBinaryOperator(it->Unwrap().Kind))
-        {
-            operators.push_back(it->Unwrap().Kind);
-            ++it;
-
-            ACE_TRY(simpleExpr, ParseSimpleExpr({ it, t_context.Scope }));
-            exprs.push_back(simpleExpr.Value);
-            it += simpleExpr.Length;
-        }
-
-        const auto collapseOperator = [&](const size_t t_index)
-        {
-            const auto& lhsExpr = exprs.at(t_index);
-            const auto& rhsExpr = exprs.at(t_index + 1);
-
-            const auto collapsedExpr = [&]() -> std::shared_ptr<const IExprNode>
-            {
-                const auto tokenKind = operators.at(t_index).get();
-
-                switch (tokenKind)
-                {
-                    case TokenKind::AmpersandAmpersand:
-                    {
-                        return std::make_shared<const AndExprNode>(
-                            CreateSourceLocationRange(t_context.Iterator, it),
-                            lhsExpr,
-                            rhsExpr
-                        );
-                    }
-
-                    case TokenKind::VerticalBarVerticalBar:
-                    {
-                        return std::make_shared<const OrExprNode>(
-                            CreateSourceLocationRange(t_context.Iterator, it),
-                            lhsExpr,
-                            rhsExpr
-                        );
-                    }
-                     
-                    default:
-                    {
-                        return std::make_shared<const UserBinaryExprNode>(
-                            CreateSourceLocationRange(t_context.Iterator, it),
-                            lhsExpr,
-                            rhsExpr,
-                            tokenKind
-                        );
-                    }
-                }
-            }();
-
-            operators.erase(begin(operators) + t_index);
-            exprs.erase(begin(exprs) + t_index + 1);
-            exprs.at(t_index) = collapsedExpr;
-        };
-        
-        for (size_t precendence = 0; precendence <= binaryOperatorPrecedenceMin; precendence++)
-        {
-            const auto associativity = getBinaryOperatorPrecedencesAssociativity(precendence);
-
-            bool didCollapseAll = false;
-            while (!didCollapseAll)
-            {
-                if (operators.empty())
-                    break;
-
-                const auto [startOperatorIndex, endOperatorIndex, operatorIndexIncrement] = [&]() -> std::tuple<int, int, int>
-                {
-                    switch (associativity)
-                    {
-                        case OperatorAssociativity::LeftToRight:
-                        {
-                            return
-                            {
-                                0,
-                                static_cast<int>(operators.size()),
-                                1,
-                            };
-                        }
-
-                        case OperatorAssociativity::RightToLeft:
-                        {
-                            return
-                            {
-                                static_cast<int>(operators.size()) - 1,
-                                -1,
-                                -1,
-                            };
-                        }
-                    }
-                }();
-
-                for (size_t i = startOperatorIndex; i != endOperatorIndex; i += operatorIndexIncrement)
-                {
-                    const bool isLastIteration = (i == (endOperatorIndex - operatorIndexIncrement));
-                    if (isLastIteration)
-                    {
-                        didCollapseAll = true;
-                    }
-
-                    const auto operatorPrecedence = getBinaryOperatorPrecedence(operators.at(i));
-                    if (precendence == operatorPrecedence)
-                    {
-                        collapseOperator(i);
-                        break;
-                    }
-                }
-            }
-        }
-
-        ACE_TRY_ASSERT((exprs.size() == 1) && (operators.empty()));
-
-        return Measured
-        {
-            exprs.front(),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseSimpleExpr(
+    static auto ParseSimpleExpr(
         const ParseContext& t_context
     ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>
     {
@@ -2933,70 +1392,7 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseMemberAccessExpr(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const MemberAccessExprNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY(expr, ParsePrimaryExpr({ it, t_context.Scope }));
-        it += expr.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Dot);
-        ++it;
-
-        ACE_TRY(name, ParseSymbolNameSection({ it, t_context.Scope }));
-        it += name.Length;
-
-        return Measured
-        {
-            std::make_shared<const MemberAccessExprNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                expr.Value,
-                name.Value
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseArgs(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::vector<std::shared_ptr<const IExprNode>>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
-        ++it;
-
-        bool isFirstArg = true;
-        std::vector<std::shared_ptr<const IExprNode>> args{};
-        while (it->Unwrap().Kind != TokenKind::CloseParen)
-        {
-            if (isFirstArg)
-            {
-                isFirstArg = false;
-            }
-            else
-            {
-                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
-                ++it;
-            }
-
-            ACE_TRY(arg, ParseExpr({ it, t_context.Scope }));
-            args.push_back(arg.Value);
-            it += arg.Length;
-        }
-
-        ++it;
-
-        return Measured
-        {
-            args,
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParsePrimaryExpr(
+    static auto ParsePrimaryExpr(
         const ParseContext& t_context
     ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>
     {
@@ -3075,24 +1471,277 @@ namespace Ace
         ACE_TRY_UNREACHABLE();
     }
 
-    auto Parser::ParseExprExpr(
+    static auto ParseExpr(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const ExprExprNode>>>
+    ) -> Expected<Measured<std::shared_ptr<const IExprNode>>>
     {
+        static constexpr size_t binaryOperatorPrecedenceMin = 9;
+        static const auto getBinaryOperatorPrecedence = [](const TokenKind t_tokenKind) -> size_t
+        {
+            if (
+                (t_tokenKind == TokenKind::Asterisk) ||
+                (t_tokenKind == TokenKind::Slash) ||
+                (t_tokenKind == TokenKind::Percent)
+                )
+            {
+                return 0;
+            }
+
+            if (
+                (t_tokenKind == TokenKind::Plus) ||
+                (t_tokenKind == TokenKind::Minus)
+                )
+            {
+                return 1;
+            }
+
+            if (
+                (t_tokenKind == TokenKind::LessThanLessThan) ||
+                (t_tokenKind == TokenKind::GreaterThanGreaterThan)
+                )
+            {
+                return 2;
+            }
+
+            if (
+                (t_tokenKind == TokenKind::LessThan) ||
+                (t_tokenKind == TokenKind::LessThanEquals) ||
+                (t_tokenKind == TokenKind::GreaterThan) ||
+                (t_tokenKind == TokenKind::GreaterThanEquals)
+                )
+            {
+                return 3;
+            }
+
+            if (
+                (t_tokenKind == TokenKind::EqualsEquals) ||
+                (t_tokenKind == TokenKind::ExclamationEquals)
+                )
+            {
+                return 4;
+            }
+
+            if (t_tokenKind == TokenKind::Ampersand)
+            {
+                return 5;
+            }
+
+            if (t_tokenKind == TokenKind::Caret)
+            {
+                return 6;
+            }
+
+            if (t_tokenKind == TokenKind::VerticalBar)
+            {
+                return 7;
+            }
+
+            if (t_tokenKind == TokenKind::AmpersandAmpersand)
+            {
+                return 8;
+            }
+
+            if (t_tokenKind == TokenKind::VerticalBarVerticalBar)
+            {
+                return binaryOperatorPrecedenceMin;
+            }
+
+            ACE_UNREACHABLE();
+        };
+        static const auto getBinaryOperatorPrecedencesAssociativity = [](const size_t t_precedence) -> OperatorAssociativityKind
+        {
+            switch (t_precedence)
+            {
+                case 0: return OperatorAssociativityKind::LeftToRight;
+                case 1: return OperatorAssociativityKind::LeftToRight;
+                case 2: return OperatorAssociativityKind::LeftToRight;
+                case 3: return OperatorAssociativityKind::LeftToRight;
+                case 4: return OperatorAssociativityKind::LeftToRight;
+                case 5: return OperatorAssociativityKind::LeftToRight;
+                case 6: return OperatorAssociativityKind::LeftToRight;
+                case 7: return OperatorAssociativityKind::LeftToRight;
+                case 8: return OperatorAssociativityKind::LeftToRight;
+                case 9: return OperatorAssociativityKind::LeftToRight;
+            }
+
+            ACE_UNREACHABLE();
+        };
+
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
+        ACE_TRY(simpleExpr, ParseSimpleExpr({ it, t_context.Scope }));
+        it += simpleExpr.Length;
+
+        std::vector<std::shared_ptr<const IExprNode>> exprs{};
+        std::vector<std::reference_wrapper<const TokenKind>> operators{};
+
+        exprs.push_back(simpleExpr.Value);
+        
+        while (IsBinaryOperator(it->Unwrap().Kind))
+        {
+            operators.push_back(it->Unwrap().Kind);
+            ++it;
+
+            ACE_TRY(simpleExpr, ParseSimpleExpr({ it, t_context.Scope }));
+            exprs.push_back(simpleExpr.Value);
+            it += simpleExpr.Length;
+        }
+
+        const auto collapseOperator = [&](const size_t t_index)
+        {
+            const auto& lhsExpr = exprs.at(t_index);
+            const auto& rhsExpr = exprs.at(t_index + 1);
+
+            const auto collapsedExpr = [&]() -> std::shared_ptr<const IExprNode>
+            {
+                const auto tokenKind = operators.at(t_index).get();
+
+                switch (tokenKind)
+                {
+                    case TokenKind::AmpersandAmpersand:
+                    {
+                        return std::make_shared<const AndExprNode>(
+                            CreateSourceLocationRange(t_context.Iterator, it),
+                            lhsExpr,
+                            rhsExpr
+                        );
+                    }
+
+                    case TokenKind::VerticalBarVerticalBar:
+                    {
+                        return std::make_shared<const OrExprNode>(
+                            CreateSourceLocationRange(t_context.Iterator, it),
+                            lhsExpr,
+                            rhsExpr
+                        );
+                    }
+                     
+                    default:
+                    {
+                        return std::make_shared<const UserBinaryExprNode>(
+                            CreateSourceLocationRange(t_context.Iterator, it),
+                            lhsExpr,
+                            rhsExpr,
+                            tokenKind
+                        );
+                    }
+                }
+            }();
+
+            operators.erase(begin(operators) + t_index);
+            exprs.erase(begin(exprs) + t_index + 1);
+            exprs.at(t_index) = collapsedExpr;
+        };
+        
+        for (size_t precendence = 0; precendence <= binaryOperatorPrecedenceMin; precendence++)
+        {
+            const auto associativity = getBinaryOperatorPrecedencesAssociativity(precendence);
+
+            bool didCollapseAll = false;
+            while (!didCollapseAll)
+            {
+                if (operators.empty())
+                    break;
+
+                const auto [startOperatorIndex, endOperatorIndex, operatorIndexIncrement] = [&]() -> std::tuple<int, int, int>
+                {
+                    switch (associativity)
+                    {
+                        case OperatorAssociativityKind::LeftToRight:
+                        {
+                            return
+                            {
+                                0,
+                                static_cast<int>(operators.size()),
+                                1,
+                            };
+                        }
+
+                        case OperatorAssociativityKind::RightToLeft:
+                        {
+                            return
+                            {
+                                static_cast<int>(operators.size()) - 1,
+                                -1,
+                                -1,
+                            };
+                        }
+                    }
+                }();
+
+                for (size_t i = startOperatorIndex; i != endOperatorIndex; i += operatorIndexIncrement)
+                {
+                    const bool isLastIteration = (i == (endOperatorIndex - operatorIndexIncrement));
+                    if (isLastIteration)
+                    {
+                        didCollapseAll = true;
+                    }
+
+                    const auto operatorPrecedence = getBinaryOperatorPrecedence(operators.at(i));
+                    if (precendence == operatorPrecedence)
+                    {
+                        collapseOperator(i);
+                        break;
+                    }
+                }
+            }
+        }
+
+        ACE_TRY_ASSERT((exprs.size() == 1) && (operators.empty()));
+
+        return Measured
+        {
+            exprs.front(),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseBlockStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const BlockStmtNode>>>
+    {
+        const auto scope = t_context.Scope->GetOrCreateChild({});
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
         ++it;
 
-        ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
-        it += expr.Length;
+        std::vector<std::shared_ptr<const IStmtNode>> stmts{};
+        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        {
+            ACE_TRY(stmt, ParseStmt({ it, scope }));
+            stmts.push_back(stmt.Value);
+            it += stmt.Length;
+        }
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
         ++it;
 
         return Measured
         {
-            std::make_shared<const ExprExprNode>(
+            std::make_shared<const BlockStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                scope,
+                stmts
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseExprStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const ExprStmtNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
+        it += expr.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ++it;
+
+        return Measured
+        {
+            std::make_shared<const ExprStmtNode>(
                 CreateSourceLocationRange(t_context.Iterator, it),
                 expr.Value
             ),
@@ -3100,312 +1749,1731 @@ namespace Ace
         };
     }
 
-    auto Parser::ParseLiteralExpr(
+    static auto ParseAssignmentStmt(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const LiteralExprNode>>>
-    {
-        ACE_TRY(literalKind, [&]() -> Expected<LiteralKind>
-        {
-            const auto tokenKind = t_context.Iterator->Unwrap().Kind;
-
-            switch (tokenKind)
-            {
-                case TokenKind::Int8:         return LiteralKind::Int8;
-                case TokenKind::Int16:        return LiteralKind::Int16;
-                case TokenKind::Int32:        return LiteralKind::Int32;
-                case TokenKind::Int64:        return LiteralKind::Int64;
-                case TokenKind::UInt8:        return LiteralKind::UInt8;
-                case TokenKind::UInt16:       return LiteralKind::UInt16;
-                case TokenKind::UInt32:       return LiteralKind::UInt32;
-                case TokenKind::UInt64:       return LiteralKind::UInt64;
-                case TokenKind::Int:          return LiteralKind::Int;
-                case TokenKind::Float32:      return LiteralKind::Float32;
-                case TokenKind::Float64:      return LiteralKind::Float64;
-                case TokenKind::String:       return LiteralKind::String;
-                case TokenKind::TrueKeyword:  return LiteralKind::True;
-                case TokenKind::FalseKeyword: return LiteralKind::False;
-
-                default:
-                {
-                    ACE_TRY_UNREACHABLE();
-                };
-            }
-        }());
-
-        return Measured
-        {
-            std::make_shared<const LiteralExprNode>(
-                t_context.Iterator->Unwrap().SourceLocation,
-                t_context.Scope,
-                literalKind,
-                t_context.Iterator->Unwrap().String
-            ),
-            size_t{ 1 },
-        };
-    }
-
-    auto Parser::ParseLiteralSymbolExpr(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const LiteralSymbolExprNode>>>
+    ) -> Expected<Measured<std::shared_ptr<const NormalAssignmentStmtNode>>>
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY(name, ParseSymbolName({ t_context.Iterator, t_context.Scope }));
-        it += name.Length;
+        ACE_TRY(lhsExpr, ParseExpr({ it, t_context.Scope }));
+        it += lhsExpr.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Equals);
+        ++it;
+
+        ACE_TRY(rhsExpr, ParseExpr({ it, t_context.Scope }));
+        it += rhsExpr.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ++it;
 
         return Measured
         {
-            std::make_shared<const LiteralSymbolExprNode>(
+            std::make_shared<const NormalAssignmentStmtNode>(
                 CreateSourceLocationRange(t_context.Iterator, it),
                 t_context.Scope,
-                name.Value
+                lhsExpr.Value,
+                rhsExpr.Value
             ),
             std::distance(t_context.Iterator, it),
         };
     }
 
-    auto Parser::ParseStructConstructionExpr(
+    static auto ParseCompoundAssignmentStmt(
         const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const StructConstructionExprNode>>>
+    ) -> Expected<Measured<std::shared_ptr<const CompoundAssignmentStmtNode>>>
     {
         auto it = t_context.Iterator;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
-        ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::New);
+        ACE_TRY(lhsExpr, ParseExpr({ it, t_context.Scope }));
+        it += lhsExpr.Length;
+
+        const auto op = it->Unwrap().Kind;
+        ACE_TRY_ASSERT(IsCompoundAssignmentOperator(op));
+        ++it;
+
+        ACE_TRY(rhsExpr, ParseExpr({ it, t_context.Scope }));
+        it += rhsExpr.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ++it;
+
+        return Measured
+        {
+            std::make_shared<const CompoundAssignmentStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                lhsExpr.Value,
+                rhsExpr.Value,
+                op
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseVarStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const VarStmtNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY(name, ParseName(t_context));
+        it += name.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Allow
+        ));
+        it += typeName.Length;
+
+        ACE_TRY(optAssignment, [&]() -> Expected<std::optional<std::shared_ptr<const IExprNode>>>
+        {
+            if (it->Unwrap().Kind == TokenKind::Semicolon)
+            {
+                ++it;
+                return std::optional<std::shared_ptr<const IExprNode>>{};
+            }
+            else if (it->Unwrap().Kind == TokenKind::Equals)
+            {
+                ++it;
+
+                ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
+                it += expr.Length;
+
+                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+                ++it;
+
+                return std::optional{ expr.Value };
+            }
+
+            ACE_TRY_UNREACHABLE();
+        }());
+
+        return Measured
+        {
+            std::make_shared<const VarStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                name.Value,
+                typeName.Value,
+                optAssignment
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseIfBlock(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::pair<std::shared_ptr<const IExprNode>, std::shared_ptr<const BlockStmtNode>>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::IfKeyword);
+        ++it;
+
+        ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
+        it += condition.Length;
+
+        ACE_TRY(body, ParseBlockStmt({ it, t_context.Scope }));
+        it += body.Length;
+
+        return Measured
+        {
+            std::pair
+            {
+                condition.Value,
+                body.Value
+            },
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseElifBlock(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::pair<std::shared_ptr<const IExprNode>, std::shared_ptr<const BlockStmtNode>>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ElifKeyword);
+        ++it;
+
+        ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
+        it += condition.Length;
+
+        ACE_TRY(body, ParseBlockStmt({ it, t_context.Scope }));
+        it += body.Length;
+
+        return Measured
+        {
+            std::pair
+            {
+                condition.Value,
+                body.Value
+            },
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseElseBlock(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const BlockStmtNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ElseKeyword);
+        ++it;
+
+        ACE_TRY(body, ParseBlockStmt({ it, t_context.Scope }));
+        it += body.Length;
+
+        return Measured
+        {
+            body.Value,
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseIfStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const IfStmtNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        std::vector<std::shared_ptr<const IExprNode>> conditions{};
+        std::vector<std::shared_ptr<const BlockStmtNode>> bodies{};
+
+        ACE_TRY(ifBlock, ParseIfBlock({ it, t_context.Scope }));
+        it += ifBlock.Length;
+
+        conditions.push_back(ifBlock.Value.first);
+        bodies.push_back(ifBlock.Value.second);
+
+        while (it->Unwrap().Kind == TokenKind::ElifKeyword)
+        {
+            ACE_TRY(elifBlock, ParseElifBlock({ it, t_context.Scope }));
+
+            conditions.push_back(elifBlock.Value.first);
+            bodies.push_back(elifBlock.Value.second);
+            it += elifBlock.Length;
+        }
+
+        if (const auto expElseBlock = ParseElseBlock({ it, t_context.Scope }))
+        {
+            bodies.push_back(expElseBlock.Unwrap().Value);
+            it += expElseBlock.Unwrap().Length;
+        }
+
+        return Measured
+        {
+            std::make_shared<const IfStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                conditions,
+                bodies
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseWhileStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const WhileStmtNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::WhileKeyword);
+        ++it;
+
+        ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
+        it += condition.Length;
+
+        ACE_TRY(body, ParseBlockStmt({ it, t_context.Scope }));
+        it += body.Length;
+
+        return Measured
+        {
+            std::make_shared<const WhileStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                condition.Value,
+                body.Value
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseReturnStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const ReturnStmtNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ReturnKeyword);
+        ++it;
+
+        ACE_TRY(optExpr, [&]() -> Expected<std::optional<std::shared_ptr<const IExprNode>>>
+        {
+            if (it->Unwrap().Kind == TokenKind::Semicolon)
+            {
+                ++it;
+                return std::optional<std::shared_ptr<const IExprNode>>{};
+            }
+
+            ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
+            it += expr.Length;
+
+            ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+            ++it;
+
+            return std::optional{ expr.Value };
+        }());
+
+        return Measured
+        {
+            std::make_shared<const ReturnStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                optExpr
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseExitStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const ExitStmtNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ExitKeyword);
+        ++it;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ++it;
+
+        return Measured
+        {
+            std::make_shared<const ExitStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseAssertStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const AssertStmtNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::AssertKeyword);
+        ++it;
+
+        ACE_TRY(condition, ParseExpr({ it, t_context.Scope }));
+        it += condition.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ++it;
+
+        return Measured
+        {
+            std::make_shared<const AssertStmtNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                condition.Value
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseKeywordStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const IStmtNode>>>
+    {
+        if (const auto expIfStmt = ParseIfStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expIfStmt.Unwrap().Value,
+                expIfStmt.Unwrap().Length,
+            };
+        }
+
+        if (const auto expWhileStmt = ParseWhileStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expWhileStmt.Unwrap().Value,
+                expWhileStmt.Unwrap().Length,
+            };
+        }
+
+        if (const auto expReturnStmt = ParseReturnStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expReturnStmt.Unwrap().Value,
+                expReturnStmt.Unwrap().Length,
+            };
+        }
+
+        if (const auto expExitStmt = ParseExitStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expExitStmt.Unwrap().Value,
+                expExitStmt.Unwrap().Length,
+            };
+        }
+
+        if (const auto expAssertStmt = ParseAssertStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expAssertStmt.Unwrap().Value,
+                expAssertStmt.Unwrap().Length,
+            };
+        }
+
+        ACE_TRY_UNREACHABLE();
+    }
+
+    static auto ParseStmt(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const IStmtNode>>>
+    {
+        if (const auto expExprStatemment = ParseExprStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expExprStatemment.Unwrap().Value,
+                expExprStatemment.Unwrap().Length,
+            };
+        }
+
+        if (const auto expAssignmentStmt = ParseAssignmentStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expAssignmentStmt.Unwrap().Value,
+                expAssignmentStmt.Unwrap().Length,
+            };
+        }
+
+        if (const auto expCompoundAssignmentStmt = ParseCompoundAssignmentStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expCompoundAssignmentStmt.Unwrap().Value,
+                expCompoundAssignmentStmt.Unwrap().Length,
+            };
+        }
+
+        if (const auto expVarStmt = ParseVarStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expVarStmt.Unwrap().Value,
+                expVarStmt.Unwrap().Length,
+            };
+        }
+
+        if (const auto expKeywordStmt = ParseKeywordStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expKeywordStmt.Unwrap().Value,
+                expKeywordStmt.Unwrap().Length,
+            };
+        }
+
+        if (const auto expBlockStmt = ParseBlockStmt(t_context))
+        {
+            return Measured<std::shared_ptr<const IStmtNode>>
+            {
+                expBlockStmt.Unwrap().Value,
+                expBlockStmt.Unwrap().Length,
+            };
+        }
+
+        ACE_TRY_UNREACHABLE();
+    }
+
+    static auto ParseImplFunction(
+        const ParseContext& t_context,
+        const SymbolName& t_selfTypeName
+    ) -> Expected<Measured<std::shared_ptr<const FunctionNode>>>
+    {
+        const auto scope = t_context.Scope->GetOrCreateChild({});
+        auto it = t_context.Iterator;
+
+        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
+        it += attributes.Length;
+
+        ACE_TRY(nameToken, [&]() -> Expected<std::shared_ptr<const Token>>
+        {
+            if (it->Unwrap().Kind == TokenKind::OperatorKeyword) 
+            {
+                ++it;
+
+                const std::shared_ptr<const Token> operatorToken = *it;
+
+                if (!IsUserOperator(operatorToken->Kind))
+                {
+                    ACE_TRY_ASSERT(
+                        operatorToken->Kind == TokenKind::ImplKeyword ||
+                        operatorToken->Kind == TokenKind::ExplKeyword ||
+                        operatorToken->Kind == TokenKind::Identifier 
+                    );
+                }
+
+                ++it;
+
+                return operatorToken;
+            }
+            else
+            {
+                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
+                const std::shared_ptr<const Token> nameToken = *it;
+                ++it;
+
+                return nameToken;
+            }
+        }());
+
+        ACE_TRY(params, ParseParams({ it, scope }));
+        it += params.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
+        it += typeName.Length;
+
+        auto accessModifier = AccessModifier::Private;
+        std::optional<std::shared_ptr<const Token>> optSelfToken{};
+        bool hasExternModifier = false;
+
+        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        {
+            ++it;
+            const auto startIt = it;
+
+            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            {
+                accessModifier = AccessModifier::Public;
+                ++it;
+            }
+
+            if (it->Unwrap().Kind == TokenKind::Identifier)
+            {
+                ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
+                optSelfToken = *it;
+                ++it;
+            }
+
+            if (it->Unwrap().Kind == TokenKind::ExternKeyword)
+            {
+                hasExternModifier = true;
+                ACE_TRY_ASSERT(!optSelfToken.has_value());
+                ++it;
+            }
+
+            ACE_TRY_ASSERT(it != startIt);
+        }
+
+        ACE_TRY(name, ([&]() -> Expected<Identifier>
+        {
+            if (nameToken->Kind == TokenKind::Identifier)
+            {
+                return Identifier
+                {
+                    nameToken->SourceLocation,
+                    nameToken->String,
+                };
+            }
+            else
+            {
+                ACE_TRY(name, GetOperatorFunctionName(
+                    nameToken,
+                    params.Value.size()
+                ));
+
+                ACE_TRY_ASSERT(accessModifier == AccessModifier::Public);
+                ACE_TRY_ASSERT(!optSelfToken.has_value());
+
+                return Identifier
+                {
+                    nameToken->SourceLocation,
+                    name,
+                };
+            }
+        }()));
+
+        ACE_TRY(optBody, [&]() -> Expected<std::optional<std::shared_ptr<const BlockStmtNode>>>
+        {
+            if (hasExternModifier)
+            {
+                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+                ++it;
+
+                return std::optional<std::shared_ptr<const BlockStmtNode>>{};
+            }
+            else
+            {
+                ACE_TRY(body, ParseBlockStmt({ it, scope }));
+                it += body.Length;
+
+                return std::optional{ body.Value };
+            }
+        }());
+
+        const auto selfParam = [&]() -> std::optional<std::shared_ptr<const SelfParamVarNode>>
+        {
+            if (!optSelfToken.has_value())
+            {
+                return std::nullopt;
+            }
+
+            return std::make_shared<const SelfParamVarNode>(
+                optSelfToken.value()->SourceLocation,
+                scope,
+                t_selfTypeName
+            );
+        }();
+
+        return Measured
+        {
+            std::make_shared<const FunctionNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                scope,
+                name,
+                typeName.Value,
+                attributes.Value,
+                accessModifier,
+                selfParam,
+                params.Value,
+                optBody
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseImplFunctionTemplate(
+        const ParseContext& t_context,
+        const SymbolName& t_selfTypeName
+    ) -> Expected<Measured<std::shared_ptr<const FunctionTemplateNode>>>
+    {
+        const auto scope = t_context.Scope->GetOrCreateChild({});
+        auto it = t_context.Iterator;
+
+        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
+        it += attributes.Length;
+
+        ACE_TRY(name, ParseName({ it, t_context.Scope }));
+        it += name.Length;
+
+        ACE_TRY(templateParams, ParseTemplateParams({ it, scope }));
+        it += templateParams.Length;
+
+        ACE_TRY(params, ParseParams({ it, scope }));
+        it += params.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
+        it += typeName.Length;
+
+        auto accessModifier = AccessModifier::Private;
+        std::optional<std::shared_ptr<const Token>> optSelfToken{};
+
+        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        {
+            ++it;
+            const auto startIt = it;
+
+            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            {
+                accessModifier = AccessModifier::Public;
+                ++it;
+            }
+
+            if (it->Unwrap().Kind == TokenKind::Identifier)
+            {
+                ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
+                optSelfToken = *it;
+                ++it;
+            }
+
+            ACE_TRY_ASSERT(it != startIt);
+        }
+
+        ACE_TRY(body, ParseBlockStmt({ it, scope }));
+        it += body.Length;
+
+        const auto selfParam = [&]() -> std::optional<std::shared_ptr<const SelfParamVarNode>>
+        {
+            if (!optSelfToken.has_value())
+            {
+                return std::nullopt;
+            }
+
+            return std::make_shared<const SelfParamVarNode>(
+                optSelfToken.value()->SourceLocation,
+                scope,
+                t_selfTypeName
+            );
+        }();
+
+        const auto function = std::make_shared<const FunctionNode>(
+            CreateSourceLocationRange(t_context.Iterator, it),
+            scope,
+            name.Value,
+            typeName.Value,
+            attributes.Value,
+            accessModifier,
+            selfParam,
+            params.Value,
+            body.Value
+        );
+
+        return Measured
+        {
+            std::make_shared<const FunctionTemplateNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                std::vector<std::shared_ptr<const ImplTemplateParamNode>>{},
+                templateParams.Value,
+                function
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseImpl(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const ImplNode>>>
+    {
+        const auto scope = t_context.Scope->GetOrCreateChild({});
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ImplKeyword);
         ++it;
 
         ACE_TRY(typeName, ParseSymbolName({ it, t_context.Scope }));
+
+        // TODO: Remove this block after impl template specialization.
+        {
+            const bool foundTemplatedSection = std::find_if(
+                begin(typeName.Value.Sections),
+                end  (typeName.Value.Sections),
+                [](const SymbolNameSection& t_section)
+                {
+                    return t_section.TemplateArgs.empty();
+                }
+            ) == end(typeName.Value.Sections);
+
+            ACE_TRY_ASSERT(!foundTemplatedSection);
+        }
+
         it += typeName.Length;
 
         ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
         ++it;
 
-        std::vector<StructConstructionExprArg> args{};
+        std::vector<std::shared_ptr<const FunctionNode>> functions{};
+        std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
+
         while (it->Unwrap().Kind != TokenKind::CloseBrace)
         {
-            if (args.size() != 0)
+            if (const auto expFunction = ParseImplFunction({ it, scope }, typeName.Value))
+            {
+                functions.push_back(expFunction.Unwrap().Value);
+                it += expFunction.Unwrap().Length;
+                continue;
+            }
+
+            if (const auto expFunctionTemplate = ParseImplFunctionTemplate({ it, scope }, typeName.Value))
+            {
+                functionTemplates.push_back(expFunctionTemplate.Unwrap().Value);
+                it += expFunctionTemplate.Unwrap().Length;
+                continue;
+            }
+
+            ACE_TRY_UNREACHABLE();
+        }
+
+        ++it;
+
+        return Measured
+        {
+            std::make_shared<const ImplNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                scope,
+                typeName.Value,
+                functions,
+                functionTemplates
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseTemplatedImplFunction(
+        const ParseContext& t_context,
+        const SymbolName& t_selfTypeName,
+        const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& t_implTemplateParams
+    ) -> Expected<Measured<std::shared_ptr<const FunctionTemplateNode>>>
+    {
+        const auto scope = t_context.Scope->GetOrCreateChild({});
+        auto it = t_context.Iterator;
+
+        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
+        it += attributes.Length;
+
+        ACE_TRY(nameToken, [&]() -> Expected<std::shared_ptr<const Token>>
+        {
+            if (it->Unwrap().Kind == TokenKind::OperatorKeyword)
+            {
+                ++it;
+
+                const std::shared_ptr<const Token> operatorToken = *it;
+
+                if (!IsUserOperator(operatorToken->Kind))
+                {
+                    ACE_TRY_ASSERT(
+                        operatorToken->Kind == TokenKind::ImplKeyword ||
+                        operatorToken->Kind == TokenKind::ExplKeyword ||
+                        operatorToken->Kind == TokenKind::Identifier
+                    );
+                }
+
+                ++it;
+
+                return operatorToken;
+            }
+            else
+            {
+                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Identifier);
+                const std::shared_ptr<const Token> nameToken = *it;
+                ++it;
+
+                return nameToken;
+            }
+        }());
+
+        ACE_TRY(templateParams, [&]() -> Expected<std::vector<std::shared_ptr<const NormalTemplateParamNode>>>
+        {
+            if (const auto expTemplateParams = ParseTemplateParams({ it, scope }))
+            {
+                it += expTemplateParams.Unwrap().Length;
+                return expTemplateParams.Unwrap().Value;
+            }
+            else
+            {
+                return std::vector<std::shared_ptr<const NormalTemplateParamNode>>{};
+            }
+        }());
+
+        ACE_TRY(params, ParseParams({ it, scope }));
+        it += params.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
+        it += typeName.Length;
+
+        auto accessModifier = AccessModifier::Private;
+        std::optional<std::shared_ptr<const Token>> optSelfToken{};
+
+        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        {
+            ++it;
+            const auto startIt = it;
+
+            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            {
+                accessModifier = AccessModifier::Public;
+                ++it;
+            }
+
+            if (it->Unwrap().Kind == TokenKind::Identifier)
+            {
+                ACE_TRY_ASSERT(it->Unwrap().String == SpecialIdentifier::Self);
+                optSelfToken = *it;
+                ++it;
+            }
+
+            ACE_TRY_ASSERT(it != startIt);
+        }
+
+        ACE_TRY(name, ([&]() -> Expected<Identifier>
+        {
+            if (nameToken->Kind == TokenKind::Identifier)
+            {
+                return Identifier
+                {
+                    nameToken->SourceLocation,
+                    nameToken->String,
+                };
+            }
+            else
+            {
+                ACE_TRY(name, GetOperatorFunctionName(
+                    nameToken,
+                    params.Value.size()
+                ));
+
+                ACE_TRY_ASSERT(accessModifier == AccessModifier::Public);
+                ACE_TRY_ASSERT(!optSelfToken.has_value());
+
+                return Identifier
+                {
+                    nameToken->SourceLocation,
+                    name,
+                };
+            }
+        }()));
+
+        ACE_TRY(body, ParseBlockStmt({ it, scope }));
+        it += body.Length;
+
+        const auto selfParam = [&]() -> std::optional<std::shared_ptr<const SelfParamVarNode>>
+        {
+            if (!optSelfToken.has_value())
+            {
+                return std::nullopt;
+            }
+
+            return std::make_shared<const SelfParamVarNode>(
+                optSelfToken.value()->SourceLocation,
+                scope,
+                t_selfTypeName
+            );
+        }();
+
+        const auto function = std::make_shared<const FunctionNode>(
+            CreateSourceLocationRange(t_context.Iterator, it),
+            scope,
+            name,
+            typeName.Value,
+            attributes.Value,
+            accessModifier,
+            selfParam,
+            params.Value,
+            body.Value
+        );
+
+        std::vector<std::shared_ptr<const ImplTemplateParamNode>> clonedImplTemplateParams{};
+        std::transform(
+            begin(t_implTemplateParams),
+            end  (t_implTemplateParams),
+            back_inserter(clonedImplTemplateParams),
+            [&](const std::shared_ptr<const ImplTemplateParamNode>& t_implTemplateParam)
+            {
+                return t_implTemplateParam->CloneInScope(scope);
+            }
+        );
+
+
+        return Measured
+        {
+            std::make_shared<const FunctionTemplateNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                clonedImplTemplateParams,
+                templateParams,
+                function
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseTemplatedImpl(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const TemplatedImplNode>>>
+    {
+        const auto scope = t_context.Scope->GetOrCreateChild({});
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ImplKeyword);
+        ++it;
+
+        ACE_TRY(templateParams, ParseImplTemplateParams({ it, scope }));
+        it += templateParams.Length;
+
+        ACE_TRY(typeName, ParseSymbolName({ it, t_context.Scope }));
+
+        // TODO: Remove this block after impl template specialization.
+        {
+            const bool foundTemplatedSection = std::find_if(begin(typeName.Value.Sections), end(typeName.Value.Sections) - 1,
+            [](const SymbolNameSection& t_section)
+            {
+                return t_section.TemplateArgs.empty();
+            }) == end(typeName.Value.Sections);
+
+            ACE_TRY_ASSERT(!foundTemplatedSection);
+
+            const auto& templateArgs = typeName.Value.Sections.back().TemplateArgs;
+            ACE_TRY_ASSERT(templateParams.Value.size() == templateArgs.size());
+
+            std::unordered_set<std::string> templateParamSet{};
+            ACE_TRY_VOID(TransformExpectedVector(templateParams.Value,
+            [&](const std::shared_ptr<const ImplTemplateParamNode>& t_templateParam) -> Expected<void>
+            {
+                const std::string& templateParamName =
+                    t_templateParam->GetName().String;
+
+                ACE_TRY_ASSERT(!templateParamSet.contains(templateParamName));
+                templateParamSet.insert(templateParamName);
+
+                return Void{};
+            }));
+            
+            ACE_TRY_VOID(TransformExpectedVector(templateArgs,
+            [&](const SymbolName& t_arg) -> Expected<void>
+            {
+                ACE_TRY_ASSERT(t_arg.Sections.size() == 1);
+                ACE_TRY_ASSERT(t_arg.Sections.back().TemplateArgs.empty());
+
+                const std::string& templateArgName = t_arg.Sections.front().Name;
+                ACE_TRY_ASSERT(templateParamSet.contains(templateArgName));
+                templateParamSet.erase(templateArgName);
+
+                return Void{};
+            }));
+        }
+
+        it += typeName.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
+        ++it;
+
+        std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
+
+        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        {
+            auto expFunctionTemplate = ParseTemplatedImplFunction(
+                { it, scope },
+                typeName.Value,
+                templateParams.Value
+            );
+            if (expFunctionTemplate)
+            {
+                functionTemplates.push_back(expFunctionTemplate.Unwrap().Value);
+                it += expFunctionTemplate.Unwrap().Length;
+                continue;
+            }
+
+            ACE_TRY_UNREACHABLE();
+        }
+
+        ++it;
+
+        auto typeTemplateName = typeName.Value;
+        auto& typeTemplateNameLastSection = typeTemplateName.Sections.back();
+        typeTemplateNameLastSection.TemplateArgs.clear();
+        typeTemplateNameLastSection.Name = SpecialIdentifier::CreateTemplate(
+            typeTemplateNameLastSection.Name
+        );
+
+        return Measured
+        {
+            std::make_shared<const TemplatedImplNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                scope,
+                typeTemplateName,
+                std::vector<std::shared_ptr<const FunctionNode>>{},
+                functionTemplates
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseFunction(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const FunctionNode>>>
+    {
+        const auto scope = t_context.Scope->GetOrCreateChild({});
+        auto it = t_context.Iterator;
+
+        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
+        it += attributes.Length;
+
+        ACE_TRY(name, ParseName({ it, t_context.Scope }));
+        it += name.Length;
+
+        ACE_TRY(params, ParseParams({ it, scope }));
+        it += params.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
+        it += typeName.Length;
+
+        auto accessModifier = AccessModifier::Private;
+        bool hasExternModifier = false;
+
+        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        {
+            ++it;
+            const auto startIt = it;
+
+            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            {
+                accessModifier = AccessModifier::Public;
+                ++it;
+            }
+
+            if (it->Unwrap().Kind == TokenKind::ExternKeyword)
+            {
+                hasExternModifier = true;
+                ++it;
+            }
+
+            ACE_TRY_ASSERT(it != startIt);
+        }
+
+        ACE_TRY(optBody, [&]() -> Expected<std::optional<std::shared_ptr<const BlockStmtNode>>>
+        {
+            if (hasExternModifier)
+            {
+                ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+                ++it;
+
+                return std::optional<std::shared_ptr<const BlockStmtNode>>{};
+            }
+            else
+            {
+                ACE_TRY(body, ParseBlockStmt({ it, scope }));
+                it += body.Length;
+
+                return std::optional{ body.Value };
+            }
+        }());
+
+        return Measured
+        {
+            std::make_shared<const FunctionNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                scope,
+                name.Value,
+                typeName.Value,
+                attributes.Value,
+                accessModifier,
+                std::nullopt,
+                params.Value,
+                optBody
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseFunctionTemplate(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const FunctionTemplateNode>>>
+    {
+        const auto scope = t_context.Scope->GetOrCreateChild({});
+        auto it = t_context.Iterator;
+
+        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
+        it += attributes.Length;
+
+        ACE_TRY(name, ParseName({ it, t_context.Scope }));
+        it += name.Length;
+
+        ACE_TRY(templateParams, [&]() -> Expected<std::vector<std::shared_ptr<const NormalTemplateParamNode>>>
+        {
+            const auto expTemplateParams = ParseTemplateParams({
+                it,
+                scope,
+            });
+            if (expTemplateParams)
+            {
+                it += expTemplateParams.Unwrap().Length;
+                return expTemplateParams.Unwrap().Value;
+            }
+            else
+            {
+                return std::vector<std::shared_ptr<const NormalTemplateParamNode>>{};
+            }
+        }());
+
+        ACE_TRY(params, ParseParams({ it, scope }));
+        it += params.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
+        it += typeName.Length;
+
+        auto accessModifier = AccessModifier::Private;
+
+        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        {
+            ++it;
+            const auto startIt = it;
+
+            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            {
+                accessModifier = AccessModifier::Public;
+                ++it;
+            }
+
+            ACE_TRY_ASSERT(it != startIt);
+        }
+
+        ACE_TRY(body, ParseBlockStmt({ it, scope }));
+        it += body.Length;
+
+        const auto function = std::make_shared<const FunctionNode>(
+            CreateSourceLocationRange(t_context.Iterator, it),
+            scope,
+            name.Value,
+            typeName.Value,
+            attributes.Value,
+            accessModifier,
+            std::nullopt,
+            params.Value,
+            body.Value
+        );
+
+        return Measured
+        {
+            std::make_shared<const FunctionTemplateNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                std::vector<std::shared_ptr<const ImplTemplateParamNode>>{},
+                templateParams,
+                function
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseVar(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const StaticVarNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
+        it += attributes.Length;
+
+        ACE_TRY(name, ParseName({ it, t_context.Scope }));
+        it += name.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
+        it += typeName.Length;
+
+        auto accessModifier = AccessModifier::Private;
+
+        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        {
+            ++it;
+            const auto startIt = it;
+
+            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            {
+                accessModifier = AccessModifier::Public;
+                ++it;
+            }
+
+            ACE_TRY_ASSERT(it != startIt);
+        }
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Semicolon);
+        ++it;
+
+        return Measured
+        {
+            std::make_shared<const StaticVarNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                name.Value,
+                typeName.Value,
+                attributes.Value,
+                accessModifier
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseMemberVar(
+        const ParseContext& t_context,
+        const size_t t_index
+    ) -> Expected<Measured<std::shared_ptr<const InstanceVarNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
+        it += attributes.Length;
+
+        ACE_TRY(name, ParseName({ it, t_context.Scope }));
+        it += name.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY(typeName, ParseTypeName(
+            { it, t_context.Scope },
+            ReferenceParsingKind::Disallow
+        ));
+        it += typeName.Length;
+
+        auto accessModifier = AccessModifier::Private;
+
+        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        {
+            ++it;
+            const auto startIt = it;
+
+            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            {
+                accessModifier = AccessModifier::Public;
+                ++it;
+            }
+
+            ACE_TRY_ASSERT(it != startIt);
+        }
+
+        return Measured
+        {
+            std::make_shared<const InstanceVarNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                t_context.Scope,
+                name.Value,
+                typeName.Value,
+                attributes.Value,
+                accessModifier,
+                t_index
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseStructBody(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::vector<std::shared_ptr<const InstanceVarNode>>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
+        ++it;
+
+        std::vector<std::shared_ptr<const InstanceVarNode>> variables{};
+        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        {
+            if (!variables.empty())
             {
                 ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Comma);
                 ++it;
 
                 if (it->Unwrap().Kind == TokenKind::CloseBrace)
+                {
                     break;
+                }
             }
 
-            ACE_TRY(name, ParseName({ it, t_context.Scope }));
-            it += name.Length;
+            ACE_TRY(variable, ParseMemberVar(
+                { it, t_context.Scope },
+                variables.size()
+            ));
+            variables.push_back(variable.Value);
+            it += variable.Length;
+        }
 
-            std::optional<std::shared_ptr<const IExprNode>> optValue{};
-            if (it->Unwrap().Kind == TokenKind::Colon)
+        ++it;
+
+        return Measured<std::vector<std::shared_ptr<const InstanceVarNode>>>
+        {
+            variables,
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseStruct(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const StructTypeNode>>>
+    {
+        const auto scope = t_context.Scope->GetOrCreateChild({});
+        auto it = t_context.Iterator;
+
+        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
+        it += attributes.Length;
+
+        ACE_TRY(name, ParseName({ it, t_context.Scope }));
+        it += name.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::StructKeyword);
+        ++it;
+
+        auto accessModifier = AccessModifier::Private;
+
+        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        {
+            ++it;
+            const auto startIt = it;
+
+            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
             {
+                accessModifier = AccessModifier::Public;
                 ++it;
-
-                ACE_TRY(value, ParseExpr({ it, t_context.Scope }));
-                optValue = value.Value;
-                it += value.Length;
             }
-            
-            args.push_back(StructConstructionExprArg{
+
+            ACE_TRY_ASSERT(it != startIt);
+        }
+
+        ACE_TRY(body, ParseStructBody({ it, scope }));
+        it += body.Length;
+
+        return Measured
+        {
+            std::make_shared<const StructTypeNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                scope,
                 name.Value,
-                optValue
-            });
+                attributes.Value,
+                accessModifier,
+                body.Value
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseStructTemplate(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const TypeTemplateNode>>>
+    {
+        const auto scope = t_context.Scope->GetOrCreateChild({});
+        auto it = t_context.Iterator;
+
+        ACE_TRY(attributes, ParseAttributes({ it, t_context.Scope }));
+        it += attributes.Length;
+
+        ACE_TRY(name, ParseName({ it, t_context.Scope }));
+        it += name.Length;
+
+        ACE_TRY(templateParams, ParseTemplateParams({ it, scope }));
+        it += templateParams.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::StructKeyword);
+        ++it;
+
+        auto accessModifier = AccessModifier::Private;
+
+        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        {
+            ++it;
+            const auto startIt = it;
+
+            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            {
+                accessModifier = AccessModifier::Public;
+                ++it;
+            }
+
+            ACE_TRY_ASSERT(it != startIt);
+        }
+
+        ACE_TRY(body, ParseStructBody({ it, scope }));
+        it += body.Length;
+
+        const auto type = std::make_shared<const StructTypeNode>(
+            CreateSourceLocationRange(t_context.Iterator, it),
+            scope,
+            name.Value,
+            attributes.Value,
+            accessModifier,
+            body.Value
+        );
+
+        return Measured
+        {
+            std::make_shared<const TypeTemplateNode>(
+                CreateSourceLocationRange(t_context.Iterator, it),
+                templateParams.Value,
+                type
+            ),
+            std::distance(t_context.Iterator, it),
+        };
+    }
+
+    static auto ParseTypeTemplate(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const TypeTemplateNode>>>
+    {
+        if (const auto expStructTemplate = ParseStructTemplate({ t_context.Iterator, t_context.Scope }))
+        {
+            return expStructTemplate;
+        }
+
+        ACE_TRY_UNREACHABLE();
+    }
+
+    static auto ParseType(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const ITypeNode>>>
+    {
+        if (const auto expStruct = ParseStruct({ t_context.Iterator, t_context.Scope }))
+        {
+            return Measured<std::shared_ptr<const ITypeNode>>
+            {
+                expStruct.Unwrap().Value,
+                expStruct.Unwrap().Length,
+            };
+        }
+
+        ACE_TRY_UNREACHABLE();
+    }
+
+    static auto ParseModule(
+        const ParseContext& t_context
+    ) -> Expected<Measured<std::shared_ptr<const ModuleNode>>>
+    {
+        auto it = t_context.Iterator;
+
+        ACE_TRY(name, ParseNestedName({ it, t_context.Scope }));
+        it += name.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::Colon);
+        ++it;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::ModuleKeyword);
+        ++it;
+
+        auto accessModifier = AccessModifier::Private;
+
+        if (it->Unwrap().Kind == TokenKind::MinusGreaterThan)
+        {
+            ++it;
+            const auto startIt = it;
+
+            if (it->Unwrap().Kind == TokenKind::PublicKeyword)
+            {
+                accessModifier = AccessModifier::Public;
+                ++it;
+            }
+
+            ACE_TRY_ASSERT(it != startIt);
+        }
+
+        std::vector<std::shared_ptr<Scope>> scopes{};
+        scopes.push_back(t_context.Scope);
+        std::transform(
+            begin(name.Value),
+            end  (name.Value),
+            back_inserter(scopes),
+            [&](const Identifier& t_name)
+            {
+                return scopes.back()->GetOrCreateChild(t_name.String);
+            }
+        );
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBrace);
+        ++it;
+
+        std::vector<std::shared_ptr<const ModuleNode>> modules{};
+        std::vector<std::shared_ptr<const ITypeNode>> types{};
+        std::vector<std::shared_ptr<const TypeTemplateNode>> typeTemplates{};
+        std::vector<std::shared_ptr<const ImplNode>> impls{};
+        std::vector<std::shared_ptr<const TemplatedImplNode>> templatedImpls{};
+        std::vector<std::shared_ptr<const FunctionNode>> functions{};
+        std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
+        std::vector<std::shared_ptr<const StaticVarNode>> variables{};
+
+        while (it->Unwrap().Kind != TokenKind::CloseBrace)
+        {
+            const auto selfScope = scopes.back();
+
+            if (const auto expModule = ParseModule({ it, selfScope }))
+            {
+                modules.push_back(expModule.Unwrap().Value);
+                it += expModule.Unwrap().Length;
+                continue;
+            }
+
+            if (const auto expType = ParseType({ it, selfScope }))
+            {
+                types.push_back(expType.Unwrap().Value);
+                it += expType.Unwrap().Length;
+                continue;
+            }
+
+            if (const auto expTypeTemplate = ParseTypeTemplate({ it, selfScope }))
+            {
+                typeTemplates.push_back(expTypeTemplate.Unwrap().Value);
+                it += expTypeTemplate.Unwrap().Length;
+                continue;
+            }
+
+            if (const auto expImpl = ParseImpl({ it, selfScope }))
+            {
+                impls.push_back(expImpl.Unwrap().Value);
+                it += expImpl.Unwrap().Length;
+                continue;
+            }
+
+            if (const auto expTemplatedImpl = ParseTemplatedImpl({ it, selfScope }))
+            {
+                templatedImpls.push_back(expTemplatedImpl.Unwrap().Value);
+                it += expTemplatedImpl.Unwrap().Length;
+                continue;
+            }
+
+            if (const auto expFunction = ParseFunction({ it, selfScope }))
+            {
+                functions.push_back(expFunction.Unwrap().Value);
+                it += expFunction.Unwrap().Length;
+                continue;
+            }
+
+            if (const auto expFunctionTemplate = ParseFunctionTemplate({ it, selfScope }))
+            {
+                functionTemplates.push_back(expFunctionTemplate.Unwrap().Value);
+                it += expFunctionTemplate.Unwrap().Length;
+                continue;
+            }
+
+            if (const auto expVar = ParseVar({ it, selfScope }))
+            {
+                variables.push_back(expVar.Unwrap().Value);
+                it += expVar.Unwrap().Length;
+                continue;
+            }
+
+            ACE_TRY_UNREACHABLE();
         }
 
         ++it;
 
         return Measured
         {
-            std::make_shared<const StructConstructionExprNode>(
+            std::make_shared<const ModuleNode>(
                 CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope,
-                typeName.Value,
-                std::move(args)
+                scopes.front(),
+                scopes.back(),
+                name.Value,
+                accessModifier,
+                modules,
+                types,
+                typeTemplates,
+                impls,
+                templatedImpls,
+                functions,
+                functionTemplates,
+                variables
             ),
             std::distance(t_context.Iterator, it),
         };
     }
 
-    auto Parser::ParseCastExpr(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const CastExprNode>>>
+    auto ParseAST(
+        const FileBuffer* const t_fileBuffer,
+        const std::vector<std::shared_ptr<const Token>>& t_tokens
+    ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
-        auto it = t_context.Iterator;
+        std::vector<ParseToken> tokens{};
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CastKeyword);
-        ++it;
+        const auto firstLineIt = begin(t_fileBuffer->GetLines());
+        const auto  lastLineIt =   end(t_fileBuffer->GetLines()) - 1;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
-        ++it;
+        const auto& firstLine = *firstLineIt;
+        const auto&  lastLine = * lastLineIt;
 
-        ACE_TRY(typeName, ParseTypeName(
-            { it, t_context.Scope },
-            ReferenceParsingKind::Allow
+        const SourceLocation leadingSourceLocation
+        {
+            t_fileBuffer,
+            begin(firstLine),
+            begin(firstLine) + 1,
+        };
+        const SourceLocation trailingSourceLocation
+        {
+            t_fileBuffer,
+            end(lastLine) - 1,
+            end(lastLine),
+        };
+
+        tokens.emplace_back(std::make_shared<const Token>(
+            leadingSourceLocation,
+            TokenKind::Identifier,
+            t_fileBuffer->GetCompilation()->Package.Name
         ));
-        it += typeName.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
-        ++it;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
-        ++it;
-
-        ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
-        it += expr.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
-        ++it;
-
-        return Measured
-        {
-            std::make_shared<const CastExprNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                typeName.Value,
-                expr.Value
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseAddressOfExpr(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const AddressOfExprNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::AddressOfKeyword);
-        ++it;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
-        ++it;
-
-        ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
-        it += expr.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
-        ++it;
-
-        return Measured
-        {
-            std::make_shared<const AddressOfExprNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                expr.Value
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseSizeOfExpr(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const SizeOfExprNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::SizeOfKeyword);
-        ++it;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
-        ++it;
-
-        ACE_TRY(typeName, ParseTypeName(
-            { it, t_context.Scope },
-            ReferenceParsingKind::Allow
+        tokens.emplace_back(std::make_shared<const Token>(
+            leadingSourceLocation,
+            TokenKind::Colon
         ));
-        it += typeName.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
-        ++it;
-
-        return Measured
-        {
-            std::make_shared<const SizeOfExprNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                t_context.Scope,
-                typeName.Value
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseDerefAsExpr(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const DerefAsExprNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::DerefAsKeyword);
-        ++it;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
-        ++it;
-
-        ACE_TRY(typeName, ParseTypeName(
-            { it, t_context.Scope },
-            ReferenceParsingKind::Allow
+        tokens.emplace_back(std::make_shared<const Token>(
+            leadingSourceLocation,
+            TokenKind::ModuleKeyword
         ));
-        it += typeName.Length;
+        tokens.emplace_back(std::make_shared<const Token>(
+            leadingSourceLocation,
+            TokenKind::OpenBrace
+        ));
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseBracket);
+        std::transform(
+            begin(t_tokens),
+            end  (t_tokens),
+            back_inserter(tokens),
+            [](const std::shared_ptr<const Token>& t_token)
+            {
+                return t_token;
+            }
+        );
+
+        tokens.insert(
+            end(tokens) - 1,
+            std::make_shared<const Token>(
+                trailingSourceLocation,
+                TokenKind::CloseBrace
+            )
+        );
+
+        auto it = begin(tokens);
+
+        ACE_TRY(module, ParseModule({
+            it,
+            t_fileBuffer->GetCompilation()->GlobalScope.Unwrap()
+        }));
+        it += module.Length;
+
+        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::EndOfFile);
         ++it;
 
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenParen);
-        ++it;
+        ACE_TRY_ASSERT(it == end(tokens));
 
-        ACE_TRY(expr, ParseExpr({ it, t_context.Scope }));
-        it += expr.Length;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::CloseParen);
-        ++it;
-
-        return Measured
-        {
-            std::make_shared<const DerefAsExprNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                typeName.Value,
-                expr.Value
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseAttribute(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::shared_ptr<const AttributeNode>>>
-    {
-        auto it = t_context.Iterator;
-
-        ACE_TRY_ASSERT(it->Unwrap().Kind == TokenKind::OpenBracket);
-        ++it;
-
-        ACE_TRY(structConstructionExpr, ParseStructConstructionExpr({ it, t_context.Scope }));
-        it += structConstructionExpr.Length;
-
-        return Measured
-        {
-            std::make_shared<const AttributeNode>(
-                CreateSourceLocationRange(t_context.Iterator, it),
-                structConstructionExpr.Value
-            ),
-            std::distance(t_context.Iterator, it),
-        };
-    }
-
-    auto Parser::ParseAttributes(
-        const ParseContext& t_context
-    ) -> Expected<Measured<std::vector<std::shared_ptr<const AttributeNode>>>>
-    {
-        auto it = t_context.Iterator;
-
-        std::vector<std::shared_ptr<const AttributeNode>> attributes{};
-        while (const auto expAttribute = ParseAttribute({ it, t_context.Scope }))
-        {
-            attributes.push_back(expAttribute.Unwrap().Value);
-            it += expAttribute.Unwrap().Length;
-        }
-
-        return Measured
-        {
-            attributes,
-            std::distance(t_context.Iterator, it),
-        };
+        return module.Value;
     }
 }

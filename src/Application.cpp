@@ -46,7 +46,7 @@ namespace Ace::Application
         diagnosticBag.Add(dgnTokens.GetDiagnosticBag());
 
         // TODO: Handle diagnostics
-        const auto ast = Parser::ParseAST(
+        const auto ast = ParseAST(
             t_fileBuffer,
             std::move(dgnTokens.Unwrap())
         ).Unwrap();
