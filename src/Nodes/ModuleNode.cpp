@@ -227,8 +227,9 @@ namespace Ace
             return t_variable->CreateBound();
         }));
 
-        auto* const selfSymbol =
-            GetSymbolScope()->ExclusiveResolveSymbol<ModuleSymbol>(GetName()).Unwrap();
+        auto* const selfSymbol = GetSymbolScope()->ExclusiveResolveSymbol<ModuleSymbol>(
+            GetName().String
+        ).Unwrap();
 
         std::vector<std::shared_ptr<const ImplBoundNode>> allBoundImpls{};
         allBoundImpls.insert(
@@ -271,7 +272,9 @@ namespace Ace
     {
         if (m_Name.size() > 1)
         {
-            std::shared_ptr<Scope> scope = GetSymbolScope()->GetParent().value();
+            std::shared_ptr<Scope> scope =
+                GetSymbolScope()->GetParent().value();
+
             auto nameIt = rbegin(m_Name) + 1;
 
             for (
@@ -308,8 +311,8 @@ namespace Ace
         return Void{}; 
     }
 
-    auto ModuleNode::GetName() const -> const std::string&
+    auto ModuleNode::GetName() const -> const Identifier&
     {
-        return m_Name.back().String;
+        return m_Name.back();
     }
 }

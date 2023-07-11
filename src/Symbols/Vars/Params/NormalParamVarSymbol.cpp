@@ -1,9 +1,9 @@
 #include "Symbols/Vars/Params/NormalParamVarSymbol.hpp"
 
 #include <memory>
-#include <string>
 
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "AccessModifier.hpp"
 
@@ -11,7 +11,7 @@ namespace Ace
 {
     NormalParamVarSymbol::NormalParamVarSymbol(
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name,
+        const Identifier& t_name,
         ITypeSymbol* const t_type,
         const size_t t_index
     ) : m_Scope{ t_scope },
@@ -26,7 +26,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto NormalParamVarSymbol::GetName() const -> const std::string&
+    auto NormalParamVarSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }

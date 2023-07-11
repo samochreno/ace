@@ -61,7 +61,7 @@ namespace Ace
         auto ContinueCreatingSymbol(
             ISymbol* const t_symbol
         ) const -> Expected<void> final;
-        auto GetName() const -> const std::string& final;
+        auto GetName() const -> const Identifier& final;
 
     private:
         SourceLocation m_SourceLocation{};

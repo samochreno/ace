@@ -122,7 +122,7 @@ namespace Ace
         {
             std::make_unique<NormalParamVarSymbol>(
                 m_Scope,
-                m_Name.String,
+                m_Name,
                 typeSymbol,
                 m_Index
             )

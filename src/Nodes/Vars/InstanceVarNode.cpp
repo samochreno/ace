@@ -126,7 +126,7 @@ namespace Ace
         {
             std::make_unique<InstanceVarSymbol>(
                 m_Scope,
-                m_Name.String,
+                m_Name,
                 m_AccessModifier,
                 typeSymbol,
                 m_Index

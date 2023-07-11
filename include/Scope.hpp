@@ -113,7 +113,9 @@ namespace Ace
             auto* const symbol = t_symbol.get();
             const auto scope = symbol->GetScope();
             ACE_TRY_ASSERT(scope->CanDefineSymbol(symbol));
-            scope->m_SymbolMap[symbol->GetName()].push_back(std::move(t_symbol));
+            scope->m_SymbolMap[symbol->GetName().String].push_back(
+                std::move(t_symbol)
+            );
             return symbol;
         }
         static auto DefineSymbol(

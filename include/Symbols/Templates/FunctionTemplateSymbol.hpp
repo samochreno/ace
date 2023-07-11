@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 
 #include "Symbols/Templates/TemplateSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -11,6 +10,7 @@
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostics.hpp"
 #include "Name.hpp"
@@ -26,7 +26,7 @@ namespace Ace
         virtual ~FunctionTemplateSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const std::string& final;
+        auto GetName() const -> const Identifier& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
@@ -34,7 +34,7 @@ namespace Ace
         auto CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*>   final;
         auto CollectParams()     const -> std::vector<NormalTemplateParamTypeSymbol*> final;
 
-        auto GetASTName() const -> const std::string& final;
+        auto GetASTName() const -> const Identifier& final;
 
         auto SetPlaceholderSymbol(ISymbol* const t_symbol) -> void final;
         auto GetPlaceholderSymbol() const -> ISymbol* final;
@@ -48,7 +48,7 @@ namespace Ace
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        std::string m_Name{};
+        Identifier m_Name{};
         const FunctionTemplateNode* m_TemplateNode{};
         ISymbol* m_PlaceholderSymbol{};
         std::vector<std::shared_ptr<const FunctionNode>> m_InstantiatedOnlySymbolsASTs{};

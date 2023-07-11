@@ -1,15 +1,17 @@
 #include "Symbols/Types/Aliases/TemplateArgs/NormalTemplateArgAliasTypeSymbol.hpp"
 
-#include <string>
+#include <memory>
 
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace
 {
     NormalTemplateArgAliasTypeSymbol::NormalTemplateArgAliasTypeSymbol(
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name,
+        const Identifier& t_name,
         ITypeSymbol* const t_aliasedType,
         const size_t t_index
     ) : m_Scope{ t_scope },
@@ -29,7 +31,7 @@ namespace Ace
         return m_AliasedType->GetSelfScope();
     }
 
-    auto NormalTemplateArgAliasTypeSymbol::GetName() const -> const std::string&
+    auto NormalTemplateArgAliasTypeSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }

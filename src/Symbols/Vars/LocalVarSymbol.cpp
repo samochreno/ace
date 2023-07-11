@@ -1,9 +1,9 @@
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 
 #include <memory>
-#include <string>
 
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 
@@ -11,7 +11,7 @@ namespace Ace
 {
     LocalVarSymbol::LocalVarSymbol(
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name,
+        const Identifier& t_name,
         ITypeSymbol* const t_type
     ) : m_Scope{ t_scope },
         m_Name{ t_name },
@@ -24,7 +24,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto LocalVarSymbol::GetName() const -> const std::string&
+    auto LocalVarSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }

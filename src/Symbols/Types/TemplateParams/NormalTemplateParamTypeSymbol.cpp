@@ -1,16 +1,17 @@
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
 
+#include <memory>
 #include <vector>
-#include <string>
 
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
 {
     NormalTemplateParamTypeSymbol::NormalTemplateParamTypeSymbol(
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name
+        const Identifier& t_name
     ) : m_Scope{ t_scope },
         m_Name{ t_name }
     {
@@ -26,7 +27,7 @@ namespace Ace
         ACE_UNREACHABLE();
     }
 
-    auto NormalTemplateParamTypeSymbol::GetName() const -> const std::string&
+    auto NormalTemplateParamTypeSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }

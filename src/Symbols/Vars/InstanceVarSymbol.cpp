@@ -1,9 +1,9 @@
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 
 #include <memory>
-#include <string>
 
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 
@@ -11,7 +11,7 @@ namespace Ace
 {
     InstanceVarSymbol::InstanceVarSymbol(
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name,
+        const Identifier& t_name,
         const AccessModifier t_accessModifier,
         ITypeSymbol* const t_type,
         const size_t t_index
@@ -28,7 +28,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto InstanceVarSymbol::GetName() const -> const std::string&
+    auto InstanceVarSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }

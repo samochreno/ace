@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 #include <optional>
 #include <utility>
 #include <algorithm>
@@ -10,6 +9,7 @@
 
 #include "Assert.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/Vars/Params/ParamVarSymbol.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
@@ -25,7 +25,7 @@ namespace Ace
 {
     FunctionSymbol::FunctionSymbol(
         const std::shared_ptr<Scope>& t_selfScope,
-        const std::string& t_name,
+        const Identifier& t_name,
         const SymbolCategory t_symbolCategory,
         const AccessModifier t_accessModifier,
         ITypeSymbol* const t_type
@@ -47,7 +47,7 @@ namespace Ace
         return m_SelfScope;
     }
 
-    auto FunctionSymbol::GetName() const -> const std::string&
+    auto FunctionSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }
@@ -177,7 +177,9 @@ namespace Ace
     auto FunctionSymbol::GetBody() -> std::optional<const IEmittable<void>*>
     {
         if (!m_OptBody.has_value())
+        {
             return {};
+        }
 
         return m_OptBody.value().get();
     }
@@ -185,7 +187,7 @@ namespace Ace
     auto FunctionSymbol::GetTemplate() const -> std::optional<FunctionTemplateSymbol*>
     {
         auto expTemplate = GetScope()->ResolveStaticSymbol<FunctionTemplateSymbol>(
-            SpecialIdentifier::CreateTemplate(m_Name)
+            SpecialIdentifier::CreateTemplate(m_Name.String)
         );
 
         return expTemplate ? expTemplate.Unwrap() : std::optional<FunctionTemplateSymbol*>{};

@@ -26,7 +26,7 @@ namespace Ace
         }
 
         if (
-            self->GetName() !=
+            self->GetName().String !=
             GetCompilation()->Natives->Reference.GetFullyQualifiedName().Sections.back().Name
             )
         {
@@ -89,7 +89,7 @@ namespace Ace
         }
 
         if (
-            self->GetName() !=
+            self->GetName().String !=
             GetCompilation()->Natives->StrongPointer.GetFullyQualifiedName().Sections.back().Name
             )
         {
@@ -153,7 +153,7 @@ namespace Ace
         auto* const self = GetUnaliased();
 
         auto expTemplate = GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(
-            SpecialIdentifier::CreateTemplate(self->GetName())
+            SpecialIdentifier::CreateTemplate(self->GetName().String)
         );
         
         return expTemplate ?

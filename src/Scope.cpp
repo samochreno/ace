@@ -368,7 +368,7 @@ namespace Ace
         if (auto* const partiallyCreatable = dynamic_cast<const IPartiallySymbolCreatable*>(t_creatable))
         {
             const auto optDefinedSymbol = scope->GetDefinedSymbol(
-                partiallyCreatable->GetName(),
+                partiallyCreatable->GetName().String,
                 {},
                 {}
             );
@@ -390,7 +390,7 @@ namespace Ace
     auto Scope::RemoveSymbol(ISymbol* const t_symbol) -> void
     {
         const auto scope = t_symbol->GetScope();
-        auto& symbols = scope->m_SymbolMap.at(t_symbol->GetName());
+        auto& symbols = scope->m_SymbolMap.at(t_symbol->GetName().String);
 
         const auto matchingSymbolIt = std::find_if(
             begin(symbols),
@@ -735,7 +735,7 @@ namespace Ace
         {
             auto aliasSymbol = std::make_unique<ImplTemplateArgAliasTypeSymbol>(
                 shared_from_this(),
-                t_implTemplateParamNames.at(i).String,
+                t_implTemplateParamNames.at(i),
                 t_implTemplateArgs.at(i),
                 i
             );
@@ -747,7 +747,7 @@ namespace Ace
         {
             auto aliasSymbol = std::make_unique<NormalTemplateArgAliasTypeSymbol>(
                 shared_from_this(),
-                t_templateParamNames.at(i).String,
+                t_templateParamNames.at(i),
                 t_templateArgs.at(i),
                 i
             );
@@ -846,8 +846,7 @@ namespace Ace
         }();
 
         return !GetDefinedSymbol(
-            t_symbol->GetName(), 
-
+            t_symbol->GetName().String, 
             templateArgs, 
             implTemplateArgs
         ).has_value();
@@ -1154,7 +1153,7 @@ namespace Ace
         const auto scope = t_template->GetScope();
 
         const auto matchingNameSymbolsIt =
-            scope->m_SymbolMap.find(t_template->GetASTName());
+            scope->m_SymbolMap.find(t_template->GetASTName().String);
         ACE_TRY_ASSERT(matchingNameSymbolsIt != end(scope->m_SymbolMap));
 
         auto& symbols = matchingNameSymbolsIt->second;

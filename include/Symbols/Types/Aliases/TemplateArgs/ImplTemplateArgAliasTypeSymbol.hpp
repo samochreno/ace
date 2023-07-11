@@ -2,14 +2,14 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 #include <optional>
 
-#include "Assert.hpp"
 #include "Symbols/Types/Aliases/TemplateArgs/TemplateArgAliasTypeSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
+#include "Diagnostics.hpp"
 #include "Emittable.hpp"
 
 namespace Ace
@@ -20,7 +20,7 @@ namespace Ace
     public:
         ImplTemplateArgAliasTypeSymbol(
             const std::shared_ptr<Scope>& t_scope,
-            const std::string& t_name,
+            const Identifier& t_name,
             ITypeSymbol* const t_aliasedType,
             const size_t t_index
         );
@@ -28,7 +28,7 @@ namespace Ace
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const std::string& final;
+        auto GetName() const -> const Identifier& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
@@ -64,7 +64,7 @@ namespace Ace
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        std::string m_Name{};
+        Identifier m_Name{};
         ITypeSymbol* m_AliasedType{};
         size_t m_Index{};
     };

@@ -21,15 +21,20 @@ namespace Ace::GlueGeneration
         const auto scope     = t_typeSymbol->GetUnaliased()->GetScope();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto name = SpecialIdentifier::CreateCopyGlue(
+        const auto nameString = SpecialIdentifier::CreateCopyGlue(
             t_typeSymbol->CreatePartialSignature()
         );
 
-        if (const auto expGlueSymbol = scope->ExclusiveResolveSymbol<FunctionSymbol>(name))
+        if (const auto expGlueSymbol = scope->ExclusiveResolveSymbol<FunctionSymbol>(nameString))
         {
             return expGlueSymbol.Unwrap();
         }
 
+        const Identifier name
+        {
+            t_typeSymbol->GetName().SourceLocation,
+            nameString,
+        };
         auto ownedGlueSymbol = std::make_unique<FunctionSymbol>(
             selfScope,
             name,
@@ -42,15 +47,26 @@ namespace Ace::GlueGeneration
             std::move(ownedGlueSymbol)
         ).Unwrap();
 
+        const Identifier selfName
+        {
+            t_typeSymbol->GetName().SourceLocation,
+            SpecialIdentifier::CreateAnonymous(),
+        };
         Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
             selfScope,
-            SpecialIdentifier::CreateAnonymous(),
+            selfName,
             t_typeSymbol->GetWithReference(),
             0
         )).Unwrap();
+
+        const Identifier otherName
+        {
+            t_typeSymbol->GetName().SourceLocation,
+            SpecialIdentifier::CreateAnonymous(),
+        };
         Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
             selfScope,
-            SpecialIdentifier::CreateAnonymous(),
+            otherName,
             t_typeSymbol->GetWithReference(),
             1
         )).Unwrap();
@@ -66,15 +82,20 @@ namespace Ace::GlueGeneration
         const auto scope     = t_typeSymbol->GetUnaliased()->GetScope();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto name = SpecialIdentifier::CreateDropGlue(
+        const auto nameString = SpecialIdentifier::CreateDropGlue(
             t_typeSymbol->CreatePartialSignature()
         );
 
-        if (const auto expGlueSymbol = scope->ExclusiveResolveSymbol<FunctionSymbol>(name))
+        if (const auto expGlueSymbol = scope->ExclusiveResolveSymbol<FunctionSymbol>(nameString))
         {
             return expGlueSymbol.Unwrap();
         }
 
+        const Identifier name
+        {
+            t_typeSymbol->GetName().SourceLocation,
+            nameString,
+        };
         auto ownedGlueSymbol = std::make_unique<FunctionSymbol>(
             selfScope,
             name,
@@ -87,9 +108,14 @@ namespace Ace::GlueGeneration
             std::move(ownedGlueSymbol)
         ).Unwrap();
 
+        const Identifier selfName
+        {
+            t_typeSymbol->GetName().SourceLocation,
+            SpecialIdentifier::CreateAnonymous(),
+        };
         Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
             selfScope,
-            SpecialIdentifier::CreateAnonymous(),
+            selfName,
             t_typeSymbol->GetWithReference(),
             0
         )).Unwrap();

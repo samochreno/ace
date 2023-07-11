@@ -101,18 +101,28 @@ namespace Ace
         // continue:
         // gotoif condition start;
 
+        const Identifier startLabelName
+        {
+            SourceLocation{}, // TODO: Fix this after adding SourceLocation to BoundNodes
+            SpecialIdentifier::CreateAnonymous(),
+        };
         auto startLabelSymbolOwned = std::make_unique<LabelSymbol>(
             m_Scope,
-            SpecialIdentifier::CreateAnonymous()
+            startLabelName
         );
 
         auto* const startLabelSymbol = dynamic_cast<LabelSymbol*>(
             m_Scope->DefineSymbol(std::move(startLabelSymbolOwned)).Unwrap()
         );
 
+        const Identifier continueLabelName
+        {
+            SourceLocation{}, // TODO: Fix this after adding SourceLocation to BoundNodes
+            SpecialIdentifier::CreateAnonymous(),
+        };
         auto continueLabelSymbolOwned = std::make_unique<LabelSymbol>(
             m_Scope,
-            SpecialIdentifier::CreateAnonymous()
+            continueLabelName
         );
 
         auto* const continueLabelSymbol = dynamic_cast<LabelSymbol*>(

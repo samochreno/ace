@@ -124,7 +124,7 @@ namespace Ace
         {
             std::make_unique<StaticVarSymbol>(
                 m_Scope,
-                m_Name.String,
+                m_Name,
                 m_AccessModifier,
                 typeSymbol
             )

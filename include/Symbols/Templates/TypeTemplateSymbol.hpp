@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 
 #include "Symbols/Templates/TemplateSymbol.hpp"
 #include "Symbols/SelfScopedSymbol.hpp"
@@ -12,6 +11,7 @@
 #include "Nodes/Templates/TypeTemplateNode.hpp"
 #include "Nodes/Types/TypeNode.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "SpecialIdentifier.hpp"
 
@@ -27,7 +27,7 @@ namespace Ace
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const std::string& final;
+        auto GetName() const -> const Identifier& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
@@ -35,7 +35,7 @@ namespace Ace
         auto CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*>   final;
         auto CollectParams()     const -> std::vector<NormalTemplateParamTypeSymbol*> final;
 
-        auto GetASTName() const -> const std::string& final;
+        auto GetASTName() const -> const Identifier& final;
   
         auto SetPlaceholderSymbol(ISymbol* const t_symbol) -> void final;
         auto GetPlaceholderSymbol() const -> ISymbol* final;
@@ -49,7 +49,7 @@ namespace Ace
         ) -> void final;
 
     private:
-        std::string m_Name{};
+        Identifier m_Name{};
         AccessModifier m_AccessModifier{};
         const TypeTemplateNode* m_TemplateNode{};
         ISymbol* m_PlaceholderSymbol{};

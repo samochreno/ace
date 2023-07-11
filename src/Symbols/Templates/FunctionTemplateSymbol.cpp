@@ -1,7 +1,6 @@
 #include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 
 #include <vector>
-#include <string>
 
 #include "Assert.hpp"
 #include "Scope.hpp"
@@ -23,7 +22,11 @@ namespace Ace
         const FunctionTemplateNode* const t_templateNode
     ) : m_TemplateNode{ t_templateNode }
     {
-        m_Name = SpecialIdentifier::CreateTemplate(GetASTName());
+        m_Name =
+        {
+            GetASTName().SourceLocation,
+            SpecialIdentifier::CreateTemplate(GetASTName().String),
+        };
     }
 
     auto FunctionTemplateSymbol::GetScope() const -> std::shared_ptr<Scope>
@@ -31,7 +34,7 @@ namespace Ace
         return m_TemplateNode->GetScope();
     }
 
-    auto FunctionTemplateSymbol::GetName() const -> const std::string&
+    auto FunctionTemplateSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }
@@ -61,9 +64,9 @@ namespace Ace
         return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<NormalTemplateParamTypeSymbol>();
     }
 
-    auto FunctionTemplateSymbol::GetASTName() const -> const std::string&
+    auto FunctionTemplateSymbol::GetASTName() const -> const Identifier&
     {
-        return m_TemplateNode->GetAST()->GetName().String;
+        return m_TemplateNode->GetAST()->GetName();
     }
 
     auto FunctionTemplateSymbol::SetPlaceholderSymbol(

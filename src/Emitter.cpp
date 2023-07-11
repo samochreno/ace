@@ -155,7 +155,7 @@ namespace Ace
         [&](const FunctionBoundNode* const t_functionNode)
         {
             if (
-                t_functionNode->GetSymbol()->GetName() != 
+                t_functionNode->GetSymbol()->GetName().String != 
                 SpecialIdentifier::Main
                 ) 
                 return;
@@ -297,7 +297,7 @@ namespace Ace
             auto* const allocaInst = m_BlockBuilder->Builder.CreateAlloca(
                 GetIRType(typeSymbol),
                 nullptr,
-                paramSymbol->GetName()
+                paramSymbol->GetName().String
             );
 
             EmitCopy(
@@ -343,7 +343,7 @@ namespace Ace
                 m_LocalVarMap[variableSymbol] = m_BlockBuilder->Builder.CreateAlloca(
                     type,
                     nullptr,
-                    variableSymbol->GetName()
+                    variableSymbol->GetName().String
                 );
             }
         );

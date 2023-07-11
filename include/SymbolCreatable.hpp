@@ -1,10 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <string>
 
 #include "Diagnostics.hpp"
 #include "Symbols/Symbol.hpp"
+#include "Identifier.hpp"
 
 namespace Ace
 {
@@ -26,7 +26,7 @@ namespace Ace
     public:
         virtual ~IPartiallySymbolCreatable() = default;
 
-        virtual auto GetName() const -> const std::string& = 0;
+        virtual auto GetName() const -> const Identifier& = 0;
         virtual auto ContinueCreatingSymbol(
             ISymbol* const t_symbol
         ) const -> Expected<void> = 0;

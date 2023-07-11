@@ -2,14 +2,11 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
-#include "Scope.hpp"
-#include "AccessModifier.hpp"
-#include "SpecialIdentifier.hpp"
+#include "Identifier.hpp"
 
 namespace Ace
 {
@@ -29,7 +26,7 @@ namespace Ace
         virtual auto CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*>   = 0;
         virtual auto CollectParams()     const -> std::vector<NormalTemplateParamTypeSymbol*> = 0;
 
-        virtual auto GetASTName() const -> const std::string& = 0;
+        virtual auto GetASTName() const -> const Identifier& = 0;
 
         virtual auto SetPlaceholderSymbol(
             ISymbol* const t_symbol

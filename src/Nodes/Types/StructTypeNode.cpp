@@ -164,7 +164,7 @@ namespace Ace
         {
             std::make_unique<StructTypeSymbol>(
                 m_SelfScope,
-                m_Name.String,
+                m_Name,
                 m_AccessModifier
             )
         };

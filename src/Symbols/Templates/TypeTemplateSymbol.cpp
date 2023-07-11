@@ -1,7 +1,6 @@
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
 
 #include <vector>
-#include <string>
 
 #include "Assert.hpp"
 #include "Scope.hpp"
@@ -17,7 +16,11 @@ namespace Ace
         const TypeTemplateNode* const t_templateNode
     ) : m_TemplateNode{ t_templateNode }
     {
-        m_Name = SpecialIdentifier::CreateTemplate(GetASTName());
+        m_Name =
+        {
+            GetASTName().SourceLocation,
+            SpecialIdentifier::CreateTemplate(GetASTName().String),
+        };
     }
 
     auto TypeTemplateSymbol::GetScope() const -> std::shared_ptr<Scope>
@@ -30,7 +33,7 @@ namespace Ace
         return m_TemplateNode->GetSelfScope();
     }
 
-    auto TypeTemplateSymbol::GetName() const -> const std::string&
+    auto TypeTemplateSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }
@@ -60,9 +63,9 @@ namespace Ace
         return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<NormalTemplateParamTypeSymbol>();
     }
 
-    auto TypeTemplateSymbol::GetASTName() const -> const std::string&
+    auto TypeTemplateSymbol::GetASTName() const -> const Identifier&
     {
-        return m_TemplateNode->GetAST()->GetName().String;
+        return m_TemplateNode->GetAST()->GetName();
     }
 
     auto TypeTemplateSymbol::SetPlaceholderSymbol(

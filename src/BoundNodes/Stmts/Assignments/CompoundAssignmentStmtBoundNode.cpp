@@ -166,9 +166,14 @@ namespace Ace
                     {
                         ACE_ASSERT(!expr->GetTypeInfo().Symbol->IsReference());
 
+                        const Identifier tmpVarName
+                        {
+                            SourceLocation{}, // TODO: Fix this after adding SourceLocation to BoundNodes
+                            SpecialIdentifier::CreateAnonymous()
+                        };
                         auto tmpVarSymbolOwned = std::make_unique<LocalVarSymbol>(
                             blockScope,
-                            SpecialIdentifier::CreateAnonymous(),
+                            tmpVarName,
                             expr->GetTypeInfo().Symbol
                         );
 
@@ -195,9 +200,14 @@ namespace Ace
                 }
             }();
 
+            const Identifier tmpRefVarName
+            {
+                SourceLocation{}, // TODO: Fix this after adding SourceLocation to BoundNodes
+                SpecialIdentifier::CreateAnonymous()
+            };
             auto tmpRefVarSymbolOwned = std::make_unique<LocalVarSymbol>(
                 blockScope,
-                SpecialIdentifier::CreateAnonymous(),
+                tmpRefVarName,
                 tmpRefExpr->GetTypeInfo().Symbol
             );
 

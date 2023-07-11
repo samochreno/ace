@@ -106,7 +106,9 @@ namespace Ace
                 end  (variableSymbols),
                 [&](const InstanceVarSymbol* const t_variableSymbol)
                 {
-                    return t_variableSymbol->GetName() == t_arg.Name.String;
+                    return
+                        t_variableSymbol->GetName().String ==
+                        t_arg.Name.String;
                 }
             );
 

@@ -93,6 +93,7 @@ namespace Ace
         return std::unique_ptr<ISymbol>
         {
             std::make_unique<SelfParamVarSymbol>(
+                m_SourceLocation,
                 m_Scope,
                 typeSymbol
             )

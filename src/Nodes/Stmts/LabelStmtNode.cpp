@@ -91,7 +91,7 @@ namespace Ace
         {
             std::make_unique<LabelSymbol>(
                 m_Scope, 
-                m_Name.String
+                m_Name
             )
         };
     }

@@ -132,7 +132,7 @@ namespace Ace
         {
             std::make_unique<LocalVarSymbol>(
                 m_Scope,
-                m_Name.String,
+                m_Name,
                 typeSymbol
             )
         };

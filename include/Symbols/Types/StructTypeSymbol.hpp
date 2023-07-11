@@ -2,13 +2,13 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 #include <optional>
 
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostics.hpp"
 #include "Emittable.hpp"
@@ -20,14 +20,14 @@ namespace Ace
     public:
         StructTypeSymbol(
             const std::shared_ptr<Scope>& t_selfScope,
-            const std::string& t_name,
+            const Identifier& t_name,
             const AccessModifier t_accessModifier
         );
         virtual ~StructTypeSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const std::string& final;
+        auto GetName() const -> const Identifier& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
@@ -61,7 +61,7 @@ namespace Ace
 
     private:
         std::shared_ptr<Scope> m_SelfScope{};
-        std::string m_Name{};
+        Identifier m_Name{};
         AccessModifier m_AccessModifier{};
 
         mutable bool m_IsResolvingSize{};

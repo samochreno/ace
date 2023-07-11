@@ -1,10 +1,10 @@
 #include "Symbols/Types/StructTypeSymbol.hpp"
 
 #include <vector>
-#include <string>
 #include <optional>
 
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Diagnostics.hpp"
@@ -15,7 +15,7 @@ namespace Ace
 {
     StructTypeSymbol::StructTypeSymbol(
         const std::shared_ptr<Scope>& t_selfScope,
-        const std::string& t_name,
+        const Identifier& t_name,
         const AccessModifier t_accessModifier
     ) : m_SelfScope{ t_selfScope },
         m_Name{ t_name },
@@ -33,7 +33,7 @@ namespace Ace
         return m_SelfScope;
     }
 
-    auto StructTypeSymbol::GetName() const -> const std::string&
+    auto StructTypeSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }

@@ -1,15 +1,19 @@
 #include "Symbols/Types/Aliases/TemplateArgs/ImplTemplateArgAliasTypeSymbol.hpp"
 
-#include <string>
+#include <memory>
+#include <vector>
+#include <optional>
 
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace
 {
     ImplTemplateArgAliasTypeSymbol::ImplTemplateArgAliasTypeSymbol(
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name,
+        const Identifier& t_name,
         ITypeSymbol* const t_aliasedType,
         const size_t t_index
     ) : m_Scope{ t_scope },
@@ -29,7 +33,7 @@ namespace Ace
         return m_AliasedType->GetSelfScope();
     }
 
-    auto ImplTemplateArgAliasTypeSymbol::GetName() const -> const std::string&
+    auto ImplTemplateArgAliasTypeSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }

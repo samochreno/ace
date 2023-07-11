@@ -1,15 +1,14 @@
 #include "Symbols/LabelSymbol.hpp"
 
-#include <string>
-
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
 {
     LabelSymbol::LabelSymbol(
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name
+        const Identifier& t_name
     ) : m_Scope{ t_scope },
         m_Name{ t_name }
     {
@@ -20,7 +19,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto LabelSymbol::GetName() const -> const std::string&
+    auto LabelSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }

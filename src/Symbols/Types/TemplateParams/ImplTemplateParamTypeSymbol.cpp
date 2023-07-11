@@ -1,16 +1,18 @@
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 
-#include <string>
+#include <memory>
 #include <vector>
 
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
+#include "Diagnostics.hpp"
 
 namespace Ace
 {
     ImplTemplateParamTypeSymbol::ImplTemplateParamTypeSymbol(
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name
+        const Identifier& t_name
     ) : m_Scope{ t_scope },
         m_Name{ t_name }
     {
@@ -26,7 +28,7 @@ namespace Ace
         ACE_UNREACHABLE();
     }
 
-    auto ImplTemplateParamTypeSymbol::GetName() const -> const std::string&
+    auto ImplTemplateParamTypeSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }

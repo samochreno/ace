@@ -43,7 +43,7 @@ namespace Ace
             return symbol->CreatePartialSignature();
         }
 
-        std::string signature = GetName();
+        std::string signature = GetName().String;
 
         if (auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(this))
         {
@@ -146,7 +146,7 @@ namespace Ace
             }
         );
 
-        nameSections.emplace_back(GetName());
+        nameSections.emplace_back(GetName().String);
 
         if (auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(this))
         {

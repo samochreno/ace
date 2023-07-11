@@ -209,7 +209,7 @@ namespace Ace
         {
             std::make_unique<FunctionSymbol>(
                 m_SelfScope,
-                m_Name.String,
+                m_Name,
                 m_OptSelf.has_value() ?
                     SymbolCategory::Instance :
                     SymbolCategory::Static,

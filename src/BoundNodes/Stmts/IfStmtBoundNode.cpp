@@ -126,9 +126,14 @@ namespace Ace
         const size_t labelCount = m_Conditions.size() + (hasElse ? 1 : 0);
         for (size_t i = 0; i < labelCount; i++)
         {
+            const Identifier labelName
+            {
+                SourceLocation{}, // TODO: Fix this after adding SourceLocation to BoundNodes
+                SpecialIdentifier::CreateAnonymous()
+            };
             auto labelSymbolOwned = std::make_unique<LabelSymbol>(
                 m_Scope,
-                SpecialIdentifier::CreateAnonymous()
+                labelName
             );
 
             auto* const labelSymbol = dynamic_cast<LabelSymbol*>(

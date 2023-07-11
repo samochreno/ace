@@ -1,8 +1,7 @@
 #include "Symbols/TemplatedImplSymbol.hpp"
 
-#include <string>
-
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
@@ -13,7 +12,11 @@ namespace Ace
         TypeTemplateSymbol* const t_implementedTypeTemplate
     ) : m_Scope{ t_scope },
         m_SelfScope{ t_selfScope },
-        m_Name{ SpecialIdentifier::CreateAnonymous() },
+        m_Name
+        {
+            t_implementedTypeTemplate->GetName().SourceLocation,
+            SpecialIdentifier::CreateAnonymous()
+        },
         m_ImplementedTypeTemplate{ t_implementedTypeTemplate }
     {
     }
@@ -28,7 +31,7 @@ namespace Ace
         return m_SelfScope;
     }
 
-    auto TemplatedImplSymbol::GetName() const -> const std::string&
+    auto TemplatedImplSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }

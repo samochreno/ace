@@ -1,16 +1,16 @@
 #include "Symbols/Vars/StaticVarSymbol.hpp"
 
 #include <memory>
-#include <string>
 
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
 {
     StaticVarSymbol::StaticVarSymbol(
         const std::shared_ptr<Scope>& t_scope,
-        const std::string& t_name,
+        const Identifier& t_name,
         const AccessModifier t_accessModifier,
         ITypeSymbol* const t_type
     ) : m_Scope{ t_scope },
@@ -25,7 +25,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto StaticVarSymbol::GetName() const -> const std::string&
+    auto StaticVarSymbol::GetName() const -> const Identifier&
     {
         return m_Name;
     }
