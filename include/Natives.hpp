@@ -8,7 +8,6 @@
 
 #include "LLVM.hpp"
 #include "Diagnostics.hpp"
-#include "Token.hpp"
 #include "Scope.hpp"
 #include "Diagnostics.hpp"
 #include "TypeSizeKind.hpp"

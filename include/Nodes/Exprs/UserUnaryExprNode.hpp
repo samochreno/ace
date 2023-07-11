@@ -7,7 +7,7 @@
 #include "BoundNodes/Exprs/UserUnaryExprBoundNode.hpp"
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
-#include "Token.hpp"
+#include "TokenKind.hpp"
 #include "Diagnostics.hpp"
 
 namespace Ace

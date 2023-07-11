@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "Symbols/Symbol.hpp"
-#include "Token.hpp"
+#include "TokenKind.hpp"
 
 namespace Ace::SpecialIdentifier
 {
