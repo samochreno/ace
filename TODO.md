@@ -11,10 +11,10 @@
 
 ## 💥 High Priority
 
-- Give template symbols shared ownership of the nodes
 - Error messages to make debugging easier:
-  - Keep track of tokens which were used in constructing a node, then if an error with a node wants to be shown, it will just call `node->CollectTokens()` and mark the error from the begining of the first token, to the end of the last token | Each node has a tokens start and end index
+  - Add parser diagnostics
   - Add source location to bound nodes, check TODO comments
+- Give template symbols shared ownership of the nodes
 - String interning and maybe put `Token`s on the stack
 - Strong pointer self
 - Traits:
