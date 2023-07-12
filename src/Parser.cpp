@@ -91,14 +91,7 @@ namespace Ace
         template<typename T>
         auto Eat(const ParseResult<T>& t_result) -> void
         {
-#if NDEBUG
             m_Iterator = t_result.EndIterator;
-#else
-            while (m_Iterator != t_result.EndIterator)
-            {
-                ++m_Iterator;
-            }
-#endif
         }
 
         auto CreateSourceLocation() -> SourceLocation
