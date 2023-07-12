@@ -29,9 +29,8 @@ namespace Ace
     using ParseIterator = std::vector<std::shared_ptr<const Token>>::const_iterator;
 
     template<typename T>
-    class ParseResult
+    struct ParseResult
     {
-    public:
         ParseResult(
             const T& t_value,
             const ParseIterator t_endIt
