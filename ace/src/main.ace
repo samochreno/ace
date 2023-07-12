@@ -129,7 +129,7 @@ impl[T] Template[T] {
     }
 }
 
-test_10(): int {
+type_template_associated_func(): int {
     obj: Template[int] = new Template[int] { field: 4 };
     ret obj.field();
 }

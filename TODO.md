@@ -11,6 +11,7 @@
 
 ## 💥 High Priority
 
+- Change that all structs take arguments by `const&`
 - Error messages to make debugging easier:
   - Add parser diagnostics
   - Add source location to bound nodes, check TODO comments
