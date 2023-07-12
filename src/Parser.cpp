@@ -79,7 +79,7 @@ namespace Ace
             return m_Iterator == m_EndIterator;
         }
 
-        auto Peek() -> const std::shared_ptr<const Token>&
+        auto Peek() const -> const std::shared_ptr<const Token>&
         {
             return *m_Iterator;
         }
