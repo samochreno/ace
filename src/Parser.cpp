@@ -56,6 +56,7 @@ namespace Ace
             m_EndIterator{ t_endIt }
         {
         }
+        ~Parser() = default;
 
         auto WithScope(const std::shared_ptr<Scope>& t_scope) const -> Parser
         {
