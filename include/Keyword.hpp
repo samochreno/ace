@@ -4,6 +4,10 @@ namespace Ace
 {
     namespace Keyword
     {
+        inline constexpr const char* AddressOf  = "__address_of";
+        inline constexpr const char* SizeOf     = "__size_of";
+        inline constexpr const char* DerefAs    = "__deref_as";
+
         inline constexpr const char* If         = "if";
         inline constexpr const char* Else       = "else";
         inline constexpr const char* Elif       = "elif";
@@ -21,9 +25,9 @@ namespace Ace
         inline constexpr const char* Assert     = "assert";
         inline constexpr const char* Impl       = "impl";
         inline constexpr const char* Expl       = "expl";
-        inline constexpr const char* AddressOf  = "__address_of";
-        inline constexpr const char* SizeOf     = "__size_of";
-        inline constexpr const char* DerefAs    = "__deref_as";
+        inline constexpr const char* Box        = "box";
+        inline constexpr const char* Unbox      = "unbox";
+
         inline constexpr const char* Int8       = "i8";
         inline constexpr const char* Int16      = "i16";
         inline constexpr const char* Int32      = "i32";
@@ -37,7 +41,5 @@ namespace Ace
         inline constexpr const char* Bool       = "bool";
         inline constexpr const char* Void       = "void";
         inline constexpr const char* Int        = "int";
-        inline constexpr const char* Box        = "box";
-        inline constexpr const char* Unbox      = "unbox";
     };
 }
