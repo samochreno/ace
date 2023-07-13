@@ -5,7 +5,7 @@
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
 #include "Symbols/TemplatableSymbol.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

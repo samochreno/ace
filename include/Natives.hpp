@@ -7,9 +7,9 @@
 #include <unordered_set>
 
 #include "LLVM.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "TypeSizeKind.hpp"
 
 namespace Ace

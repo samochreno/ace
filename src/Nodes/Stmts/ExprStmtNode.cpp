@@ -6,7 +6,7 @@
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "BoundNodes/Stmts/ExprStmtBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

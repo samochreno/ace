@@ -7,7 +7,7 @@
 #include "Scope.hpp"
 #include "Identifier.hpp"
 #include "Nodes/AttributeNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"

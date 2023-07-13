@@ -6,7 +6,7 @@
 #include "Symbols/Symbol.hpp"
 #include "Symbols/SelfScopedSymbol.hpp"
 #include "Symbols/TemplatableSymbol.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "TypeSizeKind.hpp"
 #include "Emittable.hpp"
 

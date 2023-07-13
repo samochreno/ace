@@ -8,7 +8,7 @@
 #include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 

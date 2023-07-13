@@ -5,7 +5,7 @@
 
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
 #include "Nodes/Exprs/LiteralSymbolExprNode.hpp"

@@ -10,7 +10,7 @@
 #include "BoundNodes/Exprs/ReferenceExprBoundNode.hpp"
 #include "BoundNodes/Exprs/DereferenceExprBoundNode.hpp"
 #include "TypeInfo.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace

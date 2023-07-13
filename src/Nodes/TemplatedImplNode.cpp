@@ -8,7 +8,7 @@
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "BoundNodes/ImplBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/TemplatedImplSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"

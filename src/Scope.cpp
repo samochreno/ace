@@ -12,7 +12,7 @@
 #include <map>
 
 #include "Assert.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Symbols/All.hpp"
 #include "SymbolCreatable.hpp"

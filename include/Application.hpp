@@ -3,7 +3,7 @@
 #include <vector>
 #include <string_view>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Compilation.hpp"
 #include "Nodes/Node.hpp"
 #include "BoundNodes/BoundNode.hpp"

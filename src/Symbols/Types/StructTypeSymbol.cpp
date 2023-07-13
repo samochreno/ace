@@ -7,7 +7,7 @@
 #include "Identifier.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/FunctionSymbol.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Emittable.hpp"
 #include "GlueGeneration.hpp"
 

@@ -6,7 +6,7 @@
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Symbols/LabelSymbol.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace

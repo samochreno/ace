@@ -8,7 +8,7 @@
 #include "Identifier.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 
 namespace Ace

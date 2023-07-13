@@ -5,7 +5,7 @@
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/ReferenceExprBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"

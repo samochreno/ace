@@ -5,7 +5,7 @@
 #include "BoundNodes/BoundNode.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Emittable.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace

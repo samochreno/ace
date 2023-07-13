@@ -6,7 +6,7 @@
 
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Nodes/Exprs/LiteralSymbolExprNode.hpp"
 #include "Nodes/Exprs/MemberAccessExprNode.hpp"

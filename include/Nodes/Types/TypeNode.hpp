@@ -4,7 +4,7 @@
 
 #include "Nodes/Node.hpp"
 #include "BoundNodes/Types/TypeBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Scope.hpp"
 #include "Identifier.hpp"
 #include "AccessModifier.hpp"

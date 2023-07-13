@@ -9,7 +9,7 @@
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "LiteralKind.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

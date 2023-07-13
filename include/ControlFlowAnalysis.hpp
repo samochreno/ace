@@ -2,7 +2,7 @@
 
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

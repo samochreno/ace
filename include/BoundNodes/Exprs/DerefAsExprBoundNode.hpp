@@ -7,7 +7,7 @@
 #include "Scope.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "TypeInfo.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "ExprEmitResult.hpp"
 

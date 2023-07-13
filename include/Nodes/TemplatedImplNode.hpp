@@ -11,7 +11,7 @@
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Symbols/Symbol.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

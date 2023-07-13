@@ -9,7 +9,7 @@
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/ExitStmtBoundNode.hpp"
 #include "BoundNodes/Exprs/LogicalNegationExprBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"

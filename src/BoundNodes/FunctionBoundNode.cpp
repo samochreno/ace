@@ -8,7 +8,7 @@
 #include "BoundNodes/Vars/Params/SelfParamVarBoundNode.hpp"
 #include "BoundNodes/Vars/Params/NormalParamVarBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace

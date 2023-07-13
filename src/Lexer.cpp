@@ -4,8 +4,9 @@
 #include <vector>
 #include <string>
 
+#include "Diagnostic.hpp"
+#include "Diagnostics/LexDiagnostics.hpp"
 #include "Token.hpp"
-#include "Diagnostics.hpp"
 #include "Keyword.hpp"
 #include "String.hpp"
 #include "FileBuffer.hpp"

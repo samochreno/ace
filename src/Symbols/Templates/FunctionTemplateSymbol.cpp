@@ -6,7 +6,7 @@
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "SpecialIdentifier.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"

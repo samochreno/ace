@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "DiagnosticsBase.hpp"
+#include "DiagnosticBase.hpp"
 
 namespace Ace
 {

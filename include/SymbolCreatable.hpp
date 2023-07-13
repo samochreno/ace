@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Identifier.hpp"
 

@@ -5,7 +5,7 @@
 #include <string_view>
 #include <filesystem>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "SourceBuffer.hpp"
 #include "CLIArgBuffer.hpp"
 #include "FileBuffer.hpp"

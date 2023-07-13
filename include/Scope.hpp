@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <tuple>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Name.hpp"
 #include "SymbolCategory.hpp"
 #include "Identifier.hpp"

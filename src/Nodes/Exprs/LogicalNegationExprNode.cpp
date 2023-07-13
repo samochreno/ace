@@ -5,7 +5,7 @@
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/LogicalNegationExprBoundNode.hpp"
 
 namespace Ace

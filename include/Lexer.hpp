@@ -5,7 +5,7 @@
 #include <string_view>
 
 #include "Token.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Measured.hpp"
 #include "FileBuffer.hpp"
 

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

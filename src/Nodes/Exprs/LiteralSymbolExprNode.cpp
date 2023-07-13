@@ -5,7 +5,7 @@
 
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/VarReferences/StaticVarReferenceExprBoundNode.hpp"
 #include "Symbols/Vars/VarSymbol.hpp"
 

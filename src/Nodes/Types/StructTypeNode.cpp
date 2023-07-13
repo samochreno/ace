@@ -9,7 +9,7 @@
 #include "Nodes/AttributeNode.hpp"
 #include "Nodes/Vars/InstanceVarNode.hpp"
 #include "BoundNodes/Types/StructTypeBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
 #include "Symbols/Symbol.hpp"
 

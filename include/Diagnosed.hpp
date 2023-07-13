@@ -4,7 +4,7 @@
 #include <vector>
 #include <type_traits>
 
-#include "DiagnosticsBase.hpp"
+#include "DiagnosticBase.hpp"
 #include "DiagnosticBag.hpp"
 
 namespace Ace

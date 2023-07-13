@@ -9,7 +9,7 @@
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "Scope.hpp"
 #include "Assert.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

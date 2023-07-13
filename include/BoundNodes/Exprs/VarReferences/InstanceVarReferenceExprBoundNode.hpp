@@ -6,7 +6,7 @@
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"

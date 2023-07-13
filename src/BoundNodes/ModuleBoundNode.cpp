@@ -7,7 +7,7 @@
 #include "BoundNodes/ImplBoundNode.hpp"
 #include "BoundNodes/FunctionBoundNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace

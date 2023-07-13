@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Token.hpp"
 #include "Nodes/All.hpp"
 #include "FileBuffer.hpp"

@@ -11,7 +11,7 @@
 #include <functional>
 #include <tuple>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Measured.hpp"
 #include "Token.hpp"
 #include "Nodes/All.hpp"

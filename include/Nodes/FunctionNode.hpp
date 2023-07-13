@@ -15,7 +15,7 @@
 #include "Identifier.hpp"
 #include "Name.hpp"
 #include "AccessModifier.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
 #include "SpecialIdentifier.hpp"
 

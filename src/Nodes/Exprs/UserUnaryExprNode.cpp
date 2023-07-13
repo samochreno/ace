@@ -5,7 +5,7 @@
 
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "SpecialIdentifier.hpp"
 #include "BoundNodes/Exprs/UserUnaryExprBoundNode.hpp"
 #include "SpecialIdentifier.hpp"

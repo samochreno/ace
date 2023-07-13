@@ -9,7 +9,7 @@
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
 #include "BoundNodes/Stmts/WhileStmtBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

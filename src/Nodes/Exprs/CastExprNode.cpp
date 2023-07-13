@@ -5,7 +5,7 @@
 
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "TypeInfo.hpp"

@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "Assert.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

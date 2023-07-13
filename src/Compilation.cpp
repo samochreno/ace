@@ -9,7 +9,8 @@
 
 #include <llvm/IR/LLVMContext.h>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
+#include "Diagnostics/CompilationDiagnostics.hpp"
 #include "SourceBuffer.hpp"
 #include "FileBuffer.hpp"
 #include "CLIArgBuffer.hpp"

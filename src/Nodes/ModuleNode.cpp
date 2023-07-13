@@ -15,7 +15,7 @@
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "Nodes/Vars/StaticVarNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/ModuleBoundNode.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/ModuleSymbol.hpp"

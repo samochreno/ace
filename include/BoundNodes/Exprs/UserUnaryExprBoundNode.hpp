@@ -8,7 +8,7 @@
 #include "Scope.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "TypeInfo.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Assert.hpp"
 #include "ExprEmitResult.hpp"

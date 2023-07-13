@@ -5,7 +5,7 @@
 #include <type_traits>
 
 #include "Assert.hpp"
-#include "DiagnosticsBase.hpp"
+#include "DiagnosticBase.hpp"
 
 namespace Ace
 {

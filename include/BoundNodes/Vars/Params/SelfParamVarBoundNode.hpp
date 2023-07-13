@@ -8,7 +8,7 @@
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace

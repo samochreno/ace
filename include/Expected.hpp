@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <algorithm>
 
-#include "DiagnosticsBase.hpp"
+#include "DiagnosticBase.hpp"
 #include "DiagnosticBag.hpp"
 #include "Assert.hpp"
 #include "MaybeChanged.hpp"

@@ -8,7 +8,7 @@
 #include "Scope.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Stmts/ReturnStmtBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

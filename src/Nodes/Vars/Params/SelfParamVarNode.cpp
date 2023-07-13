@@ -8,7 +8,7 @@
 #include "Name.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Nodes/AttributeNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/Vars/Params/SelfParamVarBoundNode.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Symbols/Symbol.hpp"

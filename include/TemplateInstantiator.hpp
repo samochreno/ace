@@ -3,7 +3,7 @@
 #include <memory>
 #include <map>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

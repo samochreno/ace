@@ -10,7 +10,7 @@
 #include <llvm/Support/TargetSelect.h>
 
 #include "Log.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "FileBuffer.hpp"
 #include "Compilation.hpp"

@@ -6,7 +6,8 @@
 #include <filesystem>
 #include <fstream>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
+#include "Diagnostics/FileSystemDiagnostics.hpp"
 
 namespace Ace
 {

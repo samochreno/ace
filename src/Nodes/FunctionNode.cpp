@@ -12,7 +12,7 @@
 #include "Nodes/Vars/Params/SelfParamVarNode.hpp"
 #include "Nodes/Vars/Params/NormalParamVarNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/FunctionBoundNode.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"

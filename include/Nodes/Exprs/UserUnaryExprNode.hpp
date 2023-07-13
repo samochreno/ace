@@ -8,7 +8,7 @@
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "TokenKind.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

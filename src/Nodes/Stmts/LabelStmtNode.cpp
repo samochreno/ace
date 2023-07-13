@@ -6,7 +6,7 @@
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Identifier.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Symbols/Symbol.hpp"

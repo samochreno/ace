@@ -2,7 +2,6 @@
 
 ## 🛠️ Refactor
 
-- Expression parsing
 - `CompoundAssignmentStmtBoundNode` lowering
 - Variable reference emitting
 - Remove `t_` prefix from parameter names

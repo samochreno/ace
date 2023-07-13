@@ -9,7 +9,7 @@
 #include "Scope.hpp"
 #include "Identifier.hpp"
 #include "AccessModifier.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Emittable.hpp"
 
 namespace Ace

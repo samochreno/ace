@@ -7,7 +7,7 @@
 #include "Nodes/AttributeNode.hpp"
 #include "Nodes/Vars/InstanceVarNode.hpp"
 #include "BoundNodes/Types/StructTypeBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Identifier.hpp"

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/AttributeBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace

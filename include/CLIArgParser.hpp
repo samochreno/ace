@@ -5,7 +5,7 @@
 #include <optional>
 #include <map>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "CLIArgBuffer.hpp"
 
 namespace Ace

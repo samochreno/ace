@@ -7,7 +7,7 @@
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Assert.hpp"
 

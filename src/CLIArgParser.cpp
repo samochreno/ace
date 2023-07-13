@@ -5,7 +5,8 @@
 #include <optional>
 #include <map>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
+#include "Diagnostics/CLIArgDiagnostics.hpp"
 #include "CLIArgBuffer.hpp"
 #include "SourceLocation.hpp"
 
@@ -113,7 +114,7 @@ namespace Ace
             end  (t_parser.Peek()),
         };
 
-        return diagnosticBag.Add(CreateMissingCommandLineOptionNameError(
+        return diagnosticBag.Add(CreateMissingCLIOptionNameError(
             sourceLocation
         ));
     }
@@ -138,7 +139,7 @@ namespace Ace
                 end  (t_parser.Peek()),
             };
 
-            return diagnosticBag.Add(CreateMissingCommandLineOptionValueError(
+            return diagnosticBag.Add(CreateMissingCLIOptionValueError(
                 sourceLocation
             ));
         }
@@ -155,7 +156,7 @@ namespace Ace
                 end  (t_optValue.value()),
             };
 
-            return diagnosticBag.Add(CreateUnexpectedCommandLineOptionValueError(
+            return diagnosticBag.Add(CreateUnexpectedCLIOptionValueError(
                 sourceLocation
             ));
         }
@@ -200,7 +201,7 @@ namespace Ace
                 end  (name),
             };
 
-            diagnosticBag.Add(CreateUnknownCommandLineOptionNameError(
+            diagnosticBag.Add(CreateUnknownCLIOptionNameError(
                 sourceLocation
             ));
         }
@@ -295,7 +296,7 @@ namespace Ace
                 end  (name),
             };
 
-            diagnosticBag.Add(CreateUnknownCommandLineOptionNameError(
+            diagnosticBag.Add(CreateUnknownCLIOptionNameError(
                 sourceLocation
             ));
         }

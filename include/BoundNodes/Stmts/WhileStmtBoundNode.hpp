@@ -8,7 +8,7 @@
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Assert.hpp"
 

@@ -16,7 +16,7 @@
 #include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 

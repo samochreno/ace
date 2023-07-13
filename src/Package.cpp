@@ -11,7 +11,10 @@
 #include <iterator>
 #include <nlohmann/json.hpp>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
+#include "Diagnostics/CompilationDiagnostics.hpp"
+#include "Diagnostics/FileSystemDiagnostics.hpp"
+#include "Diagnostics/JsonDiagnostics.hpp"
 #include "String.hpp"
 #include "Compilation.hpp"
 

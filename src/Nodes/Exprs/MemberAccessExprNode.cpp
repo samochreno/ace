@@ -6,7 +6,7 @@
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "BoundNodes/Exprs/VarReferences/InstanceVarReferenceExprBoundNode.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 

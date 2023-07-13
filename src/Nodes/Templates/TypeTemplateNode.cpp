@@ -5,7 +5,7 @@
 
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "Nodes/TemplateParams/NormalTemplateParamNode.hpp"

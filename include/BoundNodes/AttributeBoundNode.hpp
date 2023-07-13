@@ -6,7 +6,7 @@
 #include "BoundNodes/BoundNode.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace

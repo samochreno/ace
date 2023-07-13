@@ -12,7 +12,7 @@
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace

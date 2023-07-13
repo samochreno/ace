@@ -10,7 +10,7 @@
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
 #include "Scope.hpp"
 #include "Symbols/ModuleSymbol.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace

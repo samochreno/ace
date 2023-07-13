@@ -7,7 +7,7 @@
 #include "BoundNodes/Exprs/AddressOfExprBoundNode.hpp"
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

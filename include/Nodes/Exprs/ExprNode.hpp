@@ -5,7 +5,7 @@
 #include "Nodes/Node.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Scope.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {

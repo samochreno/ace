@@ -9,7 +9,7 @@
 #include "Compilation.hpp"
 #include "Scope.hpp"
 #include "SymbolCreatable.hpp"
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "Assert.hpp"
 
 namespace Ace

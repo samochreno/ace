@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostics.hpp"
+#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "BoundNodes/Exprs/ReferenceExprBoundNode.hpp"
 #include "BoundNodes/Exprs/DereferenceExprBoundNode.hpp"
