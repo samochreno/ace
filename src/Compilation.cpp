@@ -149,6 +149,11 @@ namespace Ace
         self->LLVMContext = std::make_unique<llvm::LLVMContext>();
         self->GlobalDiagnosticBag = std::make_unique<Ace::GlobalDiagnosticBag>();
 
+        if (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error)
+        {
+            return diagnosticBag;
+        }
+
         return
         {
             std::unique_ptr<const Compilation>{ std::move(self) },

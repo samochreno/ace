@@ -8,7 +8,6 @@
 - Remove `t_` prefix from parameter names
 - ❓ Remove `ACE_TRY` macros
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
-- Make it so `Application.cpp` doesn't have to check severity
 
 ## 💥 High Priority
 

@@ -611,10 +611,7 @@ namespace Ace::Application
             t_args
         );
         diagnosticBag.Add(expCompilation);
-        if (
-            !expCompilation ||
-            (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error)
-            )
+        if (!expCompilation)
         {
             GlobalDiagnosticBag{}.Add(expCompilation);
             return diagnosticBag;
@@ -627,7 +624,7 @@ namespace Ace::Application
 
         const auto expDidCompile = Compile(expCompilation.Unwrap().get());
         diagnosticBag.Add(expDidCompile);
-        if (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error)
+        if (!expDidCompile)
         {
             Log << CreateIndent() << termcolor::bright_red << "Failed";
             Log << termcolor::reset << " to compile\n";
@@ -636,10 +633,14 @@ namespace Ace::Application
             return diagnosticBag;
         }
 
-
         Log << CreateIndent() << termcolor::bright_green << "Finished";
         Log << termcolor::reset << " compilation\n";
         IndentLevel++;
+
+        if (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error)
+        {
+            return diagnosticBag;
+        }
 
         return Void{ diagnosticBag };
     }

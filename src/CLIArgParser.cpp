@@ -398,9 +398,7 @@ namespace Ace
         };
 
         auto optionMap = CreateDefaultOptionMap(parser);
-
         std::vector<std::string_view> positionalArgs{};
-
         while (!parser.IsEnd())
         {
             if (!parser.Peek().starts_with('-'))
