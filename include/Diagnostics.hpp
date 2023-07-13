@@ -13,11 +13,6 @@ namespace Ace
 {
     class FileBuffer;
 
-    auto CreateMissingPackagePathArgError() -> std::shared_ptr<const Diagnostic>;
-    auto CreateMultiplePackagePathArgsError(
-        const SourceLocation& t_sourceLocation
-    ) -> std::shared_ptr<const Diagnostic>;
-
     auto CreateMissingCommandLineOptionNameError(
         const SourceLocation& t_sourceLocation
     ) -> std::shared_ptr<const Diagnostic>;
@@ -36,6 +31,10 @@ namespace Ace
         const nlohmann::json::exception& t_jsonException
     ) -> std::shared_ptr<const Diagnostic>;
 
+    auto CreateMissingPackagePathArgError() -> std::shared_ptr<const Diagnostic>;
+    auto CreateMultiplePackagePathArgsError(
+        const SourceLocation& t_sourceLocation
+    ) -> std::shared_ptr<const Diagnostic>;
     auto CreateUnexpectedPackagePropertyWarning(
         const FileBuffer* const t_packageFileBuffer,
         const std::string& t_propertyName

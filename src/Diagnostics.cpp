@@ -11,26 +11,6 @@
 
 namespace Ace
 {
-    auto CreateMissingPackagePathArgError() -> std::shared_ptr<const Diagnostic>
-    {
-        return std::make_shared<const Diagnostic>(
-            DiagnosticSeverity::Error,
-            std::nullopt,
-            "missing package path argument"
-        );
-    }
-
-    auto CreateMultiplePackagePathArgsError(
-        const SourceLocation& t_sourceLocation
-    ) -> std::shared_ptr<const Diagnostic>
-    {
-        return std::make_shared<const Diagnostic>(
-            DiagnosticSeverity::Error,
-            t_sourceLocation,
-            "multiple package path arguments"
-        );
-    }
-
     auto CreateMissingCommandLineOptionNameError(
         const SourceLocation& t_sourceLocation
     ) -> std::shared_ptr<const Diagnostic>
@@ -162,6 +142,26 @@ namespace Ace
             DiagnosticSeverity::Error,
             sourceLocation,
             message
+        );
+    }
+
+    auto CreateMissingPackagePathArgError() -> std::shared_ptr<const Diagnostic>
+    {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            std::nullopt,
+            "missing package path argument"
+        );
+    }
+
+    auto CreateMultiplePackagePathArgsError(
+        const SourceLocation& t_sourceLocation
+    ) -> std::shared_ptr<const Diagnostic>
+    {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            t_sourceLocation,
+            "multiple package path arguments"
         );
     }
 

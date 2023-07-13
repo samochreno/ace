@@ -8,20 +8,20 @@
 
 namespace Ace
 {
-    class CommandLineArgBuffer : public virtual ISourceBuffer
+    class CLIArgBuffer : public virtual ISourceBuffer
     {
     public:
-        CommandLineArgBuffer() = default;
-        CommandLineArgBuffer(const CommandLineArgBuffer&) = delete;
-        CommandLineArgBuffer(CommandLineArgBuffer&&) = default;
-        CommandLineArgBuffer(
+        CLIArgBuffer() = default;
+        CLIArgBuffer(const CLIArgBuffer&) = delete;
+        CLIArgBuffer(CLIArgBuffer&&) = default;
+        CLIArgBuffer(
             const Compilation* const t_compilation,
             const std::vector<std::string_view>& t_args
         );
-        ~CommandLineArgBuffer() = default;
+        ~CLIArgBuffer() = default;
 
-        auto operator=(const CommandLineArgBuffer&) -> CommandLineArgBuffer& = delete;
-        auto operator=(CommandLineArgBuffer&&) -> CommandLineArgBuffer& = default;
+        auto operator=(const CLIArgBuffer&) -> CLIArgBuffer& = delete;
+        auto operator=(CLIArgBuffer&&) -> CLIArgBuffer& = default;
 
         auto GetCompilation() const -> const Compilation*;
         auto GetBuffer() const -> const std::string& final;
