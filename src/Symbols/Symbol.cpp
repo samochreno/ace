@@ -116,7 +116,7 @@ namespace Ace
         return signature;
     }
 
-    auto ISymbol::CreateFullyQualifiedName() const ->SymbolName 
+    auto ISymbol::CreateFullyQualifiedName() const -> SymbolName 
     {
         auto* const symbol = UnwrapAlias(this);
         if (symbol != this)
