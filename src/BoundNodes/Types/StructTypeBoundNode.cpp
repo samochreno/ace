@@ -3,21 +3,31 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
-#include "MaybeChanged.hpp"
+#include "SourceLocation.hpp"
+#include "Symbols/Types/StructTypeSymbol.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
+#include "Scope.hpp"
+#include "Diagnostic.hpp"
+#include "MaybeChanged.hpp"
 
 namespace Ace
 {
     StructTypeBoundNode::StructTypeBoundNode(
+        const SourceLocation& t_sourceLocation,
         StructTypeSymbol* const t_symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes,
         const std::vector<std::shared_ptr<const InstanceVarBoundNode>>& t_variables
-    ) : m_Symbol{ t_symbol },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Symbol{ t_symbol },
         m_Attributes{ t_attributes },
         m_Vars{ t_variables }
     {
+    }
+
+    auto StructTypeBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto StructTypeBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -60,6 +70,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StructTypeBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchCheckedAttributes.Value,
             mchCheckedVars.Value
@@ -98,6 +109,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StructTypeBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchLoweredAttributes.Value,
             mchLoweredVars.Value

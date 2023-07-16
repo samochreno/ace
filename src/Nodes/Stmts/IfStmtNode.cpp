@@ -102,7 +102,8 @@ namespace Ace
         }));
 
         return std::make_shared<const IfStmtBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             boundConditions,
             boundBodies
         );

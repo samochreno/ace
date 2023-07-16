@@ -5,6 +5,8 @@
 
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "Symbols/Vars/StaticVarSymbol.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "Symbols/Vars/Params/ParamVarSymbol.hpp"
@@ -20,6 +22,21 @@
 
 namespace Ace
 {
+    StaticVarReferenceExprBoundNode::StaticVarReferenceExprBoundNode(
+        const SourceLocation& t_sourceLocation,
+        const std::shared_ptr<Scope>& t_scope,
+        IVarSymbol* const t_variableSymbol
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
+        m_VarSymbol{ t_variableSymbol }
+    {
+    }
+
+    auto StaticVarReferenceExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
+    }
+
     auto StaticVarReferenceExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;
@@ -80,5 +97,10 @@ namespace Ace
     auto StaticVarReferenceExprBoundNode::GetTypeInfo() const -> TypeInfo
     {
         return { m_VarSymbol->GetType(), ValueKind::L };
+    }
+
+    auto StaticVarReferenceExprBoundNode::GetVarSymbol() const -> IVarSymbol*
+    {
+        return m_VarSymbol;
     }
 }

@@ -5,6 +5,7 @@
 #include <string>
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "LiteralKind.hpp"
 #include "TypeInfo.hpp"
@@ -22,12 +23,14 @@ namespace Ace
     {
     public:
         LiteralExprBoundNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
             const LiteralKind t_kind,
             const std::string& t_string
         );
         virtual ~LiteralExprBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -47,6 +50,7 @@ namespace Ace
         auto GetTypeInfo() const -> TypeInfo final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
         LiteralKind m_Kind{};
         std::string m_String{};

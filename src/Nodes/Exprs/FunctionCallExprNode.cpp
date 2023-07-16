@@ -102,13 +102,15 @@ namespace Ace
             return std::shared_ptr<const IExprBoundNode>
             {
                 std::make_shared<const StaticFunctionCallExprBoundNode>(
+                    GetSourceLocation(),
                     GetScope(),
                     functionSymbol,
                     boundArgs
                 )
             };
         }
-        else if (const auto* const memberAccess = dynamic_cast<const MemberAccessExprNode*>(m_Expr.get()))
+        
+        if (const auto* const memberAccess = dynamic_cast<const MemberAccessExprNode*>(m_Expr.get()))
         {
             ACE_TRY(boundExpr, memberAccess->GetExpr()->CreateBoundExpr());
 
@@ -121,6 +123,7 @@ namespace Ace
             return std::shared_ptr<const IExprBoundNode>
             {
                 std::make_shared<const InstanceFunctionCallExprBoundNode>(
+                    GetSourceLocation(),
                     boundExpr,
                     functionSymbol,
                     boundArgs

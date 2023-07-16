@@ -89,6 +89,7 @@ namespace Ace
         ).Unwrap();
 
         return std::make_shared<const StaticVarBoundNode>(
+            GetSourceLocation(),
             selfSymbol,
             boundAttributes
         );

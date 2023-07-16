@@ -95,6 +95,7 @@ namespace Ace
         }));
 
         return std::make_shared<const ImplBoundNode>(
+            GetSourceLocation(),
             GetScope(),
             boundFunctions
         );

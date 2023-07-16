@@ -1,18 +1,27 @@
 #include "BoundNodes/Exprs/ConversionPlaceholderExprBoundNode.hpp"
 
 #include <memory>
+#include <vector>
 
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 
 namespace Ace
 {
     ConversionPlaceholderExprBoundNode::ConversionPlaceholderExprBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const TypeInfo& t_typeInfo
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_TypeInfo{ t_typeInfo }
     {
+    }
+
+    auto ConversionPlaceholderExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto ConversionPlaceholderExprBoundNode::GetScope() const -> std::shared_ptr<Scope>

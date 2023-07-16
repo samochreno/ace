@@ -80,6 +80,7 @@ namespace Ace
         }));
 
         return std::make_shared<const BlockStmtBoundNode>(
+            GetSourceLocation(),
             m_SelfScope,
             boundStmts
         );

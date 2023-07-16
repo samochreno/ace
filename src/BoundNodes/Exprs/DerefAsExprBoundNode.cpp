@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Diagnostic.hpp"
@@ -14,11 +15,18 @@
 namespace Ace
 {
     DerefAsExprBoundNode::DerefAsExprBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_expr,
         ITypeSymbol* const t_typeSymbol
-    ) : m_TypeSymbol{ t_typeSymbol },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_TypeSymbol{ t_typeSymbol },
         m_Expr{ t_expr }
     {
+    }
+
+    auto DerefAsExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto DerefAsExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -54,6 +62,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const DerefAsExprBoundNode>(
+            GetSourceLocation(),
             m_Expr,
             m_TypeSymbol
         ));
@@ -70,8 +79,7 @@ namespace Ace
         const LoweringContext& t_context
     ) const -> MaybeChanged<std::shared_ptr<const DerefAsExprBoundNode>>
     {
-        const auto mchLoweredExpr =
-            m_Expr->GetOrCreateLoweredExpr({});
+        const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
         if (!mchLoweredExpr.IsChanged)
         {
@@ -79,6 +87,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const DerefAsExprBoundNode>(
+            GetSourceLocation(),
             m_Expr,
             m_TypeSymbol
         )->GetOrCreateLowered({}).Value);

@@ -8,6 +8,7 @@
 #include "AccessModifier.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Types/Aliases/TemplateArgs/NormalTemplateArgAliasTypeSymbol.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "Application.hpp"
 
 namespace Ace

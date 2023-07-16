@@ -70,6 +70,7 @@ namespace Ace
         ));
 
         return std::make_shared<const InstanceVarReferenceExprBoundNode>(
+            GetSourceLocation(),
             boundExpr,
             memberSymbol
         );

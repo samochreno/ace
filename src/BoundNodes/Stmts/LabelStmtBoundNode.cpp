@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
@@ -10,9 +12,16 @@
 namespace Ace
 {
     LabelStmtBoundNode::LabelStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         LabelSymbol* const t_symbol
-    ) : m_Symbol{ t_symbol }
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Symbol{ t_symbol }
     {
+    }
+
+    auto LabelStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto LabelStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>

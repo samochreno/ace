@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
@@ -12,9 +14,16 @@
 namespace Ace
 {
     BlockEndStmtBoundNode::BlockEndStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_selfScope
-    ) : m_SelfScope{ t_selfScope }
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_SelfScope{ t_selfScope }
     {
+    }
+
+    auto BlockEndStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto BlockEndStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>

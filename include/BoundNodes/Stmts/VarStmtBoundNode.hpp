@@ -7,6 +7,7 @@
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -23,11 +24,13 @@ namespace Ace
     {
     public:
         VarStmtBoundNode(
+            const SourceLocation& t_sourceLocation,
             LocalVarSymbol* const t_symbol,
             const std::optional<std::shared_ptr<const IExprBoundNode>>& t_optAssignedExpr
         );
         virtual ~VarStmtBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -47,6 +50,7 @@ namespace Ace
         auto GetSymbol() const -> LocalVarSymbol* final;
         
     private:
+        SourceLocation m_SourceLocation{};
         LocalVarSymbol* m_Symbol{};
         std::optional<std::shared_ptr<const IExprBoundNode>> m_OptAssignedExpr{};
     };

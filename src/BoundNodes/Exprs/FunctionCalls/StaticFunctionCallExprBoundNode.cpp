@@ -4,6 +4,8 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
@@ -14,13 +16,20 @@
 namespace Ace
 {
     StaticFunctionCallExprBoundNode::StaticFunctionCallExprBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         FunctionSymbol* const t_functionSymbol,
         const std::vector<std::shared_ptr<const IExprBoundNode>>& t_args
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_FunctionSymbol{ t_functionSymbol },
         m_Args{ t_args }
     {
+    }
+
+    auto StaticFunctionCallExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto StaticFunctionCallExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -55,7 +64,8 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             m_FunctionSymbol,
             mchConvertedAndCheckedArgs.Value
         ));
@@ -84,7 +94,8 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             m_FunctionSymbol,
             mchLoweredArgs.Value
         )->GetOrCreateLowered({}).Value);

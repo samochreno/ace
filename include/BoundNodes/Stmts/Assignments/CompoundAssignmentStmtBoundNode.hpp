@@ -6,6 +6,7 @@
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Stmts/GroupStmtBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Diagnostic.hpp"
@@ -22,12 +23,14 @@ namespace Ace
     {
     public:
         CompoundAssignmentStmtBoundNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprBoundNode>& t_lhsExpr,
             const std::shared_ptr<const IExprBoundNode>& t_rhsExpr,
             FunctionSymbol* const t_operatorSymbol
         );
         virtual ~CompoundAssignmentStmtBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -45,6 +48,7 @@ namespace Ace
         auto Emit(Emitter& t_emitter) const -> void final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprBoundNode> m_LHSExpr{};
         std::shared_ptr<const IExprBoundNode> m_RHSExpr{};
         FunctionSymbol* m_OperatorSymbol{};

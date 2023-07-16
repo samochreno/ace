@@ -352,10 +352,12 @@ namespace Ace::GlueGeneration
 
         const auto paramSymbols = t_glueSymbol->CollectParams();
         const auto selfParamReferenceExprNode = std::make_shared<const StaticVarReferenceExprBoundNode>(
+            SourceLocation{},
             bodyScope,
             paramSymbols.at(0)
         );
         const auto otherParamReferenceExprNode = std::make_shared<const StaticVarReferenceExprBoundNode>(
+            SourceLocation{},
             bodyScope,
             paramSymbols.at(1)
         );
@@ -373,12 +375,14 @@ namespace Ace::GlueGeneration
             args.push_back(otherParamReferenceExprNode);
 
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
+                SourceLocation{},
                 bodyScope,
                 expOperatorSymbol.Unwrap(),
                 args
             );
 
             const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
+                SourceLocation{},
                 functionCallExprNode
             );
 
@@ -397,10 +401,12 @@ namespace Ace::GlueGeneration
                 ).Unwrap();
                 
                 const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
+                    SourceLocation{},
                     selfParamReferenceExprNode,
                     t_variableSymbol
                 );
                 const auto otherParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
+                    SourceLocation{},
                     otherParamReferenceExprNode,
                     t_variableSymbol
                 );
@@ -410,12 +416,14 @@ namespace Ace::GlueGeneration
                 args.push_back(otherParamVarRerefenceExprNode);
 
                 const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
+                    SourceLocation{},
                     bodyScope,
                     variableTypeGlueSymbol,
                     args
                 );
 
                 const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
+                    SourceLocation{},
                     functionCallExprNode
                 );
 
@@ -424,6 +432,7 @@ namespace Ace::GlueGeneration
         }
 
         const auto bodyNode = std::make_shared<const BlockStmtBoundNode>(
+            SourceLocation{},
             bodyScope->GetParent().value(),
             stmts
         );
@@ -463,6 +472,7 @@ namespace Ace::GlueGeneration
 
         const auto paramSymbols = t_glueSymbol->CollectParams();
         const auto selfParamReferenceExprNode = std::make_shared<const StaticVarReferenceExprBoundNode>(
+            SourceLocation{},
             bodyScope,
             paramSymbols.at(0)
         );
@@ -480,12 +490,14 @@ namespace Ace::GlueGeneration
             args.push_back(selfParamReferenceExprNode);
 
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
+                SourceLocation{},
                 bodyScope,
                 expOperatorSymbol.Unwrap(),
                 args
             );
 
             const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
+                SourceLocation{},
                 functionCallExprNode
             );
 
@@ -503,6 +515,7 @@ namespace Ace::GlueGeneration
             ).Unwrap();
             
             const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
+                SourceLocation{},
                 selfParamReferenceExprNode,
                 t_variableSymbol
             );
@@ -511,12 +524,14 @@ namespace Ace::GlueGeneration
             args.push_back(selfParamVarRerefenceExprNode);
 
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
+                SourceLocation{},
                 bodyScope,
                 variableTypeGlueSymbol,
                 args
             );
 
             const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
+                SourceLocation{},
                 functionCallExprNode
             );
 
@@ -524,6 +539,7 @@ namespace Ace::GlueGeneration
         });
 
         const auto bodyNode = std::make_shared<const BlockStmtBoundNode>(
+            SourceLocation{},
             bodyScope->GetParent().value(),
             stmts
         );

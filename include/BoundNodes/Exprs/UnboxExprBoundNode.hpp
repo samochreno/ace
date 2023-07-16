@@ -5,6 +5,7 @@
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "Diagnostic.hpp"
@@ -21,10 +22,12 @@ namespace Ace
     {
     public:
         UnboxExprBoundNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprBoundNode>& t_expr
         );
         virtual ~UnboxExprBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -44,6 +47,7 @@ namespace Ace
         auto GetTypeInfo() const -> TypeInfo final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprBoundNode> m_Expr{};
     };
 }

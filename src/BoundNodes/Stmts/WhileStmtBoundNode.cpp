@@ -3,13 +3,14 @@
 #include <memory>
 #include <vector>
 
-#include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/GroupStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/Jumps/NormalJumpStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/Jumps/ConditionalJumpStmtBoundNode.hpp"
-#include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
-#include "Scope.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "SpecialIdentifier.hpp"
 #include "Diagnostic.hpp"
@@ -20,13 +21,20 @@
 namespace Ace
 {
     WhileStmtBoundNode::WhileStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const std::shared_ptr<const IExprBoundNode>& t_condition,
         const std::shared_ptr<const BlockStmtBoundNode>& t_body
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_Condition{ t_condition },
         m_Body{ t_body }
     {
+    }
+
+    auto WhileStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto WhileStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -72,6 +80,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const WhileStmtBoundNode>(
+            GetSourceLocation(),
             m_Scope,
             mchConvertedAndCheckedCondition.Value,
             mchCheckedBody.Value
@@ -103,7 +112,7 @@ namespace Ace
 
         const Identifier startLabelName
         {
-            SourceLocation{}, // TODO: Fix this after adding SourceLocation to BoundNodes
+            GetSourceLocation().CreateFirst(),
             SpecialIdentifier::CreateAnonymous(),
         };
         auto startLabelSymbolOwned = std::make_unique<LabelSymbol>(
@@ -117,7 +126,7 @@ namespace Ace
 
         const Identifier continueLabelName
         {
-            SourceLocation{}, // TODO: Fix this after adding SourceLocation to BoundNodes
+            GetSourceLocation().CreateLast(),
             SpecialIdentifier::CreateAnonymous(),
         };
         auto continueLabelSymbolOwned = std::make_unique<LabelSymbol>(
@@ -132,26 +141,31 @@ namespace Ace
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
 
         stmts.push_back(std::make_shared<const NormalJumpStmtBoundNode>(
+            GetSourceLocation().CreateFirst(),
             m_Scope,
             continueLabelSymbol
         ));
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
+            startLabelSymbol->GetName().SourceLocation,
             startLabelSymbol
         ));
 
         stmts.push_back(m_Body);
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
+            continueLabelSymbol->GetName().SourceLocation,
             continueLabelSymbol
         ));
 
         stmts.push_back(std::make_shared<const ConditionalJumpStmtBoundNode>(
+            m_Condition->GetSourceLocation(),
             m_Condition,
             startLabelSymbol
         ));
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
+            GetSourceLocation(),
             m_Scope,
             stmts
         )->GetOrCreateLowered(t_context).Value);

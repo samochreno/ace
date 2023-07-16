@@ -63,6 +63,7 @@ namespace Ace
         ACE_TRY(boundLHSExpr, m_LHSExpr->CreateBoundExpr());
         ACE_TRY(boundRHSExpr, m_RHSExpr->CreateBoundExpr());
         return std::make_shared<const AndExprBoundNode>(
+            GetSourceLocation(),
             boundLHSExpr,
             boundRHSExpr
         );

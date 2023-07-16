@@ -5,6 +5,8 @@
 #include <functional>
 #include <unordered_map>
 
+#include "SourceBuffer.hpp"
+#include "Scope.hpp"
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/Jumps/NormalJumpStmtBoundNode.hpp"
@@ -23,11 +25,18 @@
 namespace Ace
 {
     BlockStmtBoundNode::BlockStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_selfScope,
         const std::vector<std::shared_ptr<const IStmtBoundNode>>& t_stmts
-    ) : m_SelfScope{ t_selfScope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_SelfScope{ t_selfScope },
         m_Stmts{ t_stmts }
     {
+    }
+
+    auto BlockStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
     
     auto BlockStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -62,6 +71,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const BlockStmtBoundNode>(
+            GetSourceLocation(),
             m_SelfScope,
             mchCheckedContent.Value
         ));
@@ -90,6 +100,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const BlockStmtBoundNode>(
+            GetSourceLocation(),
             m_SelfScope,
             mchLoweredStmts.Value
         )->GetOrCreateLowered(t_context).Value);
@@ -113,6 +124,7 @@ namespace Ace
         auto stmts = m_Stmts;
 
         const auto blockEnd = std::make_shared<const BlockEndStmtBoundNode>(
+            GetSourceLocation().CreateLast(),
             m_SelfScope
         );
         stmts.push_back(blockEnd);

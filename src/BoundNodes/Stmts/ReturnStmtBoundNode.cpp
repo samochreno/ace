@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
@@ -12,11 +14,18 @@
 namespace Ace
 {
     ReturnStmtBoundNode::ReturnStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const std::optional<std::shared_ptr<const IExprBoundNode>>& t_optExpr
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_OptExpr{ t_optExpr }
     {
+    }
+
+    auto ReturnStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto ReturnStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -73,7 +82,8 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ReturnStmtBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             mchCheckedOptExpr.Value
         ));
     }
@@ -101,7 +111,8 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ReturnStmtBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             mchLoweredOptExpr.Value
         )->GetOrCreateLowered(t_context).Value);
     }

@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Diagnostic.hpp"
@@ -15,9 +17,16 @@
 namespace Ace
 {
     UnboxExprBoundNode::UnboxExprBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_expr
-    ) : m_Expr{ t_expr }
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr }
     {
+    }
+
+    auto UnboxExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto UnboxExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -67,6 +76,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const UnboxExprBoundNode>(
+            GetSourceLocation(),
             mchCheckedAndConvertedExpr.Value
         ));
     }
@@ -95,6 +105,7 @@ namespace Ace
         ACE_ASSERT(functionSymbol);
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
+            GetSourceLocation(),
             GetScope(),
             functionSymbol,
             std::vector{ mchLoweredExpr.Value }

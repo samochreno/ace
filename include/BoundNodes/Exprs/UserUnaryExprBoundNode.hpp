@@ -5,6 +5,7 @@
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "TypeInfo.hpp"
@@ -23,11 +24,13 @@ namespace Ace
     {
     public:
         UserUnaryExprBoundNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprBoundNode>& t_expr,
             FunctionSymbol* const t_operatorSymbol
         );
         virtual ~UserUnaryExprBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -47,6 +50,7 @@ namespace Ace
         auto GetTypeInfo() const -> TypeInfo final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprBoundNode> m_Expr{};
         FunctionSymbol* m_OperatorSymbol{};
     };

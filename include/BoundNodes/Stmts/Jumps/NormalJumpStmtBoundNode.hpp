@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/Stmts/Jumps/JumpStmtBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Diagnostic.hpp"
@@ -19,11 +20,13 @@ namespace Ace
     {
     public:
         NormalJumpStmtBoundNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
             LabelSymbol* const t_labelSymbol
         );
         virtual ~NormalJumpStmtBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -43,6 +46,7 @@ namespace Ace
         auto GetLabelSymbol() const -> LabelSymbol* final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
         LabelSymbol* m_LabelSymbol{};
     };

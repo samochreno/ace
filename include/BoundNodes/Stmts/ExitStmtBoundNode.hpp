@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -17,9 +18,13 @@ namespace Ace
         public virtual ILowerableBoundNode<ExitStmtBoundNode>
     {
     public:
-        ExitStmtBoundNode(const std::shared_ptr<Scope>& t_scope);
+        ExitStmtBoundNode(
+            const SourceLocation& t_sourceLocation,
+            const std::shared_ptr<Scope>& t_scope
+        );
         virtual ~ExitStmtBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -37,6 +42,7 @@ namespace Ace
         auto Emit(Emitter& t_emitter) const -> void final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
     };
 }

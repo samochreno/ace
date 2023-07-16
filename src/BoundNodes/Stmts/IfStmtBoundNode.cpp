@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/GroupStmtBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
@@ -23,6 +25,7 @@
 namespace Ace
 {
     IfStmtBoundNode::IfStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const std::vector<std::shared_ptr<const IExprBoundNode>>& t_conditions,
         const std::vector<std::shared_ptr<const BlockStmtBoundNode>>& t_bodies
@@ -30,6 +33,11 @@ namespace Ace
         m_Conditions{ t_conditions },
         m_Bodies{ t_bodies }
     {
+    }
+
+    auto IfStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto IfStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -79,7 +87,8 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const IfStmtBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             mchConvertedAndCheckedConditions.Value,
             mchCheckedBodies.Value
         ));
@@ -119,16 +128,36 @@ namespace Ace
         // body_2;
         // 
         // label_2:
-
+        
         const bool hasElse = m_Bodies.size() > m_Conditions.size();
 
+        const auto lastBody = m_Bodies.back();
+
         std::vector<LabelSymbol*> labelSymbols{};
-        const size_t labelCount = m_Conditions.size() + (hasElse ? 1 : 0);
+
+        const size_t labelCount = hasElse ?
+            (m_Conditions.size() + 1) :
+            (m_Conditions.size());
+
         for (size_t i = 0; i < labelCount; i++)
         {
+            const auto labelSourceLocation = [&]()
+            {
+                if (i == (labelCount - 1))
+                {
+                    return lastBody->GetSourceLocation().CreateFirst();
+                }
+
+                if (hasElse && (i == (labelCount - 2)))
+                {
+                    return lastBody->GetSourceLocation().CreateLast();
+                }
+
+                return m_Conditions.at(i + 1)->GetSourceLocation();
+            }();
             const Identifier labelName
             {
-                SourceLocation{}, // TODO: Fix this after adding SourceLocation to BoundNodes
+                labelSourceLocation,
                 SpecialIdentifier::CreateAnonymous()
             };
             auto labelSymbolOwned = std::make_unique<LabelSymbol>(
@@ -143,6 +172,8 @@ namespace Ace
             labelSymbols.push_back(labelSymbol);
         }
 
+        auto* const lastLabelSymbol = labelSymbols.back();
+
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
 
         for (size_t i = 0; i < m_Conditions.size(); i++)
@@ -152,45 +183,56 @@ namespace Ace
 
             if (!isFirstBody)
             {
+                auto* const labelSymbol = labelSymbols.at(i - 1);
                 stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-                    labelSymbols.at(i - 1)
+                    labelSymbol->GetName().SourceLocation,
+                    labelSymbol
                 ));
             }
 
             const auto condition = std::make_shared<const LogicalNegationExprBoundNode>(
+                m_Conditions.at(i)->GetSourceLocation(),
                 m_Conditions.at(i)
             );
 
             stmts.push_back(std::make_shared<const ConditionalJumpStmtBoundNode>(
+                condition->GetSourceLocation(),
                 condition,
                 labelSymbols.at(i)
             ));
 
-            stmts.push_back(m_Bodies.at(i));
+            const auto body = m_Bodies.at(i);
+            stmts.push_back(body);
 
             if (!isLastBody)
             {
                 stmts.push_back(std::make_shared<const NormalJumpStmtBoundNode>(
-                    m_Scope,
-                    labelSymbols.back()
+                    body->GetSourceLocation().CreateLast(),
+                    GetScope(),
+                    lastLabelSymbol
                 ));
             }
         }
 
         if (hasElse)
         {
+            auto* const elseLabelSymbol = labelSymbols.rbegin()[1];
+
             stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-                labelSymbols.rbegin()[1]
+                elseLabelSymbol->GetName().SourceLocation,
+                elseLabelSymbol
             ));
 
-            stmts.push_back(m_Bodies.back());
+            stmts.push_back(lastBody);
         }
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-            labelSymbols.back()
+            lastLabelSymbol->GetName().SourceLocation,
+            lastLabelSymbol
         ));
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
+            GetSourceLocation(),
             m_Scope,
             stmts
         )->GetOrCreateLowered(t_context).Value);

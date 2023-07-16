@@ -57,7 +57,10 @@ namespace Ace
     auto ExprExprNode::CreateBound() const -> Expected<std::shared_ptr<const ExprExprBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
-        return std::make_shared<const ExprExprBoundNode>(boundExpr);
+        return std::make_shared<const ExprExprBoundNode>(
+            GetSourceLocation(),
+            boundExpr
+        );
     }
 
     auto ExprExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>

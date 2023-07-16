@@ -3,15 +3,25 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
 {
     SelfParamVarBoundNode::SelfParamVarBoundNode(
+        const SourceLocation& t_sourceLocation,
         SelfParamVarSymbol* const t_symbol
-    ) : m_Symbol{ t_symbol }
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Symbol{ t_symbol }
     {
+    }
+
+    auto SelfParamVarBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto SelfParamVarBoundNode::GetScope() const -> std::shared_ptr<Scope>

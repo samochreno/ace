@@ -4,6 +4,8 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Diagnostic.hpp"
@@ -13,11 +15,18 @@
 namespace Ace
 {
     UserUnaryExprBoundNode::UserUnaryExprBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_expr,
         FunctionSymbol* const t_operatorSymbol
-    ) : m_Expr{ t_expr },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr },
         m_OperatorSymbol{ t_operatorSymbol }
     {
+    }
+
+    auto UserUnaryExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto UserUnaryExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -46,6 +55,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const UserUnaryExprBoundNode>(
+            GetSourceLocation(),
             mchCheckedExpr.Value,
             m_OperatorSymbol
         ));
@@ -65,6 +75,7 @@ namespace Ace
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
+            GetSourceLocation(),
             GetScope(),
             m_OperatorSymbol,
             std::vector{ mchLoweredExpr.Value }

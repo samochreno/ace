@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Diagnostic.hpp"
@@ -18,9 +19,13 @@ namespace Ace
         public virtual ILowerableBoundNode<LabelStmtBoundNode>
     {
     public:
-        LabelStmtBoundNode(LabelSymbol* const t_symbol);
+        LabelStmtBoundNode(
+            const SourceLocation& t_sourceLocation,
+            LabelSymbol* const t_symbol
+        );
         virtual ~LabelStmtBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -40,6 +45,7 @@ namespace Ace
         auto GetLabelSymbol() const -> LabelSymbol*;
 
     private:
+        SourceLocation m_SourceLocation{};
         LabelSymbol* m_Symbol{};
     };
 }

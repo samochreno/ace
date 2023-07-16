@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "BoundNodes/Exprs/ReferenceExprBoundNode.hpp"
@@ -21,13 +23,20 @@
 namespace Ace
 {
     CompoundAssignmentStmtBoundNode::CompoundAssignmentStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& t_rhsExpr,
         FunctionSymbol* const t_operatorSymbol
-    ) : m_LHSExpr{ t_lhsExpr },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr },
         m_OperatorSymbol{ t_operatorSymbol }
     {
+    }
+
+    auto CompoundAssignmentStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto CompoundAssignmentStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -71,6 +80,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const CompoundAssignmentStmtBoundNode>(
+            GetSourceLocation(),
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value,
             m_OperatorSymbol
@@ -110,12 +120,14 @@ namespace Ace
             // lhs = lhs + rhs;
 
             const auto userBinaryExpr = std::make_shared<const UserBinaryExprBoundNode>(
+                m_RHSExpr->GetSourceLocation(),
                 m_LHSExpr,
                 m_RHSExpr,
                 m_OperatorSymbol
             );
 
             const auto assignmentStmt = std::make_shared<const AssignmentStmtBoundNode>(
+                GetSourceLocation(),
                 m_LHSExpr,
                 userBinaryExpr
             );
@@ -158,6 +170,7 @@ namespace Ace
                         }
 
                         return std::make_shared<const ReferenceExprBoundNode>(
+                            expr->GetSourceLocation(),
                             expr
                         );
                     }
@@ -168,7 +181,7 @@ namespace Ace
 
                         const Identifier tmpVarName
                         {
-                            SourceLocation{}, // TODO: Fix this after adding SourceLocation to BoundNodes
+                            expr->GetSourceLocation(),
                             SpecialIdentifier::CreateAnonymous()
                         };
                         auto tmpVarSymbolOwned = std::make_unique<LocalVarSymbol>(
@@ -183,17 +196,20 @@ namespace Ace
                         ACE_ASSERT(tmpVarSymbol);
 
                         const auto tmpVarStmt = std::make_shared<const VarStmtBoundNode>(
+                            expr->GetSourceLocation(),
                             tmpVarSymbol,
                             expr
                         );
                         blockStmts.push_back(tmpVarStmt);
 
                         const auto tmpVarReferenceExpr = std::make_shared<const StaticVarReferenceExprBoundNode>(
+                            expr->GetSourceLocation(),
                             blockScope,
                             tmpVarSymbol
                         );
 
                         return std::make_shared<const ReferenceExprBoundNode>(
+                            expr->GetSourceLocation(),
                             tmpVarReferenceExpr
                         );
                     }
@@ -202,7 +218,7 @@ namespace Ace
 
             const Identifier tmpRefVarName
             {
-                SourceLocation{}, // TODO: Fix this after adding SourceLocation to BoundNodes
+                tmpRefExpr->GetSourceLocation(),
                 SpecialIdentifier::CreateAnonymous()
             };
             auto tmpRefVarSymbolOwned = std::make_unique<LocalVarSymbol>(
@@ -217,34 +233,40 @@ namespace Ace
             ACE_ASSERT(tmpRefVarSymbol);
 
             const auto tmpRefVarStmt = std::make_shared<const VarStmtBoundNode>(
+                tmpRefExpr->GetSourceLocation(),
                 tmpRefVarSymbol,
                 tmpRefExpr
             );
             blockStmts.push_back(tmpRefVarStmt);
 
             const auto tmpRefVarReferenceExpr = std::make_shared<const StaticVarReferenceExprBoundNode>(
+                tmpRefExpr->GetSourceLocation(),
                 blockScope,
                 tmpRefVarSymbol
             );
 
             const auto tmpRefVarFieldReferenceExpr = std::make_shared<const InstanceVarReferenceExprBoundNode>(
+                m_LHSExpr->GetSourceLocation(),
                 tmpRefVarReferenceExpr,
                 instanceVarReferenceExpr->GetVarSymbol()
             );
 
             const auto userBinaryExpr = std::make_shared<const UserBinaryExprBoundNode>(
+                m_RHSExpr->GetSourceLocation(),
                 tmpRefVarFieldReferenceExpr,
                 m_RHSExpr,
                 m_OperatorSymbol
             );
 
             const auto assignmentStmt = std::make_shared<const AssignmentStmtBoundNode>(
+                GetSourceLocation(),
                 tmpRefVarFieldReferenceExpr,
                 userBinaryExpr
             );
             blockStmts.push_back(assignmentStmt);
 
             const auto blockStmt = std::make_shared<const BlockStmtBoundNode>(
+                GetSourceLocation(),
                 blockScope,
                 blockStmts
             );
@@ -256,6 +278,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
+            GetSourceLocation(),
             GetScope(),
             stmts
         )->GetOrCreateLowered({}).Value);

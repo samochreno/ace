@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "Diagnostic.hpp"
@@ -20,11 +21,13 @@ namespace Ace
     {
     public:
         AndExprBoundNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprBoundNode>& t_lhsExpr,
             const std::shared_ptr<const IExprBoundNode>& t_rhsExpr
         );
         virtual ~AndExprBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -45,6 +48,7 @@ namespace Ace
         auto GetTypeInfo() const -> TypeInfo final;
     
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprBoundNode> m_LHSExpr;
         std::shared_ptr<const IExprBoundNode> m_RHSExpr;
     };

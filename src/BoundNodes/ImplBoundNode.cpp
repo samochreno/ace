@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "BoundNodes/FunctionBoundNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
 #include "Diagnostic.hpp"
@@ -11,11 +13,18 @@
 namespace Ace
 {
     ImplBoundNode::ImplBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const std::vector<std::shared_ptr<const FunctionBoundNode>>& t_functions
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_Functions{ t_functions }
     {
+    }
+
+    auto ImplBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto ImplBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -48,7 +57,8 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ImplBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             mchCheckedFunctions.Value
         ));
     }
@@ -69,7 +79,8 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ImplBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             mchLoweredFunctions.Value
         )->GetOrCreateLowered({}).Value);
     }

@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Diagnostic.hpp"
@@ -14,11 +16,18 @@
 namespace Ace
 {
     SizeOfExprBoundNode::SizeOfExprBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         ITypeSymbol* const t_typeSymbol
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_TypeSymbol{ t_typeSymbol }
     {
+    }
+
+    auto SizeOfExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto SizeOfExprBoundNode::GetScope() const -> std::shared_ptr<Scope>

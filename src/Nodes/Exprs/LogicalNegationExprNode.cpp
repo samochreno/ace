@@ -57,8 +57,8 @@ namespace Ace
     auto LogicalNegationExprNode::CreateBound() const -> Expected<std::shared_ptr<const LogicalNegationExprBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
-
         return std::make_shared<const LogicalNegationExprBoundNode>(
+            GetSourceLocation(),
             boundExpr
         );
     }

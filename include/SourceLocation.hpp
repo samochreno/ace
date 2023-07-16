@@ -19,6 +19,25 @@ namespace Ace
         {
         }
 
+        auto CreateFirst() const -> SourceLocation
+        {
+            return
+            {
+                Buffer,
+                CharacterBeginIterator,
+                CharacterBeginIterator + 1,
+            };
+        }
+        auto CreateLast() const -> SourceLocation
+        {
+            return
+            {
+                Buffer,
+                CharacterEndIterator - 1,
+                CharacterEndIterator,
+            };
+        }
+
         const ISourceBuffer* Buffer{};
         std::string_view::const_iterator CharacterBeginIterator{};
         std::string_view::const_iterator CharacterEndIterator{};

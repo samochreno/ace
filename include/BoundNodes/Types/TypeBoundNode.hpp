@@ -4,8 +4,6 @@
 #include <vector>
 
 #include "BoundNodes/BoundNode.hpp"
-#include "BoundNodes/AttributeBoundNode.hpp"
-#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 

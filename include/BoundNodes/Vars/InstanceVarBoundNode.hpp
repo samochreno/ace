@@ -6,6 +6,7 @@
 #include "BoundNodes/BoundNode.hpp"
 #include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
@@ -22,11 +23,13 @@ namespace Ace
     {
     public:
         InstanceVarBoundNode(
+            const SourceLocation& t_sourceLocation,
             InstanceVarSymbol* const t_symbol,
             const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes
         );
         virtual ~InstanceVarBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -39,6 +42,7 @@ namespace Ace
         auto GetSymbol() const -> InstanceVarSymbol* final;
 
     private:
+        SourceLocation m_SourceLocation{};
         InstanceVarSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const AttributeBoundNode>> m_Attributes{};
     };

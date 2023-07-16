@@ -59,7 +59,8 @@ namespace Ace
     {
         ACE_TRY(variableSymbol, m_Scope->ResolveStaticSymbol<IVarSymbol>(m_Name));
         return std::make_shared<const StaticVarReferenceExprBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             variableSymbol
         );
     }

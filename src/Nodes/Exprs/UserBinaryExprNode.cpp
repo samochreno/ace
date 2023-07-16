@@ -143,6 +143,7 @@ namespace Ace
             expRHSOperatorSymbol.Unwrap();
 
         return std::make_shared<const UserBinaryExprBoundNode>(
+            GetSourceLocation(),
             boundLHSExpr,
             boundRHSExpr,
             operatorSymbol

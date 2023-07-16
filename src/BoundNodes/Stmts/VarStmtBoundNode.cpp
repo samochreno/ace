@@ -3,10 +3,13 @@
 #include <memory>
 #include <vector>
 
-#include "BoundNodes/Stmts/StmtBoundNode.hpp"
+#include "SourceLocation.hpp"
+#include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/VarReferences/StaticVarReferenceExprBoundNode.hpp"
+#include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
@@ -16,11 +19,18 @@
 namespace Ace
 {
     VarStmtBoundNode::VarStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         LocalVarSymbol* const t_symbol,
         const std::optional<std::shared_ptr<const IExprBoundNode>>& t_optAssignedExpr
-    ) : m_Symbol{ t_symbol },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Symbol{ t_symbol },
         m_OptAssignedExpr{ t_optAssignedExpr }
     {
+    }
+
+    auto VarStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto VarStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -58,6 +68,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const VarStmtBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchConvertedAndCheckedOptAssignedExpr.Value
         ));
@@ -86,6 +97,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const VarStmtBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchLoweredOptAssignedExpr.Value
         )->GetOrCreateLowered(t_context).Value);
@@ -106,12 +118,14 @@ namespace Ace
         }
 
         const auto variableReferenceExpr = std::make_shared<const StaticVarReferenceExprBoundNode>(
+            m_Symbol->GetName().SourceLocation,
             GetScope(),
             m_Symbol
         );
 
         // Without type checking and implicit conversions, references can be initialized too.
         const auto assignmentStmt = std::make_shared<const AssignmentStmtBoundNode>(
+            GetSourceLocation(),
             variableReferenceExpr,
             m_OptAssignedExpr.value()
         );

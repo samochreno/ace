@@ -122,6 +122,7 @@ namespace Ace
         ).Unwrap();
 
         return std::make_shared<const StructTypeBoundNode>(
+            GetSourceLocation(),
             selfSymbol,
             boundAttributes,
             boundVars

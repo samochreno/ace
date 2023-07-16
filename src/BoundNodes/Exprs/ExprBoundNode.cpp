@@ -114,6 +114,7 @@ namespace Ace
             if (!isTargetReference)
             {
                 t_expr = std::make_shared<const DereferenceExprBoundNode>(
+                    t_expr->GetSourceLocation(),
                     t_expr
                 );
             }
@@ -123,6 +124,7 @@ namespace Ace
             if (isTargetReference)
             {
                 t_expr = std::make_shared<const ReferenceExprBoundNode>(
+                    t_expr->GetSourceLocation(),
                     t_expr
                 );
             }
@@ -143,6 +145,7 @@ namespace Ace
         ));
 
         t_expr = std::make_shared<const StaticFunctionCallExprBoundNode>(
+            t_expr->GetSourceLocation(),
             t_expr->GetScope(),
             operatorSymbol,
             std::vector{ t_expr }

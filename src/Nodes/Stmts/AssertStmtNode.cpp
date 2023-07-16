@@ -60,7 +60,10 @@ namespace Ace
     auto AssertStmtNode::CreateBound() const -> Expected<std::shared_ptr<const AssertStmtBoundNode>>
     {
         ACE_TRY(boundCondition, m_Condition->CreateBoundExpr());
-        return std::make_shared<const AssertStmtBoundNode>(boundCondition);
+        return std::make_shared<const AssertStmtBoundNode>(
+            GetSourceLocation(),
+            boundCondition
+        );
     }
 
     auto AssertStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>

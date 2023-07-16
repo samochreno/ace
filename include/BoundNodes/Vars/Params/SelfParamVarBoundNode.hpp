@@ -6,6 +6,7 @@
 #include "BoundNodes/BoundNode.hpp"
 #include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
@@ -21,9 +22,13 @@ namespace Ace
         public virtual ILowerableBoundNode<SelfParamVarBoundNode>
     {
     public:
-        SelfParamVarBoundNode(SelfParamVarSymbol* const t_symbol);
+        SelfParamVarBoundNode(
+            const SourceLocation& t_sourceLocation,
+            SelfParamVarSymbol* const t_symbol
+        );
         virtual ~SelfParamVarBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -36,6 +41,7 @@ namespace Ace
         auto GetSymbol() const -> SelfParamVarSymbol* final;
 
     private:
+        SourceLocation m_SourceLocation{};
         SelfParamVarSymbol* m_Symbol{};
     };
 }

@@ -3,18 +3,28 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
 {
     InstanceVarBoundNode::InstanceVarBoundNode(
+        const SourceLocation& t_sourceLocation,
         InstanceVarSymbol* const t_symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes
-    ) : m_Symbol{ t_symbol },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Symbol{ t_symbol },
         m_Attributes{ t_attributes }
     {
+    }
+
+    auto InstanceVarBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto InstanceVarBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -50,6 +60,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceVarBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchCheckedAttributes.Value
         ));
@@ -71,6 +82,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceVarBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchLoweredAttributes.Value
         )->GetOrCreateLowered({}).Value);

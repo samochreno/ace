@@ -62,7 +62,10 @@ namespace Ace
             m_Name.String
         ).Unwrap();
 
-        return std::make_shared<const LabelStmtBoundNode>(selfSymbol);
+        return std::make_shared<const LabelStmtBoundNode>(
+            GetSourceLocation(),
+            selfSymbol
+        );
     }
 
     auto LabelStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>

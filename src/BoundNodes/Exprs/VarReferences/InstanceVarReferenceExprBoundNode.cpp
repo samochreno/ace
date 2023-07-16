@@ -7,8 +7,10 @@
 #include "BoundNodes/Exprs/FunctionCalls/InstanceFunctionCallExprBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/DerefAsExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
+#include "Scope.hpp"
 #include "Assert.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -20,11 +22,18 @@
 namespace Ace
 {
     InstanceVarReferenceExprBoundNode::InstanceVarReferenceExprBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_expr,
         InstanceVarSymbol* const t_variableSymbol
-    ) : m_Expr{ t_expr },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr },
         m_VarSymbol{ t_variableSymbol }
     {
+    }
+
+    auto InstanceVarReferenceExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto InstanceVarReferenceExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -53,6 +62,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceVarReferenceExprBoundNode>(
+            GetSourceLocation(),
             mchCheckedExpr.Value,
             m_VarSymbol
         ));
@@ -77,6 +87,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceVarReferenceExprBoundNode>(
+            GetSourceLocation(),
             mchLoweredExpr.Value,
             m_VarSymbol
         )->GetOrCreateLowered({}).Value);
@@ -115,6 +126,7 @@ namespace Ace
                 if (isReference)
                 {
                     return std::make_shared<const DerefAsExprBoundNode>(
+                        t_expr->GetSourceLocation(),
                         t_expr,
                         typeSymbol->GetWithoutReference()
                     );
@@ -122,6 +134,7 @@ namespace Ace
                 else if (isStrongPointer)
                 {
                     return std::make_shared<const DerefAsExprBoundNode>(
+                        t_expr->GetSourceLocation(),
                         t_expr,
                         typeSymbol->GetWithoutStrongPointer()
                     );

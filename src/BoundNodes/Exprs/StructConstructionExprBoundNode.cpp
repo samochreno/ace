@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Diagnostic.hpp"
@@ -14,13 +16,20 @@
 namespace Ace
 {
     StructConstructionExprBoundNode::StructConstructionExprBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         StructTypeSymbol* const t_structSymbol,
         const std::vector<StructConstructionExprBoundArg>& t_args
-    ) : m_Scope{ t_scope },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Scope{ t_scope },
         m_StructSymbol{ t_structSymbol },
         m_Args{ t_args }
     {
+    }
+
+    auto StructConstructionExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto StructConstructionExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -67,7 +76,8 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StructConstructionExprBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             m_StructSymbol,
             mchCheckedArgs.Value
         ));
@@ -107,7 +117,8 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StructConstructionExprBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             m_StructSymbol,
             mchLoweredArgs.Value
         )->GetOrCreateLowered({}).Value);

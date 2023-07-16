@@ -3,17 +3,27 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Symbols/Vars/Params/NormalParamVarSymbol.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
 {
     ParamVarBoundNode::ParamVarBoundNode(
+        const SourceLocation& t_sourceLocation,
         NormalParamVarSymbol* const t_symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes
-    ) : m_Symbol{ t_symbol },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Symbol{ t_symbol },
         m_Attributes{ t_attributes }
     {
+    }
+
+    auto ParamVarBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto ParamVarBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -49,6 +59,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ParamVarBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchCheckedAttributes.Value
         ));
@@ -70,6 +81,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ParamVarBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchLoweredAttributes.Value
         )->GetOrCreateLowered({}).Value);

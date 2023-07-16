@@ -4,17 +4,26 @@
 #include <vector>
 
 #include "BoundNodes/AttributeBoundNode.hpp"
+#include "SourceLocation.hpp"
+#include "Symbols/Vars/StaticVarSymbol.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
 {
     StaticVarBoundNode::StaticVarBoundNode(
+        const SourceLocation& t_sourceLocation,
         StaticVarSymbol* const t_symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes
-    ) : m_Symbol{ t_symbol },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Symbol{ t_symbol },
         m_Attributes{ t_attributes }
     {
+    }
+
+    auto StaticVarBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto StaticVarBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -50,6 +59,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StaticVarBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchCheckedAttributes.Value
         ));
@@ -71,6 +81,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StaticVarBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchLoweredAttributes.Value
         )->GetOrCreateLowered({}).Value);

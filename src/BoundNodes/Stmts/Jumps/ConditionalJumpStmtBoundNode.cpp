@@ -3,7 +3,10 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "Symbols/LabelSymbol.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
@@ -13,11 +16,18 @@
 namespace Ace
 {
     ConditionalJumpStmtBoundNode::ConditionalJumpStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_condition,
         LabelSymbol* const t_labelSymbol
-    ) : m_Condition{ t_condition },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Condition{ t_condition },
         m_LabelSymbol{ t_labelSymbol }
     {
+    }
+
+    auto ConditionalJumpStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto ConditionalJumpStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -55,6 +65,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
+            GetSourceLocation(),
             mchConvertedAndCheckedCondition.Value,
             m_LabelSymbol
         ));
@@ -80,6 +91,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
+            GetSourceLocation(),
             mchLoweredCondition.Value,
             m_LabelSymbol
         )->GetOrCreateLowered(t_context).Value);

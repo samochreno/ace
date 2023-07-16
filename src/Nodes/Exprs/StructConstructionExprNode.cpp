@@ -145,7 +145,8 @@ namespace Ace
         }));
 
         return std::make_shared<const StructConstructionExprBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             structSymbol,
             boundArgs
         );

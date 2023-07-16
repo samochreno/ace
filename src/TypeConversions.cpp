@@ -147,6 +147,7 @@ namespace Ace
         for (size_t i = 0; i < t_fromTypeInfos.size(); i++)
         {
             const auto dummyExpr = std::make_shared<const ConversionPlaceholderExprBoundNode>(
+                SourceLocation{},
                 t_scope,
                 t_fromTypeInfos.at(i)
             );

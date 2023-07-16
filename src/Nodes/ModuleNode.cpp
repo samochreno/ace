@@ -244,6 +244,7 @@ namespace Ace
         );
 
         return std::make_shared<const ModuleBoundNode>(
+            GetSourceLocation(),
             selfSymbol,
             boundModules,
             boundTypes,

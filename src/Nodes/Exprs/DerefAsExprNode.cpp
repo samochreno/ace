@@ -64,8 +64,8 @@ namespace Ace
         ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
-
         return std::make_shared<const DerefAsExprBoundNode>(
+            GetSourceLocation(),
             boundExpr,
             typeSymbol
         );

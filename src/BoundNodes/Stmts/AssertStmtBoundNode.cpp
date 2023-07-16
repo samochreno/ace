@@ -3,12 +3,15 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "BoundNodes/Exprs/LogicalNegationExprBoundNode.hpp"
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
 #include "BoundNodes/Stmts/IfStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/GroupStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/ExitStmtBoundNode.hpp"
-#include "BoundNodes/Exprs/LogicalNegationExprBoundNode.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
@@ -17,9 +20,16 @@
 namespace Ace
 {
     AssertStmtBoundNode::AssertStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_condition
-    ) : m_Condition{ t_condition }
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Condition{ t_condition }
     {
+    }
+
+    auto AssertStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto AssertStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -57,6 +67,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const AssertStmtBoundNode>(
+            GetSourceLocation(),
             mchConvertedAndCheckedCondition.Value
         ));
     }
@@ -76,21 +87,25 @@ namespace Ace
             m_Condition->GetOrCreateLoweredExpr({});
 
         const auto condition = std::make_shared<const LogicalNegationExprBoundNode>(
+            mchLoweredCondition.Value->GetSourceLocation(),
             mchLoweredCondition.Value
         );
 
         const auto bodyScope = GetScope()->GetOrCreateChild({});
 
         const auto exitStmt = std::make_shared<const ExitStmtBoundNode>(
+            GetSourceLocation(),
             bodyScope
         );
 
         const auto bodyStmt = std::make_shared<const BlockStmtBoundNode>(
+            GetSourceLocation(),
             bodyScope,
             std::vector<std::shared_ptr<const IStmtBoundNode>>{ exitStmt }
         );
 
         return CreateChanged(std::make_shared<const IfStmtBoundNode>(
+            GetSourceLocation(),
             GetScope(),
             std::vector<std::shared_ptr<const IExprBoundNode>>{ condition },
             std::vector<std::shared_ptr<const BlockStmtBoundNode>>{ bodyStmt }

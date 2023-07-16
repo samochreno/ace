@@ -5,6 +5,9 @@
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/ReferenceExprBoundNode.hpp"
+#include "SourceLocation.hpp"
+#include "Symbols/FunctionSymbol.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
@@ -15,13 +18,20 @@
 namespace Ace
 {
     InstanceFunctionCallExprBoundNode::InstanceFunctionCallExprBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_expr,
         FunctionSymbol* const t_functionSymbol,
         const std::vector<std::shared_ptr<const IExprBoundNode>>& t_args
-    ) : m_Expr{ t_expr },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr },
         m_FunctionSymbol{ t_functionSymbol },
         m_Args{ t_args }
     {
+    }
+
+    auto InstanceFunctionCallExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto InstanceFunctionCallExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -62,6 +72,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
+            GetSourceLocation(),
             mchCheckedExpr.Value,
             m_FunctionSymbol,
             mchConvertedAndCheckedArgs.Value
@@ -96,6 +107,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
+            GetSourceLocation(),
             mchLoweredExpr.Value,
             m_FunctionSymbol,
             mchLoweredArgs.Value
@@ -125,11 +137,13 @@ namespace Ace
                 return m_Expr;
             }
 
-            return std::make_shared<const ReferenceExprBoundNode>(m_Expr);
+            return std::make_shared<const ReferenceExprBoundNode>(
+                m_Expr->GetSourceLocation(),
+                m_Expr
+            );
         }();
 
-        auto* const selfType =
-            t_emitter.GetIRType(expr->GetTypeInfo().Symbol);
+        auto* const selfType = t_emitter.GetIRType(expr->GetTypeInfo().Symbol);
         
         const auto selfEmitResult = expr->Emit(t_emitter);
         temporaries.insert(

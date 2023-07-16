@@ -3,29 +3,39 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Symbols/ModuleSymbol.hpp"
 #include "BoundNodes/Types/TypeBoundNode.hpp"
 #include "BoundNodes/ImplBoundNode.hpp"
 #include "BoundNodes/FunctionBoundNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
 {
     ModuleBoundNode::ModuleBoundNode(
+        const SourceLocation& t_sourceLocation,
         ModuleSymbol* const t_symbol,
         const std::vector<std::shared_ptr<const ModuleBoundNode>>& t_modules,
         const std::vector<std::shared_ptr<const ITypeBoundNode>>& t_types,
         const std::vector<std::shared_ptr<const ImplBoundNode>>& t_impls,
         const std::vector<std::shared_ptr<const FunctionBoundNode>>& t_functions,
         const std::vector<std::shared_ptr<const StaticVarBoundNode>>& t_variables
-    ) : m_Symbol{ t_symbol },
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Symbol{ t_symbol },
         m_Modules{ t_modules },
         m_Types{ t_types },
         m_Impls{ t_impls },
         m_Functions{ t_functions },
         m_Vars{ t_variables }
     {
+    }
+
+    auto ModuleBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto ModuleBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -92,6 +102,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ModuleBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchCheckedModules.Value,
             mchCheckedTypes.Value,
@@ -147,6 +158,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ModuleBoundNode>(
+            GetSourceLocation(),
             m_Symbol,
             mchLoweredModules.Value,
             mchLoweredTypes.Value,

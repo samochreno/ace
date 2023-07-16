@@ -81,7 +81,8 @@ namespace Ace
         }));
 
         return std::make_shared<const ReturnStmtBoundNode>(
-            m_Scope,
+            GetSourceLocation(),
+            GetScope(),
             boundOptExpr
         );
     }

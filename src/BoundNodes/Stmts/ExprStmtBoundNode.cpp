@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
@@ -10,9 +11,15 @@
 namespace Ace
 {
     ExprStmtBoundNode::ExprStmtBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_expr
     ) : m_Expr{ t_expr }
     {
+    }
+
+    auto ExprStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto ExprStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -41,6 +48,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ExprStmtBoundNode>(
+            GetSourceLocation(),
             mchCheckedExpr.Value
         ));
     }
@@ -64,6 +72,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ExprStmtBoundNode>(
+            GetSourceLocation(),
             mchLoweredExpr.Value
         )->GetOrCreateLowered(t_context).Value);
     }

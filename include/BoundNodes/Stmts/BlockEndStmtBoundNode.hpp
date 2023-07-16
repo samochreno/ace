@@ -1,8 +1,10 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
+#include "SourceBuffer.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -16,9 +18,13 @@ namespace Ace
         public virtual ILowerableBoundNode<BlockEndStmtBoundNode>
     {
     public:
-        BlockEndStmtBoundNode(const std::shared_ptr<Scope>& t_selfScope);
+        BlockEndStmtBoundNode(
+            const SourceLocation& t_sourceLocation,
+            const std::shared_ptr<Scope>& t_selfScope
+        );
         virtual ~BlockEndStmtBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope>;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
@@ -37,6 +43,7 @@ namespace Ace
         auto Emit(Emitter& t_emitter) const -> void final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_SelfScope{};
     };
 }

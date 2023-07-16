@@ -59,7 +59,8 @@ namespace Ace
     auto LiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const LiteralExprBoundNode>>
     {
         return std::make_shared<const LiteralExprBoundNode>(
-            m_Scope, 
+            GetSourceLocation(),
+            GetScope(),
             m_Kind,
             m_String
         );

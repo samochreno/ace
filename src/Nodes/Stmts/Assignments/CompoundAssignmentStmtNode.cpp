@@ -89,6 +89,7 @@ namespace Ace
         ));
 
         return std::make_shared<const CompoundAssignmentStmtBoundNode>(
+            GetSourceLocation(),
             boundLHSExpr,
             boundRHSExpr,
             operatorSymbol

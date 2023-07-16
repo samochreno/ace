@@ -5,6 +5,7 @@
 
 #include "BoundNodes/BoundNode.hpp"
 #include "BoundNodes/FunctionBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -19,11 +20,13 @@ namespace Ace
     {
     public:
         ImplBoundNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
             const std::vector<std::shared_ptr<const FunctionBoundNode>>& t_functions
         );
         virtual ~ImplBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -34,6 +37,7 @@ namespace Ace
         ) const -> MaybeChanged<std::shared_ptr<const ImplBoundNode>> final;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<Scope> m_Scope{};
         std::vector<std::shared_ptr<const FunctionBoundNode>> m_Functions{};
     };

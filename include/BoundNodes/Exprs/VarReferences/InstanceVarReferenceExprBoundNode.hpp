@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "SourceLocation.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
@@ -21,11 +22,13 @@ namespace Ace
     {
     public:
         InstanceVarReferenceExprBoundNode(
+            const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprBoundNode>& t_expr,
             InstanceVarSymbol* const t_variableSymbol
         );
         virtual ~InstanceVarReferenceExprBoundNode() = default;
 
+        auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -48,6 +51,7 @@ namespace Ace
         auto GetVarSymbol() const -> InstanceVarSymbol*;
 
     private:
+        SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprBoundNode> m_Expr{};
         InstanceVarSymbol* m_VarSymbol{};
     };

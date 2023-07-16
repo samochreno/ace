@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.hpp"
+#include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Diagnostic.hpp"
@@ -13,9 +15,16 @@
 namespace Ace
 {
     LogicalNegationExprBoundNode::LogicalNegationExprBoundNode(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_expr
-    ) : m_Expr{ t_expr }
+    ) : m_SourceLocation{ t_sourceLocation },
+        m_Expr{ t_expr }
     {
+    }
+
+    auto LogicalNegationExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    {
+        return m_SourceLocation;
     }
 
     auto LogicalNegationExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -53,6 +62,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
+            GetSourceLocation(),
             mchConvertedAndCheckedExpr.Value
         ));
     }
@@ -76,6 +86,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
+            GetSourceLocation(),
             mchLoweredExpr.Value
         )->GetOrCreateLowered({}).Value);
     }
