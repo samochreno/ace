@@ -211,7 +211,10 @@ namespace Ace::Application
                 auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(
                     t_typeSymbol
                 );
-                if (templatableSymbol && templatableSymbol->IsTemplatePlaceholder())
+                if (
+                    templatableSymbol &&
+                    templatableSymbol->IsTemplatePlaceholder()
+                    )
                 {
                     return true;
                 }

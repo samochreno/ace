@@ -18,8 +18,9 @@ namespace Ace
     struct Void
     {
         Void() = default;
-        Void(const DiagnosticBag& t_diagnosticBag)
-            : DiagnosticBag{ t_diagnosticBag }
+        Void(
+            const DiagnosticBag& t_diagnosticBag
+        ) : DiagnosticBag{ t_diagnosticBag }
         {
         }
 
@@ -51,13 +52,15 @@ namespace Ace
         ) : m_DiagnosticBag{ std::move(t_value.DiagnosticBag) }
         {
         }
-        Expected(const std::shared_ptr<const Diagnostic>& t_diagnostic)
-            : m_IsFatal{ true }
+        Expected(
+            const std::shared_ptr<const Diagnostic>& t_diagnostic
+        ) : m_IsFatal{ true }
         {
             m_DiagnosticBag.Add(t_diagnostic);
         }
-        Expected(const DiagnosticBag& t_bag)
-            : m_IsFatal{ true }
+        Expected(
+            const DiagnosticBag& t_bag
+        ) : m_IsFatal{ true }
         {
             m_DiagnosticBag.Add(t_bag);
         }
