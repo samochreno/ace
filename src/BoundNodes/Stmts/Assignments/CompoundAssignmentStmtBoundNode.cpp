@@ -136,21 +136,21 @@ namespace Ace
         else if (const auto* const instanceVarReferenceExpr = dynamic_cast<const InstanceVarReferenceExprBoundNode*>(m_LHSExpr.get()))
         {
             // From:
-            // lhs.variable += rhs;
+            // lhs.var += rhs;
             // 
             // To:
             //
             // If lhs is L-value:
             // {
             //     tmp_ref: &auto = lhs;
-            //     tmp_ref.variable = tmp_ref.field + rhs;
+            //     tmp_ref.var = tmp_ref.field + rhs;
             // }
             // 
             // If lhs is R-value:
             // {
             //     tmp: auto = lhs;
             //     tmp_ref: &auto = tmp;
-            //     tmp_ref.variable = tmp_ref.field + rhs;
+            //     tmp_ref.var = tmp_ref.field + rhs;
             // }
 
             std::vector<std::shared_ptr<const IStmtBoundNode>> blockStmts{};

@@ -23,7 +23,7 @@ namespace Ace
             const SourceLocation& t_sourceLocation,
             StructTypeSymbol* const t_symbol,
             const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes,
-            const std::vector<std::shared_ptr<const InstanceVarBoundNode>>& t_variables
+            const std::vector<std::shared_ptr<const InstanceVarBoundNode>>& t_vars
         );
         virtual ~StructTypeBoundNode() = default;
 

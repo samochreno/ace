@@ -131,7 +131,7 @@ namespace Ace
             const std::vector<StructTypeSymbol*>& t_structSymbols
         ) -> void;
         auto EmitStaticVars(
-            const std::vector<StaticVarSymbol*>& t_variableSymbols
+            const std::vector<StaticVarSymbol*>& t_varSymbols
         ) -> void;
         auto EmitFunctions(
             const std::vector<FunctionSymbol*>& t_functionSymbols

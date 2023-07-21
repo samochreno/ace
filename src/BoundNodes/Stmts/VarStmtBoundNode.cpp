@@ -117,7 +117,7 @@ namespace Ace
             return;
         }
 
-        const auto variableReferenceExpr = std::make_shared<const StaticVarReferenceExprBoundNode>(
+        const auto varReferenceExpr = std::make_shared<const StaticVarReferenceExprBoundNode>(
             m_Symbol->GetName().SourceLocation,
             GetScope(),
             m_Symbol
@@ -126,7 +126,7 @@ namespace Ace
         // Without type checking and implicit conversions, references can be initialized too.
         const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
             GetSourceLocation(),
-            variableReferenceExpr,
+            varReferenceExpr,
             m_OptAssignedExpr.value()
         );
 

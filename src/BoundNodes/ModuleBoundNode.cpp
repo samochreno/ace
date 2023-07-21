@@ -22,14 +22,14 @@ namespace Ace
         const std::vector<std::shared_ptr<const ITypeBoundNode>>& t_types,
         const std::vector<std::shared_ptr<const ImplBoundNode>>& t_impls,
         const std::vector<std::shared_ptr<const FunctionBoundNode>>& t_functions,
-        const std::vector<std::shared_ptr<const StaticVarBoundNode>>& t_variables
+        const std::vector<std::shared_ptr<const StaticVarBoundNode>>& t_vars
     ) : m_SourceLocation{ t_sourceLocation },
         m_Symbol{ t_symbol },
         m_Modules{ t_modules },
         m_Types{ t_types },
         m_Impls{ t_impls },
         m_Functions{ t_functions },
-        m_Vars{ t_variables }
+        m_Vars{ t_vars }
     {
     }
 
@@ -85,9 +85,9 @@ namespace Ace
         }));
 
         ACE_TRY(mchCheckedVars, TransformExpectedMaybeChangedVector(m_Vars,
-        [](const std::shared_ptr<const StaticVarBoundNode>& t_variable)
+        [](const std::shared_ptr<const StaticVarBoundNode>& t_var)
         {
-            return t_variable->GetOrCreateTypeChecked({});
+            return t_var->GetOrCreateTypeChecked({});
         }));
 
         if (
@@ -141,9 +141,9 @@ namespace Ace
         });
 
         const auto mchLoweredVars = TransformMaybeChangedVector(m_Vars,
-        [](const std::shared_ptr<const StaticVarBoundNode>& t_variable)
+        [](const std::shared_ptr<const StaticVarBoundNode>& t_var)
         {
-            return t_variable->GetOrCreateLowered({});
+            return t_var->GetOrCreateLowered({});
         });
 
         if (

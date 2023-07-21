@@ -28,7 +28,7 @@ namespace Ace
             const Identifier& t_name,
             const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
             const AccessModifier t_accessModifier,
-            const std::vector<std::shared_ptr<const InstanceVarNode>>& t_variables
+            const std::vector<std::shared_ptr<const InstanceVarNode>>& t_vars
         );
         virtual ~StructTypeNode() = default;
 

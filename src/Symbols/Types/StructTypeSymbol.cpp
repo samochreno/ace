@@ -76,12 +76,12 @@ namespace Ace
                 return TypeSizeKind::Unsized;
             }
 
-            const auto variables = GetVars();
+            const auto vars = GetVars();
 
             const auto canResolveSize = TransformExpectedVector(GetVars(),
-            [](const InstanceVarSymbol* const t_variable) -> Expected<void>
+            [](const InstanceVarSymbol* const t_var) -> Expected<void>
             {
-                ACE_TRY(sizeKind, t_variable->GetType()->GetSizeKind());
+                ACE_TRY(sizeKind, t_var->GetType()->GetSizeKind());
                 ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
                 return Void{};
             });
@@ -187,8 +187,8 @@ namespace Ace
 
     auto StructTypeSymbol::GetVars() const -> std::vector<InstanceVarSymbol*>
     {
-        auto variables = m_SelfScope->CollectSymbols<InstanceVarSymbol>();
-        std::sort(begin(variables), end(variables),
+        auto vars = m_SelfScope->CollectSymbols<InstanceVarSymbol>();
+        std::sort(begin(vars), end(vars),
         [](
             const InstanceVarSymbol* const t_lhs,
             const InstanceVarSymbol* const t_rhs
@@ -197,6 +197,6 @@ namespace Ace
             return t_lhs->GetIndex() < t_rhs->GetIndex();
         });
 
-        return variables;
+        return vars;
     }
 }

@@ -24,7 +24,7 @@ namespace Ace
         InstanceVarReferenceExprBoundNode(
             const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprBoundNode>& t_expr,
-            InstanceVarSymbol* const t_variableSymbol
+            InstanceVarSymbol* const t_varSymbol
         );
         virtual ~InstanceVarReferenceExprBoundNode() = default;
 

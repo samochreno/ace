@@ -95,25 +95,25 @@ namespace Ace
     {
         ACE_TRY(structSymbol, m_Scope->ResolveStaticSymbol<StructTypeSymbol>(m_TypeName));
 
-        const auto variableSymbols = structSymbol->GetVars();
-        ACE_TRY_ASSERT(variableSymbols.size() == m_Args.size());
+        const auto varSymbols = structSymbol->GetVars();
+        ACE_TRY_ASSERT(varSymbols.size() == m_Args.size());
 
         ACE_TRY(boundArgs, TransformExpectedVector(m_Args,
         [&](const StructConstructionExprArg& t_arg) -> Expected<StructConstructionExprBoundArg>
         {
-            const auto matchingVariableSymbolIt = std::find_if(
-                begin(variableSymbols),
-                end  (variableSymbols),
-                [&](const InstanceVarSymbol* const t_variableSymbol)
+            const auto matchingVarSymbolIt = std::find_if(
+                begin(varSymbols),
+                end  (varSymbols),
+                [&](const InstanceVarSymbol* const t_varSymbol)
                 {
                     return
-                        t_variableSymbol->GetName().String ==
+                        t_varSymbol->GetName().String ==
                         t_arg.Name.String;
                 }
             );
 
-            ACE_TRY_ASSERT(matchingVariableSymbolIt != end(variableSymbols));
-            auto* const variableSymbol = *matchingVariableSymbolIt;
+            ACE_TRY_ASSERT(matchingVarSymbolIt != end(varSymbols));
+            auto* const varSymbol = *matchingVarSymbolIt;
 
             ACE_TRY(boundValue, ([&]() -> Expected<std::shared_ptr<const IExprBoundNode>>
             {
@@ -135,11 +135,11 @@ namespace Ace
                 )->CreateBoundExpr();
             }()));
 
-            ACE_TRY_ASSERT(IsSymbolVisibleFromScope(variableSymbol, m_Scope));
+            ACE_TRY_ASSERT(IsSymbolVisibleFromScope(varSymbol, m_Scope));
 
             return StructConstructionExprBoundArg
             {
-                variableSymbol,
+                varSymbol,
                 boundValue,
             };
         }));

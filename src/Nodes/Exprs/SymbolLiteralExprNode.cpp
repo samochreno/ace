@@ -57,11 +57,11 @@ namespace Ace
 
     auto SymbolLiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const StaticVarReferenceExprBoundNode>>
     {
-        ACE_TRY(variableSymbol, m_Scope->ResolveStaticSymbol<IVarSymbol>(m_Name));
+        ACE_TRY(varSymbol, m_Scope->ResolveStaticSymbol<IVarSymbol>(m_Name));
         return std::make_shared<const StaticVarReferenceExprBoundNode>(
             GetSourceLocation(),
             GetScope(),
-            variableSymbol
+            varSymbol
         );
     }
 

@@ -42,7 +42,7 @@ namespace Ace
             const std::vector<std::shared_ptr<const TemplatedImplNode>>& t_templatedImpls,
             const std::vector<std::shared_ptr<const FunctionNode>>& t_functions,
             const std::vector<std::shared_ptr<const FunctionTemplateNode>>& t_functionTemplates,
-            const std::vector<std::shared_ptr<const StaticVarNode>>& t_variables
+            const std::vector<std::shared_ptr<const StaticVarNode>>& t_vars
         );
         virtual ~ModuleNode() = default;
 

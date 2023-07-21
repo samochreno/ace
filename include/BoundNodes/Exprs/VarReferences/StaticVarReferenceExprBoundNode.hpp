@@ -24,7 +24,7 @@ namespace Ace
         StaticVarReferenceExprBoundNode(
             const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
-            IVarSymbol* const t_variableSymbol
+            IVarSymbol* const t_varSymbol
         );
         virtual ~StaticVarReferenceExprBoundNode() = default;
 

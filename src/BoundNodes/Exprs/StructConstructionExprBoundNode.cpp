@@ -150,7 +150,7 @@ namespace Ace
                 t_arg.Value->GetTypeInfo().Symbol;
             auto* const argType = t_emitter.GetIRType(argTypeSymbol);
 
-            const auto variableIndex = t_arg.Symbol->GetIndex();
+            const auto varIndex = t_arg.Symbol->GetIndex();
 
             auto* const int32Type = llvm::Type::getInt32Ty(
                 *GetCompilation()->LLVMContext
@@ -163,7 +163,7 @@ namespace Ace
             ));
             indexList.push_back(llvm::ConstantInt::get(
                 int32Type,
-                variableIndex
+                varIndex
             ));
 
             auto* const elementPtr = t_emitter.GetBlockBuilder().Builder.CreateGEP(

@@ -25,10 +25,10 @@ namespace Ace
     StaticVarReferenceExprBoundNode::StaticVarReferenceExprBoundNode(
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
-        IVarSymbol* const t_variableSymbol
+        IVarSymbol* const t_varSymbol
     ) : m_SourceLocation{ t_sourceLocation },
         m_Scope{ t_scope },
-        m_VarSymbol{ t_variableSymbol }
+        m_VarSymbol{ t_varSymbol }
     {
     }
 
@@ -86,9 +86,9 @@ namespace Ace
         {
             return { t_emitter.GetLocalVarMap().at(m_VarSymbol), {} };
         }
-        else if (auto* const variableSymbol = dynamic_cast<StaticVarSymbol*>(m_VarSymbol))
+        else if (auto* const varSymbol = dynamic_cast<StaticVarSymbol*>(m_VarSymbol))
         {
-            return { t_emitter.GetStaticVarMap().at(variableSymbol), {} };
+            return { t_emitter.GetStaticVarMap().at(varSymbol), {} };
         }
 
         ACE_UNREACHABLE();

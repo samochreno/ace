@@ -377,23 +377,23 @@ namespace Ace::GlueGeneration
         }
         else
         {
-            const auto variableSymbols = t_structSymbol->GetVars();
-            std::for_each(begin(variableSymbols), end(variableSymbols),
-            [&](InstanceVarSymbol* const t_variableSymbol)
+            const auto varSymbols = t_structSymbol->GetVars();
+            std::for_each(begin(varSymbols), end(varSymbols),
+            [&](InstanceVarSymbol* const t_varSymbol)
             {
-                auto* const variableTypeSymbol = t_variableSymbol->GetType();
-                auto* const variableTypeGlueSymbol =
-                    variableTypeSymbol->GetCopyGlue().value();
+                auto* const varTypeSymbol = t_varSymbol->GetType();
+                auto* const varTypeGlueSymbol =
+                    varTypeSymbol->GetCopyGlue().value();
                 
                 const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
                     SourceLocation{},
                     selfParamReferenceExprNode,
-                    t_variableSymbol
+                    t_varSymbol
                 );
                 const auto otherParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
                     SourceLocation{},
                     otherParamReferenceExprNode,
-                    t_variableSymbol
+                    t_varSymbol
                 );
 
                 std::vector<std::shared_ptr<const IExprBoundNode>> args{};
@@ -403,7 +403,7 @@ namespace Ace::GlueGeneration
                 const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                     SourceLocation{},
                     bodyScope,
-                    variableTypeGlueSymbol,
+                    varTypeGlueSymbol,
                     args
                 );
 
@@ -494,18 +494,18 @@ namespace Ace::GlueGeneration
             stmts.push_back(exprStmtNode);
         }
 
-        const auto variableSymbols = t_structSymbol->GetVars();
-        std::for_each(rbegin(variableSymbols), rend(variableSymbols),
-        [&](InstanceVarSymbol* const t_variableSymbol)
+        const auto varSymbols = t_structSymbol->GetVars();
+        std::for_each(rbegin(varSymbols), rend(varSymbols),
+        [&](InstanceVarSymbol* const t_varSymbol)
         {
-            auto* const variableTypeSymbol = t_variableSymbol->GetType();
-            auto* const variableTypeGlueSymbol = 
-                variableTypeSymbol->GetDropGlue().value();
+            auto* const varTypeSymbol = t_varSymbol->GetType();
+            auto* const varTypeGlueSymbol = 
+                varTypeSymbol->GetDropGlue().value();
             
             const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
                 SourceLocation{},
                 selfParamReferenceExprNode,
-                t_variableSymbol
+                t_varSymbol
             );
 
             std::vector<std::shared_ptr<const IExprBoundNode>> args{};
@@ -514,7 +514,7 @@ namespace Ace::GlueGeneration
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                 SourceLocation{},
                 bodyScope,
-                variableTypeGlueSymbol,
+                varTypeGlueSymbol,
                 args
             );
 

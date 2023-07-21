@@ -35,7 +35,7 @@ namespace Ace
         const std::vector<std::shared_ptr<const TemplatedImplNode>>& t_templatedImpls,
         const std::vector<std::shared_ptr<const FunctionNode>>& t_functions,
         const std::vector<std::shared_ptr<const FunctionTemplateNode>>& t_functionTemplates,
-        const std::vector<std::shared_ptr<const StaticVarNode>>& t_variables
+        const std::vector<std::shared_ptr<const StaticVarNode>>& t_vars
     ) : m_SourceLocation{ t_sourceLocation },
         m_Scope{ t_scope },
         m_SelfScope{ t_selfScope },
@@ -48,7 +48,7 @@ namespace Ace
         m_TemplatedImpls{ t_templatedImpls },
         m_Functions{ t_functions },
         m_FunctionTemplates{ t_functionTemplates },
-        m_Vars{ t_variables }
+        m_Vars{ t_vars }
     {
     }
 
@@ -166,9 +166,9 @@ namespace Ace
             begin(m_Vars),
             end  (m_Vars),
             back_inserter(clonedVars),
-            [&](const std::shared_ptr<const StaticVarNode>& t_variable)
+            [&](const std::shared_ptr<const StaticVarNode>& t_var)
             {
-                return t_variable->CloneInScope(selfScope);
+                return t_var->CloneInScope(selfScope);
             }
         );
 
@@ -222,9 +222,9 @@ namespace Ace
         }));
 
         ACE_TRY(boundVars, TransformExpectedVector(m_Vars,
-        [](const std::shared_ptr<const StaticVarNode>& t_variable)
+        [](const std::shared_ptr<const StaticVarNode>& t_var)
         {
-            return t_variable->CreateBound();
+            return t_var->CreateBound();
         }));
 
         auto* const selfSymbol = GetSymbolScope()->ExclusiveResolveSymbol<ModuleSymbol>(

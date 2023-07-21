@@ -30,7 +30,7 @@ namespace Ace
             const std::vector<std::shared_ptr<const ITypeBoundNode>>& t_types,
             const std::vector<std::shared_ptr<const ImplBoundNode>>& t_impls,
             const std::vector<std::shared_ptr<const FunctionBoundNode>>& t_functions,
-            const std::vector<std::shared_ptr<const StaticVarBoundNode>>& t_variables
+            const std::vector<std::shared_ptr<const StaticVarBoundNode>>& t_vars
         );
         virtual ~ModuleBoundNode() = default;
 

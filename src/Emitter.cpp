@@ -120,8 +120,8 @@ namespace Ace
             }
         );
 
-        const auto structSymbols   = DynamicCastFilter<StructTypeSymbol*>(typeSymbols);
-        const auto variableSymbols = DynamicCastFilter<StaticVarSymbol*>(symbols);
+        const auto structSymbols = DynamicCastFilter<StructTypeSymbol*>(typeSymbols);
+        const auto varSymbols    = DynamicCastFilter<StaticVarSymbol*>(symbols);
 
         std::vector<const IBoundNode*> nodes{}; 
         std::for_each(begin(m_ASTs), end(m_ASTs),
@@ -135,7 +135,7 @@ namespace Ace
         EmitNativeTypes();
         EmitStructTypes(structSymbols);
 
-        EmitStaticVars(variableSymbols);
+        EmitStaticVars(varSymbols);
 
         const auto allFunctionSymbols = globalScope->CollectSymbolsRecursive<FunctionSymbol>();
         std::vector<FunctionSymbol*> functionSymbols{};
@@ -316,18 +316,15 @@ namespace Ace
             ACE_ASSERT(!m_StmtIndexMap.contains(stmt)); 
             m_StmtIndexMap[stmt] = i;
         
-            auto* const variableStmt = 
-                dynamic_cast<const VarStmtBoundNode*>(stmt);
+            auto* const varStmt = dynamic_cast<const VarStmtBoundNode*>(stmt);
 
-            if (variableStmt)
+            if (varStmt)
             {
-                auto* const variableSymbol = variableStmt->GetSymbol();
-                ACE_ASSERT(!m_LocalVarSymbolStmtIndexMap.contains(
-                    variableSymbol
-                ));
-                m_LocalVarSymbolStmtIndexMap[variableSymbol] = i;
+                auto* const varSymbol = varStmt->GetSymbol();
+                ACE_ASSERT(!m_LocalVarSymbolStmtIndexMap.contains(varSymbol));
+                m_LocalVarSymbolStmtIndexMap[varSymbol] = i;
                 m_LocalVarSymbolStmtIndexPairs.push_back(
-                    LocalVarSymbolStmtIndexPair{ variableSymbol, i }
+                    LocalVarSymbolStmtIndexPair{ varSymbol, i }
                 );
             }
         }
@@ -337,13 +334,13 @@ namespace Ace
             end(m_LocalVarSymbolStmtIndexPairs), 
             [&](const LocalVarSymbolStmtIndexPair& t_symbolIndexPair)
             {
-                auto* const variableSymbol = t_symbolIndexPair.LocalVarSymbol;
-                auto* const type = GetIRType(variableSymbol->GetType());
-                ACE_ASSERT(!m_LocalVarMap.contains(variableSymbol));
-                m_LocalVarMap[variableSymbol] = m_BlockBuilder->Builder.CreateAlloca(
+                auto* const varSymbol = t_symbolIndexPair.LocalVarSymbol;
+                auto* const type = GetIRType(varSymbol->GetType());
+                ACE_ASSERT(!m_LocalVarMap.contains(varSymbol));
+                m_LocalVarMap[varSymbol] = m_BlockBuilder->Builder.CreateAlloca(
                     type,
                     nullptr,
-                    variableSymbol->GetName().String
+                    varSymbol->GetName().String
                 );
             }
         );
@@ -444,11 +441,11 @@ namespace Ace
                     std::for_each(
                         begin(blockVarSymbols),
                         end  (blockVarSymbols),
-                        [&](LocalVarSymbol* const t_variableSymbol)
+                        [&](LocalVarSymbol* const t_varSymbol)
                         {
                             EmitDrop({ 
-                                m_LocalVarMap.at(t_variableSymbol), 
-                                t_variableSymbol->GetType() 
+                                m_LocalVarMap.at(t_varSymbol), 
+                                t_varSymbol->GetType() 
                             });
                         }
                     );
@@ -563,33 +560,30 @@ namespace Ace
             rend(m_LocalVarSymbolStmtIndexPairs),
             [&](const LocalVarSymbolStmtIndexPair& t_symbolIndexPair)
             {
-                const auto variableStmtIndex =
-                    t_symbolIndexPair.StmtIndex;
-
-                if (variableStmtIndex >= stmtIndex)
+                const auto varStmtIndex = t_symbolIndexPair.StmtIndex;
+                if (varStmtIndex >= stmtIndex)
                 {
                     return;
                 }
 
-                auto* const variableSymbol =
-                    t_symbolIndexPair.LocalVarSymbol;
+                auto* const varSymbol = t_symbolIndexPair.LocalVarSymbol;
 
-                if (variableSymbol->GetScope() != scope)
+                if (varSymbol->GetScope() != scope)
                 {
                     if (
-                        variableSymbol->GetScope()->GetNestLevel() >=
+                        varSymbol->GetScope()->GetNestLevel() >=
                         scope->GetNestLevel()
                         )
                     {
                         return;
                     }
 
-                    scope = variableSymbol->GetScope();
+                    scope = varSymbol->GetScope();
                 }
 
                 EmitDrop({
-                    m_LocalVarMap.at(variableSymbol),
-                    variableSymbol->GetType()
+                    m_LocalVarMap.at(varSymbol),
+                    varSymbol->GetType()
                 });
             }
         );
@@ -709,11 +703,11 @@ namespace Ace
 
             std::vector<llvm::Type*> elements{};
 
-            const auto variableSymbols = t_structSymbol->GetVars();
-            std::for_each(begin(variableSymbols), end(variableSymbols),
-            [&](const InstanceVarSymbol* const t_variableSymbol)
+            const auto varSymbols = t_structSymbol->GetVars();
+            std::for_each(begin(varSymbols), end(varSymbols),
+            [&](const InstanceVarSymbol* const t_varSymbol)
             {
-                auto* const type = GetIRType(t_variableSymbol->GetType());
+                auto* const type = GetIRType(t_varSymbol->GetType());
                 elements.push_back(type);
             });
 
@@ -723,25 +717,25 @@ namespace Ace
     }
 
     auto Emitter::EmitStaticVars(
-        const std::vector<StaticVarSymbol*>& t_variableSymbols
+        const std::vector<StaticVarSymbol*>& t_varSymbols
     ) -> void
     {
-        std::for_each(begin(t_variableSymbols), end(t_variableSymbols),
-        [&](const StaticVarSymbol* const t_variableSymbol)
+        std::for_each(begin(t_varSymbols), end(t_varSymbols),
+        [&](const StaticVarSymbol* const t_varSymbol)
         {
-            const auto name = t_variableSymbol->CreateSignature();
-            auto* const type = GetIRType(t_variableSymbol->GetType());
+            const auto name = t_varSymbol->CreateSignature();
+            auto* const type = GetIRType(t_varSymbol->GetType());
 
             m_Module->getOrInsertGlobal(
                 name,
                 llvm::PointerType::get(type, 0)
             );
 
-            auto* const variable = m_Module->getNamedGlobal(name);
-            variable->setInitializer(llvm::Constant::getNullValue(variable->getType()));
-            variable->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
+            auto* const var = m_Module->getNamedGlobal(name);
+            var->setInitializer(llvm::Constant::getNullValue(var->getType()));
+            var->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
 
-            m_StaticVarMap[t_variableSymbol] = variable;
+            m_StaticVarMap[t_varSymbol] = var;
         });
     }
 

@@ -21,13 +21,13 @@ namespace Ace
         const Identifier& t_name,
         const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
         const AccessModifier t_accessModifier,
-        const std::vector<std::shared_ptr<const InstanceVarNode>>& t_variables
+        const std::vector<std::shared_ptr<const InstanceVarNode>>& t_vars
     ) : m_SourceLocation{ t_sourceLocation },
         m_SelfScope{ t_selfScope },
         m_Name{ t_name },
         m_Attributes{ t_attributes },
         m_AccessModifier{ t_accessModifier },
-        m_Vars{ t_variables }
+        m_Vars{ t_vars }
     {
     }
 
@@ -78,9 +78,9 @@ namespace Ace
             begin(m_Vars),
             end  (m_Vars),
             back_inserter(clonedVars),
-            [&](const std::shared_ptr<const InstanceVarNode>& t_variable)
+            [&](const std::shared_ptr<const InstanceVarNode>& t_var)
             {
-                return t_variable->CloneInScope(selfScope);
+                return t_var->CloneInScope(selfScope);
             }
         );
 
@@ -110,9 +110,9 @@ namespace Ace
         }));
 
         ACE_TRY(boundVars, TransformExpectedVector(m_Vars,
-        [](const std::shared_ptr<const InstanceVarNode>& t_variable)
+        [](const std::shared_ptr<const InstanceVarNode>& t_var)
         {
-            return t_variable->CreateBound();
+            return t_var->CreateBound();
         }));
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<StructTypeSymbol>(

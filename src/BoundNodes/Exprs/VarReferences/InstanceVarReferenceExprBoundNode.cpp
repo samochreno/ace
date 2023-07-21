@@ -24,10 +24,10 @@ namespace Ace
     InstanceVarReferenceExprBoundNode::InstanceVarReferenceExprBoundNode(
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_expr,
-        InstanceVarSymbol* const t_variableSymbol
+        InstanceVarSymbol* const t_varSymbol
     ) : m_SourceLocation{ t_sourceLocation },
         m_Expr{ t_expr },
-        m_VarSymbol{ t_variableSymbol }
+        m_VarSymbol{ t_varSymbol }
     {
     }
 
@@ -104,9 +104,9 @@ namespace Ace
     {
         std::vector<ExprDropData> temporaries{};
 
-        auto* const variableSymbol =
+        auto* const varSymbol =
             dynamic_cast<InstanceVarSymbol*>(m_VarSymbol);
-        ACE_ASSERT(variableSymbol);
+        ACE_ASSERT(varSymbol);
 
         const std::function<std::shared_ptr<const IExprBoundNode>(const std::shared_ptr<const IExprBoundNode>& t_expr)>
         getDereferenced = [&](const std::shared_ptr<const IExprBoundNode>& t_expr) -> std::shared_ptr<const IExprBoundNode>
@@ -155,7 +155,7 @@ namespace Ace
         auto* const exprTypeSymbol = expr->GetTypeInfo().Symbol;
         auto* const exprType = t_emitter.GetIRType(exprTypeSymbol);
 
-        const auto variableIndex = variableSymbol->GetIndex();
+        const auto varIndex = varSymbol->GetIndex();
 
         auto* const int32Type = llvm::Type::getInt32Ty(
             *GetCompilation()->LLVMContext
@@ -163,7 +163,7 @@ namespace Ace
 
         std::vector<llvm::Value*> indexList{};
         indexList.push_back(llvm::ConstantInt::get(int32Type, 0));
-        indexList.push_back(llvm::ConstantInt::get(int32Type, variableIndex));
+        indexList.push_back(llvm::ConstantInt::get(int32Type, varIndex));
 
         auto* const gepInst = t_emitter.GetBlockBuilder().Builder.CreateGEP(
             exprType,

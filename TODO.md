@@ -2,7 +2,6 @@
 
 ## 🛠️ Refactor
 
-- Rename all `variable` to `var`
 - ❓ Change all `Is...` functions in `Parser.cpp` to use `switch`
 - ❓ Change most `const&` constructor to pass by value, and change all r-value reference parameters to value
 - ❓ Rename `CreateUnknown...Error` to `CreateInvalid...Error`
