@@ -1132,7 +1132,7 @@ namespace Ace
             (t_parser.Peek() == TokenKind::FalseKeyword);
     }
 
-    static auto IsLiteralSymbolExprStart(
+    static auto IsSymbolLiteralExprStart(
         const Parser& t_parser
     ) -> bool
     {
@@ -2112,10 +2112,10 @@ namespace Ace
         };
     }
 
-    static auto ParseLiteralSymbolExpr(
+    static auto ParseSymbolLiteralExpr(
         Parser& t_parser,
         const std::shared_ptr<Scope>& t_scope
-    ) -> Expected<std::shared_ptr<const LiteralSymbolExprNode>>
+    ) -> Expected<std::shared_ptr<const SymbolLiteralExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -2130,7 +2130,7 @@ namespace Ace
 
         return Expected
         {
-            std::make_shared<const LiteralSymbolExprNode>(
+            std::make_shared<const SymbolLiteralExprNode>(
                 CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
                 t_scope,
                 expName.Unwrap()
@@ -2674,9 +2674,9 @@ namespace Ace
             return ParseLiteralExpr(t_parser, t_scope);
         }
 
-        if (IsLiteralSymbolExprStart(t_parser))
+        if (IsSymbolLiteralExprStart(t_parser))
         {
-            return ParseLiteralSymbolExpr(t_parser, t_scope);
+            return ParseSymbolLiteralExpr(t_parser, t_scope);
         }
 
         return DiagnosticBag{}.Add(CreateUnexpectedTokenError(

@@ -8,7 +8,7 @@
 #include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
-#include "Nodes/Exprs/LiteralSymbolExprNode.hpp"
+#include "Nodes/Exprs/SymbolLiteralExprNode.hpp"
 #include "Name.hpp"
 
 namespace Ace
@@ -128,7 +128,7 @@ namespace Ace
                     SymbolNameResolutionScope::Local,
                 };
 
-                return std::make_shared<const LiteralSymbolExprNode>(
+                return std::make_shared<const SymbolLiteralExprNode>(
                     t_arg.Name.SourceLocation,
                     m_Scope,
                     symbolName

@@ -8,7 +8,7 @@
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "Nodes/Exprs/LiteralSymbolExprNode.hpp"
+#include "Nodes/Exprs/SymbolLiteralExprNode.hpp"
 #include "Nodes/Exprs/MemberAccessExprNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
@@ -92,10 +92,10 @@ namespace Ace
             }
         );
 
-        if (const auto* const literalSymbol = dynamic_cast<const LiteralSymbolExprNode*>(m_Expr.get()))
+        if (const auto* const symbolLiteralExpr = dynamic_cast<const SymbolLiteralExprNode*>(m_Expr.get()))
         {
             ACE_TRY(functionSymbol, GetScope()->ResolveStaticSymbol<FunctionSymbol>(
-                literalSymbol->GetName(),
+                symbolLiteralExpr->GetName(),
                 Scope::CreateArgTypes(argTypeSymbols)
             ));
 
@@ -110,13 +110,13 @@ namespace Ace
             };
         }
         
-        if (const auto* const memberAccess = dynamic_cast<const MemberAccessExprNode*>(m_Expr.get()))
+        if (const auto* const memberAccessExpr = dynamic_cast<const MemberAccessExprNode*>(m_Expr.get()))
         {
-            ACE_TRY(boundExpr, memberAccess->GetExpr()->CreateBoundExpr());
+            ACE_TRY(boundExpr, memberAccessExpr->GetExpr()->CreateBoundExpr());
 
             ACE_TRY(functionSymbol, GetScope()->ResolveInstanceSymbol<FunctionSymbol>(
                 boundExpr->GetTypeInfo().Symbol->GetWithoutReference(),
-                memberAccess->GetName(),
+                memberAccessExpr->GetName(),
                 Scope::CreateArgTypes(argTypeSymbols)
             ));
 

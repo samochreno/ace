@@ -12,7 +12,7 @@
 #include "Nodes/Exprs/ExprExprNode.hpp"
 #include "Nodes/Exprs/FunctionCallExprNode.hpp"
 #include "Nodes/Exprs/LiteralExprNode.hpp"
-#include "Nodes/Exprs/LiteralSymbolExprNode.hpp"
+#include "Nodes/Exprs/SymbolLiteralExprNode.hpp"
 #include "Nodes/Exprs/LogicalNegationExprNode.hpp"
 #include "Nodes/Exprs/MemberAccessExprNode.hpp"
 #include "Nodes/Exprs/OrExprNode.hpp"

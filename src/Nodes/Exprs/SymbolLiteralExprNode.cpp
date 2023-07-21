@@ -1,4 +1,4 @@
-#include "Nodes/Exprs/LiteralSymbolExprNode.hpp"
+#include "Nodes/Exprs/SymbolLiteralExprNode.hpp"
 
 #include <memory>
 #include <vector>
@@ -11,7 +11,7 @@
 
 namespace Ace
 {
-    LiteralSymbolExprNode::LiteralSymbolExprNode(
+    SymbolLiteralExprNode::SymbolLiteralExprNode(
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         const SymbolName& t_name
@@ -21,41 +21,41 @@ namespace Ace
     {
     }
 
-    auto LiteralSymbolExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto SymbolLiteralExprNode::GetSourceLocation() const -> const SourceLocation&
     {
         return m_SourceLocation;
     }
 
-    auto LiteralSymbolExprNode::GetScope() const -> std::shared_ptr<Scope>
+    auto SymbolLiteralExprNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;
     }
 
-    auto LiteralSymbolExprNode::GetChildren() const -> std::vector<const INode*>
+    auto SymbolLiteralExprNode::GetChildren() const -> std::vector<const INode*>
     {
         return {};
 
     }
 
-    auto LiteralSymbolExprNode::CloneInScope(
+    auto SymbolLiteralExprNode::CloneInScope(
         const std::shared_ptr<Scope>& t_scope
-    ) const -> std::shared_ptr<const LiteralSymbolExprNode>
+    ) const -> std::shared_ptr<const SymbolLiteralExprNode>
     {
-        return std::make_shared<const LiteralSymbolExprNode>(
+        return std::make_shared<const SymbolLiteralExprNode>(
             m_SourceLocation,
             t_scope,
             m_Name
         );
     }
 
-    auto LiteralSymbolExprNode::CloneInScopeExpr(
+    auto SymbolLiteralExprNode::CloneInScopeExpr(
         const std::shared_ptr<Scope>& t_scope
     ) const -> std::shared_ptr<const IExprNode>
     {
         return CloneInScope(t_scope);
     }
 
-    auto LiteralSymbolExprNode::CreateBound() const -> Expected<std::shared_ptr<const StaticVarReferenceExprBoundNode>>
+    auto SymbolLiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const StaticVarReferenceExprBoundNode>>
     {
         ACE_TRY(variableSymbol, m_Scope->ResolveStaticSymbol<IVarSymbol>(m_Name));
         return std::make_shared<const StaticVarReferenceExprBoundNode>(
@@ -65,12 +65,12 @@ namespace Ace
         );
     }
 
-    auto LiteralSymbolExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto SymbolLiteralExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }
 
-    auto LiteralSymbolExprNode::GetName() const -> const SymbolName&
+    auto SymbolLiteralExprNode::GetName() const -> const SymbolName&
     {
         return m_Name;
     }

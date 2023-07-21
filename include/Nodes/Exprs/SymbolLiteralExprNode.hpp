@@ -12,25 +12,25 @@
 
 namespace Ace
 {
-    class LiteralSymbolExprNode :
+    class SymbolLiteralExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<LiteralSymbolExprNode>, 
+        public virtual ICloneableNode<SymbolLiteralExprNode>, 
         public virtual IBindableNode<StaticVarReferenceExprBoundNode>
     {
     public:
-        LiteralSymbolExprNode(
+        SymbolLiteralExprNode(
             const SourceLocation& t_sourceLocation,
             const std::shared_ptr<Scope>& t_scope,
             const SymbolName& t_name
         );
-        virtual ~LiteralSymbolExprNode() = default;
+        virtual ~SymbolLiteralExprNode() = default;
 
         auto GetSourceLocation() const -> const SourceLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
             const std::shared_ptr<Scope>& t_scope
-        ) const -> std::shared_ptr<const LiteralSymbolExprNode> final;
+        ) const -> std::shared_ptr<const SymbolLiteralExprNode> final;
         auto CloneInScopeExpr(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IExprNode> final;

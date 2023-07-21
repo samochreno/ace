@@ -2,7 +2,6 @@
 
 ## 🛠️ Refactor
 
-- Rename `LiteralSymbol` to `SymbolLiteral`
 - Rename `AssignmentStmtBoundNode` to `NormalAssignmentStmtBoundNode`
 - Rename all `variable` to `var`
 - ❓ Change all `Is...` functions in `Parser.cpp` to use `switch`
