@@ -87,43 +87,199 @@ namespace Ace
             TokenKind::Identifier,
         };
 
-        if      (t_string == Keyword::If)        token.Kind = TokenKind::IfKeyword;
-        else if (t_string == Keyword::Else)      token.Kind = TokenKind::ElseKeyword;
-        else if (t_string == Keyword::Elif)      token.Kind = TokenKind::ElifKeyword;
-        else if (t_string == Keyword::While)     token.Kind = TokenKind::WhileKeyword;
-        else if (t_string == Keyword::Return)    token.Kind = TokenKind::ReturnKeyword;
-        else if (t_string == Keyword::Struct)    token.Kind = TokenKind::StructKeyword;
-        else if (t_string == Keyword::Operator)  token.Kind = TokenKind::OperatorKeyword;
-        else if (t_string == Keyword::Public)    token.Kind = TokenKind::PublicKeyword;
-        else if (t_string == Keyword::Extern)    token.Kind = TokenKind::ExternKeyword;
-        else if (t_string == Keyword::Cast)      token.Kind = TokenKind::CastKeyword;
-        else if (t_string == Keyword::Exit)      token.Kind = TokenKind::ExitKeyword;
-        else if (t_string == Keyword::Assert)    token.Kind = TokenKind::AssertKeyword;
-        else if (t_string == Keyword::Module)    token.Kind = TokenKind::ModuleKeyword;
-        else if (t_string == Keyword::Impl)      token.Kind = TokenKind::ImplKeyword;
-        else if (t_string == Keyword::AddressOf) token.Kind = TokenKind::AddressOfKeyword;
-        else if (t_string == Keyword::SizeOf)    token.Kind = TokenKind::SizeOfKeyword;
-        else if (t_string == Keyword::DerefAs)   token.Kind = TokenKind::DerefAsKeyword;
-        else if (t_string == Keyword::Box)       token.Kind = TokenKind::BoxKeyword;
-        else if (t_string == Keyword::Unbox)     token.Kind = TokenKind::UnboxKeyword;
-        else if (t_string == Keyword::True)      token.Kind = TokenKind::TrueKeyword;
-        else if (t_string == Keyword::False)     token.Kind = TokenKind::FalseKeyword;
+        if (t_string == Keyword::If)
+        {
+            token.Kind = TokenKind::IfKeyword;
+        }
+        else if (t_string == Keyword::Else)
+        {
+            token.Kind = TokenKind::ElseKeyword;
+        }
+        else if (t_string == Keyword::Elif)
+        {
+            token.Kind = TokenKind::ElifKeyword;
+        }
+        else if (t_string == Keyword::While)
+        {
+            token.Kind = TokenKind::WhileKeyword;
+        }
+        else if (t_string == Keyword::Return)
+        {
+            token.Kind = TokenKind::ReturnKeyword;
+        }
+        else if (t_string == Keyword::Struct)
+        {
+            token.Kind = TokenKind::StructKeyword;
+        }
+        else if (t_string == Keyword::Operator)
+        {
+            token.Kind = TokenKind::OperatorKeyword;
+        }
+        else if (t_string == Keyword::Public)
+        {
+            token.Kind = TokenKind::PublicKeyword;
+        }
+        else if (t_string == Keyword::Extern)
+        {
+            token.Kind = TokenKind::ExternKeyword;
+        }
+        else if (t_string == Keyword::Cast)
+        {
+            token.Kind = TokenKind::CastKeyword;
+        }
+        else if (t_string == Keyword::Exit)
+        {
+            token.Kind = TokenKind::ExitKeyword;
+        }
+        else if (t_string == Keyword::Assert)
+        {
+            token.Kind = TokenKind::AssertKeyword;
+        }
+        else if (t_string == Keyword::Module)
+        {
+            token.Kind = TokenKind::ModuleKeyword;
+        }
+        else if (t_string == Keyword::Impl)
+        {
+            token.Kind = TokenKind::ImplKeyword;
+        }
+        else if (t_string == Keyword::AddressOf)
+        {
+            token.Kind = TokenKind::AddressOfKeyword;
+        }
+        else if (t_string == Keyword::SizeOf)
+        {
+            token.Kind = TokenKind::SizeOfKeyword;
+        }
+        else if (t_string == Keyword::DerefAs)
+        {
+            token.Kind = TokenKind::DerefAsKeyword;
+        }
+        else if (t_string == Keyword::Box)
+        {
+            token.Kind = TokenKind::BoxKeyword;
+        }
+        else if (t_string == Keyword::Unbox)
+        {
+            token.Kind = TokenKind::UnboxKeyword;
+        }
+        else if (t_string == Keyword::True)
+        {
+            token.Kind = TokenKind::TrueKeyword;
+        }
+        else if (t_string == Keyword::False)
+        {
+            token.Kind = TokenKind::FalseKeyword;
+        }
 
-        else if (t_string == Keyword::Int8)    return CreateNativeTypeName(t_context, t_sourceLocation, natives->Int8);
-        else if (t_string == Keyword::Int16)   return CreateNativeTypeName(t_context, t_sourceLocation, natives->Int16);
-        else if (t_string == Keyword::Int32)   return CreateNativeTypeName(t_context, t_sourceLocation, natives->Int32);
-        else if (t_string == Keyword::Int64)   return CreateNativeTypeName(t_context, t_sourceLocation, natives->Int64);
-        else if (t_string == Keyword::UInt8)   return CreateNativeTypeName(t_context, t_sourceLocation, natives->UInt8);
-        else if (t_string == Keyword::UInt16)  return CreateNativeTypeName(t_context, t_sourceLocation, natives->UInt16);
-        else if (t_string == Keyword::UInt32)  return CreateNativeTypeName(t_context, t_sourceLocation, natives->UInt32);
-        else if (t_string == Keyword::UInt64)  return CreateNativeTypeName(t_context, t_sourceLocation, natives->UInt64);
-        else if (t_string == Keyword::Int)     return CreateNativeTypeName(t_context, t_sourceLocation, natives->Int);
-        else if (t_string == Keyword::Float32) return CreateNativeTypeName(t_context, t_sourceLocation, natives->Float32);
-        else if (t_string == Keyword::Float64) return CreateNativeTypeName(t_context, t_sourceLocation, natives->Float64);
-        else if (t_string == Keyword::Bool)    return CreateNativeTypeName(t_context, t_sourceLocation, natives->Bool);
-        else if (t_string == Keyword::Void)    return CreateNativeTypeName(t_context, t_sourceLocation, natives->Void);
-
-        else return std::nullopt;
+        else if (t_string == Keyword::Int8)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->Int8
+            );
+        }
+        else if (t_string == Keyword::Int16)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->Int16
+            );
+        }
+        else if (t_string == Keyword::Int32)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->Int32
+            );
+        }
+        else if (t_string == Keyword::Int64)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->Int64
+            );
+        }
+        else if (t_string == Keyword::UInt8)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->UInt8
+            );
+        }
+        else if (t_string == Keyword::UInt16)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->UInt16
+            );
+        }
+        else if (t_string == Keyword::UInt32)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->UInt32
+            );
+        }
+        else if (t_string == Keyword::UInt64)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->UInt64
+            );
+        }
+        else if (t_string == Keyword::Int)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->Int
+            );
+        }
+        else if (t_string == Keyword::Float32)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->Float32
+            );
+        }
+        else if (t_string == Keyword::Float64)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->Float64
+            );
+        }
+        else if (t_string == Keyword::Bool)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->Bool
+            );
+        }
+        else if (t_string == Keyword::Void)
+        {
+            return CreateNativeTypeName(
+                t_context,
+                t_sourceLocation,
+                natives->Void
+            );
+        }
+        else
+        {
+            return std::nullopt;
+        }
 
         return std::vector{ std::make_shared<const Token>(token) };
     }

@@ -2,7 +2,6 @@
 
 ## 🛠️ Refactor
 
-- Reformat `CreateKeyword` in `Lexer.cpp`
 - Abbreviate `Operator` as `Op`
 - Rename `LiteralSymbol` to `SymbolLiteral`
 - Rename `AssignmentStmtBoundNode` to `NormalAssignmentStmtBoundNode`
