@@ -123,7 +123,8 @@ namespace Ace
             m_Symbol
         );
 
-        // Without type checking and implicit conversions, references can be initialized too.
+        // Without type checking and implicit conversions,
+        // references can be initialized too
         const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
             GetSourceLocation(),
             varReferenceExpr,

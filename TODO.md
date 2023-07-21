@@ -11,7 +11,6 @@
 ## 💥 High Priority
 
 - Fix so compilation cannot succeed with parsing errors
-- Fix TODO's in `Package.cpp`
 - Check why CLI arg parsing never checks if EOF (Probably a bug)
 - Error messages to make debugging easier:
   - Improve parsing, for example: if we already know we are parsing a function, we should do the best we can to actually parse it, so for example insert missing name token or something, allow semicolon between function header and body just discard it
