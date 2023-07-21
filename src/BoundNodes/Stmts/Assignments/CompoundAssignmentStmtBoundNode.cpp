@@ -126,7 +126,7 @@ namespace Ace
                 m_OpSymbol
             );
 
-            const auto assignmentStmt = std::make_shared<const AssignmentStmtBoundNode>(
+            const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
                 GetSourceLocation(),
                 m_LHSExpr,
                 userBinaryExpr
@@ -258,7 +258,7 @@ namespace Ace
                 m_OpSymbol
             );
 
-            const auto assignmentStmt = std::make_shared<const AssignmentStmtBoundNode>(
+            const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
                 GetSourceLocation(),
                 tmpRefVarFieldReferenceExpr,
                 userBinaryExpr

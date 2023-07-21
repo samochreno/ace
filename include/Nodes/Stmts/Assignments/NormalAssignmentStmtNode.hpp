@@ -15,7 +15,7 @@ namespace Ace
     class NormalAssignmentStmtNode :
         public virtual IStmtNode,
         public virtual ICloneableNode<NormalAssignmentStmtNode>,
-        public virtual IBindableNode<AssignmentStmtBoundNode>
+        public virtual IBindableNode<NormalAssignmentStmtBoundNode>
     {
     public:
         NormalAssignmentStmtNode(
@@ -35,7 +35,7 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& t_scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const AssignmentStmtBoundNode>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const NormalAssignmentStmtBoundNode>> final;
         auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
         
     private:

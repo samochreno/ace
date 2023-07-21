@@ -124,7 +124,7 @@ namespace Ace
         );
 
         // Without type checking and implicit conversions, references can be initialized too.
-        const auto assignmentStmt = std::make_shared<const AssignmentStmtBoundNode>(
+        const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
             GetSourceLocation(),
             variableReferenceExpr,
             m_OptAssignedExpr.value()

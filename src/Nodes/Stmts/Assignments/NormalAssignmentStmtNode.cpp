@@ -61,11 +61,11 @@ namespace Ace
         return CloneInScope(t_scope);
     }
 
-    auto NormalAssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const AssignmentStmtBoundNode>>
+    auto NormalAssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const NormalAssignmentStmtBoundNode>>
     {
         ACE_TRY(boundLHSExpr, m_LHSExpr->CreateBoundExpr());
         ACE_TRY(boundRHSExpr, m_RHSExpr->CreateBoundExpr());
-        return std::make_shared<const AssignmentStmtBoundNode>(
+        return std::make_shared<const NormalAssignmentStmtBoundNode>(
             GetSourceLocation(),
             boundLHSExpr,
             boundRHSExpr

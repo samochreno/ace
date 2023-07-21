@@ -14,7 +14,7 @@
 
 namespace Ace
 {
-    AssignmentStmtBoundNode::AssignmentStmtBoundNode(
+    NormalAssignmentStmtBoundNode::NormalAssignmentStmtBoundNode(
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& t_rhsExpr
@@ -24,17 +24,17 @@ namespace Ace
     {
     }
 
-    auto AssignmentStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto NormalAssignmentStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
     {
         return m_SourceLocation;
     }
 
-    auto AssignmentStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
+    auto NormalAssignmentStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_LHSExpr->GetScope();
     }
 
-    auto AssignmentStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto NormalAssignmentStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 
@@ -44,9 +44,9 @@ namespace Ace
         return children;
     }
 
-    auto AssignmentStmtBoundNode::GetOrCreateTypeChecked(
+    auto NormalAssignmentStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& t_context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const AssignmentStmtBoundNode>>>
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const NormalAssignmentStmtBoundNode>>>
     {
         auto* const lhsExprTypeSymbol =
             m_LHSExpr->GetTypeInfo().Symbol->GetWithoutReference();
@@ -69,23 +69,23 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        return CreateChanged(std::make_shared<const AssignmentStmtBoundNode>(
+        return CreateChanged(std::make_shared<const NormalAssignmentStmtBoundNode>(
             GetSourceLocation(),
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value
         ));
     }
 
-    auto AssignmentStmtBoundNode::GetOrCreateTypeCheckedStmt(
+    auto NormalAssignmentStmtBoundNode::GetOrCreateTypeCheckedStmt(
         const StmtTypeCheckingContext& t_context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
         return GetOrCreateTypeChecked(t_context);
     }
 
-    auto AssignmentStmtBoundNode::GetOrCreateLowered(
+    auto NormalAssignmentStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& t_context
-    ) const -> MaybeChanged<std::shared_ptr<const AssignmentStmtBoundNode>>
+    ) const -> MaybeChanged<std::shared_ptr<const NormalAssignmentStmtBoundNode>>
     {
         const auto mchLoweredRHSExpr = m_RHSExpr->GetOrCreateLoweredExpr({});
         const auto mchLoweredLHSExpr = m_LHSExpr->GetOrCreateLoweredExpr({});
@@ -98,21 +98,21 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        return CreateChanged(std::make_shared<const AssignmentStmtBoundNode>(
+        return CreateChanged(std::make_shared<const NormalAssignmentStmtBoundNode>(
             GetSourceLocation(),
             mchLoweredLHSExpr.Value,
             mchLoweredRHSExpr.Value
         )->GetOrCreateLowered({}).Value);
     }
 
-    auto AssignmentStmtBoundNode::GetOrCreateLoweredStmt(
+    auto NormalAssignmentStmtBoundNode::GetOrCreateLoweredStmt(
         const LoweringContext& t_context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
         return GetOrCreateLowered(t_context);
     }
 
-    auto AssignmentStmtBoundNode::Emit(Emitter& t_emitter) const -> void
+    auto NormalAssignmentStmtBoundNode::Emit(Emitter& t_emitter) const -> void
     {
         std::vector<ExprDropData> temporaries{};
 
