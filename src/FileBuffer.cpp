@@ -131,7 +131,7 @@ namespace Ace
         return
             m_Path.string() + ':' +
             std::to_string(lineIndex + 1) + ':' +
-            std::to_string(characterIndex + 1) + ':' + ' ';
+            std::to_string(characterIndex + 1);
     }
 
 

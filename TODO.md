@@ -13,7 +13,6 @@
 ## 💥 High Priority
 
 - Fix so compilation cannot succeed with parsing errors
-- Remove last colon in printed error source location
 - Fix TODO's in `Package.cpp`
 - Check why CLI arg parsing never checks if EOF (Probably a bug)
 - Error messages to make debugging easier:
