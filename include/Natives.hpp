@@ -30,15 +30,11 @@ namespace Ace
 
         virtual auto GetCompilation() const -> const Compilation* = 0;
 
+        virtual auto CreateFullyQualifiedName(
+            const SourceLocation& t_sourceLocation
+        ) const -> SymbolName = 0;
+
         virtual auto Initialize() -> void = 0;
-    };
-
-    class ITypeableNative : public virtual INative
-    {
-    public:
-        virtual ~ITypeableNative() = default;
-
-        virtual auto GetFullyQualifiedName() const -> const SymbolName& = 0;
     };
 
     enum class NativeCopyabilityKind
@@ -47,21 +43,23 @@ namespace Ace
         NonTrivial,
     };
 
-    class NativeType : public virtual ITypeableNative
+    class NativeType : public virtual INative
     {
     public:
         NativeType(
             const Compilation* const t_compilation,
-            SymbolName&& t_name,
+            std::vector<const char*>&& t_nameSectionStrings,
             std::optional<std::function<llvm::Type*()>>&& t_irTypeGetter,
             const TypeSizeKind t_sizeKind,
             const NativeCopyabilityKind t_copyabilityKind
         );
         ~NativeType() = default;
 
-        auto GetFullyQualifiedName() const -> const SymbolName& final;
-
         auto GetCompilation() const -> const Compilation*;
+
+        auto CreateFullyQualifiedName(
+            const SourceLocation& t_sourceLocation
+        ) const -> SymbolName final;
 
         auto Initialize() -> void final;
 
@@ -72,7 +70,7 @@ namespace Ace
         
     private:
         const Compilation* m_Compilation{};
-        SymbolName m_Name{};
+        std::vector<const char*> m_NameSectionStrings{};
         std::optional<std::function<llvm::Type*()>> m_IRTypeGetter{};
         bool m_IsSized{};
         bool m_IsTriviallyCopyable{};
@@ -80,18 +78,20 @@ namespace Ace
         ITypeSymbol* m_Symbol{};
     };
 
-    class NativeTypeTemplate : public virtual ITypeableNative
+    class NativeTypeTemplate : public virtual INative
     {
     public:
         NativeTypeTemplate(
             const Compilation* const t_compilation,
-            SymbolName&& t_name
+            std::vector<const char*>&& t_nameSectionStrings
         );
         ~NativeTypeTemplate() = default;
 
-        auto GetFullyQualifiedName() const -> const SymbolName& final;
-
         auto GetCompilation() const -> const Compilation*;
+
+        auto CreateFullyQualifiedName(
+            const SourceLocation& t_sourceLocation
+        ) const -> SymbolName final;
 
         auto Initialize() -> void final;
 
@@ -99,7 +99,7 @@ namespace Ace
 
     private:
         const Compilation* m_Compilation{};
-        SymbolName m_Name{};
+        std::vector<const char*> m_NameSectionStrings{};
 
         TypeTemplateSymbol* m_Symbol{};
     };
@@ -109,12 +109,16 @@ namespace Ace
     public:
         NativeFunction(
             const Compilation* const t_compilation,
-            SymbolName&& t_name,
+            std::vector<const char*>&& t_nameSectionStrings,
             FunctionBodyEmitter&& t_bodyEmitter
         );
         ~NativeFunction() = default;
 
         auto GetCompilation() const -> const Compilation*;
+
+        auto CreateFullyQualifiedName(
+            const SourceLocation& t_sourceLocation
+        ) const -> SymbolName final;
 
         auto Initialize() -> void final;
 
@@ -122,7 +126,7 @@ namespace Ace
         
     private:
         const Compilation* m_Compilation{};
-        SymbolName m_Name{};
+        std::vector<const char*> m_NameSectionStrings{};
         FunctionBodyEmitter m_BodyEmitter{};
 
         FunctionSymbol* m_Symbol{};
@@ -133,11 +137,15 @@ namespace Ace
     public:
         NativeFunctionTemplate(
             const Compilation* const t_compilation,
-            SymbolName&& t_name
+            std::vector<const char*>&& t_nameSectionStrings
         );
         ~NativeFunctionTemplate() = default;
 
         auto GetCompilation() const -> const Compilation*;
+
+        auto CreateFullyQualifiedName(
+            const SourceLocation& t_sourceLocation
+        ) const -> SymbolName final;
 
         auto Initialize() -> void final;
 
@@ -145,7 +153,7 @@ namespace Ace
 
     private:
         const Compilation* m_Compilation{};
-        SymbolName m_Name{};
+        std::vector<const char*> m_NameSectionStrings{};
 
         FunctionTemplateSymbol* m_Symbol{};
     };
@@ -154,7 +162,7 @@ namespace Ace
     {
     public:
         NativeAssociatedFunction(
-            const ITypeableNative& t_type,
+            const INative& t_type,
             const char* const t_name,
             FunctionBodyEmitter&& t_bodyEmitter
         );
@@ -162,12 +170,16 @@ namespace Ace
 
         auto GetCompilation() const -> const Compilation*;
 
+        auto CreateFullyQualifiedName(
+            const SourceLocation& t_sourceLocation
+        ) const -> SymbolName final;
+
         auto Initialize() -> void final;
 
         auto GetSymbol() const -> FunctionSymbol*;
 
     private:
-        const ITypeableNative& m_Type;
+        const INative& m_Type;
         const char* m_Name{};
         FunctionBodyEmitter m_BodyEmitter{};
 
@@ -178,19 +190,23 @@ namespace Ace
     {
     public:
         NativeAssociatedFunctionTemplate(
-            const ITypeableNative& t_type,
+            const INative& t_type,
             const char* const t_name
         );
         ~NativeAssociatedFunctionTemplate() = default;
 
         auto GetCompilation() const -> const Compilation*;
 
+        auto CreateFullyQualifiedName(
+            const SourceLocation& t_sourceLocation
+        ) const -> SymbolName final;
+
         auto Initialize() -> void final;
 
         auto GetSymbol() const -> FunctionTemplateSymbol*;
 
     private:
-        const ITypeableNative& m_Type;
+        const INative& m_Type;
         const char* m_Name{};
 
         FunctionTemplateSymbol* m_Symbol{};
@@ -562,6 +578,8 @@ namespace Ace
 
         NativeAssociatedFunctionTemplate StrongPointer__new;
         NativeAssociatedFunctionTemplate StrongPointer__value;
+
+        NativeAssociatedFunctionTemplate WeakPointer__from;
 
     private:
         auto InitializeCollectionsOfNatives() -> void;

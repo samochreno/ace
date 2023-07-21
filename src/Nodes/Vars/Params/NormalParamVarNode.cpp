@@ -83,7 +83,7 @@ namespace Ace
         }));
 
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<NormalParamVarSymbol>(
-            m_Name.String
+            m_Name
         ).Unwrap();
 
         return std::make_shared<const ParamVarBoundNode>(
@@ -118,7 +118,6 @@ namespace Ace
         ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
-
         return std::unique_ptr<ISymbol>
         {
             std::make_unique<NormalParamVarSymbol>(

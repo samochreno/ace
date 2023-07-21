@@ -8,6 +8,7 @@
 #include "Emittable.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
+#include "SourceLocation.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Scope.hpp"
@@ -35,7 +36,12 @@ namespace Ace
         virtual auto GetTypeInfo() const -> TypeInfo = 0;
     };
 
-    typedef Expected<FunctionSymbol*>(*ConversionOperatorGetterFunction)(const std::shared_ptr<Scope>&, ITypeSymbol*, ITypeSymbol*);
+    typedef Expected<FunctionSymbol*>(*ConversionOperatorGetterFunction)(
+        const SourceLocation&,
+        const std::shared_ptr<Scope>&,
+        ITypeSymbol*,
+        ITypeSymbol*
+    );
     auto CreateConverted(
         std::shared_ptr<const IExprBoundNode> t_expr,
         TypeInfo t_targetTypeInfo,

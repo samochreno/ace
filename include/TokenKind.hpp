@@ -87,7 +87,6 @@ namespace Ace
         AssertKeyword,
         ModuleKeyword,
         ImplKeyword,
-        ExplKeyword,
         AddressOfKeyword,
         SizeOfKeyword,
         DerefAsKeyword,

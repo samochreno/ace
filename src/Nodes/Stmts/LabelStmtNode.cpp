@@ -59,7 +59,7 @@ namespace Ace
     auto LabelStmtNode::CreateBound() const -> Expected<std::shared_ptr<const LabelStmtBoundNode>>
     {
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<LabelSymbol>(
-            m_Name.String
+            m_Name
         ).Unwrap();
 
         return std::make_shared<const LabelStmtBoundNode>(

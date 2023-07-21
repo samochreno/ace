@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "SourceLocation.hpp"
+#include "Operator.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/UserBinaryExprBoundNode.hpp"
@@ -16,7 +17,7 @@ namespace Ace
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_lhsExpr,
         const std::shared_ptr<const IExprNode>& t_rhsExpr,
-        const TokenKind t_operator
+        const Operator& t_operator
     ) : m_SourceLocation{ t_sourceLocation },
         m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr },
@@ -71,17 +72,27 @@ namespace Ace
         auto* const lhsTypeSymbol = boundLHSExpr->GetTypeInfo().Symbol;
         auto* const rhsTypeSymbol = boundRHSExpr->GetTypeInfo().Symbol;
 
-        const auto operatorNameIt =
-            SpecialIdentifier::Operator::BinaryNameMap.find(m_Operator);
-        ACE_TRY_ASSERT(
-            operatorNameIt != end(SpecialIdentifier::Operator::BinaryNameMap)
+        const auto& operatorNameMap =
+            SpecialIdentifier::Operator::BinaryNameMap;
+
+        const auto operatorNameIt = operatorNameMap.find(m_Operator.TokenKind);
+        ACE_TRY_ASSERT(operatorNameIt != end(operatorNameMap));
+
+        auto lhsName = lhsTypeSymbol->CreateFullyQualifiedName(
+            m_Operator.SourceLocation
         );
+        lhsName.Sections.emplace_back(Identifier{
+            m_Operator.SourceLocation,
+            operatorNameIt->second,
+        });
 
-        auto lhsName = lhsTypeSymbol->CreateFullyQualifiedName();
-        lhsName.Sections.emplace_back(operatorNameIt->second);
-
-        auto rhsName = rhsTypeSymbol->CreateFullyQualifiedName();
-        rhsName.Sections.emplace_back(operatorNameIt->second);
+        auto rhsName = rhsTypeSymbol->CreateFullyQualifiedName(
+            m_Operator.SourceLocation
+        );
+        rhsName.Sections.emplace_back(Identifier{
+            m_Operator.SourceLocation,
+            operatorNameIt->second,
+        });
 
         const std::vector<TypeInfo> argTypeInfos
         {

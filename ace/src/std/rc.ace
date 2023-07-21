@@ -86,8 +86,12 @@ std::rc: module -> pub {
                 weak_count:   0,
             };
 
-            mem::copy(Reference[T]::ptr(value), value_ptr,         __size_of[T]);
-            mem::copy(__address_of(control_block),  control_block_ptr, __size_of[ControlBlock]);
+            mem::copy(Reference[T]::ptr(value), value_ptr, __size_of[T]);
+            mem::copy(
+                __address_of(control_block),
+                control_block_ptr,
+                __size_of[ControlBlock]
+            );
 
             ret new StrongPointer[T] { internal_data };
         }
@@ -103,7 +107,11 @@ std::rc: module -> pub {
             ret new StrongPointer[T] { internal_data };
         }
 
-        operator copy(self: &StrongPointer[T], other: &StrongPointer[T]): void -> pub {
+        operator copy(
+            self:  &StrongPointer[T],
+            other: &StrongPointer[T]
+        ): void -> pub
+        {
             set_value_ptr        (self, value_ptr(other));
             set_control_block_ptr(self, control_block_ptr(other));
 
@@ -132,13 +140,18 @@ std::rc: module -> pub {
     }
 
     impl[T] WeakPointer[T] {
-        operator impl(strong_ptr: &StrongPointer[T]): WeakPointer[T] -> pub {
-            control_block_ptr: Pointer = StrongPointer[T]::control_block_ptr(strong_ptr);
+        from(strong_ptr: &StrongPointer[T]): WeakPointer[T] -> pub {
+            control_block_ptr: Pointer =
+                StrongPointer[T]::control_block_ptr(strong_ptr);
             ControlBlock::increment_weak_count(control_block_ptr);
             ret new WeakPointer[T] { control_block_ptr };
         }
  
-        operator copy(self: &WeakPointer[T], other: &WeakPointer[T]): void -> pub {
+        operator copy(
+            self:  &WeakPointer[T],
+            other: &WeakPointer[T]
+        ): void -> pub
+        {
             self.control_block_ptr = other.control_block_ptr;
 
             ControlBlock::increment_weak_count(self.control_block_ptr);

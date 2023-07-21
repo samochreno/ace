@@ -10,6 +10,7 @@
 #include "SymbolKind.hpp"
 #include "SymbolCategory.hpp"
 #include "AccessModifier.hpp"
+#include "SourceLocation.hpp"
 #include "Name.hpp"
 
 namespace Ace
@@ -28,6 +29,8 @@ namespace Ace
 
         virtual auto CreatePartialSignature() const -> std::string final;
         virtual auto CreateSignature() const -> std::string final;
-        virtual auto CreateFullyQualifiedName() const -> SymbolName final;
+        virtual auto CreateFullyQualifiedName(
+            const SourceLocation& t_sourceLocation
+        ) const -> SymbolName final;
     };
 }

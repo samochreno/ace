@@ -7,7 +7,7 @@
 #include "BoundNodes/Exprs/VarReferences/InstanceVarReferenceExprBoundNode.hpp"
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
-#include "Name.hpp"
+#include "Identifier.hpp"
 #include "Diagnostic.hpp"
 
 namespace Ace

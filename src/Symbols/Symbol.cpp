@@ -10,6 +10,7 @@
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/TemplatableSymbol.hpp"
 #include "Scope.hpp"
+#include "SourceLocation.hpp"
 #include "Name.hpp"
 
 namespace Ace
@@ -116,12 +117,14 @@ namespace Ace
         return signature;
     }
 
-    auto ISymbol::CreateFullyQualifiedName() const -> SymbolName 
+    auto ISymbol::CreateFullyQualifiedName(
+        const SourceLocation& t_sourceLocation
+    ) const -> SymbolName
     {
         auto* const symbol = UnwrapAlias(this);
         if (symbol != this)
         {
-            return symbol->CreateFullyQualifiedName();
+            return symbol->CreateFullyQualifiedName(t_sourceLocation);
         }
 
         std::vector<SymbolNameSection> nameSections{};
@@ -140,15 +143,25 @@ namespace Ace
             rbegin(scopes) + 1, 
             rend  (scopes), 
             back_inserter(nameSections),
-            [](const std::shared_ptr<Scope>& t_scope)
+            [&](const std::shared_ptr<Scope>& t_scope)
             {
-                return SymbolNameSection{ t_scope->GetName() };
+                return SymbolNameSection
+                {
+                    Identifier
+                    {
+                        t_sourceLocation,
+                        t_scope->GetName(),
+                    }
+                };
             }
         );
 
-        nameSections.emplace_back(GetName().String);
+        nameSections.emplace_back(Identifier{
+            t_sourceLocation,
+            GetName().String
+        });
 
-        if (auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(this))
+        if (const auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(this))
         {
             const auto implTemplateArgs = templatableSymbol->CollectImplTemplateArgs();
             std::vector<SymbolName> implTemplateArgNames{};
@@ -156,9 +169,11 @@ namespace Ace
                 begin(implTemplateArgs), 
                 end  (implTemplateArgs), 
                 back_inserter(implTemplateArgNames),
-                [](ITypeSymbol* const t_implTemplateArg)
+                [&](ITypeSymbol* const t_implTemplateArg)
                 {
-                    return t_implTemplateArg->CreateFullyQualifiedName();
+                    return t_implTemplateArg->CreateFullyQualifiedName(
+                        t_sourceLocation
+                    );
                 }
             );
 
@@ -170,9 +185,11 @@ namespace Ace
                 begin(templateArgs), 
                 end  (templateArgs), 
                 back_inserter(templateArgNames),
-                [](ITypeSymbol* const t_templateArg)
+                [&](ITypeSymbol* const t_templateArg)
                 {
-                    return t_templateArg->CreateFullyQualifiedName();
+                    return t_templateArg->CreateFullyQualifiedName(
+                        t_sourceLocation
+                    );
                 }
             );
 

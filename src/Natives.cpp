@@ -10,6 +10,7 @@
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "Emittable.hpp"
+#include "SourceLocation.hpp"
 #include "Scope.hpp"
 #include "Emitter.hpp"
 #include "SpecialIdentifier.hpp"
@@ -35,14 +36,47 @@ namespace Ace
         FunctionBodyEmitter m_BodyEmitter;
     };
 
+    static auto CreateSymbolName(
+        const SourceLocation& t_sourceLocation,
+        const std::vector<const char*>& t_nameSectionStrings
+    ) -> SymbolName
+    {
+        std::vector<SymbolNameSection> sections{};
+        std::transform(
+            begin(t_nameSectionStrings),
+            end  (t_nameSectionStrings),
+            back_inserter(sections),
+            [&](const char* const t_nameSectionString)
+            {
+                return SymbolNameSection
+                {
+                    Identifier{ t_sourceLocation, t_nameSectionString }
+                };
+            }
+        );
+
+        return SymbolName{ sections, SymbolNameResolutionScope::Global };
+    }
+
+    static auto CreateAssociatedSymbolName(
+        const SourceLocation& t_sourceLocation,
+        const INative& t_type,
+        const char* const t_name
+    ) -> SymbolName
+    {
+        auto name = t_type.CreateFullyQualifiedName(t_sourceLocation);
+        name.Sections.emplace_back(Identifier{ t_sourceLocation, t_name });
+        return name;
+    }
+
     NativeType::NativeType(
         const Compilation* const t_compilation,
-        SymbolName&& t_name,
+        std::vector<const char*>&& t_nameSectionStrings,
         std::optional<std::function<llvm::Type*()>>&& t_irTypeGetter,
         const TypeSizeKind t_sizeKind,
         const NativeCopyabilityKind t_copyabilityKind
     ) : m_Compilation{ t_compilation },
-        m_Name{ std::move(t_name) },
+        m_NameSectionStrings{ std::move(t_nameSectionStrings) },
         m_IRTypeGetter{ std::move(t_irTypeGetter) },
         m_IsSized{ t_sizeKind == TypeSizeKind::Sized },
         m_IsTriviallyCopyable{ t_copyabilityKind == NativeCopyabilityKind::Trivial }
@@ -58,37 +92,27 @@ namespace Ace
         );
     }
 
-    auto NativeType::GetFullyQualifiedName() const -> const SymbolName&
-    {
-        return m_Name;
-    }
-
     auto NativeType::GetCompilation() const -> const Compilation*
     {
         return m_Compilation;
     }
 
-    auto NativeType::GetSymbol() const -> ITypeSymbol*
+    auto NativeType::CreateFullyQualifiedName(
+        const SourceLocation& t_sourceLocation
+    ) const -> SymbolName
     {
-        ACE_ASSERT(m_Symbol);
-        return m_Symbol;
-    }
-
-    auto NativeType::HasIRType() const -> bool
-    {
-        return m_IRTypeGetter.has_value();
-    }
-
-    auto NativeType::GetIRType() const -> llvm::Type*
-    {
-        ACE_ASSERT(HasIRType());
-        return m_IRTypeGetter.value()();
+        return CreateSymbolName(
+            t_sourceLocation,
+            m_NameSectionStrings
+        );
     }
 
     auto NativeType::Initialize() -> void
     {
-        auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<ITypeSymbol>(m_Name).Unwrap();
+        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        auto* const symbol = globalScope->ResolveStaticSymbol<ITypeSymbol>(
+            CreateFullyQualifiedName(SourceLocation{})
+        ).Unwrap();
 
         if (m_IRTypeGetter.has_value())
         {
@@ -108,35 +132,60 @@ namespace Ace
         m_Symbol = symbol;
     }
 
-    auto NativeTypeTemplate::Initialize() -> void
+
+
+    auto NativeType::GetSymbol() const -> ITypeSymbol*
     {
-        auto name = m_Name;
-        name.Sections.back().Name = SpecialIdentifier::CreateTemplate(
-            name.Sections.back().Name
-        );
+        ACE_ASSERT(m_Symbol);
+        return m_Symbol;
+    }
 
-        auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<TypeTemplateSymbol>(name).Unwrap();
+    auto NativeType::HasIRType() const -> bool
+    {
+        return m_IRTypeGetter.has_value();
+    }
 
-        m_Symbol = symbol;
+    auto NativeType::GetIRType() const -> llvm::Type*
+    {
+        ACE_ASSERT(HasIRType());
+        return m_IRTypeGetter.value()();
     }
 
     NativeTypeTemplate::NativeTypeTemplate(
         const Compilation* const t_compilation,
-        SymbolName&& t_name
+        std::vector<const char*>&& t_nameSectionStrings
     ) : m_Compilation{ t_compilation },
-        m_Name{ std::move(t_name) }
+        m_NameSectionStrings{ std::move(t_nameSectionStrings) }
     {
-    }
-
-    auto NativeTypeTemplate::GetFullyQualifiedName() const -> const SymbolName&
-    {
-        return m_Name;
     }
 
     auto NativeTypeTemplate::GetCompilation() const -> const Compilation*
     {
         return m_Compilation;
+    }
+
+    auto NativeTypeTemplate::CreateFullyQualifiedName(
+        const SourceLocation& t_sourceLocation
+    ) const -> SymbolName
+    {
+        return CreateSymbolName(
+            t_sourceLocation,
+            m_NameSectionStrings
+        );
+    }
+
+    auto NativeTypeTemplate::Initialize() -> void
+    {
+        auto name = CreateFullyQualifiedName(SourceLocation{});
+        name.Sections.back().Name.String = SpecialIdentifier::CreateTemplate(
+            name.Sections.back().Name.String
+        );
+
+        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        auto* const symbol =
+            globalScope->ResolveStaticSymbol<TypeTemplateSymbol>(name).Unwrap();
+
+        m_Symbol = symbol;
     }
 
     auto NativeTypeTemplate::GetSymbol() const -> TypeTemplateSymbol*
@@ -147,10 +196,10 @@ namespace Ace
 
     NativeFunction::NativeFunction(
         const Compilation* const t_compilation,
-        SymbolName&& t_name,
+        std::vector<const char*>&& t_nameSectionStrings,
         FunctionBodyEmitter&& t_bodyEmitter
     ) : m_Compilation{ t_compilation },
-        m_Name{ std::move(t_name) },
+        m_NameSectionStrings{ std::move(t_nameSectionStrings) },
         m_BodyEmitter{ std::move(t_bodyEmitter) }
     {
     }
@@ -160,16 +209,22 @@ namespace Ace
         return m_Compilation;
     }
 
-    auto NativeFunction::GetSymbol() const -> FunctionSymbol*
+    auto NativeFunction::CreateFullyQualifiedName(
+        const SourceLocation& t_sourceLocation
+    ) const -> SymbolName
     {
-        ACE_ASSERT(m_Symbol);
-        return m_Symbol;
+        return CreateSymbolName(
+            t_sourceLocation,
+            m_NameSectionStrings
+        );
     }
 
     auto NativeFunction::Initialize() -> void
     {
-        auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(m_Name).Unwrap();
+        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
+            CreateFullyQualifiedName(SourceLocation{})
+        ).Unwrap();
 
         symbol->BindBody(std::make_shared<FunctionEmittableBody>(
             m_BodyEmitter
@@ -178,20 +233,18 @@ namespace Ace
         m_Symbol = symbol;
     }
 
-    NativeFunctionTemplate::NativeFunctionTemplate(
-        const Compilation* const t_compilation,
-        SymbolName&& t_name
-    ) : m_Compilation{ t_compilation },
-        m_Name{ std::move(t_name) }
+    auto NativeFunction::GetSymbol() const -> FunctionSymbol*
     {
+        ACE_ASSERT(m_Symbol);
+        return m_Symbol;
     }
 
-    auto NativeFunctionTemplate::Initialize() -> void
+    NativeFunctionTemplate::NativeFunctionTemplate(
+        const Compilation* const t_compilation,
+        std::vector<const char*>&& t_nameSectionStrings
+    ) : m_Compilation{ t_compilation },
+        m_NameSectionStrings{ std::move(t_nameSectionStrings) }
     {
-        auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionTemplateSymbol>(m_Name).Unwrap();
-
-        m_Symbol = symbol;
     }
 
     auto NativeFunctionTemplate::GetCompilation() const -> const Compilation*
@@ -199,8 +252,34 @@ namespace Ace
         return m_Compilation;
     }
 
+    auto NativeFunctionTemplate::CreateFullyQualifiedName(
+        const SourceLocation& t_sourceLocation
+    ) const -> SymbolName
+    {
+        return CreateSymbolName(
+            t_sourceLocation,
+            m_NameSectionStrings
+        );
+    }
+
+    auto NativeFunctionTemplate::Initialize() -> void
+    {
+        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        auto* const symbol = globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
+            CreateFullyQualifiedName(SourceLocation{})
+        ).Unwrap();
+
+        m_Symbol = symbol;
+    }
+
+    auto NativeFunctionTemplate::GetSymbol() const -> FunctionTemplateSymbol*
+    {
+        ACE_ASSERT(m_Symbol);
+        return m_Symbol;
+    }
+
     NativeAssociatedFunction::NativeAssociatedFunction(
-        const ITypeableNative& t_type,
+        const INative& t_type,
         const char* const t_name,
         FunctionBodyEmitter&& t_bodyEmitter
     ) : m_Type{ t_type },
@@ -214,13 +293,23 @@ namespace Ace
         return m_Type.GetCompilation();
     }
 
+    auto NativeAssociatedFunction::CreateFullyQualifiedName(
+        const SourceLocation& t_sourceLocation
+    ) const -> SymbolName
+    {
+        return CreateAssociatedSymbolName(
+            t_sourceLocation,
+            m_Type,
+            m_Name
+        );
+    }
+
     auto NativeAssociatedFunction::Initialize() -> void
     {
-        auto name = m_Type.GetFullyQualifiedName();
-        name.Sections.emplace_back(m_Name);
-
-        auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(name).Unwrap();
+        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
+            CreateFullyQualifiedName(SourceLocation{})
+        ).Unwrap();
 
         symbol->BindBody(std::make_shared<FunctionEmittableBody>(
             m_BodyEmitter
@@ -236,7 +325,7 @@ namespace Ace
     }
 
     NativeAssociatedFunctionTemplate::NativeAssociatedFunctionTemplate(
-        const ITypeableNative& t_type,
+        const INative& t_type,
         const char* const t_name
     ) : m_Type{ t_type },
         m_Name{ t_name }
@@ -248,13 +337,23 @@ namespace Ace
         return m_Type.GetCompilation();
     }
 
+    auto NativeAssociatedFunctionTemplate::CreateFullyQualifiedName(
+        const SourceLocation& t_sourceLocation
+    ) const -> SymbolName
+    {
+        return CreateAssociatedSymbolName(
+            t_sourceLocation,
+            m_Type,
+            m_Name
+        );
+    }
+
     auto NativeAssociatedFunctionTemplate::Initialize() -> void
     {
-        auto name = m_Type.GetFullyQualifiedName();
-        name.Sections.emplace_back(m_Name);
-
-        auto* const symbol =
-            GetCompilation()->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionTemplateSymbol>(name).Unwrap();
+        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        auto* const symbol = globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
+            CreateFullyQualifiedName(SourceLocation{})
+        ).Unwrap();
 
         m_Symbol = symbol;
     }
@@ -1294,11 +1393,7 @@ namespace Ace
     ) : Int8
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int8" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Int8" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt8Ty(*t_compilation->LLVMContext);
@@ -1309,11 +1404,7 @@ namespace Ace
         Int16
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int16" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Int16" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt16Ty(*t_compilation->LLVMContext);
@@ -1324,11 +1415,7 @@ namespace Ace
         Int32
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int32" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Int32" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(*t_compilation->LLVMContext);
@@ -1339,11 +1426,7 @@ namespace Ace
         Int64
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int64" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Int64" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt64Ty(*t_compilation->LLVMContext);
@@ -1355,11 +1438,7 @@ namespace Ace
         UInt8
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt8" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "UInt8" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt8Ty(*t_compilation->LLVMContext);
@@ -1370,11 +1449,7 @@ namespace Ace
         UInt16
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt16" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "UInt16" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt16Ty(*t_compilation->LLVMContext);
@@ -1385,11 +1460,7 @@ namespace Ace
         UInt32
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt32" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "UInt32" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(*t_compilation->LLVMContext);
@@ -1400,11 +1471,7 @@ namespace Ace
         UInt64
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "UInt64" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "UInt64" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt64Ty(*t_compilation->LLVMContext);
@@ -1416,11 +1483,7 @@ namespace Ace
         Int
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Int" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Int" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(*t_compilation->LLVMContext);
@@ -1432,11 +1495,7 @@ namespace Ace
         Float32
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Float32" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Float32" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getFloatTy(*t_compilation->LLVMContext);
@@ -1447,11 +1506,7 @@ namespace Ace
         Float64
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Float64" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Float64" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getDoubleTy(*t_compilation->LLVMContext);
@@ -1463,11 +1518,7 @@ namespace Ace
         Bool
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Bool" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Bool" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt1Ty(*t_compilation->LLVMContext);
@@ -1478,11 +1529,7 @@ namespace Ace
         Void
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Void" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Void" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getVoidTy(*t_compilation->LLVMContext);
@@ -1493,11 +1540,7 @@ namespace Ace
         String
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "String" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Void" },
             {},
             TypeSizeKind::Sized,
             NativeCopyabilityKind::NonTrivial,
@@ -1506,11 +1549,7 @@ namespace Ace
         Pointer
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Pointer" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "Pointer" },
             [t_compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt8PtrTy(*t_compilation->LLVMContext);
@@ -1522,39 +1561,23 @@ namespace Ace
         Reference
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "Reference" } },
-                SymbolNameResolutionScope::Global,
-            }
+            std::vector{ "ace", "std", "Reference" },
         },
         StrongPointer
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "rc" }, { "StrongPointer" } },
-                SymbolNameResolutionScope::Global,
-            }
+            std::vector{ "ace", "std", "rc", "StrongPointer" },
         },
         WeakPointer
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "rc" }, { "WeakPointer" } },
-                SymbolNameResolutionScope::Global,
-            }
+            std::vector{ "ace", "std", "rc", "WeakPointer" },
         },
 
         print_int
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "print_int" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "print_int" },
             [this, t_compilation](Emitter& t_emitter)
             {
                 std::string string{ "%" PRId32 "\n" };
@@ -1617,11 +1640,7 @@ namespace Ace
         print_ptr
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "print_ptr" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "print_ptr" },
             [t_compilation](Emitter& t_emitter)
             {
                 std::string string{ "0x%" PRIXPTR "\n" };
@@ -1685,11 +1704,7 @@ namespace Ace
         alloc
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "mem" }, { "alloc" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "mem", "alloc" },
             [this](Emitter& t_emitter)
             {
                 auto* const mallocFunction =
@@ -1718,11 +1733,7 @@ namespace Ace
         dealloc
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "mem" }, { "dealloc" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "mem", "dealloc" },
             [this](Emitter& t_emitter)
             {
                 auto* const freeFunction =
@@ -1746,11 +1757,7 @@ namespace Ace
         copy
         {
             t_compilation,
-            SymbolName
-            {
-                std::vector<SymbolNameSection>{ { "ace" }, { "std" }, { "mem" }, { "copy" } },
-                SymbolNameResolutionScope::Global,
-            },
+            std::vector{ "ace", "std", "mem", "copy" },
             [this](Emitter& t_emitter)
             {
                 auto* const memcpyFunction =
@@ -2135,6 +2142,12 @@ namespace Ace
         {
             StrongPointer,
             "value"
+        },
+
+        WeakPointer__from
+        {
+            WeakPointer,
+            "from"
         }
     {
     }
@@ -2549,6 +2562,8 @@ namespace Ace
         {
             &StrongPointer__new,
             &StrongPointer__value,
+
+            &WeakPointer__from,
         };
 
         m_Natives.insert(

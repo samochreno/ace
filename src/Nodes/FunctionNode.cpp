@@ -165,7 +165,7 @@ namespace Ace
         ));
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<FunctionSymbol>(
-            m_Name.String,
+            m_Name,
             m_SelfScope->CollectImplTemplateArgs(),
             m_SelfScope->CollectTemplateArgs()
         ).Unwrap();

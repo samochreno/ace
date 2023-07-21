@@ -18,6 +18,14 @@ namespace Ace
             CharacterEndIterator{ t_characterEndIt }
         {
         }
+        SourceLocation(
+            const SourceLocation& t_first,
+            const SourceLocation& t_last
+        ) : Buffer{ t_first.Buffer },
+            CharacterBeginIterator{ t_first.CharacterBeginIterator },
+            CharacterEndIterator{ t_last.CharacterEndIterator }
+        {
+        }
 
         auto CreateFirst() const -> SourceLocation
         {

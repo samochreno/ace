@@ -532,7 +532,7 @@ unwrap[T](wrapped: Wrapper[T]): T {
 }
 
 unwrapper(): int {
-    wrapped: Wrapper[int] = new Wrapper[int] { value: -87783 };
+    wrapped: Wrapper[int] = new Wrapper[int] { value: -1001001 };
     ret unwrap(wrapped);
 }
 

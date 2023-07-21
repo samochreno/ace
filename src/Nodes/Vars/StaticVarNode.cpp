@@ -85,7 +85,7 @@ namespace Ace
         }));
 
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<StaticVarSymbol>(
-            m_Name.String
+            m_Name
         ).Unwrap();
 
         return std::make_shared<const StaticVarBoundNode>(

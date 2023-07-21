@@ -52,6 +52,9 @@ namespace Ace
         virtual auto IsStrongPointer() const -> bool final;
         virtual auto GetWithoutStrongPointer() -> ITypeSymbol* final;
         virtual auto GetWithStrongPointer() -> ITypeSymbol* final;
+        virtual auto IsWeakPointer() const -> bool final;
+        virtual auto GetWithoutWeakPointer() -> ITypeSymbol* final;
+        virtual auto GetWithWeakPointer() -> ITypeSymbol* final;
         virtual auto GetUnaliased() -> ITypeSymbol* final;
         virtual auto GetUnaliased() const -> const ITypeSymbol* final;
         virtual auto GetTemplate() const -> std::optional<TypeTemplateSymbol*> final;

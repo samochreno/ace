@@ -138,14 +138,14 @@ namespace Ace
 
         template<typename TSymbol>
         auto ResolveStaticSymbol(
-            const std::string& t_name
+            const Identifier& t_name
         ) const -> Expected<TSymbol*>
         {
             return ResolveStaticSymbol<TSymbol>(t_name, {});
         }
         template<typename TSymbol>
         auto ResolveStaticSymbol(
-            const std::string& t_name,
+            const Identifier& t_name,
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes
         ) const -> Expected<TSymbol*>
         {
@@ -250,14 +250,14 @@ namespace Ace
 
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const std::string& t_name
+            const Identifier& t_name
         ) const -> Expected<TSymbol*>
         {
             return ExclusiveResolveSymbol<TSymbol>(t_name, {});
         }
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const std::string& t_name,
+            const Identifier& t_name,
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes
         ) const -> Expected<TSymbol*>
         {
@@ -270,7 +270,7 @@ namespace Ace
         }
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const std::string& t_name,
+            const Identifier& t_name,
             const std::vector<ITypeSymbol*>& t_implTemplateArgs,
             const std::vector<ITypeSymbol*>& t_templateArgs
         ) const -> Expected<TSymbol*>
@@ -284,7 +284,7 @@ namespace Ace
         }
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const std::string& t_name,
+            const Identifier& t_name,
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes,
             const std::vector<ITypeSymbol*>& t_implTemplateArgs,
             const std::vector<ITypeSymbol*>& t_templateArgs
@@ -292,7 +292,7 @@ namespace Ace
         {
             std::vector<SymbolNameSection> nameSections
             { 
-                SymbolNameSection { t_name }
+                SymbolNameSection{ t_name }
             };
 
             const std::vector<std::shared_ptr<const Scope>> scopes

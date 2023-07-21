@@ -56,7 +56,7 @@ namespace Ace
     auto SelfParamVarNode::CreateBound() const -> Expected<std::shared_ptr<const SelfParamVarBoundNode>>
     {
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<SelfParamVarSymbol>(
-            m_Name.String
+            m_Name
         ).Unwrap();
 
         return std::make_shared<const SelfParamVarBoundNode>(

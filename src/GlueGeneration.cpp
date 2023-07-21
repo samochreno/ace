@@ -13,28 +13,28 @@
 
 namespace Ace::GlueGeneration
 {
-    static auto GetOrDefineCopyGlueSymbols(
+    static auto GetOrDefineAndBindCopyGlueSymbols(
         const Compilation* const t_compilation,
         ITypeSymbol* const t_typeSymbol
     ) -> FunctionSymbol*
     {
+        if (t_typeSymbol->GetCopyGlue().has_value())
+        {
+            return t_typeSymbol->GetCopyGlue().value();
+        }
+
         const auto scope     = t_typeSymbol->GetUnaliased()->GetScope();
         const auto selfScope = scope->GetOrCreateChild({});
 
         const auto nameString = SpecialIdentifier::CreateCopyGlue(
             t_typeSymbol->CreatePartialSignature()
         );
-
-        if (const auto expGlueSymbol = scope->ExclusiveResolveSymbol<FunctionSymbol>(nameString))
-        {
-            return expGlueSymbol.Unwrap();
-        }
-
         const Identifier name
         {
             t_typeSymbol->GetName().SourceLocation,
             nameString,
         };
+
         auto ownedGlueSymbol = std::make_unique<FunctionSymbol>(
             selfScope,
             name,
@@ -46,6 +46,7 @@ namespace Ace::GlueGeneration
         auto* const glueSymbol = Scope::DefineSymbol(
             std::move(ownedGlueSymbol)
         ).Unwrap();
+        t_typeSymbol->BindCopyGlue(glueSymbol);
 
         const Identifier selfName
         {
@@ -74,28 +75,28 @@ namespace Ace::GlueGeneration
         return glueSymbol;
     }
 
-    static auto GetOrDefineDropGlueSymbols(
+    static auto GetOrDefineAndBindDropGlueSymbols(
         const Compilation* const t_compilation,
         ITypeSymbol* const t_typeSymbol
     ) -> FunctionSymbol*
     {
+        if (t_typeSymbol->GetDropGlue().has_value())
+        {
+            return t_typeSymbol->GetDropGlue().value();
+        }
+
         const auto scope     = t_typeSymbol->GetUnaliased()->GetScope();
         const auto selfScope = scope->GetOrCreateChild({});
 
         const auto nameString = SpecialIdentifier::CreateDropGlue(
             t_typeSymbol->CreatePartialSignature()
         );
-
-        if (const auto expGlueSymbol = scope->ExclusiveResolveSymbol<FunctionSymbol>(nameString))
-        {
-            return expGlueSymbol.Unwrap();
-        }
-
         const Identifier name
         {
             t_typeSymbol->GetName().SourceLocation,
             nameString,
         };
+
         auto ownedGlueSymbol = std::make_unique<FunctionSymbol>(
             selfScope,
             name,
@@ -107,6 +108,7 @@ namespace Ace::GlueGeneration
         auto* const glueSymbol = Scope::DefineSymbol(
             std::move(ownedGlueSymbol)
         ).Unwrap();
+        t_typeSymbol->BindDropGlue(glueSymbol);
 
         const Identifier selfName
         {
@@ -123,10 +125,10 @@ namespace Ace::GlueGeneration
         return glueSymbol;
     }
 
-    static auto TryDefineGlueSymbols(
+    static auto TryDefineAndBindGlueSymbols(
         const Compilation* const t_compilation,
         ITypeSymbol* const t_typeSymbol,
-        const std::function<FunctionSymbol*(const Compilation* const, ITypeSymbol* const)>& t_getOrDefineGlueSymbols
+        const std::function<FunctionSymbol*(const Compilation* const, ITypeSymbol* const)>& t_getOrDefineAndBindGlueSymbols
     ) -> std::optional<FunctionSymbol*>
     {
         auto* const templatableSymbol = dynamic_cast<ITemplatableSymbol*>(
@@ -147,7 +149,7 @@ namespace Ace::GlueGeneration
             return std::nullopt;
         }
 
-        return t_getOrDefineGlueSymbols(t_compilation, t_typeSymbol);
+        return t_getOrDefineAndBindGlueSymbols(t_compilation, t_typeSymbol);
     }
 
     static auto CreateAndBindGlueBody(
@@ -164,8 +166,7 @@ namespace Ace::GlueGeneration
     static auto GenerateAndBindGlue(
         const Compilation* const t_compilation,
         const std::function<FunctionSymbol*(const Compilation* const, ITypeSymbol* const)>& t_getOrDefineGlueSymbols,
-        const std::function<std::shared_ptr<const IEmittable<void>>(ITypeSymbol* const, FunctionSymbol* const)>& t_createGlueBody,
-        const std::function<void(ITypeSymbol* const, FunctionSymbol* const)>& t_bindGlue
+        const std::function<std::shared_ptr<const IEmittable<void>>(ITypeSymbol* const, FunctionSymbol* const)>& t_createGlueBody
     ) -> void
     {
         const auto typeSymbols =
@@ -182,7 +183,7 @@ namespace Ace::GlueGeneration
         std::for_each(begin(typeSymbols), end(typeSymbols),
         [&](ITypeSymbol* const t_typeSymbol)
         {
-            const auto optGlueSymbol = TryDefineGlueSymbols(
+            const auto optGlueSymbol = TryDefineAndBindGlueSymbols(
                 t_compilation,
                 t_typeSymbol, 
                 t_getOrDefineGlueSymbols
@@ -207,11 +208,6 @@ namespace Ace::GlueGeneration
                 t_typeGlueSymbolPair.TypeSymbol,
                 t_typeGlueSymbolPair.FunctionSymbol
             );
-
-            t_bindGlue(
-                t_typeGlueSymbolPair.TypeSymbol,
-                t_typeGlueSymbolPair.FunctionSymbol
-            );
         });
     }
 
@@ -221,38 +217,24 @@ namespace Ace::GlueGeneration
     {
         GenerateAndBindGlue(
             t_compilation,
-            &GetOrDefineCopyGlueSymbols,
+            &GetOrDefineAndBindCopyGlueSymbols,
             [](
                 ITypeSymbol* const t_typeSymbol, 
                 FunctionSymbol* const t_glueSymbol
             ) 
             { 
                 return t_typeSymbol->CreateCopyGlueBody(t_glueSymbol);
-            },
-            [](
-                ITypeSymbol* const t_typeSymbol, 
-                FunctionSymbol* const t_glueSymbol
-            ) 
-            { 
-                t_typeSymbol->BindCopyGlue(t_glueSymbol);
             }
         );
         GenerateAndBindGlue(
             t_compilation,
-            &GetOrDefineDropGlueSymbols,
+            &GetOrDefineAndBindDropGlueSymbols,
             [](
                 ITypeSymbol* const t_typeSymbol, 
                 FunctionSymbol* const t_glueSymbol
             ) 
             { 
                 return t_typeSymbol->CreateDropGlueBody(t_glueSymbol);
-            },
-            [](
-                ITypeSymbol* const t_typeSymbol, 
-                FunctionSymbol* const t_glueSymbol
-            ) 
-            { 
-                t_typeSymbol->BindDropGlue(t_glueSymbol);
             }
         );
     }
@@ -362,8 +344,13 @@ namespace Ace::GlueGeneration
             paramSymbols.at(1)
         );
 
-        auto operatorName = t_structSymbol->CreateFullyQualifiedName();
-        operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Copy);
+        auto operatorName = t_structSymbol->CreateFullyQualifiedName(
+            t_structSymbol->GetName().SourceLocation
+        );
+        operatorName.Sections.push_back(Identifier{
+            t_structSymbol->GetName().SourceLocation,
+            SpecialIdentifier::Operator::Copy,
+        });
         const auto expOperatorSymbol = 
             t_compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(operatorName);
 
@@ -395,10 +382,8 @@ namespace Ace::GlueGeneration
             [&](InstanceVarSymbol* const t_variableSymbol)
             {
                 auto* const variableTypeSymbol = t_variableSymbol->GetType();
-                const auto variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
-                auto* const variableTypeGlueSymbol = variableTypeScope->ExclusiveResolveSymbol<FunctionSymbol>(
-                    SpecialIdentifier::CreateCopyGlue(variableTypeSymbol->CreatePartialSignature())
-                ).Unwrap();
+                auto* const variableTypeGlueSymbol =
+                    variableTypeSymbol->GetCopyGlue().value();
                 
                 const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
                     SourceLocation{},
@@ -479,8 +464,13 @@ namespace Ace::GlueGeneration
 
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
 
-        auto operatorName = t_structSymbol->CreateFullyQualifiedName();
-        operatorName.Sections.emplace_back(SpecialIdentifier::Operator::Drop);
+        auto operatorName = t_structSymbol->CreateFullyQualifiedName(
+            t_structSymbol->GetName().SourceLocation
+        );
+        operatorName.Sections.push_back(Identifier{
+            t_structSymbol->GetName().SourceLocation,
+            SpecialIdentifier::Operator::Drop,
+        });
         const auto expOperatorSymbol = 
             t_compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(operatorName);
 
@@ -509,10 +499,8 @@ namespace Ace::GlueGeneration
         [&](InstanceVarSymbol* const t_variableSymbol)
         {
             auto* const variableTypeSymbol = t_variableSymbol->GetType();
-            const auto variableTypeScope = variableTypeSymbol->GetUnaliased()->GetScope();
-            auto* const variableTypeGlueSymbol = variableTypeScope->ExclusiveResolveSymbol<FunctionSymbol>(
-                SpecialIdentifier::CreateDropGlue(variableTypeSymbol->CreatePartialSignature())
-            ).Unwrap();
+            auto* const variableTypeGlueSymbol = 
+                variableTypeSymbol->GetDropGlue().value();
             
             const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
                 SourceLocation{},

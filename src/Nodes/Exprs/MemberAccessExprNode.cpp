@@ -4,7 +4,9 @@
 #include <vector>
 
 #include "SourceLocation.hpp"
+#include "Identifier.hpp"
 #include "Scope.hpp"
+#include "Name.hpp"
 #include "BoundNodes/Exprs/VarReferences/InstanceVarReferenceExprBoundNode.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"

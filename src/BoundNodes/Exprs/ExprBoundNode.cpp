@@ -93,9 +93,7 @@ namespace Ace
     {
         if (t_targetTypeInfo.ValueKind == ValueKind::L)
         {
-            ACE_TRY_ASSERT(
-                t_expr->GetTypeInfo().ValueKind != ValueKind::R
-            );
+            ACE_TRY_ASSERT(t_expr->GetTypeInfo().ValueKind != ValueKind::R);
         }
 
         if (
@@ -139,6 +137,7 @@ namespace Ace
         }
 
         ACE_TRY(operatorSymbol, t_func(
+            t_expr->GetSourceLocation(),
             t_expr->GetScope(), 
             t_expr->GetTypeInfo().Symbol,
             t_targetTypeInfo.Symbol
@@ -197,7 +196,7 @@ namespace Ace
         return MaybeChanged<std::optional<std::shared_ptr<const IExprBoundNode>>>
         {
             mchConvertedAndChecked.IsChanged,
-            mchConvertedAndChecked.Value
+            mchConvertedAndChecked.Value,
         };
     }
 }

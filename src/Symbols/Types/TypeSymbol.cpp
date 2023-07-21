@@ -17,17 +17,22 @@ namespace Ace
     {
         auto* const self = GetUnaliased();
 
+        const auto& reference = GetCompilation()->Natives->Reference;
+
         if (
             self->GetScope() !=
-            GetCompilation()->Natives->Reference.GetSymbol()->GetScope()
+            reference.GetSymbol()->GetScope()
             )
         {
             return false;
         }
 
+        const auto referenceName = reference.CreateFullyQualifiedName(
+            SourceLocation{}
+        );
         if (
             self->GetName().String !=
-            GetCompilation()->Natives->Reference.GetFullyQualifiedName().Sections.back().Name
+            referenceName.Sections.back().Name.String
             )
         {
             return false;
@@ -55,7 +60,7 @@ namespace Ace
         }
 
         const auto* const self = GetUnaliased();
-        return self->CollectTemplateArgs().front();
+        return self->CollectTemplateArgs().front()->GetUnaliased();
     }
 
     auto ITypeSymbol::GetWithReference() -> ITypeSymbol*
@@ -80,17 +85,22 @@ namespace Ace
     {
         auto* const self = GetUnaliased();
 
+        const auto& strongPointer = GetCompilation()->Natives->StrongPointer;
+
         if (
             self->GetScope() !=
-            GetCompilation()->Natives->StrongPointer.GetSymbol()->GetScope()
+            strongPointer.GetSymbol()->GetScope()
             )
         {
             return false;
         }
 
+        const auto strongPointerName = strongPointer.CreateFullyQualifiedName(
+            SourceLocation{}
+        );
         if (
             self->GetName().String !=
-            GetCompilation()->Natives->StrongPointer.GetFullyQualifiedName().Sections.back().Name
+            strongPointerName.Sections.back().Name.String
             )
         {
             return false;
@@ -107,7 +117,7 @@ namespace Ace
         }
 
         auto* const self = GetUnaliased();
-        return self->CollectTemplateArgs().front();
+        return self->CollectTemplateArgs().front()->GetUnaliased();
     }
 
     auto ITypeSymbol::GetWithStrongPointer() -> ITypeSymbol*
@@ -115,6 +125,61 @@ namespace Ace
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
             GetCompilation()->Natives->StrongPointer.GetSymbol(),
+            std::nullopt,
+            {},
+            { this->GetUnaliased() }
+        ).Unwrap();
+
+        auto* const typeSymbol = dynamic_cast<ITypeSymbol*>(symbol);
+        ACE_ASSERT(typeSymbol);
+
+        return typeSymbol;
+    }
+
+    auto ITypeSymbol::IsWeakPointer() const -> bool
+    {
+        auto* const self = GetUnaliased();
+
+        const auto& weakPointer = GetCompilation()->Natives->WeakPointer;
+
+        if (
+            self->GetScope() !=
+            weakPointer.GetSymbol()->GetScope()
+            )
+        {
+            return false;
+        }
+
+        const auto weakPointerName = weakPointer.CreateFullyQualifiedName(
+            SourceLocation{}
+        );
+        if (
+            self->GetName().String !=
+            weakPointerName.Sections.back().Name.String
+            )
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    auto ITypeSymbol::GetWithoutWeakPointer() -> ITypeSymbol*
+    {
+        if (!IsWeakPointer())
+        {
+            return this;
+        }
+
+        auto* const self = GetUnaliased();
+        return self->CollectTemplateArgs().front();
+    }
+
+    auto ITypeSymbol::GetWithWeakPointer() -> ITypeSymbol*
+    {
+        auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
+            GetCompilation(),
+            GetCompilation()->Natives->WeakPointer.GetSymbol(),
             std::nullopt,
             {},
             { this->GetUnaliased() }
@@ -152,9 +217,14 @@ namespace Ace
     {
         auto* const self = GetUnaliased();
 
-        auto expTemplate = GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(
-            SpecialIdentifier::CreateTemplate(self->GetName().String)
-        );
+        const Identifier name
+        {
+            self->GetName().SourceLocation,
+            SpecialIdentifier::CreateTemplate(self->GetName().String),
+        };
+
+        auto expTemplate =
+            GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(name);
         
         return expTemplate ?
             expTemplate.Unwrap() :

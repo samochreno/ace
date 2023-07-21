@@ -5,6 +5,7 @@
 
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
+#include "Operator.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Stmts/Assignments/CompoundAssignmentStmtBoundNode.hpp"
 #include "SpecialIdentifier.hpp"
@@ -16,7 +17,7 @@ namespace Ace
         const std::shared_ptr<Scope>& t_scope,
         const std::shared_ptr<const IExprNode>& t_lhsExpr,
         const std::shared_ptr<const IExprNode>& t_rhsExpr,
-        const TokenKind t_operator
+        const Operator& t_operator
     ) : m_SourceLocation{ t_sourceLocation },
         m_Scope{ t_scope },
         m_LHSExpr{ t_lhsExpr },
@@ -73,15 +74,19 @@ namespace Ace
         auto* const lhsTypeSymbol = boundLHSExpr->GetTypeInfo().Symbol;
         auto* const rhsTypeSymbol = boundRHSExpr->GetTypeInfo().Symbol;
 
-        const auto operatorNameIt =
-            SpecialIdentifier::Operator::BinaryNameMap.find(m_Operator);
-        ACE_TRY_ASSERT(
-            operatorNameIt != end(SpecialIdentifier::Operator::BinaryNameMap)
-        );
+        const auto& operatorNameMap =
+            SpecialIdentifier::Operator::BinaryNameMap;
 
-        auto operatorFullName =
-            lhsTypeSymbol->GetWithoutReference()->CreateFullyQualifiedName();
-        operatorFullName.Sections.emplace_back(operatorNameIt->second);
+        const auto operatorNameIt = operatorNameMap.find(m_Operator.TokenKind);
+        ACE_TRY_ASSERT(operatorNameIt != end(operatorNameMap));
+
+        auto operatorFullName = lhsTypeSymbol->GetWithoutReference()->CreateFullyQualifiedName(
+            m_Operator.SourceLocation
+        );
+        operatorFullName.Sections.emplace_back(Identifier{
+            m_Operator.SourceLocation,
+            operatorNameIt->second,
+        });
 
         ACE_TRY(operatorSymbol, m_Scope->ResolveStaticSymbol<FunctionSymbol>(
             operatorFullName,

@@ -39,7 +39,9 @@ namespace Ace
         const NativeType& t_nativeType
     ) -> std::vector<std::shared_ptr<const Token>>
     {
-        const auto name = t_nativeType.GetFullyQualifiedName();
+        const auto name = t_nativeType.CreateFullyQualifiedName(
+            t_sourceLocation
+        );
 
         std::vector<std::shared_ptr<const Token>> tokens{};
 
@@ -51,18 +53,20 @@ namespace Ace
 
         for (size_t i = 0; i < name.Sections.size(); i++)
         {
+            const auto& section = name.Sections.at(i);
+
             if (i != 0)
             {
                 tokens.emplace_back(std::make_shared<const Token>(
-                    t_sourceLocation,
+                    section.Name.SourceLocation,
                     TokenKind::ColonColon
                 ));
             }
 
             tokens.emplace_back(std::make_shared<const Token>(
-                t_sourceLocation,
+                section.Name.SourceLocation,
                 TokenKind::Identifier,
-                name.Sections.at(i).Name
+                section.Name.String
             ));
         }
 
@@ -97,7 +101,6 @@ namespace Ace
         else if (t_string == Keyword::Assert)    token.Kind = TokenKind::AssertKeyword;
         else if (t_string == Keyword::Module)    token.Kind = TokenKind::ModuleKeyword;
         else if (t_string == Keyword::Impl)      token.Kind = TokenKind::ImplKeyword;
-        else if (t_string == Keyword::Expl)      token.Kind = TokenKind::ExplKeyword;
         else if (t_string == Keyword::AddressOf) token.Kind = TokenKind::AddressOfKeyword;
         else if (t_string == Keyword::SizeOf)    token.Kind = TokenKind::SizeOfKeyword;
         else if (t_string == Keyword::DerefAs)   token.Kind = TokenKind::DerefAsKeyword;

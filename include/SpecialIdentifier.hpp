@@ -45,8 +45,6 @@ namespace Ace::SpecialIdentifier
         inline constexpr const char* OR                 = "$operator_OR";
         inline constexpr const char* Copy               = "$operator_copy";
         inline constexpr const char* Drop               = "$operator_drop";
-        inline constexpr const char* ImplicitFrom       = "$operator_implicit_from";
-        inline constexpr const char* ExplicitFrom       = "$operator_explicit_from";
 
         inline const std::unordered_map<TokenKind, std::string> BinaryNameMap
         {

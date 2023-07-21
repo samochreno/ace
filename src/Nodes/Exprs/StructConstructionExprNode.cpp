@@ -124,7 +124,7 @@ namespace Ace
 
                 const SymbolName symbolName
                 {
-                    SymbolNameSection{ t_arg.Name.String },
+                    SymbolNameSection{ t_arg.Name },
                     SymbolNameResolutionScope::Local,
                 };
 

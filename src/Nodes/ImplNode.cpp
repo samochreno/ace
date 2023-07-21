@@ -116,8 +116,8 @@ namespace Ace
 
                 auto& lastNameSection = typeName.Sections.back();
                 lastNameSection.TemplateArgs.clear();
-                lastNameSection.Name = SpecialIdentifier::CreateTemplate(
-                    lastNameSection.Name
+                lastNameSection.Name.String = SpecialIdentifier::CreateTemplate(
+                    lastNameSection.Name.String
                 );
 
                 ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(typeName));

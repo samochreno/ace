@@ -24,7 +24,6 @@ namespace Ace
         inline constexpr const char* Exit       = "exit";
         inline constexpr const char* Assert     = "assert";
         inline constexpr const char* Impl       = "impl";
-        inline constexpr const char* Expl       = "expl";
         inline constexpr const char* Box        = "box";
         inline constexpr const char* Unbox      = "unbox";
 

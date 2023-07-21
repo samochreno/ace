@@ -142,18 +142,24 @@ namespace Ace
 
         auto* const selfSymbol = boundAST->GetSymbol();
 
-        auto copyOperatorName = selfSymbol->CreateFullyQualifiedName();
-        copyOperatorName.Sections.push_back(
-            SymbolNameSection{ SpecialIdentifier::Operator::Copy }
+        const SourceLocation sourceLocation{};
+
+        auto copyOperatorName = selfSymbol->CreateFullyQualifiedName(
+            sourceLocation
         );
+        copyOperatorName.Sections.push_back(SymbolNameSection{
+            Identifier{ sourceLocation, SpecialIdentifier::Operator::Copy }
+        });
         selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
             copyOperatorName
         );
 
-        auto dropOperatorName = selfSymbol->CreateFullyQualifiedName();
-        dropOperatorName.Sections.push_back(
-            SymbolNameSection{ SpecialIdentifier::Operator::Drop }
+        auto dropOperatorName = selfSymbol->CreateFullyQualifiedName(
+            sourceLocation
         );
+        dropOperatorName.Sections.push_back(SymbolNameSection{
+            Identifier{ sourceLocation, SpecialIdentifier::Operator::Drop }
+        });
         selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
             dropOperatorName
         );

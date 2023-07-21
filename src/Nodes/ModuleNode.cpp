@@ -228,7 +228,7 @@ namespace Ace
         }));
 
         auto* const selfSymbol = GetSymbolScope()->ExclusiveResolveSymbol<ModuleSymbol>(
-            GetName().String
+            GetName()
         ).Unwrap();
 
         std::vector<std::shared_ptr<const ImplBoundNode>> allBoundImpls{};
@@ -285,7 +285,7 @@ namespace Ace
                 )
             {
                 ACE_TRY(symbol, scope->ExclusiveResolveSymbol<ModuleSymbol>(
-                    nameIt->String
+                    *nameIt
                 ));
             }
         }

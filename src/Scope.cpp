@@ -185,7 +185,7 @@ namespace Ace
         ImplTemplateArgs{ t_implTemplateArgs },
         IsSymbolTemplate{ t_isSymbolTemplate },
         IsLastNameSection{ std::distance(t_nameSectionsBegin, t_nameSectionsEnd) == 1 },
-        Name{ t_nameSectionsBegin->Name },
+        Name{ t_nameSectionsBegin->Name.String },
         TemplateName{ SpecialIdentifier::CreateTemplate(Name) }
     {
     }
@@ -1039,12 +1039,6 @@ namespace Ace
         const std::vector<ITypeSymbol*>& t_templateArgs
     ) const -> std::vector<ISymbol*>
     {
-        const auto remainingNameSectionsSize = std::distance(
-            t_data.NameSectionsBegin,
-            t_data.NameSectionsEnd
-        );
-        const bool isLastNameSection = remainingNameSectionsSize == 1;
-
         const auto matchingTemplateNameSymbolsIt =
             m_SymbolMap.find(t_data.TemplateName);
 
@@ -1066,6 +1060,12 @@ namespace Ace
             t_data,
             matchingNameSymbols
         );
+
+        const auto remainingNameSectionsSize = std::distance(
+            t_data.NameSectionsBegin,
+            t_data.NameSectionsEnd
+        );
+        const bool isLastNameSection = remainingNameSectionsSize == 1;
 
         const bool isTemplateSymbol = 
             isTemplate && isLastNameSection && !isInstanceVar;
@@ -1290,7 +1290,7 @@ namespace Ace
 
         const auto& section = t_name.Sections.front();
 
-        const auto& name = section.Name;
+        const auto& name = section.Name.String;
         const auto templateName = SpecialIdentifier::CreateTemplate(name);
 
         for (
@@ -1327,9 +1327,7 @@ namespace Ace
         {
             const auto scope = optScope.value();
 
-            const auto implTemplateArgs =
-                scope->CollectImplTemplateArgs();
-
+            const auto implTemplateArgs = scope->CollectImplTemplateArgs();
             if (!implTemplateArgs.empty())
             {
                 return implTemplateArgs;

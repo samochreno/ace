@@ -24,6 +24,7 @@
 #include "BoundNodes/All.hpp"
 #include "ControlFlowAnalysis.hpp"
 #include "Emitter.hpp"
+#include "GlueGeneration.hpp"
 
 namespace Ace::Application
 {
@@ -37,7 +38,7 @@ namespace Ace::Application
     static auto ParseAST(
         const Compilation* const t_compilation,
     const FileBuffer* const t_fileBuffer
-    ) -> Diagnosed<std::shared_ptr<const ModuleNode>>
+    ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -45,15 +46,19 @@ namespace Ace::Application
         auto dgnTokens = lexer.EatTokens();
         diagnosticBag.Add(dgnTokens.GetDiagnosticBag());
 
-        // TODO: Handle diagnostics
-        const auto ast = ParseAST(
+        const auto expAST = ParseAST(
             t_fileBuffer,
             std::move(dgnTokens.Unwrap())
-        ).Unwrap();
-
-        return Diagnosed
+        );
+        diagnosticBag.Add(expAST);
+        if (!expAST)
         {
-            ast,
+            return diagnosticBag;
+        }
+
+        return Expected
+        {
+            expAST.Unwrap(),
             diagnosticBag,
         };
     }
@@ -227,248 +232,6 @@ namespace Ace::Application
         return Void{};
     }
 
-    static auto GetOrDefineCopyGlueSymbols(
-        const Compilation* const t_compilation,
-        ITypeSymbol* const t_typeSymbol
-    ) -> FunctionSymbol*
-    {
-        const auto scope     = t_typeSymbol->GetUnaliased()->GetScope();
-        const auto selfScope = scope->GetOrCreateChild({});
-
-        const auto nameString = SpecialIdentifier::CreateCopyGlue(
-            t_typeSymbol->CreatePartialSignature()
-        );
-
-        if (const auto expGlueSymbol = scope->ExclusiveResolveSymbol<FunctionSymbol>(nameString))
-        {
-            return expGlueSymbol.Unwrap();
-        }
-
-        const Identifier name
-        {
-            t_typeSymbol->GetName().SourceLocation,
-            nameString,
-        };
-        auto ownedGlueSymbol = std::make_unique<FunctionSymbol>(
-            selfScope,
-            name,
-            SymbolCategory::Static,
-            AccessModifier::Public,
-            t_compilation->Natives->Void.GetSymbol()
-        );
-
-        auto* const glueSymbol = Scope::DefineSymbol(
-            std::move(ownedGlueSymbol)
-        ).Unwrap();
-
-        const Identifier selfName
-        {
-            t_typeSymbol->GetName().SourceLocation,
-            SpecialIdentifier::CreateAnonymous(),
-        };
-        Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
-            selfScope,
-            selfName,
-            t_typeSymbol->GetWithReference(),
-            0
-        )).Unwrap();
-
-        const Identifier otherName
-        {
-            t_typeSymbol->GetName().SourceLocation,
-            SpecialIdentifier::CreateAnonymous(),
-        };
-        Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
-            selfScope,
-            otherName,
-            t_typeSymbol->GetWithReference(),
-            1
-        )).Unwrap();
-
-        return glueSymbol;
-    }
-
-    static auto GetOrDefineDropGlueSymbols(
-        const Compilation* const t_compilation,
-        ITypeSymbol* const t_typeSymbol
-    ) -> FunctionSymbol*
-    {
-        const auto scope     = t_typeSymbol->GetUnaliased()->GetScope();
-        const auto selfScope = scope->GetOrCreateChild({});
-
-        const auto nameString = SpecialIdentifier::CreateDropGlue(
-            t_typeSymbol->CreatePartialSignature()
-        );
-
-        if (const auto expGlueSymbol = scope->ExclusiveResolveSymbol<FunctionSymbol>(nameString))
-        {
-            return expGlueSymbol.Unwrap();
-        }
-
-        const Identifier name
-        {
-            t_typeSymbol->GetName().SourceLocation,
-            nameString,
-        };
-        auto ownedGlueSymbol = std::make_unique<FunctionSymbol>(
-            selfScope,
-            name,
-            SymbolCategory::Static,
-            AccessModifier::Public,
-            t_compilation->Natives->Void.GetSymbol()
-        );
-
-        auto* const glueSymbol = Scope::DefineSymbol(
-            std::move(ownedGlueSymbol)
-        ).Unwrap();
-
-        const Identifier selfName
-        {
-            t_typeSymbol->GetName().SourceLocation,
-            SpecialIdentifier::CreateAnonymous(),
-        };
-        Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
-            selfScope,
-            selfName,
-            t_typeSymbol->GetWithReference(),
-            0
-        )).Unwrap();
-
-        return glueSymbol;
-    }
-
-    static auto TryDefineGlueSymbols(
-        const Compilation* const t_compilation,
-        ITypeSymbol* const t_typeSymbol,
-        const std::function<FunctionSymbol*(const Compilation* const, ITypeSymbol* const)>& t_getOrDefineGlueSymbols
-    ) -> std::optional<FunctionSymbol*>
-    {
-        auto* const templatableSymbol = dynamic_cast<ITemplatableSymbol*>(
-            t_typeSymbol
-        );
-        if (templatableSymbol && templatableSymbol->IsTemplatePlaceholder())
-        {
-            return std::nullopt;
-        }
-
-        if (t_typeSymbol->GetSizeKind().Unwrap() == TypeSizeKind::Unsized)
-        {
-            return std::nullopt;
-        }
-
-        if (t_typeSymbol->IsReference())
-        {
-            return std::nullopt;
-        }
-
-        return t_getOrDefineGlueSymbols(t_compilation, t_typeSymbol);
-    }
-
-    static auto CreateAndBindGlueBody(
-        const Compilation* const t_compilation,
-        const std::function<std::shared_ptr<const IEmittable<void>>(ITypeSymbol* const, FunctionSymbol* const)>& t_createGlueBody,
-        ITypeSymbol* const t_typeSymbol,
-        FunctionSymbol* const t_glueSymbol
-    ) -> void
-    {
-        const auto body = t_createGlueBody(t_typeSymbol, t_glueSymbol);
-        t_glueSymbol->BindBody(body);
-    }
-
-    static auto GenerateAndBindGlue(
-        const Compilation* const t_compilation,
-        const std::function<FunctionSymbol*(const Compilation* const, ITypeSymbol* const)>& t_getOrDefineGlueSymbols,
-        const std::function<std::shared_ptr<const IEmittable<void>>(ITypeSymbol* const, FunctionSymbol* const)>& t_createGlueBody,
-        const std::function<void(ITypeSymbol* const, FunctionSymbol* const)>& t_bindGlue
-    ) -> void
-    {
-        const auto typeSymbols =
-            t_compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<ITypeSymbol>();
-
-        struct TypeGlueSymbolPair
-        {
-            ITypeSymbol* TypeSymbol{};
-            FunctionSymbol* FunctionSymbol{};
-        };
-
-        std::vector<TypeGlueSymbolPair> typeGlueSymbolPairs{};
-
-        std::for_each(begin(typeSymbols), end(typeSymbols),
-        [&](ITypeSymbol* const t_typeSymbol)
-        {
-            const auto optGlueSymbol = TryDefineGlueSymbols(
-                t_compilation,
-                t_typeSymbol, 
-                t_getOrDefineGlueSymbols
-            );
-            if (!optGlueSymbol.has_value())
-            {
-                return;
-            }
-
-            typeGlueSymbolPairs.push_back(TypeGlueSymbolPair{ 
-                t_typeSymbol,
-                optGlueSymbol.value()
-            });
-        });
-
-        std::for_each(begin(typeGlueSymbolPairs), end(typeGlueSymbolPairs),
-        [&](const TypeGlueSymbolPair& t_typeGlueSymbolPair)
-        {
-            CreateAndBindGlueBody(
-                t_compilation,
-                t_createGlueBody,
-                t_typeGlueSymbolPair.TypeSymbol,
-                t_typeGlueSymbolPair.FunctionSymbol
-            );
-
-            t_bindGlue(
-                t_typeGlueSymbolPair.TypeSymbol,
-                t_typeGlueSymbolPair.FunctionSymbol
-            );
-        });
-    }
-
-    auto GenerateAndBindGlue(const Compilation* const t_compilation) -> void
-    {
-        GenerateAndBindGlue(
-            t_compilation,
-            &GetOrDefineCopyGlueSymbols,
-            [](
-                ITypeSymbol* const t_typeSymbol, 
-                FunctionSymbol* const t_glueSymbol
-            ) 
-            { 
-                return t_typeSymbol->CreateCopyGlueBody(t_glueSymbol);
-            },
-            [](
-                ITypeSymbol* const t_typeSymbol, 
-                FunctionSymbol* const t_glueSymbol
-            ) 
-            { 
-                t_typeSymbol->BindCopyGlue(t_glueSymbol);
-            }
-        );
-        GenerateAndBindGlue(
-            t_compilation,
-            &GetOrDefineDropGlueSymbols,
-            [](
-                ITypeSymbol* const t_typeSymbol, 
-                FunctionSymbol* const t_glueSymbol
-            ) 
-            { 
-                return t_typeSymbol->CreateDropGlueBody(t_glueSymbol);
-            },
-            [](
-                ITypeSymbol* const t_typeSymbol, 
-                FunctionSymbol* const t_glueSymbol
-            ) 
-            { 
-                t_typeSymbol->BindDropGlue(t_glueSymbol);
-            }
-        );
-    }
-
     static auto Compile(
         const Compilation* const t_compilation
     ) -> Expected<void>
@@ -485,20 +248,23 @@ namespace Ace::Application
         const auto timeParsingStart = now();
 
         std::vector<std::shared_ptr<const ModuleNode>> asts{};
-        std::transform(
+        std::for_each(
             begin(t_compilation->Package.SourceFileBuffers),
             end  (t_compilation->Package.SourceFileBuffers),
-            back_inserter(asts),
             [&](const FileBuffer* const t_sourceFileBuffer)
             {
-                const auto dgnAST = ParseAST(
+                const auto expAST = ParseAST(
                     t_compilation,
                     t_sourceFileBuffer
                 );
+                t_compilation->GlobalDiagnosticBag->Add(expAST);
+                diagnosticBag.Add(expAST);
+                if (!expAST)
+                {
+                    return;
+                }
 
-                t_compilation->GlobalDiagnosticBag->Add(dgnAST.GetDiagnosticBag());
-                diagnosticBag.Add(dgnAST.GetDiagnosticBag());
-                return dgnAST.Unwrap();
+                asts.push_back(expAST.Unwrap());
             }
         );
 
@@ -553,7 +319,7 @@ namespace Ace::Application
 
         t_compilation->TemplateInstantiator->InstantiateSemanticsForSymbols();
 
-        GenerateAndBindGlue(t_compilation);
+        GlueGeneration::GenerateAndBindGlue(t_compilation);
 
         const auto timeBindingAndVerificationEnd = now();
 

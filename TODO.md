@@ -2,19 +2,27 @@
 
 ## 🛠️ Refactor
 
+- Reformat `CreateKeyword` in `Lexer.cpp`
+- Abbreviate `Operator` as `Op`
+- Rename `LiteralSymbol` to `SymbolLiteral`
+- Rename `AssignmentStmtBoundNode` to `NormalAssignmentStmtBoundNode`
+- Rename all `variable` to `var`
+- ❓ Change all `Is...` functions in `Parser.cpp` to use `switch`
+- ❓ Change most `const&` constructor to pass by value, and change all r-value reference parameters to value
+- ❓ Rename `CreateUnknown...Error` to `CreateInvalid...Error`
 - `CompoundAssignmentStmtBoundNode` lowering
 - Variable reference emitting
 - Remove `t_` prefix from parameter names
-- ❓ Remove `ACE_TRY` macros
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
 
 ## 💥 High Priority
 
+- Fix so compilation cannot succeed with parsing errors
+- Remove last colon in printed error source location
+- Fix TODO's in `Package.cpp`
 - Check why CLI arg parsing never checks if EOF (Probably a bug)
-- Change that all structs take arguments by `const&`
 - Error messages to make debugging easier:
-  - Add parser diagnostics
-  - Add source location to bound nodes, check TODO comments
+  - Improve parsing, for example: if we already know we are parsing a function, we should do the best we can to actually parse it, so for example insert missing name token or something, allow semicolon between function header and body just discard it
 - Give template symbols shared ownership of the nodes
 - String interning and maybe put `Token`s on the stack
 - Strong pointer self
@@ -209,4 +217,9 @@
   func(): std::Optional[int] {
       ret Ret::new(5);
   }
+  ```
+- Make copying explicit:
+  ```
+  obj_1: Object = new Object {};
+  obj_2: Object = copy obj_1;
   ```

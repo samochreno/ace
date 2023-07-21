@@ -7,8 +7,10 @@
 
 #include "SpecialIdentifier.hpp"
 #include "Scope.hpp"
+#include "Identifier.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
+#include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "TypeInfo.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/ConversionPlaceholderExprBoundNode.hpp"
@@ -36,7 +38,37 @@ namespace Ace
         return foundOperatorIt->second;
     }
 
+    static auto GetImplicitPointerConversionOperator(
+        const std::shared_ptr<Scope>& t_scope,
+        ITypeSymbol* t_fromType,
+        ITypeSymbol* t_toType
+    ) -> Expected<FunctionSymbol*>
+    {
+        t_fromType = t_fromType->GetWithoutReference();
+          t_toType =   t_toType->GetWithoutReference();
+
+        ACE_TRY_ASSERT(
+            t_fromType->IsStrongPointer() && t_toType->IsWeakPointer()
+        );
+
+        ACE_TRY_ASSERT(
+            t_fromType->GetWithoutStrongPointer() ==
+            t_toType->GetWithoutWeakPointer()
+        );
+
+        auto* const compilation = t_scope->GetCompilation();
+
+        return dynamic_cast<FunctionSymbol*>(Scope::ResolveOrInstantiateTemplateInstance(
+            compilation,
+            compilation->Natives->WeakPointer__from.GetSymbol(),
+            std::nullopt,
+            { t_fromType->GetWithoutStrongPointer()->GetWithoutReference() },
+            {}
+        ).Unwrap());
+    }
+
     auto GetImplicitConversionOperator(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         ITypeSymbol* t_fromType,
         ITypeSymbol* t_toType
@@ -52,16 +84,15 @@ namespace Ace
             return optNativeOperator.value();
         }
 
-        auto name = t_toType->CreateFullyQualifiedName();
-        name.Sections.emplace_back(
-            std::string{ SpecialIdentifier::Operator::ImplicitFrom }
+        return GetImplicitPointerConversionOperator(
+            t_scope,
+            t_fromType,
+            t_toType
         );
-
-        ACE_TRY(operatorSymbol, t_scope->ResolveStaticSymbol<FunctionSymbol>(name));
-        return operatorSymbol;
     }
 
     auto GetExplicitConversionOperator(
+        const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         ITypeSymbol* t_fromType,
         ITypeSymbol* t_toType
@@ -87,26 +118,11 @@ namespace Ace
             return optNativeExplicitOperator.value();
         }
 
-        auto name = t_toType->CreateFullyQualifiedName();
-        name.Sections.emplace_back(std::string{});
-
-        name.Sections.back().Name = SpecialIdentifier::Operator::ExplicitFrom;
-        const auto expExplicitOperatorSymbol =
-            t_scope->ResolveStaticSymbol<FunctionSymbol>(name);
-        if (expExplicitOperatorSymbol)
-        {
-            return expExplicitOperatorSymbol.Unwrap();
-        }
-
-        name.Sections.back().Name = SpecialIdentifier::Operator::ImplicitFrom;
-        const auto expImplicitOperatorSymbol =
-            t_scope->ResolveStaticSymbol<FunctionSymbol>(name);
-        if (expImplicitOperatorSymbol)
-        {
-            return expImplicitOperatorSymbol.Unwrap();
-        }
-
-        ACE_TRY_UNREACHABLE();
+        return GetImplicitPointerConversionOperator(
+            t_scope,
+            t_fromType,
+            t_toType
+        );
     }
 
     auto AreTypesSame(

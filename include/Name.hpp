@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+#include "Identifier.hpp"
+
 namespace Ace
 {
     class Compilation;
@@ -12,14 +14,14 @@ namespace Ace
     struct SymbolNameSection
     {
         SymbolNameSection();
-        SymbolNameSection(const std::string& t_name);
+        SymbolNameSection(const Identifier& t_name);
         SymbolNameSection(
-            const std::string& t_name,
+            const Identifier& t_name,
             const std::vector<SymbolName>& t_templateArgs
         );
         ~SymbolNameSection();
 
-        std::string Name;
+        Identifier Name;
         std::vector<SymbolName> TemplateArgs;
     };
 

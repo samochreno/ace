@@ -82,7 +82,7 @@ namespace Ace
     auto VarStmtNode::CreateBound() const -> Expected<std::shared_ptr<const VarStmtBoundNode>>
     {
         auto* selfSymbol = m_Scope->ExclusiveResolveSymbol<LocalVarSymbol>(
-            m_Name.String
+            m_Name
         ).Unwrap();
 
         ACE_TRY(boundOptAssignedExpr, TransformExpectedOptional(m_OptAssignedExpr,

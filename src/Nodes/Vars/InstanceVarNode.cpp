@@ -87,7 +87,7 @@ namespace Ace
         }));
 
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<InstanceVarSymbol>(
-            m_Name.String
+            m_Name
         ).Unwrap();
 
         return std::make_shared<const InstanceVarBoundNode>(

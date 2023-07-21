@@ -522,12 +522,9 @@ namespace Ace
     auto Emitter::EmitDrop(const ExprDropData& t_dropData) -> void
     {
         if (t_dropData.TypeSymbol->IsReference())
+        {
             return;
-
-        auto operatorName = t_dropData.TypeSymbol->CreateFullyQualifiedName();
-        operatorName.Sections.push_back(
-            SymbolNameSection{ SpecialIdentifier::Operator::Drop }
-        );
+        }
 
         const auto glueSymbol = t_dropData.TypeSymbol->GetDropGlue().value();
 
