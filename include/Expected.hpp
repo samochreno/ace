@@ -59,10 +59,10 @@ namespace Ace
             m_DiagnosticBag.Add(t_diagnostic);
         }
         Expected(
-            const DiagnosticBag& t_bag
+            const DiagnosticBag& t_diagnosticBag
         ) : m_IsFatal{ true }
         {
-            m_DiagnosticBag.Add(t_bag);
+            m_DiagnosticBag.Add(t_diagnosticBag);
         }
         ~Expected() = default;
 
@@ -133,9 +133,9 @@ namespace Ace
         }
         Expected(
             const TValue& t_value,
-            const DiagnosticBag& t_bag
+            const DiagnosticBag& t_diagnosticBag
         ) : m_OptValue{ t_value },
-            m_DiagnosticBag{ t_bag }
+            m_DiagnosticBag{ t_diagnosticBag }
         {
         }
         Expected(TValue&& t_value) noexcept
@@ -144,19 +144,19 @@ namespace Ace
         }
         Expected(
             TValue&& t_value,
-            const DiagnosticBag& t_bag
+            const DiagnosticBag& t_diagnosticBag
         ) noexcept
           : m_OptValue{ std::move(t_value) },
-            m_DiagnosticBag{ t_bag }
+            m_DiagnosticBag{ t_diagnosticBag }
         {
         }
         Expected(const std::shared_ptr<const Diagnostic>& t_diagnostic)
         {
             m_DiagnosticBag.Add(t_diagnostic);
         }
-        Expected(const DiagnosticBag& t_bag)
+        Expected(const DiagnosticBag& t_diagnosticBag)
         {
-            m_DiagnosticBag.Add(t_bag);
+            m_DiagnosticBag.Add(t_diagnosticBag);
         }
         ~Expected() = default;
 
