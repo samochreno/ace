@@ -822,7 +822,7 @@ namespace Ace
 
     auto Scope::CanDefineSymbol(const ISymbol* const symbol) -> bool
     {
-        // TODO: Dont allow private types to leak in public interface.
+        // TODO: Dont allow private types to leak in public interface
 
 #if 0 // This doesnt work for associated functions params, needs rework.
         if (auto typedSymbol = dynamic_cast<const ISymbol*>(symbol))

@@ -4117,7 +4117,7 @@ namespace Ace
             return diagnosticBag;
         }
 
-        // TODO: Remove this block after impl template specialization.
+        // TODO: Remove this block after impl template specialization
         {
             const auto& sections = expTypeName.Unwrap().Sections;
 
@@ -4426,7 +4426,7 @@ namespace Ace
             return diagnosticBag;
         }
 
-        // TODO: Remove this block after impl template specialization.
+        // TODO: Remove this block after impl template specialization
         {
             const auto expIsNotSpecialized = [&]() -> Expected<void>
             {

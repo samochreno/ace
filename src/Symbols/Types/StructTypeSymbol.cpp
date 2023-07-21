@@ -62,7 +62,8 @@ namespace Ace
 
         const auto expSizeKind = [&]() -> Expected<TypeSizeKind>
         {
-            // If size resolution is already in progress, we have detected a circular dependency.
+            // If size resolution is already in progress,
+            // we have detected a circular dependency
             ACE_TRY_ASSERT(!m_IsResolvingSize);
             m_IsResolvingSize = true;
 

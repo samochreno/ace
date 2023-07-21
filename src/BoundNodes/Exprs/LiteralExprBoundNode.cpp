@@ -117,7 +117,7 @@ namespace Ace
             }
             else if (m_Kind == LiteralKind::String)
             {
-                // TODO: Finish strings.
+                // TODO: Finish strings
                 return nullptr;
             }
             else if (m_Kind & LiteralKind::BoolMask)
