@@ -202,18 +202,23 @@ namespace Ace
                 return Recursiveness::NonRecursive;
             }
 
-            if (beforeExtension.at(1) != '*')
+            auto recursiveness = Recursiveness::NonRecursive;
+            auto it = begin(beforeExtension) + 1;
+            if (*it == '*')
             {
-                // TODO: Error
-                return Recursiveness::NonRecursive;
+                recursiveness = Recursiveness::Recursive;
+                ++it;
             }
 
-            if (beforeExtension.size() != 2)
+            if (it != end(beforeExtension))
             {
-                // TODO: Error
+                diagnosticBag.Add(CreateTrailingPackagePathCharactersBeforeExtensionError(
+                    fileBuffer,
+                    std::string_view{ it, end(beforeExtension) }
+                ));
             }
 
-            return Recursiveness::Recursive;
+            return recursiveness;
         }();
 
         return

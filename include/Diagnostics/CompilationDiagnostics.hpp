@@ -103,5 +103,17 @@ namespace Ace
             packageFileBuffer->CreateFirstLocation(),
             "undefined reference to macro `" + macro + "`"
         );
-    }   
+    }
+
+    inline auto CreateTrailingPackagePathCharactersBeforeExtensionError(
+        const FileBuffer* const packageFileBuffer,
+        const std::string_view characters
+    ) -> std::shared_ptr<const Diagnostic>
+    {
+        return std::make_shared<const Diagnostic>(
+            DiagnosticSeverity::Error,
+            packageFileBuffer->CreateFirstLocation(),
+            "trailing characters in path before extension `" + std::string{ characters } + "`"
+        );
+    }
 }
