@@ -8,12 +8,12 @@
 namespace Ace
 {
     ModuleSymbol::ModuleSymbol(
-        const std::shared_ptr<Scope>& t_selfScope,
-        const Identifier& t_name,
-        const AccessModifier t_accessModifier
-    ) : m_SelfScope{ t_selfScope },
-        m_Name{ t_name },
-        m_AccessModifier{ t_accessModifier }
+        const std::shared_ptr<Scope>& selfScope,
+        const Identifier& name,
+        const AccessModifier accessModifier
+    ) : m_SelfScope{ selfScope },
+        m_Name{ name },
+        m_AccessModifier{ accessModifier }
     {
     }
 

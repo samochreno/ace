@@ -13,8 +13,8 @@ namespace Ace
     struct StmtTypeCheckingContext : public TypeCheckingContext
     {
         StmtTypeCheckingContext(
-            ITypeSymbol* const t_parentFunctionType
-        ) : ParentFunctionTypeSymbol{ t_parentFunctionType }
+            ITypeSymbol* const parentFunctionType
+        ) : ParentFunctionTypeSymbol{ parentFunctionType }
         {
         }
 
@@ -29,10 +29,10 @@ namespace Ace
         virtual ~IStmtBoundNode() = default;
 
         virtual auto GetOrCreateTypeCheckedStmt(
-            const StmtTypeCheckingContext& t_context
+            const StmtTypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>> = 0;
         virtual auto GetOrCreateLoweredStmt(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>> = 0;
     };
 }

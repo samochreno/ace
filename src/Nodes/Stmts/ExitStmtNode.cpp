@@ -11,10 +11,10 @@
 namespace Ace
 {
     ExitStmtNode::ExitStmtNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope }
     {
     }
 
@@ -34,20 +34,20 @@ namespace Ace
     }
 
     auto ExitStmtNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const ExitStmtNode>
     {
         return std::make_shared<const ExitStmtNode>(
             m_SourceLocation,
-            t_scope
+            scope
         );
     }
 
     auto ExitStmtNode::CloneInScopeStmt(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto ExitStmtNode::CreateBound() const -> Expected<std::shared_ptr<const ExitStmtBoundNode>>

@@ -15,8 +15,8 @@ namespace Ace
     struct Package
     {
         static auto Parse(
-            std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
-            const FileBuffer* const t_fileBuffer
+            std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+            const FileBuffer* const fileBuffer
         ) -> Expected<Package>;
 
         std::string Name{};

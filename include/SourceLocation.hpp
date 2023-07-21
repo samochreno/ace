@@ -10,20 +10,20 @@ namespace Ace
     {
         SourceLocation() = default;
         SourceLocation(
-            const ISourceBuffer* const t_buffer,
-            const std::string_view::const_iterator t_characterBeginIt,
-            const std::string_view::const_iterator t_characterEndIt
-        ) : Buffer{ t_buffer },
-            CharacterBeginIterator{ t_characterBeginIt },
-            CharacterEndIterator{ t_characterEndIt }
+            const ISourceBuffer* const buffer,
+            const std::string_view::const_iterator characterBeginIt,
+            const std::string_view::const_iterator characterEndIt
+        ) : Buffer{ buffer },
+            CharacterBeginIterator{ characterBeginIt },
+            CharacterEndIterator{ characterEndIt }
         {
         }
         SourceLocation(
-            const SourceLocation& t_first,
-            const SourceLocation& t_last
-        ) : Buffer{ t_first.Buffer },
-            CharacterBeginIterator{ t_first.CharacterBeginIterator },
-            CharacterEndIterator{ t_last.CharacterEndIterator }
+            const SourceLocation& first,
+            const SourceLocation& last
+        ) : Buffer{ first.Buffer },
+            CharacterBeginIterator{ first.CharacterBeginIterator },
+            CharacterEndIterator{ last.CharacterEndIterator }
         {
         }
 

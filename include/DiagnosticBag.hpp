@@ -16,21 +16,21 @@ namespace Ace
         ~DiagnosticBag() = default;
 
         auto Add(
-            const std::shared_ptr<const Diagnostic>& t_diagnostic
+            const std::shared_ptr<const Diagnostic>& diagnostic
         ) -> DiagnosticBag&;
         template<typename TDiagnosed, typename = std::enable_if_t<std::is_base_of_v<IDiagnosed, TDiagnosed>>>
-        auto Add(const TDiagnosed& t_diagnosed) -> DiagnosticBag&
+        auto Add(const TDiagnosed& diagnosed) -> DiagnosticBag&
         {
-            return Add(t_diagnosed.GetDiagnosticBag());
+            return Add(diagnosed.GetDiagnosticBag());
         }
-        auto Add(const DiagnosticBag& t_diagnosticBag) -> DiagnosticBag&;
+        auto Add(const DiagnosticBag& diagnosticBag) -> DiagnosticBag&;
 
         auto IsEmpty() const -> bool;
         auto GetDiagnostics() const -> const std::vector<std::shared_ptr<const Diagnostic>>&;
         auto GetSeverity() const -> DiagnosticSeverity;
 
     private:
-        auto AddSeverity(const DiagnosticSeverity& t_severity) -> void;
+        auto AddSeverity(const DiagnosticSeverity& severity) -> void;
 
         std::vector<std::shared_ptr<const Diagnostic>> m_Diagnostics{};
         DiagnosticSeverity m_Severity = DiagnosticSeverity::Info;

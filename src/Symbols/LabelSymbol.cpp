@@ -7,10 +7,10 @@
 namespace Ace
 {
     LabelSymbol::LabelSymbol(
-        const std::shared_ptr<Scope>& t_scope,
-        const Identifier& t_name
-    ) : m_Scope{ t_scope },
-        m_Name{ t_name }
+        const std::shared_ptr<Scope>& scope,
+        const Identifier& name
+    ) : m_Scope{ scope },
+        m_Name{ name }
     {
     }
 

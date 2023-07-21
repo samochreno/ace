@@ -14,10 +14,10 @@
 namespace Ace
 {
     ExprExprBoundNode::ExprExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_expr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& expr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr }
     {
     }
 
@@ -41,7 +41,7 @@ namespace Ace
     }
 
     auto ExprExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const ExprExprBoundNode>>>
     {
         ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
@@ -58,14 +58,14 @@ namespace Ace
     }
 
     auto ExprExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto ExprExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const ExprExprBoundNode>>
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
@@ -82,15 +82,15 @@ namespace Ace
     }
 
     auto ExprExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto ExprExprBoundNode::Emit(Emitter& t_emitter) const -> ExprEmitResult
+    auto ExprExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
-        return m_Expr->Emit(t_emitter);
+        return m_Expr->Emit(emitter);
     }
 
     auto ExprExprBoundNode::GetTypeInfo() const -> TypeInfo

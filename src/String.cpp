@@ -4,70 +4,70 @@
 
 namespace Ace
 {
-    static auto IsLowercase(const char t_character) -> bool
+    static auto IsLowercase(const char character) -> bool
     {
-        return islower(t_character);
+        return islower(character);
     }
 
-    static auto IsUppercase(const char t_character) -> bool
+    static auto IsUppercase(const char character) -> bool
     {
-        return isupper(t_character);
+        return isupper(character);
     }
 
-    auto IsInAlphabet(const char t_character) -> bool
+    auto IsInAlphabet(const char character) -> bool
     {
-        return IsLowercase(t_character) || IsUppercase(t_character);
+        return IsLowercase(character) || IsUppercase(character);
     }
 
-    auto IsNumber(const char t_character) -> bool
+    auto IsNumber(const char character) -> bool
     {
-        return (t_character >= '0') && (t_character <= '9');
+        return (character >= '0') && (character <= '9');
     }
 
-    auto TrimRight(std::string& t_value) -> std::string&
+    auto TrimRight(std::string& value) -> std::string&
     {
-        t_value.erase(t_value.find_last_not_of(' ') + 1);
-        return t_value;
+        value.erase(value.find_last_not_of(' ') + 1);
+        return value;
     }
 
-    auto TrimLeft(std::string& t_value) -> std::string&
+    auto TrimLeft(std::string& value) -> std::string&
     {
-        t_value.erase(0, t_value.find_first_not_of(' '));
-        return t_value;
+        value.erase(0, value.find_first_not_of(' '));
+        return value;
     }
 
-    auto Trim(std::string& t_value) -> std::string&
+    auto Trim(std::string& value) -> std::string&
     {
-        TrimLeft(t_value);
-        TrimRight(t_value);
-        return t_value;
+        TrimLeft(value);
+        TrimRight(value);
+        return value;
     }
 
-    auto MakeLowercase(std::string& t_value) -> std::string&
+    auto MakeLowercase(std::string& value) -> std::string&
     {
-        std::for_each(begin(t_value), end(t_value),
-        [](char& t_value)
+        std::for_each(begin(value), end(value),
+        [](char& value)
         {
-            if (IsUppercase(t_value))
+            if (IsUppercase(value))
             {
-                t_value = tolower(t_value);
+                value = tolower(value);
             }
         });
 
-        return t_value;
+        return value;
     }
 
-    auto MakeUppercase(std::string& t_value) -> std::string&
+    auto MakeUppercase(std::string& value) -> std::string&
     {
-        std::for_each(begin(t_value), end(t_value),
-        [](char& t_value)
+        std::for_each(begin(value), end(value),
+        [](char& value)
         {
-            if (IsLowercase(t_value))
+            if (IsLowercase(value))
             {
-                t_value = toupper(t_value);
+                value = toupper(value);
             }
         });
 
-        return t_value;
+        return value;
     }
 }

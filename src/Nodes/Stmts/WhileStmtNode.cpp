@@ -14,14 +14,14 @@
 namespace Ace
 {
     WhileStmtNode::WhileStmtNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const std::shared_ptr<const IExprNode>& t_condition,
-        const std::shared_ptr<const BlockStmtNode>& t_body
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Condition{ t_condition },
-        m_Body{ t_body }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const std::shared_ptr<const IExprNode>& condition,
+        const std::shared_ptr<const BlockStmtNode>& body
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Condition{ condition },
+        m_Body{ body }
     {
     }
 
@@ -46,22 +46,22 @@ namespace Ace
     }
 
     auto WhileStmtNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const WhileStmtNode>
     {
         return std::make_shared<const WhileStmtNode>(
             m_SourceLocation,
-            t_scope,
-            m_Condition->CloneInScopeExpr(t_scope),
-            m_Body->CloneInScope(t_scope)
+            scope,
+            m_Condition->CloneInScopeExpr(scope),
+            m_Body->CloneInScope(scope)
         );
     }
 
     auto WhileStmtNode::CloneInScopeStmt(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto WhileStmtNode::CreateBound() const -> Expected<std::shared_ptr<const WhileStmtBoundNode>>

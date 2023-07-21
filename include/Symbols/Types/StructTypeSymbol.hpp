@@ -19,9 +19,9 @@ namespace Ace
     {
     public:
         StructTypeSymbol(
-            const std::shared_ptr<Scope>& t_selfScope,
-            const Identifier& t_name,
-            const AccessModifier t_accessModifier
+            const std::shared_ptr<Scope>& selfScope,
+            const Identifier& name,
+            const AccessModifier accessModifier
         );
         virtual ~StructTypeSymbol() = default;
 
@@ -43,15 +43,15 @@ namespace Ace
         auto IsTriviallyDroppable() const -> bool final;
 
         auto CreateCopyGlueBody(
-            FunctionSymbol* const t_glueSymbol
+            FunctionSymbol* const glueSymbol
         ) -> std::shared_ptr<const IEmittable<void>> final;
         auto CreateDropGlueBody(
-            FunctionSymbol* const t_glueSymbol
+            FunctionSymbol* const glueSymbol
         ) -> std::shared_ptr<const IEmittable<void>> final;
 
-        auto BindCopyGlue(FunctionSymbol* const t_glue) -> void final;
+        auto BindCopyGlue(FunctionSymbol* const glue) -> void final;
         auto GetCopyGlue() const -> std::optional<FunctionSymbol*> final;
-        auto BindDropGlue(FunctionSymbol* const t_glue) -> void final;
+        auto BindDropGlue(FunctionSymbol* const glue) -> void final;
         auto GetDropGlue() const -> std::optional<FunctionSymbol*> final;
 
         auto CollectTemplateArgs() const -> std::vector<ITypeSymbol*> final;

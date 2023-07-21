@@ -16,28 +16,28 @@ namespace Ace
     }
 
     SymbolName::SymbolName(
-        const SymbolNameSection& t_section,
-        const SymbolNameResolutionScope& t_resolutionScope
+        const SymbolNameSection& section,
+        const SymbolNameResolutionScope& resolutionScope
     ) : Sections{},
-        IsGlobal{ t_resolutionScope == SymbolNameResolutionScope::Global }
+        IsGlobal{ resolutionScope == SymbolNameResolutionScope::Global }
     {
         ACE_ASSERT(
-            (t_resolutionScope == SymbolNameResolutionScope::Local) || 
-            (t_resolutionScope == SymbolNameResolutionScope::Global)
+            (resolutionScope == SymbolNameResolutionScope::Local) || 
+            (resolutionScope == SymbolNameResolutionScope::Global)
         );
 
-        Sections.push_back(t_section);
+        Sections.push_back(section);
     }
 
     SymbolName::SymbolName(
-        const std::vector<SymbolNameSection>& t_sections, 
-        const SymbolNameResolutionScope& t_resolutionScope
-    ) : Sections{ t_sections },
-        IsGlobal{ t_resolutionScope == SymbolNameResolutionScope::Global }
+        const std::vector<SymbolNameSection>& sections, 
+        const SymbolNameResolutionScope& resolutionScope
+    ) : Sections{ sections },
+        IsGlobal{ resolutionScope == SymbolNameResolutionScope::Global }
     {
         ACE_ASSERT(
-            (t_resolutionScope == SymbolNameResolutionScope::Local) || 
-            (t_resolutionScope == SymbolNameResolutionScope::Global)
+            (resolutionScope == SymbolNameResolutionScope::Local) || 
+            (resolutionScope == SymbolNameResolutionScope::Global)
         );
     }
 
@@ -50,15 +50,15 @@ namespace Ace
     {
     }
 
-    SymbolNameSection::SymbolNameSection(const Identifier& t_name)
-        : Name{ t_name }, TemplateArgs{}
+    SymbolNameSection::SymbolNameSection(const Identifier& name)
+        : Name{ name }, TemplateArgs{}
     {
     }
 
     SymbolNameSection::SymbolNameSection(
-        const Identifier& t_name,
-        const std::vector<SymbolName>& t_templateArgs
-    ) : Name{ t_name }, TemplateArgs{ t_templateArgs }
+        const Identifier& name,
+        const std::vector<SymbolName>& templateArgs
+    ) : Name{ name }, TemplateArgs{ templateArgs }
     {
     }
 
@@ -72,10 +72,10 @@ namespace Ace
     }
 
     TypeName::TypeName(
-        const Ace::SymbolName& t_symbolName,
-        const std::vector<TypeNameModifier>& t_modifiers
-    ) : SymbolName{ t_symbolName },
-        Modifiers{ t_modifiers }
+        const Ace::SymbolName& symbolName,
+        const std::vector<TypeNameModifier>& modifiers
+    ) : SymbolName{ symbolName },
+        Modifiers{ modifiers }
     {
     }
 
@@ -84,40 +84,40 @@ namespace Ace
     }
 
     static auto CreateModifierTypeFullyQualifiedName(
-        const SourceLocation& t_sourceLocation,
-        const TypeNameModifier t_modifier
+        const SourceLocation& sourceLocation,
+        const TypeNameModifier modifier
     ) -> SymbolName
     {
         const auto& natives =
-            t_sourceLocation.Buffer->GetCompilation()->Natives;
+            sourceLocation.Buffer->GetCompilation()->Natives;
 
-        switch (t_modifier)
+        switch (modifier)
         {
             case TypeNameModifier::Reference:
             {
                 return natives->Reference.CreateFullyQualifiedName(
-                    t_sourceLocation
+                    sourceLocation
                 );
             }
 
             case TypeNameModifier::StrongPointer:
             {
                 return natives->StrongPointer.CreateFullyQualifiedName(
-                    t_sourceLocation
+                    sourceLocation
                 );
             }
 
             case TypeNameModifier::WeakPointer:
             {
                 return natives->WeakPointer.CreateFullyQualifiedName(
-                    t_sourceLocation
+                    sourceLocation
                 );
             }
         }
     }
 
     auto TypeName::ToSymbolName(
-        const Compilation* const t_compilation
+        const Compilation* const compilation
     ) const -> Ace::SymbolName
     {
         if (Modifiers.empty())
@@ -127,7 +127,7 @@ namespace Ace
 
         auto name = SymbolName;
         std::for_each(rbegin(Modifiers), rend(Modifiers),
-        [&](const TypeNameModifier t_modifier)
+        [&](const TypeNameModifier modifier)
         {
             const auto& firstNameSectionSourceLocation =
                 SymbolName.Sections.front().Name.SourceLocation;
@@ -143,7 +143,7 @@ namespace Ace
 
             auto modifiedName = CreateModifierTypeFullyQualifiedName(
                 sourceLocation,
-                t_modifier
+                modifier
             );
             modifiedName.Sections.back().TemplateArgs.push_back(name);
             name = modifiedName;

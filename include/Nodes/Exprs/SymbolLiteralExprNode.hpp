@@ -19,9 +19,9 @@ namespace Ace
     {
     public:
         SymbolLiteralExprNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const SymbolName& t_name
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const SymbolName& name
         );
         virtual ~SymbolLiteralExprNode() = default;
 
@@ -29,10 +29,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const SymbolLiteralExprNode> final;
         auto CloneInScopeExpr(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const StaticVarReferenceExprBoundNode>> final;
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;

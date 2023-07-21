@@ -15,12 +15,12 @@
 namespace Ace
 {
     NormalAssignmentStmtBoundNode::NormalAssignmentStmtBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_lhsExpr,
-        const std::shared_ptr<const IExprBoundNode>& t_rhsExpr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_LHSExpr{ t_lhsExpr },
-        m_RHSExpr{ t_rhsExpr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& lhsExpr,
+        const std::shared_ptr<const IExprBoundNode>& rhsExpr
+    ) : m_SourceLocation{ sourceLocation },
+        m_LHSExpr{ lhsExpr },
+        m_RHSExpr{ rhsExpr }
     {
     }
 
@@ -45,7 +45,7 @@ namespace Ace
     }
 
     auto NormalAssignmentStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const NormalAssignmentStmtBoundNode>>>
     {
         auto* const lhsExprTypeSymbol =
@@ -77,14 +77,14 @@ namespace Ace
     }
 
     auto NormalAssignmentStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto NormalAssignmentStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const NormalAssignmentStmtBoundNode>>
     {
         const auto mchLoweredRHSExpr = m_RHSExpr->GetOrCreateLoweredExpr({});
@@ -106,36 +106,36 @@ namespace Ace
     }
 
     auto NormalAssignmentStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto NormalAssignmentStmtBoundNode::Emit(Emitter& t_emitter) const -> void
+    auto NormalAssignmentStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
         std::vector<ExprDropData> temporaries{};
 
-        const auto rhsEmitResult = m_RHSExpr.get()->Emit(t_emitter);
+        const auto rhsEmitResult = m_RHSExpr.get()->Emit(emitter);
         temporaries.insert(
             end(temporaries),
             begin(rhsEmitResult.Temporaries),
             end  (rhsEmitResult.Temporaries)
         );
 
-        const auto lhsEmitResult = m_LHSExpr.get()->Emit(t_emitter);
+        const auto lhsEmitResult = m_LHSExpr.get()->Emit(emitter);
         temporaries.insert(
             end(temporaries),
             begin(lhsEmitResult.Temporaries),
             end  (lhsEmitResult.Temporaries)
         );
 
-        t_emitter.EmitCopy(
+        emitter.EmitCopy(
             lhsEmitResult.Value,
             rhsEmitResult.Value,
             m_LHSExpr->GetTypeInfo().Symbol
         );
 
-        t_emitter.EmitDropTemporaries(temporaries);
+        emitter.EmitDropTemporaries(temporaries);
     }
 }

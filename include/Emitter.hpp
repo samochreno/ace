@@ -20,15 +20,15 @@ namespace Ace
     struct BlockBuilder
     {
         BlockBuilder(
-            llvm::LLVMContext& t_context,
-            llvm::Function* const t_function
-        ) : BlockBuilder{ llvm::BasicBlock::Create(t_context, "", t_function) }
+            llvm::LLVMContext& context,
+            llvm::Function* const function
+        ) : BlockBuilder{ llvm::BasicBlock::Create(context, "", function) }
         {
         }
 
         BlockBuilder(
-            llvm::BasicBlock* t_block
-        ) : Block{ t_block },
+            llvm::BasicBlock* block
+        ) : Block{ block },
             Builder{ llvm::IRBuilder<>{ Block } }
         {
         }
@@ -40,10 +40,10 @@ namespace Ace
     class LabelBlockMap
     {
     public:
-        LabelBlockMap(Emitter& t_emitter);
+        LabelBlockMap(Emitter& emitter);
 
         auto GetOrCreateAt(
-            const LabelSymbol* const t_labelSymbol
+            const LabelSymbol* const labelSymbol
         ) -> llvm::BasicBlock*;
         auto Clear() -> void;
 
@@ -72,33 +72,33 @@ namespace Ace
             size_t StmtIndex{};
         };
 
-        Emitter(const Compilation* const t_compilation);
+        Emitter(const Compilation* const compilation);
         ~Emitter();
 
         auto SetASTs(
-            const std::vector<std::shared_ptr<const ModuleBoundNode>>& t_asts
+            const std::vector<std::shared_ptr<const ModuleBoundNode>>& asts
         ) -> void;
 
         auto Emit() -> Result;
 
         auto EmitFunctionBodyStmts(
-            const std::vector<std::shared_ptr<const IStmtBoundNode>>& t_stmts
+            const std::vector<std::shared_ptr<const IStmtBoundNode>>& stmts
         ) -> void;
         auto EmitLoadArg(
-            const size_t t_index, 
-            llvm::Type* const t_type
+            const size_t index, 
+            llvm::Type* const type
         ) const -> llvm::Value*;
         auto EmitCopy(
-            llvm::Value* const t_lhsValue, 
-            llvm::Value* const t_rhsValue, 
-            ITypeSymbol* const t_typeSymbol
+            llvm::Value* const lhsValue, 
+            llvm::Value* const rhsValue, 
+            ITypeSymbol* const typeSymbol
         ) -> void;
-        auto EmitDrop(const ExprDropData& t_dropData) -> void;
+        auto EmitDrop(const ExprDropData& dropData) -> void;
         auto EmitDropTemporaries(
-            const std::vector<ExprDropData>& t_temporaries
+            const std::vector<ExprDropData>& temporaries
         ) -> void;
         auto EmitDropLocalVarsBeforeStmt(
-            const IStmtBoundNode* const t_stmt
+            const IStmtBoundNode* const stmt
         ) -> void;
         auto EmitDropArgs() -> void;
 
@@ -107,7 +107,7 @@ namespace Ace
         auto GetC() const -> const C&;
 
         auto GetIRType(
-            const ITypeSymbol* const t_typeSymbol
+            const ITypeSymbol* const typeSymbol
         ) const -> llvm::Type*;
 
         auto GetStaticVarMap() const -> const std::unordered_map<const StaticVarSymbol*, llvm::Constant*>&;
@@ -119,22 +119,22 @@ namespace Ace
 
         auto GetBlockBuilder() -> BlockBuilder&;
         auto SetBlockBuilder(
-            std::unique_ptr<BlockBuilder>&& t_value
+            std::unique_ptr<BlockBuilder>&& value
         ) -> void;
 
     private:
         auto EmitTypes(
-            const std::vector<ITypeSymbol*>& t_typeSymbols
+            const std::vector<ITypeSymbol*>& typeSymbols
         ) -> void;
         auto EmitNativeTypes() -> void;
         auto EmitStructTypes(
-            const std::vector<StructTypeSymbol*>& t_structSymbols
+            const std::vector<StructTypeSymbol*>& structSymbols
         ) -> void;
         auto EmitStaticVars(
-            const std::vector<StaticVarSymbol*>& t_varSymbols
+            const std::vector<StaticVarSymbol*>& varSymbols
         ) -> void;
         auto EmitFunctions(
-            const std::vector<FunctionSymbol*>& t_functionSymbols
+            const std::vector<FunctionSymbol*>& functionSymbols
         ) -> void;
 
         const Compilation* m_Compilation{};

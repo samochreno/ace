@@ -14,8 +14,8 @@
 namespace Ace
 {
     TypeTemplateSymbol::TypeTemplateSymbol(
-        const TypeTemplateNode* const t_templateNode
-    ) : m_TemplateNode{ t_templateNode }
+        const TypeTemplateNode* const templateNode
+    ) : m_TemplateNode{ templateNode }
     {
         m_Name =
         {
@@ -70,10 +70,10 @@ namespace Ace
     }
 
     auto TypeTemplateSymbol::SetPlaceholderSymbol(
-        ISymbol* const t_symbol
+        ISymbol* const symbol
     ) -> void
     {
-        m_PlaceholderSymbol = t_symbol;
+        m_PlaceholderSymbol = symbol;
     }
 
     auto TypeTemplateSymbol::GetPlaceholderSymbol() const -> ISymbol*
@@ -82,13 +82,13 @@ namespace Ace
     }
 
     auto TypeTemplateSymbol::InstantiateSymbols(
-        const std::vector<ITypeSymbol*>& t_implArgs,
-        const std::vector<ITypeSymbol*>& t_args
+        const std::vector<ITypeSymbol*>& implArgs,
+        const std::vector<ITypeSymbol*>& args
     ) -> Expected<TemplateSymbolsInstantationResult>
     {
         const auto paramNames = m_TemplateNode->CollectParamNames();
 
-        ACE_TRY_ASSERT(t_args.size() == paramNames.size());
+        ACE_TRY_ASSERT(args.size() == paramNames.size());
 
         const auto ast = m_TemplateNode->GetAST()->CloneInScopeType(
             m_TemplateNode->GetScope()
@@ -98,7 +98,7 @@ namespace Ace
             {},
             {},
             paramNames,
-            t_args
+            args
         ));
 
         const auto nodes = Application::GetAllNodes(ast);
@@ -110,33 +110,31 @@ namespace Ace
             GetCompilation(),
             this,
             std::nullopt,
-            t_implArgs,
-            t_args
+            implArgs,
+            args
         ).Unwrap();
 
         return TemplateSymbolsInstantationResult{ symbol, ast };
     }
 
     auto TypeTemplateSymbol::InstantiateSemanticsForSymbols(
-        const std::shared_ptr<const INode>& t_ast
+        const std::shared_ptr<const INode>& ast
     ) -> void
     {
-        const auto ast = std::dynamic_pointer_cast<const ITypeNode>(t_ast);
-
         const auto boundAST = Application::CreateBoundTransformedAndVerifiedAST(
             GetCompilation(),
-            ast,
-            [](const std::shared_ptr<const ITypeNode>& t_ast)
+            std::dynamic_pointer_cast<const ITypeNode>(ast),
+            [](const std::shared_ptr<const ITypeNode>& ast)
             {
-                return t_ast->CreateBoundType();
+                return ast->CreateBoundType();
             },
-            [](const std::shared_ptr<const ITypeBoundNode>& t_ast)
+            [](const std::shared_ptr<const ITypeBoundNode>& ast)
             {
-                return t_ast->GetOrCreateTypeCheckedType({});
+                return ast->GetOrCreateTypeCheckedType({});
             },
-            [](const std::shared_ptr<const ITypeBoundNode>& t_ast)
+            [](const std::shared_ptr<const ITypeBoundNode>& ast)
             {
-                return t_ast->GetOrCreateLoweredType({});
+                return ast->GetOrCreateLoweredType({});
             }
         ).Unwrap();
 

@@ -21,10 +21,10 @@ namespace Ace
     {
     public:
         IfStmtNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const std::vector<std::shared_ptr<const IExprNode>>& t_conditions,
-            const std::vector<std::shared_ptr<const BlockStmtNode>>& t_bodies
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const std::vector<std::shared_ptr<const IExprNode>>& conditions,
+            const std::vector<std::shared_ptr<const BlockStmtNode>>& bodies
         );
         virtual ~IfStmtNode() = default;
 
@@ -32,10 +32,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IfStmtNode> final;
         auto CloneInScopeStmt(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IStmtNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const IfStmtBoundNode>> final;
         auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;

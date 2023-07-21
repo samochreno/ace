@@ -19,9 +19,9 @@ namespace Ace
     {
     public:
         DerefAsExprNode(
-            const SourceLocation& t_sourceLocation,
-            const TypeName& t_typeName, 
-            const std::shared_ptr<const IExprNode>& t_expr
+            const SourceLocation& sourceLocation,
+            const TypeName& typeName, 
+            const std::shared_ptr<const IExprNode>& expr
         );
         virtual ~DerefAsExprNode() = default;
 
@@ -29,10 +29,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const DerefAsExprNode> final;
         auto CloneInScopeExpr(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const DerefAsExprBoundNode>> final;
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;

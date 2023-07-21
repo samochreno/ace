@@ -36,18 +36,18 @@ namespace Ace::Application
     }
 
     static auto ParseAST(
-        const Compilation* const t_compilation,
-    const FileBuffer* const t_fileBuffer
+        const Compilation* const compilation,
+    const FileBuffer* const fileBuffer
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        Lexer lexer{ t_fileBuffer };
+        Lexer lexer{ fileBuffer };
         auto dgnTokens = lexer.EatTokens();
         diagnosticBag.Add(dgnTokens.GetDiagnosticBag());
 
         const auto expAST = ParseAST(
-            t_fileBuffer,
+            fileBuffer,
             std::move(dgnTokens.Unwrap())
         );
         diagnosticBag.Add(expAST);
@@ -64,24 +64,24 @@ namespace Ace::Application
     }
 
     auto CreateAndDefineSymbols(
-        const Compilation* const t_compilation,
-        const std::vector<const INode*>& t_nodes
+        const Compilation* const compilation,
+        const std::vector<const INode*>& nodes
     ) -> Expected<void>
     {
         auto symbolCreatableNodes =
-            DynamicCastFilter<const ISymbolCreatableNode*>(t_nodes);
+            DynamicCastFilter<const ISymbolCreatableNode*>(nodes);
 
         std::sort(begin(symbolCreatableNodes), end(symbolCreatableNodes),
         [](
-            const ISymbolCreatableNode* const t_lhs,
-            const ISymbolCreatableNode* const t_rhs
+            const ISymbolCreatableNode* const lhs,
+            const ISymbolCreatableNode* const rhs
         )
         {
             const auto lhsCreationOrder =
-                GetSymbolCreationOrder(t_lhs->GetSymbolKind());
+                GetSymbolCreationOrder(lhs->GetSymbolKind());
 
             const auto rhsCreationOrder =
-                GetSymbolCreationOrder(t_rhs->GetSymbolKind());
+                GetSymbolCreationOrder(rhs->GetSymbolKind());
 
             if (lhsCreationOrder < rhsCreationOrder)
             {
@@ -94,10 +94,10 @@ namespace Ace::Application
             }
 
             const auto lhsKindSpecificCreationOrder =
-                t_lhs->GetSymbolCreationSuborder();
+                lhs->GetSymbolCreationSuborder();
 
             const auto rhsKindSpecificCreationOrder =
-                t_rhs->GetSymbolCreationSuborder();
+                rhs->GetSymbolCreationSuborder();
 
             if (lhsKindSpecificCreationOrder < rhsKindSpecificCreationOrder)
             {
@@ -112,27 +112,39 @@ namespace Ace::Application
             return false;
         });
 
+#if 0
         ACE_TRY_VOID(TransformExpectedVector(symbolCreatableNodes,
-        [](const ISymbolCreatableNode* const t_symbolCreatableNode) -> Expected<void>
+        [](const ISymbolCreatableNode* const symbolCreatableNode) -> Expected<void>
         {
-            ACE_TRY(symbol, Scope::DefineSymbol(t_symbolCreatableNode));
+            ACE_TRY(symbol, Scope::DefineSymbol(symbolCreatableNode));
             return Void{};
         }));
+#else
+        for (const auto* const symbolCreatableNode : symbolCreatableNodes)
+        {
+            const auto expSymbol = Scope::DefineSymbol(symbolCreatableNode);
+            if (!expSymbol)
+            {
+                [](){}();
+                ACE_TRY_UNREACHABLE();
+            }
+        }
+#endif
 
         return Void{};
     }
 
     auto DefineAssociations(
-        const Compilation* const t_compilation,
-        const std::vector<const INode*>& t_nodes
+        const Compilation* const compilation,
+        const std::vector<const INode*>& nodes
     ) -> Expected<void>
     {
-        const auto implNodes = DynamicCastFilter<const ImplNode*>(t_nodes);
+        const auto implNodes = DynamicCastFilter<const ImplNode*>(nodes);
 
         const auto didCreateAssociations = TransformExpectedVector(implNodes,
-        [](const ImplNode* const t_implNode) -> Expected<void>
+        [](const ImplNode* const implNode) -> Expected<void>
         {
-            ACE_TRY_VOID(t_implNode->DefineAssociations());
+            ACE_TRY_VOID(implNode->DefineAssociations());
             return Void{};
         });
         ACE_TRY_ASSERT(didCreateAssociations);
@@ -141,34 +153,34 @@ namespace Ace::Application
     }
 
     auto ValidateControlFlow(
-        const Compilation* const t_compilation,
-        const std::vector<const IBoundNode*>& t_nodes
+        const Compilation* const compilation,
+        const std::vector<const IBoundNode*>& nodes
     ) -> Expected<void>
     {
         const auto functionNodes =
-            DynamicCastFilter<const FunctionBoundNode*>(t_nodes);
+            DynamicCastFilter<const FunctionBoundNode*>(nodes);
 
         const bool didControlFlowAnalysisSucceed = std::find_if(
             begin(functionNodes), 
             end  (functionNodes),
-            [&](const FunctionBoundNode* const t_functionNode)
+            [&](const FunctionBoundNode* const functionNode)
             {
                 if (
-                    t_functionNode->GetSymbol()->GetType()->GetUnaliased() == 
-                    t_compilation->Natives->Void.GetSymbol()
+                    functionNode->GetSymbol()->GetType()->GetUnaliased() == 
+                    compilation->Natives->Void.GetSymbol()
                     )
                 {
                     return false;
                 }
 
-                if (!t_functionNode->GetBody().has_value())
+                if (!functionNode->GetBody().has_value())
                 {
                     return false;
                 }
 
                 ControlFlowAnalysis controlFlowAnalysis
                 {
-                    t_functionNode->GetBody().value()
+                    functionNode->GetBody().value()
                 };
 
                 return controlFlowAnalysis.IsEndReachableWithoutReturn();
@@ -180,41 +192,41 @@ namespace Ace::Application
     }
 
     auto BindFunctionSymbolsBodies(
-        const Compilation* const t_compilation,
-        const std::vector<const IBoundNode*>& t_nodes
+        const Compilation* const compilation,
+        const std::vector<const IBoundNode*>& nodes
     ) -> void
     {
         const auto functionNodes =
-            DynamicCastFilter<const FunctionBoundNode*>(t_nodes);
+            DynamicCastFilter<const FunctionBoundNode*>(nodes);
 
         std::for_each(begin(functionNodes), end(functionNodes),
-        [&](const FunctionBoundNode* const t_functionNode)
+        [&](const FunctionBoundNode* const functionNode)
         {
-            if (!t_functionNode->GetBody().has_value())
+            if (!functionNode->GetBody().has_value())
             {
                 return;
             }
 
-            t_functionNode->GetSymbol()->BindBody(
-                t_functionNode->GetBody().value()
+            functionNode->GetSymbol()->BindBody(
+                functionNode->GetBody().value()
             );
         });
     }
 
     static auto ValidateTypeSizes(
-        const Compilation* const t_compilation
+        const Compilation* const compilation
     ) -> Expected<void>
     {
         const auto typeSymbols =
-            t_compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<ITypeSymbol>();
+            compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<ITypeSymbol>();
 
         const bool didValidateTypeSizes = std::find_if_not(
             begin(typeSymbols), 
             end  (typeSymbols),
-            [](const ITypeSymbol* const t_typeSymbol) -> bool
+            [](const ITypeSymbol* const typeSymbol) -> bool
             {
                 auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(
-                    t_typeSymbol
+                    typeSymbol
                 );
                 if (
                     templatableSymbol &&
@@ -224,7 +236,7 @@ namespace Ace::Application
                     return true;
                 }
 
-                return t_typeSymbol->GetSizeKind();
+                return typeSymbol->GetSizeKind();
             }
         ) == end(typeSymbols);
         ACE_TRY_ASSERT(didValidateTypeSizes);
@@ -233,13 +245,13 @@ namespace Ace::Application
     }
 
     static auto Compile(
-        const Compilation* const t_compilation
+        const Compilation* const compilation
     ) -> Expected<void>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& packageName = t_compilation->Package.Name;
-        auto* const globalScope = t_compilation->GlobalScope.Unwrap().get();
+        const auto& packageName = compilation->Package.Name;
+        auto* const globalScope = compilation->GlobalScope.Unwrap().get();
 
         const auto& now = std::chrono::steady_clock::now;
 
@@ -249,15 +261,15 @@ namespace Ace::Application
 
         std::vector<std::shared_ptr<const ModuleNode>> asts{};
         std::for_each(
-            begin(t_compilation->Package.SourceFileBuffers),
-            end  (t_compilation->Package.SourceFileBuffers),
-            [&](const FileBuffer* const t_sourceFileBuffer)
+            begin(compilation->Package.SourceFileBuffers),
+            end  (compilation->Package.SourceFileBuffers),
+            [&](const FileBuffer* const sourceFileBuffer)
             {
                 const auto expAST = ParseAST(
-                    t_compilation,
-                    t_sourceFileBuffer
+                    compilation,
+                    sourceFileBuffer
                 );
-                t_compilation->GlobalDiagnosticBag->Add(expAST);
+                compilation->GlobalDiagnosticBag->Add(expAST);
                 diagnosticBag.Add(expAST);
                 if (!expAST)
                 {
@@ -274,62 +286,62 @@ namespace Ace::Application
 
         const auto timeSymbolCreationStart = now();
 
-        ACE_TRY_VOID(CreateAndDefineSymbols(t_compilation, nodes));
-        ACE_TRY_VOID(DefineAssociations(t_compilation, nodes));
+        ACE_TRY_VOID(CreateAndDefineSymbols(compilation, nodes));
+        ACE_TRY_VOID(DefineAssociations(compilation, nodes));
 
         const auto timeSymbolCreationEnd = now();
 
         const auto templateSymbols = globalScope->CollectSymbolsRecursive<ITemplateSymbol>();
-        t_compilation->TemplateInstantiator->SetSymbols(templateSymbols);
-        ACE_TRY_VOID(t_compilation->TemplateInstantiator->InstantiatePlaceholderSymbols());
+        compilation->TemplateInstantiator->SetSymbols(templateSymbols);
+        ACE_TRY_VOID(compilation->TemplateInstantiator->InstantiatePlaceholderSymbols());
 
         const auto timeBindingAndVerificationStart = now();
 
-        t_compilation->Natives->Initialize();
+        compilation->Natives->Initialize();
 
         std::vector<std::shared_ptr<const ModuleBoundNode>> boundASTs{};
         std::for_each(begin(asts), end(asts),
-        [&](const std::shared_ptr<const ModuleNode>& t_ast)
+        [&](const std::shared_ptr<const ModuleNode>& ast)
         {
             const auto expBoundAST = CreateBoundTransformedAndVerifiedAST(
-                t_compilation,
-                t_ast,
-                [](const std::shared_ptr<const ModuleNode>& t_ast)
+                compilation,
+                ast,
+                [](const std::shared_ptr<const ModuleNode>& ast)
                 {
-                    return t_ast->CreateBound(); 
+                    return ast->CreateBound(); 
                 },
-                [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
+                [](const std::shared_ptr<const ModuleBoundNode>& ast)
                 { 
-                    return t_ast->GetOrCreateTypeChecked({});
+                    return ast->GetOrCreateTypeChecked({});
                 },
-                [](const std::shared_ptr<const ModuleBoundNode>& t_ast)
+                [](const std::shared_ptr<const ModuleBoundNode>& ast)
                 {
-                    return t_ast->GetOrCreateLowered({});
+                    return ast->GetOrCreateLowered({});
                 }
             );
             if (!expBoundAST)
             {
                 diagnosticBag.Add(expBoundAST);
-                t_compilation->GlobalDiagnosticBag->Add(expBoundAST);
+                compilation->GlobalDiagnosticBag->Add(expBoundAST);
                 return;
             }
 
             boundASTs.push_back(expBoundAST.Unwrap());
         });
 
-        t_compilation->TemplateInstantiator->InstantiateSemanticsForSymbols();
+        compilation->TemplateInstantiator->InstantiateSemanticsForSymbols();
 
-        GlueGeneration::GenerateAndBindGlue(t_compilation);
+        GlueGeneration::GenerateAndBindGlue(compilation);
 
         const auto timeBindingAndVerificationEnd = now();
 
-        ACE_TRY_VOID(ValidateTypeSizes(t_compilation));
+        ACE_TRY_VOID(ValidateTypeSizes(compilation));
 
         const auto timeFrontendEnd = now();
 
         const auto timeBackendStart = now();
 
-        Emitter emitter{ t_compilation };
+        Emitter emitter{ compilation };
         emitter.SetASTs(boundASTs);
         const auto emitterResult = emitter.Emit();
 
@@ -337,11 +349,11 @@ namespace Ace::Application
         
         const auto timeEnd = now();
 
-        const auto getFormattedDuration = [](std::chrono::nanoseconds t_duration) -> std::string
+        const auto getFormattedDuration = [](std::chrono::nanoseconds duration) -> std::string
         {
-            const auto minutes     = std::chrono::duration_cast<std::chrono::minutes>     (t_duration);
-            const auto seconds     = std::chrono::duration_cast<std::chrono::seconds>     (t_duration -= minutes);
-            const auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(t_duration -= seconds);
+            const auto minutes     = std::chrono::duration_cast<std::chrono::minutes>     (duration);
+            const auto seconds     = std::chrono::duration_cast<std::chrono::seconds>     (duration -= minutes);
+            const auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration -= seconds);
 
             std::string value{};
 
@@ -369,15 +381,15 @@ namespace Ace::Application
     }
 
     static auto Compile(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
-        const std::vector<std::string_view>& t_args
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        const std::vector<std::string_view>& args
     ) -> Expected<void>
     {
         DiagnosticBag diagnosticBag{};
 
         const auto expCompilation = Compilation::Parse(
-            t_sourceBuffers,
-            t_args
+            sourceBuffers,
+            args
         );
         diagnosticBag.Add(expCompilation);
         if (!expCompilation)
@@ -414,7 +426,7 @@ namespace Ace::Application
         return Void{ diagnosticBag };
     }
 
-    auto Main(const std::vector<std::string_view>& t_args) -> void
+    auto Main(const std::vector<std::string_view>& args) -> void
     {
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();

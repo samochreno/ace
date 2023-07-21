@@ -19,12 +19,12 @@
 namespace Ace
 {
     FunctionCallExprNode::FunctionCallExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprNode>& t_expr,
-        const std::vector<std::shared_ptr<const IExprNode>>& t_args
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr },
-        m_Args{ t_args }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprNode>& expr,
+        const std::vector<std::shared_ptr<const IExprNode>>& args
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr },
+        m_Args{ args }
     {
     }
 
@@ -49,36 +49,36 @@ namespace Ace
     }
 
     auto FunctionCallExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const FunctionCallExprNode>
     {
         std::vector<std::shared_ptr<const IExprNode>> clonedArgs{};
         std::transform(begin(m_Args), end(m_Args), back_inserter(clonedArgs),
-        [&](const std::shared_ptr<const IExprNode>& t_arg)
+        [&](const std::shared_ptr<const IExprNode>& arg)
         {
-            return t_arg->CloneInScopeExpr(t_scope);
+            return arg->CloneInScopeExpr(scope);
         });
 
         return std::make_shared<const FunctionCallExprNode>(
             m_SourceLocation,
-            m_Expr->CloneInScopeExpr(t_scope),
+            m_Expr->CloneInScopeExpr(scope),
             clonedArgs
         );
     }
 
     auto FunctionCallExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto FunctionCallExprNode::CreateBound() const -> Expected<std::shared_ptr<const IExprBoundNode>>
     {
         ACE_TRY(boundArgs, TransformExpectedVector(m_Args,
-        [](const std::shared_ptr<const IExprNode>& t_arg)
+        [](const std::shared_ptr<const IExprNode>& arg)
         {
-            return t_arg->CreateBoundExpr();
+            return arg->CreateBoundExpr();
         }));
 
         std::vector<ITypeSymbol*> argTypeSymbols{};
@@ -86,9 +86,9 @@ namespace Ace
             begin(boundArgs),
             end  (boundArgs),
             back_inserter(argTypeSymbols),
-            [](const std::shared_ptr<const IExprBoundNode>& t_arg)
+            [](const std::shared_ptr<const IExprBoundNode>& arg)
             {
-                return t_arg->GetTypeInfo().Symbol;
+                return arg->GetTypeInfo().Symbol;
             }
         );
 

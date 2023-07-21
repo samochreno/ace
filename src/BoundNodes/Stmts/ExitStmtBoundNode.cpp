@@ -12,10 +12,10 @@
 namespace Ace
 {
     ExitStmtBoundNode::ExitStmtBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope }
     {
     }
 
@@ -35,46 +35,46 @@ namespace Ace
     }
 
     auto ExitStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const ExitStmtBoundNode>>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto ExitStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto ExitStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const ExitStmtBoundNode>>
     {
         return CreateUnchanged(shared_from_this());
     }
     
     auto ExitStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto ExitStmtBoundNode::Emit(Emitter& t_emitter) const -> void
+    auto ExitStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
         auto* const argValue = llvm::ConstantInt::get(
-            t_emitter.GetC().GetTypes().GetInt(),
+            emitter.GetC().GetTypes().GetInt(),
             -1,
             true
         );
 
-        t_emitter.GetBlockBuilder().Builder.CreateCall(
-            t_emitter.GetC().GetFunctions().GetExit(),
+        emitter.GetBlockBuilder().Builder.CreateCall(
+            emitter.GetC().GetFunctions().GetExit(),
             { argValue }
         );
 
-        t_emitter.GetBlockBuilder().Builder.CreateUnreachable();
+        emitter.GetBlockBuilder().Builder.CreateUnreachable();
     }
 }

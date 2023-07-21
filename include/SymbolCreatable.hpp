@@ -28,7 +28,7 @@ namespace Ace
 
         virtual auto GetName() const -> const Identifier& = 0;
         virtual auto ContinueCreatingSymbol(
-            ISymbol* const t_symbol
+            ISymbol* const symbol
         ) const -> Expected<void> = 0;
     };
 }

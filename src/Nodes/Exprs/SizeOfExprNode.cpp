@@ -11,12 +11,12 @@
 namespace Ace
 {
     SizeOfExprNode::SizeOfExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const TypeName& t_typeName
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope}, 
-        m_TypeName{ t_typeName }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const TypeName& typeName
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope}, 
+        m_TypeName{ typeName }
     {
     }
 
@@ -36,21 +36,21 @@ namespace Ace
     }
 
     auto SizeOfExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const SizeOfExprNode>
     {
         return std::make_shared<const SizeOfExprNode>(
             m_SourceLocation,
-            t_scope,
+            scope,
             m_TypeName
         );
     }
 
     auto SizeOfExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto SizeOfExprNode::CreateBound() const -> Expected<std::shared_ptr<const SizeOfExprBoundNode>>

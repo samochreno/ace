@@ -32,11 +32,11 @@ namespace Ace
     };
 
     inline constexpr auto operator&(
-        const LiteralKind t_lhs,
-        const LiteralKind t_rhs
+        const LiteralKind lhs,
+        const LiteralKind rhs
     ) -> bool
     {
         return
-            (static_cast<uint16_t>(t_lhs) & static_cast<uint16_t>(t_rhs)) != 0;
+            (static_cast<uint16_t>(lhs) & static_cast<uint16_t>(rhs)) != 0;
     }
 }

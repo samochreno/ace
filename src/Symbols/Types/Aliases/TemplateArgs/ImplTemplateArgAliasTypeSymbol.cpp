@@ -12,14 +12,14 @@
 namespace Ace
 {
     ImplTemplateArgAliasTypeSymbol::ImplTemplateArgAliasTypeSymbol(
-        const std::shared_ptr<Scope>& t_scope,
-        const Identifier& t_name,
-        ITypeSymbol* const t_aliasedType,
-        const size_t t_index
-    ) : m_Scope{ t_scope },
-        m_Name{ t_name },
-        m_AliasedType{ t_aliasedType },
-        m_Index{ t_index }
+        const std::shared_ptr<Scope>& scope,
+        const Identifier& name,
+        ITypeSymbol* const aliasedType,
+        const size_t index
+    ) : m_Scope{ scope },
+        m_Name{ name },
+        m_AliasedType{ aliasedType },
+        m_Index{ index }
     {
     }
 
@@ -104,24 +104,24 @@ namespace Ace
     }
 
     auto ImplTemplateArgAliasTypeSymbol::CreateCopyGlueBody(
-        FunctionSymbol* const t_glueSymbol
+        FunctionSymbol* const glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
-        return m_AliasedType->CreateCopyGlueBody(t_glueSymbol);
+        return m_AliasedType->CreateCopyGlueBody(glueSymbol);
     }
 
     auto ImplTemplateArgAliasTypeSymbol::CreateDropGlueBody(
-        FunctionSymbol* const t_glueSymbol
+        FunctionSymbol* const glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
-        return m_AliasedType->CreateDropGlueBody(t_glueSymbol);
+        return m_AliasedType->CreateDropGlueBody(glueSymbol);
     }
 
     auto ImplTemplateArgAliasTypeSymbol::BindCopyGlue(
-        FunctionSymbol* const t_glue
+        FunctionSymbol* const glue
     ) -> void
     {
-        m_AliasedType->BindCopyGlue(t_glue);
+        m_AliasedType->BindCopyGlue(glue);
     }
 
     auto ImplTemplateArgAliasTypeSymbol::GetCopyGlue() const -> std::optional<FunctionSymbol*>
@@ -130,10 +130,10 @@ namespace Ace
     }
 
     auto ImplTemplateArgAliasTypeSymbol::BindDropGlue(
-        FunctionSymbol* const t_glue
+        FunctionSymbol* const glue
     ) -> void
     {
-        m_AliasedType->BindDropGlue(t_glue);
+        m_AliasedType->BindDropGlue(glue);
     }
 
     auto ImplTemplateArgAliasTypeSymbol::GetDropGlue() const -> std::optional<FunctionSymbol*>

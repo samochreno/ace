@@ -18,7 +18,7 @@ namespace Ace
         virtual auto GetBuffer() const -> const std::string& = 0;
 
         virtual auto FormatLocation(
-            const SourceLocation& t_location
+            const SourceLocation& location
         ) const -> std::string = 0;
     };
 }

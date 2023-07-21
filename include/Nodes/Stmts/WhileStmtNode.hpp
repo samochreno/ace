@@ -20,10 +20,10 @@ namespace Ace
     {
     public:
         WhileStmtNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const std::shared_ptr<const IExprNode>& t_condition,
-            const std::shared_ptr<const BlockStmtNode>& t_body
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const std::shared_ptr<const IExprNode>& condition,
+            const std::shared_ptr<const BlockStmtNode>& body
         );
         virtual ~WhileStmtNode() = default;
 
@@ -31,10 +31,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const WhileStmtNode> final;
         auto CloneInScopeStmt(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IStmtNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const WhileStmtBoundNode>> final;
         auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;

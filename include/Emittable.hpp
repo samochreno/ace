@@ -13,6 +13,6 @@ namespace Ace
     public:
         virtual ~IEmittable() = default;
 
-        virtual auto Emit(Emitter& t_emitter) const -> T = 0;
+        virtual auto Emit(Emitter& emitter) const -> T = 0;
     };
 }

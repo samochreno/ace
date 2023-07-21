@@ -23,14 +23,14 @@
 namespace Ace
 {
     CompoundAssignmentStmtBoundNode::CompoundAssignmentStmtBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_lhsExpr,
-        const std::shared_ptr<const IExprBoundNode>& t_rhsExpr,
-        FunctionSymbol* const t_opSymbol
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_LHSExpr{ t_lhsExpr },
-        m_RHSExpr{ t_rhsExpr },
-        m_OpSymbol{ t_opSymbol }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& lhsExpr,
+        const std::shared_ptr<const IExprBoundNode>& rhsExpr,
+        FunctionSymbol* const opSymbol
+    ) : m_SourceLocation{ sourceLocation },
+        m_LHSExpr{ lhsExpr },
+        m_RHSExpr{ rhsExpr },
+        m_OpSymbol{ opSymbol }
     {
     }
 
@@ -55,7 +55,7 @@ namespace Ace
     }
 
     auto CompoundAssignmentStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>>
     {
         const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
@@ -88,14 +88,14 @@ namespace Ace
     }
 
     auto CompoundAssignmentStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto CompoundAssignmentStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const GroupStmtBoundNode>>
     {
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
@@ -285,14 +285,14 @@ namespace Ace
     }
 
     auto CompoundAssignmentStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
     auto CompoundAssignmentStmtBoundNode::Emit(
-        Emitter& t_emitter
+        Emitter& emitter
     ) const -> void
     {
         ACE_UNREACHABLE();

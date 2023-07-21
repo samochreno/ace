@@ -14,14 +14,14 @@
 namespace Ace
 {
     StructConstructionExprNode::StructConstructionExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const SymbolName& t_typeName,
-        std::vector<StructConstructionExprArg>&& t_args
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_TypeName{ t_typeName },
-        m_Args{ t_args }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const SymbolName& typeName,
+        std::vector<StructConstructionExprArg>&& args
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_TypeName{ typeName },
+        m_Args{ args }
     {
     }
 
@@ -40,11 +40,11 @@ namespace Ace
         std::vector<const INode*> children{};
 
         std::for_each(begin(m_Args), end(m_Args),
-        [&](const StructConstructionExprArg& t_arg)
+        [&](const StructConstructionExprArg& arg)
         {
-            if (t_arg.OptValue.has_value())
+            if (arg.OptValue.has_value())
             {
-                AddChildren(children, t_arg.OptValue.value());
+                AddChildren(children, arg.OptValue.value());
             }
         });
 
@@ -52,43 +52,43 @@ namespace Ace
     }
 
     auto StructConstructionExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const StructConstructionExprNode>
     {
         std::vector<StructConstructionExprArg> clonedArgs{};
         std::transform(begin(m_Args), end(m_Args), back_inserter(clonedArgs),
-        [&](const StructConstructionExprArg& t_arg)
+        [&](const StructConstructionExprArg& arg)
         {
             const auto clonedOptValue = [&]() -> std::optional<std::shared_ptr<const IExprNode>>
             {
-                if (!t_arg.OptValue.has_value())
+                if (!arg.OptValue.has_value())
                 {
                     return std::nullopt;
                 }
 
-                return t_arg.OptValue.value()->CloneInScopeExpr(t_scope);
+                return arg.OptValue.value()->CloneInScopeExpr(scope);
             }();
 
             return StructConstructionExprArg
             {
-                t_arg.Name,
+                arg.Name,
                 clonedOptValue,
             };
         });
 
         return std::make_shared<const StructConstructionExprNode>(
             m_SourceLocation,
-            t_scope,
+            scope,
             m_TypeName,
             std::move(clonedArgs)
         );
     }
 
     auto StructConstructionExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto StructConstructionExprNode::CreateBound() const -> Expected<std::shared_ptr<const StructConstructionExprBoundNode>>
@@ -99,16 +99,16 @@ namespace Ace
         ACE_TRY_ASSERT(varSymbols.size() == m_Args.size());
 
         ACE_TRY(boundArgs, TransformExpectedVector(m_Args,
-        [&](const StructConstructionExprArg& t_arg) -> Expected<StructConstructionExprBoundArg>
+        [&](const StructConstructionExprArg& arg) -> Expected<StructConstructionExprBoundArg>
         {
             const auto matchingVarSymbolIt = std::find_if(
                 begin(varSymbols),
                 end  (varSymbols),
-                [&](const InstanceVarSymbol* const t_varSymbol)
+                [&](const InstanceVarSymbol* const varSymbol)
                 {
                     return
-                        t_varSymbol->GetName().String ==
-                        t_arg.Name.String;
+                        varSymbol->GetName().String ==
+                        arg.Name.String;
                 }
             );
 
@@ -117,19 +117,19 @@ namespace Ace
 
             ACE_TRY(boundValue, ([&]() -> Expected<std::shared_ptr<const IExprBoundNode>>
             {
-                if (t_arg.OptValue.has_value())
+                if (arg.OptValue.has_value())
                 {
-                    return t_arg.OptValue.value()->CreateBoundExpr();
+                    return arg.OptValue.value()->CreateBoundExpr();
                 }
 
                 const SymbolName symbolName
                 {
-                    SymbolNameSection{ t_arg.Name },
+                    SymbolNameSection{ arg.Name },
                     SymbolNameResolutionScope::Local,
                 };
 
                 return std::make_shared<const SymbolLiteralExprNode>(
-                    t_arg.Name.SourceLocation,
+                    arg.Name.SourceLocation,
                     m_Scope,
                     symbolName
                 )->CreateBoundExpr();

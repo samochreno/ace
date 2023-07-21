@@ -12,10 +12,10 @@
 namespace Ace
 {
     LabelStmtBoundNode::LabelStmtBoundNode(
-        const SourceLocation& t_sourceLocation,
-        LabelSymbol* const t_symbol
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Symbol{ t_symbol }
+        const SourceLocation& sourceLocation,
+        LabelSymbol* const symbol
+    ) : m_SourceLocation{ sourceLocation },
+        m_Symbol{ symbol }
     {
     }
 
@@ -35,34 +35,34 @@ namespace Ace
     }
 
     auto LabelStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const LabelStmtBoundNode>>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto LabelStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto LabelStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const LabelStmtBoundNode>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto LabelStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto LabelStmtBoundNode::Emit(Emitter& t_emitter) const -> void
+    auto LabelStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
     }
 

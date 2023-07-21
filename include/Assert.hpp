@@ -5,11 +5,11 @@
 
 #include "Log.hpp"
 
-#define ACE_ASSERT(t_condition) \
-    if (!(t_condition)) \
+#define ACE_ASSERT(condition) \
+    if (!(condition)) \
     { \
         Log << termcolor::bright_red << "Assertion failed in file"; \
-        Log << __FILE__ << " at line " << __LINE__ << ": " << #t_condition; \
+        Log << __FILE__ << " at line " << __LINE__ << ": " << #condition; \
         Log << "\n" << std::flush; \
         std::terminate(); \
     } static_assert(true, "Semicolon required.")

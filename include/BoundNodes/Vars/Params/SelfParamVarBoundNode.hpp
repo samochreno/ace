@@ -23,8 +23,8 @@ namespace Ace
     {
     public:
         SelfParamVarBoundNode(
-            const SourceLocation& t_sourceLocation,
-            SelfParamVarSymbol* const t_symbol
+            const SourceLocation& sourceLocation,
+            SelfParamVarSymbol* const symbol
         );
         virtual ~SelfParamVarBoundNode() = default;
 
@@ -32,10 +32,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const SelfParamVarBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const SelfParamVarBoundNode>> final;
 
         auto GetSymbol() const -> SelfParamVarSymbol* final;

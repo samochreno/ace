@@ -14,14 +14,14 @@
 namespace Ace
 {
     UserBinaryExprNode::UserBinaryExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprNode>& t_lhsExpr,
-        const std::shared_ptr<const IExprNode>& t_rhsExpr,
-        const Op& t_op
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_LHSExpr{ t_lhsExpr },
-        m_RHSExpr{ t_rhsExpr },
-        m_Op{ t_op }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprNode>& lhsExpr,
+        const std::shared_ptr<const IExprNode>& rhsExpr,
+        const Op& op
+    ) : m_SourceLocation{ sourceLocation },
+        m_LHSExpr{ lhsExpr },
+        m_RHSExpr{ rhsExpr },
+        m_Op{ op }
     {
     }
 
@@ -46,22 +46,22 @@ namespace Ace
     }
 
     auto UserBinaryExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const UserBinaryExprNode>
     {
         return std::make_shared<const UserBinaryExprNode>(
             m_SourceLocation,
-            m_LHSExpr->CloneInScopeExpr(t_scope),
-            m_RHSExpr->CloneInScopeExpr(t_scope),
+            m_LHSExpr->CloneInScopeExpr(scope),
+            m_RHSExpr->CloneInScopeExpr(scope),
             m_Op
         );
     }
 
     auto UserBinaryExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto UserBinaryExprNode::CreateBound() const -> Expected<std::shared_ptr<const UserBinaryExprBoundNode>>
@@ -105,7 +105,7 @@ namespace Ace
             begin(argTypeInfos),
             end  (argTypeInfos),
             back_inserter(argTypeSymbols),
-            [](const TypeInfo& t_typeInfo) { return t_typeInfo.Symbol; }
+            [](const TypeInfo& typeInfo) { return typeInfo.Symbol; }
         );
 
         const auto expLHSOpSymbol = [&]() -> Expected<FunctionSymbol*>

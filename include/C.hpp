@@ -8,8 +8,8 @@ namespace Ace
     {
     public:
         auto Initialize(
-            llvm::LLVMContext& t_context,
-            llvm::Module& t_module
+            llvm::LLVMContext& context,
+            llvm::Module& module
         ) -> void;
 
         auto GetInt()         const -> llvm::IntegerType*;
@@ -32,9 +32,9 @@ namespace Ace
     {
     public:
         auto Initialize(
-            llvm::LLVMContext& t_context,
-            llvm::Module& t_module,
-            const CTypes& t_types
+            llvm::LLVMContext& context,
+            llvm::Module& module,
+            const CTypes& types
         ) -> void;
 
         auto GetPrintf()  const -> llvm::Function*;
@@ -60,8 +60,8 @@ namespace Ace
     struct C
     {
         auto Initialize(
-            llvm::LLVMContext& t_context,
-            llvm::Module& t_module
+            llvm::LLVMContext& context,
+            llvm::Module& module
         ) -> void;
 
         auto GetTypes()     const -> const CTypes&;

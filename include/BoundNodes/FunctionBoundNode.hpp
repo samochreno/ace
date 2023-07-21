@@ -27,12 +27,12 @@ namespace Ace
     {
     public:
         FunctionBoundNode(
-            const SourceLocation& t_sourceLocation,
-            FunctionSymbol* const t_symbol,
-            const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes,
-            const std::optional<const std::shared_ptr<const SelfParamVarBoundNode>>& t_optSelf,
-            const std::vector<std::shared_ptr<const ParamVarBoundNode>>& t_params,
-            const std::optional<std::shared_ptr<const BlockStmtBoundNode>>& t_optBody
+            const SourceLocation& sourceLocation,
+            FunctionSymbol* const symbol,
+            const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
+            const std::optional<const std::shared_ptr<const SelfParamVarBoundNode>>& optSelf,
+            const std::vector<std::shared_ptr<const ParamVarBoundNode>>& params,
+            const std::optional<std::shared_ptr<const BlockStmtBoundNode>>& optBody
         );
         virtual ~FunctionBoundNode() = default;
 
@@ -40,10 +40,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const FunctionBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const FunctionBoundNode>> final;
 
         auto GetSymbol() const -> FunctionSymbol* final;

@@ -25,8 +25,8 @@ namespace Ace
     struct Compilation
     {
         static auto Parse(
-            std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
-            const std::vector<std::string_view>& t_args
+            std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+            const std::vector<std::string_view>& args
         ) -> Expected<std::unique_ptr<const Compilation>>;
 
         const CLIArgBuffer* CLIArgBuffer{};

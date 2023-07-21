@@ -8,32 +8,32 @@
 namespace Ace
 {
     CLIArgBuffer::CLIArgBuffer(
-        const Compilation* const t_compilation,
-        const std::vector<std::string_view>& t_args
-    ) : m_Compilation{ t_compilation }
+        const Compilation* const compilation,
+        const std::vector<std::string_view>& args
+    ) : m_Compilation{ compilation }
     {
         std::vector<std::pair<size_t, size_t>> argIndexLengthPairs{};
-        std::for_each(begin(t_args), end(t_args),
-        [&](const std::string_view t_arg)
+        std::for_each(begin(args), end(args),
+        [&](const std::string_view arg)
         {
             const auto index = m_Buffer.size();
 
-            m_Buffer += t_arg;
+            m_Buffer += arg;
             m_Buffer += '\n';
 
-            argIndexLengthPairs.emplace_back(index, t_arg.size());
+            argIndexLengthPairs.emplace_back(index, arg.size());
         });
 
         std::transform(
             begin(argIndexLengthPairs),
             end  (argIndexLengthPairs),
             back_inserter(m_Args),
-            [&](const std::pair<size_t, size_t>& t_argIndexLengthPair)
+            [&](const std::pair<size_t, size_t>& argIndexLengthPair)
             {
                 return std::string_view
                 {
-                    m_Buffer.data() + t_argIndexLengthPair.first,
-                    t_argIndexLengthPair.second,
+                    m_Buffer.data() + argIndexLengthPair.first,
+                    argIndexLengthPair.second,
                 };
             }
         );
@@ -50,7 +50,7 @@ namespace Ace
     }
 
     auto CLIArgBuffer::FormatLocation(
-        const SourceLocation& t_location
+        const SourceLocation& location
     ) const -> std::string
     {
         return {};

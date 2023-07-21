@@ -7,25 +7,25 @@
 namespace Ace
 {
     auto DiagnosticBag::Add(
-        const std::shared_ptr<const Diagnostic>& t_diagnostic
+        const std::shared_ptr<const Diagnostic>& diagnostic
     ) -> DiagnosticBag&
     {
-        m_Diagnostics.push_back(t_diagnostic);
-        AddSeverity(t_diagnostic->Severity);
+        m_Diagnostics.push_back(diagnostic);
+        AddSeverity(diagnostic->Severity);
 
         return *this;
     }
 
     auto DiagnosticBag::Add(
-        const DiagnosticBag& t_diagnosticBag
+        const DiagnosticBag& diagnosticBag
     ) -> DiagnosticBag&
     {
         std::for_each(
-            begin(t_diagnosticBag.GetDiagnostics()),
-            end  (t_diagnosticBag.GetDiagnostics()),
-            [&](const std::shared_ptr<const Diagnostic>& t_diagnostic)
+            begin(diagnosticBag.GetDiagnostics()),
+            end  (diagnosticBag.GetDiagnostics()),
+            [&](const std::shared_ptr<const Diagnostic>& diagnostic)
             {
-                Add(t_diagnostic);
+                Add(diagnostic);
             }
         );
 
@@ -48,10 +48,10 @@ namespace Ace
     }
 
     auto DiagnosticBag::AddSeverity(
-        const DiagnosticSeverity& t_severity
+        const DiagnosticSeverity& severity
     ) -> void
     {
-        switch (t_severity)
+        switch (severity)
         {
             case DiagnosticSeverity::Info:
             {

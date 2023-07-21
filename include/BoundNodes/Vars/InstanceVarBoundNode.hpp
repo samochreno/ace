@@ -23,9 +23,9 @@ namespace Ace
     {
     public:
         InstanceVarBoundNode(
-            const SourceLocation& t_sourceLocation,
-            InstanceVarSymbol* const t_symbol,
-            const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes
+            const SourceLocation& sourceLocation,
+            InstanceVarSymbol* const symbol,
+            const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes
         );
         virtual ~InstanceVarBoundNode() = default;
 
@@ -33,10 +33,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const InstanceVarBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const InstanceVarBoundNode>> final;
 
         auto GetSymbol() const -> InstanceVarSymbol* final;

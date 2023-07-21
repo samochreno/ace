@@ -32,7 +32,7 @@ namespace Ace
         virtual ~ICloneableNode() = default;
 
         virtual auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const T> = 0;
     };
 
@@ -63,49 +63,49 @@ namespace Ace
 
     template<typename T>
     auto AddChildren(
-        std::vector<const INode*>& t_vec,
-        const T* const t_node
+        std::vector<const INode*>& vec,
+        const T* const node
     ) -> void
     {
-        ACE_ASSERT(t_node);
+        ACE_ASSERT(node);
 
-        t_vec.push_back(t_node);
-        std::vector<const INode*> childChildren = t_node->GetChildren();
-        t_vec.insert(end(t_vec), begin(childChildren), end(childChildren));
+        vec.push_back(node);
+        std::vector<const INode*> childChildren = node->GetChildren();
+        vec.insert(end(vec), begin(childChildren), end(childChildren));
     }
 
     template<typename T>
     auto AddChildren(
-        std::vector<const INode*>& t_vec,
-        const std::shared_ptr<const T>& t_node
+        std::vector<const INode*>& vec,
+        const std::shared_ptr<const T>& node
     ) -> void
     {
-        AddChildren(t_vec, t_node.get());
+        AddChildren(vec, node.get());
     }
 
     template<typename T>
     auto AddChildren(
-        std::vector<const INode*>& t_vec,
-        const std::vector<const T*>& t_nodes
+        std::vector<const INode*>& vec,
+        const std::vector<const T*>& nodes
     ) -> void
     {
-        std::for_each(begin(t_nodes), end(t_nodes), 
-        [&](const T* const t_node)
+        std::for_each(begin(nodes), end(nodes), 
+        [&](const T* const node)
         {
-            AddChildren(t_vec, t_node);
+            AddChildren(vec, node);
         });
     }
 
     template<typename T>
     auto AddChildren(
-        std::vector<const INode*>& t_vec,
-        const std::vector<std::shared_ptr<const T>>& t_nodes
+        std::vector<const INode*>& vec,
+        const std::vector<std::shared_ptr<const T>>& nodes
     ) -> void
     {
-        std::for_each(begin(t_nodes), end(t_nodes), 
-        [&](const std::shared_ptr<const T>& t_node)
+        std::for_each(begin(nodes), end(nodes), 
+        [&](const std::shared_ptr<const T>& node)
         {
-            AddChildren(t_vec, t_node);
+            AddChildren(vec, node);
         });
     }
 }

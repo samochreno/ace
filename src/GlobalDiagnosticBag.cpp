@@ -10,10 +10,10 @@
 namespace Ace
 {
     auto LogDiagnostic(
-        const std::shared_ptr<const Diagnostic>& t_diagnostic
+        const std::shared_ptr<const Diagnostic>& diagnostic
     ) -> void
     {
-        switch (t_diagnostic->Severity)
+        switch (diagnostic->Severity)
         {
             case DiagnosticSeverity::Info:
             {
@@ -33,35 +33,35 @@ namespace Ace
         }
 
         Log << termcolor::reset << ": ";
-        Log << t_diagnostic->Message << "\n";
+        Log << diagnostic->Message << "\n";
         
-        if (t_diagnostic->OptSourceLocation.has_value())
+        if (diagnostic->OptSourceLocation.has_value())
         {
             Log << termcolor::bright_blue << " --> ";
             Log << termcolor::reset;
-            Log << t_diagnostic->OptSourceLocation.value().Buffer->FormatLocation(
-                t_diagnostic->OptSourceLocation.value()
+            Log << diagnostic->OptSourceLocation.value().Buffer->FormatLocation(
+                diagnostic->OptSourceLocation.value()
             );
             Log << "\n";
         }
     }
 
     auto LogGlobalDiagnostics(
-        const DiagnosticBag& t_diagnosticBag,
-        const size_t t_lastLogSize
+        const DiagnosticBag& diagnosticBag,
+        const size_t lastLogSize
     ) -> void
     {
         std::for_each(
-            begin(t_diagnosticBag.GetDiagnostics()) + t_lastLogSize,
-            end  (t_diagnosticBag.GetDiagnostics()),
-            [&](const std::shared_ptr<const Diagnostic>& t_diagnostic)
+            begin(diagnosticBag.GetDiagnostics()) + lastLogSize,
+            end  (diagnosticBag.GetDiagnostics()),
+            [&](const std::shared_ptr<const Diagnostic>& diagnostic)
             {
-                if (t_diagnostic != *begin(t_diagnosticBag.GetDiagnostics()))
+                if (diagnostic != *begin(diagnosticBag.GetDiagnostics()))
                 {
                     Log << "\n";
                 }
 
-                LogDiagnostic(t_diagnostic);
+                LogDiagnostic(diagnostic);
             }
         );
     }

@@ -21,9 +21,9 @@ namespace Ace
     {
     public:
         BlockStmtBoundNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_selfScope,
-            const std::vector<std::shared_ptr<const IStmtBoundNode>>& t_stmts
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& selfScope,
+            const std::vector<std::shared_ptr<const IStmtBoundNode>>& stmts
         );
         virtual ~BlockStmtBoundNode() = default;
         
@@ -31,18 +31,18 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const StmtTypeCheckingContext& t_context
+            const StmtTypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const BlockStmtBoundNode>>> final;
         auto GetOrCreateTypeCheckedStmt(
-            const StmtTypeCheckingContext& t_context
+            const StmtTypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const BlockStmtBoundNode>> final;
         auto GetOrCreateLoweredStmt(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>> final;
-        auto Emit(Emitter& t_emitter) const -> void final;
+        auto Emit(Emitter& emitter) const -> void final;
 
         auto CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const IStmtBoundNode>> final;
 

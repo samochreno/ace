@@ -12,10 +12,10 @@
 namespace Ace
 {
     SelfParamVarBoundNode::SelfParamVarBoundNode(
-        const SourceLocation& t_sourceLocation,
-        SelfParamVarSymbol* const t_symbol
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Symbol{ t_symbol }
+        const SourceLocation& sourceLocation,
+        SelfParamVarSymbol* const symbol
+    ) : m_SourceLocation{ sourceLocation },
+        m_Symbol{ symbol }
     {
     }
 
@@ -35,7 +35,7 @@ namespace Ace
     }
 
     auto SelfParamVarBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const SelfParamVarBoundNode>>>
     {
         ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
@@ -45,7 +45,7 @@ namespace Ace
     }
 
     auto SelfParamVarBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const SelfParamVarBoundNode>>
     {
         return CreateUnchanged(shared_from_this());

@@ -40,7 +40,7 @@ namespace Ace
         virtual ~ITypeCheckableBoundNode() = default;
 
         virtual auto GetOrCreateTypeChecked(
-            const TContext& t_context
+            const TContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const TNode>>> = 0;
     };
 
@@ -51,39 +51,39 @@ namespace Ace
         virtual ~ILowerableBoundNode() = default;
 
         virtual auto GetOrCreateLowered(
-            const TContext& t_context
+            const TContext& context
         ) const -> MaybeChanged<std::shared_ptr<const TNode>> = 0;
     };
 
     template<typename T>
     auto AddChildren(
-        std::vector<const IBoundNode*>& t_vec,
-        const std::shared_ptr<const T>& t_node
+        std::vector<const IBoundNode*>& vec,
+        const std::shared_ptr<const T>& node
     ) -> void
     {
-        if (!t_node)
+        if (!node)
         {
             return;
         }
 
-        t_vec.push_back(t_node.get());
-        std::vector<const IBoundNode*> childChildren = t_node->GetChildren();
-        t_vec.insert(end(t_vec), begin(childChildren), end(childChildren));
+        vec.push_back(node.get());
+        std::vector<const IBoundNode*> childChildren = node->GetChildren();
+        vec.insert(end(vec), begin(childChildren), end(childChildren));
     }
 
     template<typename T>
     auto AddChildren(
-        std::vector<const IBoundNode*>& t_vec,
-        const std::vector<std::shared_ptr<const T>>& t_nodes
+        std::vector<const IBoundNode*>& vec,
+        const std::vector<std::shared_ptr<const T>>& nodes
     ) -> void
     {
-        std::for_each(begin(t_nodes), end(t_nodes),
-        [&](const std::shared_ptr<const T>& t_node)
+        std::for_each(begin(nodes), end(nodes),
+        [&](const std::shared_ptr<const T>& node)
         {
-            t_vec.push_back(t_node.get());
+            vec.push_back(node.get());
 
-            auto children = t_node->GetChildren();
-            t_vec.insert(end(t_vec), begin(children), end(children));
+            auto children = node->GetChildren();
+            vec.insert(end(vec), begin(children), end(children));
         });
     }
 }

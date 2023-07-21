@@ -23,9 +23,9 @@ namespace Ace
     {
     public:
         StaticVarBoundNode(
-            const SourceLocation& t_sourceLocation,
-            StaticVarSymbol* const t_symbol,
-            const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes
+            const SourceLocation& sourceLocation,
+            StaticVarSymbol* const symbol,
+            const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes
         );
         virtual ~StaticVarBoundNode() = default;
 
@@ -33,10 +33,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const StaticVarBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const StaticVarBoundNode>> final;
 
         auto GetSymbol() const -> StaticVarSymbol* final;

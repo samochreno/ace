@@ -50,8 +50,8 @@ namespace Ace
     }
 
     auto Compilation::Parse(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
-        const std::vector<std::string_view>& t_args
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        const std::vector<std::string_view>& args
     ) -> Expected<std::unique_ptr<const Compilation>>
     {
         DiagnosticBag diagnosticBag{};
@@ -60,10 +60,10 @@ namespace Ace
 
         const auto cliArgBuffer = std::make_shared<const Ace::CLIArgBuffer>(
             self.get(),
-            t_args
+            args
         );
         self->CLIArgBuffer = cliArgBuffer.get();
-        t_sourceBuffers->push_back(std::move(cliArgBuffer));
+        sourceBuffers->push_back(std::move(cliArgBuffer));
 
         const auto expCLIArgsParseResult = ParseCommandLineArgs(
             self->CLIArgBuffer,
@@ -89,13 +89,13 @@ namespace Ace
             std::for_each(
                 begin(positionalArgs),
                 end  (positionalArgs),
-                [&](const std::string_view t_positionalArg)
+                [&](const std::string_view positionalArg)
                 {
                     const SourceLocation sourceLocation
                     {
                         self->CLIArgBuffer,
-                        begin(t_positionalArg),
-                        end  (t_positionalArg),
+                        begin(positionalArg),
+                        end  (positionalArg),
                     };
 
                     diagnosticBag.Add(CreateMultiplePackagePathArgsError(
@@ -118,10 +118,10 @@ namespace Ace
         }
 
         self->PackageFileBuffer = expPackageFileBuffer.Unwrap().get();
-        t_sourceBuffers->push_back(std::move(expPackageFileBuffer.Unwrap()));
+        sourceBuffers->push_back(std::move(expPackageFileBuffer.Unwrap()));
 
         auto expPackage = Package::Parse(
-            t_sourceBuffers,
+            sourceBuffers,
             self->PackageFileBuffer
         );
         diagnosticBag.Add(expPackage);

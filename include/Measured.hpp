@@ -11,31 +11,31 @@ namespace Ace
     {
         Measured() = default;
         Measured(
-            const T& t_value,
-            const size_t t_length
-        ) : Value{ t_value },
-            Length{ t_length }
+            const T& value,
+            const size_t length
+        ) : Value{ value },
+            Length{ length }
         {
         }
         Measured(
-            T&& t_value,
-            const size_t t_length
-        ) : Value{ std::move(t_value) },
-            Length{ t_length }
+            T&& value,
+            const size_t length
+        ) : Value{ std::move(value) },
+            Length{ length }
         {
         }
         Measured(
-            const T& t_value,
-            const ptrdiff_t t_length
-        ) : Value{ t_value },
-            Length{ static_cast<size_t>(t_length) }
+            const T& value,
+            const ptrdiff_t length
+        ) : Value{ value },
+            Length{ static_cast<size_t>(length) }
         {
         }
         Measured(
-            T&& t_value,
-            const ptrdiff_t t_length
-        ) : Value{ std::move(t_value) },
-            Length{ static_cast<size_t>(t_length) }
+            T&& value,
+            const ptrdiff_t length
+        ) : Value{ std::move(value) },
+            Length{ static_cast<size_t>(length) }
         {
         }
 

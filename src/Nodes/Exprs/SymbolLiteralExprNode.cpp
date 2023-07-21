@@ -12,12 +12,12 @@
 namespace Ace
 {
     SymbolLiteralExprNode::SymbolLiteralExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const SymbolName& t_name
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Name{ t_name }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const SymbolName& name
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Name{ name }
     {
     }
 
@@ -38,21 +38,21 @@ namespace Ace
     }
 
     auto SymbolLiteralExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const SymbolLiteralExprNode>
     {
         return std::make_shared<const SymbolLiteralExprNode>(
             m_SourceLocation,
-            t_scope,
+            scope,
             m_Name
         );
     }
 
     auto SymbolLiteralExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto SymbolLiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const StaticVarReferenceExprBoundNode>>

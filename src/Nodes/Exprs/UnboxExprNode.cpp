@@ -12,10 +12,10 @@
 namespace Ace
 {
     UnboxExprNode::UnboxExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprNode>& t_expr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprNode>& expr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr }
     {
     }
 
@@ -39,20 +39,20 @@ namespace Ace
     }
 
     auto UnboxExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const UnboxExprNode>
     {
         return std::make_shared<const UnboxExprNode>(
             m_SourceLocation,
-            m_Expr->CloneInScopeExpr(t_scope)
+            m_Expr->CloneInScopeExpr(scope)
         );
     }
 
     auto UnboxExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto UnboxExprNode::CreateBound() const -> Expected<std::shared_ptr<const UnboxExprBoundNode>>

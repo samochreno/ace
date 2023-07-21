@@ -19,8 +19,8 @@ namespace Ace
     {
     public:
         AttributeNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<const StructConstructionExprNode>& t_structConstructionExpr
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<const StructConstructionExprNode>& structConstructionExpr
         );
         virtual ~AttributeNode() = default;
 
@@ -28,7 +28,7 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const AttributeNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const AttributeBoundNode>> final;
 

@@ -9,14 +9,14 @@
 namespace Ace
 {
     StaticVarSymbol::StaticVarSymbol(
-        const std::shared_ptr<Scope>& t_scope,
-        const Identifier& t_name,
-        const AccessModifier t_accessModifier,
-        ITypeSymbol* const t_type
-    ) : m_Scope{ t_scope },
-        m_Name{ t_name },
-        m_AccessModifier{ t_accessModifier },
-        m_Type{ t_type }
+        const std::shared_ptr<Scope>& scope,
+        const Identifier& name,
+        const AccessModifier accessModifier,
+        ITypeSymbol* const type
+    ) : m_Scope{ scope },
+        m_Name{ name },
+        m_AccessModifier{ accessModifier },
+        m_Type{ type }
     {
     }
 

@@ -15,12 +15,12 @@
 namespace Ace
 {
     UserUnaryExprNode::UserUnaryExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprNode>& t_expr,
-        const Op t_op
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr },
-        m_Op{ t_op }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprNode>& expr,
+        const Op op
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr },
+        m_Op{ op }
     {
     }
 
@@ -44,21 +44,21 @@ namespace Ace
     }
 
     auto UserUnaryExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const UserUnaryExprNode>
     {
         return std::make_unique<UserUnaryExprNode>(
             m_SourceLocation,
-            m_Expr->CloneInScopeExpr(t_scope),
+            m_Expr->CloneInScopeExpr(scope),
             m_Op
         );
     }
 
     auto UserUnaryExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto UserUnaryExprNode::CreateBound() const -> Expected<std::shared_ptr<const UserUnaryExprBoundNode>>

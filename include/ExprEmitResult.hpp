@@ -15,10 +15,10 @@ namespace Ace
     struct ExprEmitResult
     {
         ExprEmitResult(
-            llvm::Value* const t_value,
-            const std::vector<ExprDropData>& t_temporaries
-        ) : Value{ t_value },
-            Temporaries{ t_temporaries }
+            llvm::Value* const value,
+            const std::vector<ExprDropData>& temporaries
+        ) : Value{ value },
+            Temporaries{ temporaries }
         {
         }
 

@@ -19,12 +19,12 @@
 namespace Ace
 {
     VarStmtBoundNode::VarStmtBoundNode(
-        const SourceLocation& t_sourceLocation,
-        LocalVarSymbol* const t_symbol,
-        const std::optional<std::shared_ptr<const IExprBoundNode>>& t_optAssignedExpr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Symbol{ t_symbol },
-        m_OptAssignedExpr{ t_optAssignedExpr }
+        const SourceLocation& sourceLocation,
+        LocalVarSymbol* const symbol,
+        const std::optional<std::shared_ptr<const IExprBoundNode>>& optAssignedExpr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Symbol{ symbol },
+        m_OptAssignedExpr{ optAssignedExpr }
     {
     }
 
@@ -51,7 +51,7 @@ namespace Ace
     }
 
     auto VarStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const VarStmtBoundNode>>>
     {
         ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
@@ -75,20 +75,20 @@ namespace Ace
     }
 
     auto VarStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto VarStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const VarStmtBoundNode>>
     {
         const auto mchLoweredOptAssignedExpr = TransformMaybeChangedOptional(m_OptAssignedExpr,
-        [](const std::shared_ptr<const IExprBoundNode>& t_expr)
+        [](const std::shared_ptr<const IExprBoundNode>& expr)
         {
-            return t_expr->GetOrCreateLoweredExpr({});
+            return expr->GetOrCreateLoweredExpr({});
         });
 
         if (!mchLoweredOptAssignedExpr.IsChanged)
@@ -100,17 +100,17 @@ namespace Ace
             GetSourceLocation(),
             m_Symbol,
             mchLoweredOptAssignedExpr.Value
-        )->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(context).Value);
     }
 
     auto VarStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto VarStmtBoundNode::Emit(Emitter& t_emitter) const -> void
+    auto VarStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
         if (!m_OptAssignedExpr.has_value())
         {
@@ -130,7 +130,7 @@ namespace Ace
             m_OptAssignedExpr.value()
         );
 
-        assignmentStmt->Emit(t_emitter);
+        assignmentStmt->Emit(emitter);
     }
 
     auto VarStmtBoundNode::GetSymbol() const -> LocalVarSymbol*

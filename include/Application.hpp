@@ -11,32 +11,32 @@
 namespace Ace::Application
 {
     auto CreateAndDefineSymbols(
-        const Compilation* const t_compilation,
-        const std::vector<const INode*>& t_nodes
+        const Compilation* const compilation,
+        const std::vector<const INode*>& nodes
     ) -> Expected<void>;
     auto DefineAssociations(
-        const Compilation* const t_compilation,
-        const std::vector<const INode*>& t_nodes
+        const Compilation* const compilation,
+        const std::vector<const INode*>& nodes
     ) -> Expected<void>;
     auto ValidateControlFlow(
-        const Compilation* const t_compilation,
-        const std::vector<const IBoundNode*>& t_nodes
+        const Compilation* const compilation,
+        const std::vector<const IBoundNode*>& nodes
     ) -> Expected<void>;
     auto BindFunctionSymbolsBodies(
-        const Compilation* const t_compilation,
-        const std::vector<const IBoundNode*>& t_nodes
+        const Compilation* const compilation,
+        const std::vector<const IBoundNode*>& nodes
     ) -> void;
 
-    auto Main(const std::vector<std::string_view>& t_args) -> void;
+    auto Main(const std::vector<std::string_view>& args) -> void;
     
 #undef TLowered
 #undef TLoweredTypeChecked
 
     template<typename TNodeSmartPointer>
-    auto GetAllNodes(const TNodeSmartPointer& t_ast)
+    auto GetAllNodes(const TNodeSmartPointer& ast)
     {
-        auto nodes = t_ast->GetChildren();
-        nodes.push_back(t_ast.get());
+        auto nodes = ast->GetChildren();
+        nodes.push_back(ast.get());
         return nodes;
     }
 
@@ -44,13 +44,13 @@ namespace Ace::Application
 #define TNodeIBase std::remove_const_t<std::remove_pointer_t<std::remove_cvref_t<decltype(TASTSmartPointer{}->GetChildren().front())>>>
 
     template<typename TIt>
-    auto GetAllNodes(TIt t_astsBegin, TIt t_astsEnd)
+    auto GetAllNodes(TIt astsBegin, TIt astsEnd)
     {
         std::vector<const TNodeIBase*> allNodes{};
-        std::for_each(t_astsBegin, t_astsEnd,
-        [&](const TASTSmartPointer& t_ast)
+        std::for_each(astsBegin, astsEnd,
+        [&](const TASTSmartPointer& ast)
         {
-            const auto nodes = GetAllNodes(t_ast);
+            const auto nodes = GetAllNodes(ast);
             allNodes.insert(allNodes.end(), nodes.begin(), nodes.end());
         });
 
@@ -59,8 +59,8 @@ namespace Ace::Application
 
 #undef TASTSmartPointer
 #undef TNodeIBase
-#define TTypeChecked        std::remove_reference_t<decltype(t_getOrCreateTypeCheckedFunc(TBound{}).Unwrap().Value)>
-#define TLowered            std::remove_reference_t<decltype(t_getOrCreateLoweredFunc(TTypeChecked{}).Value)>
+#define TTypeChecked        std::remove_reference_t<decltype(getOrCreateTypeCheckedFunc(TBound{}).Unwrap().Value)>
+#define TLowered            std::remove_reference_t<decltype(getOrCreateLoweredFunc(TTypeChecked{}).Value)>
 
     template<
         typename TBound, 
@@ -68,27 +68,27 @@ namespace Ace::Application
         typename TGetOrCreateLoweredFunc
     >
     auto CreateTransformedAndVerifiedAST(
-        const Compilation* const t_compilation,
-        const TBound& t_boundAST,
-        TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
-        TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc
+        const Compilation* const compilation,
+        const TBound& boundAST,
+        TGetOrCreateTypeCheckedFunc&& getOrCreateTypeCheckedFunc,
+        TGetOrCreateLoweredFunc&& getOrCreateLoweredFunc
     ) -> Expected<TLowered>
     {
-        ACE_TRY(mchTypeCheckedAST, t_getOrCreateTypeCheckedFunc(t_boundAST));
-        const auto mchLoweredAST = t_getOrCreateLoweredFunc(
+        ACE_TRY(mchTypeCheckedAST, getOrCreateTypeCheckedFunc(boundAST));
+        const auto mchLoweredAST = getOrCreateLoweredFunc(
             mchTypeCheckedAST.Value
         );
 
         auto& finalAST = mchLoweredAST.Value;
         const auto nodes = GetAllNodes(finalAST);
         
-        ACE_TRY_VOID(ValidateControlFlow(t_compilation, nodes));
-        BindFunctionSymbolsBodies(t_compilation, nodes);
+        ACE_TRY_VOID(ValidateControlFlow(compilation, nodes));
+        BindFunctionSymbolsBodies(compilation, nodes);
 
         return finalAST;
     }
 
-#define TBound std::remove_reference_t<decltype(t_createBoundFunc(T{}).Unwrap())>
+#define TBound std::remove_reference_t<decltype(createBoundFunc(T{}).Unwrap())>
 
     template<
         typename T, 
@@ -97,20 +97,20 @@ namespace Ace::Application
         typename TGetOrCreateLoweredFunc
     >
     auto CreateBoundTransformedAndVerifiedAST(
-        const Compilation* const t_compilation,
-        const T& t_ast,
-        TCreateBoundFunc&& t_createBoundFunc,
-        TGetOrCreateTypeCheckedFunc&& t_getOrCreateTypeCheckedFunc,
-        TGetOrCreateLoweredFunc&& t_getOrCreateLoweredFunc
+        const Compilation* const compilation,
+        const T& ast,
+        TCreateBoundFunc&& createBoundFunc,
+        TGetOrCreateTypeCheckedFunc&& getOrCreateTypeCheckedFunc,
+        TGetOrCreateLoweredFunc&& getOrCreateLoweredFunc
     ) -> Expected<TLowered>
     {
-        ACE_TRY(boundAST, t_createBoundFunc(t_ast));
+        ACE_TRY(boundAST, createBoundFunc(ast));
 
         ACE_TRY(finalAST, CreateTransformedAndVerifiedAST(
-            t_compilation,
+            compilation,
             boundAST,
-            t_getOrCreateTypeCheckedFunc,
-            t_getOrCreateLoweredFunc
+            getOrCreateTypeCheckedFunc,
+            getOrCreateLoweredFunc
         ));
 
         return finalAST;

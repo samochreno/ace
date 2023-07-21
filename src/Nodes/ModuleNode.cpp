@@ -23,32 +23,32 @@
 namespace Ace
 {
     ModuleNode::ModuleNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const std::shared_ptr<Scope>& t_selfScope,
-        const std::vector<Identifier>& t_name,
-        const AccessModifier t_accessModifier,
-        const std::vector<std::shared_ptr<const ModuleNode>>& t_modules,
-        const std::vector<std::shared_ptr<const ITypeNode>>& t_types,
-        const std::vector<std::shared_ptr<const TypeTemplateNode>>& t_typeTemplates,
-        const std::vector<std::shared_ptr<const ImplNode>>& t_impls,
-        const std::vector<std::shared_ptr<const TemplatedImplNode>>& t_templatedImpls,
-        const std::vector<std::shared_ptr<const FunctionNode>>& t_functions,
-        const std::vector<std::shared_ptr<const FunctionTemplateNode>>& t_functionTemplates,
-        const std::vector<std::shared_ptr<const StaticVarNode>>& t_vars
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_SelfScope{ t_selfScope },
-        m_Name{ t_name },
-        m_AccessModifier{ t_accessModifier },
-        m_Modules{ t_modules },
-        m_Types{ t_types },
-        m_TypeTemplates{ t_typeTemplates },
-        m_Impls{ t_impls },
-        m_TemplatedImpls{ t_templatedImpls },
-        m_Functions{ t_functions },
-        m_FunctionTemplates{ t_functionTemplates },
-        m_Vars{ t_vars }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const std::shared_ptr<Scope>& selfScope,
+        const std::vector<Identifier>& name,
+        const AccessModifier accessModifier,
+        const std::vector<std::shared_ptr<const ModuleNode>>& modules,
+        const std::vector<std::shared_ptr<const ITypeNode>>& types,
+        const std::vector<std::shared_ptr<const TypeTemplateNode>>& typeTemplates,
+        const std::vector<std::shared_ptr<const ImplNode>>& impls,
+        const std::vector<std::shared_ptr<const TemplatedImplNode>>& templatedImpls,
+        const std::vector<std::shared_ptr<const FunctionNode>>& functions,
+        const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates,
+        const std::vector<std::shared_ptr<const StaticVarNode>>& vars
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_SelfScope{ selfScope },
+        m_Name{ name },
+        m_AccessModifier{ accessModifier },
+        m_Modules{ modules },
+        m_Types{ types },
+        m_TypeTemplates{ typeTemplates },
+        m_Impls{ impls },
+        m_TemplatedImpls{ templatedImpls },
+        m_Functions{ functions },
+        m_FunctionTemplates{ functionTemplates },
+        m_Vars{ vars }
     {
     }
 
@@ -79,19 +79,19 @@ namespace Ace
     }
 
     auto ModuleNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const ModuleNode>
     {
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto selfScope = scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const ModuleNode>> clonedModules{};
         std::transform(
             begin(m_Modules),
             end  (m_Modules),
             back_inserter(clonedModules),
-            [&](const std::shared_ptr<const ModuleNode>& t_module)
+            [&](const std::shared_ptr<const ModuleNode>& module)
             {
-                return t_module->CloneInScope(selfScope);
+                return module->CloneInScope(selfScope);
             }
         );
 
@@ -100,9 +100,9 @@ namespace Ace
             begin(m_Types),
             end  (m_Types),
             back_inserter(clonedTypes),
-            [&](const std::shared_ptr<const ITypeNode>& t_type)
+            [&](const std::shared_ptr<const ITypeNode>& type)
             {
-                return t_type->CloneInScopeType(selfScope);
+                return type->CloneInScopeType(selfScope);
             }
         );
 
@@ -111,9 +111,9 @@ namespace Ace
             begin(m_TypeTemplates),
             end  (m_TypeTemplates),
             back_inserter(clonedTypeTemplates),
-            [&](const std::shared_ptr<const TypeTemplateNode>& t_typeTemplate)
+            [&](const std::shared_ptr<const TypeTemplateNode>& typeTemplate)
             {
-                return t_typeTemplate->CloneInScope(selfScope);
+                return typeTemplate->CloneInScope(selfScope);
             }
         );
 
@@ -122,9 +122,9 @@ namespace Ace
             begin(m_Impls),
             end  (m_Impls),
             back_inserter(clonedImpls),
-            [&](const std::shared_ptr<const ImplNode>& t_impl)
+            [&](const std::shared_ptr<const ImplNode>& impl)
             {
-                return t_impl->CloneInScope(selfScope);
+                return impl->CloneInScope(selfScope);
             }
         );
 
@@ -133,9 +133,9 @@ namespace Ace
             begin(m_TemplatedImpls),
             end  (m_TemplatedImpls),
             back_inserter(clonedTemplatedImpls),
-            [&](const std::shared_ptr<const TemplatedImplNode>& t_templatedImpl)
+            [&](const std::shared_ptr<const TemplatedImplNode>& templatedImpl)
             {
-                return t_templatedImpl->CloneInScope(selfScope);
+                return templatedImpl->CloneInScope(selfScope);
             }
         );
 
@@ -144,9 +144,9 @@ namespace Ace
             begin(m_Functions),
             end  (m_Functions),
             back_inserter(clonedFunctions),
-            [&](const std::shared_ptr<const FunctionNode>& t_function)
+            [&](const std::shared_ptr<const FunctionNode>& function)
             {
-                return t_function->CloneInScope(selfScope);
+                return function->CloneInScope(selfScope);
             }
         );
 
@@ -155,9 +155,9 @@ namespace Ace
             begin(m_FunctionTemplates),
             end  (m_FunctionTemplates),
             back_inserter(clonedFunctionTemplates),
-            [&](const std::shared_ptr<const FunctionTemplateNode>& t_functionTemplate)
+            [&](const std::shared_ptr<const FunctionTemplateNode>& functionTemplate)
             {
-                return t_functionTemplate->CloneInScope(selfScope);
+                return functionTemplate->CloneInScope(selfScope);
             }
         );
 
@@ -166,15 +166,15 @@ namespace Ace
             begin(m_Vars),
             end  (m_Vars),
             back_inserter(clonedVars),
-            [&](const std::shared_ptr<const StaticVarNode>& t_var)
+            [&](const std::shared_ptr<const StaticVarNode>& var)
             {
-                return t_var->CloneInScope(selfScope);
+                return var->CloneInScope(selfScope);
             }
         );
 
         return std::make_shared<const ModuleNode>(
             m_SourceLocation,
-            t_scope,
+            scope,
             selfScope,
             m_Name,
             m_AccessModifier,
@@ -192,39 +192,39 @@ namespace Ace
     auto ModuleNode::CreateBound() const -> Expected<std::shared_ptr<const ModuleBoundNode>>
     {
         ACE_TRY(boundModules, TransformExpectedVector(m_Modules,
-        [](const std::shared_ptr<const ModuleNode>& t_module)
+        [](const std::shared_ptr<const ModuleNode>& module)
         {
-            return t_module->CreateBound();
+            return module->CreateBound();
         }));
 
         ACE_TRY(boundTypes, TransformExpectedVector(m_Types,
-        [](const std::shared_ptr<const ITypeNode>& t_type)
+        [](const std::shared_ptr<const ITypeNode>& type)
         {
-            return t_type->CreateBoundType();
+            return type->CreateBoundType();
         }));
 
         ACE_TRY(boundImpls, TransformExpectedVector(m_Impls,
-        [](const std::shared_ptr<const ImplNode>& t_impl)
+        [](const std::shared_ptr<const ImplNode>& impl)
         {
-            return t_impl->CreateBound();
+            return impl->CreateBound();
         }));
 
         ACE_TRY(boundTemplateImpls, TransformExpectedVector(m_TemplatedImpls,
-        [](const std::shared_ptr<const TemplatedImplNode>& t_templatedImpl)
+        [](const std::shared_ptr<const TemplatedImplNode>& templatedImpl)
         {
-            return t_templatedImpl->CreateBound();
+            return templatedImpl->CreateBound();
         }));
 
         ACE_TRY(boundFunctions, TransformExpectedVector(m_Functions,
-        [](const std::shared_ptr<const FunctionNode>& t_function)
+        [](const std::shared_ptr<const FunctionNode>& function)
         {
-            return t_function->CreateBound();
+            return function->CreateBound();
         }));
 
         ACE_TRY(boundVars, TransformExpectedVector(m_Vars,
-        [](const std::shared_ptr<const StaticVarNode>& t_var)
+        [](const std::shared_ptr<const StaticVarNode>& var)
         {
-            return t_var->CreateBound();
+            return var->CreateBound();
         }));
 
         auto* const selfSymbol = GetSymbolScope()->ExclusiveResolveSymbol<ModuleSymbol>(
@@ -301,10 +301,10 @@ namespace Ace
     }
 
     auto ModuleNode::ContinueCreatingSymbol(
-        ISymbol* const t_symbol
+        ISymbol* const symbol
     ) const -> Expected<void>
     {
-        auto* const moduleSymbol = dynamic_cast<ModuleSymbol*>(t_symbol);
+        auto* const moduleSymbol = dynamic_cast<ModuleSymbol*>(symbol);
         ACE_ASSERT(moduleSymbol);
 
         ACE_TRY_ASSERT(moduleSymbol->GetAccessModifier() == m_AccessModifier);

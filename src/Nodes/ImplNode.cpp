@@ -17,15 +17,15 @@
 namespace Ace
 {
     ImplNode::ImplNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_selfScope,
-        const SymbolName& t_typeName,
-        const std::vector<std::shared_ptr<const FunctionNode>>& t_functions,
-        const std::vector<std::shared_ptr<const FunctionTemplateNode>>& t_functionTemplates
-    ) : m_SelfScope{ t_selfScope },
-        m_TypeName{ t_typeName },
-        m_Functions{ t_functions },
-        m_FunctionTemplates{ t_functionTemplates }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& selfScope,
+        const SymbolName& typeName,
+        const std::vector<std::shared_ptr<const FunctionNode>>& functions,
+        const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates
+    ) : m_SelfScope{ selfScope },
+        m_TypeName{ typeName },
+        m_Functions{ functions },
+        m_FunctionTemplates{ functionTemplates }
     {
     }
 
@@ -50,19 +50,19 @@ namespace Ace
     }
 
     auto ImplNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const ImplNode>
     {
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto selfScope = scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const FunctionNode>> clonedFunctions{};
         std::transform(
             begin(m_Functions),
             end  (m_Functions),
             back_inserter(clonedFunctions),
-            [&](const std::shared_ptr<const FunctionNode>& t_function)
+            [&](const std::shared_ptr<const FunctionNode>& function)
             {
-                return t_function->CloneInScope(selfScope);
+                return function->CloneInScope(selfScope);
             }
         );
 
@@ -71,9 +71,9 @@ namespace Ace
             begin(m_FunctionTemplates),
             end  (m_FunctionTemplates),
             back_inserter(clonedFunctionTemplates),
-            [&](const std::shared_ptr<const FunctionTemplateNode>& t_functionTemplate)
+            [&](const std::shared_ptr<const FunctionTemplateNode>& functionTemplate)
             {
-                return t_functionTemplate->CloneInScope(selfScope);
+                return functionTemplate->CloneInScope(selfScope);
             }
         );
 
@@ -89,9 +89,9 @@ namespace Ace
     auto ImplNode::CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>>
     {
         ACE_TRY(boundFunctions, TransformExpectedVector(m_Functions,
-        [](const std::shared_ptr<const FunctionNode>& t_function)
+        [](const std::shared_ptr<const FunctionNode>& function)
         {
-            return t_function->CreateBound();
+            return function->CreateBound();
         }));
 
         return std::make_shared<const ImplBoundNode>(

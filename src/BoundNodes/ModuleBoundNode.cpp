@@ -16,20 +16,20 @@
 namespace Ace
 {
     ModuleBoundNode::ModuleBoundNode(
-        const SourceLocation& t_sourceLocation,
-        ModuleSymbol* const t_symbol,
-        const std::vector<std::shared_ptr<const ModuleBoundNode>>& t_modules,
-        const std::vector<std::shared_ptr<const ITypeBoundNode>>& t_types,
-        const std::vector<std::shared_ptr<const ImplBoundNode>>& t_impls,
-        const std::vector<std::shared_ptr<const FunctionBoundNode>>& t_functions,
-        const std::vector<std::shared_ptr<const StaticVarBoundNode>>& t_vars
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Symbol{ t_symbol },
-        m_Modules{ t_modules },
-        m_Types{ t_types },
-        m_Impls{ t_impls },
-        m_Functions{ t_functions },
-        m_Vars{ t_vars }
+        const SourceLocation& sourceLocation,
+        ModuleSymbol* const symbol,
+        const std::vector<std::shared_ptr<const ModuleBoundNode>>& modules,
+        const std::vector<std::shared_ptr<const ITypeBoundNode>>& types,
+        const std::vector<std::shared_ptr<const ImplBoundNode>>& impls,
+        const std::vector<std::shared_ptr<const FunctionBoundNode>>& functions,
+        const std::vector<std::shared_ptr<const StaticVarBoundNode>>& vars
+    ) : m_SourceLocation{ sourceLocation },
+        m_Symbol{ symbol },
+        m_Modules{ modules },
+        m_Types{ types },
+        m_Impls{ impls },
+        m_Functions{ functions },
+        m_Vars{ vars }
     {
     }
 
@@ -57,37 +57,37 @@ namespace Ace
     }
 
     auto ModuleBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const ModuleBoundNode>>>
     {
         ACE_TRY(mchCheckedModules, TransformExpectedMaybeChangedVector(m_Modules,
-        [](const std::shared_ptr<const ModuleBoundNode>& t_module)
+        [](const std::shared_ptr<const ModuleBoundNode>& module)
         {
-            return t_module->GetOrCreateTypeChecked({});
+            return module->GetOrCreateTypeChecked({});
         }));
 
         ACE_TRY(mchCheckedTypes, TransformExpectedMaybeChangedVector(m_Types,
-        [](const std::shared_ptr<const ITypeBoundNode>& t_type)
+        [](const std::shared_ptr<const ITypeBoundNode>& type)
         {
-            return t_type->GetOrCreateTypeCheckedType({});
+            return type->GetOrCreateTypeCheckedType({});
         }));
 
         ACE_TRY(mchCheckedImpls, TransformExpectedMaybeChangedVector(m_Impls,
-        [](const std::shared_ptr<const ImplBoundNode>& t_impl)
+        [](const std::shared_ptr<const ImplBoundNode>& impl)
         {
-            return t_impl->GetOrCreateTypeChecked({});
+            return impl->GetOrCreateTypeChecked({});
         }));
 
         ACE_TRY(mchCheckedFunctions, TransformExpectedMaybeChangedVector(m_Functions,
-        [](const std::shared_ptr<const FunctionBoundNode>& t_function)
+        [](const std::shared_ptr<const FunctionBoundNode>& function)
         {
-            return t_function->GetOrCreateTypeChecked({});
+            return function->GetOrCreateTypeChecked({});
         }));
 
         ACE_TRY(mchCheckedVars, TransformExpectedMaybeChangedVector(m_Vars,
-        [](const std::shared_ptr<const StaticVarBoundNode>& t_var)
+        [](const std::shared_ptr<const StaticVarBoundNode>& var)
         {
-            return t_var->GetOrCreateTypeChecked({});
+            return var->GetOrCreateTypeChecked({});
         }));
 
         if (
@@ -113,37 +113,37 @@ namespace Ace
     }
 
     auto ModuleBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const ModuleBoundNode>>
     {
         const auto mchLoweredModules = TransformMaybeChangedVector(m_Modules,
-        [](const std::shared_ptr<const ModuleBoundNode>& t_module)
+        [](const std::shared_ptr<const ModuleBoundNode>& module)
         {
-            return t_module->GetOrCreateLowered({});
+            return module->GetOrCreateLowered({});
         });
 
         const auto mchLoweredTypes = TransformMaybeChangedVector(m_Types,
-        [](const std::shared_ptr<const ITypeBoundNode>& t_type)
+        [](const std::shared_ptr<const ITypeBoundNode>& type)
         {
-            return t_type->GetOrCreateLoweredType({});
+            return type->GetOrCreateLoweredType({});
         });
 
         const auto mchLoweredImpls = TransformMaybeChangedVector(m_Impls,
-        [](const std::shared_ptr<const ImplBoundNode>& t_impl)
+        [](const std::shared_ptr<const ImplBoundNode>& impl)
         {
-            return t_impl->GetOrCreateLowered({});
+            return impl->GetOrCreateLowered({});
         });
 
         const auto mchLoweredFunctions = TransformMaybeChangedVector(m_Functions,
-        [](const std::shared_ptr<const FunctionBoundNode>& t_function)
+        [](const std::shared_ptr<const FunctionBoundNode>& function)
         {
-            return t_function->GetOrCreateLowered({});
+            return function->GetOrCreateLowered({});
         });
 
         const auto mchLoweredVars = TransformMaybeChangedVector(m_Vars,
-        [](const std::shared_ptr<const StaticVarBoundNode>& t_var)
+        [](const std::shared_ptr<const StaticVarBoundNode>& var)
         {
-            return t_var->GetOrCreateLowered({});
+            return var->GetOrCreateLowered({});
         });
 
         if (

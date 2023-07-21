@@ -22,12 +22,12 @@
 namespace Ace
 {
     InstanceVarReferenceExprBoundNode::InstanceVarReferenceExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_expr,
-        InstanceVarSymbol* const t_varSymbol
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr },
-        m_VarSymbol{ t_varSymbol }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        InstanceVarSymbol* const varSymbol
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr },
+        m_VarSymbol{ varSymbol }
     {
     }
 
@@ -51,7 +51,7 @@ namespace Ace
     }
 
     auto InstanceVarReferenceExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const InstanceVarReferenceExprBoundNode>>>
     {
         ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
@@ -69,14 +69,14 @@ namespace Ace
     }
 
     auto InstanceVarReferenceExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto InstanceVarReferenceExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const InstanceVarReferenceExprBoundNode>>
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
@@ -94,13 +94,13 @@ namespace Ace
     }
 
     auto InstanceVarReferenceExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto InstanceVarReferenceExprBoundNode::Emit(Emitter& t_emitter) const -> ExprEmitResult
+    auto InstanceVarReferenceExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
         std::vector<ExprDropData> temporaries{};
 
@@ -108,17 +108,17 @@ namespace Ace
             dynamic_cast<InstanceVarSymbol*>(m_VarSymbol);
         ACE_ASSERT(varSymbol);
 
-        const std::function<std::shared_ptr<const IExprBoundNode>(const std::shared_ptr<const IExprBoundNode>& t_expr)>
-        getDereferenced = [&](const std::shared_ptr<const IExprBoundNode>& t_expr) -> std::shared_ptr<const IExprBoundNode>
+        const std::function<std::shared_ptr<const IExprBoundNode>(const std::shared_ptr<const IExprBoundNode>& expr)>
+        getDereferenced = [&](const std::shared_ptr<const IExprBoundNode>& expr) -> std::shared_ptr<const IExprBoundNode>
         {
-            auto* const typeSymbol = t_expr->GetTypeInfo().Symbol;
+            auto* const typeSymbol = expr->GetTypeInfo().Symbol;
 
             const bool isReference = typeSymbol->IsReference();
             const bool isStrongPointer = typeSymbol->IsStrongPointer();
 
             if (!isReference && !isStrongPointer)
             {
-                return t_expr;
+                return expr;
             }
 
             return getDereferenced([&]()
@@ -126,16 +126,16 @@ namespace Ace
                 if (isReference)
                 {
                     return std::make_shared<const DerefAsExprBoundNode>(
-                        t_expr->GetSourceLocation(),
-                        t_expr,
+                        expr->GetSourceLocation(),
+                        expr,
                         typeSymbol->GetWithoutReference()
                     );
                 }
                 else if (isStrongPointer)
                 {
                     return std::make_shared<const DerefAsExprBoundNode>(
-                        t_expr->GetSourceLocation(),
-                        t_expr,
+                        expr->GetSourceLocation(),
+                        expr,
                         typeSymbol->GetWithoutStrongPointer()
                     );
                 }
@@ -145,7 +145,7 @@ namespace Ace
         };
 
         const auto expr = getDereferenced(m_Expr);
-        const auto exprEmitResult = expr->Emit(t_emitter);
+        const auto exprEmitResult = expr->Emit(emitter);
         temporaries.insert(
             end  (temporaries), 
             begin(exprEmitResult.Temporaries), 
@@ -153,7 +153,7 @@ namespace Ace
         );
 
         auto* const exprTypeSymbol = expr->GetTypeInfo().Symbol;
-        auto* const exprType = t_emitter.GetIRType(exprTypeSymbol);
+        auto* const exprType = emitter.GetIRType(exprTypeSymbol);
 
         const auto varIndex = varSymbol->GetIndex();
 
@@ -165,7 +165,7 @@ namespace Ace
         indexList.push_back(llvm::ConstantInt::get(int32Type, 0));
         indexList.push_back(llvm::ConstantInt::get(int32Type, varIndex));
 
-        auto* const gepInst = t_emitter.GetBlockBuilder().Builder.CreateGEP(
+        auto* const gepInst = emitter.GetBlockBuilder().Builder.CreateGEP(
             exprType,
             exprEmitResult.Value,
             indexList,

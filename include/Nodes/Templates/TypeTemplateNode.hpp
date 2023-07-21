@@ -20,9 +20,9 @@ namespace Ace
     {
     public:
         TypeTemplateNode(
-            const SourceLocation& t_sourceLocation,
-            const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& t_params,
-            const std::shared_ptr<const ITypeNode>& t_ast
+            const SourceLocation& sourceLocation,
+            const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& params,
+            const std::shared_ptr<const ITypeNode>& ast
         );
         virtual ~TypeTemplateNode() = default;
 
@@ -30,7 +30,7 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const TypeTemplateNode> final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;

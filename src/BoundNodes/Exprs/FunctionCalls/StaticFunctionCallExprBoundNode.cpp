@@ -16,14 +16,14 @@
 namespace Ace
 {
     StaticFunctionCallExprBoundNode::StaticFunctionCallExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        FunctionSymbol* const t_functionSymbol,
-        const std::vector<std::shared_ptr<const IExprBoundNode>>& t_args
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_FunctionSymbol{ t_functionSymbol },
-        m_Args{ t_args }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        FunctionSymbol* const functionSymbol,
+        const std::vector<std::shared_ptr<const IExprBoundNode>>& args
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_FunctionSymbol{ functionSymbol },
+        m_Args{ args }
     {
     }
 
@@ -47,7 +47,7 @@ namespace Ace
     }
 
     auto StaticFunctionCallExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const StaticFunctionCallExprBoundNode>>>
     {
         const auto argTypeInfos = m_FunctionSymbol->CollectArgTypeInfos();
@@ -72,20 +72,20 @@ namespace Ace
     }
 
     auto StaticFunctionCallExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto StaticFunctionCallExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
     {
         const auto mchLoweredArgs = TransformMaybeChangedVector(m_Args,
-        [&](const std::shared_ptr<const IExprBoundNode>& t_arg)
+        [&](const std::shared_ptr<const IExprBoundNode>& arg)
         {
-            return t_arg->GetOrCreateLoweredExpr({});
+            return arg->GetOrCreateLoweredExpr({});
         });
 
         if (!mchLoweredArgs.IsChanged)
@@ -102,14 +102,14 @@ namespace Ace
     }
 
     auto StaticFunctionCallExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
     auto StaticFunctionCallExprBoundNode::Emit(
-        Emitter& t_emitter
+        Emitter& emitter
     ) const -> ExprEmitResult
     {
         std::vector<ExprDropData> temporaries{};
@@ -119,9 +119,9 @@ namespace Ace
             begin(m_Args),
             end  (m_Args),
             back_inserter(args),
-            [&](const std::shared_ptr<const IExprBoundNode>& t_arg)
+            [&](const std::shared_ptr<const IExprBoundNode>& arg)
             {
-                const auto argEmitResult = t_arg->Emit(t_emitter);
+                const auto argEmitResult = arg->Emit(emitter);
                 temporaries.insert(
                     end(temporaries),
                     begin(argEmitResult.Temporaries),
@@ -131,8 +131,8 @@ namespace Ace
             }
         );
 
-        auto* const callInst = t_emitter.GetBlockBuilder().Builder.CreateCall(
-            t_emitter.GetFunctionMap().at(m_FunctionSymbol),
+        auto* const callInst = emitter.GetBlockBuilder().Builder.CreateCall(
+            emitter.GetFunctionMap().at(m_FunctionSymbol),
             args
         );
 
@@ -142,10 +142,10 @@ namespace Ace
         }
 
         auto* const allocaInst =
-            t_emitter.GetBlockBuilder().Builder.CreateAlloca(callInst->getType());
+            emitter.GetBlockBuilder().Builder.CreateAlloca(callInst->getType());
         temporaries.emplace_back(allocaInst, m_FunctionSymbol->GetType());
 
-        t_emitter.GetBlockBuilder().Builder.CreateStore(
+        emitter.GetBlockBuilder().Builder.CreateStore(
             callInst,
             allocaInst
         );

@@ -19,10 +19,10 @@ namespace Ace
     {
     public:
         ImplTemplateArgAliasTypeSymbol(
-            const std::shared_ptr<Scope>& t_scope,
-            const Identifier& t_name,
-            ITypeSymbol* const t_aliasedType,
-            const size_t t_index
+            const std::shared_ptr<Scope>& scope,
+            const Identifier& name,
+            ITypeSymbol* const aliasedType,
+            const size_t index
         );
         virtual ~ImplTemplateArgAliasTypeSymbol() = default;
 
@@ -47,15 +47,15 @@ namespace Ace
         auto IsTriviallyDroppable() const -> bool final;
 
         auto CreateCopyGlueBody(
-            FunctionSymbol* const t_glueSymbol
+            FunctionSymbol* const glueSymbol
         ) -> std::shared_ptr<const IEmittable<void>> final;
         auto CreateDropGlueBody(
-            FunctionSymbol* const t_glueSymbol
+            FunctionSymbol* const glueSymbol
         ) -> std::shared_ptr<const IEmittable<void>> final;
 
-        auto BindCopyGlue(FunctionSymbol* const t_glue) -> void final;
+        auto BindCopyGlue(FunctionSymbol* const glue) -> void final;
         auto GetCopyGlue() const -> std::optional<FunctionSymbol*> final;
-        auto BindDropGlue(FunctionSymbol* const t_glue) -> void final;
+        auto BindDropGlue(FunctionSymbol* const glue) -> void final;
         auto GetDropGlue() const -> std::optional<FunctionSymbol*> final;
 
         auto GetAliasedType() const -> ITypeSymbol* final;

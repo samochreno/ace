@@ -25,12 +25,12 @@
 namespace Ace
 {
     BlockStmtBoundNode::BlockStmtBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_selfScope,
-        const std::vector<std::shared_ptr<const IStmtBoundNode>>& t_stmts
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_SelfScope{ t_selfScope },
-        m_Stmts{ t_stmts }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& selfScope,
+        const std::vector<std::shared_ptr<const IStmtBoundNode>>& stmts
+    ) : m_SourceLocation{ sourceLocation },
+        m_SelfScope{ selfScope },
+        m_Stmts{ stmts }
     {
     }
 
@@ -54,14 +54,14 @@ namespace Ace
     }
 
     auto BlockStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const BlockStmtBoundNode>>>
     {
         ACE_TRY(mchCheckedContent, TransformExpectedMaybeChangedVector(m_Stmts,
-        [&](const std::shared_ptr<const IStmtBoundNode>& t_stmt)
+        [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
         {
-            return t_stmt->GetOrCreateTypeCheckedStmt({
-                t_context.ParentFunctionTypeSymbol
+            return stmt->GetOrCreateTypeCheckedStmt({
+                context.ParentFunctionTypeSymbol
             });
         }));
 
@@ -78,20 +78,20 @@ namespace Ace
     }
 
     auto BlockStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto BlockStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const BlockStmtBoundNode>>
     {
         const auto mchLoweredStmts = TransformMaybeChangedVector(m_Stmts,
-        [](const std::shared_ptr<const IStmtBoundNode>& t_stmt)
+        [](const std::shared_ptr<const IStmtBoundNode>& stmt)
         {
-            return t_stmt->GetOrCreateLoweredStmt({});
+            return stmt->GetOrCreateLoweredStmt({});
         });
 
         if (!mchLoweredStmts.IsChanged)
@@ -103,20 +103,20 @@ namespace Ace
             GetSourceLocation(),
             m_SelfScope,
             mchLoweredStmts.Value
-        )->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(context).Value);
     }
 
     auto BlockStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto BlockStmtBoundNode::Emit(Emitter& t_emitter) const -> void
+    auto BlockStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
         const auto stmts = CreateExpanded();
-        t_emitter.EmitFunctionBodyStmts(stmts);
+        emitter.EmitFunctionBodyStmts(stmts);
     }
 
     auto BlockStmtBoundNode::CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const IStmtBoundNode>>

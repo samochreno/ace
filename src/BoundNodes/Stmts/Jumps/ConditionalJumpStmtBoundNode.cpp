@@ -16,12 +16,12 @@
 namespace Ace
 {
     ConditionalJumpStmtBoundNode::ConditionalJumpStmtBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_condition,
-        LabelSymbol* const t_labelSymbol
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Condition{ t_condition },
-        m_LabelSymbol{ t_labelSymbol }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& condition,
+        LabelSymbol* const labelSymbol
+    ) : m_SourceLocation{ sourceLocation },
+        m_Condition{ condition },
+        m_LabelSymbol{ labelSymbol }
     {
     }
 
@@ -45,7 +45,7 @@ namespace Ace
     }
 
     auto ConditionalJumpStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const ConditionalJumpStmtBoundNode>>>
     {
         const TypeInfo typeInfo
@@ -72,14 +72,14 @@ namespace Ace
     }
 
     auto ConditionalJumpStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto ConditionalJumpStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const ConditionalJumpStmtBoundNode>>
     {
         const auto mchLoweredCondition =
@@ -94,39 +94,39 @@ namespace Ace
             GetSourceLocation(),
             mchLoweredCondition.Value,
             m_LabelSymbol
-        )->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(context).Value);
     }
 
     auto ConditionalJumpStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto ConditionalJumpStmtBoundNode::Emit(Emitter& t_emitter) const -> void
+    auto ConditionalJumpStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
         auto blockBuilder = std::make_unique<BlockBuilder>(
             *GetCompilation()->LLVMContext,
-            t_emitter.GetFunction()
+            emitter.GetFunction()
         );
 
-        const auto conditionEmitResult = m_Condition->Emit(t_emitter);
+        const auto conditionEmitResult = m_Condition->Emit(emitter);
 
-        auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
+        auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             GetCompilation()->Natives->Bool.GetIRType(),
             conditionEmitResult.Value
         );
 
-        t_emitter.EmitDropTemporaries(conditionEmitResult.Temporaries);
+        emitter.EmitDropTemporaries(conditionEmitResult.Temporaries);
 
-        t_emitter.GetBlockBuilder().Builder.CreateCondBr(
+        emitter.GetBlockBuilder().Builder.CreateCondBr(
             loadInst,
-            t_emitter.GetLabelBlockMap().GetOrCreateAt(m_LabelSymbol),
+            emitter.GetLabelBlockMap().GetOrCreateAt(m_LabelSymbol),
             blockBuilder->Block
         );
 
-        t_emitter.SetBlockBuilder(std::move(blockBuilder));
+        emitter.SetBlockBuilder(std::move(blockBuilder));
     }
 
     auto ConditionalJumpStmtBoundNode::GetLabelSymbol() const -> LabelSymbol*

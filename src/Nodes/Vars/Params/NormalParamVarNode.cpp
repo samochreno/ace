@@ -15,18 +15,18 @@
 namespace Ace
 {
     NormalParamVarNode::NormalParamVarNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const Identifier& t_name,
-        const TypeName& t_typeName,
-        const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-        const size_t t_index
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Name{ t_name },
-        m_TypeName{ t_typeName },
-        m_Attributes{ t_attributes },
-        m_Index{ t_index }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const Identifier& name,
+        const TypeName& typeName,
+        const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
+        const size_t index
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Name{ name },
+        m_TypeName{ typeName },
+        m_Attributes{ attributes },
+        m_Index{ index }
     {
     }
 
@@ -50,7 +50,7 @@ namespace Ace
     }
 
     auto NormalParamVarNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const NormalParamVarNode>
     {
         std::vector<std::shared_ptr<const AttributeNode>> clonedAttributes{};
@@ -58,15 +58,15 @@ namespace Ace
             begin(m_Attributes),
             end  (m_Attributes),
             back_inserter(clonedAttributes),
-            [&](const std::shared_ptr<const AttributeNode>& t_attribute)
+            [&](const std::shared_ptr<const AttributeNode>& attribute)
             {
-                return t_attribute->CloneInScope(t_scope);
+                return attribute->CloneInScope(scope);
             }
         );
 
         return std::make_shared<const NormalParamVarNode>(
             m_SourceLocation,
-            t_scope,
+            scope,
             m_Name,
             m_TypeName,
             clonedAttributes,
@@ -77,9 +77,9 @@ namespace Ace
     auto NormalParamVarNode::CreateBound() const -> Expected<std::shared_ptr<const ParamVarBoundNode>>
     {
         ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeNode>& t_attribute)
+        [](const std::shared_ptr<const AttributeNode>& attribute)
         {
-            return t_attribute->CreateBound();
+            return attribute->CreateBound();
         }));
 
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<NormalParamVarSymbol>(

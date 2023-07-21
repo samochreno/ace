@@ -18,8 +18,8 @@ namespace Ace
     {
     public:
         LogicalNegationExprNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<const IExprNode>& t_expr
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<const IExprNode>& expr
         );
         virtual ~LogicalNegationExprNode() = default;
 
@@ -27,10 +27,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope>;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const LogicalNegationExprNode> final;
         auto CloneInScopeExpr(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const LogicalNegationExprBoundNode>> final;
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;

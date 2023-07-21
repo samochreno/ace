@@ -31,7 +31,7 @@ namespace Ace
         virtual auto GetCompilation() const -> const Compilation* = 0;
 
         virtual auto CreateFullyQualifiedName(
-            const SourceLocation& t_sourceLocation
+            const SourceLocation& sourceLocation
         ) const -> SymbolName = 0;
 
         virtual auto Initialize() -> void = 0;
@@ -47,18 +47,18 @@ namespace Ace
     {
     public:
         NativeType(
-            const Compilation* const t_compilation,
-            std::vector<const char*>&& t_nameSectionStrings,
-            std::optional<std::function<llvm::Type*()>>&& t_irTypeGetter,
-            const TypeSizeKind t_sizeKind,
-            const NativeCopyabilityKind t_copyabilityKind
+            const Compilation* const compilation,
+            std::vector<const char*>&& nameSectionStrings,
+            std::optional<std::function<llvm::Type*()>>&& irTypeGetter,
+            const TypeSizeKind sizeKind,
+            const NativeCopyabilityKind copyabilityKind
         );
         ~NativeType() = default;
 
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& t_sourceLocation
+            const SourceLocation& sourceLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -82,15 +82,15 @@ namespace Ace
     {
     public:
         NativeTypeTemplate(
-            const Compilation* const t_compilation,
-            std::vector<const char*>&& t_nameSectionStrings
+            const Compilation* const compilation,
+            std::vector<const char*>&& nameSectionStrings
         );
         ~NativeTypeTemplate() = default;
 
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& t_sourceLocation
+            const SourceLocation& sourceLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -108,16 +108,16 @@ namespace Ace
     {
     public:
         NativeFunction(
-            const Compilation* const t_compilation,
-            std::vector<const char*>&& t_nameSectionStrings,
-            FunctionBodyEmitter&& t_bodyEmitter
+            const Compilation* const compilation,
+            std::vector<const char*>&& nameSectionStrings,
+            FunctionBodyEmitter&& bodyEmitter
         );
         ~NativeFunction() = default;
 
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& t_sourceLocation
+            const SourceLocation& sourceLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -136,15 +136,15 @@ namespace Ace
     {
     public:
         NativeFunctionTemplate(
-            const Compilation* const t_compilation,
-            std::vector<const char*>&& t_nameSectionStrings
+            const Compilation* const compilation,
+            std::vector<const char*>&& nameSectionStrings
         );
         ~NativeFunctionTemplate() = default;
 
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& t_sourceLocation
+            const SourceLocation& sourceLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -162,16 +162,16 @@ namespace Ace
     {
     public:
         NativeAssociatedFunction(
-            const INative& t_type,
-            const char* const t_name,
-            FunctionBodyEmitter&& t_bodyEmitter
+            const INative& type,
+            const char* const name,
+            FunctionBodyEmitter&& bodyEmitter
         );
         ~NativeAssociatedFunction() = default;
 
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& t_sourceLocation
+            const SourceLocation& sourceLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -190,15 +190,15 @@ namespace Ace
     {
     public:
         NativeAssociatedFunctionTemplate(
-            const INative& t_type,
-            const char* const t_name
+            const INative& type,
+            const char* const name
         );
         ~NativeAssociatedFunctionTemplate() = default;
 
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& t_sourceLocation
+            const SourceLocation& sourceLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -215,7 +215,7 @@ namespace Ace
     class Natives
     {
     public:
-        Natives(const Compilation* const t_compilation);
+        Natives(const Compilation* const compilation);
         ~Natives() = default;
 
         auto Initialize() -> void;
@@ -224,7 +224,7 @@ namespace Ace
         auto GetImplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
         auto GetExplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
 
-        auto IsIntTypeSigned(const NativeType& t_intType) const -> bool;
+        auto IsIntTypeSigned(const NativeType& intType) const -> bool;
 
         NativeType Int8;
         NativeType Int16;
@@ -283,7 +283,7 @@ namespace Ace
         NativeAssociatedFunction i8__less_than_equals;
         NativeAssociatedFunction i8__greater_than_equals;
         NativeAssociatedFunction i8__equals;
-        NativeAssociatedFunction i8__not_equals;
+        NativeAssociatedFunction i8__noequals;
         NativeAssociatedFunction i8__AND;
         NativeAssociatedFunction i8__XOR;
         NativeAssociatedFunction i8__OR;
@@ -313,7 +313,7 @@ namespace Ace
         NativeAssociatedFunction i16__less_than_equals;
         NativeAssociatedFunction i16__greater_than_equals;
         NativeAssociatedFunction i16__equals;
-        NativeAssociatedFunction i16__not_equals;
+        NativeAssociatedFunction i16__noequals;
         NativeAssociatedFunction i16__AND;
         NativeAssociatedFunction i16__XOR;
         NativeAssociatedFunction i16__OR;
@@ -343,7 +343,7 @@ namespace Ace
         NativeAssociatedFunction i32__less_than_equals;
         NativeAssociatedFunction i32__greater_than_equals;
         NativeAssociatedFunction i32__equals;
-        NativeAssociatedFunction i32__not_equals;
+        NativeAssociatedFunction i32__noequals;
         NativeAssociatedFunction i32__AND;
         NativeAssociatedFunction i32__XOR;
         NativeAssociatedFunction i32__OR;
@@ -373,7 +373,7 @@ namespace Ace
         NativeAssociatedFunction i64__less_than_equals;
         NativeAssociatedFunction i64__greater_than_equals;
         NativeAssociatedFunction i64__equals;
-        NativeAssociatedFunction i64__not_equals;
+        NativeAssociatedFunction i64__noequals;
         NativeAssociatedFunction i64__AND;
         NativeAssociatedFunction i64__XOR;
         NativeAssociatedFunction i64__OR;
@@ -403,7 +403,7 @@ namespace Ace
         NativeAssociatedFunction u8__less_than_equals;
         NativeAssociatedFunction u8__greater_than_equals;
         NativeAssociatedFunction u8__equals;
-        NativeAssociatedFunction u8__not_equals;
+        NativeAssociatedFunction u8__noequals;
         NativeAssociatedFunction u8__AND;
         NativeAssociatedFunction u8__XOR;
         NativeAssociatedFunction u8__OR;
@@ -433,7 +433,7 @@ namespace Ace
         NativeAssociatedFunction u16__less_than_equals;
         NativeAssociatedFunction u16__greater_than_equals;
         NativeAssociatedFunction u16__equals;
-        NativeAssociatedFunction u16__not_equals;
+        NativeAssociatedFunction u16__noequals;
         NativeAssociatedFunction u16__AND;
         NativeAssociatedFunction u16__XOR;
         NativeAssociatedFunction u16__OR;
@@ -463,7 +463,7 @@ namespace Ace
         NativeAssociatedFunction u32__less_than_equals;
         NativeAssociatedFunction u32__greater_than_equals;
         NativeAssociatedFunction u32__equals;
-        NativeAssociatedFunction u32__not_equals;
+        NativeAssociatedFunction u32__noequals;
         NativeAssociatedFunction u32__AND;
         NativeAssociatedFunction u32__XOR;
         NativeAssociatedFunction u32__OR;
@@ -493,40 +493,40 @@ namespace Ace
         NativeAssociatedFunction u64__less_than_equals;
         NativeAssociatedFunction u64__greater_than_equals;
         NativeAssociatedFunction u64__equals;
-        NativeAssociatedFunction u64__not_equals;
+        NativeAssociatedFunction u64__noequals;
         NativeAssociatedFunction u64__AND;
         NativeAssociatedFunction u64__XOR;
         NativeAssociatedFunction u64__OR;
 
-        NativeAssociatedFunction int__from_i8;
-        NativeAssociatedFunction int__from_i16;
-        NativeAssociatedFunction int__from_i32;
-        NativeAssociatedFunction int__from_i64;
-        NativeAssociatedFunction int__from_u8;
-        NativeAssociatedFunction int__from_u16;
-        NativeAssociatedFunction int__from_u32;
-        NativeAssociatedFunction int__from_u64;
-        NativeAssociatedFunction int__from_f32;
-        NativeAssociatedFunction int__from_f64;
-        NativeAssociatedFunction int__unary_plus;
-        NativeAssociatedFunction int__unary_negation;
-        NativeAssociatedFunction int__one_complement;
-        NativeAssociatedFunction int__multiplication;
-        NativeAssociatedFunction int__division;
-        NativeAssociatedFunction int__remainder;
-        NativeAssociatedFunction int__addition;
-        NativeAssociatedFunction int__subtraction;
-        NativeAssociatedFunction int__right_shift;
-        NativeAssociatedFunction int__left_shift;
-        NativeAssociatedFunction int__less_than;
-        NativeAssociatedFunction int__greater_than;
-        NativeAssociatedFunction int__less_than_equals;
-        NativeAssociatedFunction int__greater_than_equals;
-        NativeAssociatedFunction int__equals;
-        NativeAssociatedFunction int__not_equals;
-        NativeAssociatedFunction int__AND;
-        NativeAssociatedFunction int__XOR;
-        NativeAssociatedFunction int__OR;
+        NativeAssociatedFunction int_from_i8;
+        NativeAssociatedFunction int_from_i16;
+        NativeAssociatedFunction int_from_i32;
+        NativeAssociatedFunction int_from_i64;
+        NativeAssociatedFunction int_from_u8;
+        NativeAssociatedFunction int_from_u16;
+        NativeAssociatedFunction int_from_u32;
+        NativeAssociatedFunction int_from_u64;
+        NativeAssociatedFunction int_from_f32;
+        NativeAssociatedFunction int_from_f64;
+        NativeAssociatedFunction int_unary_plus;
+        NativeAssociatedFunction int_unary_negation;
+        NativeAssociatedFunction int_one_complement;
+        NativeAssociatedFunction int_multiplication;
+        NativeAssociatedFunction int_division;
+        NativeAssociatedFunction int_remainder;
+        NativeAssociatedFunction int_addition;
+        NativeAssociatedFunction int_subtraction;
+        NativeAssociatedFunction int_right_shift;
+        NativeAssociatedFunction int_left_shift;
+        NativeAssociatedFunction int_less_than;
+        NativeAssociatedFunction int_greater_than;
+        NativeAssociatedFunction int_less_than_equals;
+        NativeAssociatedFunction int_greater_than_equals;
+        NativeAssociatedFunction int_equals;
+        NativeAssociatedFunction int_noequals;
+        NativeAssociatedFunction int_AND;
+        NativeAssociatedFunction int_XOR;
+        NativeAssociatedFunction int_OR;
 
         NativeAssociatedFunction f32__from_i8;
         NativeAssociatedFunction f32__from_i16;
@@ -550,7 +550,7 @@ namespace Ace
         NativeAssociatedFunction f32__less_than_equals;
         NativeAssociatedFunction f32__greater_than_equals;
         NativeAssociatedFunction f32__equals;
-        NativeAssociatedFunction f32__not_equals;
+        NativeAssociatedFunction f32__noequals;
 
         NativeAssociatedFunction f64__from_i8;
         NativeAssociatedFunction f64__from_i16;
@@ -574,7 +574,7 @@ namespace Ace
         NativeAssociatedFunction f64__less_than_equals;
         NativeAssociatedFunction f64__greater_than_equals;
         NativeAssociatedFunction f64__equals;
-        NativeAssociatedFunction f64__not_equals;
+        NativeAssociatedFunction f64__noequals;
 
         NativeAssociatedFunctionTemplate StrongPointer__new;
         NativeAssociatedFunctionTemplate StrongPointer__value;

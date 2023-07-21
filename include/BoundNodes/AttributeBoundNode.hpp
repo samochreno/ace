@@ -20,8 +20,8 @@ namespace Ace
     {
     public:
         AttributeBoundNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<const StructConstructionExprBoundNode>& t_structConstructionExpr
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<const StructConstructionExprBoundNode>& structConstructionExpr
         );
         virtual ~AttributeBoundNode() = default;
 
@@ -29,10 +29,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const AttributeBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const AttributeBoundNode>> final;
 
     private:

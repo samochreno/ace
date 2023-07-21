@@ -20,10 +20,10 @@
 namespace Ace
 {
     AssertStmtBoundNode::AssertStmtBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_condition
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Condition{ t_condition }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& condition
+    ) : m_SourceLocation{ sourceLocation },
+        m_Condition{ condition }
     {
     }
 
@@ -47,7 +47,7 @@ namespace Ace
     }
 
     auto AssertStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const AssertStmtBoundNode>>>
     {
         const TypeInfo typeInfo
@@ -73,14 +73,14 @@ namespace Ace
     }
 
     auto AssertStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto AssertStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const GroupStmtBoundNode>>
     {
         const auto mchLoweredCondition =
@@ -113,13 +113,13 @@ namespace Ace
     };
 
     auto AssertStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto AssertStmtBoundNode::Emit(Emitter& t_emitter) const -> void
+    auto AssertStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
         ACE_UNREACHABLE();
     }

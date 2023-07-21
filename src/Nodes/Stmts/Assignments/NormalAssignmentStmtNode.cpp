@@ -11,14 +11,14 @@
 namespace Ace
 {
     NormalAssignmentStmtNode::NormalAssignmentStmtNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const std::shared_ptr<const IExprNode>& t_lhsExpr,
-        const std::shared_ptr<const IExprNode>& t_rhsExpr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_LHSExpr{ t_lhsExpr },
-        m_RHSExpr{ t_rhsExpr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const std::shared_ptr<const IExprNode>& lhsExpr,
+        const std::shared_ptr<const IExprNode>& rhsExpr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_LHSExpr{ lhsExpr },
+        m_RHSExpr{ rhsExpr }
     {
     }
 
@@ -43,22 +43,22 @@ namespace Ace
     }
 
     auto NormalAssignmentStmtNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const NormalAssignmentStmtNode>
     {
         return std::make_shared<const NormalAssignmentStmtNode>(
             m_SourceLocation,
             m_Scope,
-            m_LHSExpr->CloneInScopeExpr(t_scope),
-            m_RHSExpr->CloneInScopeExpr(t_scope)
+            m_LHSExpr->CloneInScopeExpr(scope),
+            m_RHSExpr->CloneInScopeExpr(scope)
         );
     }
 
     auto NormalAssignmentStmtNode::CloneInScopeStmt(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto NormalAssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const NormalAssignmentStmtBoundNode>>

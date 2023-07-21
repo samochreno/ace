@@ -11,16 +11,16 @@ namespace Ace
 
         const auto partiallyExpanded = CreatePartiallyExpanded();
         std::for_each(begin(partiallyExpanded), end(partiallyExpanded),
-        [&](const std::shared_ptr<const IStmtBoundNode>& t_stmt)
+        [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
         {
-            if (const auto* const expandable = dynamic_cast<const IExpandableStmtBoundNode*>(t_stmt.get()))
+            if (const auto* const expandable = dynamic_cast<const IExpandableStmtBoundNode*>(stmt.get()))
             {
                 const auto expanded = expandable->CreateExpanded();
                 stmts.insert(end(stmts), begin(expanded), end(expanded));
             }
             else
             {
-                stmts.push_back(t_stmt);
+                stmts.push_back(stmt);
             }
         });
 

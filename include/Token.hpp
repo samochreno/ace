@@ -18,21 +18,21 @@ namespace Ace
         {
         }
         Token(
-            const SourceLocation& t_sourceLocation,
-            const TokenKind t_kind
-        ) : SourceLocation{ t_sourceLocation },
-            Kind{ t_kind },
+            const SourceLocation& sourceLocation,
+            const TokenKind kind
+        ) : SourceLocation{ sourceLocation },
+            Kind{ kind },
             String{}
             
         {
         }
         Token(
-            const SourceLocation& t_sourceLocation,
-            const TokenKind t_kind,
-            const std::string& t_string
-        ) : SourceLocation{ t_sourceLocation },
-            Kind{ t_kind },
-            String{ t_string }
+            const SourceLocation& sourceLocation,
+            const TokenKind kind,
+            const std::string& string
+        ) : SourceLocation{ sourceLocation },
+            Kind{ kind },
+            String{ string }
         {
         }
 
@@ -41,30 +41,30 @@ namespace Ace
         std::string String{};
     };
 
-    auto operator==(const Token& t_token, const TokenKind t_kind) -> bool;
+    auto operator==(const Token& token, const TokenKind kind) -> bool;
     auto operator==(
-        const Token& t_token,
-        const std::string_view t_string
+        const Token& token,
+        const std::string_view string
     ) -> bool;
     template<typename T>
-    auto operator!=(const Token& t_token, T&& t_value) -> bool
+    auto operator!=(const Token& token, T&& value) -> bool
     {
-        return !(t_token == t_value);
+        return !(token == value);
     }
     template<typename T>
     auto operator==(
-        const std::shared_ptr<const Token>& t_token,
-        T&& t_value
+        const std::shared_ptr<const Token>& token,
+        T&& value
     ) -> bool
     {
-        return (*t_token.get()) == t_value;
+        return (*token.get()) == value;
     }
     template<typename T>
     auto operator!=(
-        const std::shared_ptr<const Token>& t_token,
-        T&& t_value
+        const std::shared_ptr<const Token>& token,
+        T&& value
     ) -> bool
     {
-        return !(t_token == t_value);
+        return !(token == value);
     }
 }

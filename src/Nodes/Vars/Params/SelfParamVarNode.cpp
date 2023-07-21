@@ -17,13 +17,13 @@
 namespace Ace
 {
     SelfParamVarNode::SelfParamVarNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const SymbolName& t_typeName
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Name{ t_sourceLocation, SpecialIdentifier::Self },
-        m_TypeName{ t_typeName, std::vector{ TypeNameModifier::Reference } }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const SymbolName& typeName
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Name{ sourceLocation, SpecialIdentifier::Self },
+        m_TypeName{ typeName, std::vector{ TypeNameModifier::Reference } }
     {
     }
 
@@ -43,12 +43,12 @@ namespace Ace
     }
 
     auto SelfParamVarNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const SelfParamVarNode>
     {
         return std::make_shared<const SelfParamVarNode>(
             m_SourceLocation,
-            t_scope,
+            scope,
             m_TypeName.SymbolName
         );
     }

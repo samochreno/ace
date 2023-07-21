@@ -13,12 +13,12 @@
 namespace Ace
 {
     CastExprNode::CastExprNode(
-        const SourceLocation& t_sourceLocation,
-        const TypeName& t_typeName,
-        const std::shared_ptr<const IExprNode>& t_expr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_TypeName{ t_typeName },
-        m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const TypeName& typeName,
+        const std::shared_ptr<const IExprNode>& expr
+    ) : m_SourceLocation{ sourceLocation },
+        m_TypeName{ typeName },
+        m_Expr{ expr }
     {
     }
 
@@ -42,21 +42,21 @@ namespace Ace
     }
 
     auto CastExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const CastExprNode>
     {
         return std::make_shared<const CastExprNode>(
             m_SourceLocation,
             m_TypeName,
-            m_Expr->CloneInScopeExpr(t_scope)
+            m_Expr->CloneInScopeExpr(scope)
         );
     }
 
     auto CastExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto CastExprNode::CreateBound() const -> Expected<std::shared_ptr<const IExprBoundNode>>

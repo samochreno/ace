@@ -18,8 +18,8 @@ namespace Ace
     {
     public:
         ExitStmtNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope
         );
         virtual ~ExitStmtNode() = default;
 
@@ -27,10 +27,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const ExitStmtNode> final;
         auto CloneInScopeStmt(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IStmtNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const ExitStmtBoundNode>> final;
         auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;

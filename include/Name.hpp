@@ -14,10 +14,10 @@ namespace Ace
     struct SymbolNameSection
     {
         SymbolNameSection();
-        SymbolNameSection(const Identifier& t_name);
+        SymbolNameSection(const Identifier& name);
         SymbolNameSection(
-            const Identifier& t_name,
-            const std::vector<SymbolName>& t_templateArgs
+            const Identifier& name,
+            const std::vector<SymbolName>& templateArgs
         );
         ~SymbolNameSection();
 
@@ -35,12 +35,12 @@ namespace Ace
     {
         SymbolName();
         SymbolName(
-            const SymbolNameSection& t_section,
-            const SymbolNameResolutionScope& t_resolutionScope
+            const SymbolNameSection& section,
+            const SymbolNameResolutionScope& resolutionScope
         );
         SymbolName(
-            const std::vector<SymbolNameSection>& t_sections,
-            const SymbolNameResolutionScope& t_resolutionScope
+            const std::vector<SymbolNameSection>& sections,
+            const SymbolNameResolutionScope& resolutionScope
         );
         ~SymbolName();
 
@@ -59,13 +59,13 @@ namespace Ace
     {
         TypeName();
         TypeName(
-            const SymbolName& t_symbolName,
-            const std::vector<TypeNameModifier>& t_modifiers
+            const SymbolName& symbolName,
+            const std::vector<TypeNameModifier>& modifiers
         );
         ~TypeName();
 
         auto ToSymbolName(
-            const Compilation* const t_compilation
+            const Compilation* const compilation
         ) const -> SymbolName;
 
         SymbolName SymbolName;

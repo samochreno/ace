@@ -3,12 +3,12 @@
 #include <vector>
 #include <string>
 
-auto main(const int t_argc, const char* t_argv[]) -> int
+auto main(const int argc, const char* argv[]) -> int
 {
     std::vector<std::string_view> args{};
-    for (size_t i = 1; i < t_argc; i++)
+    for (size_t i = 1; i < argc; i++)
     {
-        args.emplace_back(t_argv[i]);
+        args.emplace_back(argv[i]);
     }
 
     Ace::Application::Main(args);

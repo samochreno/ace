@@ -14,12 +14,12 @@
 namespace Ace
 {
     TypeTemplateNode::TypeTemplateNode(
-        const SourceLocation& t_sourceLocation,
-        const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& t_params,
-        const std::shared_ptr<const ITypeNode>& t_ast
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Params{ t_params },
-        m_AST{ t_ast }
+        const SourceLocation& sourceLocation,
+        const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& params,
+        const std::shared_ptr<const ITypeNode>& ast
+    ) : m_SourceLocation{ sourceLocation },
+        m_Params{ params },
+        m_AST{ ast }
     {
     }
 
@@ -43,7 +43,7 @@ namespace Ace
     }
 
     auto TypeTemplateNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const TypeTemplateNode>
     {
         std::vector<std::shared_ptr<const NormalTemplateParamNode>> clonedParams{};
@@ -51,16 +51,16 @@ namespace Ace
             begin(m_Params),
             end  (m_Params),
             back_inserter(clonedParams),
-            [&](const std::shared_ptr<const NormalTemplateParamNode>& t_param)
+            [&](const std::shared_ptr<const NormalTemplateParamNode>& param)
             {
-                return t_param->CloneInScope(m_AST->GetSelfScope());
+                return param->CloneInScope(m_AST->GetSelfScope());
             }
         );
 
         return std::make_shared<const TypeTemplateNode>(
             m_SourceLocation,
             clonedParams,
-            m_AST->CloneInScopeType(t_scope)
+            m_AST->CloneInScopeType(scope)
         );
     }
 
@@ -99,9 +99,9 @@ namespace Ace
             begin(m_Params),
             end  (m_Params),
             back_inserter(names),
-            [](const std::shared_ptr<const NormalTemplateParamNode>& t_param)
+            [](const std::shared_ptr<const NormalTemplateParamNode>& param)
             {
-                return t_param->GetName();
+                return param->GetName();
             }
         );
 

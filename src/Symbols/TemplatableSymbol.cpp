@@ -5,16 +5,16 @@
 
 namespace Ace
 {
-    static auto IsParam(ITypeSymbol* t_arg) -> bool
+    static auto IsParam(ITypeSymbol* arg) -> bool
     {
-        t_arg = t_arg->GetUnaliased();
+        arg = arg->GetUnaliased();
 
-        if (dynamic_cast<ImplTemplateParamTypeSymbol*>(t_arg))
+        if (dynamic_cast<ImplTemplateParamTypeSymbol*>(arg))
         {
             return true;
         }
 
-        if (dynamic_cast<NormalTemplateParamTypeSymbol*>(t_arg))
+        if (dynamic_cast<NormalTemplateParamTypeSymbol*>(arg))
         {
             return true;
         }

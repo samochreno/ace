@@ -11,10 +11,10 @@
 namespace Ace
 {
     inline auto CreateTokenKindString(
-        const TokenKind t_tokenKind
+        const TokenKind tokenKind
     ) -> std::string
     {
-        switch (t_tokenKind)
+        switch (tokenKind)
         {
             case TokenKind::EndOfFile:
             {
@@ -347,283 +347,283 @@ namespace Ace
     }
 
     inline auto CreateUnexpectedTokenError(
-        const std::shared_ptr<const Token>& t_unexpectedToken
+        const std::shared_ptr<const Token>& unexpectedToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message =
             "unexpected " +
-            CreateTokenKindString(t_unexpectedToken->Kind);
+            CreateTokenKindString(unexpectedToken->Kind);
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_unexpectedToken->SourceLocation,
+            unexpectedToken->SourceLocation,
             message
         );
     }
 
     inline auto CreateUnexpectedTokenError(
-        const std::shared_ptr<const Token>& t_unexpectedToken,
-        const TokenKind t_expectedTokenKind
+        const std::shared_ptr<const Token>& unexpectedToken,
+        const TokenKind expectedTokenKind
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message =
             "unexpected " +
-            CreateTokenKindString(t_unexpectedToken->Kind) + ", expected " +
-            CreateTokenKindString(t_expectedTokenKind);
+            CreateTokenKindString(unexpectedToken->Kind) + ", expected " +
+            CreateTokenKindString(expectedTokenKind);
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_unexpectedToken->SourceLocation,
+            unexpectedToken->SourceLocation,
             message
         );
     }
 
     inline auto CreateUnexpectedTokenExpectedLiteralError(
-        const std::shared_ptr<const Token>& t_unexpectedToken
+        const std::shared_ptr<const Token>& unexpectedToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message =
             "unexpected " +
-            CreateTokenKindString(t_unexpectedToken->Kind) +
+            CreateTokenKindString(unexpectedToken->Kind) +
             ", expected a literal";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_unexpectedToken->SourceLocation,
+            unexpectedToken->SourceLocation,
             message
         );
     }
 
     inline auto CreateUnexpectedTokenExpectedNewError(
-        const std::shared_ptr<const Token>& t_unexpectedToken
+        const std::shared_ptr<const Token>& unexpectedToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message =
             "unexpected " +
-            CreateTokenKindString(t_unexpectedToken->Kind) +
+            CreateTokenKindString(unexpectedToken->Kind) +
             ", expected " + SpecialIdentifier::New;
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_unexpectedToken->SourceLocation,
+            unexpectedToken->SourceLocation,
             message
         );
     }
 
     inline auto CreateUnexpectedTokenExpectedCompoundAssignmentOpError(
-        const std::shared_ptr<const Token>& t_unexpectedToken
+        const std::shared_ptr<const Token>& unexpectedToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message =
             "unexpected " +
-            CreateTokenKindString(t_unexpectedToken->Kind) +
+            CreateTokenKindString(unexpectedToken->Kind) +
             ", expected a compound assignment op";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_unexpectedToken->SourceLocation,
+            unexpectedToken->SourceLocation,
             message
         );
     }
 
     inline auto CreateUnexpectedTokenExpectedOverloadableOpError(
-        const std::shared_ptr<const Token>& t_unexpectedToken
+        const std::shared_ptr<const Token>& unexpectedToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message =
             "unexpected " +
-            CreateTokenKindString(t_unexpectedToken->Kind) +
+            CreateTokenKindString(unexpectedToken->Kind) +
             ", expected an overloadable op";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_unexpectedToken->SourceLocation,
+            unexpectedToken->SourceLocation,
             message
         );
     }
 
     inline auto CreateEmptyTemplateParamsError(
-        const SourceLocation& t_sourceLocation
+        const SourceLocation& sourceLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_sourceLocation,
+            sourceLocation,
             "empty template parameters"
         );
     }
 
     inline auto CreateEmptyTemplateArgsError(
-        const SourceLocation& t_sourceLocation
+        const SourceLocation& sourceLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_sourceLocation,
+            sourceLocation,
             "empty template arguments"
         );
     }
 
     inline auto CreateExternInstanceFunctionError(
-        const std::shared_ptr<const Token>& t_externKeywordToken
+        const std::shared_ptr<const Token>& externKeywordToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_externKeywordToken->SourceLocation,
+            externKeywordToken->SourceLocation,
             "extern method"
         );
     }
 
     inline auto CreateUnknownModifierError(
-        const std::shared_ptr<const Token>& t_modifierToken
+        const std::shared_ptr<const Token>& modifierToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_modifierToken->SourceLocation,
+            modifierToken->SourceLocation,
             "unknown modifier"
         );
     }
 
     inline auto CreateForbiddenModifierError(
-        const std::shared_ptr<const Token>& t_modifierToken
+        const std::shared_ptr<const Token>& modifierToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_modifierToken->SourceLocation,
+            modifierToken->SourceLocation,
             "forbidden modifier"
         );
     }
 
     inline auto CreateEmptyModifiersError(
-        const std::shared_ptr<const Token>& t_minusGreaterThanToken
+        const std::shared_ptr<const Token>& minusGreaterThanToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_minusGreaterThanToken->SourceLocation,
+            minusGreaterThanToken->SourceLocation,
             "empty function modifier list"
         );
     }
 
     inline auto CreateMissingTokenError(
-        const std::shared_ptr<const Token>& t_lastToken,
-        const TokenKind t_expectedTokenKind
+        const std::shared_ptr<const Token>& lastToken,
+        const TokenKind expectedTokenKind
     ) -> std::shared_ptr<const Diagnostic>
     {
         const SourceLocation sourceLocation
         {
-            t_lastToken->SourceLocation.Buffer,
-            t_lastToken->SourceLocation.CharacterEndIterator - 1,
-            t_lastToken->SourceLocation.CharacterEndIterator,
+            lastToken->SourceLocation.Buffer,
+            lastToken->SourceLocation.CharacterEndIterator - 1,
+            lastToken->SourceLocation.CharacterEndIterator,
         };
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             sourceLocation,
-            "missing " + CreateTokenKindString(t_expectedTokenKind)
+            "missing " + CreateTokenKindString(expectedTokenKind)
         );
     }
 
     inline auto CreateTemplateSpecializationError(
-        const SourceLocation& t_sourceLocation
+        const SourceLocation& sourceLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_sourceLocation,
+            sourceLocation,
             "template specialization"
         );
     }
 
     inline auto CreateOpString(
-        const std::shared_ptr<const Token>& t_opToken
+        const std::shared_ptr<const Token>& opToken
     ) -> std::string
     {
-        if (t_opToken->Kind == TokenKind::Identifier)
+        if (opToken->Kind == TokenKind::Identifier)
         {
-            return "`" + t_opToken->String + "`";
+            return "`" + opToken->String + "`";
         }
 
-        return CreateTokenKindString(t_opToken->Kind);
+        return CreateTokenKindString(opToken->Kind);
     }
 
     inline auto CreateUnexpectedUnaryOpParamCountError(
-        const std::shared_ptr<const Token>& t_opToken
+        const std::shared_ptr<const Token>& opToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = 
-            "op" + CreateOpString(t_opToken) +
+            "op" + CreateOpString(opToken) +
             "must have 1 parameter";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_opToken->SourceLocation,
+            opToken->SourceLocation,
             message
         );
     }
 
     inline auto CreateUnexpectedBinaryOpParamCountError(
-        const std::shared_ptr<const Token>& t_opToken
+        const std::shared_ptr<const Token>& opToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = 
-            "op" + CreateOpString(t_opToken) +
+            "op" + CreateOpString(opToken) +
             "must have 2 parameters";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_opToken->SourceLocation,
+            opToken->SourceLocation,
             message
         );
     }
 
     inline auto CreateUnexpectedUnaryOrBinaryOpParamCountError(
-        const std::shared_ptr<const Token>& t_opToken
+        const std::shared_ptr<const Token>& opToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = 
-            "op" + CreateOpString(t_opToken) +
+            "op" + CreateOpString(opToken) +
             "must have 1 or 2 parameters";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_opToken->SourceLocation,
+            opToken->SourceLocation,
             message
         );
     }
 
     inline auto CreateUnknownIdentifierOpError(
-        const std::shared_ptr<const Token>& t_opToken
+        const std::shared_ptr<const Token>& opToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_opToken->SourceLocation,
+            opToken->SourceLocation,
             "unknown op"
         );
     }
 
     inline auto CreateOpMustBePublicError(
-        const std::shared_ptr<const Token>& t_nameToken
+        const std::shared_ptr<const Token>& nameToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_nameToken->SourceLocation,
+            nameToken->SourceLocation,
             "op must be public"
         );
     }
 
     inline auto CreateInstanceOpError(
-        const std::shared_ptr<const Token>& t_nameToken
+        const std::shared_ptr<const Token>& nameToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_nameToken->SourceLocation,
+            nameToken->SourceLocation,
             "instance op"
         );
     }

@@ -23,12 +23,12 @@
 namespace Ace
 {
     StaticVarReferenceExprBoundNode::StaticVarReferenceExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        IVarSymbol* const t_varSymbol
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_VarSymbol{ t_varSymbol }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        IVarSymbol* const varSymbol
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_VarSymbol{ varSymbol }
     {
     }
 
@@ -48,35 +48,35 @@ namespace Ace
     }
 
     auto StaticVarReferenceExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const StaticVarReferenceExprBoundNode>>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto StaticVarReferenceExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto StaticVarReferenceExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const StaticVarReferenceExprBoundNode>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto StaticVarReferenceExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
     auto StaticVarReferenceExprBoundNode::Emit(
-        Emitter& t_emitter
+        Emitter& emitter
     ) const -> ExprEmitResult
     {
         if (
@@ -84,11 +84,11 @@ namespace Ace
             dynamic_cast<IParamVarSymbol*>(m_VarSymbol)
             )
         {
-            return { t_emitter.GetLocalVarMap().at(m_VarSymbol), {} };
+            return { emitter.GetLocalVarMap().at(m_VarSymbol), {} };
         }
         else if (auto* const varSymbol = dynamic_cast<StaticVarSymbol*>(m_VarSymbol))
         {
-            return { t_emitter.GetStaticVarMap().at(varSymbol), {} };
+            return { emitter.GetStaticVarMap().at(varSymbol), {} };
         }
 
         ACE_UNREACHABLE();

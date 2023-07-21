@@ -25,11 +25,11 @@ namespace Ace
     {
     public:
         VarStmtNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const Identifier& t_name,
-            const TypeName& t_typeName,
-            const std::optional<std::shared_ptr<const IExprNode>>& t_optAssignedExpr
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const Identifier& name,
+            const TypeName& typeName,
+            const std::optional<std::shared_ptr<const IExprNode>>& optAssignedExpr
         );
         virtual ~VarStmtNode() = default;
 
@@ -37,10 +37,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const VarStmtNode> final;
         auto CloneInScopeStmt(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IStmtNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const VarStmtBoundNode>> final;
         auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;

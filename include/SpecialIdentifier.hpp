@@ -9,9 +9,9 @@
 namespace Ace::SpecialIdentifier
 {
     auto CreateAnonymous() -> std::string;
-    auto CreateTemplate(const std::string& t_templateName) -> std::string;
-    auto CreateCopyGlue(const std::string& t_typePartialSignature) -> std::string;
-    auto CreateDropGlue(const std::string& t_typePartialSignature) -> std::string;
+    auto CreateTemplate(const std::string& templateName) -> std::string;
+    auto CreateCopyGlue(const std::string& typePartialSignature) -> std::string;
+    auto CreateDropGlue(const std::string& typePartialSignature) -> std::string;
 
     inline constexpr const char* Self   = "self";
     inline constexpr const char* Main   = "main";
@@ -33,13 +33,13 @@ namespace Ace::SpecialIdentifier
         inline constexpr const char* Addition           = "$op_addition";
         inline constexpr const char* Subtraction        = "$op_subtraction";
         inline constexpr const char* RightShift         = "$op_right_shift";
-        inline constexpr const char* LeftShift          = "$op_left_shift";
+        inline constexpr const char* LeftShift          = "$op_lefshift";
         inline constexpr const char* LessThan           = "$op_less_than";
         inline constexpr const char* GreaterThan        = "$op_greater_than";
         inline constexpr const char* LessThanEquals     = "$op_less_than_equals";
         inline constexpr const char* GreaterThanEquals  = "$op_greater_than_equals";
         inline constexpr const char* Equals             = "$op_equals";
-        inline constexpr const char* NotEquals          = "$op_not_equals";
+        inline constexpr const char* NotEquals          = "$op_noequals";
         inline constexpr const char* AND                = "$op_AND";
         inline constexpr const char* XOR                = "$op_XOR";
         inline constexpr const char* OR                 = "$op_OR";

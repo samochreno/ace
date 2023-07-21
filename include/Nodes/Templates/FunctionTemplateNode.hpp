@@ -20,10 +20,10 @@ namespace Ace
     {
     public:
         FunctionTemplateNode(
-            const SourceLocation& t_sourceLocation,
-            const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& t_implParams,
-            const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& t_params,
-            const std::shared_ptr<const FunctionNode>& t_ast
+            const SourceLocation& sourceLocation,
+            const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& implParams,
+            const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& params,
+            const std::shared_ptr<const FunctionNode>& ast
         );
         virtual ~FunctionTemplateNode() = default;
 
@@ -31,7 +31,7 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const FunctionTemplateNode> final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;

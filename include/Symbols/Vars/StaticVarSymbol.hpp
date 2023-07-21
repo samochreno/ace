@@ -14,10 +14,10 @@ namespace Ace
     {
     public:
         StaticVarSymbol(
-            const std::shared_ptr<Scope>& t_scope,
-            const Identifier& t_name,
-            const AccessModifier t_accessModifier,
-            ITypeSymbol* const t_type
+            const std::shared_ptr<Scope>& scope,
+            const Identifier& name,
+            const AccessModifier accessModifier,
+            ITypeSymbol* const type
         );
         virtual ~StaticVarSymbol() = default;
 

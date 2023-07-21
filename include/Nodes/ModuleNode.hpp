@@ -30,19 +30,19 @@ namespace Ace
     {
     public:
         ModuleNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const std::shared_ptr<Scope>& t_selfScope,
-            const std::vector<Identifier>& t_name,
-            const AccessModifier t_accessModifier,
-            const std::vector<std::shared_ptr<const ModuleNode>>& t_modules,
-            const std::vector<std::shared_ptr<const ITypeNode>>& t_types,
-            const std::vector<std::shared_ptr<const TypeTemplateNode>>& t_typeTemplates,
-            const std::vector<std::shared_ptr<const ImplNode>>& t_impls,
-            const std::vector<std::shared_ptr<const TemplatedImplNode>>& t_templatedImpls,
-            const std::vector<std::shared_ptr<const FunctionNode>>& t_functions,
-            const std::vector<std::shared_ptr<const FunctionTemplateNode>>& t_functionTemplates,
-            const std::vector<std::shared_ptr<const StaticVarNode>>& t_vars
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const std::shared_ptr<Scope>& selfScope,
+            const std::vector<Identifier>& name,
+            const AccessModifier accessModifier,
+            const std::vector<std::shared_ptr<const ModuleNode>>& modules,
+            const std::vector<std::shared_ptr<const ITypeNode>>& types,
+            const std::vector<std::shared_ptr<const TypeTemplateNode>>& typeTemplates,
+            const std::vector<std::shared_ptr<const ImplNode>>& impls,
+            const std::vector<std::shared_ptr<const TemplatedImplNode>>& templatedImpls,
+            const std::vector<std::shared_ptr<const FunctionNode>>& functions,
+            const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates,
+            const std::vector<std::shared_ptr<const StaticVarNode>>& vars
         );
         virtual ~ModuleNode() = default;
 
@@ -50,7 +50,7 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const ModuleNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const ModuleBoundNode>> final;
 
@@ -59,7 +59,7 @@ namespace Ace
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
         auto ContinueCreatingSymbol(
-            ISymbol* const t_symbol
+            ISymbol* const symbol
         ) const -> Expected<void> final;
         auto GetName() const -> const Identifier& final;
 

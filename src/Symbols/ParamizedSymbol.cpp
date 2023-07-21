@@ -11,9 +11,9 @@ namespace Ace
             begin(params),
             end  (params),
             back_inserter(types),
-            [](IParamVarSymbol* const t_param)
+            [](IParamVarSymbol* const param)
             {
-                return t_param->GetType();
+                return param->GetType();
             }
         );
         

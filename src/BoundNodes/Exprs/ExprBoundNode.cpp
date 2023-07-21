@@ -16,19 +16,19 @@
 namespace Ace
 {
     auto CreateConvertedVector(
-        const std::vector<std::shared_ptr<const IExprBoundNode>>& t_exprs,
-        const TypeInfo& t_targetTypeInfo,
-        ConversionFunction t_func
+        const std::vector<std::shared_ptr<const IExprBoundNode>>& exprs,
+        const TypeInfo& targetTypeInfo,
+        ConversionFunction func
     ) -> Expected<MaybeChanged<std::vector<std::shared_ptr<const IExprBoundNode>>>>
     {
         bool isChanged = false;
         std::vector<std::shared_ptr<const IExprBoundNode>> convertedExprs{};
-        convertedExprs.reserve(t_exprs.size());
+        convertedExprs.reserve(exprs.size());
 
-        ACE_TRY_ASSERT(std::find_if_not(begin(t_exprs), end(t_exprs),
-        [&](const std::shared_ptr<const IExprBoundNode>& t_expr)
+        ACE_TRY_ASSERT(std::find_if_not(begin(exprs), end(exprs),
+        [&](const std::shared_ptr<const IExprBoundNode>& expr)
         {
-            auto expMchConvertedExpr = t_func(t_expr, t_targetTypeInfo);
+            auto expMchConvertedExpr = func(expr, targetTypeInfo);
             if (!expMchConvertedExpr)
             {
                 return false;
@@ -42,31 +42,31 @@ namespace Ace
             convertedExprs.push_back(expMchConvertedExpr.Unwrap().Value);
             return true;
 
-        }) == end(t_exprs));
+        }) == end(exprs));
 
         if (!isChanged)
         {
-            return CreateUnchanged(t_exprs);
+            return CreateUnchanged(exprs);
         }
 
         return CreateChanged(convertedExprs);
     }
 
     auto CreateConvertedVector(
-        const std::vector<std::shared_ptr<const IExprBoundNode>>& t_exprs,
-        const std::vector<TypeInfo>& t_targetTypeInfos,
-        ConversionFunction t_func
+        const std::vector<std::shared_ptr<const IExprBoundNode>>& exprs,
+        const std::vector<TypeInfo>& targetTypeInfos,
+        ConversionFunction func
     ) -> Expected<MaybeChanged<std::vector<std::shared_ptr<const IExprBoundNode>>>>
     {
         bool isChanged = false;
         std::vector<std::shared_ptr<const IExprBoundNode>> convertedExprs{};
-        convertedExprs.reserve(t_exprs.size());
+        convertedExprs.reserve(exprs.size());
 
-        for (size_t i = 0; i < t_exprs.size(); i++)
+        for (size_t i = 0; i < exprs.size(); i++)
         {
-            ACE_TRY(mchConvertedExpr, t_func(
-                t_exprs.at(i),
-                t_targetTypeInfos.at(i)
+            ACE_TRY(mchConvertedExpr, func(
+                exprs.at(i),
+                targetTypeInfos.at(i)
             ));
 
             if (mchConvertedExpr.IsChanged)
@@ -79,41 +79,41 @@ namespace Ace
 
         if (!isChanged)
         {
-            return CreateUnchanged(t_exprs);
+            return CreateUnchanged(exprs);
         }
 
         return CreateChanged(convertedExprs);
     }
 
     auto CreateConverted(
-        std::shared_ptr<const IExprBoundNode> t_expr,
-        TypeInfo t_targetTypeInfo,
-        ConversionOpGetterFunction t_func
+        std::shared_ptr<const IExprBoundNode> expr,
+        TypeInfo targetTypeInfo,
+        ConversionOpGetterFunction func
     ) -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        if (t_targetTypeInfo.ValueKind == ValueKind::L)
+        if (targetTypeInfo.ValueKind == ValueKind::L)
         {
-            ACE_TRY_ASSERT(t_expr->GetTypeInfo().ValueKind != ValueKind::R);
+            ACE_TRY_ASSERT(expr->GetTypeInfo().ValueKind != ValueKind::R);
         }
 
         if (
-            t_expr->GetTypeInfo().Symbol->GetUnaliased() ==
-            t_targetTypeInfo.Symbol->GetUnaliased()
+            expr->GetTypeInfo().Symbol->GetUnaliased() ==
+            targetTypeInfo.Symbol->GetUnaliased()
             )
         {
-            return CreateUnchanged(t_expr);
+            return CreateUnchanged(expr);
         }
 
-        const bool isReference = t_expr->GetTypeInfo().Symbol->IsReference();
-        const bool isTargetReference = t_targetTypeInfo.Symbol->IsReference();
+        const bool isReference = expr->GetTypeInfo().Symbol->IsReference();
+        const bool isTargetReference = targetTypeInfo.Symbol->IsReference();
 
         if (isReference)
         {
             if (!isTargetReference)
             {
-                t_expr = std::make_shared<const DereferenceExprBoundNode>(
-                    t_expr->GetSourceLocation(),
-                    t_expr
+                expr = std::make_shared<const DereferenceExprBoundNode>(
+                    expr->GetSourceLocation(),
+                    expr
                 );
             }
         }
@@ -121,46 +121,46 @@ namespace Ace
         {
             if (isTargetReference)
             {
-                t_expr = std::make_shared<const ReferenceExprBoundNode>(
-                    t_expr->GetSourceLocation(),
-                    t_expr
+                expr = std::make_shared<const ReferenceExprBoundNode>(
+                    expr->GetSourceLocation(),
+                    expr
                 );
             }
         }
 
         if (
-            t_expr->GetTypeInfo().Symbol->GetUnaliased() ==
-            t_targetTypeInfo.Symbol->GetUnaliased()
+            expr->GetTypeInfo().Symbol->GetUnaliased() ==
+            targetTypeInfo.Symbol->GetUnaliased()
             )
         {
-            return CreateChanged(t_expr);
+            return CreateChanged(expr);
         }
 
-        ACE_TRY(opSymbol, t_func(
-            t_expr->GetSourceLocation(),
-            t_expr->GetScope(), 
-            t_expr->GetTypeInfo().Symbol,
-            t_targetTypeInfo.Symbol
+        ACE_TRY(opSymbol, func(
+            expr->GetSourceLocation(),
+            expr->GetScope(), 
+            expr->GetTypeInfo().Symbol,
+            targetTypeInfo.Symbol
         ));
 
-        t_expr = std::make_shared<const StaticFunctionCallExprBoundNode>(
-            t_expr->GetSourceLocation(),
-            t_expr->GetScope(),
+        expr = std::make_shared<const StaticFunctionCallExprBoundNode>(
+            expr->GetSourceLocation(),
+            expr->GetScope(),
             opSymbol,
-            std::vector{ t_expr }
+            std::vector{ expr }
         );
 
-        return CreateChanged(t_expr);
+        return CreateChanged(expr);
     }
 
     auto CreateImplicitlyConvertedAndTypeChecked(
-        const std::shared_ptr<const IExprBoundNode>& t_expr,
-        const TypeInfo& t_targetTypeInfo
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const TypeInfo& targetTypeInfo
     ) -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
         ACE_TRY(mchConverted, CreateImplicitlyConverted(
-            t_expr,
-            t_targetTypeInfo
+            expr,
+            targetTypeInfo
         ));
 
         ACE_TRY(mchChecked, mchConverted.Value->GetOrCreateTypeCheckedExpr({}));
@@ -170,18 +170,18 @@ namespace Ace
             !mchChecked.IsChanged
             )
         {
-            return CreateUnchanged(t_expr);
+            return CreateUnchanged(expr);
         }
 
         return CreateChanged(mchChecked.Value);
     }
 
     auto CreateImplicitlyConvertedAndTypeCheckedOptional(
-        const std::optional<std::shared_ptr<const IExprBoundNode>>& t_optExpr,
-        const TypeInfo& t_targetTypeInfo
+        const std::optional<std::shared_ptr<const IExprBoundNode>>& optExpr,
+        const TypeInfo& targetTypeInfo
     ) -> Expected<MaybeChanged<std::optional<std::shared_ptr<const IExprBoundNode>>>>
     {
-        if (!t_optExpr.has_value())
+        if (!optExpr.has_value())
         {
             return CreateUnchanged(
                 std::optional<std::shared_ptr<const IExprBoundNode>>{}
@@ -189,8 +189,8 @@ namespace Ace
         }
 
         ACE_TRY(mchConvertedAndChecked, CreateImplicitlyConvertedAndTypeChecked(
-            t_optExpr.value(),
-            t_targetTypeInfo
+            optExpr.value(),
+            targetTypeInfo
         ));
 
         return MaybeChanged<std::optional<std::shared_ptr<const IExprBoundNode>>>

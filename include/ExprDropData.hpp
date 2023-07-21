@@ -12,10 +12,10 @@ namespace Ace
     struct ExprDropData
     {
         ExprDropData(
-            llvm::Value* const t_value,
-            ITypeSymbol* const t_typeSymbol
-        ) : Value{ t_value },
-            TypeSymbol{ t_typeSymbol }
+            llvm::Value* const value,
+            ITypeSymbol* const typeSymbol
+        ) : Value{ value },
+            TypeSymbol{ typeSymbol }
         {
         }
 

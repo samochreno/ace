@@ -29,16 +29,16 @@ namespace Ace
         virtual auto GetASTName() const -> const Identifier& = 0;
 
         virtual auto SetPlaceholderSymbol(
-            ISymbol* const t_symbol
+            ISymbol* const symbol
         ) -> void = 0;
         virtual auto GetPlaceholderSymbol() const -> ISymbol* = 0;
 
         virtual auto InstantiateSymbols(
-            const std::vector<ITypeSymbol*>& t_implArgs,
-            const std::vector<ITypeSymbol*>& t_args
+            const std::vector<ITypeSymbol*>& implArgs,
+            const std::vector<ITypeSymbol*>& args
         ) -> Expected<TemplateSymbolsInstantationResult> = 0;
         virtual auto InstantiateSemanticsForSymbols(
-            const std::shared_ptr<const INode>& t_ast
+            const std::shared_ptr<const INode>& ast
         ) -> void = 0;
     };
 }

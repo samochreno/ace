@@ -24,9 +24,9 @@ namespace Ace
     {
     public:
         UserUnaryExprBoundNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<const IExprBoundNode>& t_expr,
-            FunctionSymbol* const t_opSymbol
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<const IExprBoundNode>& expr,
+            FunctionSymbol* const opSymbol
         );
         virtual ~UserUnaryExprBoundNode() = default;
 
@@ -34,18 +34,18 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const UserUnaryExprBoundNode>>> final;
         auto GetOrCreateTypeCheckedExpr(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const StaticFunctionCallExprBoundNode>> final;
         auto GetOrCreateLoweredExpr(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>> final;
-        auto Emit(Emitter& t_emitter) const -> ExprEmitResult final;
+        auto Emit(Emitter& emitter) const -> ExprEmitResult final;
 
         auto GetTypeInfo() const -> TypeInfo final;
 

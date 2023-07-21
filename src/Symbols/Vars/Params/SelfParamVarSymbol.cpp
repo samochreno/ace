@@ -12,14 +12,14 @@
 namespace Ace
 {
     SelfParamVarSymbol::SelfParamVarSymbol(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        ITypeSymbol* const t_type
-    ) : m_Scope{ t_scope },
-        m_Type{ t_type },
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        ITypeSymbol* const type
+    ) : m_Scope{ scope },
+        m_Type{ type },
         m_Name
         {
-            t_sourceLocation,
+            sourceLocation,
             SpecialIdentifier::Self,
         }
     {

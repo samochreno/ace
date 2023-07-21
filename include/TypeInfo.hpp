@@ -10,10 +10,10 @@ namespace Ace
     {
     public:
         TypeInfo(
-            ITypeSymbol* const t_symbol,
-            const ValueKind t_valueKind
-        ) : Symbol{ t_symbol },
-            ValueKind{ t_valueKind }
+            ITypeSymbol* const symbol,
+            const ValueKind valueKind
+        ) : Symbol{ symbol },
+            ValueKind{ valueKind }
         {
         }
 

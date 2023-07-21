@@ -20,45 +20,45 @@ namespace Ace
     }
 
     inline auto CreateMultiplePackagePathArgsError(
-        const SourceLocation& t_sourceLocation
+        const SourceLocation& sourceLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_sourceLocation,
+            sourceLocation,
             "multiple package path arguments"
         );
     }
 
     inline auto CreateUnexpectedPackagePropertyWarning(
-        const FileBuffer* const t_packageFileBuffer,
-        const std::string& t_propertyName
+        const FileBuffer* const packageFileBuffer,
+        const std::string& propertyName
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Warning,
-            t_packageFileBuffer->CreateFirstLocation(),
-            "unexpected property `" + t_propertyName + "`"
+            packageFileBuffer->CreateFirstLocation(),
+            "unexpected property `" + propertyName + "`"
         );
     }
 
     inline auto CreateMissingPackagePropertyError(
-        const FileBuffer* const t_packageFileBuffer,
-        const std::string& t_propertyName
+        const FileBuffer* const packageFileBuffer,
+        const std::string& propertyName
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_packageFileBuffer->CreateFirstLocation(),
-            "missing property `" + t_propertyName + "`"
+            packageFileBuffer->CreateFirstLocation(),
+            "missing property `" + propertyName + "`"
         );
     }
 
     inline auto CreateJsonTypeString(
-        const nlohmann::json::value_t t_type
+        const nlohmann::json::value_t type
     ) -> const char* 
     {
-        switch (t_type)
+        switch (type)
         {
             case nlohmann::json::value_t::null:            return "null";
             case nlohmann::json::value_t::object:          return "object";
@@ -75,33 +75,33 @@ namespace Ace
     }
 
     inline auto CreateUnexpectedPackagePropertyTypeError(
-        const FileBuffer* const t_packageFileBuffer,
-        const std::string& t_propertyName,
-        const nlohmann::json::value_t t_type,
-        const nlohmann::json::value_t t_expectedType
+        const FileBuffer* const packageFileBuffer,
+        const std::string& propertyName,
+        const nlohmann::json::value_t type,
+        const nlohmann::json::value_t expectedType
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = std::string{} +
-            "unexpected type `" + CreateJsonTypeString(t_type) + 
-            "` of property `" + t_propertyName +  "`, expected `" +
-            CreateJsonTypeString(t_expectedType) + "`";
+            "unexpected type `" + CreateJsonTypeString(type) + 
+            "` of property `" + propertyName +  "`, expected `" +
+            CreateJsonTypeString(expectedType) + "`";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_packageFileBuffer->CreateFirstLocation(),
+            packageFileBuffer->CreateFirstLocation(),
             message
         );
     }
 
     inline auto CreateUndefinedReferenceToPackagePathMacroError(
-        const FileBuffer* const t_packageFileBuffer,
-        const std::string& t_macro
+        const FileBuffer* const packageFileBuffer,
+        const std::string& macro
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_packageFileBuffer->CreateFirstLocation(),
-            "undefined reference to macro `" + t_macro + "`"
+            packageFileBuffer->CreateFirstLocation(),
+            "undefined reference to macro `" + macro + "`"
         );
     }   
 }

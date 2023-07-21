@@ -13,8 +13,8 @@ namespace Ace
     {
     public:
         LabelSymbol(
-            const std::shared_ptr<Scope>& t_scope,
-            const Identifier& t_name
+            const std::shared_ptr<Scope>& scope,
+            const Identifier& name
         );
         virtual ~LabelSymbol() = default;
 

@@ -31,11 +31,11 @@ namespace Ace
     {
     public:
         FunctionSymbol(
-            const std::shared_ptr<Scope>& t_selfScope,
-            const Identifier& t_name,
-            const SymbolCategory t_symbolCategory,
-            const AccessModifier t_accessModifier,
-            ITypeSymbol* const t_type
+            const std::shared_ptr<Scope>& selfScope,
+            const Identifier& name,
+            const SymbolCategory symbolCategory,
+            const AccessModifier accessModifier,
+            ITypeSymbol* const type
         );
         virtual ~FunctionSymbol() = default;
 
@@ -53,7 +53,7 @@ namespace Ace
 
         auto CollectArgTypeInfos() const -> std::vector<TypeInfo>;
 
-        auto BindBody(const std::shared_ptr<const IEmittable<void>>& t_body) -> void;
+        auto BindBody(const std::shared_ptr<const IEmittable<void>>& body) -> void;
         auto GetBody() -> std::optional<const IEmittable<void>*>;
 
         auto GetTemplate() const -> std::optional<FunctionTemplateSymbol*>;

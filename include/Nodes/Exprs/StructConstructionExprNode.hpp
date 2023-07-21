@@ -27,10 +27,10 @@ namespace Ace
     {
     public:
         StructConstructionExprNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const SymbolName& t_typeName,
-            std::vector<StructConstructionExprArg>&& t_args
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const SymbolName& typeName,
+            std::vector<StructConstructionExprArg>&& args
         );
         virtual ~StructConstructionExprNode() = default;
 
@@ -38,10 +38,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const StructConstructionExprNode> final;
         auto CloneInScopeExpr(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const StructConstructionExprBoundNode>> final;
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;

@@ -15,12 +15,12 @@
 namespace Ace
 {
     OrExprBoundNode::OrExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_lhsExpr,
-        const std::shared_ptr<const IExprBoundNode>& t_rhsExpr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_LHSExpr{ t_lhsExpr },
-        m_RHSExpr{ t_rhsExpr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& lhsExpr,
+        const std::shared_ptr<const IExprBoundNode>& rhsExpr
+    ) : m_SourceLocation{ sourceLocation },
+        m_LHSExpr{ lhsExpr },
+        m_RHSExpr{ rhsExpr }
     {
     }
 
@@ -45,7 +45,7 @@ namespace Ace
     }
 
     auto OrExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const OrExprBoundNode>>>
     {
         const TypeInfo typeInfo
@@ -80,14 +80,14 @@ namespace Ace
     }
 
     auto OrExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto OrExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const OrExprBoundNode>>
     {
         const auto mchLoweredLHSExpr = m_LHSExpr->GetOrCreateLoweredExpr({});
@@ -107,76 +107,76 @@ namespace Ace
     }
 
     auto OrExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto OrExprBoundNode::Emit(Emitter& t_emitter) const -> ExprEmitResult
+    auto OrExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
         std::vector<ExprDropData> temporaries{};
 
         auto* const boolType = GetCompilation()->Natives->Bool.GetIRType();
 
         auto* const allocaInst =
-            t_emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
+            emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
 
-        const auto lhsEmitResult = m_LHSExpr->Emit(t_emitter);
+        const auto lhsEmitResult = m_LHSExpr->Emit(emitter);
         temporaries.insert(
             end(temporaries), 
             begin(lhsEmitResult.Temporaries), 
             end  (lhsEmitResult.Temporaries)
         );
 
-        auto* const lhsLoadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
+        auto* const lhsLoadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,
             lhsEmitResult.Value
         );
 
-        t_emitter.GetBlockBuilder().Builder.CreateStore(
+        emitter.GetBlockBuilder().Builder.CreateStore(
             lhsLoadInst,
             allocaInst
         );
 
         auto falseBlockBuilder = std::make_unique<BlockBuilder>(
             *GetCompilation()->LLVMContext,
-            t_emitter.GetFunction()
+            emitter.GetFunction()
         );
 
         auto endBlockBuilder = std::make_unique<BlockBuilder>(
             *GetCompilation()->LLVMContext,
-            t_emitter.GetFunction()
+            emitter.GetFunction()
         );
 
-        t_emitter.GetBlockBuilder().Builder.CreateCondBr(
+        emitter.GetBlockBuilder().Builder.CreateCondBr(
             lhsLoadInst,
             endBlockBuilder->Block,
             falseBlockBuilder->Block
         );
 
-        t_emitter.SetBlockBuilder(std::move(falseBlockBuilder));
+        emitter.SetBlockBuilder(std::move(falseBlockBuilder));
 
-        const auto rhsEmitResult = m_RHSExpr->Emit(t_emitter);
+        const auto rhsEmitResult = m_RHSExpr->Emit(emitter);
         temporaries.insert(
             end(temporaries), 
             begin(rhsEmitResult.Temporaries), 
             end  (rhsEmitResult.Temporaries)
         );
 
-        auto* const rhsLoadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
+        auto* const rhsLoadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,
             rhsEmitResult.Value
         );
 
-        t_emitter.GetBlockBuilder().Builder.CreateStore(
+        emitter.GetBlockBuilder().Builder.CreateStore(
             rhsLoadInst,
             allocaInst
         );
 
-        t_emitter.GetBlockBuilder().Builder.CreateBr(endBlockBuilder->Block);
+        emitter.GetBlockBuilder().Builder.CreateBr(endBlockBuilder->Block);
 
-        t_emitter.SetBlockBuilder(std::move(endBlockBuilder));
+        emitter.SetBlockBuilder(std::move(endBlockBuilder));
 
         return { allocaInst, temporaries };
     }

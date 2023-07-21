@@ -16,7 +16,7 @@ namespace Ace
         virtual ~IStmtNode() = default;
 
         virtual auto CloneInScopeStmt(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IStmtNode> = 0;
         
         virtual auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> = 0;

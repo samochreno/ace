@@ -21,14 +21,14 @@
 namespace Ace
 {
     WhileStmtBoundNode::WhileStmtBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const std::shared_ptr<const IExprBoundNode>& t_condition,
-        const std::shared_ptr<const BlockStmtBoundNode>& t_body
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Condition{ t_condition },
-        m_Body{ t_body }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const std::shared_ptr<const IExprBoundNode>& condition,
+        const std::shared_ptr<const BlockStmtBoundNode>& body
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Condition{ condition },
+        m_Body{ body }
     {
     }
 
@@ -53,7 +53,7 @@ namespace Ace
     }
 
     auto WhileStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const WhileStmtBoundNode>>>
     {
         const TypeInfo typeInfo
@@ -68,7 +68,7 @@ namespace Ace
         ));
 
         ACE_TRY(mchCheckedBody, m_Body->GetOrCreateTypeChecked({
-            t_context.ParentFunctionTypeSymbol
+            context.ParentFunctionTypeSymbol
         }));
 
         if (
@@ -88,14 +88,14 @@ namespace Ace
     }
 
     auto WhileStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto WhileStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const GroupStmtBoundNode>>
     {
         // From:
@@ -168,17 +168,17 @@ namespace Ace
             GetSourceLocation(),
             m_Scope,
             stmts
-        )->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(context).Value);
     }
 
     auto WhileStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto WhileStmtBoundNode::Emit(Emitter& t_emitter) const -> void
+    auto WhileStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
         ACE_UNREACHABLE();
     }

@@ -19,8 +19,8 @@
 namespace Ace
 {
     FunctionTemplateSymbol::FunctionTemplateSymbol(
-        const FunctionTemplateNode* const t_templateNode
-    ) : m_TemplateNode{ t_templateNode }
+        const FunctionTemplateNode* const templateNode
+    ) : m_TemplateNode{ templateNode }
     {
         m_Name =
         {
@@ -70,10 +70,10 @@ namespace Ace
     }
 
     auto FunctionTemplateSymbol::SetPlaceholderSymbol(
-        ISymbol* const t_symbol
+        ISymbol* const symbol
     ) -> void
     {
-        m_PlaceholderSymbol = t_symbol;
+        m_PlaceholderSymbol = symbol;
     }
 
     auto FunctionTemplateSymbol::GetPlaceholderSymbol() const -> ISymbol*
@@ -82,15 +82,15 @@ namespace Ace
     }
 
     auto FunctionTemplateSymbol::InstantiateSymbols(
-        const std::vector<ITypeSymbol*>& t_implArgs,
-        const std::vector<ITypeSymbol*>& t_args
+        const std::vector<ITypeSymbol*>& implArgs,
+        const std::vector<ITypeSymbol*>& args
     ) -> Expected<TemplateSymbolsInstantationResult>
     {
         const auto implParamNames = m_TemplateNode->CollectImplParamNames();
         const auto paramNames = m_TemplateNode->CollectParamNames();
 
-        ACE_TRY_ASSERT(t_implArgs.size() == implParamNames.size());
-        ACE_TRY_ASSERT(t_args.size() == paramNames.size());
+        ACE_TRY_ASSERT(implArgs.size() == implParamNames.size());
+        ACE_TRY_ASSERT(args.size() == paramNames.size());
 
         const auto ast = m_TemplateNode->GetAST()->CloneInScope(
             m_TemplateNode->GetScope()
@@ -98,9 +98,9 @@ namespace Ace
 
         ACE_TRY_VOID(ast->GetSelfScope()->DefineTemplateArgAliases(
             implParamNames,
-            t_implArgs,
+            implArgs,
             paramNames,
-            t_args
+            args
         ));
 
         const auto nodes = Application::GetAllNodes(ast);
@@ -112,33 +112,31 @@ namespace Ace
             GetCompilation(),
             this,
             std::nullopt,
-            t_implArgs,
-            t_args
+            implArgs,
+            args
         ).Unwrap();
 
         return TemplateSymbolsInstantationResult{ symbol, ast };
     }
 
     auto FunctionTemplateSymbol::InstantiateSemanticsForSymbols(
-        const std::shared_ptr<const INode>& t_ast
+        const std::shared_ptr<const INode>& ast
     ) -> void
     {
-        const auto ast = std::dynamic_pointer_cast<const FunctionNode>(t_ast);
-
         const auto boundAST = Application::CreateBoundTransformedAndVerifiedAST(
             GetCompilation(),
-            ast,
-            [](const std::shared_ptr<const FunctionNode>& t_ast)
+            std::dynamic_pointer_cast<const FunctionNode>(ast),
+            [](const std::shared_ptr<const FunctionNode>& ast)
             {
-                return t_ast->CreateBound();
+                return ast->CreateBound();
             },
-            [](const std::shared_ptr<const FunctionBoundNode>& t_ast)
+            [](const std::shared_ptr<const FunctionBoundNode>& ast)
             {
-                return t_ast->GetOrCreateTypeChecked({});
+                return ast->GetOrCreateTypeChecked({});
             },
-            [](const std::shared_ptr<const FunctionBoundNode>& t_ast)
+            [](const std::shared_ptr<const FunctionBoundNode>& ast)
             {
-                return t_ast->GetOrCreateLowered({});
+                return ast->GetOrCreateLowered({});
             }
         ).Unwrap();
     }

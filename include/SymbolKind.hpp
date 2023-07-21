@@ -25,9 +25,9 @@ namespace Ace
     };
 
     constexpr auto operator&(
-        const SymbolKind t_lhs,
-        const SymbolKind t_rhs
+        const SymbolKind lhs,
+        const SymbolKind rhs
     ) -> bool;
 
-    auto GetSymbolCreationOrder(const SymbolKind t_kind) -> int8_t;
+    auto GetSymbolCreationOrder(const SymbolKind kind) -> int8_t;
 }

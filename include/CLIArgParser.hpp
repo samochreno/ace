@@ -37,7 +37,7 @@ namespace Ace
     };
 
     auto ParseCommandLineArgs(
-        const CLIArgBuffer* const t_argBuffer,
-        std::vector<const CLIOptionDefinition*>&& t_optionDefinitions
+        const CLIArgBuffer* const argBuffer,
+        std::vector<const CLIOptionDefinition*>&& optionDefinitions
     ) -> Expected<CLIArgsParseResult>;
 }

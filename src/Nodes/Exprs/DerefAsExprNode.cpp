@@ -12,12 +12,12 @@
 namespace Ace
 {
     DerefAsExprNode::DerefAsExprNode(
-        const SourceLocation& t_sourceLocation,
-        const TypeName& t_typeName, 
-        const std::shared_ptr<const IExprNode>& t_expr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_TypeName{ t_typeName },
-        m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const TypeName& typeName, 
+        const std::shared_ptr<const IExprNode>& expr
+    ) : m_SourceLocation{ sourceLocation },
+        m_TypeName{ typeName },
+        m_Expr{ expr }
     {
     }
 
@@ -41,21 +41,21 @@ namespace Ace
     }
 
     auto DerefAsExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const DerefAsExprNode>
     {
         return std::make_shared<const DerefAsExprNode>(
             m_SourceLocation,
             m_TypeName,
-            m_Expr->CloneInScopeExpr(t_scope)
+            m_Expr->CloneInScopeExpr(scope)
         );
     }
 
     auto DerefAsExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto DerefAsExprNode::CreateBound() const -> Expected<std::shared_ptr<const DerefAsExprBoundNode>>

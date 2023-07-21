@@ -15,12 +15,12 @@
 namespace Ace
 {
     UserUnaryExprBoundNode::UserUnaryExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_expr,
-        FunctionSymbol* const t_opSymbol
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr },
-        m_OpSymbol{ t_opSymbol }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        FunctionSymbol* const opSymbol
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr },
+        m_OpSymbol{ opSymbol }
     {
     }
 
@@ -44,7 +44,7 @@ namespace Ace
     }
 
     auto UserUnaryExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const UserUnaryExprBoundNode>>>
     {
         ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
@@ -62,14 +62,14 @@ namespace Ace
     }
 
     auto UserUnaryExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto UserUnaryExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
@@ -83,13 +83,13 @@ namespace Ace
     }
 
     auto UserUnaryExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto UserUnaryExprBoundNode::Emit(Emitter& t_emitter) const -> ExprEmitResult
+    auto UserUnaryExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
         ACE_UNREACHABLE();
     }

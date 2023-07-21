@@ -15,9 +15,9 @@ namespace Ace
     {
     public:
         SelfParamVarSymbol(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            ITypeSymbol* const t_type
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            ITypeSymbol* const type
         );
         virtual ~SelfParamVarSymbol() = default;
 

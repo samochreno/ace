@@ -34,15 +34,15 @@ namespace Ace
         virtual auto IsTriviallyDroppable() const -> bool = 0;
 
         virtual auto CreateCopyGlueBody(
-            FunctionSymbol* const t_glueSymbol
+            FunctionSymbol* const glueSymbol
         ) -> std::shared_ptr<const IEmittable<void>> = 0;
         virtual auto CreateDropGlueBody(
-            FunctionSymbol* const t_glueSymbol
+            FunctionSymbol* const glueSymbol
         ) -> std::shared_ptr<const IEmittable<void>> = 0;
 
-        virtual auto BindCopyGlue(FunctionSymbol* const t_glue) -> void = 0;
+        virtual auto BindCopyGlue(FunctionSymbol* const glue) -> void = 0;
         virtual auto GetCopyGlue() const -> std::optional<FunctionSymbol*> = 0;
-        virtual auto BindDropGlue(FunctionSymbol* const t_glue) -> void = 0;
+        virtual auto BindDropGlue(FunctionSymbol* const glue) -> void = 0;
         virtual auto GetDropGlue() const -> std::optional<FunctionSymbol*> = 0;
 
         virtual auto IsReference() const -> bool final;

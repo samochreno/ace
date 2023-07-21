@@ -38,12 +38,12 @@ namespace Ace
     struct FilteredDirectory
     {
         FilteredDirectory(
-            const std::filesystem::path& t_path, 
-            const std::optional<std::string>& t_optExtensionFilter, 
-            const Recursiveness t_recursiveness
-        ) : Path{ t_path }, 
-            OptExtensionFilter{ t_optExtensionFilter }, 
-            Recursiveness{ t_recursiveness }
+            const std::filesystem::path& path, 
+            const std::optional<std::string>& optExtensionFilter, 
+            const Recursiveness recursiveness
+        ) : Path{ path }, 
+            OptExtensionFilter{ optExtensionFilter }, 
+            Recursiveness{ recursiveness }
         {
         }
 
@@ -53,27 +53,27 @@ namespace Ace
     };
 
     static auto DoesDirectoryEntryMatchFilter(
-        const std::filesystem::directory_entry& t_directoryEntry,
-        std::optional<std::string> t_optExtensionFilter
+        const std::filesystem::directory_entry& directoryEntry,
+        std::optional<std::string> optExtensionFilter
     ) -> bool
     {
-        if (!t_directoryEntry.is_regular_file())
+        if (!directoryEntry.is_regular_file())
         {
             return false;
         }
 
-        if (!t_optExtensionFilter.has_value())
+        if (!optExtensionFilter.has_value())
         {
             return true;
         }
 
-        const auto& path = t_directoryEntry.path();
+        const auto& path = directoryEntry.path();
         if (!path.has_extension())
         {
             return false;
         }
 
-        if (path.extension() != t_optExtensionFilter.value())
+        if (path.extension() != optExtensionFilter.value())
         {
             return false;
         }
@@ -82,12 +82,12 @@ namespace Ace
     }
 
     static auto CollectFilteredDirectoryFilePaths(
-        const FilteredDirectory& t_directory
+        const FilteredDirectory& directory
     ) -> Diagnosed<std::vector<std::filesystem::path>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (!std::filesystem::exists(t_directory.Path))
+        if (!std::filesystem::exists(directory.Path))
         {
             return { {}, diagnosticBag };
         }
@@ -95,16 +95,16 @@ namespace Ace
         std::vector<std::filesystem::path> filePaths{};
         try
         {
-            if (t_directory.Recursiveness == Recursiveness::Recursive)
+            if (directory.Recursiveness == Recursiveness::Recursive)
             {
                 for (
                     const auto& directoryEntry :
-                    std::filesystem::recursive_directory_iterator(t_directory.Path)
+                    std::filesystem::recursive_directory_iterator(directory.Path)
                     )
                 {
                     const bool doesMatch = DoesDirectoryEntryMatchFilter(
                         directoryEntry,
-                        t_directory.OptExtensionFilter
+                        directory.OptExtensionFilter
                     );
                     if (!doesMatch)
                     {
@@ -118,12 +118,12 @@ namespace Ace
             {
                 for (
                     const auto& directoryEntry :
-                    std::filesystem::directory_iterator(t_directory.Path)
+                    std::filesystem::directory_iterator(directory.Path)
                     )
                 {
                     const bool doesMatch = DoesDirectoryEntryMatchFilter(
                         directoryEntry,
-                        t_directory.OptExtensionFilter
+                        directory.OptExtensionFilter
                     );
                     if (!doesMatch)
                     {
@@ -136,7 +136,7 @@ namespace Ace
         }
         catch (const std::filesystem::filesystem_error& e)
         {
-            diagnosticBag.Add(CreateFileSystemError(t_directory.Path, e));
+            diagnosticBag.Add(CreateFileSystemError(directory.Path, e));
         }
 
         return { filePaths, diagnosticBag };
@@ -150,13 +150,11 @@ namespace Ace
     };
 
     static auto ExpandLastFilePathPart(
-        const FileBuffer* const t_fileBuffer,
-        const std::string& t_part
+        const FileBuffer* const fileBuffer,
+        std::string part
     ) -> Diagnosed<ExpandedLastFilePathPartData>
     {
         DiagnosticBag diagnosticBag{};
-
-        std::string part = t_part;
 
         TrimRight(part);
 
@@ -235,13 +233,13 @@ namespace Ace
     public:
         FilePathOrFilteredDirectory() = default;
         FilePathOrFilteredDirectory(
-            const std::filesystem::path& t_filePath
-        ) : m_OptFilePath{ t_filePath }
+            const std::filesystem::path& filePath
+        ) : m_OptFilePath{ filePath }
         {
         }
         FilePathOrFilteredDirectory(
-            const FilteredDirectory& t_directoryPath
-        ) : m_OptFilteredDirectory{ t_directoryPath }
+            const FilteredDirectory& directoryPath
+        ) : m_OptFilteredDirectory{ directoryPath }
         {
         }
         ~FilePathOrFilteredDirectory() = default;
@@ -270,26 +268,26 @@ namespace Ace
     };
 
     static auto ExpandFirstFilePathPart(
-        const FileBuffer* const t_fileBuffer,
-        const std::string& t_part,
-        const std::unordered_map<std::string, std::string>& t_pathMacroMap
+        const FileBuffer* const fileBuffer,
+        const std::string& part,
+        const std::unordered_map<std::string, std::string>& pathMacroMap
     ) -> Diagnosed<std::string>
     {
         DiagnosticBag diagnosticBag{};
 
-        const bool isMacro = t_part.starts_with('$');
+        const bool isMacro = part.starts_with('$');
         if (!isMacro)
         {
-            return { t_part, diagnosticBag };
+            return { part, diagnosticBag };
         }
 
-        const std::string pathMacro = t_part.substr(1);
+        const std::string pathMacro = part.substr(1);
 
-        const auto macroValueIt = t_pathMacroMap.find(pathMacro);
-        if (macroValueIt == end(t_pathMacroMap))
+        const auto macroValueIt = pathMacroMap.find(pathMacro);
+        if (macroValueIt == end(pathMacroMap))
         {
             diagnosticBag.Add(CreateUndefinedReferenceToPackagePathMacroError(
-                t_fileBuffer,
+                fileBuffer,
                 pathMacro
             ));
 
@@ -300,31 +298,31 @@ namespace Ace
     }
 
     static auto ExpandFilePathParts(
-        const FileBuffer* const t_fileBuffer,
-        const std::vector<std::string>& t_filePathParts,
-        const std::unordered_map<std::string, std::string>& t_pathMacroMap
+        const FileBuffer* const fileBuffer,
+        const std::vector<std::string>& filePathParts,
+        const std::unordered_map<std::string, std::string>& pathMacroMap
     ) -> Diagnosed<FilePathOrFilteredDirectory>
     {
         DiagnosticBag diagnosticBag{};
 
         const auto dgnFirstFilePathPart = ExpandFirstFilePathPart(
-            t_fileBuffer,
-            t_filePathParts.front(),
-            t_pathMacroMap
+            fileBuffer,
+            filePathParts.front(),
+            pathMacroMap
         );
         diagnosticBag.Add(dgnFirstFilePathPart);
 
         const auto dgnLastFilePathPartData = ExpandLastFilePathPart(
-            t_fileBuffer,
-            t_filePathParts.back()
+            fileBuffer,
+            filePathParts.back()
         );
         diagnosticBag.Add(dgnLastFilePathPartData);
 
         std::string path = dgnFirstFilePathPart.Unwrap() + '/';
         std::for_each(
-            begin(t_filePathParts) + 1,
-            end  (t_filePathParts) - 1,
-            [&](const std::string& t_part) { path += t_part + '/'; }
+            begin(filePathParts) + 1,
+            end  (filePathParts) - 1,
+            [&](const std::string& part) { path += part + '/'; }
         );
 
         const bool isFilePath = dgnLastFilePathPartData.Unwrap().OptPath.has_value();
@@ -350,25 +348,25 @@ namespace Ace
     }
 
     static auto SplitFilePath(
-        const std::string& t_filePath
+        const std::string& filePath
     ) -> Expected<std::vector<std::string>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto isPathSeparator = [](const char& t_character) -> bool
+        const auto isPathSeparator = [](const char& character) -> bool
         {
-            return (t_character == '/') || (t_character == '\\');
+            return (character == '/') || (character == '\\');
         };
 
         std::vector<std::string> parts{};
 
-        auto itBegin = begin(t_filePath);
-        auto itEnd   = begin(t_filePath);
+        auto itBegin = begin(filePath);
+        auto itEnd   = begin(filePath);
 
         char character{};
         char lastCharacter{};
 
-        for (; itEnd != end(t_filePath); [&]() { lastCharacter = character; ++itEnd; }())
+        for (; itEnd != end(filePath); [&]() { lastCharacter = character; ++itEnd; }())
         {
             character = *itEnd;
 
@@ -388,12 +386,12 @@ namespace Ace
 
         if (!isPathSeparator(character))
         {
-            parts.emplace_back(itBegin, end(t_filePath));
+            parts.emplace_back(itBegin, end(filePath));
         }
         else
         {
             return diagnosticBag.Add(CreateFilePathEndsWithSeparatorError(
-                t_filePath
+                filePath
             ));
         }
 
@@ -401,19 +399,19 @@ namespace Ace
     }
 
     static auto TransformFilePaths(
-        const FileBuffer* const t_fileBuffer,
-        const std::filesystem::path& t_packageFilePath,
-        const std::vector<std::string>& t_filePaths,
-        const std::unordered_map<std::string, std::string>& t_pathMacroMap
+        const FileBuffer* const fileBuffer,
+        const std::filesystem::path& packageFilePath,
+        const std::vector<std::string>& filePaths,
+        const std::unordered_map<std::string, std::string>& pathMacroMap
     ) -> Diagnosed<std::vector<std::filesystem::path>>
     {
         DiagnosticBag diagnosticBag{};
 
         std::vector<std::vector<std::string>> filePathsParts{};
-        std::for_each(begin(t_filePaths), end(t_filePaths),
-        [&](const std::string& t_filePath)
+        std::for_each(begin(filePaths), end(filePaths),
+        [&](const std::string& filePath)
         {
-            const auto expFilePathParts = SplitFilePath(t_filePath);
+            const auto expFilePathParts = SplitFilePath(filePath);
             diagnosticBag.Add(expFilePathParts);
             if (!expFilePathParts)
             {
@@ -423,16 +421,16 @@ namespace Ace
             filePathsParts.push_back(expFilePathParts.Unwrap());
         });
 
-        const auto packageDirectoryPath = t_packageFilePath.parent_path();
+        const auto packageDirectoryPath = packageFilePath.parent_path();
 
         std::vector<std::filesystem::path> finalFilePaths{};
         std::for_each(begin(filePathsParts), end(filePathsParts),
-        [&](const std::vector<std::string>& t_filePathParts)
+        [&](const std::vector<std::string>& filePathParts)
         {
             const auto dgnFilePathOrFilteredDirectory = ExpandFilePathParts(
-                t_fileBuffer,
-                t_filePathParts,
-                t_pathMacroMap
+                fileBuffer,
+                filePathParts,
+                pathMacroMap
             );
             diagnosticBag.Add(dgnFilePathOrFilteredDirectory);
 
@@ -479,16 +477,16 @@ namespace Ace
     }
 
     static auto ReadFilePath(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
-        const FileBuffer* const t_fileBuffer,
-        const std::filesystem::path& t_filePath
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        const FileBuffer* const fileBuffer,
+        const std::filesystem::path& filePath
     ) -> Expected<const FileBuffer*>
     {
         DiagnosticBag diagnosticBag{};
 
         const auto expFileBuffer = FileBuffer::Read(
-            t_fileBuffer->GetCompilation(),
-            t_filePath
+            fileBuffer->GetCompilation(),
+            filePath
         );
         diagnosticBag.Add(expFileBuffer);
         if (!expFileBuffer)
@@ -496,16 +494,16 @@ namespace Ace
             return diagnosticBag;
         }
 
-        t_sourceBuffers->push_back(expFileBuffer.Unwrap());
+        sourceBuffers->push_back(expFileBuffer.Unwrap());
 
         return { expFileBuffer.Unwrap().get(), diagnosticBag };
     }
 
     static auto CreateDefaultValue(
-        const nlohmann::json::value_t t_type
+        const nlohmann::json::value_t type
     ) -> nlohmann::json
     {
-        switch (t_type)
+        switch (type)
         {
             case nlohmann::json::value_t::null:            return nullptr;
             case nlohmann::json::value_t::object:          return nlohmann::json::object();
@@ -521,99 +519,99 @@ namespace Ace
     }
 
     static auto GetOrCreateProperty(
-        const FileBuffer* const t_fileBuffer,
-        const nlohmann::json& t_json,
-        const std::string& t_namePrefix,
-        const std::string& t_name,
-        const nlohmann::json::value_t t_type
+        const FileBuffer* const fileBuffer,
+        const nlohmann::json& json,
+        const std::string& namePrefix,
+        const std::string& name,
+        const nlohmann::json::value_t type
     ) -> Diagnosed<nlohmann::json>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto prefixedName = t_namePrefix.empty() ?
-            t_name :
-            (t_namePrefix + "." + t_name);
+        const auto prefixedName = namePrefix.empty() ?
+            name :
+            (namePrefix + "." + name);
 
-        if (!t_json.contains(t_name))
+        if (!json.contains(name))
         {
             diagnosticBag.Add(CreateMissingPackagePropertyError(
-                t_fileBuffer,
+                fileBuffer,
                 prefixedName
             ));
-            return { CreateDefaultValue(t_type), diagnosticBag };
+            return { CreateDefaultValue(type), diagnosticBag };
         }
 
-        if (t_json[t_name].type() != t_type)
+        if (json[name].type() != type)
         {
             diagnosticBag.Add(CreateUnexpectedPackagePropertyTypeError(
-                t_fileBuffer,
+                fileBuffer,
                 prefixedName,
-                t_json[t_name].type(),
-                t_type
+                json[name].type(),
+                type
             ));
-            return { CreateDefaultValue(t_type), diagnosticBag };
+            return { CreateDefaultValue(type), diagnosticBag };
         }
 
-        return { t_json[t_name], diagnosticBag };
+        return { json[name], diagnosticBag };
     }
 
     static auto GetOrCreateElement(
-        const FileBuffer* const t_fileBuffer,
-        const nlohmann::json& t_json,
-        const std::string& t_namePrefix,
-        const size_t t_index,
-        const nlohmann::json::value_t t_type
+        const FileBuffer* const fileBuffer,
+        const nlohmann::json& json,
+        const std::string& namePrefix,
+        const size_t index,
+        const nlohmann::json::value_t type
     ) -> Diagnosed<nlohmann::json>
     {
         DiagnosticBag diagnosticBag{};
 
-        ACE_ASSERT(t_index < t_json.size());
+        ACE_ASSERT(index < json.size());
 
-        if (t_json.at(t_index).type() != t_type)
+        if (json.at(index).type() != type)
         {
             diagnosticBag.Add(CreateUnexpectedPackagePropertyTypeError(
-                t_fileBuffer,
-                t_namePrefix + "[" + std::to_string(t_index) + "]",
-                t_json.at(t_index).type(),
-                t_type
+                fileBuffer,
+                namePrefix + "[" + std::to_string(index) + "]",
+                json.at(index).type(),
+                type
             ));
-            return { CreateDefaultValue(t_type), diagnosticBag };
+            return { CreateDefaultValue(type), diagnosticBag };
         }
 
-        return { t_json.at(t_index), diagnosticBag };
+        return { json.at(index), diagnosticBag };
     }
 
     static auto DiagnoseUnexpectedProperties(
-        const FileBuffer* const t_fileBuffer,
-        const nlohmann::json& t_json,
-        const std::string& t_namePrefix,
-        std::vector<std::string> t_expectedNames
+        const FileBuffer* const fileBuffer,
+        const nlohmann::json& json,
+        const std::string& namePrefix,
+        std::vector<std::string> expectedNames
     ) -> Diagnosed<void>
     {
         DiagnosticBag diagnosticBag{};
 
-        for (const auto& nameValuePair : t_json.items())
+        for (const auto& nameValuePair : json.items())
         {
             const auto& name  = nameValuePair.key();
             const auto& value = nameValuePair.value();
 
             const auto matchingNameIt = std::find_if(
-                begin(t_expectedNames),
-                end  (t_expectedNames),
-                [&](const std::string& t_expectedName)
+                begin(expectedNames),
+                end  (expectedNames),
+                [&](const std::string& expectedName)
                 {
-                    return name == t_expectedName;
+                    return name == expectedName;
                 }
             );
-            if (matchingNameIt != end(t_expectedNames))
+            if (matchingNameIt != end(expectedNames))
             {
-                t_expectedNames.erase(matchingNameIt);
+                expectedNames.erase(matchingNameIt);
             }
             else
             {
                 diagnosticBag.Add(CreateUnexpectedPackagePropertyWarning(
-                    t_fileBuffer,
-                    t_namePrefix.empty() ? name : (t_namePrefix + "." + name)
+                    fileBuffer,
+                    namePrefix.empty() ? name : (namePrefix + "." + name)
                 ));
             }
         }
@@ -622,15 +620,15 @@ namespace Ace
     }
 
     static auto ParsePathMacroMap(
-        const FileBuffer* const t_fileBuffer,
-        const nlohmann::json& t_package
+        const FileBuffer* const fileBuffer,
+        const nlohmann::json& package
     ) -> Diagnosed<std::unordered_map<std::string, std::string>>
     {
         DiagnosticBag diagnosticBag{};
 
         const auto dgnPathMacros = GetOrCreateProperty(
-            t_fileBuffer,
-            t_package,
+            fileBuffer,
+            package,
             {},
             Property::PathMacros,
             nlohmann::json::value_t::array
@@ -641,7 +639,7 @@ namespace Ace
         for (size_t i = 0; i < dgnPathMacros.Unwrap().size(); i++)
         {
             const auto dgnPathMacro = GetOrCreateElement(
-                t_fileBuffer,
+                fileBuffer,
                 dgnPathMacros.Unwrap(),
                 Property::PathMacros,
                 i,
@@ -653,7 +651,7 @@ namespace Ace
                 Property::PathMacros + "[" + std::to_string(i) + "]";
 
             diagnosticBag.Add(DiagnoseUnexpectedProperties(
-                t_fileBuffer,
+                fileBuffer,
                 dgnPathMacro.Unwrap(),
                 pathMacroPropertyNamePrefix,
                 {
@@ -663,7 +661,7 @@ namespace Ace
             ));
 
             const auto dgnPathMacroName = GetOrCreateProperty(
-                t_fileBuffer,
+                fileBuffer,
                 dgnPathMacro.Unwrap(),
                 pathMacroPropertyNamePrefix,
                 Property::Name,
@@ -672,7 +670,7 @@ namespace Ace
             diagnosticBag.Add(dgnPathMacroName);
 
             const auto dgnPathMacroValue = GetOrCreateProperty(
-                t_fileBuffer,
+                fileBuffer,
                 dgnPathMacro.Unwrap(),
                 pathMacroPropertyNamePrefix,
                 Property::Value,
@@ -692,18 +690,18 @@ namespace Ace
     }
 
     static auto ParseFiles(
-        const FileBuffer* const t_fileBuffer,
-        const nlohmann::json& t_package,
-        const std::string& t_filesPropertyName
+        const FileBuffer* const fileBuffer,
+        const nlohmann::json& package,
+        const std::string& filesPropertyName
     ) -> Diagnosed<std::vector<std::string>>
     {
         DiagnosticBag diagnosticBag{};
 
         const auto dgnFilesArray = GetOrCreateProperty(
-            t_fileBuffer,
-            t_package,
+            fileBuffer,
+            package,
             {},
-            t_filesPropertyName,
+            filesPropertyName,
             nlohmann::json::value_t::array
         );
         diagnosticBag.Add(dgnFilesArray);
@@ -712,9 +710,9 @@ namespace Ace
         for (size_t i = 0; i < dgnFilesArray.Unwrap().size(); i++)
         {
             const auto dgnFile = GetOrCreateElement(
-                t_fileBuffer,
+                fileBuffer,
                 dgnFilesArray.Unwrap(),
-                t_filesPropertyName,
+                filesPropertyName,
                 i,
                 nlohmann::json::value_t::string
             );
@@ -727,21 +725,21 @@ namespace Ace
     }
 
     static auto ReadFilePaths(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
-        const FileBuffer* const t_fileBuffer,
-        const std::vector<std::filesystem::path>& t_filePaths
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        const FileBuffer* const fileBuffer,
+        const std::vector<std::filesystem::path>& filePaths
     ) -> Diagnosed<std::vector<const FileBuffer*>>
     {
         DiagnosticBag diagnosticBag{};
 
         std::vector<const FileBuffer*> fileBuffers{};
-        std::for_each(begin(t_filePaths), end(t_filePaths),
-        [&](const std::filesystem::path& t_filePath)
+        std::for_each(begin(filePaths), end(filePaths),
+        [&](const std::filesystem::path& filePath)
         {
             const auto expFileBuffer = ReadFilePath(
-                t_sourceBuffers,
-                t_fileBuffer,
-                t_filePath
+                sourceBuffers,
+                fileBuffer,
+                filePath
             );
             diagnosticBag.Add(expFileBuffer);
             if (!expFileBuffer)
@@ -756,16 +754,16 @@ namespace Ace
     }
 
     static auto ParsePackage(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
-        const FileBuffer* const t_fileBuffer
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        const FileBuffer* const fileBuffer
     ) -> Diagnosed<Package>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto package = nlohmann::json::parse(t_fileBuffer->GetBuffer());
+        const auto package = nlohmann::json::parse(fileBuffer->GetBuffer());
 
         diagnosticBag.Add(DiagnoseUnexpectedProperties(
-            t_fileBuffer,
+            fileBuffer,
             package,
             {},
             {
@@ -777,7 +775,7 @@ namespace Ace
         ));
 
         auto dgnName = GetOrCreateProperty(
-            t_fileBuffer,
+            fileBuffer,
             package,
             {},
             Property::Name,
@@ -786,44 +784,44 @@ namespace Ace
         diagnosticBag.Add(dgnName);
 
         const auto dgnPathMacroMap = ParsePathMacroMap(
-            t_fileBuffer,
+            fileBuffer,
             package
         );
         diagnosticBag.Add(dgnPathMacroMap);
 
         const auto dgnSourceFiles = ParseFiles(
-            t_fileBuffer,
+            fileBuffer,
             package,
             Property::SourceFiles
         );
         diagnosticBag.Add(dgnSourceFiles);
 
         const auto dgnDependencyFiles = ParseFiles(
-            t_fileBuffer,
+            fileBuffer,
             package,
             Property::DependencyFiles
         );
         diagnosticBag.Add(dgnDependencyFiles);
 
         const auto dgnSourceFilePaths = TransformFilePaths(
-            t_fileBuffer,
-            t_fileBuffer->GetPath(),
+            fileBuffer,
+            fileBuffer->GetPath(),
             dgnSourceFiles.Unwrap(),
             dgnPathMacroMap.Unwrap()
         );
         diagnosticBag.Add(dgnSourceFilePaths);
 
         const auto dgnDependencyFilePaths = TransformFilePaths(
-            t_fileBuffer,
-            t_fileBuffer->GetPath(),
+            fileBuffer,
+            fileBuffer->GetPath(),
             dgnDependencyFiles.Unwrap(),
             dgnPathMacroMap.Unwrap()
         );
         diagnosticBag.Add(dgnDependencyFilePaths);
 
         const auto dgnSourceFileBuffers = ReadFilePaths(
-            t_sourceBuffers,
-            t_fileBuffer,
+            sourceBuffers,
+            fileBuffer,
             dgnSourceFilePaths.Unwrap()
         );
         diagnosticBag.Add(dgnSourceFileBuffers);
@@ -841,8 +839,8 @@ namespace Ace
     }
 
     auto Package::Parse(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const t_sourceBuffers,
-        const FileBuffer* const t_fileBuffer
+        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        const FileBuffer* const fileBuffer
     ) -> Expected<Package>
     {
         DiagnosticBag diagnosticBag{};
@@ -850,8 +848,8 @@ namespace Ace
         try
         {
             const auto dgnPackage = ParsePackage(
-                t_sourceBuffers,
-                t_fileBuffer
+                sourceBuffers,
+                fileBuffer
             );
             diagnosticBag.Add(dgnPackage);
 
@@ -860,7 +858,7 @@ namespace Ace
         catch (const nlohmann::json::exception& exception)
         {
             return diagnosticBag.Add(CreateJsonError(
-                t_fileBuffer,
+                fileBuffer,
                 exception
             ));
         }

@@ -13,12 +13,12 @@
 namespace Ace
 {
     ReturnStmtNode::ReturnStmtNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const std::optional<std::shared_ptr<const IExprNode>>& t_optExpr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_OptExpr{ t_optExpr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const std::optional<std::shared_ptr<const IExprNode>>& optExpr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_OptExpr{ optExpr }
     {
     }
 
@@ -45,7 +45,7 @@ namespace Ace
     }
 
     auto ReturnStmtNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const ReturnStmtNode>
     {
         const auto clonedOptExpr = [&]() -> std::optional<std::shared_ptr<const IExprNode>>
@@ -55,29 +55,29 @@ namespace Ace
                 return std::nullopt;
             }
 
-            return m_OptExpr.value()->CloneInScopeExpr(t_scope);
+            return m_OptExpr.value()->CloneInScopeExpr(scope);
         }();
 
         return std::make_shared<const ReturnStmtNode>(
             m_SourceLocation,
-            t_scope,
+            scope,
             clonedOptExpr
         );
     }
 
     auto ReturnStmtNode::CloneInScopeStmt(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto ReturnStmtNode::CreateBound() const -> Expected<std::shared_ptr<const ReturnStmtBoundNode>>
     {
         ACE_TRY(boundOptExpr, TransformExpectedOptional(m_OptExpr,
-        [](const std::shared_ptr<const IExprNode>& t_expr)
+        [](const std::shared_ptr<const IExprNode>& expr)
         {
-            return t_expr->CreateBoundExpr();
+            return expr->CreateBoundExpr();
         }));
 
         return std::make_shared<const ReturnStmtBoundNode>(

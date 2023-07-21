@@ -12,10 +12,10 @@
 namespace Ace
 {
     AttributeBoundNode::AttributeBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const StructConstructionExprBoundNode>& t_structConstructionExpr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_StructConstructionExpr{ t_structConstructionExpr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const StructConstructionExprBoundNode>& structConstructionExpr
+    ) : m_SourceLocation{ sourceLocation },
+        m_StructConstructionExpr{ structConstructionExpr }
     {
     }
 
@@ -39,7 +39,7 @@ namespace Ace
     }
 
     auto AttributeBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const AttributeBoundNode>>>
     {
         ACE_TRY(mchCheckedStructureConstructionExpr, m_StructConstructionExpr->GetOrCreateTypeChecked({}));
@@ -56,7 +56,7 @@ namespace Ace
     }
 
     auto AttributeBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const AttributeBoundNode>>
     {
         const auto mchLowewredStructConstructionExpr =

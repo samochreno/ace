@@ -12,33 +12,31 @@
 namespace Ace
 {
     static auto CreateStmt(
-        const std::shared_ptr<const IStmtBoundNode>& t_stmtNode
+        const std::shared_ptr<const IStmtBoundNode>& stmtNode
     ) -> Expected<ControlFlowStmt>
     {
-        auto* const stmtNode = t_stmtNode.get();
-
         ControlFlowStmt self{};
 
-        if (const auto* const labelStmt = dynamic_cast<const LabelStmtBoundNode*>(stmtNode))
+        if (const auto* const labelStmt = dynamic_cast<const LabelStmtBoundNode*>(stmtNode.get()))
         {
             self.Kind = ControlFlowStmtKind::Label;
             self.LabelSymbol = labelStmt->GetLabelSymbol();
         }
-        else if (const auto* const normalJumpStmt = dynamic_cast<const NormalJumpStmtBoundNode*>(stmtNode))
+        else if (const auto* const normalJumpStmt = dynamic_cast<const NormalJumpStmtBoundNode*>(stmtNode.get()))
         {
             self.Kind = ControlFlowStmtKind::NormalJump;
             self.LabelSymbol = normalJumpStmt->GetLabelSymbol();
         }
-        else if (const auto* const conditionalJumpStmt = dynamic_cast<const ConditionalJumpStmtBoundNode*>(stmtNode))
+        else if (const auto* const conditionalJumpStmt = dynamic_cast<const ConditionalJumpStmtBoundNode*>(stmtNode.get()))
         {
             self.Kind = ControlFlowStmtKind::ConditionalJump;
             self.LabelSymbol = conditionalJumpStmt->GetLabelSymbol();
         }
-        else if (const auto* const returnStmt = dynamic_cast<const ReturnStmtBoundNode*>(stmtNode))
+        else if (const auto* const returnStmt = dynamic_cast<const ReturnStmtBoundNode*>(stmtNode.get()))
         {
             self.Kind = ControlFlowStmtKind::Return;
         }
-        else if (const auto* const exitStmt = dynamic_cast<const ExitStmtBoundNode*>(stmtNode))
+        else if (const auto* const exitStmt = dynamic_cast<const ExitStmtBoundNode*>(stmtNode.get()))
         {
             self.Kind = ControlFlowStmtKind::Exit;
         }
@@ -51,17 +49,19 @@ namespace Ace
     }
 
     ControlFlowAnalysis::ControlFlowAnalysis(
-        const std::shared_ptr<const BlockStmtBoundNode>& t_blockStmtNode
+        const std::shared_ptr<const BlockStmtBoundNode>& blockStmtNode
     )
     {
-        const auto stmtNodes = t_blockStmtNode->CreateExpanded();
+        const auto stmtNodes = blockStmtNode->CreateExpanded();
 
         std::for_each(begin(stmtNodes), end(stmtNodes),
-        [&](const std::shared_ptr<const IStmtBoundNode>& t_stmtNode)
+        [&](const std::shared_ptr<const IStmtBoundNode>& stmtNode)
         {
-            const auto expStmt = CreateStmt(t_stmtNode);
+            const auto expStmt = CreateStmt(stmtNode);
             if (!expStmt)
+            {
                 return;
+            }
 
             m_Stmts.push_back(expStmt.Unwrap());
         });
@@ -73,17 +73,17 @@ namespace Ace
     }
 
     auto ControlFlowAnalysis::FindLabelStmt(
-        const LabelSymbol* const t_labelSymbol
+        const LabelSymbol* const labelSymbol
     ) const -> std::vector<ControlFlowStmt>::const_iterator
     {
         const auto matchingLabelStmtIt = std::find_if(
             begin(m_Stmts),
             end  (m_Stmts),
-            [&](const ControlFlowStmt& t_stmt)
+            [&](const ControlFlowStmt& stmt)
             {
                 return 
-                    (t_stmt.Kind == ControlFlowStmtKind::Label) &&
-                    (t_stmt.LabelSymbol == t_labelSymbol);
+                    (stmt.Kind == ControlFlowStmtKind::Label) &&
+                    (stmt.LabelSymbol == labelSymbol);
             }
         );
 
@@ -92,31 +92,31 @@ namespace Ace
     }
 
     static auto IsEnd(
-        const std::vector<std::vector<ControlFlowStmt>::const_iterator>& t_ends,
-        const std::vector<ControlFlowStmt>::const_iterator t_stmtIt
+        const std::vector<std::vector<ControlFlowStmt>::const_iterator>& ends,
+        const std::vector<ControlFlowStmt>::const_iterator stmtIt
     ) -> bool
     {
-        const auto matchingEndIt = std::find_if(begin(t_ends), end(t_ends),
-        [&](const std::vector<ControlFlowStmt>::const_iterator t_end)
+        const auto matchingEndIt = std::find_if(begin(ends), end(ends),
+        [&](const std::vector<ControlFlowStmt>::const_iterator end)
         {
-            return t_stmtIt == t_end;
+            return stmtIt == end;
         });
 
-        return matchingEndIt != end(t_ends);
+        return matchingEndIt != end(ends);
     }
 
     auto ControlFlowAnalysis::IsEndReachableWithoutReturn(
-        const std::vector<ControlFlowStmt>::const_iterator t_begin,
-        const std::vector<std::vector<ControlFlowStmt>::const_iterator>& t_ends
+        const std::vector<ControlFlowStmt>::const_iterator begin,
+        const std::vector<std::vector<ControlFlowStmt>::const_iterator>& ends
     ) const -> bool
     {
         for (
-            auto stmtIt = t_begin;
+            auto stmtIt = begin;
             stmtIt != end(m_Stmts);
             ++stmtIt
             )
         {
-            if (IsEnd(t_ends, stmtIt))
+            if (IsEnd(ends, stmtIt))
             {
                 return false;
             }
@@ -136,12 +136,12 @@ namespace Ace
                         stmt.LabelSymbol
                     );
 
-                    auto ends = t_ends;
-                    ends.push_back(stmtIt);
+                    auto newEnds = ends;
+                    newEnds.push_back(stmtIt);
 
                     return IsEndReachableWithoutReturn(
                         labelStmtIt,
-                        ends
+                        newEnds
                     );
                 }
 
@@ -151,7 +151,7 @@ namespace Ace
                         stmt.LabelSymbol
                     );
 
-                    auto whenTrueEnds = t_ends;
+                    auto whenTrueEnds = ends;
                     whenTrueEnds.push_back(stmtIt);
 
                     const bool whenTrue = IsEndReachableWithoutReturn(
@@ -161,7 +161,7 @@ namespace Ace
 
                     const bool whenFalse = IsEndReachableWithoutReturn(
                         stmtIt + 1,
-                        t_ends
+                        ends
                     );
 
                     return whenTrue || whenFalse;

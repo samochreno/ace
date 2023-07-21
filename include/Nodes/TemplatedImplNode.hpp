@@ -23,11 +23,11 @@ namespace Ace
     {
     public:
         TemplatedImplNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_selfScope,
-            const SymbolName& t_typeTemplateName,
-            const std::vector<std::shared_ptr<const FunctionNode>>& t_functions,
-            const std::vector<std::shared_ptr<const FunctionTemplateNode>>& t_functionTemplates
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& selfScope,
+            const SymbolName& typeTemplateName,
+            const std::vector<std::shared_ptr<const FunctionNode>>& functions,
+            const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates
         );
         virtual ~TemplatedImplNode() = default;
 
@@ -35,7 +35,7 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const TemplatedImplNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>> final;
 

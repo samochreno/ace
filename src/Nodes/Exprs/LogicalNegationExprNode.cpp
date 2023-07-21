@@ -11,10 +11,10 @@
 namespace Ace
 {
     LogicalNegationExprNode::LogicalNegationExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprNode>& t_expr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprNode>& expr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr }
     {
     }
 
@@ -38,20 +38,20 @@ namespace Ace
     }
 
     auto LogicalNegationExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const LogicalNegationExprNode>
     {
         return std::make_shared<const LogicalNegationExprNode>(
             m_SourceLocation,
-            m_Expr->CloneInScopeExpr(t_scope)
+            m_Expr->CloneInScopeExpr(scope)
         );
     }
 
     auto LogicalNegationExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto LogicalNegationExprNode::CreateBound() const -> Expected<std::shared_ptr<const LogicalNegationExprBoundNode>>

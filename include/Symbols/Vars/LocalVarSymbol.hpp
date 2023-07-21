@@ -14,9 +14,9 @@ namespace Ace
     {
     public:
         LocalVarSymbol(
-            const std::shared_ptr<Scope>& t_scope,
-            const Identifier& t_name,
-            ITypeSymbol* const t_type
+            const std::shared_ptr<Scope>& scope,
+            const Identifier& name,
+            ITypeSymbol* const type
         );
         virtual ~LocalVarSymbol() = default;
 

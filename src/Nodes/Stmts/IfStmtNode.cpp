@@ -14,14 +14,14 @@
 namespace Ace
 {
     IfStmtNode::IfStmtNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const std::vector<std::shared_ptr<const IExprNode>>& t_conditions,
-        const std::vector<std::shared_ptr<const BlockStmtNode>>& t_bodies
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Conditions{ t_conditions },
-        m_Bodies{ t_bodies }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const std::vector<std::shared_ptr<const IExprNode>>& conditions,
+        const std::vector<std::shared_ptr<const BlockStmtNode>>& bodies
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Conditions{ conditions },
+        m_Bodies{ bodies }
 
     {
     }
@@ -47,7 +47,7 @@ namespace Ace
     }
 
     auto IfStmtNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IfStmtNode>
     {
         std::vector<std::shared_ptr<const IExprNode>> clonedConditions{};
@@ -55,9 +55,9 @@ namespace Ace
             begin(m_Conditions),
             end  (m_Conditions),
             back_inserter(clonedConditions),
-            [&](const std::shared_ptr<const IExprNode>& t_condition)
+            [&](const std::shared_ptr<const IExprNode>& condition)
             {
-                return t_condition->CloneInScopeExpr(t_scope);
+                return condition->CloneInScopeExpr(scope);
             }
         );
 
@@ -66,39 +66,39 @@ namespace Ace
             begin(m_Bodies),
             end  (m_Bodies),
             back_inserter(clonedBodies),
-            [&](const std::shared_ptr<const BlockStmtNode>& t_body)
+            [&](const std::shared_ptr<const BlockStmtNode>& body)
             {
-                return t_body->CloneInScope(t_scope);
+                return body->CloneInScope(scope);
             }
         );
 
         return std::make_shared<const IfStmtNode>(
             m_SourceLocation,
-            t_scope,
+            scope,
             clonedConditions,
             clonedBodies
         );
     }
 
     auto IfStmtNode::CloneInScopeStmt(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto IfStmtNode::CreateBound() const -> Expected<std::shared_ptr<const IfStmtBoundNode>>
     {
         ACE_TRY(boundConditions, TransformExpectedVector(m_Conditions,
-        [](const std::shared_ptr<const IExprNode>& t_condition)
+        [](const std::shared_ptr<const IExprNode>& condition)
         {
-            return t_condition->CreateBoundExpr();
+            return condition->CreateBoundExpr();
         }));
 
         ACE_TRY(boundBodies, TransformExpectedVector(m_Bodies,
-        [](const std::shared_ptr<const BlockStmtNode>& t_body)
+        [](const std::shared_ptr<const BlockStmtNode>& body)
         {
-            return t_body->CreateBound();
+            return body->CreateBound();
         }));
 
         return std::make_shared<const IfStmtBoundNode>(

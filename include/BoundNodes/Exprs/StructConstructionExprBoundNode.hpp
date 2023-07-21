@@ -29,10 +29,10 @@ namespace Ace
     {
     public:
         StructConstructionExprBoundNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            StructTypeSymbol* const t_structSymbol,
-            const std::vector<StructConstructionExprBoundArg>& t_args
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            StructTypeSymbol* const structSymbol,
+            const std::vector<StructConstructionExprBoundArg>& args
         );
         virtual ~StructConstructionExprBoundNode() = default;
 
@@ -40,18 +40,18 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const StructConstructionExprBoundNode>>> final;
         auto GetOrCreateTypeCheckedExpr(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const StructConstructionExprBoundNode>> final;
         auto GetOrCreateLoweredExpr(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>> final;
-        auto Emit(Emitter& t_emitter) const -> ExprEmitResult final;
+        auto Emit(Emitter& emitter) const -> ExprEmitResult final;
 
         auto GetTypeInfo() const -> TypeInfo final;
 

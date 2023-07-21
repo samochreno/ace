@@ -16,18 +16,18 @@
 namespace Ace
 {
     StructTypeNode::StructTypeNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_selfScope,
-        const Identifier& t_name,
-        const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-        const AccessModifier t_accessModifier,
-        const std::vector<std::shared_ptr<const InstanceVarNode>>& t_vars
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_SelfScope{ t_selfScope },
-        m_Name{ t_name },
-        m_Attributes{ t_attributes },
-        m_AccessModifier{ t_accessModifier },
-        m_Vars{ t_vars }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& selfScope,
+        const Identifier& name,
+        const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
+        const AccessModifier accessModifier,
+        const std::vector<std::shared_ptr<const InstanceVarNode>>& vars
+    ) : m_SourceLocation{ sourceLocation },
+        m_SelfScope{ selfScope },
+        m_Name{ name },
+        m_Attributes{ attributes },
+        m_AccessModifier{ accessModifier },
+        m_Vars{ vars }
     {
     }
 
@@ -57,19 +57,19 @@ namespace Ace
     }
 
     auto StructTypeNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const StructTypeNode>
     {
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto selfScope = scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const AttributeNode>> clonedAttributes{};
         std::transform(
             begin(m_Attributes),
             end  (m_Attributes),
             back_inserter(clonedAttributes),
-            [&](const std::shared_ptr<const AttributeNode>& t_attribute)
+            [&](const std::shared_ptr<const AttributeNode>& attribute)
             {
-                return t_attribute->CloneInScope(t_scope);
+                return attribute->CloneInScope(scope);
             }
         );
 
@@ -78,9 +78,9 @@ namespace Ace
             begin(m_Vars),
             end  (m_Vars),
             back_inserter(clonedVars),
-            [&](const std::shared_ptr<const InstanceVarNode>& t_var)
+            [&](const std::shared_ptr<const InstanceVarNode>& var)
             {
-                return t_var->CloneInScope(selfScope);
+                return var->CloneInScope(selfScope);
             }
         );
 
@@ -95,24 +95,24 @@ namespace Ace
     }
 
     auto StructTypeNode::CloneInScopeType(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const ITypeNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto StructTypeNode::CreateBound() const -> Expected<std::shared_ptr<const StructTypeBoundNode>>
     {
         ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeNode>& t_attribute)
+        [](const std::shared_ptr<const AttributeNode>& attribute)
         {
-            return t_attribute->CreateBound();
+            return attribute->CreateBound();
         }));
 
         ACE_TRY(boundVars, TransformExpectedVector(m_Vars,
-        [](const std::shared_ptr<const InstanceVarNode>& t_var)
+        [](const std::shared_ptr<const InstanceVarNode>& var)
         {
-            return t_var->CreateBound();
+            return var->CreateBound();
         }));
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<StructTypeSymbol>(

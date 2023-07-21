@@ -7,17 +7,17 @@
 namespace Ace
 {
     TemplatedImplSymbol::TemplatedImplSymbol(
-        const std::shared_ptr<Scope>& t_scope,
-        const std::shared_ptr<Scope>& t_selfScope,
-        TypeTemplateSymbol* const t_implementedTypeTemplate
-    ) : m_Scope{ t_scope },
-        m_SelfScope{ t_selfScope },
+        const std::shared_ptr<Scope>& scope,
+        const std::shared_ptr<Scope>& selfScope,
+        TypeTemplateSymbol* const implementedTypeTemplate
+    ) : m_Scope{ scope },
+        m_SelfScope{ selfScope },
         m_Name
         {
-            t_implementedTypeTemplate->GetName().SourceLocation,
+            implementedTypeTemplate->GetName().SourceLocation,
             SpecialIdentifier::CreateAnonymous()
         },
-        m_ImplementedTypeTemplate{ t_implementedTypeTemplate }
+        m_ImplementedTypeTemplate{ implementedTypeTemplate }
     {
     }
 

@@ -11,14 +11,14 @@
 namespace Ace
 {
     LiteralExprNode::LiteralExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const LiteralKind t_kind,
-        const std::string& t_string
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Kind{ t_kind },
-        m_String{ t_string }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const LiteralKind kind,
+        const std::string& string
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Kind{ kind },
+        m_String{ string }
     {
     }
 
@@ -38,22 +38,22 @@ namespace Ace
     }
 
     auto LiteralExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const LiteralExprNode>
     {
         return std::make_shared<const LiteralExprNode>(
             m_SourceLocation,
-            t_scope,
+            scope,
             m_Kind,
             m_String
         );
     }
 
     auto LiteralExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto LiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const LiteralExprBoundNode>>

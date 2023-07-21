@@ -28,14 +28,14 @@ namespace Ace
     class Compilation;
 
     auto IsSymbolVisibleFromScope(
-        ISymbol* const t_symbol,
-        const std::shared_ptr<const Scope>& t_scope
+        ISymbol* const symbol,
+        const std::shared_ptr<const Scope>& scope
     ) -> bool;
 
     template<typename TSymbol>
-    auto IsCorrectSymbolType(const ISymbol* const t_symbol) -> bool
+    auto IsCorrectSymbolType(const ISymbol* const symbol) -> bool
     {
-        return dynamic_cast<const TSymbol*>(t_symbol) != nullptr;
+        return dynamic_cast<const TSymbol*>(symbol) != nullptr;
     }
 
     template<typename TSymbol>
@@ -44,19 +44,19 @@ namespace Ace
         return std::is_base_of_v<ITemplateSymbol, TSymbol>;
     }
 
-    auto GetSymbolCategory(ISymbol* const t_symbol) -> SymbolCategory;
+    auto GetSymbolCategory(ISymbol* const symbol) -> SymbolCategory;
 
     struct SymbolResolutionData
     {
         SymbolResolutionData(
-            const std::shared_ptr<const Scope>& t_resolvingFromScope,
-            const std::vector<SymbolNameSection>::const_iterator t_nameSectionsBegin,
-            const std::vector<SymbolNameSection>::const_iterator t_nameSectionsEnd,
-            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes,
-            const std::function<bool(const ISymbol* const)>& t_isCorrectSymbolType,
-            const std::vector<std::shared_ptr<const Scope>>& t_scopes,
-            const std::vector<ITypeSymbol*>& t_implTemplateArgs,
-            const bool t_isSymbolTemplate
+            const std::shared_ptr<const Scope>& resolvingFromScope,
+            const std::vector<SymbolNameSection>::const_iterator nameSectionsBegin,
+            const std::vector<SymbolNameSection>::const_iterator nameSectionsEnd,
+            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes,
+            const std::function<bool(const ISymbol* const)>& isCorrectSymbolType,
+            const std::vector<std::shared_ptr<const Scope>>& scopes,
+            const std::vector<ITypeSymbol*>& implTemplateArgs,
+            const bool isTemplate
         );
 
         std::shared_ptr<const Scope> ResolvingFromScope{};
@@ -66,7 +66,7 @@ namespace Ace
         std::function<bool(const ISymbol* const)> IsCorrectSymbolType{};
         std::vector<std::shared_ptr<const Scope>> Scopes{};
         std::vector<ITypeSymbol*> ImplTemplateArgs{};
-        bool IsSymbolTemplate{};
+        bool IsTemplate{};
         bool IsLastNameSection{};
         std::string Name{};
         std::string TemplateName{};
@@ -76,7 +76,7 @@ namespace Ace
     {
     public:
         GlobalScope();
-        GlobalScope(const Compilation* const t_compilation);
+        GlobalScope(const Compilation* const compilation);
         ~GlobalScope();
 
         auto Unwrap() const -> const std::shared_ptr<Scope>&;
@@ -99,81 +99,81 @@ namespace Ace
         auto FindModule() const -> std::optional<ModuleSymbol*>;
 
         auto GetOrCreateChild(
-            const std::optional<std::string>& t_optName
+            const std::optional<std::string>& optName
         ) -> std::shared_ptr<Scope>;
         auto HasChild(
-            const std::shared_ptr<const Scope>& t_scope
+            const std::shared_ptr<const Scope>& scope
         ) const -> bool;
 
         template<typename TSymbol>
         static auto DefineSymbol(
-            std::unique_ptr<TSymbol>&& t_symbol
+            std::unique_ptr<TSymbol>&& ownedSymbol
         ) -> Expected<TSymbol*>
         {
-            auto* const symbol = t_symbol.get();
+            auto* const symbol = ownedSymbol.get();
             const auto scope = symbol->GetScope();
             ACE_TRY_ASSERT(scope->CanDefineSymbol(symbol));
             scope->m_SymbolMap[symbol->GetName().String].push_back(
-                std::move(t_symbol)
+                std::move(ownedSymbol)
             );
             return symbol;
         }
         static auto DefineSymbol(
-            const ISymbolCreatable* const t_creatable
+            const ISymbolCreatable* const creatable
         ) -> Expected<ISymbol*>;
         static auto RemoveSymbol(
-            ISymbol* const t_symbol
+            ISymbol* const symbol
         ) -> void;
 
         auto DefineAssociation(
-            const std::shared_ptr<Scope>& t_association
+            const std::shared_ptr<Scope>& association
         ) -> void;
 
         static auto CreateArgTypes(
-            ITypeSymbol* const t_argType
+            ITypeSymbol* const argType
         ) -> std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>;
         static auto CreateArgTypes(
-            const std::vector<ITypeSymbol*>& t_argTypes
+            const std::vector<ITypeSymbol*>& argTypes
         ) -> std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>;
 
         template<typename TSymbol>
         auto ResolveStaticSymbol(
-            const Identifier& t_name
+            const Identifier& name
         ) const -> Expected<TSymbol*>
         {
-            return ResolveStaticSymbol<TSymbol>(t_name, {});
+            return ResolveStaticSymbol<TSymbol>(name, {});
         }
         template<typename TSymbol>
         auto ResolveStaticSymbol(
-            const Identifier& t_name,
-            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes
+            const Identifier& name,
+            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
             const SymbolName symbolName
             {
-                SymbolNameSection{ t_name },
+                SymbolNameSection{ name },
                 SymbolNameResolutionScope::Local,
             };
 
             return ResolveStaticSymbol<TSymbol>(
                 symbolName,
-                t_optArgTypes
+                optArgTypes
             );
         }
         template<typename TSymbol>
         auto ResolveStaticSymbol(
-            const SymbolName& t_name
+            const SymbolName& name
         ) const -> Expected<TSymbol*>
         {
-            return ResolveStaticSymbol<TSymbol>(t_name, {});
+            return ResolveStaticSymbol<TSymbol>(name, {});
         }
         template<typename TSymbol>
         auto ResolveStaticSymbol(
-            const SymbolName& t_name,
-            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes
+            const SymbolName& name,
+            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
-            ACE_TRY(startScope, GetStaticSymbolResolutionStartScope(t_name));
+            ACE_TRY(startScope, GetStaticSymbolResolutionStartScope(name));
 
             std::vector<std::shared_ptr<const Scope>> startScopes{};
             startScopes.push_back(startScope);
@@ -185,9 +185,9 @@ namespace Ace
 
             ACE_TRY(symbol, ResolveSymbolInScopes(SymbolResolutionData{
                 shared_from_this(),
-                t_name.Sections.begin(),
-                t_name.Sections.end(),
-                t_optArgTypes,
+                name.Sections.begin(),
+                name.Sections.end(),
+                optArgTypes,
                 IsCorrectSymbolType<TSymbol>,
                 startScopes,
                 GetStaticSymbolResolutionImplTemplateArgs(shared_from_this()),
@@ -206,35 +206,35 @@ namespace Ace
 
         template<typename TSymbol>
         auto ResolveInstanceSymbol(
-            ITypeSymbol* const t_selfType,
-            const SymbolNameSection& t_name
+            ITypeSymbol* const selfType,
+            const SymbolNameSection& name
         ) const -> Expected<TSymbol*>
         {
             return ResolveInstanceSymbol<TSymbol>(
-                t_selfType,
-                t_name,
+                selfType,
+                name,
                 {}
             );
         }
         template<typename TSymbol>
         auto ResolveInstanceSymbol(
-            ITypeSymbol* const t_selfType,
-            const SymbolNameSection& t_name,
-            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes
+            ITypeSymbol* const selfType,
+            const SymbolNameSection& name,
+            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
-            const std::vector nameSections{ t_name };
+            const std::vector nameSections{ name };
 
-            const auto scopes = GetInstanceSymbolResolutionScopes(t_selfType);
+            const auto scopes = GetInstanceSymbolResolutionScopes(selfType);
 
             ACE_TRY(symbol, ResolveSymbolInScopes({
                 shared_from_this(),
                 nameSections.begin(),
                 nameSections.end(),
-                t_optArgTypes,
+                optArgTypes,
                 IsCorrectSymbolType<TSymbol>,
                 scopes,
-                CollectInstanceSymbolResolutionImplTemplateArgs(t_selfType),
+                CollectInstanceSymbolResolutionImplTemplateArgs(selfType),
                 IsTemplate<TSymbol>()
             }));
 
@@ -250,49 +250,49 @@ namespace Ace
 
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const Identifier& t_name
+            const Identifier& name
         ) const -> Expected<TSymbol*>
         {
-            return ExclusiveResolveSymbol<TSymbol>(t_name, {});
+            return ExclusiveResolveSymbol<TSymbol>(name, {});
         }
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const Identifier& t_name,
-            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes
+            const Identifier& name,
+            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
             return ExclusiveResolveSymbol<TSymbol>(
-                t_name,
-                t_optArgTypes,
+                name,
+                optArgTypes,
                 {},
                 {}
             );
         }
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const Identifier& t_name,
-            const std::vector<ITypeSymbol*>& t_implTemplateArgs,
-            const std::vector<ITypeSymbol*>& t_templateArgs
+            const Identifier& name,
+            const std::vector<ITypeSymbol*>& implTemplateArgs,
+            const std::vector<ITypeSymbol*>& templateArgs
         ) const -> Expected<TSymbol*>
         {
             return ExclusiveResolveSymbol<TSymbol>(
-                t_name,
+                name,
                 {},
-                t_implTemplateArgs,
-                t_templateArgs
+                implTemplateArgs,
+                templateArgs
             );
         }
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const Identifier& t_name,
-            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes,
-            const std::vector<ITypeSymbol*>& t_implTemplateArgs,
-            const std::vector<ITypeSymbol*>& t_templateArgs
+            const Identifier& name,
+            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes,
+            const std::vector<ITypeSymbol*>& implTemplateArgs,
+            const std::vector<ITypeSymbol*>& templateArgs
         ) const -> Expected<TSymbol*>
         {
             std::vector<SymbolNameSection> nameSections
             { 
-                SymbolNameSection{ t_name }
+                SymbolNameSection{ name }
             };
 
             const std::vector<std::shared_ptr<const Scope>> scopes
@@ -305,14 +305,14 @@ namespace Ace
                 shared_from_this(),
                 nameSections.begin(),
                 nameSections.end(),
-                t_optArgTypes,
+                optArgTypes,
                 IsCorrectSymbolType<TSymbol>,
                 scopes,
-                t_implTemplateArgs,
+                implTemplateArgs,
                 IsTemplate<TSymbol>()
             };
 
-            ACE_TRY(symbol, ResolveSymbolInScopes(data, t_templateArgs));
+            ACE_TRY(symbol, ResolveSymbolInScopes(data, templateArgs));
 
             auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
             ACE_TRY_ASSERT(castedSymbol);
@@ -326,16 +326,18 @@ namespace Ace
             std::vector<TSymbol*> symbols{};
 
             std::for_each(begin(m_SymbolMap), end(m_SymbolMap),
-            [&](const std::pair<const std::string&, const std::vector<std::unique_ptr<ISymbol>>&>& t_pair)
+            [&](const std::pair<const std::string&, const std::vector<std::unique_ptr<ISymbol>>&>& pair)
             {
-                std::for_each(begin(t_pair.second), end(t_pair.second),
-                [&](const std::unique_ptr<ISymbol>& t_symbol)
+                std::for_each(begin(pair.second), end(pair.second),
+                [&](const std::unique_ptr<ISymbol>& ownedSymbol)
                 {
                     auto* const symbol = dynamic_cast<TSymbol*>(
-                        t_symbol.get()
+                        ownedSymbol.get()
                     );
                     if (!symbol)
+                    {
                         return;
+                    }
 
                     symbols.push_back(symbol);
                 });
@@ -349,9 +351,9 @@ namespace Ace
             auto symbols = CollectSymbols<TSymbol>();
 
             std::for_each(begin(m_Children), end(m_Children),
-            [&](const std::weak_ptr<Scope>& t_child)
+            [&](const std::weak_ptr<Scope>& child)
             {
-                const auto childSymbols = t_child.lock()->CollectSymbolsRecursive<TSymbol>();
+                const auto childSymbols = child.lock()->CollectSymbolsRecursive<TSymbol>();
                 symbols.insert(
                     end(symbols), 
                     begin(childSymbols), 
@@ -366,87 +368,87 @@ namespace Ace
         auto CollectAllDefinedSymbolsRecursive() const -> std::vector<ISymbol*>;
 
         static auto ResolveOrInstantiateTemplateInstance(
-            const Compilation* const t_compilation,
-            ITemplateSymbol* const t_template,
-            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& t_optArgTypes,
-            const std::vector<ITypeSymbol*>& t_implTemplateArgs,
-            const std::vector<ITypeSymbol*>& t_templateArgs
+            const Compilation* const compilation,
+            ITemplateSymbol* const t3mplate,
+            const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes,
+            const std::vector<ITypeSymbol*>& implTemplateArgs,
+            const std::vector<ITypeSymbol*>& templateArgs
         ) -> Expected<ISymbol*>;
 
         auto CollectTemplateArgs() const -> std::vector<ITypeSymbol*>;
         auto CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*>;
 
         auto DefineTemplateArgAliases(
-            const std::vector<Identifier>& t_implTemplateParamNames,
-            const std::vector<ITypeSymbol*> t_implTemplateArgs,
-            const std::vector<Identifier>& t_templateParamNames,
-            const std::vector<ITypeSymbol*> t_templateArgs
+            const std::vector<Identifier>& implTemplateParamNames,
+            const std::vector<ITypeSymbol*> implTemplateArgs,
+            const std::vector<Identifier>& templateParamNames,
+            const std::vector<ITypeSymbol*> templateArgs
         ) -> Expected<void>;
 
     private:
-        Scope(const Compilation* const t_compilation);
+        Scope(const Compilation* const compilation);
         auto Clear() -> void;
 
         Scope(
-            const Compilation* const t_compilation,
-            const std::optional<std::string>& t_optName,
-            const std::optional<std::shared_ptr<Scope>>& t_optParent
+            const Compilation* const compilation,
+            const std::optional<std::string>& optName,
+            const std::optional<std::shared_ptr<Scope>>& optParent
         );
 
-        auto AddChild(const std::optional<std::string>& t_optName) -> std::shared_ptr<Scope>;
+        auto AddChild(const std::optional<std::string>& optName) -> std::shared_ptr<Scope>;
 
-        auto CanDefineSymbol(const ISymbol* const t_symbol) -> bool;
+        auto CanDefineSymbol(const ISymbol* const symbol) -> bool;
         auto GetDefinedSymbol(
-            const std::string& t_name,
-            const std::vector<ITypeSymbol*>& t_templateArgs,
-            const std::vector<ITypeSymbol*>& t_implTemplateArgs
+            const std::string& name,
+            const std::vector<ITypeSymbol*>& templateArgs,
+            const std::vector<ITypeSymbol*>& implTemplateArgs
         ) -> std::optional<ISymbol*>;
 
         static auto ResolveSymbolInScopes(
-            const SymbolResolutionData& t_data
+            const SymbolResolutionData& data
         ) -> Expected<ISymbol*>;
         static auto ResolveSymbolInScopes(
-            const SymbolResolutionData& t_data,
-            const std::vector<ITypeSymbol*>& t_templateArgs
+            const SymbolResolutionData& data,
+            const std::vector<ITypeSymbol*>& templateArgs
         ) -> Expected<ISymbol*>;
 
         auto CollectMatchingSymbols(
-            const SymbolResolutionData& t_data,
-            const std::vector<ITypeSymbol*>& t_templateArgs
+            const SymbolResolutionData& data,
+            const std::vector<ITypeSymbol*>& templateArgs
         ) const -> std::vector<ISymbol*>;
         auto CollectMatchingNormalSymbols(
-            const SymbolResolutionData& t_data,
-        const std::vector<ITypeSymbol*>& t_templateArgs,
-            const std::vector<std::unique_ptr<ISymbol>>& t_matchingNameSymbols
+            const SymbolResolutionData& data,
+        const std::vector<ITypeSymbol*>& templateArgs,
+            const std::vector<std::unique_ptr<ISymbol>>& matchingNameSymbols
         ) const -> std::vector<ISymbol*>;
         auto CollectMatchingTemplateSymbols(
-            const SymbolResolutionData& t_data,
-            const std::vector<ITypeSymbol*>& t_templateArgs,
-            const std::vector<std::unique_ptr<ISymbol>>& t_matchingNameSymbols
+            const SymbolResolutionData& data,
+            const std::vector<ITypeSymbol*>& templateArgs,
+            const std::vector<std::unique_ptr<ISymbol>>& matchingNameSymbols
         ) const -> std::vector<ISymbol*>;
 
         static auto ResolveTemplateInstance(
-            const ITemplateSymbol* const t_template,
-            const std::vector<ITypeSymbol*>& t_implTemplateArgs,
-            const std::vector<ITypeSymbol*>& t_templateArgs
+            const ITemplateSymbol* const t3mplate,
+            const std::vector<ITypeSymbol*>& implTemplateArgs,
+            const std::vector<ITypeSymbol*>& templateArgs
         ) -> Expected<ISymbol*>;
 
         auto ExclusiveResolveTemplate(
-            const std::string& t_name
+            const std::string& name
         ) const -> Expected<ITemplateSymbol*>;
 
         static auto GetInstanceSymbolResolutionScopes(
-            ITypeSymbol* t_selfType
+            ITypeSymbol* selfType
         ) -> std::vector<std::shared_ptr<const Scope>>;
         static auto CollectInstanceSymbolResolutionImplTemplateArgs(
-            ITypeSymbol* const t_selfType
+            ITypeSymbol* const selfType
         ) -> std::vector<ITypeSymbol*>;
 
         auto GetStaticSymbolResolutionStartScope(
-            const SymbolName& t_name
+            const SymbolName& name
         ) const -> Expected<std::shared_ptr<const Scope>>;
         static auto GetStaticSymbolResolutionImplTemplateArgs(
-            const std::shared_ptr<const Scope>& t_startScope
+            const std::shared_ptr<const Scope>& startScope
         ) -> std::vector<ITypeSymbol*>;
 
         const Compilation* m_Compilation{};

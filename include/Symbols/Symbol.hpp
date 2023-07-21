@@ -30,7 +30,7 @@ namespace Ace
         virtual auto CreatePartialSignature() const -> std::string final;
         virtual auto CreateSignature() const -> std::string final;
         virtual auto CreateFullyQualifiedName(
-            const SourceLocation& t_sourceLocation
+            const SourceLocation& sourceLocation
         ) const -> SymbolName final;
     };
 }

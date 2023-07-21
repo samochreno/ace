@@ -19,15 +19,15 @@ namespace Ace
         ~TemplateInstantiator();
 
         auto SetSymbols(
-            const std::vector<ITemplateSymbol*>& t_symbols
+            const std::vector<ITemplateSymbol*>& symbols
         ) -> void;
 
         auto InstantiatePlaceholderSymbols() -> Expected<void>;
 
         auto InstantiateSymbols(
-            ITemplateSymbol* const t_templateSymbol,
-            const std::vector<ITypeSymbol*>& t_implArgs,
-            const std::vector<ITypeSymbol*>& t_args
+            ITemplateSymbol* const templateSymbol,
+            const std::vector<ITypeSymbol*>& implArgs,
+            const std::vector<ITypeSymbol*>& args
         ) -> Expected<ISymbol*>;
         auto InstantiateSemanticsForSymbols() -> void;
 

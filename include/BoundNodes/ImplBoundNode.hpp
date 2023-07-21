@@ -20,9 +20,9 @@ namespace Ace
     {
     public:
         ImplBoundNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const std::vector<std::shared_ptr<const FunctionBoundNode>>& t_functions
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const std::vector<std::shared_ptr<const FunctionBoundNode>>& functions
         );
         virtual ~ImplBoundNode() = default;
 
@@ -30,10 +30,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const ImplBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const ImplBoundNode>> final;
 
     private:

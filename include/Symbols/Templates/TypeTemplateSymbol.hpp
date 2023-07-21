@@ -22,7 +22,7 @@ namespace Ace
         public virtual ISelfScopedSymbol
     {
     public:
-        TypeTemplateSymbol(const TypeTemplateNode* const t_templateNode);
+        TypeTemplateSymbol(const TypeTemplateNode* const templateNode);
         virtual ~TypeTemplateSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
@@ -37,15 +37,15 @@ namespace Ace
 
         auto GetASTName() const -> const Identifier& final;
   
-        auto SetPlaceholderSymbol(ISymbol* const t_symbol) -> void final;
+        auto SetPlaceholderSymbol(ISymbol* const symbol) -> void final;
         auto GetPlaceholderSymbol() const -> ISymbol* final;
 
         auto InstantiateSymbols(
-            const std::vector<ITypeSymbol*>& t_implArgs,
-            const std::vector<ITypeSymbol*>& t_args
+            const std::vector<ITypeSymbol*>& implArgs,
+            const std::vector<ITypeSymbol*>& args
         ) -> Expected<TemplateSymbolsInstantationResult> final;
         auto InstantiateSemanticsForSymbols(
-            const std::shared_ptr<const INode>& t_ast
+            const std::shared_ptr<const INode>& ast
         ) -> void final;
 
     private:

@@ -18,18 +18,18 @@
 namespace Ace
 {
     static auto GetNativeConversionOp(
-        ITypeSymbol* t_fromType, 
-        ITypeSymbol* t_toType, 
-        const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>& t_fromOpMap
+        ITypeSymbol* fromType, 
+        ITypeSymbol* toType, 
+        const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>& fromOpMap
     ) -> std::optional<FunctionSymbol*>
     {
-        const auto fromOpMapIt = t_fromOpMap.find(t_toType);
-        if (fromOpMapIt == end(t_fromOpMap))
+        const auto fromOpMapIt = fromOpMap.find(toType);
+        if (fromOpMapIt == end(fromOpMap))
         {
             return std::nullopt;
         }
 
-        const auto foundOpIt = fromOpMapIt->second.find(t_fromType);
+        const auto foundOpIt = fromOpMapIt->second.find(fromType);
         if (foundOpIt == end(fromOpMapIt->second))
         {
             return std::nullopt;
@@ -39,45 +39,45 @@ namespace Ace
     }
 
     static auto GetImplicitPointerConversionOp(
-        const std::shared_ptr<Scope>& t_scope,
-        ITypeSymbol* t_fromType,
-        ITypeSymbol* t_toType
+        const std::shared_ptr<Scope>& scope,
+        ITypeSymbol* fromType,
+        ITypeSymbol* toType
     ) -> Expected<FunctionSymbol*>
     {
-        t_fromType = t_fromType->GetWithoutReference();
-          t_toType =   t_toType->GetWithoutReference();
+        fromType = fromType->GetWithoutReference();
+          toType =   toType->GetWithoutReference();
 
         ACE_TRY_ASSERT(
-            t_fromType->IsStrongPointer() && t_toType->IsWeakPointer()
+            fromType->IsStrongPointer() && toType->IsWeakPointer()
         );
 
         ACE_TRY_ASSERT(
-            t_fromType->GetWithoutStrongPointer() ==
-            t_toType->GetWithoutWeakPointer()
+            fromType->GetWithoutStrongPointer() ==
+            toType->GetWithoutWeakPointer()
         );
 
-        auto* const compilation = t_scope->GetCompilation();
+        auto* const compilation = scope->GetCompilation();
 
         return dynamic_cast<FunctionSymbol*>(Scope::ResolveOrInstantiateTemplateInstance(
             compilation,
             compilation->Natives->WeakPointer__from.GetSymbol(),
             std::nullopt,
-            { t_fromType->GetWithoutStrongPointer()->GetWithoutReference() },
+            { fromType->GetWithoutStrongPointer()->GetWithoutReference() },
             {}
         ).Unwrap());
     }
 
     auto GetImplicitConversionOp(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        ITypeSymbol* t_fromType,
-        ITypeSymbol* t_toType
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        ITypeSymbol* fromType,
+        ITypeSymbol* toType
     ) -> Expected<FunctionSymbol*>
     {
         const auto optNativeOp = GetNativeConversionOp(
-            t_fromType,
-            t_toType,
-            t_scope->GetCompilation()->Natives->GetImplicitFromOpMap()
+            fromType,
+            toType,
+            scope->GetCompilation()->Natives->GetImplicitFromOpMap()
         );
         if (optNativeOp.has_value())
         {
@@ -85,23 +85,23 @@ namespace Ace
         }
 
         return GetImplicitPointerConversionOp(
-            t_scope,
-            t_fromType,
-            t_toType
+            scope,
+            fromType,
+            toType
         );
     }
 
     auto GetExplicitConversionOp(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        ITypeSymbol* t_fromType,
-        ITypeSymbol* t_toType
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        ITypeSymbol* fromType,
+        ITypeSymbol* toType
     ) -> Expected<FunctionSymbol*>
     {
         const auto optNativeImplicitOp = GetNativeConversionOp(
-            t_fromType,
-            t_toType,
-            t_scope->GetCompilation()->Natives->GetImplicitFromOpMap()
+            fromType,
+            toType,
+            scope->GetCompilation()->Natives->GetImplicitFromOpMap()
         );
         if (optNativeImplicitOp.has_value())
         {
@@ -109,9 +109,9 @@ namespace Ace
         }
 
         const auto optNativeExplicitOp = GetNativeConversionOp(
-            t_fromType,
-            t_toType,
-            t_scope->GetCompilation()->Natives->GetExplicitFromOpMap()
+            fromType,
+            toType,
+            scope->GetCompilation()->Natives->GetExplicitFromOpMap()
         );
         if (optNativeExplicitOp)
         {
@@ -119,27 +119,27 @@ namespace Ace
         }
 
         return GetImplicitPointerConversionOp(
-            t_scope,
-            t_fromType,
-            t_toType
+            scope,
+            fromType,
+            toType
         );
     }
 
     auto AreTypesSame(
-        const std::vector<ITypeSymbol*>& t_typesA,
-        const std::vector<ITypeSymbol*>& t_typesB
+        const std::vector<ITypeSymbol*>& typesA,
+        const std::vector<ITypeSymbol*>& typesB
     ) -> bool
     {
-        if (t_typesA.size() != t_typesB.size())
+        if (typesA.size() != typesB.size())
         {
             return false;
         }
 
-        for (size_t i = 0; i < t_typesA.size(); i++)
+        for (size_t i = 0; i < typesA.size(); i++)
         {
             if (
-                t_typesA.at(i)->GetUnaliased() !=
-                t_typesB.at(i)->GetUnaliased()
+                typesA.at(i)->GetUnaliased() !=
+                typesB.at(i)->GetUnaliased()
                 )
             {
                 return false;
@@ -150,27 +150,27 @@ namespace Ace
     }
 
     auto AreTypesConvertible(
-        const std::shared_ptr<Scope>& t_scope,
-        const std::vector<TypeInfo>& t_fromTypeInfos,
-        const std::vector<TypeInfo>& t_targetTypeInfos
+        const std::shared_ptr<Scope>& scope,
+        const std::vector<TypeInfo>& fromTypeInfos,
+        const std::vector<TypeInfo>& targetTypeInfos
     ) -> bool
     {
-        if (t_fromTypeInfos.size() != t_targetTypeInfos.size())
+        if (fromTypeInfos.size() != targetTypeInfos.size())
         {
             return false;
         }
 
-        for (size_t i = 0; i < t_fromTypeInfos.size(); i++)
+        for (size_t i = 0; i < fromTypeInfos.size(); i++)
         {
             const auto dummyExpr = std::make_shared<const ConversionPlaceholderExprBoundNode>(
                 SourceLocation{},
-                t_scope,
-                t_fromTypeInfos.at(i)
+                scope,
+                fromTypeInfos.at(i)
             );
 
             const auto expConvertedExpr = CreateImplicitlyConverted(
                 dummyExpr,
-                t_targetTypeInfos.at(i)
+                targetTypeInfos.at(i)
             );
             if (expConvertedExpr)
             {

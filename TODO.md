@@ -7,7 +7,6 @@
 - ❓ Rename `CreateUnknown...Error` to `CreateInvalid...Error`
 - `CompoundAssignmentStmtBoundNode` lowering
 - Variable reference emitting
-- Remove `t_` prefix from parameter names
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
 
 ## 💥 High Priority

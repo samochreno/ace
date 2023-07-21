@@ -13,16 +13,16 @@
 namespace Ace
 {
     CompoundAssignmentStmtNode::CompoundAssignmentStmtNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const std::shared_ptr<const IExprNode>& t_lhsExpr,
-        const std::shared_ptr<const IExprNode>& t_rhsExpr,
-        const Op& t_op
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_LHSExpr{ t_lhsExpr },
-        m_RHSExpr{ t_rhsExpr },
-        m_Op{ t_op }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const std::shared_ptr<const IExprNode>& lhsExpr,
+        const std::shared_ptr<const IExprNode>& rhsExpr,
+        const Op& op
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_LHSExpr{ lhsExpr },
+        m_RHSExpr{ rhsExpr },
+        m_Op{ op }
     {
     }
 
@@ -47,23 +47,23 @@ namespace Ace
     }
 
     auto CompoundAssignmentStmtNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const CompoundAssignmentStmtNode>
     {
         return std::make_shared<const CompoundAssignmentStmtNode>(
             m_SourceLocation,
             m_Scope,
-            m_LHSExpr->CloneInScopeExpr(t_scope),
-            m_RHSExpr->CloneInScopeExpr(t_scope),
+            m_LHSExpr->CloneInScopeExpr(scope),
+            m_RHSExpr->CloneInScopeExpr(scope),
             m_Op
         );
     }
 
     auto CompoundAssignmentStmtNode::CloneInScopeStmt(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto CompoundAssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>

@@ -24,13 +24,13 @@ namespace Ace
     {
     public:
         ModuleBoundNode(
-            const SourceLocation& t_sourceLocation,
-            ModuleSymbol* const t_symbol,
-            const std::vector<std::shared_ptr<const ModuleBoundNode>>& t_modules,
-            const std::vector<std::shared_ptr<const ITypeBoundNode>>& t_types,
-            const std::vector<std::shared_ptr<const ImplBoundNode>>& t_impls,
-            const std::vector<std::shared_ptr<const FunctionBoundNode>>& t_functions,
-            const std::vector<std::shared_ptr<const StaticVarBoundNode>>& t_vars
+            const SourceLocation& sourceLocation,
+            ModuleSymbol* const symbol,
+            const std::vector<std::shared_ptr<const ModuleBoundNode>>& modules,
+            const std::vector<std::shared_ptr<const ITypeBoundNode>>& types,
+            const std::vector<std::shared_ptr<const ImplBoundNode>>& impls,
+            const std::vector<std::shared_ptr<const FunctionBoundNode>>& functions,
+            const std::vector<std::shared_ptr<const StaticVarBoundNode>>& vars
         );
         virtual ~ModuleBoundNode() = default;
 
@@ -38,10 +38,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const ModuleBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const ModuleBoundNode>> final;
 
     private:

@@ -8,56 +8,56 @@
 namespace Ace
 {
     inline auto CreateUnterminatedMultiLineCommentError(
-        const SourceLocation& t_sourceLocation
+        const SourceLocation& sourceLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_sourceLocation,
+            sourceLocation,
             "unterminated multiline comment"
         );
     }
 
     inline auto CreateUnterminatedStringLiteralError(
-        const SourceLocation& t_sourceLocation
+        const SourceLocation& sourceLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_sourceLocation,
+            sourceLocation,
             "unterminated string literal"
         );
     }
 
     inline auto CreateUnexpectedCharacterError(
-        const SourceLocation& t_sourceLocation
+        const SourceLocation& sourceLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_sourceLocation,
+            sourceLocation,
             "unexpected character"
         );
     }
 
     inline auto CreateUnknownNumericLiteralTypeSuffixError(
-        const SourceLocation& t_sourceLocation
+        const SourceLocation& sourceLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_sourceLocation,
+            sourceLocation,
             "unknown numeric literal type suffix"
         );
     }
 
     inline auto CreateDecimalPointInNonFloatNumericLiteralError(
-        const SourceLocation& t_sourceLocation
+        const SourceLocation& sourceLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_sourceLocation,
+            sourceLocation,
             "decimal point in non-float numeric literal"
         );
     }   

@@ -14,16 +14,16 @@ namespace Ace
     class Lexer
     {
     public:
-        Lexer(const FileBuffer* const t_fileBuffer);
+        Lexer(const FileBuffer* const fileBuffer);
         ~Lexer() = default;
 
         auto EatTokens() -> Diagnosed<std::vector<std::shared_ptr<const Token>>>;
 
     private:
         auto EatCharacter() -> void;
-        auto EatCharacters(const size_t t_count) -> void;
+        auto EatCharacters(const size_t count) -> void;
         auto EatCharactersUntil(
-            const std::string_view::const_iterator t_it
+            const std::string_view::const_iterator it
         ) -> void;
         auto EatWhitespace() -> void;
         auto EatComment() -> Diagnosed<void>;
@@ -36,7 +36,7 @@ namespace Ace
         auto ScanTokenSequence() const -> Expected<Measured<std::vector<std::shared_ptr<const Token>>>>;
 
         auto GetCharacter()                       const -> char;
-        auto GetCharacter(const size_t t_offset) const -> char;
+        auto GetCharacter(const size_t offset) const -> char;
         auto GetLine() const -> const std::string_view;
 
         auto IsEndOfLine()    const -> bool;

@@ -17,14 +17,14 @@
 namespace Ace
 {
     LiteralExprBoundNode::LiteralExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const LiteralKind t_kind,
-        const std::string& t_string
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Kind{ t_kind },
-        m_String{ t_string }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const LiteralKind kind,
+        const std::string& string
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Kind{ kind },
+        m_String{ string }
     {
     }
 
@@ -44,36 +44,36 @@ namespace Ace
     }
 
     auto LiteralExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const LiteralExprBoundNode>>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto LiteralExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto LiteralExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const LiteralExprBoundNode>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto LiteralExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto LiteralExprBoundNode::Emit(Emitter& t_emitter) const -> ExprEmitResult
+    auto LiteralExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
-        auto* const type = t_emitter.GetIRType(GetTypeInfo().Symbol);
+        auto* const type = emitter.GetIRType(GetTypeInfo().Symbol);
 
         auto* const value = [&]() -> llvm::Value*
         {
@@ -81,16 +81,16 @@ namespace Ace
             {
                 std::string numberString{};
                 (void)std::find_if_not(begin(m_String), end(m_String),
-                [&](const char t_character)
+                [&](const char character)
                 {
-                    if (IsInAlphabet(t_character))
+                    if (IsInAlphabet(character))
                     {
                         return false;
                     }
 
-                    if (IsNumber(t_character) || (t_character == '.'))
+                    if (IsNumber(character) || (character == '.'))
                     {
-                        numberString += t_character;
+                        numberString += character;
                     }
 
                     return true;
@@ -134,8 +134,8 @@ namespace Ace
         ACE_ASSERT(value);
         
         auto* const allocaInst =
-            t_emitter.GetBlockBuilder().Builder.CreateAlloca(value->getType());
-        t_emitter.GetBlockBuilder().Builder.CreateStore(value, allocaInst);
+            emitter.GetBlockBuilder().Builder.CreateAlloca(value->getType());
+        emitter.GetBlockBuilder().Builder.CreateStore(value, allocaInst);
 
         return { allocaInst, { { allocaInst, GetTypeInfo().Symbol } } };
     }

@@ -15,10 +15,10 @@ namespace Ace
         virtual ~ITypeBoundNode() = default;
 
         virtual auto GetOrCreateTypeCheckedType(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const ITypeBoundNode>>> = 0;
         virtual auto GetOrCreateLoweredType(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const ITypeBoundNode>> = 0;
 
         virtual auto GetSymbol() const -> ITypeSymbol* = 0;

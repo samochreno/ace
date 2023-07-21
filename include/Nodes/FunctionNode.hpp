@@ -28,15 +28,15 @@ namespace Ace
     {
     public:
         FunctionNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_selfScope,
-            const Identifier& t_name,
-            const TypeName& t_typeName,
-            const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-            const AccessModifier t_accessModifier,
-            const std::optional<std::shared_ptr<const SelfParamVarNode>>& t_optSelf,
-            const std::vector<std::shared_ptr<const NormalParamVarNode>>& t_params,
-            const std::optional<std::shared_ptr<const BlockStmtNode>>& t_optBody
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& selfScope,
+            const Identifier& name,
+            const TypeName& typeName,
+            const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
+            const AccessModifier accessModifier,
+            const std::optional<std::shared_ptr<const SelfParamVarNode>>& optSelf,
+            const std::vector<std::shared_ptr<const NormalParamVarNode>>& params,
+            const std::optional<std::shared_ptr<const BlockStmtNode>>& optBody
         );
         virtual ~FunctionNode() = default;
 
@@ -44,7 +44,7 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const FunctionNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const FunctionBoundNode>> final;
 

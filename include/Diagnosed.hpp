@@ -18,8 +18,8 @@ namespace Ace
     public:
         Diagnosed() = default;
         Diagnosed(
-            const DiagnosticBag& t_diagnosticBag
-        ) : m_DiagnosticBag{ t_diagnosticBag }
+            const DiagnosticBag& diagnosticBag
+        ) : m_DiagnosticBag{ diagnosticBag }
         {
         }
 
@@ -37,17 +37,17 @@ namespace Ace
     {
     public:
         Diagnosed(
-            const TValue& t_value,
-            const DiagnosticBag& t_diagnosticBag
-        ) : m_Value{ t_value },
-            m_DiagnosticBag{ t_diagnosticBag }
+            const TValue& value,
+            const DiagnosticBag& diagnosticBag
+        ) : m_Value{ value },
+            m_DiagnosticBag{ diagnosticBag }
         {
         }
         Diagnosed(
-            TValue&& t_value,
-            const DiagnosticBag& t_diagnosticBag
-        ) : m_Value{ std::move(t_value) },
-            m_DiagnosticBag{ t_diagnosticBag }
+            TValue&& value,
+            const DiagnosticBag& diagnosticBag
+        ) : m_Value{ std::move(value) },
+            m_DiagnosticBag{ diagnosticBag }
         {
         }
 

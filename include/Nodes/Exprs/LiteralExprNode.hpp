@@ -20,10 +20,10 @@ namespace Ace
     {
     public:
         LiteralExprNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const LiteralKind t_kind,
-            const std::string& t_string
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const LiteralKind kind,
+            const std::string& string
         );
         virtual ~LiteralExprNode() = default;
 
@@ -31,10 +31,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const LiteralExprNode> final;
         auto CloneInScopeExpr(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const LiteralExprBoundNode>> final;
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;

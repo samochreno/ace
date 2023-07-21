@@ -23,12 +23,12 @@ namespace Ace
     {
     public:
         StructTypeNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_selfScope,
-            const Identifier& t_name,
-            const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-            const AccessModifier t_accessModifier,
-            const std::vector<std::shared_ptr<const InstanceVarNode>>& t_vars
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& selfScope,
+            const Identifier& name,
+            const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
+            const AccessModifier accessModifier,
+            const std::vector<std::shared_ptr<const InstanceVarNode>>& vars
         );
         virtual ~StructTypeNode() = default;
 
@@ -37,10 +37,10 @@ namespace Ace
         auto GetSelfScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const StructTypeNode> final;
         auto CloneInScopeType(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const ITypeNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const StructTypeBoundNode>> final;
         auto CreateBoundType() const -> Expected<std::shared_ptr<const ITypeBoundNode>> final;

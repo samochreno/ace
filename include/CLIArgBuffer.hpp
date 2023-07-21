@@ -15,8 +15,8 @@ namespace Ace
         CLIArgBuffer(const CLIArgBuffer&) = delete;
         CLIArgBuffer(CLIArgBuffer&&) = default;
         CLIArgBuffer(
-            const Compilation* const t_compilation,
-            const std::vector<std::string_view>& t_args
+            const Compilation* const compilation,
+            const std::vector<std::string_view>& args
         );
         ~CLIArgBuffer() = default;
 
@@ -27,7 +27,7 @@ namespace Ace
         auto GetBuffer() const -> const std::string& final;
 
         auto FormatLocation(
-            const SourceLocation& t_location 
+            const SourceLocation& location 
         ) const -> std::string final;
 
         auto GetArgs() const -> const std::vector<std::string_view>&;

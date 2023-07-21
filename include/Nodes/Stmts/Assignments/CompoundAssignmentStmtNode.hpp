@@ -20,11 +20,11 @@ namespace Ace
     {
     public:
         CompoundAssignmentStmtNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const std::shared_ptr<const IExprNode>& t_lhsExpr,
-            const std::shared_ptr<const IExprNode>& t_rhsExpr,
-            const Op& t_op
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const std::shared_ptr<const IExprNode>& lhsExpr,
+            const std::shared_ptr<const IExprNode>& rhsExpr,
+            const Op& op
         );
         virtual ~CompoundAssignmentStmtNode() = default;
 
@@ -32,10 +32,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const CompoundAssignmentStmtNode> final;
         auto CloneInScopeStmt(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IStmtNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const CompoundAssignmentStmtBoundNode>> final;
         auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;

@@ -13,12 +13,12 @@
 namespace Ace
 {
     ImplBoundNode::ImplBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const std::vector<std::shared_ptr<const FunctionBoundNode>>& t_functions
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Functions{ t_functions }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const std::vector<std::shared_ptr<const FunctionBoundNode>>& functions
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Functions{ functions }
     {
     }
 
@@ -42,13 +42,13 @@ namespace Ace
     }
 
     auto ImplBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const ImplBoundNode>>>
     {
         ACE_TRY(mchCheckedFunctions, TransformExpectedMaybeChangedVector(m_Functions,
-        [](const std::shared_ptr<const FunctionBoundNode>& t_function)
+        [](const std::shared_ptr<const FunctionBoundNode>& function)
         {
-            return t_function->GetOrCreateTypeChecked({});
+            return function->GetOrCreateTypeChecked({});
         }));
 
         if (!mchCheckedFunctions.IsChanged)
@@ -64,13 +64,13 @@ namespace Ace
     }
 
     auto ImplBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const ImplBoundNode>>
     {
         const auto mchLoweredFunctions = TransformMaybeChangedVector(m_Functions,
-        [](const std::shared_ptr<const FunctionBoundNode>& t_function)
+        [](const std::shared_ptr<const FunctionBoundNode>& function)
         {
-            return t_function->GetOrCreateLowered({});
+            return function->GetOrCreateLowered({});
         });
 
         if (!mchLoweredFunctions.IsChanged)

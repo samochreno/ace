@@ -16,14 +16,14 @@
 namespace Ace
 {
     StructConstructionExprBoundNode::StructConstructionExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        StructTypeSymbol* const t_structSymbol,
-        const std::vector<StructConstructionExprBoundArg>& t_args
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_StructSymbol{ t_structSymbol },
-        m_Args{ t_args }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        StructTypeSymbol* const structSymbol,
+        const std::vector<StructConstructionExprBoundArg>& args
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_StructSymbol{ structSymbol },
+        m_Args{ args }
     {
     }
 
@@ -42,30 +42,30 @@ namespace Ace
         std::vector<const IBoundNode*> children{};
 
         std::for_each(begin(m_Args), end(m_Args),
-        [&](const StructConstructionExprBoundArg& t_arg)
+        [&](const StructConstructionExprBoundArg& arg)
         {
-            AddChildren(children, t_arg.Value);
+            AddChildren(children, arg.Value);
         });
 
         return children;
     }
 
     auto StructConstructionExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const StructConstructionExprBoundNode>>>
     {
         ACE_TRY(mchCheckedArgs, TransformExpectedMaybeChangedVector(m_Args,
-        [](const StructConstructionExprBoundArg& t_arg) -> Expected<MaybeChanged<StructConstructionExprBoundArg>>
+        [](const StructConstructionExprBoundArg& arg) -> Expected<MaybeChanged<StructConstructionExprBoundArg>>
         {
-            ACE_TRY(mchCheckedValue, t_arg.Value->GetOrCreateTypeCheckedExpr({}));
+            ACE_TRY(mchCheckedValue, arg.Value->GetOrCreateTypeCheckedExpr({}));
 
             if (!mchCheckedValue.IsChanged)
             {
-                return CreateUnchanged(t_arg);
+                return CreateUnchanged(arg);
             }
 
             return CreateChanged(StructConstructionExprBoundArg{
-                t_arg.Symbol,
+                arg.Symbol,
                 mchCheckedValue.Value,
             });
         }));
@@ -84,29 +84,29 @@ namespace Ace
     }
 
     auto StructConstructionExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto StructConstructionExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const StructConstructionExprBoundNode>>
     {
         const auto mchLoweredArgs = TransformMaybeChangedVector(m_Args,
-        [&](const StructConstructionExprBoundArg& t_arg) -> MaybeChanged<StructConstructionExprBoundArg>
+        [&](const StructConstructionExprBoundArg& arg) -> MaybeChanged<StructConstructionExprBoundArg>
         {
             const auto mchLoweredValue =
-                t_arg.Value->GetOrCreateLoweredExpr({});
+                arg.Value->GetOrCreateLoweredExpr({});
 
             if (!mchLoweredValue.IsChanged)
             {
-                return CreateUnchanged(t_arg);
+                return CreateUnchanged(arg);
             }
 
             return CreateChanged(StructConstructionExprBoundArg{
-                t_arg.Symbol,
+                arg.Symbol,
                 mchLoweredValue.Value,
             });
         });
@@ -125,32 +125,32 @@ namespace Ace
     }
 
     auto StructConstructionExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
     auto StructConstructionExprBoundNode::Emit(
-        Emitter& t_emitter
+        Emitter& emitter
     ) const -> ExprEmitResult
     {
         std::vector<ExprDropData> temporaries{};
 
-        auto* const structureType = t_emitter.GetIRType(m_StructSymbol);
+        auto* const structureType = emitter.GetIRType(m_StructSymbol);
 
         auto* const allocaInst =
-            t_emitter.GetBlockBuilder().Builder.CreateAlloca(structureType);
+            emitter.GetBlockBuilder().Builder.CreateAlloca(structureType);
         temporaries.emplace_back(allocaInst, m_StructSymbol);
 
         std::for_each(begin(m_Args), end(m_Args),
-        [&](const StructConstructionExprBoundArg& t_arg)
+        [&](const StructConstructionExprBoundArg& arg)
         {
             auto* const argTypeSymbol =
-                t_arg.Value->GetTypeInfo().Symbol;
-            auto* const argType = t_emitter.GetIRType(argTypeSymbol);
+                arg.Value->GetTypeInfo().Symbol;
+            auto* const argType = emitter.GetIRType(argTypeSymbol);
 
-            const auto varIndex = t_arg.Symbol->GetIndex();
+            const auto varIndex = arg.Symbol->GetIndex();
 
             auto* const int32Type = llvm::Type::getInt32Ty(
                 *GetCompilation()->LLVMContext
@@ -166,7 +166,7 @@ namespace Ace
                 varIndex
             ));
 
-            auto* const elementPtr = t_emitter.GetBlockBuilder().Builder.CreateGEP(
+            auto* const elementPtr = emitter.GetBlockBuilder().Builder.CreateGEP(
                 structureType,
                 allocaInst,
                 indexList,
@@ -174,14 +174,14 @@ namespace Ace
                 true
             );
 
-            const auto argEmitResult = t_arg.Value->Emit(t_emitter);
+            const auto argEmitResult = arg.Value->Emit(emitter);
             temporaries.insert(
                 end(temporaries),
                 begin(argEmitResult.Temporaries),
                 end  (argEmitResult.Temporaries)
             );
 
-            t_emitter.EmitCopy(
+            emitter.EmitCopy(
                 elementPtr,
                 argEmitResult.Value, 
                 argTypeSymbol

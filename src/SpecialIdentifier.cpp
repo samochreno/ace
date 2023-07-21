@@ -14,18 +14,18 @@ namespace Ace::SpecialIdentifier
         return "$anonymous_" + std::to_string(Count++);
     }
 
-    auto CreateTemplate(const std::string& t_templateName) -> std::string
+    auto CreateTemplate(const std::string& templateName) -> std::string
     {
-        return "$template_" + t_templateName;
+        return "$template_" + templateName;
     }
 
-    auto CreateCopyGlue(const std::string& t_typePartialSignature) -> std::string
+    auto CreateCopyGlue(const std::string& typePartialSignature) -> std::string
     {
-        return "$copy_glue_" + t_typePartialSignature;
+        return "$copy_glue_" + typePartialSignature;
     }
 
-    auto CreateDropGlue(const std::string& t_typePartialSignature) -> std::string
+    auto CreateDropGlue(const std::string& typePartialSignature) -> std::string
     {
-        return "$drop_glue_" + t_typePartialSignature;
+        return "$drop_glue_" + typePartialSignature;
     }
 }

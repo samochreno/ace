@@ -12,12 +12,12 @@
 namespace Ace
 {
     BlockStmtNode::BlockStmtNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_selfScope,
-        const std::vector<std::shared_ptr<const IStmtNode>>& t_stmts
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_SelfScope{ t_selfScope },
-        m_Stmts{ t_stmts }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& selfScope,
+        const std::vector<std::shared_ptr<const IStmtNode>>& stmts
+    ) : m_SourceLocation{ sourceLocation },
+        m_SelfScope{ selfScope },
+        m_Stmts{ stmts }
     {
     }
 
@@ -41,19 +41,19 @@ namespace Ace
     }
 
     auto BlockStmtNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const BlockStmtNode>
     {
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto selfScope = scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const IStmtNode>> clonedStmts{};
         std::transform(
             begin(m_Stmts),
             end  (m_Stmts),
             back_inserter(clonedStmts),
-            [&](const std::shared_ptr<const IStmtNode>& t_stmt)
+            [&](const std::shared_ptr<const IStmtNode>& stmt)
             {
-                return t_stmt->CloneInScopeStmt(selfScope);
+                return stmt->CloneInScopeStmt(selfScope);
             }
         );
 
@@ -65,18 +65,18 @@ namespace Ace
     }
 
     auto BlockStmtNode::CloneInScopeStmt(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto BlockStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BlockStmtBoundNode>>
     {
         ACE_TRY(boundStmts, TransformExpectedVector(m_Stmts,
-        [](const std::shared_ptr<const IStmtNode>& t_stmt)
+        [](const std::shared_ptr<const IStmtNode>& stmt)
         {
-            return t_stmt->CreateBoundStmt();
+            return stmt->CreateBoundStmt();
         }));
 
         return std::make_shared<const BlockStmtBoundNode>(

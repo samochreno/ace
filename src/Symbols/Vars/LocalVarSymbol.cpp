@@ -10,12 +10,12 @@
 namespace Ace
 {
     LocalVarSymbol::LocalVarSymbol(
-        const std::shared_ptr<Scope>& t_scope,
-        const Identifier& t_name,
-        ITypeSymbol* const t_type
-    ) : m_Scope{ t_scope },
-        m_Name{ t_name },
-        m_Type{ t_type }
+        const std::shared_ptr<Scope>& scope,
+        const Identifier& name,
+        ITypeSymbol* const type
+    ) : m_Scope{ scope },
+        m_Name{ name },
+        m_Type{ type }
     {
     }
 

@@ -23,10 +23,10 @@ namespace Ace
     {
     public:
         LiteralExprBoundNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const LiteralKind t_kind,
-            const std::string& t_string
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const LiteralKind kind,
+            const std::string& string
         );
         virtual ~LiteralExprBoundNode() = default;
 
@@ -34,18 +34,18 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const LiteralExprBoundNode>>> final;
         auto GetOrCreateTypeCheckedExpr(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const LiteralExprBoundNode>> final;
         auto GetOrCreateLoweredExpr(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>> final;
-        auto Emit(Emitter& t_emitter) const -> ExprEmitResult final;
+        auto Emit(Emitter& emitter) const -> ExprEmitResult final;
 
         auto GetTypeInfo() const -> TypeInfo final;
 

@@ -12,11 +12,11 @@
 namespace Ace
 {
     inline auto CreateJsonError(
-        const FileBuffer* const t_fileBuffer,
-        const nlohmann::json::exception& t_jsonException
+        const FileBuffer* const fileBuffer,
+        const nlohmann::json::exception& jsonException
     ) -> std::shared_ptr<const Diagnostic>
     {
-        std::string what = t_jsonException.what();
+        std::string what = jsonException.what();
         MakeLowercase(what);
 
         const auto closingBracketIt = std::find(
@@ -37,7 +37,7 @@ namespace Ace
                     end(what),
                 };
 
-                return { message, t_fileBuffer->CreateFirstLocation() };
+                return { message, fileBuffer->CreateFirstLocation() };
             }
 
             const auto colonIt = std::find(
@@ -76,10 +76,10 @@ namespace Ace
             const auto characterIndex =
                 static_cast<size_t>(std::stoi(columnString));
 
-            const auto& line = t_fileBuffer->GetLines().at(lineIndex);
+            const auto& line = fileBuffer->GetLines().at(lineIndex);
             const SourceLocation sourceLocation
             {
-                t_fileBuffer,
+                fileBuffer,
                 begin(line) + characterIndex,
                 begin(line) + characterIndex + 1,
             };

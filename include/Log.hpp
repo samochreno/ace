@@ -7,8 +7,8 @@ namespace Ace
     struct LoggerConfiguration
     {
         LoggerConfiguration(
-            std::ostream& t_stream
-        ) : Stream{ t_stream }
+            std::ostream& stream
+        ) : Stream{ stream }
         {
         }
 
@@ -19,20 +19,20 @@ namespace Ace
     {
     public:
         Logger(
-            const LoggerConfiguration t_configuration
-        ) : m_Configuration{ t_configuration }
+            const LoggerConfiguration configuration
+        ) : m_Configuration{ configuration }
         {
         }
 
         template<typename T>
-        auto operator<<(const T& t_value) const -> const Logger&
+        auto operator<<(const T& value) const -> const Logger&
         {
-            m_Configuration.Stream << t_value;
+            m_Configuration.Stream << value;
             return *this;
         }
-        auto operator<<(std::ostream& (*t_func)(std::ostream&)) const -> const Logger&
+        auto operator<<(std::ostream& (*func)(std::ostream&)) const -> const Logger&
         {
-            t_func(m_Configuration.Stream);
+            func(m_Configuration.Stream);
             return *this;
         }
 

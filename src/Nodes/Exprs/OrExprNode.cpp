@@ -11,12 +11,12 @@
 namespace Ace
 {
     OrExprNode::OrExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprNode>& t_lhsExpr,
-        const std::shared_ptr<const IExprNode>& t_rhsExpr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_LHSExpr{ t_lhsExpr },
-        m_RHSExpr{ t_rhsExpr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprNode>& lhsExpr,
+        const std::shared_ptr<const IExprNode>& rhsExpr
+    ) : m_SourceLocation{ sourceLocation },
+        m_LHSExpr{ lhsExpr },
+        m_RHSExpr{ rhsExpr }
     {
     }
 
@@ -41,21 +41,21 @@ namespace Ace
     }
 
     auto OrExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const OrExprNode>
     {
         return std::make_shared<const OrExprNode>(
             m_SourceLocation,
-            m_LHSExpr->CloneInScopeExpr(t_scope),
-            m_RHSExpr->CloneInScopeExpr(t_scope)
+            m_LHSExpr->CloneInScopeExpr(scope),
+            m_RHSExpr->CloneInScopeExpr(scope)
         );
     }
 
     auto OrExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto OrExprNode::CreateBound() const -> Expected<std::shared_ptr<const OrExprBoundNode>>

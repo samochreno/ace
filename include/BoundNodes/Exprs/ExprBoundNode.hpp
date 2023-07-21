@@ -27,10 +27,10 @@ namespace Ace
         virtual ~IExprBoundNode() = default;
 
         virtual auto GetOrCreateTypeCheckedExpr(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>> = 0;
         virtual auto GetOrCreateLoweredExpr(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>> = 0;
 
         virtual auto GetTypeInfo() const -> TypeInfo = 0;
@@ -43,88 +43,88 @@ namespace Ace
         ITypeSymbol*
     );
     auto CreateConverted(
-        std::shared_ptr<const IExprBoundNode> t_expr,
-        TypeInfo t_targetTypeInfo,
-        ConversionOpGetterFunction t_func
+        std::shared_ptr<const IExprBoundNode> expr,
+        TypeInfo targetTypeInfo,
+        ConversionOpGetterFunction func
     ) -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>;
     inline auto CreateImplicitlyConverted(
-        const std::shared_ptr<const IExprBoundNode>& t_expr,
-        const TypeInfo& t_targetTypeInfo
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const TypeInfo& targetTypeInfo
     )
     {
         return CreateConverted(
-            t_expr,
-            t_targetTypeInfo,
+            expr,
+            targetTypeInfo,
             &GetImplicitConversionOp
         );
     }
     inline auto CreateExplicitlyConverted(
-        const std::shared_ptr<const IExprBoundNode>& t_expr,
-        const TypeInfo& t_targetTypeInfo
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const TypeInfo& targetTypeInfo
     )
     {
         return CreateConverted(
-            t_expr,
-            t_targetTypeInfo,
+            expr,
+            targetTypeInfo,
             &GetExplicitConversionOp
         );
     }
 
     typedef Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>(*ConversionFunction)(const std::shared_ptr<const IExprBoundNode>&, const TypeInfo&);
     auto CreateConvertedVector(
-        const std::vector<std::shared_ptr<const IExprBoundNode>>& t_exprs,
-        const TypeInfo& t_targetTypeInfo,
-        ConversionFunction t_func
+        const std::vector<std::shared_ptr<const IExprBoundNode>>& exprs,
+        const TypeInfo& targetTypeInfo,
+        ConversionFunction func
     ) -> Expected<MaybeChanged<std::vector<std::shared_ptr<const IExprBoundNode>>>>;
     auto CreateConvertedVector(
-        const std::vector<std::shared_ptr<const IExprBoundNode>>& t_exprs,
-        const std::vector<TypeInfo>& t_targetTypeInfos,
-        ConversionFunction t_func
+        const std::vector<std::shared_ptr<const IExprBoundNode>>& exprs,
+        const std::vector<TypeInfo>& targetTypeInfos,
+        ConversionFunction func
     ) -> Expected<MaybeChanged<std::vector<std::shared_ptr<const IExprBoundNode>>>>;
     template<typename T>
     auto CreateImplicitlyConvertedVector(
-        const std::vector<std::shared_ptr<const IExprBoundNode>>& t_exprs,
-        const T& t_targetTypeInfo
+        const std::vector<std::shared_ptr<const IExprBoundNode>>& exprs,
+        const T& targetTypeInfo
     ) -> Expected<MaybeChanged<std::vector<std::shared_ptr<const IExprBoundNode>>>>
     {
         return CreateConvertedVector(
-            t_exprs,
-            t_targetTypeInfo,
+            exprs,
+            targetTypeInfo,
             &CreateImplicitlyConverted
         );
     }
     template<typename T>
     auto CreateExplicitlyConvertedVector(
-        const std::vector<std::shared_ptr<const IExprBoundNode>>& t_exprs,
-        const T& t_targetTypeInfo
+        const std::vector<std::shared_ptr<const IExprBoundNode>>& exprs,
+        const T& targetTypeInfo
     ) -> Expected<MaybeChanged<std::vector<std::shared_ptr<const IExprBoundNode>>>>
     {
         return CreateConvertedVector(
-            t_exprs,
-            t_targetTypeInfo,
+            exprs,
+            targetTypeInfo,
             &CreateExplicitlyConverted
         );
     }
 
     auto CreateImplicitlyConvertedAndTypeChecked(
-        const std::shared_ptr<const IExprBoundNode>& t_expr,
-        const TypeInfo& t_targetTypeInfo
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const TypeInfo& targetTypeInfo
     ) -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>;
     template<typename T>
     auto CreateImplicitlyConvertedAndTypeCheckedVector(
-        const std::vector<std::shared_ptr<const IExprBoundNode>>& t_exprs,
-        const T& t_targetTypeInfo
+        const std::vector<std::shared_ptr<const IExprBoundNode>>& exprs,
+        const T& targetTypeInfo
     ) -> Expected<MaybeChanged<std::vector<std::shared_ptr<const IExprBoundNode>>>>
     {
         ACE_TRY(mchConverted, CreateImplicitlyConvertedVector(
-            t_exprs,
-            t_targetTypeInfo
+            exprs,
+            targetTypeInfo
         ));
 
         ACE_TRY(mchChecked, TransformExpectedMaybeChangedVector(mchConverted.Value,
-        [](const std::shared_ptr<const IExprBoundNode>& t_expr)
+        [](const std::shared_ptr<const IExprBoundNode>& expr)
         {
-            return t_expr->GetOrCreateTypeCheckedExpr({});
+            return expr->GetOrCreateTypeCheckedExpr({});
         }));
 
         if (
@@ -132,13 +132,13 @@ namespace Ace
             !mchChecked.IsChanged
             )
         {
-            return CreateUnchanged(t_exprs);
+            return CreateUnchanged(exprs);
         }
 
         return CreateChanged(mchChecked.Value);
     }
     auto CreateImplicitlyConvertedAndTypeCheckedOptional(
-        const std::optional<std::shared_ptr<const IExprBoundNode>>& t_optExpr,
-        const TypeInfo& t_targetTypeInfo
+        const std::optional<std::shared_ptr<const IExprBoundNode>>& optExpr,
+        const TypeInfo& targetTypeInfo
     ) -> Expected<MaybeChanged<std::optional<std::shared_ptr<const IExprBoundNode>>>>;
 }

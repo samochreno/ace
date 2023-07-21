@@ -19,8 +19,8 @@ namespace Ace
     {
         Void() = default;
         Void(
-            const DiagnosticBag& t_diagnosticBag
-        ) : DiagnosticBag{ t_diagnosticBag }
+            const DiagnosticBag& diagnosticBag
+        ) : DiagnosticBag{ diagnosticBag }
         {
         }
 
@@ -36,49 +36,49 @@ namespace Ace
     public:
         Expected() = default;
         Expected(
-            const Expected& t_other
-        ) : m_IsFatal{ t_other.m_IsFatal },
-            m_DiagnosticBag{ t_other.m_DiagnosticBag }
+            const Expected& other
+        ) : m_IsFatal{ other.m_IsFatal },
+            m_DiagnosticBag{ other.m_DiagnosticBag }
         {
         }
-        Expected(Expected&& t_other) noexcept
-          : m_IsFatal{ t_other.m_IsFatal },
-            m_DiagnosticBag{ std::move(t_other.m_DiagnosticBag) }
+        Expected(Expected&& other) noexcept
+          : m_IsFatal{ other.m_IsFatal },
+            m_DiagnosticBag{ std::move(other.m_DiagnosticBag) }
         {
-            t_other.m_IsFatal = false;
-        }
-        Expected(
-            Void&& t_value
-        ) : m_DiagnosticBag{ std::move(t_value.DiagnosticBag) }
-        {
+            other.m_IsFatal = false;
         }
         Expected(
-            const std::shared_ptr<const Diagnostic>& t_diagnostic
+            Void&& value
+        ) : m_DiagnosticBag{ std::move(value.DiagnosticBag) }
+        {
+        }
+        Expected(
+            const std::shared_ptr<const Diagnostic>& diagnostic
         ) : m_IsFatal{ true }
         {
-            m_DiagnosticBag.Add(t_diagnostic);
+            m_DiagnosticBag.Add(diagnostic);
         }
         Expected(
-            const DiagnosticBag& t_diagnosticBag
+            const DiagnosticBag& diagnosticBag
         ) : m_IsFatal{ true }
         {
-            m_DiagnosticBag.Add(t_diagnosticBag);
+            m_DiagnosticBag.Add(diagnosticBag);
         }
         ~Expected() = default;
 
-        auto operator=(const Expected& t_other) -> Expected&
+        auto operator=(const Expected& other) -> Expected&
         {
-            m_IsFatal = t_other.m_IsFatal;
-            m_DiagnosticBag = t_other.m_DiagnosticBag;
+            m_IsFatal = other.m_IsFatal;
+            m_DiagnosticBag = other.m_DiagnosticBag;
 
             return *this;
         }
-        auto operator=(Expected&& t_other) noexcept -> Expected&
+        auto operator=(Expected&& other) noexcept -> Expected&
         {
-            m_IsFatal = t_other.m_IsFatal;
-            m_DiagnosticBag = std::move(t_other.m_DiagnosticBag);
+            m_IsFatal = other.m_IsFatal;
+            m_DiagnosticBag = std::move(other.m_DiagnosticBag);
 
-            t_other.m_IsFatal = false;
+            other.m_IsFatal = false;
 
             return *this;
         }
@@ -116,61 +116,61 @@ namespace Ace
         {
         }
         Expected(
-            const Expected& t_other
-        ) : m_OptValue{ t_other.m_OptValue },
-            m_DiagnosticBag{ t_other.m_DiagnosticBag }
+            const Expected& other
+        ) : m_OptValue{ other.m_OptValue },
+            m_DiagnosticBag{ other.m_DiagnosticBag }
         {
         }
-        Expected(Expected&& t_other) noexcept
-          : m_OptValue{ std::move(t_other.m_OptValue) },
-            m_DiagnosticBag{ std::move(t_other.m_DiagnosticBag) }
-        {
-        }
-        Expected(
-            const TValue& t_value
-        ) : m_OptValue{ t_value }
+        Expected(Expected&& other) noexcept
+          : m_OptValue{ std::move(other.m_OptValue) },
+            m_DiagnosticBag{ std::move(other.m_DiagnosticBag) }
         {
         }
         Expected(
-            const TValue& t_value,
-            const DiagnosticBag& t_diagnosticBag
-        ) : m_OptValue{ t_value },
-            m_DiagnosticBag{ t_diagnosticBag }
-        {
-        }
-        Expected(TValue&& t_value) noexcept
-            : m_OptValue{ std::move(t_value) }
+            const TValue& value
+        ) : m_OptValue{ value }
         {
         }
         Expected(
-            TValue&& t_value,
-            const DiagnosticBag& t_diagnosticBag
+            const TValue& value,
+            const DiagnosticBag& diagnosticBag
+        ) : m_OptValue{ value },
+            m_DiagnosticBag{ diagnosticBag }
+        {
+        }
+        Expected(TValue&& value) noexcept
+            : m_OptValue{ std::move(value) }
+        {
+        }
+        Expected(
+            TValue&& value,
+            const DiagnosticBag& diagnosticBag
         ) noexcept
-          : m_OptValue{ std::move(t_value) },
-            m_DiagnosticBag{ t_diagnosticBag }
+          : m_OptValue{ std::move(value) },
+            m_DiagnosticBag{ diagnosticBag }
         {
         }
-        Expected(const std::shared_ptr<const Diagnostic>& t_diagnostic)
+        Expected(const std::shared_ptr<const Diagnostic>& diagnostic)
         {
-            m_DiagnosticBag.Add(t_diagnostic);
+            m_DiagnosticBag.Add(diagnostic);
         }
-        Expected(const DiagnosticBag& t_diagnosticBag)
+        Expected(const DiagnosticBag& diagnosticBag)
         {
-            m_DiagnosticBag.Add(t_diagnosticBag);
+            m_DiagnosticBag.Add(diagnosticBag);
         }
         ~Expected() = default;
 
-        auto operator=(const Expected& t_other) -> Expected&
+        auto operator=(const Expected& other) -> Expected&
         {
-            m_OptValue = t_other.m_OptValue;
-            m_DiagnosticBag = t_other.m_DiagnosticBag;
+            m_OptValue = other.m_OptValue;
+            m_DiagnosticBag = other.m_DiagnosticBag;
 
             return *this;
         }
-        auto operator=(Expected&& t_other) noexcept -> Expected&
+        auto operator=(Expected&& other) noexcept -> Expected&
         {
-            m_OptValue = std::move(t_other.m_OptValue);
-            m_DiagnosticBag = std::move(t_other.m_DiagnosticBag);
+            m_OptValue = std::move(other.m_OptValue);
+            m_DiagnosticBag = std::move(other.m_DiagnosticBag);
 
             return *this;
         }
@@ -213,22 +213,22 @@ namespace Ace
     };
 
 #define TIn  typename std::decay_t<decltype(*TBegin{})>
-#define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
+#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap())>
 
     template<typename TBegin, typename TEnd, typename F>
     auto TransformExpected(
-        const TBegin t_begin,
-        const TEnd t_end,
-        F&& t_func
+        const TBegin begin,
+        const TEnd end,
+        F&& func
     ) -> std::enable_if_t<!std::is_same_v<TOut, void>, Expected<std::vector<TOut>>>
     {
         DiagnosticBag diagnosticBag{};
 
         std::vector<TOut> outVec{};
-        const auto unexpectedIt = std::find_if_not(t_begin, t_end,
-        [&](const TIn& t_element)
+        const auto unexpectedIt = std::find_if_not(begin, end,
+        [&](const TIn& element)
         {
-            auto expOut = t_func(t_element);
+            auto expOut = func(element);
             diagnosticBag.Add(expOut);
             if (!expOut)
             {
@@ -247,7 +247,7 @@ namespace Ace
             return true;
         });
 
-        if (unexpectedIt != t_end)
+        if (unexpectedIt != end)
         {
             return diagnosticBag;
         }
@@ -257,21 +257,21 @@ namespace Ace
 
 #undef TOut
 #define TIn  typename std::decay_t<decltype(*TBegin{})>
-#define TOut typename std::decay_t<decltype(t_func(*TIn{}).Unwrap())>
+#define TOut typename std::decay_t<decltype(func(*TIn{}).Unwrap())>
 
     template<typename TBegin, typename TEnd, typename F>
     auto TransformExpected(
-        const TBegin t_begin,
-        const TEnd t_end,
-        F&& t_func
+        const TBegin begin,
+        const TEnd end,
+        F&& func
     ) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto unexpectedIt = std::find_if_not(t_begin, t_end,
-        [&](const TIn& t_element)
+        const auto unexpectedIt = std::find_if_not(begin, end,
+        [&](const TIn& element)
         {
-            const auto expOut = t_func(t_element);
+            const auto expOut = func(element);
             diagnosticBag.Add(expOut);
             if (!expOut)
             {
@@ -281,7 +281,7 @@ namespace Ace
             return true;
         });
 
-        if (unexpectedIt != t_end)
+        if (unexpectedIt != end)
         {
             return diagnosticBag;
         }
@@ -291,25 +291,25 @@ namespace Ace
 
 #undef TIn
 #undef TOut
-#define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
+#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap())>
 
     template<typename TIn, typename F>
     auto TransformExpectedVector(
-        const std::vector<TIn>& t_inVec,
-        F&& t_func
+        const std::vector<TIn>& inVec,
+        F&& func
     ) -> std::enable_if_t<!std::is_same_v<TOut, void>, Expected<std::vector<TOut>>>
     {
         DiagnosticBag diagnosticBag{};
 
         std::vector<TOut> outVec{};
-        outVec.reserve(t_inVec.size());
+        outVec.reserve(inVec.size());
 
         const auto unexpectedIt = std::find_if_not(
-            begin(t_inVec),
-            end  (t_inVec),
-            [&](const TIn& t_element)
+            begin(inVec),
+            end  (inVec),
+            [&](const TIn& element)
             {
-                auto expOut = t_func(t_element);
+                auto expOut = func(element);
                 diagnosticBag.Add(expOut);
                 if (!expOut)
                 {
@@ -329,7 +329,7 @@ namespace Ace
             }
         );
 
-        if (unexpectedIt != end(t_inVec))
+        if (unexpectedIt != end(inVec))
         {
             return diagnosticBag;
         }
@@ -338,22 +338,22 @@ namespace Ace
     }
 
 #undef TOut
-#define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
+#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap())>
 
     template<typename TIn, typename F>
     auto TransformExpectedVector(
-        const std::vector<TIn>& t_inVec,
-        F&& t_func
+        const std::vector<TIn>& inVec,
+        F&& func
     ) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
     {
         DiagnosticBag diagnosticBag{};
 
         const auto unexpectedIt = std::find_if_not(
-            begin(t_inVec),
-            end  (t_inVec),
-            [&](const TIn& t_element)
+            begin(inVec),
+            end  (inVec),
+            [&](const TIn& element)
             {
-                const auto expOut = t_func(t_element);
+                const auto expOut = func(element);
                 diagnosticBag.Add(expOut);
                 if (!expOut)
                 {
@@ -364,7 +364,7 @@ namespace Ace
             }
         );
 
-        if (unexpectedIt != end(t_inVec))
+        if (unexpectedIt != end(inVec))
         {
             return diagnosticBag;
         }
@@ -373,44 +373,44 @@ namespace Ace
     }
 
 #undef TOut
-#define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap())>
+#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap())>
 
     template<typename TIn, typename F>
     auto TransformExpectedOptional(
-        const std::optional<TIn>& t_optIn,
-        F&& t_func
+        const std::optional<TIn>& optIn,
+        F&& func
     ) -> Expected<std::optional<TOut>>
     {
-        if (!t_optIn.has_value())
+        if (!optIn.has_value())
         {
             return std::optional<TOut>{};
         }
 
-        ACE_TRY(out, t_func(t_optIn.value()));
+        ACE_TRY(out, func(optIn.value()));
         return std::optional{ out };
     }
 
 #undef TOut
-#define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap().Value)>
+#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap().Value)>
 
     template<typename TIn, typename F>
     auto TransformExpectedMaybeChangedVector(
-        const std::vector<TIn>& t_inVec,
-        F&& t_func
+        const std::vector<TIn>& inVec,
+        F&& func
     ) -> Expected<MaybeChanged<std::vector<TOut>>>
     {
         DiagnosticBag diagnosticBag{};
 
         bool isChanged = false;
         std::vector<TOut> outVec{};
-        outVec.reserve(t_inVec.size());
+        outVec.reserve(inVec.size());
 
         const auto unexpectedIt = std::find_if_not(
-            begin(t_inVec),
-            end  (t_inVec),
-            [&](const TIn& t_element)
+            begin(inVec),
+            end  (inVec),
+            [&](const TIn& element)
             {
-                auto expMchElement = t_func(t_element);
+                auto expMchElement = func(element);
                 diagnosticBag.Add(expMchElement);
                 if (!expMchElement)
                 {
@@ -435,40 +435,40 @@ namespace Ace
             }
         );
 
-        if (unexpectedIt != end(t_inVec))
+        if (unexpectedIt != end(inVec))
         {
             return diagnosticBag;
         }
 
         if (!isChanged)
         {
-            return CreateUnchanged(t_inVec);
+            return CreateUnchanged(inVec);
         }
 
         return CreateChanged(outVec);
     }
 
 #undef TOut
-#define TOut typename std::decay_t<decltype(t_func(TIn{}).Unwrap().Value)>
+#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap().Value)>
 
     template<typename TIn, typename F>
     auto TransformExpectedMaybeChangedOptional(
-        const std::optional<TIn>& t_optIn,
-        F&& t_func
+        const std::optional<TIn>& optIn,
+        F&& func
     ) -> Expected<MaybeChanged<std::optional<TOut>>>
     {
         bool isChanged = false;
 
-        if (!t_optIn.has_value())
+        if (!optIn.has_value())
         {
-            return CreateUnchanged(t_optIn);
+            return CreateUnchanged(optIn);
         }
 
-        ACE_TRY(mchOut, t_func(t_optIn.value()));
+        ACE_TRY(mchOut, func(optIn.value()));
 
         if (!mchOut.IsChanged)
         {
-            return CreateUnchanged(t_optIn);
+            return CreateUnchanged(optIn);
         }
 
         return CreateChanged(std::optional{ mchOut.Value });

@@ -15,10 +15,10 @@
 namespace Ace
 {
     LogicalNegationExprBoundNode::LogicalNegationExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_expr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& expr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr }
     {
     }
 
@@ -42,7 +42,7 @@ namespace Ace
     }
 
     auto LogicalNegationExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const LogicalNegationExprBoundNode>>>
     {
         const TypeInfo typeInfo
@@ -68,14 +68,14 @@ namespace Ace
     }
 
     auto LogicalNegationExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto LogicalNegationExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const LogicalNegationExprBoundNode>>
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
@@ -92,19 +92,19 @@ namespace Ace
     }
 
     auto LogicalNegationExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
     auto LogicalNegationExprBoundNode::Emit(
-        Emitter& t_emitter
+        Emitter& emitter
     ) const -> ExprEmitResult
     {
         std::vector<ExprDropData> temporaries{};
 
-        const auto exprEmitResult = m_Expr->Emit(t_emitter);
+        const auto exprEmitResult = m_Expr->Emit(emitter);
         temporaries.insert(
             end(temporaries),
             begin(exprEmitResult.Temporaries),
@@ -113,21 +113,21 @@ namespace Ace
 
         auto* const boolType = GetCompilation()->Natives->Bool.GetIRType();
 
-        auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
+        auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,
             exprEmitResult.Value
         );
 
-        auto* const negatedValue = t_emitter.GetBlockBuilder().Builder.CreateXor(
+        auto* const negatedValue = emitter.GetBlockBuilder().Builder.CreateXor(
             loadInst,
             1
         );
 
-        auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(
+        auto* const allocaInst = emitter.GetBlockBuilder().Builder.CreateAlloca(
             boolType
         );
 
-        t_emitter.GetBlockBuilder().Builder.CreateStore(
+        emitter.GetBlockBuilder().Builder.CreateStore(
             negatedValue,
             allocaInst
         );

@@ -17,10 +17,10 @@
 namespace Ace
 {
     DereferenceExprBoundNode::DereferenceExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_expr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& expr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr }
     {
     }
 
@@ -44,7 +44,7 @@ namespace Ace
     }
 
     auto DereferenceExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const DereferenceExprBoundNode>>>
     {
         ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
@@ -60,14 +60,14 @@ namespace Ace
         ));
     }
     auto DereferenceExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto DereferenceExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const DereferenceExprBoundNode>>
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
@@ -84,17 +84,17 @@ namespace Ace
     }
 
     auto DereferenceExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto DereferenceExprBoundNode::Emit(Emitter& t_emitter) const -> ExprEmitResult
+    auto DereferenceExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
         std::vector<ExprDropData> temporaries{};
 
-        const auto exprEmitResult = m_Expr->Emit(t_emitter);
+        const auto exprEmitResult = m_Expr->Emit(emitter);
         temporaries.insert(
             end(temporaries),
             begin(exprEmitResult.Temporaries),
@@ -105,11 +105,11 @@ namespace Ace
         ACE_ASSERT(typeSymbol->IsReference());
 
         auto* const type = llvm::PointerType::get(
-            t_emitter.GetIRType(typeSymbol), 
+            emitter.GetIRType(typeSymbol), 
             0
         );
 
-        auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
+        auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             type,
             exprEmitResult.Value
         );

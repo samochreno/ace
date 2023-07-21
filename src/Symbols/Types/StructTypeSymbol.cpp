@@ -14,12 +14,12 @@
 namespace Ace
 {
     StructTypeSymbol::StructTypeSymbol(
-        const std::shared_ptr<Scope>& t_selfScope,
-        const Identifier& t_name,
-        const AccessModifier t_accessModifier
-    ) : m_SelfScope{ t_selfScope },
-        m_Name{ t_name },
-        m_AccessModifier{ t_accessModifier }
+        const std::shared_ptr<Scope>& selfScope,
+        const Identifier& name,
+        const AccessModifier accessModifier
+    ) : m_SelfScope{ selfScope },
+        m_Name{ name },
+        m_AccessModifier{ accessModifier }
     {
     }
 
@@ -79,9 +79,9 @@ namespace Ace
             const auto vars = GetVars();
 
             const auto canResolveSize = TransformExpectedVector(GetVars(),
-            [](const InstanceVarSymbol* const t_var) -> Expected<void>
+            [](const InstanceVarSymbol* const var) -> Expected<void>
             {
-                ACE_TRY(sizeKind, t_var->GetType()->GetSizeKind());
+                ACE_TRY(sizeKind, var->GetType()->GetSizeKind());
                 ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
                 return Void{};
             });
@@ -132,31 +132,31 @@ namespace Ace
     }
 
     auto StructTypeSymbol::CreateCopyGlueBody(
-        FunctionSymbol* const t_glueSymbol
+        FunctionSymbol* const glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>> 
     {
         return GlueGeneration::CreateCopyGlueBody(
             GetCompilation(),
-            t_glueSymbol,
+            glueSymbol,
             this
         );
     }
 
     auto StructTypeSymbol::CreateDropGlueBody(
-        FunctionSymbol* const t_glueSymbol
+        FunctionSymbol* const glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
         return GlueGeneration::CreateDropGlueBody(
             GetCompilation(),
-            t_glueSymbol,
+            glueSymbol,
             this
         );
     }
 
-    auto StructTypeSymbol::BindCopyGlue(FunctionSymbol* const t_symbol) -> void
+    auto StructTypeSymbol::BindCopyGlue(FunctionSymbol* const symbol) -> void
     {
-        ACE_ASSERT(t_symbol);
-        m_OptCopyGlue = t_symbol;
+        ACE_ASSERT(symbol);
+        m_OptCopyGlue = symbol;
     }
 
     auto StructTypeSymbol::GetCopyGlue() const -> std::optional<FunctionSymbol*>
@@ -164,10 +164,10 @@ namespace Ace
         return m_OptCopyGlue;
     }
 
-    auto StructTypeSymbol::BindDropGlue(FunctionSymbol* const t_symbol) -> void
+    auto StructTypeSymbol::BindDropGlue(FunctionSymbol* const symbol) -> void
     {
-        ACE_ASSERT(t_symbol);
-        m_OptDropGlue = t_symbol;
+        ACE_ASSERT(symbol);
+        m_OptDropGlue = symbol;
     }
 
     auto StructTypeSymbol::GetDropGlue() const -> std::optional<FunctionSymbol*>
@@ -190,11 +190,11 @@ namespace Ace
         auto vars = m_SelfScope->CollectSymbols<InstanceVarSymbol>();
         std::sort(begin(vars), end(vars),
         [](
-            const InstanceVarSymbol* const t_lhs,
-            const InstanceVarSymbol* const t_rhs
+            const InstanceVarSymbol* const lhs,
+            const InstanceVarSymbol* const rhs
         )
         {
-            return t_lhs->GetIndex() < t_rhs->GetIndex();
+            return lhs->GetIndex() < rhs->GetIndex();
         });
 
         return vars;

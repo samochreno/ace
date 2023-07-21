@@ -11,10 +11,10 @@
 namespace Ace
 {
     AttributeNode::AttributeNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const StructConstructionExprNode>& t_structConstructionExpr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_StructConstructionExpr{ t_structConstructionExpr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const StructConstructionExprNode>& structConstructionExpr
+    ) : m_SourceLocation{ sourceLocation },
+        m_StructConstructionExpr{ structConstructionExpr }
     {
     }
 
@@ -38,12 +38,12 @@ namespace Ace
     }
 
     auto AttributeNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const AttributeNode>
     {
         return std::make_shared<const AttributeNode>(
             m_SourceLocation,
-            m_StructConstructionExpr->CloneInScope(t_scope)
+            m_StructConstructionExpr->CloneInScope(scope)
         );
     }
 

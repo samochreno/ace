@@ -22,9 +22,9 @@ namespace Ace
         class NullBuffer : public std::streambuf
         {
         public:
-            auto overflow(int t_c) -> int
+            auto overflow(int c) -> int
             {
-               return t_c;
+               return c;
             }
         } m_Buffer;
     

@@ -15,14 +15,14 @@
 namespace Ace
 {
     FunctionTemplateNode::FunctionTemplateNode(
-        const SourceLocation& t_sourceLocation,
-        const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& t_implParams,
-        const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& t_params,
-        const std::shared_ptr<const FunctionNode>& t_ast
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_ImplParams{ t_implParams },
-        m_Params{ t_params },
-        m_AST{ t_ast }
+        const SourceLocation& sourceLocation,
+        const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& implParams,
+        const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& params,
+        const std::shared_ptr<const FunctionNode>& ast
+    ) : m_SourceLocation{ sourceLocation },
+        m_ImplParams{ implParams },
+        m_Params{ params },
+        m_AST{ ast }
     {
     }
 
@@ -47,7 +47,7 @@ namespace Ace
     }
 
     auto FunctionTemplateNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const FunctionTemplateNode>
     {
         std::vector<std::shared_ptr<const ImplTemplateParamNode>> clonedImplParams{};
@@ -55,9 +55,9 @@ namespace Ace
             begin(m_ImplParams),
             end  (m_ImplParams),
             back_inserter(clonedImplParams),
-            [&](const std::shared_ptr<const ImplTemplateParamNode>& t_implParam)
+            [&](const std::shared_ptr<const ImplTemplateParamNode>& implParam)
             {
-                return t_implParam->CloneInScope(m_AST->GetSelfScope());
+                return implParam->CloneInScope(m_AST->GetSelfScope());
             }
         );
 
@@ -66,9 +66,9 @@ namespace Ace
             begin(m_Params),
             end  (m_Params),
             back_inserter(clonedParams),
-            [&](const std::shared_ptr<const NormalTemplateParamNode>& t_param)
+            [&](const std::shared_ptr<const NormalTemplateParamNode>& param)
             {
-                return t_param->CloneInScope(m_AST->GetSelfScope());
+                return param->CloneInScope(m_AST->GetSelfScope());
             }
         );
 
@@ -76,7 +76,7 @@ namespace Ace
             m_SourceLocation,
             clonedImplParams,
             clonedParams,
-            m_AST->CloneInScope(t_scope)
+            m_AST->CloneInScope(scope)
         );
     }
 
@@ -110,9 +110,9 @@ namespace Ace
             begin(m_ImplParams),
             end  (m_ImplParams),
             back_inserter(names),
-            [](const std::shared_ptr<const ImplTemplateParamNode>& t_implParam)
+            [](const std::shared_ptr<const ImplTemplateParamNode>& implParam)
             {
-                return t_implParam->GetName();
+                return implParam->GetName();
             }
         );
 
@@ -126,9 +126,9 @@ namespace Ace
             begin(m_Params),
             end  (m_Params),
             back_inserter(names),
-            [](const std::shared_ptr<const NormalTemplateParamNode>& t_param)
+            [](const std::shared_ptr<const NormalTemplateParamNode>& param)
             {
-                return t_param->GetName();
+                return param->GetName();
             }
         );
 

@@ -21,24 +21,24 @@
 namespace Ace
 {
     FunctionNode::FunctionNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_selfScope,
-        const Identifier& t_name,
-        const TypeName& t_typeName,
-        const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-        const AccessModifier t_accessModifier,
-        const std::optional<std::shared_ptr<const SelfParamVarNode>>& t_optSelf,
-        const std::vector<std::shared_ptr<const NormalParamVarNode>>& t_params,
-        const std::optional<std::shared_ptr<const BlockStmtNode>>& t_optBody
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_SelfScope{ t_selfScope },
-        m_Name{ t_name },
-        m_TypeName{ t_typeName },
-        m_Attributes{ t_attributes },
-        m_AccessModifier{ t_accessModifier },
-        m_OptSelf{ t_optSelf },
-        m_Params{ t_params },
-        m_OptBody{ t_optBody }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& selfScope,
+        const Identifier& name,
+        const TypeName& typeName,
+        const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
+        const AccessModifier accessModifier,
+        const std::optional<std::shared_ptr<const SelfParamVarNode>>& optSelf,
+        const std::vector<std::shared_ptr<const NormalParamVarNode>>& params,
+        const std::optional<std::shared_ptr<const BlockStmtNode>>& optBody
+    ) : m_SourceLocation{ sourceLocation },
+        m_SelfScope{ selfScope },
+        m_Name{ name },
+        m_TypeName{ typeName },
+        m_Attributes{ attributes },
+        m_AccessModifier{ accessModifier },
+        m_OptSelf{ optSelf },
+        m_Params{ params },
+        m_OptBody{ optBody }
     {
     }
 
@@ -74,19 +74,19 @@ namespace Ace
     }
 
     auto FunctionNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const FunctionNode>
     {
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto selfScope = scope->GetOrCreateChild({});
 
         std::vector<std::shared_ptr<const AttributeNode>> clonedAttributes{};
         std::transform(
             begin(m_Attributes),
             end  (m_Attributes),
             back_inserter(clonedAttributes),
-            [&](const std::shared_ptr<const AttributeNode>& t_attribute)
+            [&](const std::shared_ptr<const AttributeNode>& attribute)
             {
-                return t_attribute->CloneInScope(t_scope);
+                return attribute->CloneInScope(scope);
             }
         );
 
@@ -105,9 +105,9 @@ namespace Ace
             begin(m_Params),
             end  (m_Params),
             back_inserter(clonedParams),
-            [&](const std::shared_ptr<const NormalParamVarNode>& t_param)
+            [&](const std::shared_ptr<const NormalParamVarNode>& param)
             {
-                return t_param->CloneInScope(selfScope);
+                return param->CloneInScope(selfScope);
             }
         );
 
@@ -137,27 +137,27 @@ namespace Ace
     auto FunctionNode::CreateBound() const -> Expected<std::shared_ptr<const FunctionBoundNode>>
     {
         ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeNode>& t_attribute)
+        [](const std::shared_ptr<const AttributeNode>& attribute)
         {
-            return t_attribute->CreateBound();
+            return attribute->CreateBound();
         }));
 
         ACE_TRY(boundOptSelf, TransformExpectedOptional(m_OptSelf,
-        [](const std::shared_ptr<const SelfParamVarNode>& t_param)
+        [](const std::shared_ptr<const SelfParamVarNode>& param)
         {
-            return t_param->CreateBound();
+            return param->CreateBound();
         }));
 
         ACE_TRY(boundParams, TransformExpectedVector(m_Params,
-        [](const std::shared_ptr<const NormalParamVarNode>& t_param)
+        [](const std::shared_ptr<const NormalParamVarNode>& param)
         {
-            return t_param->CreateBound();
+            return param->CreateBound();
         }));
 
         ACE_TRY(boundOptBody, TransformExpectedOptional(m_OptBody,
-        [](const std::shared_ptr<const BlockStmtNode>& t_body)
+        [](const std::shared_ptr<const BlockStmtNode>& body)
         {
-            return t_body->CreateBound();
+            return body->CreateBound();
         }));
 
         ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<ITypeSymbol>(

@@ -20,10 +20,10 @@ namespace Ace
     {
     public:
         StructTypeBoundNode(
-            const SourceLocation& t_sourceLocation,
-            StructTypeSymbol* const t_symbol,
-            const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes,
-            const std::vector<std::shared_ptr<const InstanceVarBoundNode>>& t_vars
+            const SourceLocation& sourceLocation,
+            StructTypeSymbol* const symbol,
+            const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
+            const std::vector<std::shared_ptr<const InstanceVarBoundNode>>& vars
         );
         virtual ~StructTypeBoundNode() = default;
 
@@ -31,16 +31,16 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const StructTypeBoundNode>>> final;
         auto GetOrCreateTypeCheckedType(
-            const TypeCheckingContext& t_context
+            const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const ITypeBoundNode>>> final;
         auto GetOrCreateLowered(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const StructTypeBoundNode>> final;
         auto GetOrCreateLoweredType(
-            const LoweringContext& t_context
+            const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const ITypeBoundNode>> final;
 
         auto GetSymbol() const -> StructTypeSymbol* final;

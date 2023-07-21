@@ -25,7 +25,7 @@ namespace Ace
     {
     public:
         ControlFlowAnalysis(
-            const std::shared_ptr<const BlockStmtBoundNode>& t_blockStmtNode
+            const std::shared_ptr<const BlockStmtBoundNode>& blockStmtNode
         );
         ~ControlFlowAnalysis() = default;
 
@@ -33,12 +33,12 @@ namespace Ace
 
     private:
         auto FindLabelStmt(
-            const LabelSymbol* const t_labelSymbol
+            const LabelSymbol* const labelSymbol
         ) const -> std::vector<ControlFlowStmt>::const_iterator;
 
         auto IsEndReachableWithoutReturn(
-            const std::vector<ControlFlowStmt>::const_iterator t_begin,
-            const std::vector<std::vector<ControlFlowStmt>::const_iterator>& t_ends
+            const std::vector<ControlFlowStmt>::const_iterator begin,
+            const std::vector<std::vector<ControlFlowStmt>::const_iterator>& ends
         ) const -> bool;
 
         std::vector<ControlFlowStmt> m_Stmts{};

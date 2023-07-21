@@ -11,7 +11,7 @@
 namespace Ace
 {
     auto ParseAST(
-        const FileBuffer* const t_fileBuffer,
-        const std::vector<std::shared_ptr<const Token>>& t_tokens
+        const FileBuffer* const fileBuffer,
+        const std::vector<std::shared_ptr<const Token>>& tokens
     ) -> Expected<std::shared_ptr<const ModuleNode>>;
 }

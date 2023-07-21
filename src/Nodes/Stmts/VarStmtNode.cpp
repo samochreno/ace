@@ -14,16 +14,16 @@
 namespace Ace
 {
     VarStmtNode::VarStmtNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const Identifier& t_name,
-        const TypeName& t_typeName,
-        const std::optional<std::shared_ptr<const IExprNode>>& t_optAssignedExpr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Name{ t_name },
-        m_TypeName{ t_typeName },
-        m_OptAssignedExpr{ t_optAssignedExpr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const Identifier& name,
+        const TypeName& typeName,
+        const std::optional<std::shared_ptr<const IExprNode>>& optAssignedExpr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Name{ name },
+        m_TypeName{ typeName },
+        m_OptAssignedExpr{ optAssignedExpr }
     {
     }
 
@@ -50,7 +50,7 @@ namespace Ace
     }
 
     auto VarStmtNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const VarStmtNode>
     {
         const auto optAssignedExpr = [&]() -> std::optional<std::shared_ptr<const IExprNode>>
@@ -60,12 +60,12 @@ namespace Ace
                 return std::nullopt;
             }
 
-            return m_OptAssignedExpr.value()->CloneInScopeExpr(t_scope);
+            return m_OptAssignedExpr.value()->CloneInScopeExpr(scope);
         }();
 
         return std::make_shared<const VarStmtNode>(
             m_SourceLocation,
-            t_scope,
+            scope,
             m_Name,
             m_TypeName,
             optAssignedExpr
@@ -73,10 +73,10 @@ namespace Ace
     }
 
     auto VarStmtNode::CloneInScopeStmt(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto VarStmtNode::CreateBound() const -> Expected<std::shared_ptr<const VarStmtBoundNode>>
@@ -86,9 +86,9 @@ namespace Ace
         ).Unwrap();
 
         ACE_TRY(boundOptAssignedExpr, TransformExpectedOptional(m_OptAssignedExpr,
-        [](const std::shared_ptr<const IExprNode>& t_expr)
+        [](const std::shared_ptr<const IExprNode>& expr)
         {
-            return t_expr->CreateBoundExpr();
+            return expr->CreateBoundExpr();
         }));
 
         return std::make_shared<const VarStmtBoundNode>(

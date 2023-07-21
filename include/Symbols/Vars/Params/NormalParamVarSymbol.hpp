@@ -14,10 +14,10 @@ namespace Ace
     {
     public:
         NormalParamVarSymbol(
-            const std::shared_ptr<Scope>& t_scope,
-            const Identifier& t_name,
-            ITypeSymbol* const t_type,
-            const size_t t_index
+            const std::shared_ptr<Scope>& scope,
+            const Identifier& name,
+            ITypeSymbol* const type,
+            const size_t index
         );
         virtual ~NormalParamVarSymbol() = default;
 

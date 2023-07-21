@@ -17,10 +17,10 @@
 namespace Ace
 {
     BoxExprBoundNode::BoxExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_expr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& expr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr }
     {
     }
 
@@ -44,7 +44,7 @@ namespace Ace
     }
 
     auto BoxExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const BoxExprBoundNode>>> 
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
@@ -80,14 +80,14 @@ namespace Ace
     }
     
     auto BoxExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto BoxExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const StaticFunctionCallExprBoundNode>> 
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
@@ -111,13 +111,13 @@ namespace Ace
     }
 
     auto BoxExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto BoxExprBoundNode::Emit(Emitter& t_emitter) const -> ExprEmitResult
+    auto BoxExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
         ACE_UNREACHABLE();
     }

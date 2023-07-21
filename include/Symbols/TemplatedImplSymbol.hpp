@@ -17,9 +17,9 @@ namespace Ace
     {
     public:
         TemplatedImplSymbol(
-            const std::shared_ptr<Scope>& t_scope,
-            const std::shared_ptr<Scope>& t_selfScope,
-            TypeTemplateSymbol* const t_implementedTypeTemplate
+            const std::shared_ptr<Scope>& scope,
+            const std::shared_ptr<Scope>& selfScope,
+            TypeTemplateSymbol* const implementedTypeTemplate
         );
         virtual ~TemplatedImplSymbol() = default;
 

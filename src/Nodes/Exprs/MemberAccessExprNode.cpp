@@ -15,12 +15,12 @@
 namespace Ace
 {
     MemberAccessExprNode::MemberAccessExprNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprNode>& t_expr,
-        const SymbolNameSection& t_name
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr },
-        m_Name{ t_name }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprNode>& expr,
+        const SymbolNameSection& name
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr },
+        m_Name{ name }
     {
     }
 
@@ -44,21 +44,21 @@ namespace Ace
     }
 
     auto MemberAccessExprNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const MemberAccessExprNode>
     {
         return std::make_shared<const MemberAccessExprNode>(
             m_SourceLocation,
-            m_Expr->CloneInScopeExpr(t_scope),
+            m_Expr->CloneInScopeExpr(scope),
             m_Name
         );
     }
 
     auto MemberAccessExprNode::CloneInScopeExpr(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IExprNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto MemberAccessExprNode::CreateBound() const -> Expected<std::shared_ptr<const InstanceVarReferenceExprBoundNode>>

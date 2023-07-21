@@ -24,12 +24,12 @@ namespace Ace
     {
     public:
         NormalParamVarNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<Scope>& t_scope,
-            const Identifier& t_name,
-            const TypeName& t_typeName,
-            const std::vector<std::shared_ptr<const AttributeNode>>& t_attributes,
-            const size_t t_index
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<Scope>& scope,
+            const Identifier& name,
+            const TypeName& typeName,
+            const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
+            const size_t index
         );
         virtual ~NormalParamVarNode() = default;
 
@@ -37,7 +37,7 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const NormalParamVarNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const ParamVarBoundNode>> final;
 

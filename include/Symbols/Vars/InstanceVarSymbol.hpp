@@ -14,11 +14,11 @@ namespace Ace
     {
     public:
         InstanceVarSymbol(
-            const std::shared_ptr<Scope>& t_scope,
-            const Identifier& t_name,
-            const AccessModifier t_accessModifier,
-            ITypeSymbol* const t_type,
-            const size_t t_index
+            const std::shared_ptr<Scope>& scope,
+            const Identifier& name,
+            const AccessModifier accessModifier,
+            ITypeSymbol* const type,
+            const size_t index
         );
         virtual ~InstanceVarSymbol() = default;
 

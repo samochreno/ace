@@ -14,14 +14,14 @@
 namespace Ace
 {
     StructTypeBoundNode::StructTypeBoundNode(
-        const SourceLocation& t_sourceLocation,
-        StructTypeSymbol* const t_symbol,
-        const std::vector<std::shared_ptr<const AttributeBoundNode>>& t_attributes,
-        const std::vector<std::shared_ptr<const InstanceVarBoundNode>>& t_vars
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Symbol{ t_symbol },
-        m_Attributes{ t_attributes },
-        m_Vars{ t_vars }
+        const SourceLocation& sourceLocation,
+        StructTypeSymbol* const symbol,
+        const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
+        const std::vector<std::shared_ptr<const InstanceVarBoundNode>>& vars
+    ) : m_SourceLocation{ sourceLocation },
+        m_Symbol{ symbol },
+        m_Attributes{ attributes },
+        m_Vars{ vars }
     {
     }
 
@@ -46,19 +46,19 @@ namespace Ace
     }
 
     auto StructTypeBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const StructTypeBoundNode>>>
     {
         ACE_TRY(mchCheckedAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeBoundNode>& t_attribute)
+        [](const std::shared_ptr<const AttributeBoundNode>& attribute)
         {
-            return t_attribute->GetOrCreateTypeChecked({});
+            return attribute->GetOrCreateTypeChecked({});
         }));
 
         ACE_TRY(mchCheckedVars, TransformExpectedMaybeChangedVector(m_Vars,
-        [](const std::shared_ptr<const InstanceVarBoundNode>& t_var)
+        [](const std::shared_ptr<const InstanceVarBoundNode>& var)
         {
-            return t_var->GetOrCreateTypeChecked({});
+            return var->GetOrCreateTypeChecked({});
         }));
 
         if (
@@ -78,26 +78,26 @@ namespace Ace
     }
 
     auto StructTypeBoundNode::GetOrCreateTypeCheckedType(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const ITypeBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto StructTypeBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const StructTypeBoundNode>>
     {
         const auto mchLoweredAttributes = TransformMaybeChangedVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeBoundNode>& t_attribute)
+        [](const std::shared_ptr<const AttributeBoundNode>& attribute)
         {
-            return t_attribute->GetOrCreateLowered({});
+            return attribute->GetOrCreateLowered({});
         });
 
         const auto mchLoweredVars = TransformMaybeChangedVector(m_Vars,
-        [](const std::shared_ptr<const InstanceVarBoundNode>& t_var)
+        [](const std::shared_ptr<const InstanceVarBoundNode>& var)
         {
-            return t_var->GetOrCreateLowered({});
+            return var->GetOrCreateLowered({});
         });
 
         if (
@@ -117,10 +117,10 @@ namespace Ace
     }
 
     auto StructTypeBoundNode::GetOrCreateLoweredType(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const ITypeBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
     auto StructTypeBoundNode::GetSymbol() const -> StructTypeSymbol*

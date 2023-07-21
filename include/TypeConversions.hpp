@@ -9,25 +9,25 @@
 namespace Ace
 {
     auto GetImplicitConversionOp(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        ITypeSymbol* t_fromType,
-        ITypeSymbol* t_targetType
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        ITypeSymbol* fromType,
+        ITypeSymbol* targetType
     ) -> Expected<FunctionSymbol*>;
     auto GetExplicitConversionOp(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        ITypeSymbol* t_fromType,
-        ITypeSymbol* t_targetType
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        ITypeSymbol* fromType,
+        ITypeSymbol* targetType
     ) -> Expected<FunctionSymbol*>;
 
     auto AreTypesSame(
-        const std::vector<ITypeSymbol*>& t_typesA,
-        const std::vector<ITypeSymbol*>& t_typesB
+        const std::vector<ITypeSymbol*>& typesA,
+        const std::vector<ITypeSymbol*>& typesB
     ) -> bool;
     auto AreTypesConvertible(
-        const std::shared_ptr<Scope>& t_scope,
-        const std::vector<TypeInfo>& t_fromTypeInfos,
-        const std::vector<TypeInfo>& t_targetTypeInfos
+        const std::shared_ptr<Scope>& scope,
+        const std::vector<TypeInfo>& fromTypeInfos,
+        const std::vector<TypeInfo>& targetTypeInfos
     ) -> bool;
 }

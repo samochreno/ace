@@ -15,12 +15,12 @@
 namespace Ace
 {
     DerefAsExprBoundNode::DerefAsExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_expr,
-        ITypeSymbol* const t_typeSymbol
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_TypeSymbol{ t_typeSymbol },
-        m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        ITypeSymbol* const typeSymbol
+    ) : m_SourceLocation{ sourceLocation },
+        m_TypeSymbol{ typeSymbol },
+        m_Expr{ expr }
     {
     }
 
@@ -44,7 +44,7 @@ namespace Ace
     }
 
     auto DerefAsExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const DerefAsExprBoundNode>>>
     {
         auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol->GetUnaliased();
@@ -69,14 +69,14 @@ namespace Ace
     }
 
     auto DerefAsExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto DerefAsExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const DerefAsExprBoundNode>>
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
@@ -94,17 +94,17 @@ namespace Ace
     }
 
     auto DerefAsExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto DerefAsExprBoundNode::Emit(Emitter& t_emitter) const -> ExprEmitResult
+    auto DerefAsExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
         std::vector<ExprDropData> temporaries{};
 
-        const auto exprEmitResult = m_Expr->Emit(t_emitter);
+        const auto exprEmitResult = m_Expr->Emit(emitter);
         temporaries.insert(
             end(temporaries),
             begin(exprEmitResult.Temporaries),
@@ -113,7 +113,7 @@ namespace Ace
 
         auto* const pointerType = GetCompilation()->Natives->Pointer.GetIRType();
 
-        auto* const loadInst = t_emitter.GetBlockBuilder().Builder.CreateLoad(
+        auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             pointerType,
             exprEmitResult.Value
         );

@@ -11,10 +11,10 @@
 namespace Ace
 {
     ImplTemplateParamTypeSymbol::ImplTemplateParamTypeSymbol(
-        const std::shared_ptr<Scope>& t_scope,
-        const Identifier& t_name
-    ) : m_Scope{ t_scope },
-        m_Name{ t_name }
+        const std::shared_ptr<Scope>& scope,
+        const Identifier& name
+    ) : m_Scope{ scope },
+        m_Name{ name }
     {
     }
 
@@ -98,21 +98,21 @@ namespace Ace
     }
 
     auto ImplTemplateParamTypeSymbol::CreateCopyGlueBody(
-        FunctionSymbol* const t_glueSymbol
+        FunctionSymbol* const glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
         ACE_UNREACHABLE();
     }
 
     auto ImplTemplateParamTypeSymbol::CreateDropGlueBody(
-        FunctionSymbol* const t_glueSymbol
+        FunctionSymbol* const glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
         ACE_UNREACHABLE();
     }
 
     auto ImplTemplateParamTypeSymbol::BindCopyGlue(
-        FunctionSymbol* const t_glue
+        FunctionSymbol* const glue
     ) -> void
     {
         ACE_UNREACHABLE();
@@ -124,7 +124,7 @@ namespace Ace
     }
 
     auto ImplTemplateParamTypeSymbol::BindDropGlue(
-        FunctionSymbol* const t_glue
+        FunctionSymbol* const glue
     ) -> void
     {
         ACE_UNREACHABLE();

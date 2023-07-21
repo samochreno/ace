@@ -20,20 +20,15 @@ namespace Ace
         return GetScope()->GetCompilation();
     }
 
-    static auto UnwrapAlias(const ISymbol* const t_symbol) -> const ISymbol*
+    static auto UnwrapAlias(const ISymbol* symbol) -> const ISymbol*
     {
-        auto* const typeSymbol = dynamic_cast<const ITypeSymbol*>(t_symbol);
+        auto* const typeSymbol = dynamic_cast<const ITypeSymbol*>(symbol);
         if (!typeSymbol)
         {
-            return t_symbol;
+            return symbol;
         }
 
-        const auto* const symbol = typeSymbol ? 
-            dynamic_cast<const ISymbol*>(typeSymbol->GetUnaliased()) : 
-            t_symbol;
-
-        ACE_ASSERT(symbol);
-        return symbol;
+        return typeSymbol->GetUnaliased();
     }
 
     auto ISymbol::CreatePartialSignature() const -> std::string
@@ -55,9 +50,9 @@ namespace Ace
                 signature += "[";
 
                 std::for_each(begin(templateArgs), end(templateArgs),
-                [&](const ITypeSymbol* const t_templateArg)
+                [&](const ITypeSymbol* const templateArg)
                 {
-                    signature += t_templateArg->CreateSignature();
+                    signature += templateArg->CreateSignature();
                 });
 
                 signature += "]";
@@ -88,16 +83,16 @@ namespace Ace
         std::string signature{};
         bool isFirstScope = true;
         std::for_each(rbegin(scopes), rend(scopes),
-        [&](const std::shared_ptr<Scope>& t_scope)
+        [&](const std::shared_ptr<Scope>& scope)
         {
             if (isFirstScope)
             {
-                signature = t_scope->GetName();
+                signature = scope->GetName();
                 isFirstScope = false;
             }
             else
             {
-                signature = signature + "::" + t_scope->GetName();
+                signature = signature + "::" + scope->GetName();
             }
         });
 
@@ -118,13 +113,13 @@ namespace Ace
     }
 
     auto ISymbol::CreateFullyQualifiedName(
-        const SourceLocation& t_sourceLocation
+        const SourceLocation& sourceLocation
     ) const -> SymbolName
     {
         auto* const symbol = UnwrapAlias(this);
         if (symbol != this)
         {
-            return symbol->CreateFullyQualifiedName(t_sourceLocation);
+            return symbol->CreateFullyQualifiedName(sourceLocation);
         }
 
         std::vector<SymbolNameSection> nameSections{};
@@ -143,21 +138,21 @@ namespace Ace
             rbegin(scopes) + 1, 
             rend  (scopes), 
             back_inserter(nameSections),
-            [&](const std::shared_ptr<Scope>& t_scope)
+            [&](const std::shared_ptr<Scope>& scope)
             {
                 return SymbolNameSection
                 {
                     Identifier
                     {
-                        t_sourceLocation,
-                        t_scope->GetName(),
+                        sourceLocation,
+                        scope->GetName(),
                     }
                 };
             }
         );
 
         nameSections.emplace_back(Identifier{
-            t_sourceLocation,
+            sourceLocation,
             GetName().String
         });
 
@@ -169,10 +164,10 @@ namespace Ace
                 begin(implTemplateArgs), 
                 end  (implTemplateArgs), 
                 back_inserter(implTemplateArgNames),
-                [&](ITypeSymbol* const t_implTemplateArg)
+                [&](ITypeSymbol* const implTemplateArg)
                 {
-                    return t_implTemplateArg->CreateFullyQualifiedName(
-                        t_sourceLocation
+                    return implTemplateArg->CreateFullyQualifiedName(
+                        sourceLocation
                     );
                 }
             );
@@ -185,10 +180,10 @@ namespace Ace
                 begin(templateArgs), 
                 end  (templateArgs), 
                 back_inserter(templateArgNames),
-                [&](ITypeSymbol* const t_templateArg)
+                [&](ITypeSymbol* const templateArg)
                 {
-                    return t_templateArg->CreateFullyQualifiedName(
-                        t_sourceLocation
+                    return templateArg->CreateFullyQualifiedName(
+                        sourceLocation
                     );
                 }
             );

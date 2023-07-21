@@ -11,9 +11,9 @@
 namespace Ace
 {
     ExprStmtBoundNode::ExprStmtBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_expr
-    ) : m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& expr
+    ) : m_Expr{ expr }
     {
     }
 
@@ -37,7 +37,7 @@ namespace Ace
     }
 
     auto ExprStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const ExprStmtBoundNode>>>
     {
         ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
@@ -54,14 +54,14 @@ namespace Ace
     }
 
     auto ExprStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& t_context
+        const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto ExprStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const ExprStmtBoundNode>>
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
@@ -74,20 +74,20 @@ namespace Ace
         return CreateChanged(std::make_shared<const ExprStmtBoundNode>(
             GetSourceLocation(),
             mchLoweredExpr.Value
-        )->GetOrCreateLowered(t_context).Value);
+        )->GetOrCreateLowered(context).Value);
     }
 
     auto ExprStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
-    auto ExprStmtBoundNode::Emit(Emitter& t_emitter) const -> void
+    auto ExprStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
-        const auto exprEmitResult = m_Expr->Emit(t_emitter);
+        const auto exprEmitResult = m_Expr->Emit(emitter);
         
-        t_emitter.EmitDropTemporaries(exprEmitResult.Temporaries);
+        emitter.EmitDropTemporaries(exprEmitResult.Temporaries);
     }
 }

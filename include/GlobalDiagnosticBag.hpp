@@ -8,17 +8,17 @@
 namespace Ace
 {
     auto LogGlobalDiagnostics(
-        const DiagnosticBag& t_diagnosticBag,
-        const size_t t_lastLogSize
+        const DiagnosticBag& diagnosticBag,
+        const size_t lastLogSize
     ) -> void;
 
     class GlobalDiagnosticBag
     {
     public:
         template<typename T>
-        auto Add(T&& t_value) -> GlobalDiagnosticBag&
+        auto Add(T&& value) -> GlobalDiagnosticBag&
         {
-            m_DiagnosticBag.Add(t_value);
+            m_DiagnosticBag.Add(value);
             LogGlobalDiagnostics(m_DiagnosticBag, m_LastLogSize);
             m_LastLogSize = m_DiagnosticBag.GetDiagnostics().size();
             return *this;

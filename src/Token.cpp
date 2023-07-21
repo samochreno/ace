@@ -4,21 +4,21 @@
 
 namespace Ace
 {
-    auto operator==(const Token& t_token, const TokenKind t_kind) -> bool
+    auto operator==(const Token& token, const TokenKind kind) -> bool
     {
-        return t_token.Kind == t_kind;
+        return token.Kind == kind;
     }
 
     auto operator==(
-        const Token& t_token,
-        const std::string_view t_string
+        const Token& token,
+        const std::string_view string
     ) -> bool
     {
-        if (t_token.Kind != TokenKind::Identifier)
+        if (token.Kind != TokenKind::Identifier)
         {
             return false;
         }
 
-        return t_token.String == t_string;
+        return token.String == string;
     }
 }

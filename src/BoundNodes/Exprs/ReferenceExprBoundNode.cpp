@@ -16,10 +16,10 @@
 namespace Ace
 {
     ReferenceExprBoundNode::ReferenceExprBoundNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprBoundNode>& t_expr
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Expr{ t_expr }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& expr
+    ) : m_SourceLocation{ sourceLocation },
+        m_Expr{ expr }
     {
     }
 
@@ -43,7 +43,7 @@ namespace Ace
     }
 
     auto ReferenceExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const ReferenceExprBoundNode>>>
     {
         ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
@@ -60,14 +60,14 @@ namespace Ace
     }
 
     auto ReferenceExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& t_context
+        const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
-        return GetOrCreateTypeChecked(t_context);
+        return GetOrCreateTypeChecked(context);
     }
 
     auto ReferenceExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const ReferenceExprBoundNode>>
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
@@ -84,33 +84,33 @@ namespace Ace
     }
 
     auto ReferenceExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& t_context
+        const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateLowered(t_context);
+        return GetOrCreateLowered(context);
     }
 
     auto ReferenceExprBoundNode::Emit(
-        Emitter& t_emitter
+        Emitter& emitter
     ) const -> ExprEmitResult
     {
         std::vector<ExprDropData> temporaries{};
 
-        const auto exprEmitResult = m_Expr->Emit(t_emitter);
+        const auto exprEmitResult = m_Expr->Emit(emitter);
         temporaries.insert(
             end(temporaries),
             begin(exprEmitResult.Temporaries),
             end  (exprEmitResult.Temporaries)
         ); 
 
-        auto* const allocaInst = t_emitter.GetBlockBuilder().Builder.CreateAlloca(
+        auto* const allocaInst = emitter.GetBlockBuilder().Builder.CreateAlloca(
             exprEmitResult.Value->getType()
         );
         temporaries.emplace_back(
             allocaInst, m_Expr->GetTypeInfo().Symbol->GetWithReference()
         );
 
-        t_emitter.GetBlockBuilder().Builder.CreateStore(
+        emitter.GetBlockBuilder().Builder.CreateStore(
             exprEmitResult.Value,
             allocaInst
         );

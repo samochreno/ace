@@ -23,15 +23,15 @@ namespace Ace
         auto operator=(FileBuffer&&) -> FileBuffer& = default;
 
         static auto Read(
-            const Compilation* const t_compilation,
-            const std::filesystem::path& t_path
+            const Compilation* const compilation,
+            const std::filesystem::path& path
         ) -> Expected<std::shared_ptr<const FileBuffer>>;
 
         auto GetCompilation() const -> const Compilation* final;
         auto GetBuffer() const -> const std::string& final;
 
         auto FormatLocation(
-            const SourceLocation& t_location
+            const SourceLocation& location
         ) const -> std::string final;
 
         auto GetPath() const -> const std::filesystem::path&;
@@ -41,19 +41,19 @@ namespace Ace
 
     private:
         FileBuffer(
-            const Compilation* const t_compilation,
-            const std::filesystem::path& t_path,
-            std::string&& t_buffer,
-            std::vector<std::string_view>&& t_lines,
-            std::vector<std::string_view::const_iterator>&& t_lineBeginIterators
+            const Compilation* const compilation,
+            const std::filesystem::path& path,
+            std::string&& buffer,
+            std::vector<std::string_view>&& lines,
+            std::vector<std::string_view::const_iterator>&& lineBeginIterators
         );
 
         auto FindLineIndex(
-            const std::string_view::const_iterator t_characterIt
+            const std::string_view::const_iterator characterIt
         ) const -> size_t;
         auto FindCharacterIndex(
-            const size_t t_lineIndex,
-            const std::string_view::const_iterator t_characterIt
+            const size_t lineIndex,
+            const std::string_view::const_iterator characterIt
         ) const -> size_t;
 
         const Compilation* m_Compilation{};

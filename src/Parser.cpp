@@ -41,10 +41,10 @@ namespace Ace
     };
 
     static auto IsCompoundAssignmentOp(
-        const TokenKind t_tokenKind
+        const TokenKind tokenKind
     ) -> bool
     {
-        switch (t_tokenKind)
+        switch (tokenKind)
         {
             case TokenKind::PlusEquals:
             case TokenKind::MinusEquals:
@@ -67,9 +67,9 @@ namespace Ace
         }
     }
 
-    static auto IsUserPrefixOp(const TokenKind t_tokenKind) -> bool
+    static auto IsUserPrefixOp(const TokenKind tokenKind) -> bool
     {
-        switch (t_tokenKind)
+        switch (tokenKind)
         {
             case TokenKind::Plus:
             case TokenKind::Minus:
@@ -85,14 +85,14 @@ namespace Ace
         }
     }
 
-    static auto IsPrefixOp(const TokenKind t_tokenKind) -> bool
+    static auto IsPrefixOp(const TokenKind tokenKind) -> bool
     {
-        if (IsUserPrefixOp(t_tokenKind))
+        if (IsUserPrefixOp(tokenKind))
         {
             return true;
         }
 
-        switch (t_tokenKind)
+        switch (tokenKind)
         {
             case TokenKind::Exclamation:
             case TokenKind::BoxKeyword:
@@ -108,9 +108,9 @@ namespace Ace
         }
     }
 
-    static auto IsPostfixOp(const TokenKind t_tokenKind) -> bool
+    static auto IsPostfixOp(const TokenKind tokenKind) -> bool
     {
-        switch (t_tokenKind)
+        switch (tokenKind)
         {
             case TokenKind::OpenParen:
             {
@@ -124,9 +124,9 @@ namespace Ace
         }
     }
 
-    static auto IsUserBinaryOp(const TokenKind t_tokenKind) -> bool
+    static auto IsUserBinaryOp(const TokenKind tokenKind) -> bool
     {
-        switch (t_tokenKind)
+        switch (tokenKind)
         {
             case TokenKind::Asterisk:
             case TokenKind::Slash:
@@ -155,14 +155,14 @@ namespace Ace
         }
     }
 
-    static auto IsBinaryOp(const TokenKind t_tokenKind) -> bool
+    static auto IsBinaryOp(const TokenKind tokenKind) -> bool
     {
-        if (IsUserBinaryOp(t_tokenKind))
+        if (IsUserBinaryOp(tokenKind))
         {
             return true;
         }
 
-        switch (t_tokenKind)
+        switch (tokenKind)
         {
             case TokenKind::VerticalBarVerticalBar:
             case TokenKind::AmpersandAmpersand:
@@ -177,82 +177,82 @@ namespace Ace
         }
     }
 
-    static auto IsUserOp(const TokenKind t_tokenKind) -> bool
+    static auto IsUserOp(const TokenKind tokenKind) -> bool
     {
         return
-            IsUserPrefixOp(t_tokenKind) ||
-            IsUserBinaryOp(t_tokenKind);
+            IsUserPrefixOp(tokenKind) ||
+            IsUserBinaryOp(tokenKind);
     }
 
     static constexpr size_t MaxBinaryOpPrecedence = 9;
     static auto GetBinaryOpPrecedence(
-        const TokenKind t_op
+        const TokenKind op
     ) -> size_t
     {
         if (
-            (t_op == TokenKind::Asterisk) ||
-            (t_op == TokenKind::Slash) ||
-            (t_op == TokenKind::Percent)
+            (op == TokenKind::Asterisk) ||
+            (op == TokenKind::Slash) ||
+            (op == TokenKind::Percent)
             )
         {
             return MaxBinaryOpPrecedence;
         }
 
         if (
-            (t_op == TokenKind::Plus) ||
-            (t_op == TokenKind::Minus)
+            (op == TokenKind::Plus) ||
+            (op == TokenKind::Minus)
             )
         {
             return 8;
         }
 
         if (
-            (t_op == TokenKind::LessThanLessThan) ||
-            (t_op == TokenKind::GreaterThanGreaterThan)
+            (op == TokenKind::LessThanLessThan) ||
+            (op == TokenKind::GreaterThanGreaterThan)
             )
         {
             return 7;
         }
 
         if (
-            (t_op == TokenKind::LessThan) ||
-            (t_op == TokenKind::LessThanEquals) ||
-            (t_op == TokenKind::GreaterThan) ||
-            (t_op == TokenKind::GreaterThanEquals)
+            (op == TokenKind::LessThan) ||
+            (op == TokenKind::LessThanEquals) ||
+            (op == TokenKind::GreaterThan) ||
+            (op == TokenKind::GreaterThanEquals)
             )
         {
             return 6;
         }
 
         if (
-            (t_op == TokenKind::EqualsEquals) ||
-            (t_op == TokenKind::ExclamationEquals)
+            (op == TokenKind::EqualsEquals) ||
+            (op == TokenKind::ExclamationEquals)
             )
         {
             return 5;
         }
 
-        if (t_op == TokenKind::Ampersand)
+        if (op == TokenKind::Ampersand)
         {
             return 4;
         }
 
-        if (t_op == TokenKind::Caret)
+        if (op == TokenKind::Caret)
         {
             return 3;
         }
 
-        if (t_op == TokenKind::VerticalBar)
+        if (op == TokenKind::VerticalBar)
         {
             return 2;
         }
 
-        if (t_op == TokenKind::AmpersandAmpersand)
+        if (op == TokenKind::AmpersandAmpersand)
         {
             return 1;
         }
 
-        if (t_op == TokenKind::VerticalBarVerticalBar)
+        if (op == TokenKind::VerticalBarVerticalBar)
         {
             return 0;
         }
@@ -261,108 +261,108 @@ namespace Ace
     };
 
     static auto CreateCollapsedPrefixExpr(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprNode>& t_expr,
-        const Op& t_op
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprNode>& expr,
+        const Op& op
     ) -> std::shared_ptr<const IExprNode>
     {
-        switch (t_op.TokenKind)
+        switch (op.TokenKind)
         {
             case TokenKind::Exclamation:
             {
                 return std::make_shared<const LogicalNegationExprNode>(
-                    t_sourceLocation,
-                    t_expr
+                    sourceLocation,
+                    expr
                 );
             }
 
             case TokenKind::BoxKeyword:
             {
                 return std::make_shared<const BoxExprNode>(
-                    t_sourceLocation,
-                    t_expr
+                    sourceLocation,
+                    expr
                 );
             }
 
             case TokenKind::UnboxKeyword:
             {
                 return std::make_shared<const UnboxExprNode>(
-                    t_sourceLocation,
-                    t_expr
+                    sourceLocation,
+                    expr
                 );
             }
 
             default:
             {
                 return std::make_shared<const UserUnaryExprNode>(
-                    t_sourceLocation,
-                    t_expr, 
-                    t_op
+                    sourceLocation,
+                    expr, 
+                    op
                 );
             }
         }
     }
 
     static auto CreateCollapsedBinaryExpr(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<const IExprNode>& t_lhsExpr,
-        const std::shared_ptr<const IExprNode>& t_rhsExpr,
-        const Op& t_op
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprNode>& lhsExpr,
+        const std::shared_ptr<const IExprNode>& rhsExpr,
+        const Op& op
     ) -> std::shared_ptr<const IExprNode>
     {
-        switch (t_op.TokenKind)
+        switch (op.TokenKind)
         {
             case TokenKind::AmpersandAmpersand:
             {
                 return std::make_shared<const AndExprNode>(
-                    t_sourceLocation,
-                    t_lhsExpr,
-                    t_rhsExpr
+                    sourceLocation,
+                    lhsExpr,
+                    rhsExpr
                 );
             }
 
             case TokenKind::VerticalBarVerticalBar:
             {
                 return std::make_shared<const OrExprNode>(
-                    t_sourceLocation,
-                    t_lhsExpr,
-                    t_rhsExpr
+                    sourceLocation,
+                    lhsExpr,
+                    rhsExpr
                 );
             }
              
             default:
             {
                 return std::make_shared<const UserBinaryExprNode>(
-                    t_sourceLocation,
-                    t_lhsExpr,
-                    t_rhsExpr,
-                    t_op
+                    sourceLocation,
+                    lhsExpr,
+                    rhsExpr,
+                    op
                 );
             }
         }
     }
 
     static auto CreateSourceLocationRange(
-        const std::shared_ptr<const Token>& t_firstToken,
-        const std::shared_ptr<const Token>& t_lastToken
+        const std::shared_ptr<const Token>& firstToken,
+        const std::shared_ptr<const Token>& lastToken
     ) -> SourceLocation
     {
         return
         {
-            t_firstToken->SourceLocation,
-             t_lastToken->SourceLocation,
+            firstToken->SourceLocation,
+             lastToken->SourceLocation,
         };
     }
 
     static auto CreateSourceLocationRange(
-        const std::shared_ptr<const INode>& t_firstToken,
-        const std::shared_ptr<const INode>& t_lastToken
+        const std::shared_ptr<const INode>& firstToken,
+        const std::shared_ptr<const INode>& lastToken
     ) -> SourceLocation
     {
         return
         {
-            t_firstToken->GetSourceLocation(),
-             t_lastToken->GetSourceLocation(),
+            firstToken->GetSourceLocation(),
+             lastToken->GetSourceLocation(),
         };
     }
 
@@ -372,20 +372,20 @@ namespace Ace
     }
 
     static auto GetOpFunctionName(
-        const std::shared_ptr<const Token>& t_opToken,
-        const size_t t_paramCount
+        const std::shared_ptr<const Token>& opToken,
+        const size_t paramCount
     ) -> Expected<const char*>
     {
         DiagnosticBag diagnosticBag{};
 
-        switch (t_opToken->Kind)
+        switch (opToken->Kind)
         {
             case TokenKind::Asterisk:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -398,10 +398,10 @@ namespace Ace
 
             case TokenKind::Slash:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -414,10 +414,10 @@ namespace Ace
 
             case TokenKind::Percent:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -430,7 +430,7 @@ namespace Ace
 
             case TokenKind::Plus:
             {
-                if (t_paramCount == 1)
+                if (paramCount == 1)
                 {
                     return
                     {
@@ -439,7 +439,7 @@ namespace Ace
                     };
                 }
 
-                if (t_paramCount == 2)
+                if (paramCount == 2)
                 {
                     return
                     {
@@ -449,13 +449,13 @@ namespace Ace
                 }
 
                 return diagnosticBag.Add(
-                    CreateUnexpectedUnaryOrBinaryOpParamCountError(t_opToken)
+                    CreateUnexpectedUnaryOrBinaryOpParamCountError(opToken)
                 );
             }
 
             case TokenKind::Minus:
             {
-                if (t_paramCount == 1)
+                if (paramCount == 1)
                 {
                     return
                     {
@@ -464,7 +464,7 @@ namespace Ace
                     };
                 }
 
-                if (t_paramCount == 2)
+                if (paramCount == 2)
                 {
                     return
                     {
@@ -474,16 +474,16 @@ namespace Ace
                 }
 
                 return diagnosticBag.Add(
-                    CreateUnexpectedUnaryOrBinaryOpParamCountError(t_opToken)
+                    CreateUnexpectedUnaryOrBinaryOpParamCountError(opToken)
                 );
             }
 
             case TokenKind::LessThan:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -496,10 +496,10 @@ namespace Ace
 
             case TokenKind::GreaterThan:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -512,10 +512,10 @@ namespace Ace
 
             case TokenKind::LessThanEquals:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -528,10 +528,10 @@ namespace Ace
 
             case TokenKind::GreaterThanEquals:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -544,10 +544,10 @@ namespace Ace
 
             case TokenKind::GreaterThanGreaterThan:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -560,10 +560,10 @@ namespace Ace
             
             case TokenKind::LessThanLessThan:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -576,10 +576,10 @@ namespace Ace
 
             case TokenKind::EqualsEquals:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -592,10 +592,10 @@ namespace Ace
 
             case TokenKind::ExclamationEquals:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -608,10 +608,10 @@ namespace Ace
 
             case TokenKind::Caret:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
     
@@ -624,10 +624,10 @@ namespace Ace
 
             case TokenKind::VerticalBar:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -640,10 +640,10 @@ namespace Ace
 
             case TokenKind::Ampersand:
             {
-                if (t_paramCount != 2)
+                if (paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                        CreateUnexpectedBinaryOpParamCountError(opToken)
                     );
                 }
 
@@ -656,10 +656,10 @@ namespace Ace
             
             case TokenKind::Tilde:
             {
-                if (t_paramCount != 1)
+                if (paramCount != 1)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedUnaryOpParamCountError(t_opToken)
+                        CreateUnexpectedUnaryOpParamCountError(opToken)
                     );
                 }
 
@@ -672,12 +672,12 @@ namespace Ace
             
             case TokenKind::Identifier:
             {
-                if (t_opToken->String == SpecialIdentifier::Copy)
+                if (opToken->String == SpecialIdentifier::Copy)
                 {
-                    if (t_paramCount != 2)
+                    if (paramCount != 2)
                     {
                         return diagnosticBag.Add(
-                            CreateUnexpectedBinaryOpParamCountError(t_opToken)
+                            CreateUnexpectedBinaryOpParamCountError(opToken)
                         );
                     }
 
@@ -688,12 +688,12 @@ namespace Ace
                     };
                 }
                 
-                if (t_opToken->String == SpecialIdentifier::Drop)
+                if (opToken->String == SpecialIdentifier::Drop)
                 {
-                    if (t_paramCount != 1)
+                    if (paramCount != 1)
                     {
                         return diagnosticBag.Add(
-                            CreateUnexpectedUnaryOpParamCountError(t_opToken)
+                            CreateUnexpectedUnaryOpParamCountError(opToken)
                         );
                     }
 
@@ -705,7 +705,7 @@ namespace Ace
                 }
 
                 return diagnosticBag.Add(
-                    CreateUnknownIdentifierOpError(t_opToken)
+                    CreateUnknownIdentifierOpError(opToken)
                 );
             }
 
@@ -717,55 +717,55 @@ namespace Ace
     }
 
     static auto CreateFunctionOrOpName(
-        const std::shared_ptr<const Token>& t_nameToken,
-        const size_t t_paramCount,
-        const AccessModifier t_accessModifier,
-        const bool t_hasSelfParam
+        const std::shared_ptr<const Token>& nameToken,
+        const size_t paramCount,
+        const AccessModifier accessModifier,
+        const bool hasSelfParam
     ) -> Expected<Identifier>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_nameToken == TokenKind::Identifier)
+        if (nameToken == TokenKind::Identifier)
         {
             return 
             {
                 Identifier
                 {
-                    t_nameToken->SourceLocation,
-                    t_nameToken->String,
+                    nameToken->SourceLocation,
+                    nameToken->String,
                 },
                 diagnosticBag,
             };
         }
 
-        const auto expName = GetOpFunctionName(t_nameToken, t_paramCount);
+        const auto expName = GetOpFunctionName(nameToken, paramCount);
         diagnosticBag.Add(expName);
         if (!expName)
         {
             return diagnosticBag;
         }
 
-        if (t_accessModifier != AccessModifier::Public)
+        if (accessModifier != AccessModifier::Public)
         {
-            return diagnosticBag.Add(CreateOpMustBePublicError(t_nameToken));
+            return diagnosticBag.Add(CreateOpMustBePublicError(nameToken));
         }
 
-        if (t_hasSelfParam)
+        if (hasSelfParam)
         {
-            return diagnosticBag.Add(CreateInstanceOpError(t_nameToken));
+            return diagnosticBag.Add(CreateInstanceOpError(nameToken));
         }
 
         return Identifier
         {
-            t_nameToken->SourceLocation,
+            nameToken->SourceLocation,
             expName.Unwrap(),
         };
     }
 
     static auto CreateSelfParam(
         const std::optional<std::shared_ptr<const Token>>& optSelfToken,
-        const std::shared_ptr<Scope>& t_scope,
-        const SymbolName& t_selfTypeName
+        const std::shared_ptr<Scope>& scope,
+        const SymbolName& selfTypeName
     ) -> std::optional<std::shared_ptr<const SelfParamVarNode>>
     {
         if (!optSelfToken.has_value())
@@ -775,18 +775,18 @@ namespace Ace
 
         return std::make_shared<const SelfParamVarNode>(
             optSelfToken.value()->SourceLocation,
-            t_scope,
-            t_selfTypeName
+            scope,
+            selfTypeName
         );
     }
 
     static auto GetLiteralKind(
-        const std::shared_ptr<const Token>& t_token
+        const std::shared_ptr<const Token>& token
     ) -> Expected<LiteralKind>
     {
         DiagnosticBag diagnosticBag{};
 
-        switch (t_token->Kind)
+        switch (token->Kind)
         {
             case TokenKind::Int8:
             {
@@ -861,19 +861,19 @@ namespace Ace
             default:
             {
                 return diagnosticBag.Add(CreateUnexpectedTokenExpectedLiteralError(
-                    t_token
+                    token
                 ));
             };
         }
     }
 
     static auto GetModifier(
-        const std::shared_ptr<const Token>& t_token
+        const std::shared_ptr<const Token>& token
     ) -> Expected<Modifier>
     {
         DiagnosticBag diagnosticBag{};
 
-        switch (t_token->Kind)
+        switch (token->Kind)
         {
             case TokenKind::PublicKeyword:
             {
@@ -887,7 +887,7 @@ namespace Ace
 
             case TokenKind::Identifier:
             {
-                if (t_token->String == SpecialIdentifier::Self)
+                if (token->String == SpecialIdentifier::Self)
                 {
                     return { Modifier::Self, diagnosticBag };
                 }
@@ -896,7 +896,7 @@ namespace Ace
             default:
             {
                 return diagnosticBag.Add(CreateUnknownModifierError(
-                    t_token
+                    token
                 ));
             }
         }
@@ -918,25 +918,25 @@ namespace Ace
     {
     public:
         Parser(
-            const FileBuffer* const t_fileBuffer,
-            const std::vector<std::shared_ptr<const Token>>& t_tokens
-        ) : m_FileBuffer{ t_fileBuffer }
+            const FileBuffer* const fileBuffer,
+            const std::vector<std::shared_ptr<const Token>>& tokens
+        ) : m_FileBuffer{ fileBuffer }
         {
-            const auto firstLineIt = begin(t_fileBuffer->GetLines());
-            const auto  lastLineIt =   end(t_fileBuffer->GetLines()) - 1;
+            const auto firstLineIt = begin(fileBuffer->GetLines());
+            const auto  lastLineIt =   end(fileBuffer->GetLines()) - 1;
 
             const auto& firstLine = *firstLineIt;
             const auto&  lastLine = * lastLineIt;
 
             const SourceLocation leadingSourceLocation
             {
-                t_fileBuffer,
+                fileBuffer,
                 begin(firstLine),
                 begin(firstLine) + 1,
             };
             const SourceLocation trailingSourceLocation
             {
-                t_fileBuffer,
+                fileBuffer,
                 end(lastLine) - 1,
                 end(lastLine),
             };
@@ -944,7 +944,7 @@ namespace Ace
             m_Tokens.push_back(std::make_shared<const Token>(
                 leadingSourceLocation,
                 TokenKind::Identifier,
-                t_fileBuffer->GetCompilation()->Package.Name
+                fileBuffer->GetCompilation()->Package.Name
             ));
             m_Tokens.push_back(std::make_shared<const Token>(
                 leadingSourceLocation,
@@ -960,12 +960,12 @@ namespace Ace
             ));
 
             std::transform(
-                begin(t_tokens),
-                end  (t_tokens),
+                begin(tokens),
+                end  (tokens),
                 back_inserter(m_Tokens),
-                [](const std::shared_ptr<const Token>& t_token)
+                [](const std::shared_ptr<const Token>& token)
                 {
-                    return t_token;
+                    return token;
                 }
             );
 
@@ -1011,15 +1011,15 @@ namespace Ace
         }
 
         auto DiscardUntil(
-            const DiscardKind t_kind,
-            const TokenKind t_tokenKind
+            const DiscardKind kind,
+            const TokenKind tokenKind
         ) -> void
         {
-            DiscardUntil(t_kind, std::vector{ t_tokenKind });
+            DiscardUntil(kind, std::vector{ tokenKind });
         }
         auto DiscardUntil(
-            const DiscardKind t_kind,
-            const std::vector<TokenKind>& t_tokenKinds
+            const DiscardKind kind,
+            const std::vector<TokenKind>& tokenKinds
         ) -> void
         {
             const auto startNestLevel = GetNestLevel();
@@ -1033,20 +1033,20 @@ namespace Ace
                 }
 
                 const auto matchingTokenKindIt = std::find_if(
-                    begin(t_tokenKinds),
-                    end  (t_tokenKinds),
-                    [&](const TokenKind t_tokenKind)
+                    begin(tokenKinds),
+                    end  (tokenKinds),
+                    [&](const TokenKind tokenKind)
                     {
-                        return t_tokenKind == Peek();
+                        return tokenKind == Peek();
                     }
                 );
-                if (matchingTokenKindIt == end(t_tokenKinds))
+                if (matchingTokenKindIt == end(tokenKinds))
                 {
                     Eat();
                     continue;
                 }
 
-                if (t_kind == DiscardKind::Inclusive)
+                if (kind == DiscardKind::Inclusive)
                 {
                     Eat();
                 }
@@ -1087,92 +1087,92 @@ namespace Ace
     };
 
     static auto IsKeywordExprStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
         return
-            (t_parser.Peek() == TokenKind::CastKeyword) ||
-            (t_parser.Peek() == TokenKind::AddressOfKeyword) ||
-            (t_parser.Peek() == TokenKind::SizeOfKeyword) ||
-            (t_parser.Peek() == TokenKind::DerefAsKeyword);
+            (parser.Peek() == TokenKind::CastKeyword) ||
+            (parser.Peek() == TokenKind::AddressOfKeyword) ||
+            (parser.Peek() == TokenKind::SizeOfKeyword) ||
+            (parser.Peek() == TokenKind::DerefAsKeyword);
     }
 
     static auto IsExprExprStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
-        return t_parser.Peek() == TokenKind::OpenParen;
+        return parser.Peek() == TokenKind::OpenParen;
     }
 
     static auto IsStructConstructionExprStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
-        return t_parser.Peek() == SpecialIdentifier::New;
+        return parser.Peek() == SpecialIdentifier::New;
     }
 
     static auto IsLiteralExprStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
         return
-            (t_parser.Peek() == TokenKind::Int8) ||
-            (t_parser.Peek() == TokenKind::Int16) ||
-            (t_parser.Peek() == TokenKind::Int32) ||
-            (t_parser.Peek() == TokenKind::Int64) ||
-            (t_parser.Peek() == TokenKind::UInt8) ||
-            (t_parser.Peek() == TokenKind::UInt16) ||
-            (t_parser.Peek() == TokenKind::UInt32) ||
-            (t_parser.Peek() == TokenKind::UInt64) ||
-            (t_parser.Peek() == TokenKind::Int) ||
-            (t_parser.Peek() == TokenKind::Float32) ||
-            (t_parser.Peek() == TokenKind::Float64) ||
-            (t_parser.Peek() == TokenKind::String) ||
-            (t_parser.Peek() == TokenKind::TrueKeyword) ||
-            (t_parser.Peek() == TokenKind::FalseKeyword);
+            (parser.Peek() == TokenKind::Int8) ||
+            (parser.Peek() == TokenKind::Int16) ||
+            (parser.Peek() == TokenKind::Int32) ||
+            (parser.Peek() == TokenKind::Int64) ||
+            (parser.Peek() == TokenKind::UInt8) ||
+            (parser.Peek() == TokenKind::UInt16) ||
+            (parser.Peek() == TokenKind::UInt32) ||
+            (parser.Peek() == TokenKind::UInt64) ||
+            (parser.Peek() == TokenKind::Int) ||
+            (parser.Peek() == TokenKind::Float32) ||
+            (parser.Peek() == TokenKind::Float64) ||
+            (parser.Peek() == TokenKind::String) ||
+            (parser.Peek() == TokenKind::TrueKeyword) ||
+            (parser.Peek() == TokenKind::FalseKeyword);
     }
 
     static auto IsSymbolLiteralExprStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
-        return t_parser.Peek() == TokenKind::Identifier;
+        return parser.Peek() == TokenKind::Identifier;
     }
 
     static auto IsKeywordStmtStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
         return
-            (t_parser.Peek() == TokenKind::IfKeyword) ||
-            (t_parser.Peek() == TokenKind::WhileKeyword) ||
-            (t_parser.Peek() == TokenKind::ReturnKeyword) ||
-            (t_parser.Peek() == TokenKind::ExitKeyword) ||
-            (t_parser.Peek() == TokenKind::AssertKeyword);
+            (parser.Peek() == TokenKind::IfKeyword) ||
+            (parser.Peek() == TokenKind::WhileKeyword) ||
+            (parser.Peek() == TokenKind::ReturnKeyword) ||
+            (parser.Peek() == TokenKind::ExitKeyword) ||
+            (parser.Peek() == TokenKind::AssertKeyword);
     }
 
     static auto IsBlockStmtStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
-        return t_parser.Peek() == TokenKind::OpenBrace;
+        return parser.Peek() == TokenKind::OpenBrace;
     }
 
     static auto IsModuleStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
-        if (t_parser.Peek(0) != TokenKind::Identifier)
+        if (parser.Peek(0) != TokenKind::Identifier)
         {
             return false;
         }
 
         size_t i = 1;
-        while (t_parser.Peek(i) == TokenKind::ColonColon)
+        while (parser.Peek(i) == TokenKind::ColonColon)
         {
             i++;
 
-            if (t_parser.Peek(i) != TokenKind::Identifier)
+            if (parser.Peek(i) != TokenKind::Identifier)
             {
                 return false;
             }
@@ -1181,33 +1181,33 @@ namespace Ace
         }
 
         return
-            (t_parser.Peek(i + 0) == TokenKind::Colon) &&
-            (t_parser.Peek(i + 1) == TokenKind::ModuleKeyword);
+            (parser.Peek(i + 0) == TokenKind::Colon) &&
+            (parser.Peek(i + 1) == TokenKind::ModuleKeyword);
     }
 
     static auto GetItemTemplateCloseBracketIndex(
-        const Parser& t_parser
+        const Parser& parser
     ) -> std::optional<size_t>
     {
-        if (t_parser.Peek(0) != TokenKind::Identifier)
+        if (parser.Peek(0) != TokenKind::Identifier)
         {
             return std::nullopt;
         }
 
-        if (t_parser.Peek(1) != TokenKind::OpenBracket)
+        if (parser.Peek(1) != TokenKind::OpenBracket)
         {
             return std::nullopt;
         }
 
         size_t i = 2;
         while (
-            (t_parser.Peek(i) != TokenKind::EndOfFile) &&
-            (t_parser.Peek(i) != TokenKind::CloseBracket)
+            (parser.Peek(i) != TokenKind::EndOfFile) &&
+            (parser.Peek(i) != TokenKind::CloseBracket)
             )
         {
             if (i != 2)
             {
-                if (t_parser.Peek(i) != TokenKind::Comma)
+                if (parser.Peek(i) != TokenKind::Comma)
                 {
                     return std::nullopt;
                 }
@@ -1215,7 +1215,7 @@ namespace Ace
                 i++;
             }
 
-            if (t_parser.Peek(i) != TokenKind::Identifier)
+            if (parser.Peek(i) != TokenKind::Identifier)
             {
                 return std::nullopt;
             }
@@ -1223,33 +1223,33 @@ namespace Ace
             i++;
         }
 
-        return (t_parser.Peek(i) == TokenKind::CloseBracket) ?
+        return (parser.Peek(i) == TokenKind::CloseBracket) ?
             i : std::optional<size_t>{};
     }
 
     static auto IsStructStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
         return
-            (t_parser.Peek(0) == TokenKind::Identifier) &&
-            (t_parser.Peek(1) == TokenKind::Colon) &&
-            (t_parser.Peek(2) == TokenKind::StructKeyword);
+            (parser.Peek(0) == TokenKind::Identifier) &&
+            (parser.Peek(1) == TokenKind::Colon) &&
+            (parser.Peek(2) == TokenKind::StructKeyword);
     }
 
     static auto IsTypeStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
-        return IsStructStart(t_parser);
+        return IsStructStart(parser);
     }
 
     static auto IsStructTemplateStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
         const auto optCloseBracketIndex = GetItemTemplateCloseBracketIndex(
-            t_parser
+            parser
         );
         if (!optCloseBracketIndex.has_value())
         {
@@ -1258,41 +1258,41 @@ namespace Ace
 
         auto i = optCloseBracketIndex.value() + 1;
 
-        if (t_parser.Peek(i) != TokenKind::Colon)
+        if (parser.Peek(i) != TokenKind::Colon)
         {
             return false;
         }
 
         i++;
 
-        return t_parser.Peek(i) == TokenKind::StructKeyword;
+        return parser.Peek(i) == TokenKind::StructKeyword;
     }
 
     static auto IsTypeTemplateStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
-        return IsStructTemplateStart(t_parser);
+        return IsStructTemplateStart(parser);
     }
 
     static auto IsFunctionStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
         return
-            (t_parser.Peek(0) == TokenKind::OpKeyword) ||
+            (parser.Peek(0) == TokenKind::OpKeyword) ||
             (
-                (t_parser.Peek(0) == TokenKind::Identifier) &&
-                (t_parser.Peek(1) == TokenKind::OpenParen)
+                (parser.Peek(0) == TokenKind::Identifier) &&
+                (parser.Peek(1) == TokenKind::OpenParen)
             );
     }
 
     static auto IsFunctionTemplateStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
         const auto optCloseBracketIndex = GetItemTemplateCloseBracketIndex(
-            t_parser
+            parser
         );
         if (!optCloseBracketIndex.has_value())
         {
@@ -1300,74 +1300,74 @@ namespace Ace
         }
 
         const auto i = optCloseBracketIndex.value() + 1;
-        return t_parser.Peek(i) == TokenKind::OpenParen;
+        return parser.Peek(i) == TokenKind::OpenParen;
     }
 
     static auto IsImplStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
         return
-            (t_parser.Peek(0) == TokenKind::ImplKeyword) &&
-            (t_parser.Peek(1) != TokenKind::OpenBracket);
+            (parser.Peek(0) == TokenKind::ImplKeyword) &&
+            (parser.Peek(1) != TokenKind::OpenBracket);
     }
 
     static auto IsTemplatedImplStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
         return
-            (t_parser.Peek(0) == TokenKind::ImplKeyword) &&
-            (t_parser.Peek(1) == TokenKind::OpenBracket);
+            (parser.Peek(0) == TokenKind::ImplKeyword) &&
+            (parser.Peek(1) == TokenKind::OpenBracket);
     }
 
     static auto IsVarStart(
-        const Parser& t_parser
+        const Parser& parser
     ) -> bool
     {
         return
-            (t_parser.Peek(0) == TokenKind::Identifier) &&
-            (t_parser.Peek(1) == TokenKind::Colon) &&
-            (t_parser.Peek(2) != TokenKind::StructKeyword) &&
-            (t_parser.Peek(2) != TokenKind::ModuleKeyword);
+            (parser.Peek(0) == TokenKind::Identifier) &&
+            (parser.Peek(1) == TokenKind::Colon) &&
+            (parser.Peek(2) != TokenKind::StructKeyword) &&
+            (parser.Peek(2) != TokenKind::ModuleKeyword);
     }
 
     static auto ParseExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const IExprNode>>;
 
     static auto ParseOptionalTemplateArgs(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<SymbolName>>;
 
     static auto ParseStructConstructionExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const StructConstructionExprNode>>;
 
     static auto ParseStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const IStmtNode>>;
 
     static auto ParseName(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<Identifier>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_parser.Peek() != TokenKind::Identifier)
+        if (parser.Peek() != TokenKind::Identifier)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Identifier
             ));
         }
 
-        const auto& nameToken = t_parser.Eat();
+        const auto& nameToken = parser.Eat();
 
         return Expected
         {
@@ -1381,15 +1381,15 @@ namespace Ace
     }
 
     static auto ParseNestedName(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<Identifier>>
     {
         DiagnosticBag diagnosticBag{};
 
         std::vector<Identifier> nestedName{};
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
@@ -1398,11 +1398,11 @@ namespace Ace
 
         nestedName.push_back(std::move(expName.Unwrap()));
 
-        while (t_parser.Peek() == TokenKind::ColonColon)
+        while (parser.Peek() == TokenKind::ColonColon)
         {
-            t_parser.Eat();
+            parser.Eat();
 
-            const auto expName = ParseName(t_parser, t_scope);
+            const auto expName = ParseName(parser, scope);
             diagnosticBag.Add(expName);
             if (!expName)
             {
@@ -1416,13 +1416,13 @@ namespace Ace
     }
 
     static auto ParseSymbolNameSection(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<SymbolNameSection>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
@@ -1430,8 +1430,8 @@ namespace Ace
         }
 
         const auto expTemplateArgs = ParseOptionalTemplateArgs(
-            t_parser,
-            t_scope
+            parser,
+            scope
         );
         diagnosticBag.Add(expTemplateArgs);
         if (!expTemplateArgs)
@@ -1451,22 +1451,22 @@ namespace Ace
     }
 
     static auto ParseSymbolName(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<SymbolName>
     {
         DiagnosticBag diagnosticBag{};
 
         auto resolutionScope = SymbolNameResolutionScope::Local;
-        if (t_parser.Peek() == TokenKind::ColonColon)
+        if (parser.Peek() == TokenKind::ColonColon)
         {
             resolutionScope = SymbolNameResolutionScope::Global;
-            t_parser.Eat();
+            parser.Eat();
         }
         
         std::vector<SymbolNameSection> sections{};
 
-        const auto expSection = ParseSymbolNameSection(t_parser, t_scope);
+        const auto expSection = ParseSymbolNameSection(parser, scope);
         diagnosticBag.Add(expSection);
         if (!expSection)
         {
@@ -1475,11 +1475,11 @@ namespace Ace
 
         sections.push_back(std::move(expSection.Unwrap()));
 
-        while (t_parser.Peek() == TokenKind::ColonColon)
+        while (parser.Peek() == TokenKind::ColonColon)
         {
-            t_parser.Eat();
+            parser.Eat();
 
-            const auto expSection = ParseSymbolNameSection(t_parser, t_scope);
+            const auto expSection = ParseSymbolNameSection(parser, scope);
             diagnosticBag.Add(expSection);
             if (!expSection)
             {
@@ -1501,44 +1501,44 @@ namespace Ace
     }
 
     static auto ParseTypeName(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope,
-        const ReferenceParsingKind t_referenceParsingKind
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope,
+        const ReferenceParsingKind referenceParsingKind
     ) -> Expected<TypeName>
     {
         DiagnosticBag diagnosticBag{};
 
         std::vector<TypeNameModifier> modifiers{};
 
-        if (t_referenceParsingKind == ReferenceParsingKind::Allow)
+        if (referenceParsingKind == ReferenceParsingKind::Allow)
         {
-            if (t_parser.Peek() == TokenKind::Ampersand)
+            if (parser.Peek() == TokenKind::Ampersand)
             {
                 modifiers.push_back(TypeNameModifier::Reference);
-                t_parser.Eat();
+                parser.Eat();
             }
         }
 
         while (true)
         {
-            if (t_parser.Peek() == TokenKind::Asterisk)
+            if (parser.Peek() == TokenKind::Asterisk)
             {
                 modifiers.push_back(TypeNameModifier::StrongPointer);
-                t_parser.Eat();
+                parser.Eat();
                 continue;
             }
 
-            if (t_parser.Peek() == TokenKind::Tilde)
+            if (parser.Peek() == TokenKind::Tilde)
             {
                 modifiers.push_back(TypeNameModifier::WeakPointer);
-                t_parser.Eat();
+                parser.Eat();
                 continue;
             }
 
             break;
         }
 
-        const auto expSymbolName = ParseSymbolName(t_parser, t_scope);
+        const auto expSymbolName = ParseSymbolName(parser, scope);
         diagnosticBag.Add(expSymbolName);
         if (!expSymbolName)
         {
@@ -1557,46 +1557,46 @@ namespace Ace
     }
 
     static auto ParseTemplateParamNames(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<Identifier>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::OpenBracket)
+        if (parser.Peek() != TokenKind::OpenBracket)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBracket
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::vector<Identifier> names{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            (t_parser.Peek() != TokenKind::CloseBracket)
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            (parser.Peek() != TokenKind::CloseBracket)
             )
         {
             if (!names.empty())
             {
-                if (t_parser.Peek() == TokenKind::Comma)
+                if (parser.Peek() == TokenKind::Comma)
                 {
-                    t_parser.Eat();
+                    parser.Eat();
                 }
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        t_parser.PeekBack(),
+                        parser.PeekBack(),
                         TokenKind::Comma
                     ));
                 }
             }
 
-            const auto expName = ParseName(t_parser, t_scope);
+            const auto expName = ParseName(parser, scope);
             diagnosticBag.Add(expName);
             if (expName)
             {
@@ -1604,20 +1604,20 @@ namespace Ace
                 continue;
             }
 
-            t_parser.DiscardUntil(
+            parser.DiscardUntil(
                 DiscardKind::Exclusive,
                 { TokenKind::Comma, TokenKind::CloseBracket }
             );
         }
 
-        if (t_parser.Peek() == TokenKind::CloseBracket)
+        if (parser.Peek() == TokenKind::CloseBracket)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::CloseBracket
             ));
         }
@@ -1625,7 +1625,7 @@ namespace Ace
         if (names.empty())
         {
             return diagnosticBag.Add(CreateEmptyTemplateParamsError(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack())
+                CreateSourceLocationRange(firstToken, parser.PeekBack())
             ));
         }
 
@@ -1633,13 +1633,13 @@ namespace Ace
     }
 
     static auto ParseImplTemplateParams(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<std::shared_ptr<const ImplTemplateParamNode>>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto expNames = ParseTemplateParamNames(t_parser, t_scope);
+        const auto expNames = ParseTemplateParamNames(parser, scope);
         diagnosticBag.Add(expNames);
         if (!expNames)
         {
@@ -1651,12 +1651,12 @@ namespace Ace
             begin(expNames.Unwrap()),
             end  (expNames.Unwrap()),
             back_inserter(params),
-            [&](const Identifier& t_name)
+            [&](const Identifier& name)
             {
                 return std::make_shared<const ImplTemplateParamNode>(
-                    t_name.SourceLocation,
-                    t_scope,
-                    t_name
+                    name.SourceLocation,
+                    scope,
+                    name
                 );
             }
         );
@@ -1665,13 +1665,13 @@ namespace Ace
     }
 
     static auto ParseTemplateParams(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<std::shared_ptr<const NormalTemplateParamNode>>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto expNames = ParseTemplateParamNames(t_parser, t_scope);
+        const auto expNames = ParseTemplateParamNames(parser, scope);
         diagnosticBag.Add(expNames);
         if (!expNames)
         {
@@ -1683,12 +1683,12 @@ namespace Ace
             begin(expNames.Unwrap()),
             end  (expNames.Unwrap()),
             back_inserter(params),
-            [&](const Identifier& t_name)
+            [&](const Identifier& name)
             {
                 return std::make_shared<const NormalTemplateParamNode>(
-                    t_name.SourceLocation,
-                    t_scope,
-                    t_name
+                    name.SourceLocation,
+                    scope,
+                    name
                 );
             }
         );
@@ -1697,11 +1697,11 @@ namespace Ace
     }
 
     static auto ParseOptionalTemplateParams(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<std::shared_ptr<const NormalTemplateParamNode>>>
     {
-        if (t_parser.Peek() != TokenKind::OpenBracket)
+        if (parser.Peek() != TokenKind::OpenBracket)
         {
             return Expected
             {
@@ -1710,50 +1710,50 @@ namespace Ace
             };
         }
 
-        return ParseTemplateParams(t_parser, t_scope);
+        return ParseTemplateParams(parser, scope);
     }
 
     static auto ParseTemplateArgs(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<SymbolName>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::OpenBracket)
+        if (parser.Peek() != TokenKind::OpenBracket)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBracket
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::vector<SymbolName> args{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            (t_parser.Peek() != TokenKind::CloseBracket)
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            (parser.Peek() != TokenKind::CloseBracket)
             )
         {
             if (!args.empty())
             {
-                if (t_parser.Peek() == TokenKind::Comma)
+                if (parser.Peek() == TokenKind::Comma)
                 {
-                    t_parser.Eat();
+                    parser.Eat();
                 }
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        t_parser.PeekBack(),
+                        parser.PeekBack(),
                         TokenKind::Comma
                     ));
                 }
             }
 
-            const auto expArg = ParseSymbolName(t_parser, t_scope);
+            const auto expArg = ParseSymbolName(parser, scope);
             diagnosticBag.Add(expArg);
             if (expArg)
             {
@@ -1761,20 +1761,20 @@ namespace Ace
                 continue;
             }
 
-            t_parser.DiscardUntil(
+            parser.DiscardUntil(
                 DiscardKind::Exclusive,
                 { TokenKind::Comma, TokenKind::CloseBracket }
             );
         }
 
-        if (t_parser.Peek() == TokenKind::CloseBracket)
+        if (parser.Peek() == TokenKind::CloseBracket)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::CloseBracket
             ));
         }
@@ -1782,7 +1782,7 @@ namespace Ace
         if (args.empty())
         {
             return diagnosticBag.Add(CreateEmptyTemplateArgsError(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack())
+                CreateSourceLocationRange(firstToken, parser.PeekBack())
             ));
         }
 
@@ -1790,18 +1790,18 @@ namespace Ace
     }
 
     static auto ParseOptionalTemplateArgs(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<SymbolName>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_parser.Peek() != TokenKind::OpenBracket)
+        if (parser.Peek() != TokenKind::OpenBracket)
         {
             return Expected{ std::vector<SymbolName>{}, diagnosticBag };
         }
 
-        const auto expArgs = ParseTemplateArgs(t_parser, t_scope);
+        const auto expArgs = ParseTemplateArgs(parser, scope);
         diagnosticBag.Add(expArgs);
         if (!expArgs)
         {
@@ -1812,27 +1812,27 @@ namespace Ace
     }
 
     static auto ParseAttribute(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const AttributeNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::OpenBracket)
+        if (parser.Peek() != TokenKind::OpenBracket)
         {
             return CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBracket
             );
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expStructConstructionExpr = ParseStructConstructionExpr(
-            t_parser,
-            t_scope
+            parser,
+            scope
         );
         diagnosticBag.Add(expStructConstructionExpr);
         if (!expStructConstructionExpr)
@@ -1840,20 +1840,20 @@ namespace Ace
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::CloseBracket)
+        if (parser.Peek() != TokenKind::CloseBracket)
         {
             return CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::CloseBracket
             );
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const AttributeNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 expStructConstructionExpr.Unwrap()
             ),
             diagnosticBag,
@@ -1861,16 +1861,16 @@ namespace Ace
     }
 
     static auto ParseAttributes(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<std::shared_ptr<const AttributeNode>>>
     {
         DiagnosticBag diagnosticBag{};
 
         std::vector<std::shared_ptr<const AttributeNode>> attributes{};
-        while (t_parser.Peek() == TokenKind::OpenBracket)
+        while (parser.Peek() == TokenKind::OpenBracket)
         {
-            const auto expAttribute = ParseAttribute(t_parser, t_scope);
+            const auto expAttribute = ParseAttribute(parser, scope);
             diagnosticBag.Add(expAttribute);
             if (expAttribute)
             {
@@ -1878,7 +1878,7 @@ namespace Ace
                 continue;
             }
 
-            t_parser.DiscardUntil(
+            parser.DiscardUntil(
                 DiscardKind::Inclusive,
                 TokenKind::CloseBracket
             );
@@ -1888,42 +1888,42 @@ namespace Ace
     }
 
     static auto ParseParam(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope,
-        const size_t t_index
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope,
+        const size_t index
     ) -> Expected<std::shared_ptr<const NormalParamVarNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expAttributes = ParseAttributes(t_parser, t_scope);
+        const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
         if (!expAttributes)
         {
             return diagnosticBag;
         }
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             );
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Allow
         );
         diagnosticBag.Add(expTypeName);
@@ -1935,58 +1935,58 @@ namespace Ace
         return Expected
         {
             std::make_shared<const NormalParamVarNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
                 expAttributes.Unwrap(),
-                t_index
+                index
             ),
             diagnosticBag,
         };
     }
 
     static auto ParseParams(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<std::shared_ptr<const NormalParamVarNode>>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_parser.Peek() != TokenKind::OpenParen)
+        if (parser.Peek() != TokenKind::OpenParen)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenParen
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::vector<std::shared_ptr<const NormalParamVarNode>> params{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            (t_parser.Peek() != TokenKind::CloseParen)
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            (parser.Peek() != TokenKind::CloseParen)
             )
         {
             if (!params.empty())
             {
-                if (t_parser.Peek() == TokenKind::Comma)
+                if (parser.Peek() == TokenKind::Comma)
                 {
-                    t_parser.Eat();
+                    parser.Eat();
                 }
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        t_parser.PeekBack(),
+                        parser.PeekBack(),
                         TokenKind::Comma
                     ));
                 }
             }
 
             const auto expParam = ParseParam(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 params.size()
             );
             diagnosticBag.Add(expParam);
@@ -1996,20 +1996,20 @@ namespace Ace
                 continue;
             }
 
-            t_parser.DiscardUntil(
+            parser.DiscardUntil(
                 DiscardKind::Exclusive,
                 { TokenKind::Comma, TokenKind::CloseParen }
             );
         }
 
-        if (t_parser.Peek() == TokenKind::CloseParen)
+        if (parser.Peek() == TokenKind::CloseParen)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::CloseParen
             ));
         }
@@ -2018,44 +2018,44 @@ namespace Ace
     }
 
     static auto ParseArgs(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<std::shared_ptr<const IExprNode>>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_parser.Peek() != TokenKind::OpenParen)
+        if (parser.Peek() != TokenKind::OpenParen)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenParen
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::vector<std::shared_ptr<const IExprNode>> args{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            (t_parser.Peek() != TokenKind::CloseParen)
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            (parser.Peek() != TokenKind::CloseParen)
             )
         {
             if (!args.empty())
             {
-                if (t_parser.Peek() == TokenKind::Comma)
+                if (parser.Peek() == TokenKind::Comma)
                 {
-                    t_parser.Eat();
+                    parser.Eat();
                 }
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        t_parser.PeekBack(),
+                        parser.PeekBack(),
                         TokenKind::Comma
                     ));
                 }
             }
 
-            const auto expArg = ParseExpr(t_parser, t_scope);
+            const auto expArg = ParseExpr(parser, scope);
             diagnosticBag.Add(expArg);
             if (expArg)
             {
@@ -2063,20 +2063,20 @@ namespace Ace
                 continue;
             }
 
-            t_parser.DiscardUntil(
+            parser.DiscardUntil(
                 DiscardKind::Exclusive,
                 { TokenKind::Comma, TokenKind::CloseParen }
             );
         }
 
-        if (t_parser.Peek() == TokenKind::CloseParen)
+        if (parser.Peek() == TokenKind::CloseParen)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::CloseParen
             ));
         }
@@ -2085,13 +2085,13 @@ namespace Ace
     }
 
     static auto ParseLiteralExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const LiteralExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& literalToken = t_parser.Eat();
+        const auto& literalToken = parser.Eat();
 
         const auto expLiteralKind = GetLiteralKind(literalToken);
         diagnosticBag.Add(expLiteralKind);
@@ -2104,7 +2104,7 @@ namespace Ace
         {
             std::make_shared<const LiteralExprNode>(
                 literalToken->SourceLocation,
-                t_scope,
+                scope,
                 expLiteralKind.Unwrap(),
                 literalToken->String
             ),
@@ -2113,15 +2113,15 @@ namespace Ace
     }
 
     static auto ParseSymbolLiteralExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const SymbolLiteralExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expName = ParseSymbolName(t_parser, t_scope);
+        const auto expName = ParseSymbolName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
@@ -2131,8 +2131,8 @@ namespace Ace
         return Expected
         {
             std::make_shared<const SymbolLiteralExprNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expName.Unwrap()
             ),
             diagnosticBag,
@@ -2140,51 +2140,51 @@ namespace Ace
     }
 
     static auto ParseStructConstructionExprArgs(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<StructConstructionExprArg>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::OpenBrace)
+        if (parser.Peek() != TokenKind::OpenBrace)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBrace
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::vector<StructConstructionExprArg> args{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            (t_parser.Peek() != TokenKind::CloseBrace)
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            (parser.Peek() != TokenKind::CloseBrace)
             )
         {
             if (!args.empty())
             {
-                if (t_parser.Peek() == TokenKind::Comma)
+                if (parser.Peek() == TokenKind::Comma)
                 {
-                    t_parser.Eat();
+                    parser.Eat();
                 }
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        t_parser.PeekBack(),
+                        parser.PeekBack(),
                         TokenKind::Comma
                     ));
                 }
 
-                if (t_parser.Peek() == TokenKind::CloseBrace)
+                if (parser.Peek() == TokenKind::CloseBrace)
                 {
                     break;
                 }
             }
 
-            const auto expName = ParseName(t_parser, t_scope);
+            const auto expName = ParseName(parser, scope);
             diagnosticBag.Add(expName);
             if (!expName)
             {
@@ -2192,11 +2192,11 @@ namespace Ace
             }
 
             std::optional<std::shared_ptr<const IExprNode>> optValue{};
-            if (t_parser.Peek() == TokenKind::Colon)
+            if (parser.Peek() == TokenKind::Colon)
             {
-                t_parser.Eat();
+                parser.Eat();
 
-                const auto expValue = ParseExpr(t_parser, t_scope);
+                const auto expValue = ParseExpr(parser, scope);
                 diagnosticBag.Add(expValue);
                 if (!expValue)
                 {
@@ -2212,14 +2212,14 @@ namespace Ace
             });
         }
 
-        if (t_parser.Peek() == TokenKind::CloseBrace)
+        if (parser.Peek() == TokenKind::CloseBrace)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::CloseBrace
             ));
         }
@@ -2228,24 +2228,24 @@ namespace Ace
     }
 
     static auto ParseStructConstructionExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const StructConstructionExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != SpecialIdentifier::New)
+        if (parser.Peek() != SpecialIdentifier::New)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenExpectedNewError(
-                t_parser.Peek()
+                parser.Peek()
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expTypeName = ParseSymbolName(t_parser, t_scope);
+        const auto expTypeName = ParseSymbolName(parser, scope);
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
         {
@@ -2253,8 +2253,8 @@ namespace Ace
         }
 
         auto expArgs = ParseStructConstructionExprArgs(
-            t_parser,
-            t_scope
+            parser,
+            scope
         );
         diagnosticBag.Add(expArgs);
         if (!expArgs)
@@ -2265,8 +2265,8 @@ namespace Ace
         return Expected
         {
             std::make_shared<const StructConstructionExprNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expTypeName.Unwrap(),
                 std::move(expArgs.Unwrap())
             ),
@@ -2275,37 +2275,37 @@ namespace Ace
     }
 
     static auto ParseCastExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const CastExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::CastKeyword)
+        if (parser.Peek() != TokenKind::CastKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::CastKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        if (t_parser.Peek() != TokenKind::OpenBracket)
+        if (parser.Peek() != TokenKind::OpenBracket)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBracket
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Allow
         );
         diagnosticBag.Add(expTypeName);
@@ -2314,47 +2314,47 @@ namespace Ace
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::CloseBracket)
+        if (parser.Peek() != TokenKind::CloseBracket)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::CloseBracket
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        if (t_parser.Peek() != TokenKind::OpenParen)
+        if (parser.Peek() != TokenKind::OpenParen)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenParen
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expExpr = ParseExpr(t_parser, t_scope);
+        const auto expExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expExpr);
         if (!expExpr)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::CloseParen)
+        if (parser.Peek() != TokenKind::CloseParen)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::CloseParen
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const CastExprNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 expTypeName.Unwrap(),
                 expExpr.Unwrap()
             ),
@@ -2363,55 +2363,55 @@ namespace Ace
     }
 
     static auto ParseAddressOfExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const AddressOfExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::AddressOfKeyword)
+        if (parser.Peek() != TokenKind::AddressOfKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::AddressOfKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        if (t_parser.Peek() != TokenKind::OpenParen)
+        if (parser.Peek() != TokenKind::OpenParen)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenParen
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expExpr = ParseExpr(t_parser, t_scope);
+        const auto expExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expExpr);
         if (!expExpr)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::CloseParen)
+        if (parser.Peek() != TokenKind::CloseParen)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::CloseParen
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const AddressOfExprNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 expExpr.Unwrap()
             ),
             diagnosticBag,
@@ -2419,37 +2419,37 @@ namespace Ace
     }
 
     static auto ParseSizeOfExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const SizeOfExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::SizeOfKeyword)
+        if (parser.Peek() != TokenKind::SizeOfKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::SizeOfKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        if (t_parser.Peek() != TokenKind::OpenBracket)
+        if (parser.Peek() != TokenKind::OpenBracket)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBracket
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Allow
         );
         diagnosticBag.Add(expTypeName);
@@ -2458,21 +2458,21 @@ namespace Ace
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::CloseBracket)
+        if (parser.Peek() != TokenKind::CloseBracket)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::CloseBracket
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const SizeOfExprNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expTypeName.Unwrap()
             ),
             diagnosticBag,
@@ -2480,37 +2480,37 @@ namespace Ace
     }
 
     static auto ParseDerefAsExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const DerefAsExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::DerefAsKeyword)
+        if (parser.Peek() != TokenKind::DerefAsKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::DerefAsKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        if (t_parser.Peek() != TokenKind::OpenBracket)
+        if (parser.Peek() != TokenKind::OpenBracket)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBracket
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Allow
         );
         diagnosticBag.Add(expTypeName);
@@ -2519,47 +2519,47 @@ namespace Ace
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::CloseBracket)
+        if (parser.Peek() != TokenKind::CloseBracket)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::CloseBracket
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        if (t_parser.Peek() != TokenKind::OpenParen)
+        if (parser.Peek() != TokenKind::OpenParen)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenParen
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expExpr = ParseExpr(t_parser, t_scope);
+        const auto expExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expExpr);
         if (!expExpr)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::CloseParen)
+        if (parser.Peek() != TokenKind::CloseParen)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::CloseParen
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const DerefAsExprNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 expTypeName.Unwrap(),
                 expExpr.Unwrap()
             ),
@@ -2568,45 +2568,45 @@ namespace Ace
     }
 
     static auto ParseExprExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const ExprExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::OpenParen)
+        if (parser.Peek() != TokenKind::OpenParen)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenParen
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expExpr = ParseExpr(t_parser, t_scope);
+        const auto expExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expExpr);
         if (!expExpr)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::CloseParen)
+        if (parser.Peek() != TokenKind::CloseParen)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::CloseParen
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const ExprExprNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 expExpr.Unwrap()
             ),
             diagnosticBag,
@@ -2614,86 +2614,86 @@ namespace Ace
     }
 
     static auto ParseKeywordExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const IExprNode>>
     {
-        switch (t_parser.Peek()->Kind)
+        switch (parser.Peek()->Kind)
         {
             case TokenKind::CastKeyword:
             {
-                return ParseCastExpr(t_parser, t_scope);
+                return ParseCastExpr(parser, scope);
             }
 
             case TokenKind::AddressOfKeyword:
             {
-                return ParseAddressOfExpr(t_parser, t_scope);
+                return ParseAddressOfExpr(parser, scope);
             }
 
             case TokenKind::SizeOfKeyword:
             {
-                return ParseSizeOfExpr(t_parser, t_scope);
+                return ParseSizeOfExpr(parser, scope);
             }
 
             case TokenKind::DerefAsKeyword:
             {
-                return ParseDerefAsExpr(t_parser, t_scope);
+                return ParseDerefAsExpr(parser, scope);
             }
 
             default:
             {
                 return DiagnosticBag{}.Add(CreateUnexpectedTokenError(
-                    t_parser.Peek()
+                    parser.Peek()
                 ));
             }
         }
     }
 
     static auto ParsePrimaryExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const IExprNode>>
     {
-        if (IsKeywordExprStart(t_parser))
+        if (IsKeywordExprStart(parser))
         {
-            return ParseKeywordExpr(t_parser, t_scope);
+            return ParseKeywordExpr(parser, scope);
         }
 
-        if (IsExprExprStart(t_parser))
+        if (IsExprExprStart(parser))
         {
-            return ParseExprExpr(t_parser, t_scope);
+            return ParseExprExpr(parser, scope);
         }
 
-        if (IsStructConstructionExprStart(t_parser))
+        if (IsStructConstructionExprStart(parser))
         {
-            return ParseStructConstructionExpr(t_parser, t_scope);
+            return ParseStructConstructionExpr(parser, scope);
         }
 
-        if (IsLiteralExprStart(t_parser))
+        if (IsLiteralExprStart(parser))
         {
-            return ParseLiteralExpr(t_parser, t_scope);
+            return ParseLiteralExpr(parser, scope);
         }
 
-        if (IsSymbolLiteralExprStart(t_parser))
+        if (IsSymbolLiteralExprStart(parser))
         {
-            return ParseSymbolLiteralExpr(t_parser, t_scope);
+            return ParseSymbolLiteralExpr(parser, scope);
         }
 
         return DiagnosticBag{}.Add(CreateUnexpectedTokenError(
-            t_parser.Peek()
+            parser.Peek()
         ));
     }
 
     static auto ParseSecondaryExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const IExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expPrimaryExpr = ParsePrimaryExpr(t_parser, t_scope);
+        const auto expPrimaryExpr = ParsePrimaryExpr(parser, scope);
         diagnosticBag.Add(expPrimaryExpr);
         if (!expPrimaryExpr)
         {
@@ -2703,15 +2703,15 @@ namespace Ace
         auto expr = expPrimaryExpr.Unwrap();
 
         while (
-            (t_parser.Peek() == TokenKind::Dot) ||
-            (t_parser.Peek() == TokenKind::OpenParen)
+            (parser.Peek() == TokenKind::Dot) ||
+            (parser.Peek() == TokenKind::OpenParen)
             )
         {
-            if (t_parser.Peek() == TokenKind::Dot)
+            if (parser.Peek() == TokenKind::Dot)
             {
-                t_parser.Eat();
+                parser.Eat();
 
-                const auto expName = ParseSymbolNameSection(t_parser, t_scope);
+                const auto expName = ParseSymbolNameSection(parser, scope);
                 diagnosticBag.Add(expName);
                 if (!expName)
                 {
@@ -2719,15 +2719,15 @@ namespace Ace
                 }
 
                 expr = std::make_shared<const MemberAccessExprNode>(
-                    CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                    CreateSourceLocationRange(firstToken, parser.PeekBack()),
                     expr,
                     expName.Unwrap()
                 );
             }
 
-            if (t_parser.Peek() == TokenKind::OpenParen)
+            if (parser.Peek() == TokenKind::OpenParen)
             {
-                const auto expArgs = ParseArgs(t_parser, t_scope);
+                const auto expArgs = ParseArgs(parser, scope);
                 diagnosticBag.Add(expArgs);
                 if (!expArgs)
                 {
@@ -2735,7 +2735,7 @@ namespace Ace
                 }
 
                 expr = std::make_shared<const FunctionCallExprNode>(
-                    CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                    CreateSourceLocationRange(firstToken, parser.PeekBack()),
                     expr,
                     expArgs.Unwrap()
                 );
@@ -2750,23 +2750,23 @@ namespace Ace
     }
 
     static auto ParseUnaryExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const IExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
         std::vector<Op> ops{};
-        while (IsPrefixOp(t_parser.Peek()->Kind))
+        while (IsPrefixOp(parser.Peek()->Kind))
         {
-            const auto& opToken = t_parser.Eat();
+            const auto& opToken = parser.Eat();
             ops.push_back(Op{
                 opToken->SourceLocation,
                 opToken->Kind
             });
         }
 
-        const auto expSecondaryExpr = ParseSecondaryExpr(t_parser, t_scope);
+        const auto expSecondaryExpr = ParseSecondaryExpr(parser, scope);
         diagnosticBag.Add(expSecondaryExpr);
         if (!expSecondaryExpr)
         {
@@ -2781,7 +2781,7 @@ namespace Ace
             const SourceLocation sourceLocation
             {
                 op.SourceLocation,
-                t_parser.PeekBack()->SourceLocation,
+                parser.PeekBack()->SourceLocation,
             };
             expr = CreateCollapsedPrefixExpr(
                 sourceLocation,
@@ -2800,13 +2800,13 @@ namespace Ace
     }
 
     static auto ParseExpr(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const IExprNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto expUnaryExpr = ParseUnaryExpr(t_parser, t_scope);
+        const auto expUnaryExpr = ParseUnaryExpr(parser, scope);
         diagnosticBag.Add(expUnaryExpr);
         if (!expUnaryExpr)
         {
@@ -2818,15 +2818,15 @@ namespace Ace
 
         exprs.push_back(expUnaryExpr.Unwrap());
         
-        while (IsBinaryOp(t_parser.Peek()->Kind))
+        while (IsBinaryOp(parser.Peek()->Kind))
         {
-            const auto& opToken = t_parser.Eat();
+            const auto& opToken = parser.Eat();
             ops.push_back(Op{
                 opToken->SourceLocation,
                 opToken->Kind
             });
 
-            const auto expUnaryExpr = ParseUnaryExpr(t_parser, t_scope);
+            const auto expUnaryExpr = ParseUnaryExpr(parser, scope);
             diagnosticBag.Add(expUnaryExpr);
             if (!expUnaryExpr)
             {
@@ -2898,32 +2898,32 @@ namespace Ace
     }
 
     static auto ParseBlockStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const BlockStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto& firstToken = parser.Peek();
+        const auto selfScope = scope->GetOrCreateChild({});
 
-        if (t_parser.Peek() != TokenKind::OpenBrace)
+        if (parser.Peek() != TokenKind::OpenBrace)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBrace
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::vector<std::shared_ptr<const IStmtNode>> stmts{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            (t_parser.Peek() != TokenKind::CloseBrace)
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            (parser.Peek() != TokenKind::CloseBrace)
             )
         {
-            const auto expStmt = ParseStmt(t_parser, selfScope);
+            const auto expStmt = ParseStmt(parser, selfScope);
             diagnosticBag.Add(expStmt);
             if (expStmt)
             {
@@ -2931,20 +2931,20 @@ namespace Ace
                 continue;
             }
 
-            t_parser.DiscardUntil(
+            parser.DiscardUntil(
                 DiscardKind::Inclusive,
                 TokenKind::Semicolon
             );
         }
 
-        if (t_parser.Peek() == TokenKind::CloseBrace)
+        if (parser.Peek() == TokenKind::CloseBrace)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::CloseBrace
             ));
         }
@@ -2952,7 +2952,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const BlockStmtNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 selfScope,
                 stmts
             ),
@@ -2961,35 +2961,35 @@ namespace Ace
     }
 
     static auto ParseExprStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const ExprStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expExpr = ParseExpr(t_parser, t_scope);
+        const auto expExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expExpr);
         if (!expExpr)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() != TokenKind::Semicolon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Semicolon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const ExprStmtNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 expExpr.Unwrap()
             ),
             diagnosticBag,
@@ -2997,53 +2997,53 @@ namespace Ace
     }
 
     static auto ParseAssignmentStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const NormalAssignmentStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expLhsExpr = ParseExpr(t_parser, t_scope);
+        const auto expLhsExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expLhsExpr);
         if (!expLhsExpr)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Equals)
+        if (parser.Peek() != TokenKind::Equals)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Equals
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expRhsExpr = ParseExpr(t_parser, t_scope);
+        const auto expRhsExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expRhsExpr);
         if (!expRhsExpr)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() != TokenKind::Semicolon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Semicolon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const NormalAssignmentStmtNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expLhsExpr.Unwrap(),
                 expRhsExpr.Unwrap()
             ),
@@ -3052,58 +3052,58 @@ namespace Ace
     }
 
     static auto ParseCompoundAssignmentStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const CompoundAssignmentStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expLhsExpr = ParseExpr(t_parser, t_scope);
+        const auto expLhsExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expLhsExpr);
         if (!expLhsExpr)
         {
             return diagnosticBag;
         }
 
-        if (!IsCompoundAssignmentOp(t_parser.Peek()->Kind))
+        if (!IsCompoundAssignmentOp(parser.Peek()->Kind))
         {
             return diagnosticBag.Add(
-                CreateUnexpectedTokenExpectedCompoundAssignmentOpError(t_parser.Peek())
+                CreateUnexpectedTokenExpectedCompoundAssignmentOpError(parser.Peek())
             );
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const Op op
         {
-            t_parser.PeekBack()->SourceLocation,
-            t_parser.PeekBack()->Kind
+            parser.PeekBack()->SourceLocation,
+            parser.PeekBack()->Kind
         };
 
-        const auto expRhsExpr = ParseExpr(t_parser, t_scope);
+        const auto expRhsExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expRhsExpr);
         if (!expRhsExpr)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() != TokenKind::Semicolon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Semicolon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const CompoundAssignmentStmtNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expLhsExpr.Unwrap(),
                 expRhsExpr.Unwrap(),
                 op
@@ -3113,34 +3113,34 @@ namespace Ace
     }
 
     static auto ParseVarStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const VarStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Allow
         );
         diagnosticBag.Add(expTypeName);
@@ -3150,11 +3150,11 @@ namespace Ace
         }
 
         std::optional<std::shared_ptr<const IExprNode>> optAssignment{};
-        if (t_parser.Peek() == TokenKind::Equals)
+        if (parser.Peek() == TokenKind::Equals)
         {
-            t_parser.Eat();
+            parser.Eat();
 
-            const auto expExpr = ParseExpr(t_parser, t_scope);
+            const auto expExpr = ParseExpr(parser, scope);
             diagnosticBag.Add(expExpr);
             if (!expExpr)
             {
@@ -3164,21 +3164,21 @@ namespace Ace
             optAssignment = expExpr.Unwrap();
         }
 
-        if (t_parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() != TokenKind::Semicolon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Semicolon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const VarStmtNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
                 optAssignment
@@ -3188,30 +3188,30 @@ namespace Ace
     }
 
     static auto ParseIfBlock(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::pair<std::shared_ptr<const IExprNode>, std::shared_ptr<const BlockStmtNode>>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_parser.Peek() != TokenKind::IfKeyword)
+        if (parser.Peek() != TokenKind::IfKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::IfKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expCondition = ParseExpr(t_parser, t_scope);
+        const auto expCondition = ParseExpr(parser, scope);
         diagnosticBag.Add(expCondition);
         if (!expCondition)
         {
             return diagnosticBag;
         }
 
-        const auto expBody = ParseBlockStmt(t_parser, t_scope);
+        const auto expBody = ParseBlockStmt(parser, scope);
         diagnosticBag.Add(expBody);
         if (!expBody)
         {
@@ -3230,30 +3230,30 @@ namespace Ace
     }
 
     static auto ParseElifBlock(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::pair<std::shared_ptr<const IExprNode>, std::shared_ptr<const BlockStmtNode>>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_parser.Peek() != TokenKind::ElifKeyword)
+        if (parser.Peek() != TokenKind::ElifKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::ElifKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expCondition = ParseExpr(t_parser, t_scope);
+        const auto expCondition = ParseExpr(parser, scope);
         diagnosticBag.Add(expCondition);
         if (!expCondition)
         {
             return diagnosticBag;
         }
 
-        const auto expBody = ParseBlockStmt(t_parser, t_scope);
+        const auto expBody = ParseBlockStmt(parser, scope);
         diagnosticBag.Add(expBody);
         if (!expBody)
         {
@@ -3272,23 +3272,23 @@ namespace Ace
     }
 
     static auto ParseElseBlock(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const BlockStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_parser.Peek() != TokenKind::ElseKeyword)
+        if (parser.Peek() != TokenKind::ElseKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::ElseKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expBody = ParseBlockStmt(t_parser, t_scope);
+        const auto expBody = ParseBlockStmt(parser, scope);
         diagnosticBag.Add(expBody);
         if (!expBody)
         {
@@ -3299,18 +3299,18 @@ namespace Ace
     }
 
     static auto ParseIfStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const IfStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
         std::vector<std::shared_ptr<const IExprNode>> conditions{};
         std::vector<std::shared_ptr<const BlockStmtNode>> bodies{};
 
-        const auto expIfBlock = ParseIfBlock(t_parser, t_scope);
+        const auto expIfBlock = ParseIfBlock(parser, scope);
         diagnosticBag.Add(expIfBlock);
         if (!expIfBlock)
         {
@@ -3320,9 +3320,9 @@ namespace Ace
         conditions.push_back(expIfBlock.Unwrap().first);
         bodies.push_back(expIfBlock.Unwrap().second);
 
-        while (t_parser.Peek() == TokenKind::ElifKeyword)
+        while (parser.Peek() == TokenKind::ElifKeyword)
         {
-            const auto expElifBlock = ParseElifBlock(t_parser, t_scope);
+            const auto expElifBlock = ParseElifBlock(parser, scope);
             diagnosticBag.Add(expElifBlock);
             if (!expElifBlock)
             {
@@ -3333,9 +3333,9 @@ namespace Ace
             bodies.push_back(expElifBlock.Unwrap().second);
         }
 
-        if (t_parser.Peek() == TokenKind::ElseKeyword)
+        if (parser.Peek() == TokenKind::ElseKeyword)
         {
-            const auto expElseBlock = ParseElseBlock(t_parser, t_scope);
+            const auto expElseBlock = ParseElseBlock(parser, scope);
             diagnosticBag.Add(expElseBlock);
             if (!expElseBlock)
             {
@@ -3348,8 +3348,8 @@ namespace Ace
         return Expected
         {
             std::make_shared<const IfStmtNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 conditions,
                 bodies
             ),
@@ -3358,32 +3358,32 @@ namespace Ace
     }
 
     static auto ParseWhileStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const WhileStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::WhileKeyword)
+        if (parser.Peek() != TokenKind::WhileKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::WhileKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expCondition = ParseExpr(t_parser, t_scope);
+        const auto expCondition = ParseExpr(parser, scope);
         diagnosticBag.Add(expCondition);
         if (!expCondition)
         {
             return diagnosticBag;
         }
 
-        const auto expBody = ParseBlockStmt(t_parser, t_scope);
+        const auto expBody = ParseBlockStmt(parser, scope);
         diagnosticBag.Add(expBody);
         if (!expBody)
         {
@@ -3393,8 +3393,8 @@ namespace Ace
         return Expected
         {
             std::make_shared<const WhileStmtNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expCondition.Unwrap(),
                 expBody.Unwrap()
             ),
@@ -3403,28 +3403,28 @@ namespace Ace
     }
 
     static auto ParseReturnStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const ReturnStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::ReturnKeyword)
+        if (parser.Peek() != TokenKind::ReturnKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::ReturnKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::optional<std::shared_ptr<const IExprNode>> optExpr{};
-        if (t_parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() != TokenKind::Semicolon)
         {
-            const auto expExpr = ParseExpr(t_parser, t_scope);
+            const auto expExpr = ParseExpr(parser, scope);
             diagnosticBag.Add(expExpr);
             if (!expExpr)
             {
@@ -3434,21 +3434,21 @@ namespace Ace
             optExpr = expExpr.Unwrap();
         }
 
-        if (t_parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() != TokenKind::Semicolon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Semicolon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const ReturnStmtNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 optExpr
             ),
             diagnosticBag,
@@ -3456,85 +3456,85 @@ namespace Ace
     }
 
     static auto ParseExitStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const ExitStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::ExitKeyword)
+        if (parser.Peek() != TokenKind::ExitKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::ExitKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        if (t_parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() != TokenKind::Semicolon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Semicolon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const ExitStmtNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope
             ),
             diagnosticBag,
         };
     }
 
     static auto ParseAssertStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const AssertStmtNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        if (t_parser.Peek() != TokenKind::AssertKeyword)
+        if (parser.Peek() != TokenKind::AssertKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::AssertKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expCondition = ParseExpr(t_parser, t_scope);
+        const auto expCondition = ParseExpr(parser, scope);
         diagnosticBag.Add(expCondition);
         if (!expCondition)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() != TokenKind::Semicolon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Semicolon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const AssertStmtNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expCondition.Unwrap()
             ),
             diagnosticBag,
@@ -3542,80 +3542,80 @@ namespace Ace
     }
 
     static auto ParseKeywordStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const IStmtNode>>
     {
-        switch (t_parser.Peek()->Kind)
+        switch (parser.Peek()->Kind)
         {
             case TokenKind::IfKeyword:
             {
-                return ParseIfStmt(t_parser, t_scope);
+                return ParseIfStmt(parser, scope);
             }
 
             case TokenKind::WhileKeyword:
             {
-                return ParseWhileStmt(t_parser, t_scope);
+                return ParseWhileStmt(parser, scope);
             }
 
             case TokenKind::ReturnKeyword:
             {
-                return ParseReturnStmt(t_parser, t_scope);
+                return ParseReturnStmt(parser, scope);
             }
 
             case TokenKind::ExitKeyword:
             {
-                return ParseExitStmt(t_parser, t_scope);
+                return ParseExitStmt(parser, scope);
             }
 
             case TokenKind::AssertKeyword:
             {
-                return ParseAssertStmt(t_parser, t_scope);
+                return ParseAssertStmt(parser, scope);
             }
 
             default:
             {
                 DiagnosticBag diagnosticBag{};
                 return diagnosticBag.Add(CreateUnexpectedTokenError(
-                    t_parser.Peek()
+                    parser.Peek()
                 ));
             }
         }
     }
 
     static auto ParseStmt(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const IStmtNode>>
     {
-        if (IsVarStart(t_parser))
+        if (IsVarStart(parser))
         {
-            return ParseVarStmt(t_parser, t_scope);
+            return ParseVarStmt(parser, scope);
         }
-        else if (IsBlockStmtStart(t_parser))
+        else if (IsBlockStmtStart(parser))
         {
-            return ParseBlockStmt(t_parser, t_scope);
+            return ParseBlockStmt(parser, scope);
         }
-        else if (IsKeywordStmtStart(t_parser))
+        else if (IsKeywordStmtStart(parser))
         {
-            return ParseKeywordStmt(t_parser, t_scope);
+            return ParseKeywordStmt(parser, scope);
         }
 
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expExpr = ParseExpr(t_parser, t_scope);
+        const auto expExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expExpr);
         if (!expExpr)
         {
             return diagnosticBag;
         }
 
-        const bool isSemicolon = t_parser.Peek() == TokenKind::Semicolon;
-        const bool isAssignment = t_parser.Peek() == TokenKind::Equals;
+        const bool isSemicolon = parser.Peek() == TokenKind::Semicolon;
+        const bool isAssignment = parser.Peek() == TokenKind::Equals;
         const bool isCompoundAssignment = IsCompoundAssignmentOp(
-            t_parser.Peek()->Kind
+            parser.Peek()->Kind
         );
 
         if (
@@ -3625,12 +3625,12 @@ namespace Ace
         {
             if (isSemicolon)
             {
-                t_parser.Eat();
+                parser.Eat();
             }
             else
             {
                 diagnosticBag.Add(CreateMissingTokenError(
-                    t_parser.PeekBack(),
+                    parser.PeekBack(),
                     TokenKind::Semicolon
                 ));
             }
@@ -3638,36 +3638,36 @@ namespace Ace
             return Expected
             {
                 std::make_shared<const ExprStmtNode>(
-                    CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                    CreateSourceLocationRange(firstToken, parser.PeekBack()),
                     expExpr.Unwrap()
                 ),
                 diagnosticBag,
             };
         }
 
-        t_parser.Eat();
+        parser.Eat();
     
         const Op op
         {
-            t_parser.PeekBack()->SourceLocation,
-            t_parser.PeekBack()->Kind,
+            parser.PeekBack()->SourceLocation,
+            parser.PeekBack()->Kind,
         };
 
-        const auto expRhsExpr = ParseExpr(t_parser, t_scope);
+        const auto expRhsExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expRhsExpr);
         if (!expRhsExpr)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() == TokenKind::Semicolon)
+        if (parser.Peek() == TokenKind::Semicolon)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::Semicolon
             ));
         }
@@ -3677,8 +3677,8 @@ namespace Ace
             return Expected
             {
                 std::make_shared<const NormalAssignmentStmtNode>(
-                    CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                    t_scope,
+                    CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                    scope,
                     expExpr.Unwrap(),
                     expRhsExpr.Unwrap()
                 ),
@@ -3691,8 +3691,8 @@ namespace Ace
             return Expected
             {
                 std::make_shared<const CompoundAssignmentStmtNode>(
-                    CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                    t_scope,
+                    CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                    scope,
                     expExpr.Unwrap(),
                     expRhsExpr.Unwrap(),
                     op
@@ -3705,59 +3705,59 @@ namespace Ace
     }
 
     static auto ParseFunctionOrOpNameToken(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const Token>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_parser.Peek() == TokenKind::Identifier)
+        if (parser.Peek() == TokenKind::Identifier)
         {
-            return Expected{ t_parser.Eat(), diagnosticBag };
+            return Expected{ parser.Eat(), diagnosticBag };
         }
 
-        if (t_parser.Peek() != TokenKind::OpKeyword)
+        if (parser.Peek() != TokenKind::OpKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Identifier
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         if (
-            (t_parser.Peek() != TokenKind::Identifier) &&
-            !IsUserOp(t_parser.Peek()->Kind)
+            (parser.Peek() != TokenKind::Identifier) &&
+            !IsUserOp(parser.Peek()->Kind)
             )
         {
             return diagnosticBag.Add(
-                CreateUnexpectedTokenExpectedOverloadableOpError(t_parser.Peek())
+                CreateUnexpectedTokenExpectedOverloadableOpError(parser.Peek())
             );
         }
 
-        return Expected{ t_parser.Eat(), diagnosticBag };
+        return Expected{ parser.Eat(), diagnosticBag };
     }
 
     static auto ParseModifiersUntil(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope,
-        std::vector<Modifier> t_allowedModifiers,
-        const std::function<bool()>& t_predicate
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope,
+        std::vector<Modifier> allowedModifiers,
+        const std::function<bool()>& predicate
     ) -> Diagnosed<std::map<Modifier, std::shared_ptr<const Token>>>
     {
         DiagnosticBag diagnosticBag{};
 
-        ACE_ASSERT(t_parser.Peek() == TokenKind::MinusGreaterThan);
-        const auto& minusGreaterThanToken = t_parser.Eat();
+        ACE_ASSERT(parser.Peek() == TokenKind::MinusGreaterThan);
+        const auto& minusGreaterThanToken = parser.Eat();
 
         std::map<Modifier, std::shared_ptr<const Token>> modifierToTokenMap{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            !t_predicate()
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            !predicate()
         )
         {
-            const auto modifierToken = t_parser.Eat();
+            const auto modifierToken = parser.Eat();
 
             const auto expModifier = GetModifier(modifierToken);
             diagnosticBag.Add(expModifier);
@@ -3767,11 +3767,11 @@ namespace Ace
             }
 
             const auto allowedModifierIt = std::find(
-                begin(t_allowedModifiers),
-                end  (t_allowedModifiers),
+                begin(allowedModifiers),
+                end  (allowedModifiers),
                 expModifier.Unwrap()
             );
-            if (allowedModifierIt == end(t_allowedModifiers))
+            if (allowedModifierIt == end(allowedModifiers))
             {
                 diagnosticBag.Add(CreateForbiddenModifierError(
                     modifierToken
@@ -3779,15 +3779,15 @@ namespace Ace
                 continue;
             }
 
-            t_allowedModifiers.erase(
-                begin(t_allowedModifiers),
+            allowedModifiers.erase(
+                begin(allowedModifiers),
                 allowedModifierIt
             );
 
             modifierToTokenMap[expModifier.Unwrap()] = modifierToken;
         }
 
-        if (t_parser.Peek().get() == minusGreaterThanToken.get())
+        if (parser.Peek().get() == minusGreaterThanToken.get())
         {
             diagnosticBag.Add(CreateEmptyModifiersError(
                 minusGreaterThanToken
@@ -3802,17 +3802,17 @@ namespace Ace
     }
 
     static auto ParseImplFunction(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope,
-        const SymbolName& t_selfTypeName
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope,
+        const SymbolName& selfTypeName
     ) -> Expected<std::shared_ptr<const FunctionNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto& firstToken = parser.Peek();
+        const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(t_parser, t_scope);
+        const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
         if (!expAttributes)
         {
@@ -3820,8 +3820,8 @@ namespace Ace
         }
 
         const auto expNameToken = ParseFunctionOrOpNameToken(
-            t_parser,
-            t_scope
+            parser,
+            scope
         );
         diagnosticBag.Add(expNameToken);
         if (!expNameToken)
@@ -3829,26 +3829,26 @@ namespace Ace
             return diagnosticBag;
         }
 
-        const auto expParams = ParseParams(t_parser, selfScope);
+        const auto expParams = ParseParams(parser, selfScope);
         diagnosticBag.Add(expParams);
         if (!expParams)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
@@ -3860,17 +3860,17 @@ namespace Ace
         auto accessModifier = AccessModifier::Private;
         std::optional<std::shared_ptr<const Token>> optSelfToken{};
         bool isExtern = false;
-        if (t_parser.Peek() == TokenKind::MinusGreaterThan)
+        if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto dgnModifierToTokenMap = ParseModifiersUntil(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 { Modifier::Public, Modifier::Self, Modifier::Extern },
                 [&]()
                 {
                     return
-                        (t_parser.Peek() == TokenKind::OpenBrace) ||
-                        (t_parser.Peek() == TokenKind::Semicolon);
+                        (parser.Peek() == TokenKind::OpenBrace) ||
+                        (parser.Peek() == TokenKind::Semicolon);
                 }
             );
             diagnosticBag.Add(dgnModifierToTokenMap);
@@ -3915,19 +3915,19 @@ namespace Ace
         std::optional<std::shared_ptr<const BlockStmtNode>> optBody{};
         if (isExtern)
         {
-            if (t_parser.Peek() != TokenKind::Semicolon)
+            if (parser.Peek() != TokenKind::Semicolon)
             {
                 return diagnosticBag.Add(CreateUnexpectedTokenError(
-                    t_parser.Peek(),
+                    parser.Peek(),
                     TokenKind::Semicolon
                 ));
             }
 
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
-            const auto expBody = ParseBlockStmt(t_parser, selfScope);
+            const auto expBody = ParseBlockStmt(parser, selfScope);
             diagnosticBag.Add(expBody);
             if (!expBody)
             {
@@ -3940,13 +3940,13 @@ namespace Ace
         const auto optSelfParam = CreateSelfParam(
             optSelfToken,
             selfScope,
-            t_selfTypeName
+            selfTypeName
         );
 
         return Expected
         {
             std::make_shared<const FunctionNode>(
-                CreateSourceLocationRange(firstToken, t_parser.Peek()),
+                CreateSourceLocationRange(firstToken, parser.Peek()),
                 selfScope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -3961,24 +3961,24 @@ namespace Ace
     }
 
     static auto ParseImplFunctionTemplate(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope,
-        const SymbolName& t_selfTypeName
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope,
+        const SymbolName& selfTypeName
     ) -> Expected<std::shared_ptr<const FunctionTemplateNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto& firstToken = parser.Peek();
+        const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(t_parser, t_scope);
+        const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
         if (!expAttributes)
         {
             return diagnosticBag;
         }
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
@@ -3986,7 +3986,7 @@ namespace Ace
         }
 
         const auto expTemplateParams = ParseTemplateParams(
-            t_parser,
+            parser,
             selfScope
         );
         diagnosticBag.Add(expTemplateParams);
@@ -3995,26 +3995,26 @@ namespace Ace
             return diagnosticBag;
         }
 
-        const auto expParams = ParseParams(t_parser, selfScope);
+        const auto expParams = ParseParams(parser, selfScope);
         diagnosticBag.Add(expParams);
         if (!expParams)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
@@ -4025,17 +4025,17 @@ namespace Ace
 
         auto accessModifier = AccessModifier::Private;
         std::optional<std::shared_ptr<const Token>> optSelfToken{};
-        if (t_parser.Peek() == TokenKind::MinusGreaterThan)
+        if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto dgnModifierToTokenMap = ParseModifiersUntil(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 { Modifier::Public, Modifier::Self },
                 [&]()
                 {
                     return
-                        (t_parser.Peek() == TokenKind::OpenBrace) ||
-                        (t_parser.Peek() == TokenKind::Semicolon);
+                        (parser.Peek() == TokenKind::OpenBrace) ||
+                        (parser.Peek() == TokenKind::Semicolon);
                 }
             );
             diagnosticBag.Add(dgnModifierToTokenMap);
@@ -4053,7 +4053,7 @@ namespace Ace
             }
         }
 
-        const auto expBody = ParseBlockStmt(t_parser, selfScope);
+        const auto expBody = ParseBlockStmt(parser, selfScope);
         diagnosticBag.Add(expBody);
         if (!expBody)
         {
@@ -4063,11 +4063,11 @@ namespace Ace
         const auto selfParam = CreateSelfParam(
             optSelfToken,
             selfScope,
-            t_selfTypeName
+            selfTypeName
         );
 
         const auto function = std::make_shared<const FunctionNode>(
-            CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+            CreateSourceLocationRange(firstToken, parser.PeekBack()),
             selfScope,
             expName.Unwrap(),
             expTypeName.Unwrap(),
@@ -4091,26 +4091,26 @@ namespace Ace
     }
 
     static auto ParseImpl(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const ImplNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto& firstToken = parser.Peek();
+        const auto selfScope = scope->GetOrCreateChild({});
 
-        if (t_parser.Peek() != TokenKind::ImplKeyword)
+        if (parser.Peek() != TokenKind::ImplKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::ImplKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        const auto expTypeName = ParseSymbolName(t_parser, t_scope);
+        const auto expTypeName = ParseSymbolName(parser, scope);
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
         {
@@ -4124,9 +4124,9 @@ namespace Ace
             const auto sectionWithTemplateArgsIt = std::find_if_not(
                 begin(sections),
                 end  (sections),
-                [](const SymbolNameSection& t_section)
+                [](const SymbolNameSection& section)
                 {
-                    return t_section.TemplateArgs.empty();
+                    return section.TemplateArgs.empty();
                 }
             );
             if (sectionWithTemplateArgsIt != end(sections))
@@ -4149,27 +4149,27 @@ namespace Ace
             }
         }
 
-        if (t_parser.Peek() != TokenKind::OpenBrace)
+        if (parser.Peek() != TokenKind::OpenBrace)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBrace
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::vector<std::shared_ptr<const FunctionNode>> functions{};
         std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            (t_parser.Peek() != TokenKind::CloseBrace)
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            (parser.Peek() != TokenKind::CloseBrace)
             )
         {
-            if (IsFunctionStart(t_parser))
+            if (IsFunctionStart(parser))
             {
                 const auto expFunction = ParseImplFunction(
-                    t_parser,
+                    parser,
                     selfScope,
                     expTypeName.Unwrap()
                 );
@@ -4180,10 +4180,10 @@ namespace Ace
                     continue;
                 }
             }
-            else if (IsFunctionTemplateStart(t_parser))
+            else if (IsFunctionTemplateStart(parser))
             {
                 const auto expFunctionTemplate = ParseImplFunctionTemplate(
-                    t_parser,
+                    parser,
                     selfScope,
                     expTypeName.Unwrap()
                 );
@@ -4197,24 +4197,24 @@ namespace Ace
             else
             {
                 diagnosticBag.Add(CreateUnexpectedTokenError(
-                    t_parser.Peek()
+                    parser.Peek()
                 ));
             }
 
-            t_parser.DiscardUntil(
+            parser.DiscardUntil(
                 DiscardKind::Inclusive,
                 { TokenKind::CloseBrace, TokenKind::Semicolon }
             );
         }
 
-        if (t_parser.Peek() == TokenKind::CloseBrace)
+        if (parser.Peek() == TokenKind::CloseBrace)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::CloseBrace
             ));
         }
@@ -4222,7 +4222,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ImplNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 selfScope,
                 expTypeName.Unwrap(),
                 functions,
@@ -4233,18 +4233,18 @@ namespace Ace
     }
 
     static auto ParseTemplatedImplFunction(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope,
-        const SymbolName& t_selfTypeName,
-        const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& t_implTemplateParams
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope,
+        const SymbolName& selfTypeName,
+        const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& implTemplateParams
     ) -> Expected<std::shared_ptr<const FunctionTemplateNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto& firstToken = parser.Peek();
+        const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(t_parser, t_scope);
+        const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
         if (!expAttributes)
         {
@@ -4252,8 +4252,8 @@ namespace Ace
         }
 
         const auto expNameToken = ParseFunctionOrOpNameToken(
-            t_parser,
-            t_scope
+            parser,
+            scope
         );
         diagnosticBag.Add(expNameToken);
         if (!expNameToken)
@@ -4262,7 +4262,7 @@ namespace Ace
         }
 
         const auto expTemplateParams = ParseOptionalTemplateParams(
-            t_parser,
+            parser,
             selfScope
         );
         diagnosticBag.Add(expTemplateParams);
@@ -4271,26 +4271,26 @@ namespace Ace
             return diagnosticBag;
         }
 
-        const auto expParams = ParseParams(t_parser, selfScope);
+        const auto expParams = ParseParams(parser, selfScope);
         diagnosticBag.Add(expParams);
         if (!expParams)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
@@ -4301,17 +4301,17 @@ namespace Ace
 
         auto accessModifier = AccessModifier::Private;
         std::optional<std::shared_ptr<const Token>> optSelfToken{};
-        if (t_parser.Peek() == TokenKind::MinusGreaterThan)
+        if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto dgnModifierToTokenMap = ParseModifiersUntil(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 { Modifier::Public, Modifier::Self },
                 [&]()
                 {
                     return
-                        (t_parser.Peek() == TokenKind::OpenBrace) ||
-                        (t_parser.Peek() == TokenKind::Semicolon);
+                        (parser.Peek() == TokenKind::OpenBrace) ||
+                        (parser.Peek() == TokenKind::Semicolon);
                 }
             );
             diagnosticBag.Add(dgnModifierToTokenMap);
@@ -4341,7 +4341,7 @@ namespace Ace
             return diagnosticBag;
         }
 
-        const auto expBody = ParseBlockStmt(t_parser, t_scope);
+        const auto expBody = ParseBlockStmt(parser, scope);
         diagnosticBag.Add(expBody);
         if (!expBody)
         {
@@ -4351,11 +4351,11 @@ namespace Ace
         const auto optSelfParam = CreateSelfParam(
             optSelfToken,
             selfScope,
-            t_selfTypeName
+            selfTypeName
         );
 
         const auto function = std::make_shared<const FunctionNode>(
-            CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+            CreateSourceLocationRange(firstToken, parser.PeekBack()),
             selfScope,
             expName.Unwrap(),
             expTypeName.Unwrap(),
@@ -4368,12 +4368,12 @@ namespace Ace
 
         std::vector<std::shared_ptr<const ImplTemplateParamNode>> clonedImplTemplateParams{};
         std::transform(
-            begin(t_implTemplateParams),
-            end  (t_implTemplateParams),
+            begin(implTemplateParams),
+            end  (implTemplateParams),
             back_inserter(clonedImplTemplateParams),
-            [&](const std::shared_ptr<const ImplTemplateParamNode>& t_implTemplateParam)
+            [&](const std::shared_ptr<const ImplTemplateParamNode>& implTemplateParam)
             {
-                return t_implTemplateParam->CloneInScope(selfScope);
+                return implTemplateParam->CloneInScope(selfScope);
             }
         );
 
@@ -4390,27 +4390,27 @@ namespace Ace
     }
 
     static auto ParseTemplatedImpl(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const TemplatedImplNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto& firstToken = parser.Peek();
+        const auto selfScope = scope->GetOrCreateChild({});
 
-        if (t_parser.Peek() != TokenKind::ImplKeyword)
+        if (parser.Peek() != TokenKind::ImplKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::ImplKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTemplateParams = ParseImplTemplateParams(
-            t_parser,
+            parser,
             selfScope
         );
         diagnosticBag.Add(expTemplateParams);
@@ -4419,7 +4419,7 @@ namespace Ace
             return diagnosticBag;
         }
 
-        const auto expTypeName = ParseSymbolName(t_parser, t_scope);
+        const auto expTypeName = ParseSymbolName(parser, scope);
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
         {
@@ -4436,9 +4436,9 @@ namespace Ace
                 const bool foundTemplatedSection = std::find_if(
                     begin(typeNameSections),
                     end  (typeNameSections) - 1,
-                    [](const SymbolNameSection& t_section)
+                    [](const SymbolNameSection& section)
                     {
-                        return t_section.TemplateArgs.empty();
+                        return section.TemplateArgs.empty();
                     }
                 ) == end(typeNameSections);
 
@@ -4449,10 +4449,10 @@ namespace Ace
 
                 std::unordered_set<std::string> templateParamSet{};
                 ACE_TRY_VOID(TransformExpectedVector(templateParams,
-                [&](const std::shared_ptr<const ImplTemplateParamNode>& t_templateParam) -> Expected<void>
+                [&](const std::shared_ptr<const ImplTemplateParamNode>& templateParam) -> Expected<void>
                 {
                     const std::string& templateParamName =
-                        t_templateParam->GetName().String;
+                        templateParam->GetName().String;
 
                     ACE_TRY_ASSERT(!templateParamSet.contains(
                         templateParamName
@@ -4463,13 +4463,13 @@ namespace Ace
                 }));
                 
                 ACE_TRY_VOID(TransformExpectedVector(templateArgs,
-                [&](const SymbolName& t_arg) -> Expected<void>
+                [&](const SymbolName& arg) -> Expected<void>
                 {
-                    ACE_TRY_ASSERT(t_arg.Sections.size() == 1);
-                    ACE_TRY_ASSERT(t_arg.Sections.back().TemplateArgs.empty());
+                    ACE_TRY_ASSERT(arg.Sections.size() == 1);
+                    ACE_TRY_ASSERT(arg.Sections.back().TemplateArgs.empty());
 
                     const std::string& templateArgName =
-                        t_arg.Sections.front().Name.String;
+                        arg.Sections.front().Name.String;
                     ACE_TRY_ASSERT(templateParamSet.contains(templateArgName));
                     templateParamSet.erase(templateArgName);
 
@@ -4498,26 +4498,26 @@ namespace Ace
             }
         }
 
-        if (t_parser.Peek() != TokenKind::OpenBrace)
+        if (parser.Peek() != TokenKind::OpenBrace)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBrace
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            (t_parser.Peek() != TokenKind::CloseBrace)
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            (parser.Peek() != TokenKind::CloseBrace)
             )
         {
-            if (IsFunctionStart(t_parser) || IsFunctionTemplateStart(t_parser))
+            if (IsFunctionStart(parser) || IsFunctionTemplateStart(parser))
             {
                 const auto expFunctionTemplate = ParseTemplatedImplFunction(
-                    t_parser,
+                    parser,
                     selfScope,
                     expTypeName.Unwrap(),
                     expTemplateParams.Unwrap()
@@ -4532,24 +4532,24 @@ namespace Ace
             else
             {
                 diagnosticBag.Add(CreateUnexpectedTokenError(
-                    t_parser.Peek()
+                    parser.Peek()
                 ));
             }
             
-            t_parser.DiscardUntil(
+            parser.DiscardUntil(
                 DiscardKind::Inclusive,
                 { TokenKind::Semicolon, TokenKind::CloseBrace }
             );
         }
 
-        if (t_parser.Peek() == TokenKind::CloseBrace)
+        if (parser.Peek() == TokenKind::CloseBrace)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::CloseBrace
             ));
         }
@@ -4564,7 +4564,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const TemplatedImplNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 selfScope,
                 typeTemplateName,
                 std::vector<std::shared_ptr<const FunctionNode>>{},
@@ -4575,48 +4575,48 @@ namespace Ace
     }
 
     static auto ParseFunction(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const FunctionNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto& firstToken = parser.Peek();
+        const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(t_parser, t_scope);
+        const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
         if (!expAttributes)
         {
             return diagnosticBag;
         }
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
             return diagnosticBag;
         }
 
-        const auto expParams = ParseParams(t_parser, selfScope);
+        const auto expParams = ParseParams(parser, selfScope);
         diagnosticBag.Add(expParams);
         if (!expParams)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
+            parser,
             selfScope,
             ReferenceParsingKind::Disallow
         );
@@ -4628,17 +4628,17 @@ namespace Ace
 
         auto accessModifier = AccessModifier::Private;
         bool isExtern = false;
-        if (t_parser.Peek() == TokenKind::MinusGreaterThan)
+        if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto dgnModifierToTokenMap = ParseModifiersUntil(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 { Modifier::Public, Modifier::Extern },
                 [&]()
                 {
                     return
-                        (t_parser.Peek() == TokenKind::OpenBrace) ||
-                        (t_parser.Peek() == TokenKind::Semicolon);
+                        (parser.Peek() == TokenKind::OpenBrace) ||
+                        (parser.Peek() == TokenKind::Semicolon);
                 }
             );
             diagnosticBag.Add(dgnModifierToTokenMap);
@@ -4659,24 +4659,19 @@ namespace Ace
         std::optional<std::shared_ptr<const BlockStmtNode>> optBody{};
         if (isExtern)
         {
-            if (t_parser.Peek() != TokenKind::Semicolon)
+            if (parser.Peek() != TokenKind::Semicolon)
             {
                 return diagnosticBag.Add(CreateUnexpectedTokenError(
-                    t_parser.Peek(),
+                    parser.Peek(),
                     TokenKind::Semicolon
                 ));
             }
 
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
-            if (expName.Unwrap().String == "test_1")
-            {
-                [](){}();
-            }
-
-            const auto expBody = ParseBlockStmt(t_parser, selfScope);
+            const auto expBody = ParseBlockStmt(parser, selfScope);
             diagnosticBag.Add(expBody);
             if (!expBody)
             {
@@ -4689,7 +4684,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const FunctionNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 selfScope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -4704,23 +4699,23 @@ namespace Ace
     }
 
     static auto ParseFunctionTemplate(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const FunctionTemplateNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto& firstToken = parser.Peek();
+        const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(t_parser, t_scope);
+        const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
         if (!expAttributes)
         {
             return diagnosticBag;
         }
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
@@ -4728,7 +4723,7 @@ namespace Ace
         }
 
         const auto expTemplateParams = ParseTemplateParams(
-            t_parser,
+            parser,
             selfScope
         );
         diagnosticBag.Add(expTemplateParams);
@@ -4738,7 +4733,7 @@ namespace Ace
         }
 
         const auto expParams = ParseParams(
-            t_parser,
+            parser,
             selfScope
         );
         diagnosticBag.Add(expParams);
@@ -4747,19 +4742,19 @@ namespace Ace
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
@@ -4769,17 +4764,17 @@ namespace Ace
         }
 
         auto accessModifier = AccessModifier::Private;
-        if (t_parser.Peek() == TokenKind::MinusGreaterThan)
+        if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto dgnModifierToTokenMap = ParseModifiersUntil(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 { Modifier::Public },
                 [&]()
                 {
                     return
-                        (t_parser.Peek() == TokenKind::OpenBrace) ||
-                        (t_parser.Peek() == TokenKind::Semicolon);
+                        (parser.Peek() == TokenKind::OpenBrace) ||
+                        (parser.Peek() == TokenKind::Semicolon);
                 }
             );
             diagnosticBag.Add(dgnModifierToTokenMap);
@@ -4792,7 +4787,7 @@ namespace Ace
             }
         }
 
-        const auto expBody = ParseBlockStmt(t_parser, selfScope);
+        const auto expBody = ParseBlockStmt(parser, selfScope);
         diagnosticBag.Add(expBody);
         if (!expBody)
         {
@@ -4800,7 +4795,7 @@ namespace Ace
         }
 
         const auto function = std::make_shared<const FunctionNode>(
-            CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+            CreateSourceLocationRange(firstToken, parser.PeekBack()),
             selfScope,
             expName.Unwrap(),
             expTypeName.Unwrap(),
@@ -4824,41 +4819,41 @@ namespace Ace
     }
 
     static auto ParseVar(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const StaticVarNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expAttributes = ParseAttributes(t_parser, t_scope);
+        const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
         if (!expAttributes)
         {
             return diagnosticBag;
         }
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
@@ -4868,13 +4863,13 @@ namespace Ace
         }
 
         auto accessModifier = AccessModifier::Private;
-        if (t_parser.Peek() == TokenKind::MinusGreaterThan)
+        if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto dgnModifierToTokenMap = ParseModifiersUntil(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 { Modifier::Public },
-                [&]() { return t_parser.Peek() == TokenKind::Semicolon; }
+                [&]() { return parser.Peek() == TokenKind::Semicolon; }
             );
             diagnosticBag.Add(dgnModifierToTokenMap);
 
@@ -4886,21 +4881,21 @@ namespace Ace
             }
         }
 
-        if (t_parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() != TokenKind::Semicolon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Semicolon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         return Expected
         {
             std::make_shared<const StaticVarNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
                 expAttributes.Unwrap(),
@@ -4911,42 +4906,42 @@ namespace Ace
     }
 
     static auto ParseMemberVar(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope,
-        const size_t t_index
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope,
+        const size_t index
     ) -> Expected<std::shared_ptr<const InstanceVarNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expAttributes = ParseAttributes(t_parser, t_scope);
+        const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
         if (!expAttributes)
         {
             return diagnosticBag;
         }
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         const auto expTypeName = ParseTypeName(
-            t_parser,
-            t_scope,
+            parser,
+            scope,
             ReferenceParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
@@ -4956,13 +4951,13 @@ namespace Ace
         }
 
         auto accessModifier = AccessModifier::Private;
-        if (t_parser.Peek() == TokenKind::MinusGreaterThan)
+        if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto dgnModifierToTokenMap = ParseModifiersUntil(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 { Modifier::Public },
-                [&]() { return t_parser.Peek() == TokenKind::Comma; }
+                [&]() { return parser.Peek() == TokenKind::Comma; }
             );
             diagnosticBag.Add(dgnModifierToTokenMap);
 
@@ -4977,64 +4972,64 @@ namespace Ace
         return Expected
         {
             std::make_shared<const InstanceVarNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
-                t_scope,
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
                 expAttributes.Unwrap(),
                 accessModifier,
-                t_index
+                index
             ),
             diagnosticBag,
         };
     }
 
     static auto ParseStructBody(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::vector<std::shared_ptr<const InstanceVarNode>>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (t_parser.Peek() != TokenKind::OpenBrace)
+        if (parser.Peek() != TokenKind::OpenBrace)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBrace
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::vector<std::shared_ptr<const InstanceVarNode>> vars{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            (t_parser.Peek() != TokenKind::CloseBrace)
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            (parser.Peek() != TokenKind::CloseBrace)
             )
         {
             if (!vars.empty())
             {
-                if (t_parser.Peek() == TokenKind::Comma)
+                if (parser.Peek() == TokenKind::Comma)
                 {
-                    t_parser.Eat();
+                    parser.Eat();
                 }
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        t_parser.PeekBack(),
+                        parser.PeekBack(),
                         TokenKind::Comma
                     ));
                 }
 
-                if (t_parser.Peek() == TokenKind::CloseBrace)
+                if (parser.Peek() == TokenKind::CloseBrace)
                 {
                     break;
                 }
             }
             
             const auto expVar = ParseMemberVar(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 vars.size()
             );
             diagnosticBag.Add(expVar);
@@ -5044,20 +5039,20 @@ namespace Ace
                 continue;
             }
 
-            t_parser.DiscardUntil(
+            parser.DiscardUntil(
                 DiscardKind::Exclusive,
                 { TokenKind::Comma, TokenKind::CloseBrace }
             );
         }
 
-        if (t_parser.Peek() == TokenKind::CloseBrace)
+        if (parser.Peek() == TokenKind::CloseBrace)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::CloseBrace
             ));
         }
@@ -5066,57 +5061,57 @@ namespace Ace
     }
 
     static auto ParseStruct(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const StructTypeNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto& firstToken = parser.Peek();
+        const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(t_parser, t_scope);
+        const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
         if (!expAttributes)
         {
             return diagnosticBag;
         }
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        if (t_parser.Peek() != TokenKind::StructKeyword)
+        if (parser.Peek() != TokenKind::StructKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::StructKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         auto accessModifier = AccessModifier::Private;
-        if (t_parser.Peek() == TokenKind::MinusGreaterThan)
+        if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto dgnModifierToTokenMap = ParseModifiersUntil(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 { Modifier::Public },
-                [&]() { return t_parser.Peek() == TokenKind::OpenBrace; }
+                [&]() { return parser.Peek() == TokenKind::OpenBrace; }
             );
             diagnosticBag.Add(dgnModifierToTokenMap);
 
@@ -5128,7 +5123,7 @@ namespace Ace
             }
         }
         
-        const auto expBody = ParseStructBody(t_parser, selfScope);
+        const auto expBody = ParseStructBody(parser, selfScope);
         diagnosticBag.Add(expBody);
         if (!expBody)
         {
@@ -5138,7 +5133,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const StructTypeNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 selfScope,
                 expName.Unwrap(),
                 expAttributes.Unwrap(),
@@ -5150,23 +5145,23 @@ namespace Ace
     }
 
     static auto ParseStructTemplate(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const TypeTemplateNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
-        const auto selfScope = t_scope->GetOrCreateChild({});
+        const auto& firstToken = parser.Peek();
+        const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(t_parser, t_scope);
+        const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
         if (!expAttributes)
         {
             return diagnosticBag;
         }
 
-        const auto expName = ParseName(t_parser, t_scope);
+        const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
@@ -5174,7 +5169,7 @@ namespace Ace
         }
 
         const auto expTemplateParams = ParseTemplateParams(
-            t_parser,
+            parser,
             selfScope
         );
         diagnosticBag.Add(expTemplateParams);
@@ -5183,34 +5178,34 @@ namespace Ace
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        if (t_parser.Peek() != TokenKind::StructKeyword)
+        if (parser.Peek() != TokenKind::StructKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::StructKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         auto accessModifier = AccessModifier::Private;
-        if (t_parser.Peek() == TokenKind::MinusGreaterThan)
+        if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto dgnModifierToTokenMap = ParseModifiersUntil(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 { Modifier::Public },
-                [&]() { return t_parser.Peek() == TokenKind::OpenBrace; }
+                [&]() { return parser.Peek() == TokenKind::OpenBrace; }
             );
             diagnosticBag.Add(dgnModifierToTokenMap);
 
@@ -5222,7 +5217,7 @@ namespace Ace
             }
         }
 
-        const auto expBody = ParseStructBody(t_parser, selfScope);
+        const auto expBody = ParseStructBody(parser, selfScope);
         diagnosticBag.Add(expBody);
         if (!expBody)
         {
@@ -5230,7 +5225,7 @@ namespace Ace
         }
 
         const auto type = std::make_shared<const StructTypeNode>(
-            CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+            CreateSourceLocationRange(firstToken, parser.PeekBack()),
             selfScope,
             expName.Unwrap(),
             expAttributes.Unwrap(),
@@ -5250,17 +5245,17 @@ namespace Ace
     }
 
     static auto ParseTypeTemplate(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const TypeTemplateNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (IsStructTemplateStart(t_parser))
+        if (IsStructTemplateStart(parser))
         {
             const auto expStructTemplate = ParseStructTemplate(
-                t_parser,
-                t_scope
+                parser,
+                scope
             );
             diagnosticBag.Add(expStructTemplate);
             if (!expStructTemplate)
@@ -5275,19 +5270,19 @@ namespace Ace
             };
         }
 
-        return diagnosticBag.Add(CreateUnexpectedTokenError(t_parser.Peek()));
+        return diagnosticBag.Add(CreateUnexpectedTokenError(parser.Peek()));
     }
 
     static auto ParseType(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const ITypeNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (IsStructStart(t_parser))
+        if (IsStructStart(parser))
         {
-            const auto expStruct = ParseStruct(t_parser, t_scope);
+            const auto expStruct = ParseStruct(parser, scope);
             diagnosticBag.Add(expStruct);
             if (!expStruct)
             {
@@ -5297,53 +5292,53 @@ namespace Ace
             return Expected{ expStruct.Unwrap(), diagnosticBag };
         }
 
-        return diagnosticBag.Add(CreateUnexpectedTokenError(t_parser.Peek()));
+        return diagnosticBag.Add(CreateUnexpectedTokenError(parser.Peek()));
     }
 
     static auto ParseModule(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = t_parser.Peek();
+        const auto& firstToken = parser.Peek();
 
-        const auto expName = ParseNestedName(t_parser, t_scope);
+        const auto expName = ParseNestedName(parser, scope);
         diagnosticBag.Add(expName);
         if (!expName)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::Colon)
+        if (parser.Peek() != TokenKind::Colon)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::Colon
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
-        if (t_parser.Peek() != TokenKind::ModuleKeyword)
+        if (parser.Peek() != TokenKind::ModuleKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::ModuleKeyword
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         auto accessModifier = AccessModifier::Private;
-        if (t_parser.Peek() == TokenKind::MinusGreaterThan)
+        if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto dgnModifierToTokenMap = ParseModifiersUntil(
-                t_parser,
-                t_scope,
+                parser,
+                scope,
                 { Modifier::Public },
-                [&]() { return t_parser.Peek() == TokenKind::OpenBrace; }
+                [&]() { return parser.Peek() == TokenKind::OpenBrace; }
             );
             diagnosticBag.Add(dgnModifierToTokenMap);
 
@@ -5356,26 +5351,26 @@ namespace Ace
         }
 
         std::vector<std::shared_ptr<Scope>> scopes{};
-        scopes.push_back(t_scope);
+        scopes.push_back(scope);
         std::transform(
             begin(expName.Unwrap()),
             end  (expName.Unwrap()),
             back_inserter(scopes),
-            [&](const Identifier& t_name)
+            [&](const Identifier& name)
             {
-                return scopes.back()->GetOrCreateChild(t_name.String);
+                return scopes.back()->GetOrCreateChild(name.String);
             }
         );
 
-        if (t_parser.Peek() != TokenKind::OpenBrace)
+        if (parser.Peek() != TokenKind::OpenBrace)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::OpenBrace
             ));
         }
 
-        t_parser.Eat();
+        parser.Eat();
 
         std::vector<std::shared_ptr<const ModuleNode>> modules{};
         std::vector<std::shared_ptr<const ITypeNode>> types{};
@@ -5386,15 +5381,15 @@ namespace Ace
         std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
         std::vector<std::shared_ptr<const StaticVarNode>> vars{};
         while (
-            (t_parser.Peek() != TokenKind::EndOfFile) &&
-            (t_parser.Peek() != TokenKind::CloseBrace)
+            (parser.Peek() != TokenKind::EndOfFile) &&
+            (parser.Peek() != TokenKind::CloseBrace)
             )
         {
             const auto selfScope = scopes.back();
 
-            if (IsModuleStart(t_parser))
+            if (IsModuleStart(parser))
             {
-                const auto expModule = ParseModule(t_parser, selfScope);
+                const auto expModule = ParseModule(parser, selfScope);
                 diagnosticBag.Add(expModule);
                 if (expModule)
                 {
@@ -5402,9 +5397,9 @@ namespace Ace
                     continue;
                 }
             }
-            else if (IsTypeStart(t_parser))
+            else if (IsTypeStart(parser))
             {
-                const auto expType = ParseType(t_parser, selfScope);
+                const auto expType = ParseType(parser, selfScope);
                 diagnosticBag.Add(expType);
                 if (expType)
                 {
@@ -5412,10 +5407,10 @@ namespace Ace
                     continue;
                 }
             }
-            else if (IsTypeTemplateStart(t_parser))
+            else if (IsTypeTemplateStart(parser))
             {
                 const auto expTypeTemplate = ParseTypeTemplate(
-                    t_parser,
+                    parser,
                     selfScope
                 );
                 diagnosticBag.Add(expTypeTemplate);
@@ -5425,10 +5420,10 @@ namespace Ace
                     continue;
                 }
             }
-            else if (IsImplStart(t_parser))
+            else if (IsImplStart(parser))
             {
                 const auto expImpl = ParseImpl(
-                    t_parser,
+                    parser,
                     selfScope
                 );
                 diagnosticBag.Add(expImpl);
@@ -5438,10 +5433,10 @@ namespace Ace
                     continue;
                 }
             }
-            else if (IsTemplatedImplStart(t_parser))
+            else if (IsTemplatedImplStart(parser))
             {
                 const auto expTemplatedImpl = ParseTemplatedImpl(
-                    t_parser,
+                    parser,
                     selfScope
                 );
                 diagnosticBag.Add(expTemplatedImpl);
@@ -5451,9 +5446,9 @@ namespace Ace
                     continue;
                 }
             }
-            else if (IsFunctionStart(t_parser))
+            else if (IsFunctionStart(parser))
             {
-                const auto expFunction = ParseFunction(t_parser, selfScope);
+                const auto expFunction = ParseFunction(parser, selfScope);
                 diagnosticBag.Add(expFunction);
                 if (expFunction)
                 {
@@ -5461,10 +5456,10 @@ namespace Ace
                     continue;
                 }
             }
-            else if (IsFunctionTemplateStart(t_parser))
+            else if (IsFunctionTemplateStart(parser))
             {
                 const auto expFunctionTemplate = ParseFunctionTemplate(
-                    t_parser,
+                    parser,
                     selfScope
                 );
                 diagnosticBag.Add(expFunctionTemplate);
@@ -5474,9 +5469,9 @@ namespace Ace
                     continue;
                 }
             }
-            else if (IsVarStart(t_parser))
+            else if (IsVarStart(parser))
             {
-                const auto expVar = ParseVar(t_parser, selfScope);
+                const auto expVar = ParseVar(parser, selfScope);
                 diagnosticBag.Add(expVar);
                 if (expVar)
                 {
@@ -5487,24 +5482,24 @@ namespace Ace
             else
             {
                 diagnosticBag.Add(CreateUnexpectedTokenError(
-                    t_parser.Peek()
+                    parser.Peek()
                 ));
             }
             
-            t_parser.DiscardUntil(
+            parser.DiscardUntil(
                 DiscardKind::Inclusive,
                 { TokenKind::Semicolon, TokenKind::CloseBrace }
             );
         }
 
-        if (t_parser.Peek() == TokenKind::CloseBrace)
+        if (parser.Peek() == TokenKind::CloseBrace)
         {
-            t_parser.Eat();
+            parser.Eat();
         }
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                t_parser.PeekBack(),
+                parser.PeekBack(),
                 TokenKind::CloseBrace
             ));
         }
@@ -5512,7 +5507,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ModuleNode>(
-                CreateSourceLocationRange(firstToken, t_parser.PeekBack()),
+                CreateSourceLocationRange(firstToken, parser.PeekBack()),
                 scopes.front(),
                 scopes.back(),
                 expName.Unwrap(),
@@ -5531,29 +5526,29 @@ namespace Ace
     }
 
     static auto ParseAST(
-        Parser& t_parser,
-        const std::shared_ptr<Scope>& t_scope
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto expModule = ParseModule(t_parser, t_scope);
+        const auto expModule = ParseModule(parser, scope);
         diagnosticBag.Add(expModule);
         if (!expModule)
         {
             return diagnosticBag;
         }
 
-        if (t_parser.Peek() != TokenKind::EndOfFile)
+        if (parser.Peek() != TokenKind::EndOfFile)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
-                t_parser.Peek(),
+                parser.Peek(),
                 TokenKind::EndOfFile
             ));
         }
 
-        t_parser.Eat();
-        ACE_ASSERT(t_parser.IsEnd());
+        parser.Eat();
+        ACE_ASSERT(parser.IsEnd());
 
         return
         {
@@ -5563,14 +5558,14 @@ namespace Ace
     }
 
     auto ParseAST(
-        const FileBuffer* const t_fileBuffer,
-        const std::vector<std::shared_ptr<const Token>>& t_tokens
+        const FileBuffer* const fileBuffer,
+        const std::vector<std::shared_ptr<const Token>>& tokens
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
-        Parser parser{ t_fileBuffer, t_tokens };
+        Parser parser{ fileBuffer, tokens };
         return ParseAST(
             parser,
-            t_fileBuffer->GetCompilation()->GlobalScope.Unwrap()
+            fileBuffer->GetCompilation()->GlobalScope.Unwrap()
         );
     }
 }

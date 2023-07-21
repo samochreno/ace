@@ -11,12 +11,12 @@
 namespace Ace
 {
     AssertStmtNode::AssertStmtNode(
-        const SourceLocation& t_sourceLocation,
-        const std::shared_ptr<Scope>& t_scope,
-        const std::shared_ptr<const IExprNode>& t_condition
-    ) : m_SourceLocation{ t_sourceLocation },
-        m_Scope{ t_scope },
-        m_Condition{ t_condition }
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const std::shared_ptr<const IExprNode>& condition
+    ) : m_SourceLocation{ sourceLocation },
+        m_Scope{ scope },
+        m_Condition{ condition }
     {
     }
 
@@ -40,21 +40,21 @@ namespace Ace
     }
 
     auto AssertStmtNode::CloneInScope(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const AssertStmtNode>
     {
         return std::make_shared<const AssertStmtNode>(
             m_SourceLocation,
-            t_scope,
-            m_Condition->CloneInScopeExpr(t_scope)
+            scope,
+            m_Condition->CloneInScopeExpr(scope)
         );
     }
 
     auto AssertStmtNode::CloneInScopeStmt(
-        const std::shared_ptr<Scope>& t_scope
+        const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
-        return CloneInScope(t_scope);
+        return CloneInScope(scope);
     }
 
     auto AssertStmtNode::CreateBound() const -> Expected<std::shared_ptr<const AssertStmtBoundNode>>

@@ -24,16 +24,16 @@
 namespace Ace
 {
     FunctionSymbol::FunctionSymbol(
-        const std::shared_ptr<Scope>& t_selfScope,
-        const Identifier& t_name,
-        const SymbolCategory t_symbolCategory,
-        const AccessModifier t_accessModifier,
-        ITypeSymbol* const t_type
-    ) : m_SelfScope{ t_selfScope },
-        m_Name{ t_name },
-        m_SymbolCategory{ t_symbolCategory },
-        m_AccessModifier{ t_accessModifier },
-        m_Type{ t_type }
+        const std::shared_ptr<Scope>& selfScope,
+        const Identifier& name,
+        const SymbolCategory symbolCategory,
+        const AccessModifier accessModifier,
+        ITypeSymbol* const type
+    ) : m_SelfScope{ selfScope },
+        m_Name{ name },
+        m_SymbolCategory{ symbolCategory },
+        m_AccessModifier{ accessModifier },
+        m_Type{ type }
     {
     }
 
@@ -77,11 +77,11 @@ namespace Ace
         auto normalParams = m_SelfScope->CollectSymbols<NormalParamVarSymbol>();
         std::sort(begin(normalParams), end(normalParams),
         [](
-            const NormalParamVarSymbol* const t_lhs, 
-            const NormalParamVarSymbol* const t_rhs
+            const NormalParamVarSymbol* const lhs, 
+            const NormalParamVarSymbol* const rhs
             )
         {
-            return t_lhs->GetIndex() < t_rhs->GetIndex();
+            return lhs->GetIndex() < rhs->GetIndex();
         });
 
         std::vector<IParamVarSymbol*> params{};
@@ -104,10 +104,10 @@ namespace Ace
         std::for_each(
             begin(definedParams),
             end  (definedParams),
-            [&](IParamVarSymbol* const t_param)
+            [&](IParamVarSymbol* const param)
             {
                 auto* const normalParam =
-                    dynamic_cast<NormalParamVarSymbol*>(t_param);
+                    dynamic_cast<NormalParamVarSymbol*>(param);
 
                 if (normalParam)
                 {
@@ -116,7 +116,7 @@ namespace Ace
                 }
 
                 auto* const selfParam =
-                    dynamic_cast<SelfParamVarSymbol*>(t_param);
+                    dynamic_cast<SelfParamVarSymbol*>(param);
 
                 if (selfParam)
                 {
@@ -136,11 +136,11 @@ namespace Ace
 
         std::sort(begin(normalParams), end(normalParams),
         [](
-            const NormalParamVarSymbol* const t_lhs,
-            const NormalParamVarSymbol* const t_rhs
+            const NormalParamVarSymbol* const lhs,
+            const NormalParamVarSymbol* const rhs
             )
         {
-            return t_lhs->GetIndex() < t_rhs->GetIndex();
+            return lhs->GetIndex() < rhs->GetIndex();
         });
         params.insert(
             end(params),
@@ -160,18 +160,18 @@ namespace Ace
             begin(params),
             end  (params),
             back_inserter(typeInfos),
-            [](const IParamVarSymbol* const t_param)
+            [](const IParamVarSymbol* const param)
             {
-                return TypeInfo{ t_param->GetType(), ValueKind::R };
+                return TypeInfo{ param->GetType(), ValueKind::R };
             }
         );
 
         return typeInfos;
     }
 
-    auto FunctionSymbol::BindBody(const std::shared_ptr<const IEmittable<void>>& t_body) -> void
+    auto FunctionSymbol::BindBody(const std::shared_ptr<const IEmittable<void>>& body) -> void
     {
-        m_OptBody = t_body;
+        m_OptBody = body;
     }
 
     auto FunctionSymbol::GetBody() -> std::optional<const IEmittable<void>*>

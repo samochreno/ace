@@ -12,23 +12,23 @@
 namespace Ace
 {
     auto FileBuffer::Read(
-        const Compilation* const t_compilation,
-        const std::filesystem::path& t_path
+        const Compilation* const compilation,
+        const std::filesystem::path& path
     ) -> Expected<std::shared_ptr<const FileBuffer>>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (!std::filesystem::exists(t_path))
+        if (!std::filesystem::exists(path))
         {
             return diagnosticBag.Add(CreateFileNotFoundError(
-                t_path
+                path
             ));
         }
 
-        std::ifstream fileStream{ t_path };
+        std::ifstream fileStream{ path };
         if (!fileStream.is_open())
         {
-            return diagnosticBag.Add(CreateFileOpenError(t_path));
+            return diagnosticBag.Add(CreateFileOpenError(path));
         }
 
         std::string buffer{};
@@ -50,12 +50,12 @@ namespace Ace
             begin(lineBeginEndIndexPairs),
             end  (lineBeginEndIndexPairs),
             back_inserter(lines),
-            [&](const std::pair<size_t, size_t>& t_lineBeginEndIndexPair)
+            [&](const std::pair<size_t, size_t>& lineBeginEndIndexPair)
             {
                 return std::string_view
                 {
-                    begin(buffer) + t_lineBeginEndIndexPair.first,
-                    begin(buffer) + t_lineBeginEndIndexPair.second,
+                    begin(buffer) + lineBeginEndIndexPair.first,
+                    begin(buffer) + lineBeginEndIndexPair.second,
                 };
             }
         );
@@ -65,17 +65,17 @@ namespace Ace
             begin(lines),
             end  (lines),
             back_inserter(lineBeginIterators),
-            [&](const std::string_view t_line)
+            [&](const std::string_view line)
             {
-                return begin(t_line);
+                return begin(line);
             }
         );
 
         return
         {
             std::shared_ptr<const FileBuffer>(new FileBuffer{
-                t_compilation,
-                t_path,
+                compilation,
+                path,
                 std::move(buffer),
                 std::move(lines),
                 std::move(lineBeginIterators),
@@ -116,16 +116,16 @@ namespace Ace
     }
 
     auto FileBuffer::FormatLocation(
-        const SourceLocation& t_location
+        const SourceLocation& location
     ) const -> std::string
     {
         const auto lineIndex = FindLineIndex(
-            t_location.CharacterBeginIterator
+            location.CharacterBeginIterator
         );
 
         const auto characterIndex = FindCharacterIndex(
             lineIndex,
-            t_location.CharacterBeginIterator
+            location.CharacterBeginIterator
         );
 
         return
@@ -136,27 +136,27 @@ namespace Ace
 
 
     FileBuffer::FileBuffer(
-        const Compilation* const t_compilation,
-        const std::filesystem::path& t_path,
-        std::string&& t_buffer,
-        std::vector<std::string_view>&& t_lines,
-        std::vector<std::string_view::const_iterator>&& t_lineBeginIterators
-    ) : m_Compilation{ t_compilation },
-        m_Path{ t_path },
-        m_Buffer{ std::move(t_buffer) },
-        m_Lines{ std::move(t_lines) },
-        m_LineBeginIterators{ std::move(t_lineBeginIterators) }
+        const Compilation* const compilation,
+        const std::filesystem::path& path,
+        std::string&& buffer,
+        std::vector<std::string_view>&& lines,
+        std::vector<std::string_view::const_iterator>&& lineBeginIterators
+    ) : m_Compilation{ compilation },
+        m_Path{ path },
+        m_Buffer{ std::move(buffer) },
+        m_Lines{ std::move(lines) },
+        m_LineBeginIterators{ std::move(lineBeginIterators) }
     {
     }
 
     auto FileBuffer::FindLineIndex(
-        const std::string_view::const_iterator t_characterIt
+        const std::string_view::const_iterator characterIt
     ) const -> size_t
     {
         const auto lineIt = std::upper_bound(
             begin(m_LineBeginIterators),
             end  (m_LineBeginIterators),
-            t_characterIt
+            characterIt
         ) - 1;
 
         return std::distance(
@@ -166,13 +166,13 @@ namespace Ace
     }
 
     auto FileBuffer::FindCharacterIndex(
-        const size_t t_lineIndex,
-        const std::string_view::const_iterator t_characterIt
+        const size_t lineIndex,
+        const std::string_view::const_iterator characterIt
     ) const -> size_t
     {
         return std::distance(
-            m_LineBeginIterators.at(t_lineIndex),
-            t_characterIt
+            m_LineBeginIterators.at(lineIndex),
+            characterIt
         );
     }
 }

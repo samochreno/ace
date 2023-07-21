@@ -19,9 +19,9 @@ namespace Ace
     {
     public:
         MemberAccessExprNode(
-            const SourceLocation& t_sourceLocation,
-            const std::shared_ptr<const IExprNode>& t_expr,
-            const SymbolNameSection& t_name
+            const SourceLocation& sourceLocation,
+            const std::shared_ptr<const IExprNode>& expr,
+            const SymbolNameSection& name
         );
         virtual ~MemberAccessExprNode() = default;
 
@@ -29,10 +29,10 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope>;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const MemberAccessExprNode> final;
         auto CloneInScopeExpr(
-            const std::shared_ptr<Scope>& t_scope
+            const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const InstanceVarReferenceExprBoundNode>> final;
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;

@@ -4,13 +4,13 @@
 
 namespace Ace
 {
-    auto IsInAlphabet(const char t_character) -> bool;
-    auto IsNumber    (const char t_character) -> bool;
+    auto IsInAlphabet(const char character) -> bool;
+    auto IsNumber    (const char character) -> bool;
 
-    auto TrimRight(std::string& t_value) -> std::string&;
-    auto TrimLeft (std::string& t_value) -> std::string&;
-    auto Trim     (std::string& t_value) -> std::string&;
+    auto TrimRight(std::string& value) -> std::string&;
+    auto TrimLeft (std::string& value) -> std::string&;
+    auto Trim     (std::string& value) -> std::string&;
 
-    auto MakeLowercase(std::string& t_value) -> std::string&;
-    auto MakeUppercase(std::string& t_value) -> std::string&;
+    auto MakeLowercase(std::string& value) -> std::string&;
+    auto MakeUppercase(std::string& value) -> std::string&;
 }
