@@ -5,7 +5,6 @@
 - ❓ Change all `Is...` functions in `Parser.cpp` to use `switch`
 - ❓ Change most `const&` constructor to pass by value, and change all r-value reference parameters to value
 - `CompoundAssignmentStmtBoundNode` lowering
-- Variable reference emitting
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
 
 ## 💥 High Priority

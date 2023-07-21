@@ -2,14 +2,10 @@
 
 #include <memory>
 #include <vector>
-#include <functional>
 
-#include "BoundNodes/Exprs/FunctionCalls/InstanceFunctionCallExprBoundNode.hpp"
-#include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "BoundNodes/Exprs/DerefAsExprBoundNode.hpp"
 #include "SourceLocation.hpp"
+#include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
-#include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
 #include "Assert.hpp"
 #include "Diagnostic.hpp"
@@ -100,51 +96,46 @@ namespace Ace
         return GetOrCreateLowered(context);
     }
 
-    auto InstanceVarReferenceExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
+    static auto GetOrCreateDereferenced(
+        const std::shared_ptr<const IExprBoundNode>& expr
+    ) -> std::shared_ptr<const IExprBoundNode>
+    {
+        auto* const typeSymbol = expr->GetTypeInfo().Symbol;
+
+        const bool isReference = typeSymbol->IsReference();
+        const bool isStrongPointer = typeSymbol->IsStrongPointer();
+
+        if (isReference)
+        {
+            return GetOrCreateDereferenced(std::make_shared<const DerefAsExprBoundNode>(
+                expr->GetSourceLocation(),
+                expr,
+                typeSymbol->GetWithoutReference()
+            ));
+        }
+
+        if (isStrongPointer)
+        {
+            return GetOrCreateDereferenced(std::make_shared<const DerefAsExprBoundNode>(
+                expr->GetSourceLocation(),
+                expr,
+                typeSymbol->GetWithoutStrongPointer()
+            ));
+        }
+
+        return expr;
+    }
+
+    auto InstanceVarReferenceExprBoundNode::Emit(
+        Emitter& emitter
+    ) const -> ExprEmitResult
     {
         std::vector<ExprDropData> temporaries{};
 
-        auto* const varSymbol =
-            dynamic_cast<InstanceVarSymbol*>(m_VarSymbol);
+        auto* const varSymbol = dynamic_cast<InstanceVarSymbol*>(m_VarSymbol);
         ACE_ASSERT(varSymbol);
 
-        const std::function<std::shared_ptr<const IExprBoundNode>(const std::shared_ptr<const IExprBoundNode>& expr)>
-        getDereferenced = [&](const std::shared_ptr<const IExprBoundNode>& expr) -> std::shared_ptr<const IExprBoundNode>
-        {
-            auto* const typeSymbol = expr->GetTypeInfo().Symbol;
-
-            const bool isReference = typeSymbol->IsReference();
-            const bool isStrongPointer = typeSymbol->IsStrongPointer();
-
-            if (!isReference && !isStrongPointer)
-            {
-                return expr;
-            }
-
-            return getDereferenced([&]()
-            {
-                if (isReference)
-                {
-                    return std::make_shared<const DerefAsExprBoundNode>(
-                        expr->GetSourceLocation(),
-                        expr,
-                        typeSymbol->GetWithoutReference()
-                    );
-                }
-                else if (isStrongPointer)
-                {
-                    return std::make_shared<const DerefAsExprBoundNode>(
-                        expr->GetSourceLocation(),
-                        expr,
-                        typeSymbol->GetWithoutStrongPointer()
-                    );
-                }
-
-                ACE_UNREACHABLE();
-            }());
-        };
-
-        const auto expr = getDereferenced(m_Expr);
+        const auto expr = GetOrCreateDereferenced(m_Expr);
         const auto exprEmitResult = expr->Emit(emitter);
         temporaries.insert(
             end  (temporaries), 
