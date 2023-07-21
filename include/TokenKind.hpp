@@ -79,7 +79,7 @@ namespace Ace
         WhileKeyword,
         ReturnKeyword,
         StructKeyword,
-        OperatorKeyword,
+        OpKeyword,
         PublicKeyword,
         ExternKeyword,
         CastKeyword,

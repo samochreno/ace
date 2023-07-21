@@ -36,7 +36,7 @@ namespace Ace
         virtual auto GetTypeInfo() const -> TypeInfo = 0;
     };
 
-    typedef Expected<FunctionSymbol*>(*ConversionOperatorGetterFunction)(
+    typedef Expected<FunctionSymbol*>(*ConversionOpGetterFunction)(
         const SourceLocation&,
         const std::shared_ptr<Scope>&,
         ITypeSymbol*,
@@ -45,7 +45,7 @@ namespace Ace
     auto CreateConverted(
         std::shared_ptr<const IExprBoundNode> t_expr,
         TypeInfo t_targetTypeInfo,
-        ConversionOperatorGetterFunction t_func
+        ConversionOpGetterFunction t_func
     ) -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>;
     inline auto CreateImplicitlyConverted(
         const std::shared_ptr<const IExprBoundNode>& t_expr,
@@ -55,7 +55,7 @@ namespace Ace
         return CreateConverted(
             t_expr,
             t_targetTypeInfo,
-            &GetImplicitConversionOperator
+            &GetImplicitConversionOp
         );
     }
     inline auto CreateExplicitlyConverted(
@@ -66,7 +66,7 @@ namespace Ace
         return CreateConverted(
             t_expr,
             t_targetTypeInfo,
-            &GetExplicitConversionOperator
+            &GetExplicitConversionOp
         );
     }
 

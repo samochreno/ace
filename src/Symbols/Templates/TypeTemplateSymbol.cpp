@@ -144,24 +144,24 @@ namespace Ace
 
         const SourceLocation sourceLocation{};
 
-        auto copyOperatorName = selfSymbol->CreateFullyQualifiedName(
+        auto copyOpName = selfSymbol->CreateFullyQualifiedName(
             sourceLocation
         );
-        copyOperatorName.Sections.push_back(SymbolNameSection{
-            Identifier{ sourceLocation, SpecialIdentifier::Operator::Copy }
+        copyOpName.Sections.push_back(SymbolNameSection{
+            Identifier{ sourceLocation, SpecialIdentifier::Op::Copy }
         });
         selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
-            copyOperatorName
+            copyOpName
         );
 
-        auto dropOperatorName = selfSymbol->CreateFullyQualifiedName(
+        auto dropOpName = selfSymbol->CreateFullyQualifiedName(
             sourceLocation
         );
-        dropOperatorName.Sections.push_back(SymbolNameSection{
-            Identifier{ sourceLocation, SpecialIdentifier::Operator::Drop }
+        dropOpName.Sections.push_back(SymbolNameSection{
+            Identifier{ sourceLocation, SpecialIdentifier::Op::Drop }
         });
         selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
-            dropOperatorName
+            dropOpName
         );
     }
 }

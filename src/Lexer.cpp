@@ -111,9 +111,9 @@ namespace Ace
         {
             token.Kind = TokenKind::StructKeyword;
         }
-        else if (t_string == Keyword::Operator)
+        else if (t_string == Keyword::Op)
         {
-            token.Kind = TokenKind::OperatorKeyword;
+            token.Kind = TokenKind::OpKeyword;
         }
         else if (t_string == Keyword::Public)
         {

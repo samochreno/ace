@@ -40,7 +40,7 @@ namespace Ace
         Self,
     };
 
-    static auto IsCompoundAssignmentOperator(
+    static auto IsCompoundAssignmentOp(
         const TokenKind t_tokenKind
     ) -> bool
     {
@@ -67,7 +67,7 @@ namespace Ace
         }
     }
 
-    static auto IsUserPrefixOperator(const TokenKind t_tokenKind) -> bool
+    static auto IsUserPrefixOp(const TokenKind t_tokenKind) -> bool
     {
         switch (t_tokenKind)
         {
@@ -85,9 +85,9 @@ namespace Ace
         }
     }
 
-    static auto IsPrefixOperator(const TokenKind t_tokenKind) -> bool
+    static auto IsPrefixOp(const TokenKind t_tokenKind) -> bool
     {
-        if (IsUserPrefixOperator(t_tokenKind))
+        if (IsUserPrefixOp(t_tokenKind))
         {
             return true;
         }
@@ -108,7 +108,7 @@ namespace Ace
         }
     }
 
-    static auto IsPostfixOperator(const TokenKind t_tokenKind) -> bool
+    static auto IsPostfixOp(const TokenKind t_tokenKind) -> bool
     {
         switch (t_tokenKind)
         {
@@ -124,7 +124,7 @@ namespace Ace
         }
     }
 
-    static auto IsUserBinaryOperator(const TokenKind t_tokenKind) -> bool
+    static auto IsUserBinaryOp(const TokenKind t_tokenKind) -> bool
     {
         switch (t_tokenKind)
         {
@@ -155,9 +155,9 @@ namespace Ace
         }
     }
 
-    static auto IsBinaryOperator(const TokenKind t_tokenKind) -> bool
+    static auto IsBinaryOp(const TokenKind t_tokenKind) -> bool
     {
-        if (IsUserBinaryOperator(t_tokenKind))
+        if (IsUserBinaryOp(t_tokenKind))
         {
             return true;
         }
@@ -177,82 +177,82 @@ namespace Ace
         }
     }
 
-    static auto IsUserOperator(const TokenKind t_tokenKind) -> bool
+    static auto IsUserOp(const TokenKind t_tokenKind) -> bool
     {
         return
-            IsUserPrefixOperator(t_tokenKind) ||
-            IsUserBinaryOperator(t_tokenKind);
+            IsUserPrefixOp(t_tokenKind) ||
+            IsUserBinaryOp(t_tokenKind);
     }
 
-    static constexpr size_t MaxBinaryOperatorPrecedence = 9;
-    static auto GetBinaryOperatorPrecedence(
-        const TokenKind t_operator
+    static constexpr size_t MaxBinaryOpPrecedence = 9;
+    static auto GetBinaryOpPrecedence(
+        const TokenKind t_op
     ) -> size_t
     {
         if (
-            (t_operator == TokenKind::Asterisk) ||
-            (t_operator == TokenKind::Slash) ||
-            (t_operator == TokenKind::Percent)
+            (t_op == TokenKind::Asterisk) ||
+            (t_op == TokenKind::Slash) ||
+            (t_op == TokenKind::Percent)
             )
         {
-            return MaxBinaryOperatorPrecedence;
+            return MaxBinaryOpPrecedence;
         }
 
         if (
-            (t_operator == TokenKind::Plus) ||
-            (t_operator == TokenKind::Minus)
+            (t_op == TokenKind::Plus) ||
+            (t_op == TokenKind::Minus)
             )
         {
             return 8;
         }
 
         if (
-            (t_operator == TokenKind::LessThanLessThan) ||
-            (t_operator == TokenKind::GreaterThanGreaterThan)
+            (t_op == TokenKind::LessThanLessThan) ||
+            (t_op == TokenKind::GreaterThanGreaterThan)
             )
         {
             return 7;
         }
 
         if (
-            (t_operator == TokenKind::LessThan) ||
-            (t_operator == TokenKind::LessThanEquals) ||
-            (t_operator == TokenKind::GreaterThan) ||
-            (t_operator == TokenKind::GreaterThanEquals)
+            (t_op == TokenKind::LessThan) ||
+            (t_op == TokenKind::LessThanEquals) ||
+            (t_op == TokenKind::GreaterThan) ||
+            (t_op == TokenKind::GreaterThanEquals)
             )
         {
             return 6;
         }
 
         if (
-            (t_operator == TokenKind::EqualsEquals) ||
-            (t_operator == TokenKind::ExclamationEquals)
+            (t_op == TokenKind::EqualsEquals) ||
+            (t_op == TokenKind::ExclamationEquals)
             )
         {
             return 5;
         }
 
-        if (t_operator == TokenKind::Ampersand)
+        if (t_op == TokenKind::Ampersand)
         {
             return 4;
         }
 
-        if (t_operator == TokenKind::Caret)
+        if (t_op == TokenKind::Caret)
         {
             return 3;
         }
 
-        if (t_operator == TokenKind::VerticalBar)
+        if (t_op == TokenKind::VerticalBar)
         {
             return 2;
         }
 
-        if (t_operator == TokenKind::AmpersandAmpersand)
+        if (t_op == TokenKind::AmpersandAmpersand)
         {
             return 1;
         }
 
-        if (t_operator == TokenKind::VerticalBarVerticalBar)
+        if (t_op == TokenKind::VerticalBarVerticalBar)
         {
             return 0;
         }
@@ -263,10 +263,10 @@ namespace Ace
     static auto CreateCollapsedPrefixExpr(
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_expr,
-        const Operator& t_operator
+        const Op& t_op
     ) -> std::shared_ptr<const IExprNode>
     {
-        switch (t_operator.TokenKind)
+        switch (t_op.TokenKind)
         {
             case TokenKind::Exclamation:
             {
@@ -297,7 +297,7 @@ namespace Ace
                 return std::make_shared<const UserUnaryExprNode>(
                     t_sourceLocation,
                     t_expr, 
-                    t_operator
+                    t_op
                 );
             }
         }
@@ -307,10 +307,10 @@ namespace Ace
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_lhsExpr,
         const std::shared_ptr<const IExprNode>& t_rhsExpr,
-        const Operator& t_operator
+        const Op& t_op
     ) -> std::shared_ptr<const IExprNode>
     {
-        switch (t_operator.TokenKind)
+        switch (t_op.TokenKind)
         {
             case TokenKind::AmpersandAmpersand:
             {
@@ -336,7 +336,7 @@ namespace Ace
                     t_sourceLocation,
                     t_lhsExpr,
                     t_rhsExpr,
-                    t_operator
+                    t_op
                 );
             }
         }
@@ -371,27 +371,27 @@ namespace Ace
         return {};
     }
 
-    static auto GetOperatorFunctionName(
-        const std::shared_ptr<const Token>& t_operatorToken,
+    static auto GetOpFunctionName(
+        const std::shared_ptr<const Token>& t_opToken,
         const size_t t_paramCount
     ) -> Expected<const char*>
     {
         DiagnosticBag diagnosticBag{};
 
-        switch (t_operatorToken->Kind)
+        switch (t_opToken->Kind)
         {
             case TokenKind::Asterisk:
             {
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::Multiplication,
+                    SpecialIdentifier::Op::Multiplication,
                     diagnosticBag,
                 };
             }
@@ -401,13 +401,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::Division,
+                    SpecialIdentifier::Op::Division,
                     diagnosticBag,
                 };
             }
@@ -417,13 +417,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::Remainder,
+                    SpecialIdentifier::Op::Remainder,
                     diagnosticBag,
                 };
             }
@@ -434,7 +434,7 @@ namespace Ace
                 {
                     return
                     {
-                        SpecialIdentifier::Operator::UnaryPlus,
+                        SpecialIdentifier::Op::UnaryPlus,
                         diagnosticBag,
                     };
                 }
@@ -443,13 +443,13 @@ namespace Ace
                 {
                     return
                     {
-                        SpecialIdentifier::Operator::Addition,
+                        SpecialIdentifier::Op::Addition,
                         diagnosticBag,
                     };
                 }
 
                 return diagnosticBag.Add(
-                    CreateUnexpectedUnaryOrBinaryOperatorParamCountError(t_operatorToken)
+                    CreateUnexpectedUnaryOrBinaryOpParamCountError(t_opToken)
                 );
             }
 
@@ -459,7 +459,7 @@ namespace Ace
                 {
                     return
                     {
-                        SpecialIdentifier::Operator::UnaryNegation,
+                        SpecialIdentifier::Op::UnaryNegation,
                         diagnosticBag,
                     };
                 }
@@ -468,13 +468,13 @@ namespace Ace
                 {
                     return
                     {
-                        SpecialIdentifier::Operator::Subtraction,
+                        SpecialIdentifier::Op::Subtraction,
                         diagnosticBag,
                     };
                 }
 
                 return diagnosticBag.Add(
-                    CreateUnexpectedUnaryOrBinaryOperatorParamCountError(t_operatorToken)
+                    CreateUnexpectedUnaryOrBinaryOpParamCountError(t_opToken)
                 );
             }
 
@@ -483,13 +483,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::LessThan,
+                    SpecialIdentifier::Op::LessThan,
                     diagnosticBag,
                 };
             }
@@ -499,13 +499,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::GreaterThan,
+                    SpecialIdentifier::Op::GreaterThan,
                     diagnosticBag,
                 };
             }
@@ -515,13 +515,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::LessThanEquals,
+                    SpecialIdentifier::Op::LessThanEquals,
                     diagnosticBag,
                 };
             }
@@ -531,13 +531,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::GreaterThanEquals,
+                    SpecialIdentifier::Op::GreaterThanEquals,
                     diagnosticBag,
                 };
             }
@@ -547,13 +547,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::RightShift,
+                    SpecialIdentifier::Op::RightShift,
                     diagnosticBag,
                 };
             }
@@ -563,13 +563,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::LeftShift,
+                    SpecialIdentifier::Op::LeftShift,
                     diagnosticBag,
                 };
             }
@@ -579,13 +579,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::Equals,
+                    SpecialIdentifier::Op::Equals,
                     diagnosticBag,
                 };
             }
@@ -595,13 +595,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::NotEquals,
+                    SpecialIdentifier::Op::NotEquals,
                     diagnosticBag,
                 };
             }
@@ -611,13 +611,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
     
                 return
                 {
-                    SpecialIdentifier::Operator::XOR,
+                    SpecialIdentifier::Op::XOR,
                     diagnosticBag,
                 };
             }
@@ -627,13 +627,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::OR,
+                    SpecialIdentifier::Op::OR,
                     diagnosticBag,
                 };
             }
@@ -643,13 +643,13 @@ namespace Ace
                 if (t_paramCount != 2)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedBinaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::AND,
+                    SpecialIdentifier::Op::AND,
                     diagnosticBag,
                 };
             }
@@ -659,53 +659,53 @@ namespace Ace
                 if (t_paramCount != 1)
                 {
                     return diagnosticBag.Add(
-                        CreateUnexpectedUnaryOperatorParamCountError(t_operatorToken)
+                        CreateUnexpectedUnaryOpParamCountError(t_opToken)
                     );
                 }
 
                 return
                 {
-                    SpecialIdentifier::Operator::OneComplement,
+                    SpecialIdentifier::Op::OneComplement,
                     diagnosticBag,
                 };
             }
             
             case TokenKind::Identifier:
             {
-                if (t_operatorToken->String == SpecialIdentifier::Copy)
+                if (t_opToken->String == SpecialIdentifier::Copy)
                 {
                     if (t_paramCount != 2)
                     {
                         return diagnosticBag.Add(
-                            CreateUnexpectedBinaryOperatorParamCountError(t_operatorToken)
+                            CreateUnexpectedBinaryOpParamCountError(t_opToken)
                         );
                     }
 
                     return
                     {
-                        SpecialIdentifier::Operator::Copy,
+                        SpecialIdentifier::Op::Copy,
                         diagnosticBag,
                     };
                 }
                 
-                if (t_operatorToken->String  == SpecialIdentifier::Drop)
+                if (t_opToken->String == SpecialIdentifier::Drop)
                 {
                     if (t_paramCount != 1)
                     {
                         return diagnosticBag.Add(
-                            CreateUnexpectedUnaryOperatorParamCountError(t_operatorToken)
+                            CreateUnexpectedUnaryOpParamCountError(t_opToken)
                         );
                     }
 
                     return
                     {
-                        SpecialIdentifier::Operator::Drop,
+                        SpecialIdentifier::Op::Drop,
                         diagnosticBag,
                     };
                 }
 
                 return diagnosticBag.Add(
-                    CreateUnknownIdentifierOperatorError(t_operatorToken)
+                    CreateUnknownIdentifierOpError(t_opToken)
                 );
             }
 
@@ -716,7 +716,7 @@ namespace Ace
         }
     }
 
-    static auto CreateFunctionOrOperatorName(
+    static auto CreateFunctionOrOpName(
         const std::shared_ptr<const Token>& t_nameToken,
         const size_t t_paramCount,
         const AccessModifier t_accessModifier,
@@ -738,7 +738,7 @@ namespace Ace
             };
         }
 
-        const auto expName = GetOperatorFunctionName(t_nameToken, t_paramCount);
+        const auto expName = GetOpFunctionName(t_nameToken, t_paramCount);
         diagnosticBag.Add(expName);
         if (!expName)
         {
@@ -747,12 +747,12 @@ namespace Ace
 
         if (t_accessModifier != AccessModifier::Public)
         {
-            return diagnosticBag.Add(CreateOperatorMustBePublicError(t_nameToken));
+            return diagnosticBag.Add(CreateOpMustBePublicError(t_nameToken));
         }
 
         if (t_hasSelfParam)
         {
-            return diagnosticBag.Add(CreateInstanceOperatorError(t_nameToken));
+            return diagnosticBag.Add(CreateInstanceOpError(t_nameToken));
         }
 
         return Identifier
@@ -1280,7 +1280,7 @@ namespace Ace
     ) -> bool
     {
         return
-            (t_parser.Peek(0) == TokenKind::OperatorKeyword) ||
+            (t_parser.Peek(0) == TokenKind::OpKeyword) ||
             (
                 (t_parser.Peek(0) == TokenKind::Identifier) &&
                 (t_parser.Peek(1) == TokenKind::OpenParen)
@@ -2756,13 +2756,13 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        std::vector<Operator> operators{};
-        while (IsPrefixOperator(t_parser.Peek()->Kind))
+        std::vector<Op> ops{};
+        while (IsPrefixOp(t_parser.Peek()->Kind))
         {
-            const auto& operatorToken = t_parser.Eat();
-            operators.push_back(Operator{
-                operatorToken->SourceLocation,
-                operatorToken->Kind
+            const auto& opToken = t_parser.Eat();
+            ops.push_back(Op{
+                opToken->SourceLocation,
+                opToken->Kind
             });
         }
 
@@ -2774,22 +2774,22 @@ namespace Ace
         }
 
         auto expr = expSecondaryExpr.Unwrap();
-        while (!operators.empty())
+        while (!ops.empty())
         {
-            const auto& op3rator = operators.back();
+            const auto& op = ops.back();
 
             const SourceLocation sourceLocation
             {
-                op3rator.SourceLocation,
+                op.SourceLocation,
                 t_parser.PeekBack()->SourceLocation,
             };
             expr = CreateCollapsedPrefixExpr(
                 sourceLocation,
                 expr,
-                op3rator
+                op
             );
 
-            operators.pop_back();
+            ops.pop_back();
         }
 
         return Expected
@@ -2814,16 +2814,16 @@ namespace Ace
         }
 
         std::vector<std::shared_ptr<const IExprNode>> exprs{};
-        std::vector<Operator> operators{};
+        std::vector<Op> ops{};
 
         exprs.push_back(expUnaryExpr.Unwrap());
         
-        while (IsBinaryOperator(t_parser.Peek()->Kind))
+        while (IsBinaryOp(t_parser.Peek()->Kind))
         {
-            const auto& operatorToken = t_parser.Eat();
-            operators.push_back(Operator{
-                operatorToken->SourceLocation,
-                operatorToken->Kind
+            const auto& opToken = t_parser.Eat();
+            ops.push_back(Op{
+                opToken->SourceLocation,
+                opToken->Kind
             });
 
             const auto expUnaryExpr = ParseUnaryExpr(t_parser, t_scope);
@@ -2836,7 +2836,7 @@ namespace Ace
             exprs.push_back(expUnaryExpr.Unwrap());
         }
 
-        if (operators.empty())
+        if (ops.empty())
         {
             ACE_ASSERT(exprs.size() == 1);
 
@@ -2848,7 +2848,7 @@ namespace Ace
         }
 
         for (
-            ssize_t precedenceLevel = MaxBinaryOperatorPrecedence;
+            ssize_t precedenceLevel = MaxBinaryOpPrecedence;
             precedenceLevel >= 0;
             precedenceLevel--
             )
@@ -2858,11 +2858,11 @@ namespace Ace
             {
                 didCollapseAny = false;
 
-                for (size_t i = 0; i < operators.size(); i++)
+                for (size_t i = 0; i < ops.size(); i++)
                 {
-                    const auto op3rator = operators.at(i);
+                    const auto op = ops.at(i);
                     const auto precedence =
-                        GetBinaryOperatorPrecedence(op3rator.TokenKind);
+                        GetBinaryOpPrecedence(op.TokenKind);
 
                     if (precedence == precedenceLevel)
                     {
@@ -2871,13 +2871,13 @@ namespace Ace
                         const auto lhsExpr = exprs.at(i);
                         const auto rhsExpr = exprs.at(i + 1);
 
-                        operators.erase(begin(operators) + i);
+                        ops.erase(begin(ops) + i);
                         exprs.erase(begin(exprs) + i + 1);
                         exprs.at(i) = CreateCollapsedBinaryExpr(
                             CreateSourceLocationRange(lhsExpr, rhsExpr),
                             lhsExpr,
                             rhsExpr,
-                            op3rator
+                            op
                         );
 
                         break;
@@ -2888,7 +2888,7 @@ namespace Ace
         }
 
         ACE_ASSERT(exprs.size() == 1);
-        ACE_ASSERT(operators.empty());
+        ACE_ASSERT(ops.empty());
 
         return Expected
         {
@@ -3067,16 +3067,16 @@ namespace Ace
             return diagnosticBag;
         }
 
-        if (!IsCompoundAssignmentOperator(t_parser.Peek()->Kind))
+        if (!IsCompoundAssignmentOp(t_parser.Peek()->Kind))
         {
             return diagnosticBag.Add(
-                CreateUnexpectedTokenExpectedCompoundAssignmentOperatorError(t_parser.Peek())
+                CreateUnexpectedTokenExpectedCompoundAssignmentOpError(t_parser.Peek())
             );
         }
 
         t_parser.Eat();
 
-        const Operator op3rator
+        const Op op
         {
             t_parser.PeekBack()->SourceLocation,
             t_parser.PeekBack()->Kind
@@ -3106,7 +3106,7 @@ namespace Ace
                 t_scope,
                 expLhsExpr.Unwrap(),
                 expRhsExpr.Unwrap(),
-                op3rator
+                op
             ),
             diagnosticBag,
         };
@@ -3614,7 +3614,7 @@ namespace Ace
 
         const bool isSemicolon = t_parser.Peek() == TokenKind::Semicolon;
         const bool isAssignment = t_parser.Peek() == TokenKind::Equals;
-        const bool isCompoundAssignment = IsCompoundAssignmentOperator(
+        const bool isCompoundAssignment = IsCompoundAssignmentOp(
             t_parser.Peek()->Kind
         );
 
@@ -3647,7 +3647,7 @@ namespace Ace
 
         t_parser.Eat();
     
-        const Operator op3rator
+        const Op op
         {
             t_parser.PeekBack()->SourceLocation,
             t_parser.PeekBack()->Kind,
@@ -3695,7 +3695,7 @@ namespace Ace
                     t_scope,
                     expExpr.Unwrap(),
                     expRhsExpr.Unwrap(),
-                    op3rator
+                    op
                 ),
                 diagnosticBag,
             };
@@ -3704,7 +3704,7 @@ namespace Ace
         ACE_UNREACHABLE();
     }
 
-    static auto ParseFunctionOrOperatorNameToken(
+    static auto ParseFunctionOrOpNameToken(
         Parser& t_parser,
         const std::shared_ptr<Scope>& t_scope
     ) -> Expected<std::shared_ptr<const Token>>
@@ -3716,7 +3716,7 @@ namespace Ace
             return Expected{ t_parser.Eat(), diagnosticBag };
         }
 
-        if (t_parser.Peek() != TokenKind::OperatorKeyword)
+        if (t_parser.Peek() != TokenKind::OpKeyword)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
                 t_parser.Peek(),
@@ -3728,11 +3728,11 @@ namespace Ace
 
         if (
             (t_parser.Peek() != TokenKind::Identifier) &&
-            !IsUserOperator(t_parser.Peek()->Kind)
+            !IsUserOp(t_parser.Peek()->Kind)
             )
         {
             return diagnosticBag.Add(
-                CreateUnexpectedTokenExpectedOverloadableOperatorError(t_parser.Peek())
+                CreateUnexpectedTokenExpectedOverloadableOpError(t_parser.Peek())
             );
         }
 
@@ -3819,7 +3819,7 @@ namespace Ace
             return diagnosticBag;
         }
 
-        const auto expNameToken = ParseFunctionOrOperatorNameToken(
+        const auto expNameToken = ParseFunctionOrOpNameToken(
             t_parser,
             t_scope
         );
@@ -3900,7 +3900,7 @@ namespace Ace
             }
         }
 
-        const auto expName = CreateFunctionOrOperatorName(
+        const auto expName = CreateFunctionOrOpName(
             expNameToken.Unwrap(),
             expParams.Unwrap().size(),
             accessModifier,
@@ -4251,7 +4251,7 @@ namespace Ace
             return diagnosticBag;
         }
 
-        const auto expNameToken = ParseFunctionOrOperatorNameToken(
+        const auto expNameToken = ParseFunctionOrOpNameToken(
             t_parser,
             t_scope
         );
@@ -4329,7 +4329,7 @@ namespace Ace
             }
         }
 
-        const auto expName = CreateFunctionOrOperatorName(
+        const auto expName = CreateFunctionOrOpName(
             expNameToken.Unwrap(),
             expParams.Unwrap().size(),
             accessModifier,

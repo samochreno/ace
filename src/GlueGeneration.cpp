@@ -344,18 +344,18 @@ namespace Ace::GlueGeneration
             paramSymbols.at(1)
         );
 
-        auto operatorName = t_structSymbol->CreateFullyQualifiedName(
+        auto opName = t_structSymbol->CreateFullyQualifiedName(
             t_structSymbol->GetName().SourceLocation
         );
-        operatorName.Sections.push_back(Identifier{
+        opName.Sections.push_back(Identifier{
             t_structSymbol->GetName().SourceLocation,
-            SpecialIdentifier::Operator::Copy,
+            SpecialIdentifier::Op::Copy,
         });
-        const auto expOperatorSymbol = 
-            t_compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(operatorName);
+        const auto expOpSymbol = 
+            t_compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(opName);
 
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
-        if (expOperatorSymbol)
+        if (expOpSymbol)
         {
             std::vector<std::shared_ptr<const IExprBoundNode>> args{};
             args.push_back(selfParamReferenceExprNode);
@@ -364,7 +364,7 @@ namespace Ace::GlueGeneration
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                 SourceLocation{},
                 bodyScope,
-                expOperatorSymbol.Unwrap(),
+                expOpSymbol.Unwrap(),
                 args
             );
 
@@ -464,17 +464,17 @@ namespace Ace::GlueGeneration
 
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
 
-        auto operatorName = t_structSymbol->CreateFullyQualifiedName(
+        auto opName = t_structSymbol->CreateFullyQualifiedName(
             t_structSymbol->GetName().SourceLocation
         );
-        operatorName.Sections.push_back(Identifier{
+        opName.Sections.push_back(Identifier{
             t_structSymbol->GetName().SourceLocation,
-            SpecialIdentifier::Operator::Drop,
+            SpecialIdentifier::Op::Drop,
         });
-        const auto expOperatorSymbol = 
-            t_compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(operatorName);
+        const auto expOpSymbol = 
+            t_compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(opName);
 
-        if (expOperatorSymbol)
+        if (expOpSymbol)
         {
             std::vector<std::shared_ptr<const IExprBoundNode>> args{};
             args.push_back(selfParamReferenceExprNode);
@@ -482,7 +482,7 @@ namespace Ace::GlueGeneration
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                 SourceLocation{},
                 bodyScope,
-                expOperatorSymbol.Unwrap(),
+                expOpSymbol.Unwrap(),
                 args
             );
 

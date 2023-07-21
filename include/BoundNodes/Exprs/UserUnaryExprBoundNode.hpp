@@ -26,7 +26,7 @@ namespace Ace
         UserUnaryExprBoundNode(
             const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprBoundNode>& t_expr,
-            FunctionSymbol* const t_operatorSymbol
+            FunctionSymbol* const t_opSymbol
         );
         virtual ~UserUnaryExprBoundNode() = default;
 
@@ -52,6 +52,6 @@ namespace Ace
     private:
         SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprBoundNode> m_Expr{};
-        FunctionSymbol* m_OperatorSymbol{};
+        FunctionSymbol* m_OpSymbol{};
     };
 }

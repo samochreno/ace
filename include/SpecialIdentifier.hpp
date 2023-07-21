@@ -22,66 +22,66 @@ namespace Ace::SpecialIdentifier
 
     inline constexpr const char* Global = "$global";
 
-    namespace Operator
+    namespace Op
     {
-        inline constexpr const char* UnaryPlus          = "$operator_unary_plus";
-        inline constexpr const char* UnaryNegation      = "$operator_unary_negation";
-        inline constexpr const char* OneComplement      = "$operator_one_complement";
-        inline constexpr const char* Multiplication     = "$operator_multiplication";
-        inline constexpr const char* Division           = "$operator_division";
-        inline constexpr const char* Remainder          = "$operator_remainder";
-        inline constexpr const char* Addition           = "$operator_addition";
-        inline constexpr const char* Subtraction        = "$operator_subtraction";
-        inline constexpr const char* RightShift         = "$operator_right_shift";
-        inline constexpr const char* LeftShift          = "$operator_left_shift";
-        inline constexpr const char* LessThan           = "$operator_less_than";
-        inline constexpr const char* GreaterThan        = "$operator_greater_than";
-        inline constexpr const char* LessThanEquals     = "$operator_less_than_equals";
-        inline constexpr const char* GreaterThanEquals  = "$operator_greater_than_equals";
-        inline constexpr const char* Equals             = "$operator_equals";
-        inline constexpr const char* NotEquals          = "$operator_not_equals";
-        inline constexpr const char* AND                = "$operator_AND";
-        inline constexpr const char* XOR                = "$operator_XOR";
-        inline constexpr const char* OR                 = "$operator_OR";
-        inline constexpr const char* Copy               = "$operator_copy";
-        inline constexpr const char* Drop               = "$operator_drop";
+        inline constexpr const char* UnaryPlus          = "$op_unary_plus";
+        inline constexpr const char* UnaryNegation      = "$op_unary_negation";
+        inline constexpr const char* OneComplement      = "$op_one_complement";
+        inline constexpr const char* Multiplication     = "$op_multiplication";
+        inline constexpr const char* Division           = "$op_division";
+        inline constexpr const char* Remainder          = "$op_remainder";
+        inline constexpr const char* Addition           = "$op_addition";
+        inline constexpr const char* Subtraction        = "$op_subtraction";
+        inline constexpr const char* RightShift         = "$op_right_shift";
+        inline constexpr const char* LeftShift          = "$op_left_shift";
+        inline constexpr const char* LessThan           = "$op_less_than";
+        inline constexpr const char* GreaterThan        = "$op_greater_than";
+        inline constexpr const char* LessThanEquals     = "$op_less_than_equals";
+        inline constexpr const char* GreaterThanEquals  = "$op_greater_than_equals";
+        inline constexpr const char* Equals             = "$op_equals";
+        inline constexpr const char* NotEquals          = "$op_not_equals";
+        inline constexpr const char* AND                = "$op_AND";
+        inline constexpr const char* XOR                = "$op_XOR";
+        inline constexpr const char* OR                 = "$op_OR";
+        inline constexpr const char* Copy               = "$op_copy";
+        inline constexpr const char* Drop               = "$op_drop";
 
         inline const std::unordered_map<TokenKind, std::string> BinaryNameMap
         {
-            { TokenKind::Asterisk, SpecialIdentifier::Operator::Multiplication },
-            { TokenKind::Slash, SpecialIdentifier::Operator::Division },
-            { TokenKind::Percent, SpecialIdentifier::Operator::Remainder },
-            { TokenKind::Plus, SpecialIdentifier::Operator::Addition },
-            { TokenKind::Minus, SpecialIdentifier::Operator::Subtraction },
-            { TokenKind::LessThan, SpecialIdentifier::Operator::LessThan },
-            { TokenKind::GreaterThan, SpecialIdentifier::Operator::GreaterThan },
-            { TokenKind::LessThanEquals, SpecialIdentifier::Operator::LessThanEquals },
-            { TokenKind::GreaterThanEquals, SpecialIdentifier::Operator::GreaterThanEquals },
-            { TokenKind::LessThanLessThan, SpecialIdentifier::Operator::LeftShift },
-            { TokenKind::GreaterThanGreaterThan, SpecialIdentifier::Operator::RightShift },
-            { TokenKind::EqualsEquals, SpecialIdentifier::Operator::Equals },
-            { TokenKind::ExclamationEquals, SpecialIdentifier::Operator::NotEquals },
-            { TokenKind::Caret, SpecialIdentifier::Operator::XOR },
-            { TokenKind::VerticalBar, SpecialIdentifier::Operator::OR },
-            { TokenKind::Ampersand, SpecialIdentifier::Operator::AND },
+            { TokenKind::Asterisk, SpecialIdentifier::Op::Multiplication },
+            { TokenKind::Slash, SpecialIdentifier::Op::Division },
+            { TokenKind::Percent, SpecialIdentifier::Op::Remainder },
+            { TokenKind::Plus, SpecialIdentifier::Op::Addition },
+            { TokenKind::Minus, SpecialIdentifier::Op::Subtraction },
+            { TokenKind::LessThan, SpecialIdentifier::Op::LessThan },
+            { TokenKind::GreaterThan, SpecialIdentifier::Op::GreaterThan },
+            { TokenKind::LessThanEquals, SpecialIdentifier::Op::LessThanEquals },
+            { TokenKind::GreaterThanEquals, SpecialIdentifier::Op::GreaterThanEquals },
+            { TokenKind::LessThanLessThan, SpecialIdentifier::Op::LeftShift },
+            { TokenKind::GreaterThanGreaterThan, SpecialIdentifier::Op::RightShift },
+            { TokenKind::EqualsEquals, SpecialIdentifier::Op::Equals },
+            { TokenKind::ExclamationEquals, SpecialIdentifier::Op::NotEquals },
+            { TokenKind::Caret, SpecialIdentifier::Op::XOR },
+            { TokenKind::VerticalBar, SpecialIdentifier::Op::OR },
+            { TokenKind::Ampersand, SpecialIdentifier::Op::AND },
 
-            { TokenKind::PlusEquals, SpecialIdentifier::Operator::Addition },
-            { TokenKind::MinusEquals, SpecialIdentifier::Operator::Subtraction },
-            { TokenKind::AsteriskEquals, SpecialIdentifier::Operator::Multiplication },
-            { TokenKind::SlashEquals, SpecialIdentifier::Operator::Division },
-            { TokenKind::PercentEquals, SpecialIdentifier::Operator::Remainder },
-            { TokenKind::LessThanLessThanEquals, SpecialIdentifier::Operator::LeftShift },
-            { TokenKind::GreaterThanGreaterThanEquals, SpecialIdentifier::Operator::RightShift },
-            { TokenKind::CaretEquals, SpecialIdentifier::Operator::XOR },
-            { TokenKind::VerticalBarEquals, SpecialIdentifier::Operator::OR },
-            { TokenKind::AmpersandEquals, SpecialIdentifier::Operator::AND },
+            { TokenKind::PlusEquals, SpecialIdentifier::Op::Addition },
+            { TokenKind::MinusEquals, SpecialIdentifier::Op::Subtraction },
+            { TokenKind::AsteriskEquals, SpecialIdentifier::Op::Multiplication },
+            { TokenKind::SlashEquals, SpecialIdentifier::Op::Division },
+            { TokenKind::PercentEquals, SpecialIdentifier::Op::Remainder },
+            { TokenKind::LessThanLessThanEquals, SpecialIdentifier::Op::LeftShift },
+            { TokenKind::GreaterThanGreaterThanEquals, SpecialIdentifier::Op::RightShift },
+            { TokenKind::CaretEquals, SpecialIdentifier::Op::XOR },
+            { TokenKind::VerticalBarEquals, SpecialIdentifier::Op::OR },
+            { TokenKind::AmpersandEquals, SpecialIdentifier::Op::AND },
         };
 
         inline const std::unordered_map<TokenKind, std::string> UnaryNameMap
         {
-            { TokenKind::Plus, SpecialIdentifier::Operator::UnaryPlus },
-            { TokenKind::Minus, SpecialIdentifier::Operator::UnaryNegation },
-            { TokenKind::Tilde, SpecialIdentifier::Operator::OneComplement },
+            { TokenKind::Plus, SpecialIdentifier::Op::UnaryPlus },
+            { TokenKind::Minus, SpecialIdentifier::Op::UnaryNegation },
+            { TokenKind::Tilde, SpecialIdentifier::Op::OneComplement },
         };
     }
 }

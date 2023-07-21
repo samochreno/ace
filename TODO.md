@@ -2,7 +2,6 @@
 
 ## 🛠️ Refactor
 
-- Abbreviate `Operator` as `Op`
 - Rename `LiteralSymbol` to `SymbolLiteral`
 - Rename `AssignmentStmtBoundNode` to `NormalAssignmentStmtBoundNode`
 - Rename all `variable` to `var`

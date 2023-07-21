@@ -107,7 +107,7 @@ std::rc: module -> pub {
             ret new StrongPointer[T] { internal_data };
         }
 
-        operator copy(
+        op copy(
             self:  &StrongPointer[T],
             other: &StrongPointer[T]
         ): void -> pub
@@ -118,7 +118,7 @@ std::rc: module -> pub {
             ControlBlock::increment_strong_count(control_block_ptr(self));
         }
 
-        operator drop(self: &StrongPointer[T]): void -> pub {
+        op drop(self: &StrongPointer[T]): void -> pub {
             ControlBlock::decrement_strong_count(control_block_ptr(self));
 
             if ControlBlock::strong_count(control_block_ptr(self)) == 0 {
@@ -147,7 +147,7 @@ std::rc: module -> pub {
             ret new WeakPointer[T] { control_block_ptr };
         }
  
-        operator copy(
+        op copy(
             self:  &WeakPointer[T],
             other: &WeakPointer[T]
         ): void -> pub
@@ -157,7 +157,7 @@ std::rc: module -> pub {
             ControlBlock::increment_weak_count(self.control_block_ptr);
         }
 
-        operator drop(self: &WeakPointer[T]): void -> pub {
+        op drop(self: &WeakPointer[T]): void -> pub {
             ControlBlock::decrement_weak_count(self.control_block_ptr);
 
             if 

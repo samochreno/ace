@@ -26,11 +26,11 @@ namespace Ace
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& t_rhsExpr,
-        FunctionSymbol* const t_operatorSymbol
+        FunctionSymbol* const t_opSymbol
     ) : m_SourceLocation{ t_sourceLocation },
         m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr },
-        m_OperatorSymbol{ t_operatorSymbol }
+        m_OpSymbol{ t_opSymbol }
     {
     }
 
@@ -58,7 +58,7 @@ namespace Ace
         const StmtTypeCheckingContext& t_context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>>
     {
-        const auto argTypeInfos = m_OperatorSymbol->CollectArgTypeInfos();
+        const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
         ACE_ASSERT(argTypeInfos.size() == 2);
 
         ACE_TRY(mchConvertedAndCheckedLHSExpr, CreateImplicitlyConvertedAndTypeChecked(
@@ -83,7 +83,7 @@ namespace Ace
             GetSourceLocation(),
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value,
-            m_OperatorSymbol
+            m_OpSymbol
         ));
     }
 
@@ -123,7 +123,7 @@ namespace Ace
                 m_RHSExpr->GetSourceLocation(),
                 m_LHSExpr,
                 m_RHSExpr,
-                m_OperatorSymbol
+                m_OpSymbol
             );
 
             const auto assignmentStmt = std::make_shared<const AssignmentStmtBoundNode>(
@@ -255,7 +255,7 @@ namespace Ace
                 m_RHSExpr->GetSourceLocation(),
                 tmpRefVarFieldReferenceExpr,
                 m_RHSExpr,
-                m_OperatorSymbol
+                m_OpSymbol
             );
 
             const auto assignmentStmt = std::make_shared<const AssignmentStmtBoundNode>(

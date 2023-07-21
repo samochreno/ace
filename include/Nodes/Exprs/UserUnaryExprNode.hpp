@@ -6,7 +6,7 @@
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Exprs/UserUnaryExprBoundNode.hpp"
 #include "SourceLocation.hpp"
-#include "Operator.hpp"
+#include "Op.hpp"
 #include "Scope.hpp"
 #include "TokenKind.hpp"
 #include "Diagnostic.hpp"
@@ -22,7 +22,7 @@ namespace Ace
         UserUnaryExprNode(
             const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprNode>& t_expr,
-            const Operator t_operator
+            const Op t_op
         );
         virtual ~UserUnaryExprNode() = default;
 
@@ -41,6 +41,6 @@ namespace Ace
     private:
         SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprNode> m_Expr{};
-        Operator m_Operator{};
+        Op m_Op{};
     };
 }

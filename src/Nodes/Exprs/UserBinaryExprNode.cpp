@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "SourceLocation.hpp"
-#include "Operator.hpp"
+#include "Op.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/UserBinaryExprBoundNode.hpp"
@@ -17,11 +17,11 @@ namespace Ace
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprNode>& t_lhsExpr,
         const std::shared_ptr<const IExprNode>& t_rhsExpr,
-        const Operator& t_operator
+        const Op& t_op
     ) : m_SourceLocation{ t_sourceLocation },
         m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr },
-        m_Operator{ t_operator }
+        m_Op{ t_op }
     {
     }
 
@@ -53,7 +53,7 @@ namespace Ace
             m_SourceLocation,
             m_LHSExpr->CloneInScopeExpr(t_scope),
             m_RHSExpr->CloneInScopeExpr(t_scope),
-            m_Operator
+            m_Op
         );
     }
 
@@ -72,26 +72,26 @@ namespace Ace
         auto* const lhsTypeSymbol = boundLHSExpr->GetTypeInfo().Symbol;
         auto* const rhsTypeSymbol = boundRHSExpr->GetTypeInfo().Symbol;
 
-        const auto& operatorNameMap =
-            SpecialIdentifier::Operator::BinaryNameMap;
+        const auto& opNameMap =
+            SpecialIdentifier::Op::BinaryNameMap;
 
-        const auto operatorNameIt = operatorNameMap.find(m_Operator.TokenKind);
-        ACE_TRY_ASSERT(operatorNameIt != end(operatorNameMap));
+        const auto opNameIt = opNameMap.find(m_Op.TokenKind);
+        ACE_TRY_ASSERT(opNameIt != end(opNameMap));
 
         auto lhsName = lhsTypeSymbol->CreateFullyQualifiedName(
-            m_Operator.SourceLocation
+            m_Op.SourceLocation
         );
         lhsName.Sections.emplace_back(Identifier{
-            m_Operator.SourceLocation,
-            operatorNameIt->second,
+            m_Op.SourceLocation,
+            opNameIt->second,
         });
 
         auto rhsName = rhsTypeSymbol->CreateFullyQualifiedName(
-            m_Operator.SourceLocation
+            m_Op.SourceLocation
         );
         rhsName.Sections.emplace_back(Identifier{
-            m_Operator.SourceLocation,
-            operatorNameIt->second,
+            m_Op.SourceLocation,
+            opNameIt->second,
         });
 
         const std::vector<TypeInfo> argTypeInfos
@@ -108,7 +108,7 @@ namespace Ace
             [](const TypeInfo& t_typeInfo) { return t_typeInfo.Symbol; }
         );
 
-        const auto expLHSOperatorSymbol = [&]() -> Expected<FunctionSymbol*>
+        const auto expLHSOpSymbol = [&]() -> Expected<FunctionSymbol*>
         {
             ACE_TRY(symbol, GetScope()->ResolveStaticSymbol<FunctionSymbol>(
                 lhsName,
@@ -123,7 +123,7 @@ namespace Ace
 
             return symbol;
         }();
-        const auto expRHSOperatorSymbol = [&]() -> Expected<FunctionSymbol*>
+        const auto expRHSOpSymbol = [&]() -> Expected<FunctionSymbol*>
         {
             ACE_TRY(symbol, GetScope()->ResolveStaticSymbol<FunctionSymbol>(
                 rhsName,
@@ -139,25 +139,25 @@ namespace Ace
             return symbol;
         }();
 
-        ACE_TRY_ASSERT(expLHSOperatorSymbol || expRHSOperatorSymbol);
+        ACE_TRY_ASSERT(expLHSOpSymbol || expRHSOpSymbol);
 
-        if (expLHSOperatorSymbol && expRHSOperatorSymbol)
+        if (expLHSOpSymbol && expRHSOpSymbol)
         {
             ACE_TRY_ASSERT(
-                expLHSOperatorSymbol.Unwrap() ==
-                expRHSOperatorSymbol.Unwrap()
+                expLHSOpSymbol.Unwrap() ==
+                expRHSOpSymbol.Unwrap()
             );
         }
 
-        auto* const operatorSymbol = expLHSOperatorSymbol ?
-            expLHSOperatorSymbol.Unwrap() :
-            expRHSOperatorSymbol.Unwrap();
+        auto* const opSymbol = expLHSOpSymbol ?
+            expLHSOpSymbol.Unwrap() :
+            expRHSOpSymbol.Unwrap();
 
         return std::make_shared<const UserBinaryExprBoundNode>(
             GetSourceLocation(),
             boundLHSExpr,
             boundRHSExpr,
-            operatorSymbol
+            opSymbol
         );
     }
 

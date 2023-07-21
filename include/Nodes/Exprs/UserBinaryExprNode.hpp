@@ -6,7 +6,7 @@
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Exprs/UserBinaryExprBoundNode.hpp"
 #include "SourceLocation.hpp"
-#include "Operator.hpp"
+#include "Op.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 
@@ -22,7 +22,7 @@ namespace Ace
             const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprNode>& t_lhsExpr,
             const std::shared_ptr<const IExprNode>& t_rhsExpr,
-            const Operator& t_operator
+            const Op& t_op
         );
         virtual ~UserBinaryExprNode() = default;
 
@@ -42,6 +42,6 @@ namespace Ace
         SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprNode> m_LHSExpr{};
         std::shared_ptr<const IExprNode> m_RHSExpr{};
-        Operator m_Operator{};
+        Op m_Op{};
     };
 }

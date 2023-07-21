@@ -575,7 +575,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Division,
+                SpecialIdentifier::Op::Division,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = [&]() -> llvm::Value*
@@ -608,7 +608,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Remainder,
+                SpecialIdentifier::Op::Remainder,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = [&]() -> llvm::Value*
@@ -641,7 +641,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::UnaryPlus,
+                SpecialIdentifier::Op::UnaryPlus,
                 [&](Emitter& t_emitter)
                 {
                     t_emitter.GetBlockBuilder().Builder.CreateRet(
@@ -658,7 +658,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::UnaryNegation,
+                SpecialIdentifier::Op::UnaryNegation,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateMul(
@@ -679,7 +679,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::OneComplement,
+                SpecialIdentifier::Op::OneComplement,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateXor(
@@ -699,7 +699,7 @@ namespace Ace
             return 
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Multiplication,
+                SpecialIdentifier::Op::Multiplication,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateMul(
@@ -719,7 +719,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Addition,
+                SpecialIdentifier::Op::Addition,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateAdd(
@@ -739,7 +739,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Subtraction,
+                SpecialIdentifier::Op::Subtraction,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateSub(
@@ -759,7 +759,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::RightShift,
+                SpecialIdentifier::Op::RightShift,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateAShr(
@@ -779,7 +779,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::LeftShift,
+                SpecialIdentifier::Op::LeftShift,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateShl(
@@ -799,7 +799,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::LessThan,
+                SpecialIdentifier::Op::LessThan,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -820,7 +820,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::GreaterThan,
+                SpecialIdentifier::Op::GreaterThan,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -841,7 +841,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::LessThanEquals,
+                SpecialIdentifier::Op::LessThanEquals,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -862,7 +862,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::GreaterThanEquals,
+                SpecialIdentifier::Op::GreaterThanEquals,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -883,7 +883,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Equals,
+                SpecialIdentifier::Op::Equals,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -904,7 +904,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::NotEquals,
+                SpecialIdentifier::Op::NotEquals,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -925,7 +925,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::AND,
+                SpecialIdentifier::Op::AND,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateAnd(
@@ -945,7 +945,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::XOR,
+                SpecialIdentifier::Op::XOR,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateXor(
@@ -965,7 +965,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::OR,
+                SpecialIdentifier::Op::OR,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateOr(
@@ -1131,7 +1131,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::UnaryPlus,
+                SpecialIdentifier::Op::UnaryPlus,
                 [&](Emitter& t_emitter)
                 {
                     t_emitter.GetBlockBuilder().Builder.CreateRet(
@@ -1148,7 +1148,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::UnaryNegation,
+                SpecialIdentifier::Op::UnaryNegation,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFMul(
@@ -1168,7 +1168,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Multiplication,
+                SpecialIdentifier::Op::Multiplication,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFMul(
@@ -1188,7 +1188,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Division,
+                SpecialIdentifier::Op::Division,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFDiv(
@@ -1208,7 +1208,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Remainder,
+                SpecialIdentifier::Op::Remainder,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFRem(
@@ -1228,7 +1228,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Addition,
+                SpecialIdentifier::Op::Addition,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFAdd(
@@ -1248,7 +1248,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Subtraction,
+                SpecialIdentifier::Op::Subtraction,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFSub(
@@ -1268,7 +1268,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::LessThan,
+                SpecialIdentifier::Op::LessThan,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1289,7 +1289,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::GreaterThan,
+                SpecialIdentifier::Op::GreaterThan,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1310,7 +1310,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::LessThanEquals,
+                SpecialIdentifier::Op::LessThanEquals,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1331,7 +1331,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::GreaterThanEquals,
+                SpecialIdentifier::Op::GreaterThanEquals,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1352,7 +1352,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::Equals,
+                SpecialIdentifier::Op::Equals,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1373,7 +1373,7 @@ namespace Ace
             return
             {
                 t_selfType,
-                SpecialIdentifier::Operator::NotEquals,
+                SpecialIdentifier::Op::NotEquals,
                 [&](Emitter& t_emitter)
                 {
                     auto* const value = t_emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -2164,8 +2164,8 @@ namespace Ace
 
         InitializeIRTypeSymbolMap();
 
-        InitializeImplicitFromOperatorMap();
-        InitializeExplicitFromOperatorMap();
+        InitializeImplicitFromOpMap();
+        InitializeExplicitFromOpMap();
 
         InitializeSignedIntTypesSet();
     }
@@ -2175,14 +2175,14 @@ namespace Ace
         return m_IRTypeSymbolMap;
     }
 
-    auto Natives::GetImplicitFromOperatorMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
+    auto Natives::GetImplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
     {
-        return m_ImplicitFromOperatorMap;
+        return m_ImplicitFromOpMap;
     }
 
-    auto Natives::GetExplicitFromOperatorMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
+    auto Natives::GetExplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
     {
-        return m_ExplicitFromOperatorMap;
+        return m_ExplicitFromOpMap;
     }
 
     auto Natives::IsIntTypeSigned(const NativeType& t_intType) const -> bool
@@ -2612,9 +2612,9 @@ namespace Ace
         });
     }
 
-    auto Natives::InitializeImplicitFromOperatorMap() -> void
+    auto Natives::InitializeImplicitFromOpMap() -> void
     {
-        auto& map = m_ImplicitFromOperatorMap;
+        auto& map = m_ImplicitFromOpMap;
 
         map[Int8.GetSymbol()] =
         {
@@ -2686,9 +2686,9 @@ namespace Ace
         };
     }
 
-    auto Natives::InitializeExplicitFromOperatorMap() -> void
+    auto Natives::InitializeExplicitFromOpMap() -> void
     {
-        auto& map = m_ExplicitFromOperatorMap;
+        auto& map = m_ExplicitFromOpMap;
 
         map[Int8.GetSymbol()] =
         {

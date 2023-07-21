@@ -221,8 +221,8 @@ namespace Ace
         auto Initialize() -> void;
 
         auto GetIRTypeSymbolMap() const -> const std::unordered_map<ITypeSymbol*, llvm::Type*>&;
-        auto GetImplicitFromOperatorMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
-        auto GetExplicitFromOperatorMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
+        auto GetImplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
+        auto GetExplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
 
         auto IsIntTypeSigned(const NativeType& t_intType) const -> bool;
 
@@ -586,8 +586,8 @@ namespace Ace
 
         auto InitializeIRTypeSymbolMap() -> void;
 
-        auto InitializeImplicitFromOperatorMap() -> void;
-        auto InitializeExplicitFromOperatorMap() -> void;
+        auto InitializeImplicitFromOpMap() -> void;
+        auto InitializeExplicitFromOpMap() -> void;
 
         auto InitializeSignedIntTypesSet() -> void;
 
@@ -601,8 +601,8 @@ namespace Ace
 
         std::unordered_map<ITypeSymbol*, llvm::Type*> m_IRTypeSymbolMap{};
 
-        std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_ImplicitFromOperatorMap{};
-        std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_ExplicitFromOperatorMap{};
+        std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_ImplicitFromOpMap{};
+        std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_ExplicitFromOpMap{};
 
         std::unordered_set<const NativeType*> m_SignedIntTypesSet{};
     };

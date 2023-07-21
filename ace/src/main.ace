@@ -214,7 +214,7 @@ reference(): int {
 }
 
 impl Vector2 {
-    operator +(lhs: &Vector2, rhs: &Vector2): Vector2 -> pub {
+    op +(lhs: &Vector2, rhs: &Vector2): Vector2 -> pub {
         ret new Vector2 {
             x: lhs.x + rhs.x,
             y: lhs.y + rhs.y,
@@ -222,7 +222,7 @@ impl Vector2 {
     }
 }
 
-operator_reference_parameter(): int {
+op_reference_parameter(): int {
     vec_a: Vector2 = new Vector2 { x: 5,  y: 10 };
     vec_b: Vector2 = new Vector2 { x: 10, y: 20 };
 
@@ -256,11 +256,11 @@ impl RAII {
         ret new RAII { };
     }
 
-    operator copy(self: &RAII, other: &RAII): void -> pub {
+    op copy(self: &RAII, other: &RAII): void -> pub {
         print_int(22222);
     }
 
-    operator drop(self: &RAII): void -> pub {
+    op drop(self: &RAII): void -> pub {
         print_int(33333);
     }
 }
@@ -276,7 +276,7 @@ TemplatedAddable[T]: struct {
 }
 
 impl[T] TemplatedAddable[T] { 
-    operator +(lhs: &TemplatedAddable[T], rhs: &TemplatedAddable[T]): TemplatedAddable[T] -> pub {
+    op +(lhs: &TemplatedAddable[T], rhs: &TemplatedAddable[T]): TemplatedAddable[T] -> pub {
         ret new TemplatedAddable[T] {
             value: lhs.value + rhs.value 
         };
@@ -296,7 +296,7 @@ POD: struct {
 }
 
 impl POD {
-    operator drop(self: &POD): void -> pub {
+    op drop(self: &POD): void -> pub {
         print_int(self.value);
     }
 }
@@ -334,7 +334,7 @@ POC: struct {
 }
 
 impl POC {
-    operator copy(self: &POC, other: &POC): void -> pub {
+    op copy(self: &POC, other: &POC): void -> pub {
         self.value = other.value;
         print_int(self.value);
     }
@@ -367,11 +367,11 @@ impl PL {
         ret new PL { };
     }
 
-    operator copy(self: &PL, other: &PL): void -> pub {
+    op copy(self: &PL, other: &PL): void -> pub {
         print_int(22222);
     }
 
-    operator drop(self: &PL): void -> pub {
+    op drop(self: &PL): void -> pub {
         print_int(33333);
     }
 }
@@ -469,7 +469,7 @@ compound_assignment_struct(): int {
     ret 0;
 }
 
-operator_precedence(): int {
+op_precedence(): int {
     i: int = -int_value();
     print_int(i);
     ret 0;
@@ -479,7 +479,7 @@ int_value(): int {
     ret -131255;
 }
 
-operator_associativity(): int {
+op_associativity(): int {
     ret 1 * -100 + 50 / 10 / 5;
 }
 
@@ -536,7 +536,7 @@ unwrapper(): int {
     ret unwrap(wrapped);
 }
 
-implicit_conversion_with_binary_operator(): int {
+implicit_conversion_with_binary_op(): int {
     i: i32 = 5i32 + 9i16;
     ret 0;
 }

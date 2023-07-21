@@ -17,28 +17,28 @@
 
 namespace Ace
 {
-    static auto GetNativeConversionOperator(
+    static auto GetNativeConversionOp(
         ITypeSymbol* t_fromType, 
         ITypeSymbol* t_toType, 
-        const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>& t_fromOperatorMap
+        const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>& t_fromOpMap
     ) -> std::optional<FunctionSymbol*>
     {
-        const auto fromOperatorMapIt = t_fromOperatorMap.find(t_toType);
-        if (fromOperatorMapIt == end(t_fromOperatorMap))
+        const auto fromOpMapIt = t_fromOpMap.find(t_toType);
+        if (fromOpMapIt == end(t_fromOpMap))
         {
             return std::nullopt;
         }
 
-        const auto foundOperatorIt = fromOperatorMapIt->second.find(t_fromType);
-        if (foundOperatorIt == end(fromOperatorMapIt->second))
+        const auto foundOpIt = fromOpMapIt->second.find(t_fromType);
+        if (foundOpIt == end(fromOpMapIt->second))
         {
             return std::nullopt;
         }
 
-        return foundOperatorIt->second;
+        return foundOpIt->second;
     }
 
-    static auto GetImplicitPointerConversionOperator(
+    static auto GetImplicitPointerConversionOp(
         const std::shared_ptr<Scope>& t_scope,
         ITypeSymbol* t_fromType,
         ITypeSymbol* t_toType
@@ -67,58 +67,58 @@ namespace Ace
         ).Unwrap());
     }
 
-    auto GetImplicitConversionOperator(
+    auto GetImplicitConversionOp(
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         ITypeSymbol* t_fromType,
         ITypeSymbol* t_toType
     ) -> Expected<FunctionSymbol*>
     {
-        const auto optNativeOperator = GetNativeConversionOperator(
+        const auto optNativeOp = GetNativeConversionOp(
             t_fromType,
             t_toType,
-            t_scope->GetCompilation()->Natives->GetImplicitFromOperatorMap()
+            t_scope->GetCompilation()->Natives->GetImplicitFromOpMap()
         );
-        if (optNativeOperator.has_value())
+        if (optNativeOp.has_value())
         {
-            return optNativeOperator.value();
+            return optNativeOp.value();
         }
 
-        return GetImplicitPointerConversionOperator(
+        return GetImplicitPointerConversionOp(
             t_scope,
             t_fromType,
             t_toType
         );
     }
 
-    auto GetExplicitConversionOperator(
+    auto GetExplicitConversionOp(
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<Scope>& t_scope,
         ITypeSymbol* t_fromType,
         ITypeSymbol* t_toType
     ) -> Expected<FunctionSymbol*>
     {
-        const auto optNativeImplicitOperator = GetNativeConversionOperator(
+        const auto optNativeImplicitOp = GetNativeConversionOp(
             t_fromType,
             t_toType,
-            t_scope->GetCompilation()->Natives->GetImplicitFromOperatorMap()
+            t_scope->GetCompilation()->Natives->GetImplicitFromOpMap()
         );
-        if (optNativeImplicitOperator.has_value())
+        if (optNativeImplicitOp.has_value())
         {
-            return optNativeImplicitOperator.value();
+            return optNativeImplicitOp.value();
         }
 
-        const auto optNativeExplicitOperator = GetNativeConversionOperator(
+        const auto optNativeExplicitOp = GetNativeConversionOp(
             t_fromType,
             t_toType,
-            t_scope->GetCompilation()->Natives->GetExplicitFromOperatorMap()
+            t_scope->GetCompilation()->Natives->GetExplicitFromOpMap()
         );
-        if (optNativeExplicitOperator)
+        if (optNativeExplicitOp)
         {
-            return optNativeExplicitOperator.value();
+            return optNativeExplicitOp.value();
         }
 
-        return GetImplicitPointerConversionOperator(
+        return GetImplicitPointerConversionOp(
             t_scope,
             t_fromType,
             t_toType

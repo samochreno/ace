@@ -283,9 +283,9 @@ namespace Ace
             {
                 return std::string{} + "`" + Keyword::Struct + "`";
             }
-            case TokenKind::OperatorKeyword:
+            case TokenKind::OpKeyword:
             {
-                return std::string{} + "`" + Keyword::Operator + "`";
+                return std::string{} + "`" + Keyword::Op + "`";
             }
             case TokenKind::PublicKeyword:
             {
@@ -410,14 +410,14 @@ namespace Ace
         );
     }
 
-    inline auto CreateUnexpectedTokenExpectedCompoundAssignmentOperatorError(
+    inline auto CreateUnexpectedTokenExpectedCompoundAssignmentOpError(
         const std::shared_ptr<const Token>& t_unexpectedToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message =
             "unexpected " +
             CreateTokenKindString(t_unexpectedToken->Kind) +
-            ", expected a compound assignment operator";
+            ", expected a compound assignment op";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
@@ -426,14 +426,14 @@ namespace Ace
         );
     }
 
-    inline auto CreateUnexpectedTokenExpectedOverloadableOperatorError(
+    inline auto CreateUnexpectedTokenExpectedOverloadableOpError(
         const std::shared_ptr<const Token>& t_unexpectedToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message =
             "unexpected " +
             CreateTokenKindString(t_unexpectedToken->Kind) +
-            ", expected an overloadable operator";
+            ", expected an overloadable op";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
@@ -538,93 +538,93 @@ namespace Ace
         );
     }
 
-    inline auto CreateOperatorString(
-        const std::shared_ptr<const Token>& t_operatorToken
+    inline auto CreateOpString(
+        const std::shared_ptr<const Token>& t_opToken
     ) -> std::string
     {
-        if (t_operatorToken->Kind == TokenKind::Identifier)
+        if (t_opToken->Kind == TokenKind::Identifier)
         {
-            return "`" + t_operatorToken->String + "`";
+            return "`" + t_opToken->String + "`";
         }
 
-        return CreateTokenKindString(t_operatorToken->Kind);
+        return CreateTokenKindString(t_opToken->Kind);
     }
 
-    inline auto CreateUnexpectedUnaryOperatorParamCountError(
-        const std::shared_ptr<const Token>& t_operatorToken
+    inline auto CreateUnexpectedUnaryOpParamCountError(
+        const std::shared_ptr<const Token>& t_opToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = 
-            "operator" + CreateOperatorString(t_operatorToken) +
+            "op" + CreateOpString(t_opToken) +
             "must have 1 parameter";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_operatorToken->SourceLocation,
+            t_opToken->SourceLocation,
             message
         );
     }
 
-    inline auto CreateUnexpectedBinaryOperatorParamCountError(
-        const std::shared_ptr<const Token>& t_operatorToken
+    inline auto CreateUnexpectedBinaryOpParamCountError(
+        const std::shared_ptr<const Token>& t_opToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = 
-            "operator" + CreateOperatorString(t_operatorToken) +
+            "op" + CreateOpString(t_opToken) +
             "must have 2 parameters";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_operatorToken->SourceLocation,
+            t_opToken->SourceLocation,
             message
         );
     }
 
-    inline auto CreateUnexpectedUnaryOrBinaryOperatorParamCountError(
-        const std::shared_ptr<const Token>& t_operatorToken
+    inline auto CreateUnexpectedUnaryOrBinaryOpParamCountError(
+        const std::shared_ptr<const Token>& t_opToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = 
-            "operator" + CreateOperatorString(t_operatorToken) +
+            "op" + CreateOpString(t_opToken) +
             "must have 1 or 2 parameters";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_operatorToken->SourceLocation,
+            t_opToken->SourceLocation,
             message
         );
     }
 
-    inline auto CreateUnknownIdentifierOperatorError(
-        const std::shared_ptr<const Token>& t_operatorToken
+    inline auto CreateUnknownIdentifierOpError(
+        const std::shared_ptr<const Token>& t_opToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            t_operatorToken->SourceLocation,
-            "unknown operator"
+            t_opToken->SourceLocation,
+            "unknown op"
         );
     }
 
-    inline auto CreateOperatorMustBePublicError(
+    inline auto CreateOpMustBePublicError(
         const std::shared_ptr<const Token>& t_nameToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_nameToken->SourceLocation,
-            "operator must be public"
+            "op must be public"
         );
     }
 
-    inline auto CreateInstanceOperatorError(
+    inline auto CreateInstanceOpError(
         const std::shared_ptr<const Token>& t_nameToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             t_nameToken->SourceLocation,
-            "instance operator"
+            "instance op"
         );
     }
 }

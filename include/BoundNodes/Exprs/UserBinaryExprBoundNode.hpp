@@ -27,7 +27,7 @@ namespace Ace
             const SourceLocation& t_sourceLocation,
             const std::shared_ptr<const IExprBoundNode>& t_lhsExpr,
             const std::shared_ptr<const IExprBoundNode>& t_rhsExpr,
-            FunctionSymbol* const t_operatorSymbol
+            FunctionSymbol* const t_opSymbol
         );
         virtual ~UserBinaryExprBoundNode() = default;
 
@@ -54,6 +54,6 @@ namespace Ace
         SourceLocation m_SourceLocation{};
         std::shared_ptr<const IExprBoundNode> m_LHSExpr{};
         std::shared_ptr<const IExprBoundNode> m_RHSExpr{};
-        FunctionSymbol* m_OperatorSymbol{};
+        FunctionSymbol* m_OpSymbol{};
     };
 }

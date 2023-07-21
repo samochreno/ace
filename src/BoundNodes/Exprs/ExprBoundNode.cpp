@@ -88,7 +88,7 @@ namespace Ace
     auto CreateConverted(
         std::shared_ptr<const IExprBoundNode> t_expr,
         TypeInfo t_targetTypeInfo,
-        ConversionOperatorGetterFunction t_func
+        ConversionOpGetterFunction t_func
     ) -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
         if (t_targetTypeInfo.ValueKind == ValueKind::L)
@@ -136,7 +136,7 @@ namespace Ace
             return CreateChanged(t_expr);
         }
 
-        ACE_TRY(operatorSymbol, t_func(
+        ACE_TRY(opSymbol, t_func(
             t_expr->GetSourceLocation(),
             t_expr->GetScope(), 
             t_expr->GetTypeInfo().Symbol,
@@ -146,7 +146,7 @@ namespace Ace
         t_expr = std::make_shared<const StaticFunctionCallExprBoundNode>(
             t_expr->GetSourceLocation(),
             t_expr->GetScope(),
-            operatorSymbol,
+            opSymbol,
             std::vector{ t_expr }
         );
 

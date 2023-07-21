@@ -23,31 +23,31 @@ std: module -> pub {
 
         from_f64(value: f64): f32 -> pub extern;
 
-        operator +(self: f32): f32 -> pub extern;
+        op +(self: f32): f32 -> pub extern;
 
-        operator -(self: f32): f32 -> pub extern;
+        op -(self: f32): f32 -> pub extern;
 
-        operator *(lhs: f32, rhs: f32): f32 -> pub extern;
+        op *(lhs: f32, rhs: f32): f32 -> pub extern;
 
-        operator /(lhs: f32, rhs: f32): f32 -> pub extern;
+        op /(lhs: f32, rhs: f32): f32 -> pub extern;
 
-        operator %(lhs: f32, rhs: f32): f32 -> pub extern;
+        op %(lhs: f32, rhs: f32): f32 -> pub extern;
 
-        operator +(lhs: f32, rhs: f32): f32 -> pub extern;
+        op +(lhs: f32, rhs: f32): f32 -> pub extern;
 
-        operator -(lhs: f32, rhs: f32): f32 -> pub extern;
+        op -(lhs: f32, rhs: f32): f32 -> pub extern;
 
-        operator <(lhs: f32, rhs: f32): bool -> pub extern;
+        op <(lhs: f32, rhs: f32): bool -> pub extern;
 
-        operator >(lhs: f32, rhs: f32): bool -> pub extern;
+        op >(lhs: f32, rhs: f32): bool -> pub extern;
 
-        operator <=(lhs: f32, rhs: f32): bool -> pub extern;
+        op <=(lhs: f32, rhs: f32): bool -> pub extern;
 
-        operator >=(lhs: f32, rhs: f32): bool -> pub extern;
+        op >=(lhs: f32, rhs: f32): bool -> pub extern;
 
-        operator ==(lhs: f32, rhs: f32): bool -> pub extern;
+        op ==(lhs: f32, rhs: f32): bool -> pub extern;
 
-        operator !=(lhs: f32, rhs: f32): bool -> pub extern;
+        op !=(lhs: f32, rhs: f32): bool -> pub extern;
     }
 
     Float64: struct -> pub { 
@@ -74,30 +74,30 @@ std: module -> pub {
 
         from_f32(value: f32): f64 -> pub extern;
 
-        operator +(self: f64): f64 -> pub extern;
+        op +(self: f64): f64 -> pub extern;
 
-        operator -(self: f64): f64 -> pub extern;
+        op -(self: f64): f64 -> pub extern;
 
-        operator *(lhs: f64, rhs: f64): f64 -> pub extern;
+        op *(lhs: f64, rhs: f64): f64 -> pub extern;
 
-        operator /(lhs: f64, rhs: f64): f64 -> pub extern;
+        op /(lhs: f64, rhs: f64): f64 -> pub extern;
 
-        operator %(lhs: f64, rhs: f64): f64 -> pub extern;
+        op %(lhs: f64, rhs: f64): f64 -> pub extern;
 
-        operator +(lhs: f64, rhs: f64): f64 -> pub extern;
+        op +(lhs: f64, rhs: f64): f64 -> pub extern;
 
-        operator -(lhs: f64, rhs: f64): f64 -> pub extern;
+        op -(lhs: f64, rhs: f64): f64 -> pub extern;
 
-        operator <(lhs: f64, rhs: f64): bool -> pub extern;
+        op <(lhs: f64, rhs: f64): bool -> pub extern;
 
-        operator >(lhs: f64, rhs: f64): bool -> pub extern;
+        op >(lhs: f64, rhs: f64): bool -> pub extern;
 
-        operator <=(lhs: f64, rhs: f64): bool -> pub extern;
+        op <=(lhs: f64, rhs: f64): bool -> pub extern;
 
-        operator >=(lhs: f64, rhs: f64): bool -> pub extern;
+        op >=(lhs: f64, rhs: f64): bool -> pub extern;
 
-        operator ==(lhs: f64, rhs: f64): bool -> pub extern;
+        op ==(lhs: f64, rhs: f64): bool -> pub extern;
 
-        operator !=(lhs: f64, rhs: f64): bool -> pub extern;
+        op !=(lhs: f64, rhs: f64): bool -> pub extern;
     }
 }

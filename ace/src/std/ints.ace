@@ -23,43 +23,43 @@ std: module -> pub {
 
         from_f64(value: f64): i8 -> pub extern;
 
-        operator +(self: i8): i8 -> pub extern;
+        op +(self: i8): i8 -> pub extern;
 
-        operator -(self: i8): i8 -> pub extern;
+        op -(self: i8): i8 -> pub extern;
 
-        operator ~(self: i8): i8 -> pub extern;
+        op ~(self: i8): i8 -> pub extern;
 
-        operator *(lhs: i8, rhs: i8): i8 -> pub extern;
+        op *(lhs: i8, rhs: i8): i8 -> pub extern;
 
-        operator /(lhs: i8, rhs: i8): i8 -> pub extern;
+        op /(lhs: i8, rhs: i8): i8 -> pub extern;
 
-        operator %(lhs: i8, rhs: i8): i8 -> pub extern;
+        op %(lhs: i8, rhs: i8): i8 -> pub extern;
 
-        operator +(lhs: i8, rhs: i8): i8 -> pub extern;
+        op +(lhs: i8, rhs: i8): i8 -> pub extern;
 
-        operator -(lhs: i8, rhs: i8): i8 -> pub extern;
+        op -(lhs: i8, rhs: i8): i8 -> pub extern;
 
-        operator >>(lhs: i8, rhs: i8): i8 -> pub extern;
+        op >>(lhs: i8, rhs: i8): i8 -> pub extern;
 
-        operator <<(lhs: i8, rhs: i8): i8 -> pub extern;
+        op <<(lhs: i8, rhs: i8): i8 -> pub extern;
 
-        operator <(lhs: i8, rhs: i8): bool -> pub extern;
+        op <(lhs: i8, rhs: i8): bool -> pub extern;
 
-        operator >(lhs: i8, rhs: i8): bool -> pub extern;
+        op >(lhs: i8, rhs: i8): bool -> pub extern;
 
-        operator <=(lhs: i8, rhs: i8): bool -> pub extern;
+        op <=(lhs: i8, rhs: i8): bool -> pub extern;
 
-        operator >=(lhs: i8, rhs: i8): bool -> pub extern;
+        op >=(lhs: i8, rhs: i8): bool -> pub extern;
 
-        operator ==(lhs: i8, rhs: i8): bool -> pub extern;
+        op ==(lhs: i8, rhs: i8): bool -> pub extern;
 
-        operator !=(lhs: i8, rhs: i8): bool -> pub extern;
+        op !=(lhs: i8, rhs: i8): bool -> pub extern;
 
-        operator &(lhs: i8, rhs: i8): i8 -> pub extern;
+        op &(lhs: i8, rhs: i8): i8 -> pub extern;
 
-        operator ^(lhs: i8, rhs: i8): i8 -> pub extern;
+        op ^(lhs: i8, rhs: i8): i8 -> pub extern;
 
-        operator |(lhs: i8, rhs: i8): i8 -> pub extern;
+        op |(lhs: i8, rhs: i8): i8 -> pub extern;
     }
 
     Int16: struct -> pub {
@@ -86,43 +86,43 @@ std: module -> pub {
 
         from_f64(value: f64): i16 -> pub extern;
 
-        operator +(self: i16): i16 -> pub extern;
+        op +(self: i16): i16 -> pub extern;
 
-        operator -(self: i16): i16 -> pub extern;
+        op -(self: i16): i16 -> pub extern;
 
-        operator ~(self: i16): i16 -> pub extern;
+        op ~(self: i16): i16 -> pub extern;
 
-        operator *(lhs: i16, rhs: i16): i16 -> pub extern;
+        op *(lhs: i16, rhs: i16): i16 -> pub extern;
 
-        operator /(lhs: i16, rhs: i16): i16 -> pub extern;
+        op /(lhs: i16, rhs: i16): i16 -> pub extern;
 
-        operator %(lhs: i16, rhs: i16): i16 -> pub extern;
+        op %(lhs: i16, rhs: i16): i16 -> pub extern;
 
-        operator +(lhs: i16, rhs: i16): i16 -> pub extern;
+        op +(lhs: i16, rhs: i16): i16 -> pub extern;
 
-        operator -(lhs: i16, rhs: i16): i16 -> pub extern;
+        op -(lhs: i16, rhs: i16): i16 -> pub extern;
 
-        operator >>(lhs: i16, rhs: i16): i16 -> pub extern;
+        op >>(lhs: i16, rhs: i16): i16 -> pub extern;
 
-        operator <<(lhs: i16, rhs: i16): i16 -> pub extern;
+        op <<(lhs: i16, rhs: i16): i16 -> pub extern;
 
-        operator <(lhs: i16, rhs: i16): bool -> pub extern;
+        op <(lhs: i16, rhs: i16): bool -> pub extern;
 
-        operator >(lhs: i16, rhs: i16): bool -> pub extern;
+        op >(lhs: i16, rhs: i16): bool -> pub extern;
 
-        operator <=(lhs: i16, rhs: i16): bool -> pub extern;
+        op <=(lhs: i16, rhs: i16): bool -> pub extern;
 
-        operator >=(lhs: i16, rhs: i16): bool -> pub extern;
+        op >=(lhs: i16, rhs: i16): bool -> pub extern;
 
-        operator ==(lhs: i16, rhs: i16): bool -> pub extern;
+        op ==(lhs: i16, rhs: i16): bool -> pub extern;
 
-        operator !=(lhs: i16, rhs: i16): bool -> pub extern;
+        op !=(lhs: i16, rhs: i16): bool -> pub extern;
 
-        operator &(lhs: i16, rhs: i16): i16 -> pub extern;
+        op &(lhs: i16, rhs: i16): i16 -> pub extern;
 
-        operator ^(lhs: i16, rhs: i16): i16 -> pub extern;
+        op ^(lhs: i16, rhs: i16): i16 -> pub extern;
 
-        operator |(lhs: i16, rhs: i16): i16 -> pub extern;
+        op |(lhs: i16, rhs: i16): i16 -> pub extern;
     }
 
     Int32: struct -> pub {
@@ -149,43 +149,43 @@ std: module -> pub {
 
         from_f64(value: f64): i32 -> pub extern;
 
-        operator +(self: i32): i32 -> pub extern;
+        op +(self: i32): i32 -> pub extern;
 
-        operator -(self: i32): i32 -> pub extern;
+        op -(self: i32): i32 -> pub extern;
 
-        operator ~(self: i32): i32 -> pub extern;
+        op ~(self: i32): i32 -> pub extern;
 
-        operator *(lhs: i32, rhs: i32): i32 -> pub extern;
+        op *(lhs: i32, rhs: i32): i32 -> pub extern;
 
-        operator /(lhs: i32, rhs: i32): i32 -> pub extern;
+        op /(lhs: i32, rhs: i32): i32 -> pub extern;
 
-        operator %(lhs: i32, rhs: i32): i32 -> pub extern;
+        op %(lhs: i32, rhs: i32): i32 -> pub extern;
 
-        operator +(lhs: i32, rhs: i32): i32 -> pub extern;
+        op +(lhs: i32, rhs: i32): i32 -> pub extern;
 
-        operator -(lhs: i32, rhs: i32): i32 -> pub extern;
+        op -(lhs: i32, rhs: i32): i32 -> pub extern;
 
-        operator >>(lhs: i32, rhs: i32): i32 -> pub extern;
+        op >>(lhs: i32, rhs: i32): i32 -> pub extern;
 
-        operator <<(lhs: i32, rhs: i32): i32 -> pub extern;
+        op <<(lhs: i32, rhs: i32): i32 -> pub extern;
 
-        operator <(lhs: i32, rhs: i32): bool -> pub extern;
+        op <(lhs: i32, rhs: i32): bool -> pub extern;
 
-        operator >(lhs: i32, rhs: i32): bool -> pub extern;
+        op >(lhs: i32, rhs: i32): bool -> pub extern;
 
-        operator <=(lhs: i32, rhs: i32): bool -> pub extern;
+        op <=(lhs: i32, rhs: i32): bool -> pub extern;
 
-        operator >=(lhs: i32, rhs: i32): bool -> pub extern;
+        op >=(lhs: i32, rhs: i32): bool -> pub extern;
 
-        operator ==(lhs: i32, rhs: i32): bool -> pub extern;
+        op ==(lhs: i32, rhs: i32): bool -> pub extern;
 
-        operator !=(lhs: i32, rhs: i32): bool -> pub extern;
+        op !=(lhs: i32, rhs: i32): bool -> pub extern;
 
-        operator &(lhs: i32, rhs: i32): i32 -> pub extern;
+        op &(lhs: i32, rhs: i32): i32 -> pub extern;
 
-        operator ^(lhs: i32, rhs: i32): i32 -> pub extern;
+        op ^(lhs: i32, rhs: i32): i32 -> pub extern;
 
-        operator |(lhs: i32, rhs: i32): i32 -> pub extern;
+        op |(lhs: i32, rhs: i32): i32 -> pub extern;
     }
 
     Int64: struct -> pub {
@@ -212,43 +212,43 @@ std: module -> pub {
 
         from_f64(value: f64): i64 -> pub extern;
 
-        operator +(self: i64): i64 -> pub extern;
+        op +(self: i64): i64 -> pub extern;
 
-        operator -(self: i64): i64 -> pub extern;
+        op -(self: i64): i64 -> pub extern;
 
-        operator ~(self: i64): i64 -> pub extern;
+        op ~(self: i64): i64 -> pub extern;
 
-        operator *(lhs: i64, rhs: i64): i64 -> pub extern;
+        op *(lhs: i64, rhs: i64): i64 -> pub extern;
 
-        operator /(lhs: i64, rhs: i64): i64 -> pub extern;
+        op /(lhs: i64, rhs: i64): i64 -> pub extern;
 
-        operator %(lhs: i64, rhs: i64): i64 -> pub extern;
+        op %(lhs: i64, rhs: i64): i64 -> pub extern;
 
-        operator +(lhs: i64, rhs: i64): i64 -> pub extern;
+        op +(lhs: i64, rhs: i64): i64 -> pub extern;
 
-        operator -(lhs: i64, rhs: i64): i64 -> pub extern;
+        op -(lhs: i64, rhs: i64): i64 -> pub extern;
 
-        operator >>(lhs: i64, rhs: i64): i64 -> pub extern;
+        op >>(lhs: i64, rhs: i64): i64 -> pub extern;
 
-        operator <<(lhs: i64, rhs: i64): i64 -> pub extern;
+        op <<(lhs: i64, rhs: i64): i64 -> pub extern;
 
-        operator <(lhs: i64, rhs: i64): bool -> pub extern;
+        op <(lhs: i64, rhs: i64): bool -> pub extern;
 
-        operator >(lhs: i64, rhs: i64): bool -> pub extern;
+        op >(lhs: i64, rhs: i64): bool -> pub extern;
 
-        operator <=(lhs: i64, rhs: i64): bool -> pub extern;
+        op <=(lhs: i64, rhs: i64): bool -> pub extern;
 
-        operator >=(lhs: i64, rhs: i64): bool -> pub extern;
+        op >=(lhs: i64, rhs: i64): bool -> pub extern;
 
-        operator ==(lhs: i64, rhs: i64): bool -> pub extern;
+        op ==(lhs: i64, rhs: i64): bool -> pub extern;
 
-        operator !=(lhs: i64, rhs: i64): bool -> pub extern;
+        op !=(lhs: i64, rhs: i64): bool -> pub extern;
 
-        operator &(lhs: i64, rhs: i64): i64 -> pub extern;
+        op &(lhs: i64, rhs: i64): i64 -> pub extern;
 
-        operator ^(lhs: i64, rhs: i64): i64 -> pub extern;
+        op ^(lhs: i64, rhs: i64): i64 -> pub extern;
 
-        operator |(lhs: i64, rhs: i64): i64 -> pub extern;
+        op |(lhs: i64, rhs: i64): i64 -> pub extern;
     }
 
     UInt8: struct -> pub {
@@ -275,43 +275,43 @@ std: module -> pub {
 
         from_f64(value: f64): u8 -> pub extern;
 
-        operator +(self: u8): u8 -> pub extern;
+        op +(self: u8): u8 -> pub extern;
 
-        operator -(self: u8): u8 -> pub extern;
+        op -(self: u8): u8 -> pub extern;
 
-        operator ~(self: u8): u8 -> pub extern;
+        op ~(self: u8): u8 -> pub extern;
 
-        operator *(lhs: u8, rhs: u8): u8 -> pub extern;
+        op *(lhs: u8, rhs: u8): u8 -> pub extern;
 
-        operator /(lhs: u8, rhs: u8): u8 -> pub extern;
+        op /(lhs: u8, rhs: u8): u8 -> pub extern;
 
-        operator %(lhs: u8, rhs: u8): u8 -> pub extern;
+        op %(lhs: u8, rhs: u8): u8 -> pub extern;
 
-        operator +(lhs: u8, rhs: u8): u8 -> pub extern;
+        op +(lhs: u8, rhs: u8): u8 -> pub extern;
 
-        operator -(lhs: u8, rhs: u8): u8 -> pub extern;
+        op -(lhs: u8, rhs: u8): u8 -> pub extern;
 
-        operator >>(lhs: u8, rhs: u8): u8 -> pub extern;
+        op >>(lhs: u8, rhs: u8): u8 -> pub extern;
 
-        operator <<(lhs: u8, rhs: u8): u8 -> pub extern;
+        op <<(lhs: u8, rhs: u8): u8 -> pub extern;
 
-        operator <(lhs: u8, rhs: u8): bool -> pub extern;
+        op <(lhs: u8, rhs: u8): bool -> pub extern;
 
-        operator >(lhs: u8, rhs: u8): bool -> pub extern;
+        op >(lhs: u8, rhs: u8): bool -> pub extern;
 
-        operator <=(lhs: u8, rhs: u8): bool -> pub extern;
+        op <=(lhs: u8, rhs: u8): bool -> pub extern;
 
-        operator >=(lhs: u8, rhs: u8): bool -> pub extern;
+        op >=(lhs: u8, rhs: u8): bool -> pub extern;
 
-        operator ==(lhs: u8, rhs: u8): bool -> pub extern;
+        op ==(lhs: u8, rhs: u8): bool -> pub extern;
 
-        operator !=(lhs: u8, rhs: u8): bool -> pub extern;
+        op !=(lhs: u8, rhs: u8): bool -> pub extern;
 
-        operator &(lhs: u8, rhs: u8): u8 -> pub extern;
+        op &(lhs: u8, rhs: u8): u8 -> pub extern;
 
-        operator ^(lhs: u8, rhs: u8): u8 -> pub extern;
+        op ^(lhs: u8, rhs: u8): u8 -> pub extern;
 
-        operator |(lhs: u8, rhs: u8): u8 -> pub extern;
+        op |(lhs: u8, rhs: u8): u8 -> pub extern;
     }
 
     UInt16: struct -> pub { 
@@ -338,43 +338,43 @@ std: module -> pub {
 
         from_f64(value: f64): u16 -> pub extern;
 
-        operator +(self: u16): u16 -> pub extern;
+        op +(self: u16): u16 -> pub extern;
 
-        operator -(self: u16): u16 -> pub extern;
+        op -(self: u16): u16 -> pub extern;
 
-        operator ~(self: u16): u16 -> pub extern;
+        op ~(self: u16): u16 -> pub extern;
 
-        operator *(lhs: u16, rhs: u16): u16 -> pub extern;
+        op *(lhs: u16, rhs: u16): u16 -> pub extern;
 
-        operator /(lhs: u16, rhs: u16): u16 -> pub extern;
+        op /(lhs: u16, rhs: u16): u16 -> pub extern;
 
-        operator %(lhs: u16, rhs: u16): u16 -> pub extern;
+        op %(lhs: u16, rhs: u16): u16 -> pub extern;
 
-        operator +(lhs: u16, rhs: u16): u16 -> pub extern;
+        op +(lhs: u16, rhs: u16): u16 -> pub extern;
 
-        operator -(lhs: u16, rhs: u16): u16 -> pub extern;
+        op -(lhs: u16, rhs: u16): u16 -> pub extern;
 
-        operator >>(lhs: u16, rhs: u16): u16 -> pub extern;
+        op >>(lhs: u16, rhs: u16): u16 -> pub extern;
 
-        operator <<(lhs: u16, rhs: u16): u16 -> pub extern;
+        op <<(lhs: u16, rhs: u16): u16 -> pub extern;
 
-        operator <(lhs: u16, rhs: u16): bool -> pub extern;
+        op <(lhs: u16, rhs: u16): bool -> pub extern;
 
-        operator >(lhs: u16, rhs: u16): bool -> pub extern;
+        op >(lhs: u16, rhs: u16): bool -> pub extern;
 
-        operator <=(lhs: u16, rhs: u16): bool -> pub extern;
+        op <=(lhs: u16, rhs: u16): bool -> pub extern;
 
-        operator >=(lhs: u16, rhs: u16): bool -> pub extern;
+        op >=(lhs: u16, rhs: u16): bool -> pub extern;
 
-        operator ==(lhs: u16, rhs: u16): bool -> pub extern;
+        op ==(lhs: u16, rhs: u16): bool -> pub extern;
 
-        operator !=(lhs: u16, rhs: u16): bool -> pub extern;
+        op !=(lhs: u16, rhs: u16): bool -> pub extern;
 
-        operator &(lhs: u16, rhs: u16): u16 -> pub extern;
+        op &(lhs: u16, rhs: u16): u16 -> pub extern;
 
-        operator ^(lhs: u16, rhs: u16): u16 -> pub extern;
+        op ^(lhs: u16, rhs: u16): u16 -> pub extern;
 
-        operator |(lhs: u16, rhs: u16): u16 -> pub extern;
+        op |(lhs: u16, rhs: u16): u16 -> pub extern;
     }
 
     UInt32: struct -> pub {
@@ -401,43 +401,43 @@ std: module -> pub {
 
         from_f64(value: f64): u32 -> pub extern;
 
-        operator +(self: u32): u32 -> pub extern;
+        op +(self: u32): u32 -> pub extern;
 
-        operator -(self: u32): u32 -> pub extern;
+        op -(self: u32): u32 -> pub extern;
 
-        operator ~(self: u32): u32 -> pub extern;
+        op ~(self: u32): u32 -> pub extern;
 
-        operator *(lhs: u32, rhs: u32): u32 -> pub extern;
+        op *(lhs: u32, rhs: u32): u32 -> pub extern;
 
-        operator /(lhs: u32, rhs: u32): u32 -> pub extern;
+        op /(lhs: u32, rhs: u32): u32 -> pub extern;
 
-        operator %(lhs: u32, rhs: u32): u32 -> pub extern;
+        op %(lhs: u32, rhs: u32): u32 -> pub extern;
 
-        operator +(lhs: u32, rhs: u32): u32 -> pub extern;
+        op +(lhs: u32, rhs: u32): u32 -> pub extern;
 
-        operator -(lhs: u32, rhs: u32): u32 -> pub extern;
+        op -(lhs: u32, rhs: u32): u32 -> pub extern;
 
-        operator >>(lhs: u32, rhs: u32): u32 -> pub extern;
+        op >>(lhs: u32, rhs: u32): u32 -> pub extern;
 
-        operator <<(lhs: u32, rhs: u32): u32 -> pub extern;
+        op <<(lhs: u32, rhs: u32): u32 -> pub extern;
 
-        operator <(lhs: u32, rhs: u32): bool -> pub extern;
+        op <(lhs: u32, rhs: u32): bool -> pub extern;
 
-        operator >(lhs: u32, rhs: u32): bool -> pub extern;
+        op >(lhs: u32, rhs: u32): bool -> pub extern;
 
-        operator <=(lhs: u32, rhs: u32): bool -> pub extern;
+        op <=(lhs: u32, rhs: u32): bool -> pub extern;
 
-        operator >=(lhs: u32, rhs: u32): bool -> pub extern;
+        op >=(lhs: u32, rhs: u32): bool -> pub extern;
 
-        operator ==(lhs: u32, rhs: u32): bool -> pub extern;
+        op ==(lhs: u32, rhs: u32): bool -> pub extern;
 
-        operator !=(lhs: u32, rhs: u32): bool -> pub extern;
+        op !=(lhs: u32, rhs: u32): bool -> pub extern;
 
-        operator &(lhs: u32, rhs: u32): u32 -> pub extern;
+        op &(lhs: u32, rhs: u32): u32 -> pub extern;
 
-        operator ^(lhs: u32, rhs: u32): u32 -> pub extern;
+        op ^(lhs: u32, rhs: u32): u32 -> pub extern;
 
-        operator |(lhs: u32, rhs: u32): u32 -> pub extern;
+        op |(lhs: u32, rhs: u32): u32 -> pub extern;
     }
 
     UInt64: struct -> pub {
@@ -464,43 +464,43 @@ std: module -> pub {
 
         from_f64(value: f64): u64 -> pub extern;
 
-        operator +(self: u64): u64 -> pub extern;
+        op +(self: u64): u64 -> pub extern;
 
-        operator -(self: u64): u64 -> pub extern;
+        op -(self: u64): u64 -> pub extern;
 
-        operator ~(self: u64): u64 -> pub extern;
+        op ~(self: u64): u64 -> pub extern;
 
-        operator *(lhs: u64, rhs: u64): u64 -> pub extern;
+        op *(lhs: u64, rhs: u64): u64 -> pub extern;
 
-        operator /(lhs: u64, rhs: u64): u64 -> pub extern;
+        op /(lhs: u64, rhs: u64): u64 -> pub extern;
 
-        operator %(lhs: u64, rhs: u64): u64 -> pub extern;
+        op %(lhs: u64, rhs: u64): u64 -> pub extern;
 
-        operator +(lhs: u64, rhs: u64): u64 -> pub extern;
+        op +(lhs: u64, rhs: u64): u64 -> pub extern;
 
-        operator -(lhs: u64, rhs: u64): u64 -> pub extern;
+        op -(lhs: u64, rhs: u64): u64 -> pub extern;
 
-        operator >>(lhs: u64, rhs: u64): u64 -> pub extern;
+        op >>(lhs: u64, rhs: u64): u64 -> pub extern;
 
-        operator <<(lhs: u64, rhs: u64): u64 -> pub extern;
+        op <<(lhs: u64, rhs: u64): u64 -> pub extern;
 
-        operator <(lhs: u64, rhs: u64): bool -> pub extern;
+        op <(lhs: u64, rhs: u64): bool -> pub extern;
 
-        operator >(lhs: u64, rhs: u64): bool -> pub extern;
+        op >(lhs: u64, rhs: u64): bool -> pub extern;
 
-        operator <=(lhs: u64, rhs: u64): bool -> pub extern;
+        op <=(lhs: u64, rhs: u64): bool -> pub extern;
 
-        operator >=(lhs: u64, rhs: u64): bool -> pub extern;
+        op >=(lhs: u64, rhs: u64): bool -> pub extern;
 
-        operator ==(lhs: u64, rhs: u64): bool -> pub extern;
+        op ==(lhs: u64, rhs: u64): bool -> pub extern;
 
-        operator !=(lhs: u64, rhs: u64): bool -> pub extern;
+        op !=(lhs: u64, rhs: u64): bool -> pub extern;
 
-        operator &(lhs: u64, rhs: u64): u64 -> pub extern;
+        op &(lhs: u64, rhs: u64): u64 -> pub extern;
 
-        operator ^(lhs: u64, rhs: u64): u64 -> pub extern;
+        op ^(lhs: u64, rhs: u64): u64 -> pub extern;
 
-        operator |(lhs: u64, rhs: u64): u64 -> pub extern;
+        op |(lhs: u64, rhs: u64): u64 -> pub extern;
     }
 
     Int: struct -> pub {
@@ -527,42 +527,42 @@ std: module -> pub {
 
         from_f64(value: f64): int -> pub extern;
 
-        operator +(self: int): int -> pub extern;
+        op +(self: int): int -> pub extern;
 
-        operator -(self: int): int -> pub extern;
+        op -(self: int): int -> pub extern;
 
-        operator ~(self: int): int -> pub extern;
+        op ~(self: int): int -> pub extern;
 
-        operator *(lhs: int, rhs: int): int -> pub extern;
+        op *(lhs: int, rhs: int): int -> pub extern;
 
-        operator /(lhs: int, rhs: int): int -> pub extern;
+        op /(lhs: int, rhs: int): int -> pub extern;
 
-        operator %(lhs: int, rhs: int): int -> pub extern;
+        op %(lhs: int, rhs: int): int -> pub extern;
 
-        operator +(lhs: int, rhs: int): int -> pub extern;
+        op +(lhs: int, rhs: int): int -> pub extern;
 
-        operator -(lhs: int, rhs: int): int -> pub extern;
+        op -(lhs: int, rhs: int): int -> pub extern;
 
-        operator >>(lhs: int, rhs: int): int -> pub extern;
+        op >>(lhs: int, rhs: int): int -> pub extern;
 
-        operator <<(lhs: int, rhs: int): int -> pub extern;
+        op <<(lhs: int, rhs: int): int -> pub extern;
 
-        operator <(lhs: int, rhs: int): bool -> pub extern;
+        op <(lhs: int, rhs: int): bool -> pub extern;
 
-        operator >(lhs: int, rhs: int): bool -> pub extern;
+        op >(lhs: int, rhs: int): bool -> pub extern;
 
-        operator <=(lhs: int, rhs: int): bool -> pub extern;
+        op <=(lhs: int, rhs: int): bool -> pub extern;
 
-        operator >=(lhs: int, rhs: int): bool -> pub extern;
+        op >=(lhs: int, rhs: int): bool -> pub extern;
 
-        operator ==(lhs: int, rhs: int): bool -> pub extern;
+        op ==(lhs: int, rhs: int): bool -> pub extern;
 
-        operator !=(lhs: int, rhs: int): bool -> pub extern;
+        op !=(lhs: int, rhs: int): bool -> pub extern;
 
-        operator &(lhs: int, rhs: int): int -> pub extern;
+        op &(lhs: int, rhs: int): int -> pub extern;
 
-        operator ^(lhs: int, rhs: int): int -> pub extern;
+        op ^(lhs: int, rhs: int): int -> pub extern;
 
-        operator |(lhs: int, rhs: int): int -> pub extern;
+        op |(lhs: int, rhs: int): int -> pub extern;
     }
 }

@@ -17,11 +17,11 @@ namespace Ace
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& t_rhsExpr,
-        FunctionSymbol* const t_operatorSymbol
+        FunctionSymbol* const t_opSymbol
     ) : m_SourceLocation{ t_sourceLocation },
         m_LHSExpr{ t_lhsExpr },
         m_RHSExpr{ t_rhsExpr },
-        m_OperatorSymbol{ t_operatorSymbol }
+        m_OpSymbol{ t_opSymbol }
     {
     }
 
@@ -49,7 +49,7 @@ namespace Ace
         const TypeCheckingContext& t_context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const UserBinaryExprBoundNode>>>
     {
-        const auto argTypeInfos = m_OperatorSymbol->CollectArgTypeInfos();
+        const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
 
         ACE_TRY(mchConvertedAndCheckedLHSExpr, CreateImplicitlyConvertedAndTypeChecked(
             m_LHSExpr,
@@ -73,7 +73,7 @@ namespace Ace
             GetSourceLocation(),
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value,
-            m_OperatorSymbol
+            m_OpSymbol
         ));
     }
 
@@ -94,7 +94,7 @@ namespace Ace
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
             GetSourceLocation(),
             GetScope(),
-            m_OperatorSymbol,
+            m_OpSymbol,
             std::vector
             {
                 mchLoweredLHSExpr.Value,
@@ -117,6 +117,6 @@ namespace Ace
 
     auto UserBinaryExprBoundNode::GetTypeInfo() const -> TypeInfo
     {
-        return { m_OperatorSymbol->GetType(), ValueKind::R };
+        return { m_OpSymbol->GetType(), ValueKind::R };
     }
 }

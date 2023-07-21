@@ -8,7 +8,7 @@
 #include "BoundNodes/Stmts/Assignments/CompoundAssignmentStmtBoundNode.hpp"
 #include "SourceLocation.hpp"
 #include "Scope.hpp"
-#include "Operator.hpp"
+#include "Op.hpp"
 #include "Diagnostic.hpp"
 
 namespace Ace
@@ -24,7 +24,7 @@ namespace Ace
             const std::shared_ptr<Scope>& t_scope,
             const std::shared_ptr<const IExprNode>& t_lhsExpr,
             const std::shared_ptr<const IExprNode>& t_rhsExpr,
-            const Operator& t_operator
+            const Op& t_op
         );
         virtual ~CompoundAssignmentStmtNode() = default;
 
@@ -45,6 +45,6 @@ namespace Ace
         std::shared_ptr<Scope> m_Scope{};
         std::shared_ptr<const IExprNode> m_LHSExpr{};
         std::shared_ptr<const IExprNode> m_RHSExpr{};
-        Operator m_Operator{};
+        Op m_Op{};
     };
 }

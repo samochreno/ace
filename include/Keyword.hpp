@@ -15,7 +15,7 @@ namespace Ace
         inline constexpr const char* Module     = "module";
         inline constexpr const char* Return     = "ret";
         inline constexpr const char* Struct     = "struct";
-        inline constexpr const char* Operator   = "operator";
+        inline constexpr const char* Op         = "op";
         inline constexpr const char* Public     = "pub";
         inline constexpr const char* True       = "true";
         inline constexpr const char* False      = "false";

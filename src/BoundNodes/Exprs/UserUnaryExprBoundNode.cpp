@@ -17,10 +17,10 @@ namespace Ace
     UserUnaryExprBoundNode::UserUnaryExprBoundNode(
         const SourceLocation& t_sourceLocation,
         const std::shared_ptr<const IExprBoundNode>& t_expr,
-        FunctionSymbol* const t_operatorSymbol
+        FunctionSymbol* const t_opSymbol
     ) : m_SourceLocation{ t_sourceLocation },
         m_Expr{ t_expr },
-        m_OperatorSymbol{ t_operatorSymbol }
+        m_OpSymbol{ t_opSymbol }
     {
     }
 
@@ -57,7 +57,7 @@ namespace Ace
         return CreateChanged(std::make_shared<const UserUnaryExprBoundNode>(
             GetSourceLocation(),
             mchCheckedExpr.Value,
-            m_OperatorSymbol
+            m_OpSymbol
         ));
     }
 
@@ -77,7 +77,7 @@ namespace Ace
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
             GetSourceLocation(),
             GetScope(),
-            m_OperatorSymbol,
+            m_OpSymbol,
             std::vector{ mchLoweredExpr.Value }
         )->GetOrCreateLowered({}).Value);
     }
@@ -96,6 +96,6 @@ namespace Ace
 
     auto UserUnaryExprBoundNode::GetTypeInfo() const -> TypeInfo
     {
-        return { m_OperatorSymbol->GetType(), ValueKind::R };
+        return { m_OpSymbol->GetType(), ValueKind::R };
     }
 }

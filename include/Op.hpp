@@ -5,7 +5,7 @@
 
 namespace Ace
 {
-    struct Operator
+    struct Op
     {
         SourceLocation SourceLocation{};
         TokenKind TokenKind{};
