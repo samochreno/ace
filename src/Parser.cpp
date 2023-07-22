@@ -40,6 +40,18 @@ namespace Ace
         Self,
     };
 
+    enum class FunctionOrOpNameKind
+    {
+        Function,
+        Op,
+    };
+
+    struct FunctionOrOpNameToken
+    {
+        FunctionOrOpNameKind Kind{};
+        std::shared_ptr<const Token> Value{};
+    };
+
     static auto IsCompoundAssignmentOp(
         const TokenKind tokenKind
     ) -> bool
@@ -717,7 +729,7 @@ namespace Ace
     }
 
     static auto CreateFunctionOrOpName(
-        const std::shared_ptr<const Token>& nameToken,
+        const FunctionOrOpNameToken& nameToken,
         const size_t paramCount,
         const AccessModifier accessModifier,
         const bool hasSelfParam
@@ -725,20 +737,21 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        if (nameToken == TokenKind::Identifier)
+        if (nameToken.Kind == FunctionOrOpNameKind::Function)
         {
+            ACE_ASSERT(nameToken.Value->Kind == TokenKind::Identifier);
             return 
             {
                 Identifier
                 {
-                    nameToken->SourceLocation,
-                    nameToken->String,
+                    nameToken.Value->SourceLocation,
+                    nameToken.Value->String,
                 },
                 diagnosticBag,
             };
         }
 
-        const auto expName = GetOpFunctionName(nameToken, paramCount);
+        const auto expName = GetOpFunctionName(nameToken.Value, paramCount);
         diagnosticBag.Add(expName);
         if (!expName)
         {
@@ -747,17 +760,21 @@ namespace Ace
 
         if (accessModifier != AccessModifier::Public)
         {
-            return diagnosticBag.Add(CreateOpMustBePublicError(nameToken));
+            return diagnosticBag.Add(
+                CreateOpMustBePublicError(nameToken.Value)
+            );
         }
 
         if (hasSelfParam)
         {
-            return diagnosticBag.Add(CreateInstanceOpError(nameToken));
+            return diagnosticBag.Add(
+                CreateInstanceOpError(nameToken.Value)
+            );
         }
 
         return Identifier
         {
-            nameToken->SourceLocation,
+            nameToken.Value->SourceLocation,
             expName.Unwrap(),
         };
     }
@@ -3707,13 +3724,21 @@ namespace Ace
     static auto ParseFunctionOrOpNameToken(
         Parser& parser,
         const std::shared_ptr<Scope>& scope
-    ) -> Expected<std::shared_ptr<const Token>>
+    ) -> Expected<FunctionOrOpNameToken>
     {
         DiagnosticBag diagnosticBag{};
 
         if (parser.Peek() == TokenKind::Identifier)
         {
-            return Expected{ parser.Eat(), diagnosticBag };
+            return Expected
+            {
+                FunctionOrOpNameToken
+                {
+                    FunctionOrOpNameKind::Function,
+                    parser.Eat(),
+                },
+                diagnosticBag,
+            };
         }
 
         if (parser.Peek() != TokenKind::OpKeyword)
@@ -3736,7 +3761,15 @@ namespace Ace
             );
         }
 
-        return Expected{ parser.Eat(), diagnosticBag };
+        return Expected
+        {
+            FunctionOrOpNameToken
+            {
+                FunctionOrOpNameKind::Op,
+                parser.Eat(),
+            },
+            diagnosticBag,
+        };
     }
 
     static auto ParseModifiersUntil(
