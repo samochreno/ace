@@ -4,14 +4,14 @@
 #include <vector>
 
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
 {
     NormalTemplateParamTypeSymbol::NormalTemplateParamTypeSymbol(
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name
+        const Ident& name
     ) : m_Scope{ scope },
         m_Name{ name }
     {
@@ -27,7 +27,7 @@ namespace Ace
         ACE_UNREACHABLE();
     }
 
-    auto NormalTemplateParamTypeSymbol::GetName() const -> const Identifier&
+    auto NormalTemplateParamTypeSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }

@@ -5,7 +5,7 @@
 
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Stmts/ExpandableStmtBoundNode.hpp"
-#include "SourceBuffer.hpp"
+#include "SrcBuffer.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -21,13 +21,13 @@ namespace Ace
     {
     public:
         BlockStmtBoundNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& selfScope,
             const std::vector<std::shared_ptr<const IStmtBoundNode>>& stmts
         );
         virtual ~BlockStmtBoundNode() = default;
         
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -47,7 +47,7 @@ namespace Ace
         auto CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const IStmtBoundNode>> final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_SelfScope;
         std::vector<std::shared_ptr<const IStmtBoundNode>> m_Stmts{};
     };

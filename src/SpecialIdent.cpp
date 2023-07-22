@@ -1,11 +1,11 @@
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 
 #include <string>
 
 #include "Symbols/Symbol.hpp"
 #include "Assert.hpp"
 
-namespace Ace::SpecialIdentifier
+namespace Ace::SpecialIdent
 {
     static uint64_t Count{};
 

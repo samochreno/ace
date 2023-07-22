@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -15,18 +15,18 @@
 namespace Ace
 {
     NormalAssignmentStmtBoundNode::NormalAssignmentStmtBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& rhsExpr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr }
     {
     }
 
-    auto NormalAssignmentStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto NormalAssignmentStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto NormalAssignmentStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -49,7 +49,7 @@ namespace Ace
     ) const -> Expected<MaybeChanged<std::shared_ptr<const NormalAssignmentStmtBoundNode>>>
     {
         auto* const lhsExprTypeSymbol =
-            m_LHSExpr->GetTypeInfo().Symbol->GetWithoutReference();
+            m_LHSExpr->GetTypeInfo().Symbol->GetWithoutRef();
 
         ACE_TRY(mchConvertedAndCheckedLHSExpr, CreateImplicitlyConvertedAndTypeChecked(
             m_LHSExpr,
@@ -70,7 +70,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const NormalAssignmentStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value
         ));
@@ -99,7 +99,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const NormalAssignmentStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchLoweredLHSExpr.Value,
             mchLoweredRHSExpr.Value
         )->GetOrCreateLowered({}).Value);
@@ -114,20 +114,20 @@ namespace Ace
 
     auto NormalAssignmentStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
-        std::vector<ExprDropData> temporaries{};
+        std::vector<ExprDropData> tmps{};
 
         const auto rhsEmitResult = m_RHSExpr.get()->Emit(emitter);
-        temporaries.insert(
-            end(temporaries),
-            begin(rhsEmitResult.Temporaries),
-            end  (rhsEmitResult.Temporaries)
+        tmps.insert(
+            end(tmps),
+            begin(rhsEmitResult.Tmps),
+            end  (rhsEmitResult.Tmps)
         );
 
         const auto lhsEmitResult = m_LHSExpr.get()->Emit(emitter);
-        temporaries.insert(
-            end(temporaries),
-            begin(lhsEmitResult.Temporaries),
-            end  (lhsEmitResult.Temporaries)
+        tmps.insert(
+            end(tmps),
+            begin(lhsEmitResult.Tmps),
+            end  (lhsEmitResult.Tmps)
         );
 
         emitter.EmitCopy(
@@ -136,6 +136,6 @@ namespace Ace
             m_LHSExpr->GetTypeInfo().Symbol
         );
 
-        emitter.EmitDropTemporaries(temporaries);
+        emitter.EmitDropTmps(tmps);
     }
 }

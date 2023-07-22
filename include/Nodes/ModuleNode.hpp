@@ -14,9 +14,9 @@
 #include "Nodes/Vars/StaticVarNode.hpp"
 #include "BoundNodes/ModuleBoundNode.hpp"
 #include "Symbols/Symbol.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostic.hpp"
 
@@ -30,10 +30,10 @@ namespace Ace
     {
     public:
         ModuleNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             const std::shared_ptr<Scope>& selfScope,
-            const std::vector<Identifier>& name,
+            const std::vector<Ident>& name,
             const AccessModifier accessModifier,
             const std::vector<std::shared_ptr<const ModuleNode>>& modules,
             const std::vector<std::shared_ptr<const ITypeNode>>& types,
@@ -46,7 +46,7 @@ namespace Ace
         );
         virtual ~ModuleNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -61,13 +61,13 @@ namespace Ace
         auto ContinueCreatingSymbol(
             ISymbol* const symbol
         ) const -> Expected<void> final;
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
         std::shared_ptr<Scope> m_SelfScope{};
-        std::vector<Identifier> m_Name{};
+        std::vector<Ident> m_Name{};
         AccessModifier m_AccessModifier{};
         std::vector<std::shared_ptr<const ModuleNode>> m_Modules{};
         std::vector<std::shared_ptr<const ITypeNode>> m_Types{};

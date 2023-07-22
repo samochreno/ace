@@ -3,7 +3,7 @@
 #include <string>
 #include <optional>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 
 #define ACE_MACRO_CONCAIMPL(x, y) x##y
 #define ACE_MACRO_CONCAT(x, y) ACE_MACRO_CONCAIMPL(x, y)
@@ -47,16 +47,16 @@ namespace Ace
     {
         Diagnostic(
             const DiagnosticSeverity severity,
-            const std::optional<SourceLocation>& optSourceLocation,
+            const std::optional<SrcLocation>& optSrcLocation,
             const std::string& message
         ) : Severity{ severity },
-            OptSourceLocation{ optSourceLocation },
+            OptSrcLocation{ optSrcLocation },
             Message{ message }
         {
         }
 
         DiagnosticSeverity Severity{};
-        std::optional<SourceLocation> OptSourceLocation{};
+        std::optional<SrcLocation> OptSrcLocation{};
         std::string Message{};
     };
 

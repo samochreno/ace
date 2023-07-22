@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -14,18 +14,18 @@
 namespace Ace
 {
     ReturnStmtBoundNode::ReturnStmtBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::optional<std::shared_ptr<const IExprBoundNode>>& optExpr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_OptExpr{ optExpr }
     {
     }
 
-    auto ReturnStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto ReturnStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto ReturnStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -82,7 +82,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ReturnStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             mchCheckedOptExpr.Value
         ));
@@ -111,7 +111,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ReturnStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             mchLoweredOptExpr.Value
         )->GetOrCreateLowered(context).Value);
@@ -142,7 +142,7 @@ namespace Ace
                 typeSymbol
             );
 
-            emitter.EmitDropTemporaries(exprEmitResult.Temporaries);
+            emitter.EmitDropTmps(exprEmitResult.Tmps);
             emitter.EmitDropLocalVarsBeforeStmt(this);
             
             auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(

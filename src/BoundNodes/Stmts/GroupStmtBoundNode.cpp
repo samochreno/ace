@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -11,18 +11,18 @@
 namespace Ace
 {
     GroupStmtBoundNode::GroupStmtBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::vector<std::shared_ptr<const IStmtBoundNode>>& stmts
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Stmts{ stmts }
     {
     }
 
-    auto GroupStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto GroupStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto GroupStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -57,7 +57,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             mchCheckedContent.Value
         ));
@@ -86,7 +86,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             mchLoweredStmts.Value
         )->GetOrCreateLowered(context).Value);

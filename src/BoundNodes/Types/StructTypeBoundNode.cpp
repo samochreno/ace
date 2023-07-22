@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
@@ -14,20 +14,20 @@
 namespace Ace
 {
     StructTypeBoundNode::StructTypeBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         StructTypeSymbol* const symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
         const std::vector<std::shared_ptr<const InstanceVarBoundNode>>& vars
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_Attributes{ attributes },
         m_Vars{ vars }
     {
     }
 
-    auto StructTypeBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto StructTypeBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto StructTypeBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -70,7 +70,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StructTypeBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Symbol,
             mchCheckedAttributes.Value,
             mchCheckedVars.Value
@@ -109,7 +109,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StructTypeBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Symbol,
             mchLoweredAttributes.Value,
             mchLoweredVars.Value

@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "Nodes/Node.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
@@ -14,7 +14,7 @@ namespace Ace
     public:
         virtual ~ITemplateNode() = default;
 
-        virtual auto CollectImplParamNames() const -> std::vector<Identifier> = 0;
-        virtual auto CollectParamNames()     const -> std::vector<Identifier> = 0;
+        virtual auto CollectImplParamNames() const -> std::vector<Ident> = 0;
+        virtual auto CollectParamNames()     const -> std::vector<Ident> = 0;
     };
 }

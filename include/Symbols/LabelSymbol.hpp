@@ -4,7 +4,7 @@
 
 #include "Symbols/Symbol.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
@@ -14,18 +14,18 @@ namespace Ace
     public:
         LabelSymbol(
             const std::shared_ptr<Scope>& scope,
-            const Identifier& name
+            const Ident& name
         );
         virtual ~LabelSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        Identifier m_Name{};
+        Ident m_Name{};
     };
 }

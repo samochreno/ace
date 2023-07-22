@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -12,18 +12,18 @@
 namespace Ace
 {
     NormalJumpStmtBoundNode::NormalJumpStmtBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         LabelSymbol* const labelSymbol
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_LabelSymbol{ labelSymbol }
     {
     }
 
-    auto NormalJumpStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto NormalJumpStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto NormalJumpStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>

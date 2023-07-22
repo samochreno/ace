@@ -6,7 +6,7 @@
 #include "BoundNodes/Types/TypeBoundNode.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
 #include "Scope.hpp"
 
@@ -20,14 +20,14 @@ namespace Ace
     {
     public:
         StructTypeBoundNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             StructTypeSymbol* const symbol,
             const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
             const std::vector<std::shared_ptr<const InstanceVarBoundNode>>& vars
         );
         virtual ~StructTypeBoundNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -46,7 +46,7 @@ namespace Ace
         auto GetSymbol() const -> StructTypeSymbol* final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         StructTypeSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const AttributeBoundNode>> m_Attributes{};
         std::vector<std::shared_ptr<const InstanceVarBoundNode>> m_Vars{};

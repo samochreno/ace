@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 
 #include "Diagnostic.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "String.hpp"
 #include "FileBuffer.hpp"
 
@@ -26,7 +26,7 @@ namespace Ace
         );
         ACE_ASSERT(closingBracketIt != end(what));
 
-        auto [message, sourceLocation] = [&]() -> std::tuple<std::string, std::optional<SourceLocation>>
+        auto [message, srcLocation] = [&]() -> std::tuple<std::string, std::optional<SrcLocation>>
         {
             const auto atLinePos = what.find("at line");
             if (atLinePos == std::string::npos)
@@ -77,7 +77,7 @@ namespace Ace
                 static_cast<size_t>(std::stoi(columnString));
 
             const auto& line = fileBuffer->GetLines().at(lineIndex);
-            const SourceLocation sourceLocation
+            const SrcLocation srcLocation
             {
                 fileBuffer,
                 begin(line) + characterIndex,
@@ -87,7 +87,7 @@ namespace Ace
             return
             {
                 message,
-                sourceLocation,
+                srcLocation,
             };
         }();
 
@@ -96,7 +96,7 @@ namespace Ace
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             message
         );
     }   

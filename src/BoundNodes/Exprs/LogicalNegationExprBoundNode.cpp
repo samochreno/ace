@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -15,16 +15,16 @@
 namespace Ace
 {
     LogicalNegationExprBoundNode::LogicalNegationExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
     }
 
-    auto LogicalNegationExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto LogicalNegationExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto LogicalNegationExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -62,7 +62,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchConvertedAndCheckedExpr.Value
         ));
     }
@@ -86,7 +86,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchLoweredExpr.Value
         )->GetOrCreateLowered({}).Value);
     }
@@ -102,13 +102,13 @@ namespace Ace
         Emitter& emitter
     ) const -> ExprEmitResult
     {
-        std::vector<ExprDropData> temporaries{};
+        std::vector<ExprDropData> tmps{};
 
         const auto exprEmitResult = m_Expr->Emit(emitter);
-        temporaries.insert(
-            end(temporaries),
-            begin(exprEmitResult.Temporaries),
-            end  (exprEmitResult.Temporaries)
+        tmps.insert(
+            end(tmps),
+            begin(exprEmitResult.Tmps),
+            end  (exprEmitResult.Tmps)
         );
 
         auto* const boolType = GetCompilation()->Natives->Bool.GetIRType();
@@ -132,7 +132,7 @@ namespace Ace
             allocaInst
         );
 
-        return { allocaInst, exprEmitResult.Temporaries };
+        return { allocaInst, exprEmitResult.Tmps };
     }
 
     auto LogicalNegationExprBoundNode::GetTypeInfo() const -> TypeInfo

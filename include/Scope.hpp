@@ -12,7 +12,7 @@
 #include "Diagnostic.hpp"
 #include "Name.hpp"
 #include "SymbolCategory.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
@@ -138,14 +138,14 @@ namespace Ace
 
         template<typename TSymbol>
         auto ResolveStaticSymbol(
-            const Identifier& name
+            const Ident& name
         ) const -> Expected<TSymbol*>
         {
             return ResolveStaticSymbol<TSymbol>(name, {});
         }
         template<typename TSymbol>
         auto ResolveStaticSymbol(
-            const Identifier& name,
+            const Ident& name,
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
@@ -250,14 +250,14 @@ namespace Ace
 
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const Identifier& name
+            const Ident& name
         ) const -> Expected<TSymbol*>
         {
             return ExclusiveResolveSymbol<TSymbol>(name, {});
         }
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const Identifier& name,
+            const Ident& name,
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
@@ -270,7 +270,7 @@ namespace Ace
         }
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const Identifier& name,
+            const Ident& name,
             const std::vector<ITypeSymbol*>& implTemplateArgs,
             const std::vector<ITypeSymbol*>& templateArgs
         ) const -> Expected<TSymbol*>
@@ -284,7 +284,7 @@ namespace Ace
         }
         template<typename TSymbol>
         auto ExclusiveResolveSymbol(
-            const Identifier& name,
+            const Ident& name,
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes,
             const std::vector<ITypeSymbol*>& implTemplateArgs,
             const std::vector<ITypeSymbol*>& templateArgs
@@ -379,9 +379,9 @@ namespace Ace
         auto CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*>;
 
         auto DefineTemplateArgAliases(
-            const std::vector<Identifier>& implTemplateParamNames,
+            const std::vector<Ident>& implTemplateParamNames,
             const std::vector<ITypeSymbol*> implTemplateArgs,
-            const std::vector<Identifier>& templateParamNames,
+            const std::vector<Ident>& templateParamNames,
             const std::vector<ITypeSymbol*> templateArgs
         ) -> Expected<void>;
 

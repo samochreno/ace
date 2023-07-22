@@ -5,7 +5,7 @@
 #include "Assert.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
@@ -24,8 +24,8 @@ namespace Ace
     {
         m_Name =
         {
-            GetASTName().SourceLocation,
-            SpecialIdentifier::CreateTemplate(GetASTName().String),
+            GetASTName().SrcLocation,
+            SpecialIdent::CreateTemplate(GetASTName().String),
         };
     }
 
@@ -34,7 +34,7 @@ namespace Ace
         return m_TemplateNode->GetScope();
     }
 
-    auto FunctionTemplateSymbol::GetName() const -> const Identifier&
+    auto FunctionTemplateSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }
@@ -64,7 +64,7 @@ namespace Ace
         return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<NormalTemplateParamTypeSymbol>();
     }
 
-    auto FunctionTemplateSymbol::GetASTName() const -> const Identifier&
+    auto FunctionTemplateSymbol::GetASTName() const -> const Ident&
     {
         return m_TemplateNode->GetAST()->GetName();
     }

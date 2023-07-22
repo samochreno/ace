@@ -4,10 +4,10 @@
 #include <vector>
 #include <optional>
 
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Diagnostic.hpp"
@@ -16,7 +16,7 @@ namespace Ace
 {
     struct StructConstructionExprArg
     {
-        Identifier Name{};
+        Ident Name{};
         std::optional<std::shared_ptr<const IExprNode>> OptValue{};
     };
 
@@ -27,14 +27,14 @@ namespace Ace
     {
     public:
         StructConstructionExprNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             const SymbolName& typeName,
             std::vector<StructConstructionExprArg>&& args
         );
         virtual ~StructConstructionExprNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -47,7 +47,7 @@ namespace Ace
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
         SymbolName m_TypeName{};
         std::vector<StructConstructionExprArg> m_Args{};

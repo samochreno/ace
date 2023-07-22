@@ -9,7 +9,7 @@ namespace Ace
 {
     ModuleSymbol::ModuleSymbol(
         const std::shared_ptr<Scope>& selfScope,
-        const Identifier& name,
+        const Ident& name,
         const AccessModifier accessModifier
     ) : m_SelfScope{ selfScope },
         m_Name{ name },
@@ -27,7 +27,7 @@ namespace Ace
         return m_SelfScope;
     }
 
-    auto ModuleSymbol::GetName() const -> const Identifier&
+    auto ModuleSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }

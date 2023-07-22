@@ -5,7 +5,7 @@
 
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Diagnostic.hpp"
@@ -19,13 +19,13 @@ namespace Ace
     {
     public:
         CastExprNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const TypeName& typeName,
             const std::shared_ptr<const IExprNode>& expr
         );
         virtual ~CastExprNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -38,7 +38,7 @@ namespace Ace
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         TypeName m_TypeName{};
         std::shared_ptr<const IExprNode> m_Expr{};
     };

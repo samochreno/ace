@@ -3,10 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "BoundNodes/Exprs/VarReferences/StaticVarReferenceExprBoundNode.hpp"
+#include "BoundNodes/Exprs/VarRefs/StaticVarRefExprBoundNode.hpp"
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
 #include "Scope.hpp"
@@ -19,18 +19,18 @@
 namespace Ace
 {
     VarStmtBoundNode::VarStmtBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         LocalVarSymbol* const symbol,
         const std::optional<std::shared_ptr<const IExprBoundNode>>& optAssignedExpr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_OptAssignedExpr{ optAssignedExpr }
     {
     }
 
-    auto VarStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto VarStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto VarStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -68,7 +68,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const VarStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Symbol,
             mchConvertedAndCheckedOptAssignedExpr.Value
         ));
@@ -97,7 +97,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const VarStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Symbol,
             mchLoweredOptAssignedExpr.Value
         )->GetOrCreateLowered(context).Value);
@@ -117,17 +117,17 @@ namespace Ace
             return;
         }
 
-        const auto varReferenceExpr = std::make_shared<const StaticVarReferenceExprBoundNode>(
-            m_Symbol->GetName().SourceLocation,
+        const auto varRefExpr = std::make_shared<const StaticVarRefExprBoundNode>(
+            m_Symbol->GetName().SrcLocation,
             GetScope(),
             m_Symbol
         );
 
         // Without type checking and implicit conversions,
-        // references can be initialized too
+        // refs can be initialized too
         const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
-            GetSourceLocation(),
-            varReferenceExpr,
+            GetSrcLocation(),
+            varRefExpr,
             m_OptAssignedExpr.value()
         );
 

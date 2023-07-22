@@ -8,7 +8,7 @@
 #include "Emittable.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Scope.hpp"
@@ -37,7 +37,7 @@ namespace Ace
     };
 
     typedef Expected<FunctionSymbol*>(*ConversionOpGetterFunction)(
-        const SourceLocation&,
+        const SrcLocation&,
         const std::shared_ptr<Scope>&,
         ITypeSymbol*,
         ITypeSymbol*

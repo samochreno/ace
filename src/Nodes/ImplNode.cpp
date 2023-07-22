@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
@@ -12,12 +12,12 @@
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 
 namespace Ace
 {
     ImplNode::ImplNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& selfScope,
         const SymbolName& typeName,
         const std::vector<std::shared_ptr<const FunctionNode>>& functions,
@@ -29,9 +29,9 @@ namespace Ace
     {
     }
 
-    auto ImplNode::GetSourceLocation() const -> const SourceLocation&
+    auto ImplNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto ImplNode::GetScope() const -> std::shared_ptr<Scope>
@@ -78,7 +78,7 @@ namespace Ace
         );
 
         return std::make_shared<const ImplNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             selfScope,
             m_TypeName,
             clonedFunctions,
@@ -95,7 +95,7 @@ namespace Ace
         }));
 
         return std::make_shared<const ImplBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             boundFunctions
         );
@@ -116,7 +116,7 @@ namespace Ace
 
                 auto& lastNameSection = typeName.Sections.back();
                 lastNameSection.TemplateArgs.clear();
-                lastNameSection.Name.String = SpecialIdentifier::CreateTemplate(
+                lastNameSection.Name.String = SpecialIdent::CreateTemplate(
                     lastNameSection.Name.String
                 );
 

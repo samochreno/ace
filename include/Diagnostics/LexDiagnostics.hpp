@@ -3,61 +3,61 @@
 #include <memory>
 
 #include "Diagnostic.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 
 namespace Ace
 {
     inline auto CreateUnterminatedMultiLineCommentError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "unterminated multiline comment"
         );
     }
 
     inline auto CreateUnterminatedStringLiteralError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "unterminated string literal"
         );
     }
 
     inline auto CreateUnexpectedCharacterError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "unexpected character"
         );
     }
 
     inline auto CreateUnknownNumericLiteralTypeSuffixError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "unknown numeric literal type suffix"
         );
     }
 
     inline auto CreateDecimalPointInNonFloatNumericLiteralError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "decimal point in non-float numeric literal"
         );
     }   

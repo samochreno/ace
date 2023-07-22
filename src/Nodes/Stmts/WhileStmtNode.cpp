@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
@@ -14,20 +14,20 @@
 namespace Ace
 {
     WhileStmtNode::WhileStmtNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprNode>& condition,
         const std::shared_ptr<const BlockStmtNode>& body
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Condition{ condition },
         m_Body{ body }
     {
     }
 
-    auto WhileStmtNode::GetSourceLocation() const -> const SourceLocation&
+    auto WhileStmtNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto WhileStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -50,7 +50,7 @@ namespace Ace
     ) const -> std::shared_ptr<const WhileStmtNode>
     {
         return std::make_shared<const WhileStmtNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_Condition->CloneInScopeExpr(scope),
             m_Body->CloneInScope(scope)
@@ -69,7 +69,7 @@ namespace Ace
         ACE_TRY(boundCondition, m_Condition->CreateBoundExpr());
         ACE_TRY(boundBody, m_Body->CreateBound());
         return std::make_shared<const WhileStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             boundCondition,
             boundBody

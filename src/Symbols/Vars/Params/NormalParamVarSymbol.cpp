@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "AccessModifier.hpp"
 
@@ -11,7 +11,7 @@ namespace Ace
 {
     NormalParamVarSymbol::NormalParamVarSymbol(
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name,
+        const Ident& name,
         ITypeSymbol* const type,
         const size_t index
     ) : m_Scope{ scope },
@@ -26,7 +26,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto NormalParamVarSymbol::GetName() const -> const Identifier&
+    auto NormalParamVarSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }

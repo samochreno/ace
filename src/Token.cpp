@@ -14,7 +14,7 @@ namespace Ace
         const std::string_view string
     ) -> bool
     {
-        if (token.Kind != TokenKind::Identifier)
+        if (token.Kind != TokenKind::Ident)
         {
             return false;
         }

@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
@@ -12,7 +12,7 @@
 #include "BoundNodes/Stmts/Jumps/NormalJumpStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/Jumps/ConditionalJumpStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
@@ -21,20 +21,20 @@
 namespace Ace
 {
     WhileStmtBoundNode::WhileStmtBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprBoundNode>& condition,
         const std::shared_ptr<const BlockStmtBoundNode>& body
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Condition{ condition },
         m_Body{ body }
     {
     }
 
-    auto WhileStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto WhileStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto WhileStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -80,7 +80,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const WhileStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Scope,
             mchConvertedAndCheckedCondition.Value,
             mchCheckedBody.Value
@@ -110,10 +110,10 @@ namespace Ace
         // continue:
         // gotoif condition start;
 
-        const Identifier startLabelName
+        const Ident startLabelName
         {
-            GetSourceLocation().CreateFirst(),
-            SpecialIdentifier::CreateAnonymous(),
+            GetSrcLocation().CreateFirst(),
+            SpecialIdent::CreateAnonymous(),
         };
         auto startLabelSymbolOwned = std::make_unique<LabelSymbol>(
             m_Scope,
@@ -124,10 +124,10 @@ namespace Ace
             m_Scope->DefineSymbol(std::move(startLabelSymbolOwned)).Unwrap()
         );
 
-        const Identifier continueLabelName
+        const Ident continueLabelName
         {
-            GetSourceLocation().CreateLast(),
-            SpecialIdentifier::CreateAnonymous(),
+            GetSrcLocation().CreateLast(),
+            SpecialIdent::CreateAnonymous(),
         };
         auto continueLabelSymbolOwned = std::make_unique<LabelSymbol>(
             m_Scope,
@@ -141,31 +141,31 @@ namespace Ace
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
 
         stmts.push_back(std::make_shared<const NormalJumpStmtBoundNode>(
-            GetSourceLocation().CreateFirst(),
+            GetSrcLocation().CreateFirst(),
             m_Scope,
             continueLabelSymbol
         ));
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-            startLabelSymbol->GetName().SourceLocation,
+            startLabelSymbol->GetName().SrcLocation,
             startLabelSymbol
         ));
 
         stmts.push_back(m_Body);
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-            continueLabelSymbol->GetName().SourceLocation,
+            continueLabelSymbol->GetName().SrcLocation,
             continueLabelSymbol
         ));
 
         stmts.push_back(std::make_shared<const ConditionalJumpStmtBoundNode>(
-            m_Condition->GetSourceLocation(),
+            m_Condition->GetSrcLocation(),
             m_Condition,
             startLabelSymbol
         ));
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Scope,
             stmts
         )->GetOrCreateLowered(context).Value);

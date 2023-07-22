@@ -10,14 +10,14 @@
 #include "Nodes/Vars/Params/NormalParamVarNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
 #include "BoundNodes/FunctionBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Name.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 
 namespace Ace
 {
@@ -28,9 +28,9 @@ namespace Ace
     {
     public:
         FunctionNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& selfScope,
-            const Identifier& name,
+            const Ident& name,
             const TypeName& typeName,
             const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
             const AccessModifier accessModifier,
@@ -40,7 +40,7 @@ namespace Ace
         );
         virtual ~FunctionNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation&;
+        auto GetSrcLocation() const -> const SrcLocation&;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -48,7 +48,7 @@ namespace Ace
         ) const -> std::shared_ptr<const FunctionNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const FunctionBoundNode>> final;
 
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
@@ -60,9 +60,9 @@ namespace Ace
         auto GetParams() const -> const std::vector<std::shared_ptr<const NormalParamVarNode>>&;
 
     protected:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_SelfScope{};
-        Identifier m_Name{};
+        Ident m_Name{};
         TypeName m_TypeName{};
         std::vector<std::shared_ptr<const AttributeNode>> m_Attributes{};
         SymbolCategory m_SymbolCategory{};

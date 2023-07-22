@@ -5,7 +5,7 @@
 #include <optional>
 
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostic.hpp"
 
@@ -13,7 +13,7 @@ namespace Ace
 {
     ImplTemplateArgAliasTypeSymbol::ImplTemplateArgAliasTypeSymbol(
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name,
+        const Ident& name,
         ITypeSymbol* const aliasedType,
         const size_t index
     ) : m_Scope{ scope },
@@ -33,7 +33,7 @@ namespace Ace
         return m_AliasedType->GetSelfScope();
     }
 
-    auto ImplTemplateArgAliasTypeSymbol::GetName() const -> const Identifier&
+    auto ImplTemplateArgAliasTypeSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }

@@ -13,27 +13,21 @@
 
 namespace Ace
 {
-    auto ITypeSymbol::IsReference() const -> bool
+    auto ITypeSymbol::IsRef() const -> bool
     {
         auto* const self = GetUnaliased();
 
-        const auto& reference = GetCompilation()->Natives->Reference;
+        const auto& ref = GetCompilation()->Natives->Ref;
 
-        if (
-            self->GetScope() !=
-            reference.GetSymbol()->GetScope()
-            )
+        if (self->GetScope() != ref.GetSymbol()->GetScope())
         {
             return false;
         }
 
-        const auto referenceName = reference.CreateFullyQualifiedName(
-            SourceLocation{}
+        const auto refName = ref.CreateFullyQualifiedName(
+            SrcLocation{}
         );
-        if (
-            self->GetName().String !=
-            referenceName.Sections.back().Name.String
-            )
+        if (self->GetName().String != refName.Sections.back().Name.String)
         {
             return false;
         }
@@ -41,9 +35,9 @@ namespace Ace
         return true;
     }
 
-    auto ITypeSymbol::GetWithoutReference() -> ITypeSymbol*
+    auto ITypeSymbol::GetWithoutRef() -> ITypeSymbol*
     {
-        if (!IsReference())
+        if (!IsRef())
         {
             return this;
         }
@@ -52,9 +46,9 @@ namespace Ace
         return self->CollectTemplateArgs().front();
     }
 
-    auto ITypeSymbol::GetWithoutReference() const -> const ITypeSymbol*
+    auto ITypeSymbol::GetWithoutRef() const -> const ITypeSymbol*
     {
-        if (!IsReference())
+        if (!IsRef())
         {
             return this;
         }
@@ -63,13 +57,13 @@ namespace Ace
         return self->CollectTemplateArgs().front()->GetUnaliased();
     }
 
-    auto ITypeSymbol::GetWithReference() -> ITypeSymbol*
+    auto ITypeSymbol::GetWithRef() -> ITypeSymbol*
     {
-        ACE_ASSERT(!IsReference());
+        ACE_ASSERT(!IsRef());
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
-            GetCompilation()->Natives->Reference.GetSymbol(),
+            GetCompilation()->Natives->Ref.GetSymbol(),
             std::nullopt,
             {},
             { this->GetUnaliased() }
@@ -81,27 +75,21 @@ namespace Ace
         return typeSymbol;
     }
 
-    auto ITypeSymbol::IsStrongPointer() const -> bool
+    auto ITypeSymbol::IsStrongPtr() const -> bool
     {
         auto* const self = GetUnaliased();
 
-        const auto& strongPointer = GetCompilation()->Natives->StrongPointer;
+        const auto& strongPtr = GetCompilation()->Natives->StrongPtr;
 
-        if (
-            self->GetScope() !=
-            strongPointer.GetSymbol()->GetScope()
-            )
+        if (self->GetScope() != strongPtr.GetSymbol()->GetScope())
         {
             return false;
         }
 
-        const auto strongPointerName = strongPointer.CreateFullyQualifiedName(
-            SourceLocation{}
+        const auto strongPtrName = strongPtr.CreateFullyQualifiedName(
+            SrcLocation{}
         );
-        if (
-            self->GetName().String !=
-            strongPointerName.Sections.back().Name.String
-            )
+        if (self->GetName().String != strongPtrName.Sections.back().Name.String)
         {
             return false;
         }
@@ -109,9 +97,9 @@ namespace Ace
         return true;
     }
 
-    auto ITypeSymbol::GetWithoutStrongPointer() -> ITypeSymbol*
+    auto ITypeSymbol::GetWithoutStrongPtr() -> ITypeSymbol*
     {
-        if (!IsStrongPointer())
+        if (!IsStrongPtr())
         {
             return this;
         }
@@ -120,11 +108,11 @@ namespace Ace
         return self->CollectTemplateArgs().front()->GetUnaliased();
     }
 
-    auto ITypeSymbol::GetWithStrongPointer() -> ITypeSymbol*
+    auto ITypeSymbol::GetWithStrongPtr() -> ITypeSymbol*
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
-            GetCompilation()->Natives->StrongPointer.GetSymbol(),
+            GetCompilation()->Natives->StrongPtr.GetSymbol(),
             std::nullopt,
             {},
             { this->GetUnaliased() }
@@ -136,27 +124,21 @@ namespace Ace
         return typeSymbol;
     }
 
-    auto ITypeSymbol::IsWeakPointer() const -> bool
+    auto ITypeSymbol::IsWeakPtr() const -> bool
     {
         auto* const self = GetUnaliased();
 
-        const auto& weakPointer = GetCompilation()->Natives->WeakPointer;
+        const auto& weakPtr = GetCompilation()->Natives->WeakPtr;
 
-        if (
-            self->GetScope() !=
-            weakPointer.GetSymbol()->GetScope()
-            )
+        if (self->GetScope() != weakPtr.GetSymbol()->GetScope())
         {
             return false;
         }
 
-        const auto weakPointerName = weakPointer.CreateFullyQualifiedName(
-            SourceLocation{}
+        const auto weakPtrName = weakPtr.CreateFullyQualifiedName(
+            SrcLocation{}
         );
-        if (
-            self->GetName().String !=
-            weakPointerName.Sections.back().Name.String
-            )
+        if (self->GetName().String != weakPtrName.Sections.back().Name.String)
         {
             return false;
         }
@@ -164,9 +146,9 @@ namespace Ace
         return true;
     }
 
-    auto ITypeSymbol::GetWithoutWeakPointer() -> ITypeSymbol*
+    auto ITypeSymbol::GetWithoutWeakPtr() -> ITypeSymbol*
     {
-        if (!IsWeakPointer())
+        if (!IsWeakPtr())
         {
             return this;
         }
@@ -175,11 +157,11 @@ namespace Ace
         return self->CollectTemplateArgs().front();
     }
 
-    auto ITypeSymbol::GetWithWeakPointer() -> ITypeSymbol*
+    auto ITypeSymbol::GetWithWeakPtr() -> ITypeSymbol*
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
-            GetCompilation()->Natives->WeakPointer.GetSymbol(),
+            GetCompilation()->Natives->WeakPtr.GetSymbol(),
             std::nullopt,
             {},
             { this->GetUnaliased() }
@@ -217,10 +199,10 @@ namespace Ace
     {
         auto* const self = GetUnaliased();
 
-        const Identifier name
+        const Ident name
         {
-            self->GetName().SourceLocation,
-            SpecialIdentifier::CreateTemplate(self->GetName().String),
+            self->GetName().SrcLocation,
+            SpecialIdent::CreateTemplate(self->GetName().String),
         };
 
         auto expTemplate =

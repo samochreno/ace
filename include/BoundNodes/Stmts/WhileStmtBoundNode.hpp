@@ -7,7 +7,7 @@
 #include "BoundNodes/Stmts/GroupStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -23,14 +23,14 @@ namespace Ace
     {
     public:
         WhileStmtBoundNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             const std::shared_ptr<const IExprBoundNode>& condition,
             const std::shared_ptr<const BlockStmtBoundNode>& body
         );
         virtual ~WhileStmtBoundNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -48,7 +48,7 @@ namespace Ace
         auto Emit(Emitter& emitter) const -> void final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
         std::shared_ptr<const IExprBoundNode> m_Condition{};
         std::shared_ptr<const BlockStmtBoundNode> m_Body{};

@@ -1,9 +1,9 @@
-#include "BoundNodes/Exprs/ReferenceExprBoundNode.hpp"
+#include "BoundNodes/Exprs/RefExprBoundNode.hpp"
 
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -15,25 +15,25 @@
 
 namespace Ace
 {
-    ReferenceExprBoundNode::ReferenceExprBoundNode(
-        const SourceLocation& sourceLocation,
+    RefExprBoundNode::RefExprBoundNode(
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
     }
 
-    auto ReferenceExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto RefExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
-    auto ReferenceExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
+    auto RefExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_Expr->GetScope();
     }
 
-    auto ReferenceExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto RefExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 
@@ -42,9 +42,9 @@ namespace Ace
         return children;
     }
 
-    auto ReferenceExprBoundNode::GetOrCreateTypeChecked(
+    auto RefExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const ReferenceExprBoundNode>>>
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const RefExprBoundNode>>>
     {
         ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
 
@@ -53,22 +53,22 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        return CreateChanged(std::make_shared<const ReferenceExprBoundNode>(
-            GetSourceLocation(),
+        return CreateChanged(std::make_shared<const RefExprBoundNode>(
+            GetSrcLocation(),
             mchCheckedExpr.Value
         ));
     }
 
-    auto ReferenceExprBoundNode::GetOrCreateTypeCheckedExpr(
+    auto RefExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
-    auto ReferenceExprBoundNode::GetOrCreateLowered(
+    auto RefExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const ReferenceExprBoundNode>>
+    ) const -> MaybeChanged<std::shared_ptr<const RefExprBoundNode>>
     {
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
@@ -77,37 +77,37 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        return CreateChanged(std::make_shared<const ReferenceExprBoundNode>(
-            GetSourceLocation(),
+        return CreateChanged(std::make_shared<const RefExprBoundNode>(
+            GetSrcLocation(),
             mchLoweredExpr.Value
         )->GetOrCreateLowered({}).Value);
     }
 
-    auto ReferenceExprBoundNode::GetOrCreateLoweredExpr(
+    auto RefExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }
 
-    auto ReferenceExprBoundNode::Emit(
+    auto RefExprBoundNode::Emit(
         Emitter& emitter
     ) const -> ExprEmitResult
     {
-        std::vector<ExprDropData> temporaries{};
+        std::vector<ExprDropData> tmps{};
 
         const auto exprEmitResult = m_Expr->Emit(emitter);
-        temporaries.insert(
-            end(temporaries),
-            begin(exprEmitResult.Temporaries),
-            end  (exprEmitResult.Temporaries)
+        tmps.insert(
+            end(tmps),
+            begin(exprEmitResult.Tmps),
+            end  (exprEmitResult.Tmps)
         ); 
 
         auto* const allocaInst = emitter.GetBlockBuilder().Builder.CreateAlloca(
             exprEmitResult.Value->getType()
         );
-        temporaries.emplace_back(
-            allocaInst, m_Expr->GetTypeInfo().Symbol->GetWithReference()
+        tmps.emplace_back(
+            allocaInst, m_Expr->GetTypeInfo().Symbol->GetWithRef()
         );
 
         emitter.GetBlockBuilder().Builder.CreateStore(
@@ -115,14 +115,14 @@ namespace Ace
             allocaInst
         );
 
-        return { allocaInst, temporaries };
+        return { allocaInst, tmps };
     }
 
-    auto ReferenceExprBoundNode::GetTypeInfo() const -> TypeInfo
+    auto RefExprBoundNode::GetTypeInfo() const -> TypeInfo
     {
         auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol;
         const auto scope = typeSymbol->GetScope();
 
-        return { typeSymbol->GetWithReference(), ValueKind::R };
+        return { typeSymbol->GetWithRef(), ValueKind::R };
     }
 }

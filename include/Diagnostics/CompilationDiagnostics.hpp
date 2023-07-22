@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 
 #include "Diagnostic.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "FileBuffer.hpp"
 
 namespace Ace
@@ -20,12 +20,12 @@ namespace Ace
     }
 
     inline auto CreateMultiplePackagePathArgsError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "multiple package path arguments"
         );
     }
@@ -93,7 +93,7 @@ namespace Ace
         );
     }
 
-    inline auto CreateUndefinedReferenceToPackagePathMacroError(
+    inline auto CreateUndefinedRefToPackagePathMacroError(
         const FileBuffer* const packageFileBuffer,
         const std::string& macro
     ) -> std::shared_ptr<const Diagnostic>

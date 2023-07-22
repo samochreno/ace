@@ -4,9 +4,9 @@
 #include <string>
 
 #include "Assert.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Compilation.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
@@ -50,13 +50,13 @@ namespace Ace
     {
     }
 
-    SymbolNameSection::SymbolNameSection(const Identifier& name)
+    SymbolNameSection::SymbolNameSection(const Ident& name)
         : Name{ name }, TemplateArgs{}
     {
     }
 
     SymbolNameSection::SymbolNameSection(
-        const Identifier& name,
+        const Ident& name,
         const std::vector<SymbolName>& templateArgs
     ) : Name{ name }, TemplateArgs{ templateArgs }
     {
@@ -84,33 +84,33 @@ namespace Ace
     }
 
     static auto CreateModifierTypeFullyQualifiedName(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const TypeNameModifier modifier
     ) -> SymbolName
     {
         const auto& natives =
-            sourceLocation.Buffer->GetCompilation()->Natives;
+            srcLocation.Buffer->GetCompilation()->Natives;
 
         switch (modifier)
         {
-            case TypeNameModifier::Reference:
+            case TypeNameModifier::Ref:
             {
-                return natives->Reference.CreateFullyQualifiedName(
-                    sourceLocation
+                return natives->Ref.CreateFullyQualifiedName(
+                    srcLocation
                 );
             }
 
-            case TypeNameModifier::StrongPointer:
+            case TypeNameModifier::StrongPtr:
             {
-                return natives->StrongPointer.CreateFullyQualifiedName(
-                    sourceLocation
+                return natives->StrongPtr.CreateFullyQualifiedName(
+                    srcLocation
                 );
             }
 
-            case TypeNameModifier::WeakPointer:
+            case TypeNameModifier::WeakPtr:
             {
-                return natives->WeakPointer.CreateFullyQualifiedName(
-                    sourceLocation
+                return natives->WeakPtr.CreateFullyQualifiedName(
+                    srcLocation
                 );
             }
         }
@@ -129,20 +129,20 @@ namespace Ace
         std::for_each(rbegin(Modifiers), rend(Modifiers),
         [&](const TypeNameModifier modifier)
         {
-            const auto& firstNameSectionSourceLocation =
-                SymbolName.Sections.front().Name.SourceLocation;
-            const auto&  lastNameSectionSourceLocation =
-                SymbolName.Sections.back().Name.SourceLocation;
+            const auto& firstNameSectionSrcLocation =
+                SymbolName.Sections.front().Name.SrcLocation;
+            const auto&  lastNameSectionSrcLocation =
+                SymbolName.Sections.back().Name.SrcLocation;
 
-            const SourceLocation sourceLocation
+            const SrcLocation srcLocation
             {
-                firstNameSectionSourceLocation.Buffer,
-                firstNameSectionSourceLocation.CharacterBeginIterator,
-                lastNameSectionSourceLocation.CharacterEndIterator,
+                firstNameSectionSrcLocation.Buffer,
+                firstNameSectionSrcLocation.CharacterBeginIterator,
+                lastNameSectionSrcLocation.CharacterEndIterator,
             };
 
             auto modifiedName = CreateModifierTypeFullyQualifiedName(
-                sourceLocation,
+                srcLocation,
                 modifier
             );
             modifiedName.Sections.back().TemplateArgs.push_back(name);

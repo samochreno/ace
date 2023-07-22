@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -14,20 +14,20 @@
 namespace Ace
 {
     UserBinaryExprBoundNode::UserBinaryExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& rhsExpr,
         FunctionSymbol* const opSymbol
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr },
         m_OpSymbol{ opSymbol }
     {
     }
 
-    auto UserBinaryExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto UserBinaryExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto UserBinaryExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -70,7 +70,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const UserBinaryExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value,
             m_OpSymbol
@@ -92,7 +92,7 @@ namespace Ace
         const auto mchLoweredRHSExpr = m_RHSExpr->GetOrCreateLoweredExpr({});
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             m_OpSymbol,
             std::vector

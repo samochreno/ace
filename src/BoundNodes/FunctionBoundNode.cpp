@@ -4,7 +4,7 @@
 #include <vector>
 #include <optional>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "BoundNodes/Vars/Params/SelfParamVarBoundNode.hpp"
@@ -17,13 +17,13 @@
 namespace Ace
 {
     FunctionBoundNode::FunctionBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         FunctionSymbol* const symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
         const std::optional<const std::shared_ptr<const SelfParamVarBoundNode>>& optSelf,
         const std::vector<std::shared_ptr<const ParamVarBoundNode>>& params,
         const std::optional<std::shared_ptr<const BlockStmtBoundNode>>& optBody
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_Attributes{ attributes },
         m_OptSelf{ optSelf },
@@ -32,9 +32,9 @@ namespace Ace
     {
     }
 
-    auto FunctionBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto FunctionBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto FunctionBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -102,7 +102,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const FunctionBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Symbol,
             mchCheckedAttributes.Value,
             mchCheckedOptSelf.Value,
@@ -150,7 +150,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const FunctionBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Symbol,
             mchLoweredAttributes.Value,
             mchLoweredOptSelf.Value,

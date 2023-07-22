@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Diagnostic.hpp"
@@ -15,18 +15,18 @@
 namespace Ace
 {
     DerefAsExprBoundNode::DerefAsExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr,
         ITypeSymbol* const typeSymbol
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_TypeSymbol{ typeSymbol },
         m_Expr{ expr }
     {
     }
 
-    auto DerefAsExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto DerefAsExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto DerefAsExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -50,8 +50,8 @@ namespace Ace
         auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol->GetUnaliased();
 
         ACE_TRY_ASSERT(
-            (typeSymbol == GetCompilation()->Natives->Pointer.GetSymbol()) ||
-            (typeSymbol->IsReference())
+            (typeSymbol == GetCompilation()->Natives->Ptr.GetSymbol()) ||
+            (typeSymbol->IsRef())
         );
 
         ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
@@ -62,7 +62,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const DerefAsExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Expr,
             m_TypeSymbol
         ));
@@ -87,7 +87,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const DerefAsExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Expr,
             m_TypeSymbol
         )->GetOrCreateLowered({}).Value);
@@ -102,23 +102,23 @@ namespace Ace
 
     auto DerefAsExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
-        std::vector<ExprDropData> temporaries{};
+        std::vector<ExprDropData> tmps{};
 
         const auto exprEmitResult = m_Expr->Emit(emitter);
-        temporaries.insert(
-            end(temporaries),
-            begin(exprEmitResult.Temporaries),
-            end  (exprEmitResult.Temporaries)
+        tmps.insert(
+            end(tmps),
+            begin(exprEmitResult.Tmps),
+            end  (exprEmitResult.Tmps)
         );
 
-        auto* const pointerType = GetCompilation()->Natives->Pointer.GetIRType();
+        auto* const ptrType = GetCompilation()->Natives->Ptr.GetIRType();
 
         auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
-            pointerType,
+            ptrType,
             exprEmitResult.Value
         );
 
-        return { loadInst, temporaries };
+        return { loadInst, tmps };
     }
 
     auto DerefAsExprBoundNode::GetTypeInfo() const -> TypeInfo

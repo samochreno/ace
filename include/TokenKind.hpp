@@ -22,7 +22,7 @@ namespace Ace
         OpenBracket,
         CloseBracket,
 
-        Identifier,
+        Ident,
 
         Int8,
         Int16,

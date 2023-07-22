@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -17,16 +17,16 @@
 namespace Ace
 {
     UnboxExprBoundNode::UnboxExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
     }
 
-    auto UnboxExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto UnboxExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto UnboxExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -47,13 +47,13 @@ namespace Ace
         const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const UnboxExprBoundNode>>>
     {
-        ACE_TRY_ASSERT(m_Expr->GetTypeInfo().Symbol->IsStrongPointer());
+        ACE_TRY_ASSERT(m_Expr->GetTypeInfo().Symbol->IsStrongPtr());
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
-            GetCompilation()->Natives->StrongPointer__value.GetSymbol(),
+            GetCompilation()->Natives->StrongPtr__value.GetSymbol(),
             std::nullopt,
-            { m_Expr->GetTypeInfo().Symbol->GetWithoutReference()->GetWithoutStrongPointer() },
+            { m_Expr->GetTypeInfo().Symbol->GetWithoutRef()->GetWithoutStrongPtr() },
             {}
         ).Unwrap();
         auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
@@ -76,7 +76,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const UnboxExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchCheckedAndConvertedExpr.Value
         ));
     }
@@ -96,16 +96,16 @@ namespace Ace
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             GetCompilation(),
-            GetCompilation()->Natives->StrongPointer__value.GetSymbol(),
+            GetCompilation()->Natives->StrongPtr__value.GetSymbol(),
             std::nullopt,
-            { mchLoweredExpr.Value->GetTypeInfo().Symbol->GetWithoutReference()->GetWithoutStrongPointer() },
+            { mchLoweredExpr.Value->GetTypeInfo().Symbol->GetWithoutRef()->GetWithoutStrongPtr() },
             {}
         ).Unwrap();
         auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
         ACE_ASSERT(functionSymbol);
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             functionSymbol,
             std::vector{ mchLoweredExpr.Value }
@@ -128,7 +128,7 @@ namespace Ace
     {
         return
         {
-            m_Expr->GetTypeInfo().Symbol->GetWithoutReference()->GetWithoutStrongPointer(),
+            m_Expr->GetTypeInfo().Symbol->GetWithoutRef()->GetWithoutStrongPtr(),
             ValueKind::R,
         };
     }

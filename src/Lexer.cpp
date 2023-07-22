@@ -11,7 +11,7 @@
 #include "String.hpp"
 #include "FileBuffer.hpp"
 #include "Compilation.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Measured.hpp"
 
 namespace Ace
@@ -35,19 +35,19 @@ namespace Ace
 
     static auto CreateNativeTypeName(
         const ScanContext& context,
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const NativeType& nativeType
     ) -> std::vector<std::shared_ptr<const Token>>
     {
         const auto name = nativeType.CreateFullyQualifiedName(
-            sourceLocation
+            srcLocation
         );
 
         std::vector<std::shared_ptr<const Token>> tokens{};
 
         ACE_ASSERT(name.IsGlobal);
         tokens.push_back(std::make_shared<const Token>(
-            sourceLocation,
+            srcLocation,
             TokenKind::ColonColon
         ));
 
@@ -58,14 +58,14 @@ namespace Ace
             if (i != 0)
             {
                 tokens.emplace_back(std::make_shared<const Token>(
-                    section.Name.SourceLocation,
+                    section.Name.SrcLocation,
                     TokenKind::ColonColon
                 ));
             }
 
             tokens.emplace_back(std::make_shared<const Token>(
-                section.Name.SourceLocation,
-                TokenKind::Identifier,
+                section.Name.SrcLocation,
+                TokenKind::Ident,
                 section.Name.String
             ));
         }
@@ -76,15 +76,15 @@ namespace Ace
     static auto CreateKeyword(
         const ScanContext& context,
         const std::string& string,
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::optional<std::vector<std::shared_ptr<const Token>>>
     {
         const auto& natives = context.FileBuffer->GetCompilation()->Natives;
 
         Token token
         {
-            sourceLocation,
-            TokenKind::Identifier,
+            srcLocation,
+            TokenKind::Ident,
         };
 
         if (string == Keyword::If)
@@ -176,7 +176,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->Int8
             );
         }
@@ -184,7 +184,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->Int16
             );
         }
@@ -192,7 +192,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->Int32
             );
         }
@@ -200,7 +200,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->Int64
             );
         }
@@ -208,7 +208,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->UInt8
             );
         }
@@ -216,7 +216,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->UInt16
             );
         }
@@ -224,7 +224,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->UInt32
             );
         }
@@ -232,7 +232,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->UInt64
             );
         }
@@ -240,7 +240,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->Int
             );
         }
@@ -248,7 +248,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->Float32
             );
         }
@@ -256,7 +256,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->Float64
             );
         }
@@ -264,7 +264,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->Bool
             );
         }
@@ -272,7 +272,7 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 context,
-                sourceLocation,
+                srcLocation,
                 natives->Void
             );
         }
@@ -284,7 +284,7 @@ namespace Ace
         return std::vector{ std::make_shared<const Token>(token) };
     }
 
-    static auto ScanIdentifier(
+    static auto ScanIdent(
         const ScanContext& context
     ) -> Measured<std::vector<std::shared_ptr<const Token>>>
     {
@@ -304,7 +304,7 @@ namespace Ace
             ++it;
         }
 
-        const SourceLocation sourceLocation
+        const SrcLocation srcLocation
         {
             context.FileBuffer,
             context.CharacterIterator,
@@ -313,21 +313,21 @@ namespace Ace
 
         const std::string string{ context.CharacterIterator, it };
 
-        const auto identifierToken = std::make_shared<const Token>(
-            sourceLocation,
-            TokenKind::Identifier,
+        const auto identToken = std::make_shared<const Token>(
+            srcLocation,
+            TokenKind::Ident,
             string
         );
 
         const auto optKeywordTokens = CreateKeyword(
             context,
             string,
-            sourceLocation
+            srcLocation
         );
 
         const auto tokens = optKeywordTokens.has_value() ?
             optKeywordTokens.value() :
-            std::vector{ identifierToken };
+            std::vector{ identToken };
 
         return
         {
@@ -357,7 +357,7 @@ namespace Ace
         if (suffix == "f64") return TokenKind::Float64;
 
         return diagnosticBag.Add(CreateUnknownNumericLiteralTypeSuffixError(
-            suffix->SourceLocation
+            suffix->SrcLocation
         ));
     }
 
@@ -385,7 +385,7 @@ namespace Ace
             ++it;
         }
 
-        const SourceLocation sourceLocation
+        const SrcLocation srcLocation
         {
             context.FileBuffer,
             context.CharacterIterator,
@@ -396,7 +396,7 @@ namespace Ace
         {
             Token
             {
-                sourceLocation,
+                srcLocation,
                 TokenKind::Int,
                 string,
             },
@@ -418,7 +418,7 @@ namespace Ace
             ++it;
         }
 
-        const SourceLocation sourceLocation
+        const SrcLocation srcLocation
         {
             context.FileBuffer,
             context.CharacterIterator,
@@ -428,8 +428,8 @@ namespace Ace
         return
         {
             std::make_shared<const Token>(
-                sourceLocation,
-                TokenKind::Identifier,
+                srcLocation,
+                TokenKind::Ident,
                 std::string{ context.CharacterIterator, it }
             ),
             std::distance(context.CharacterIterator, it),
@@ -498,7 +498,7 @@ namespace Ace
 
             if (!isFloatKind)
             {
-                const SourceLocation sourceLocation
+                const SrcLocation srcLocation
                 {
                     context.FileBuffer,
                     context.CharacterIterator + decimalPointPos,
@@ -506,14 +506,14 @@ namespace Ace
                 };
 
                 diagnosticBag.Add(CreateDecimalPointInNonFloatNumericLiteralError(
-                    sourceLocation
+                    srcLocation
                 ));
 
                 numberToken.Value.String.erase(decimalPointPos);
             } 
         }
 
-        const SourceLocation sourceLocation
+        const SrcLocation srcLocation
         {
             context.FileBuffer,
             context.CharacterIterator,
@@ -521,7 +521,7 @@ namespace Ace
         };
 
         const auto token = std::make_shared<const Token>(
-            sourceLocation,
+            srcLocation,
             tokenKind,
             numberToken.Value.String
         );
@@ -819,7 +819,7 @@ namespace Ace
 
             default:
             {
-                const SourceLocation sourceLocation
+                const SrcLocation srcLocation
                 {
                     context.FileBuffer,
                     it,
@@ -827,7 +827,7 @@ namespace Ace
                 };
 
                 return diagnosticBag.Add(CreateUnexpectedCharacterError(
-                    sourceLocation
+                    srcLocation
                 ));
             }
         }
@@ -849,7 +849,7 @@ namespace Ace
         }
         it += expTokenKind.Unwrap().Length;
 
-        const SourceLocation sourceLocation
+        const SrcLocation srcLocation
         {
             context.FileBuffer,
             context.CharacterIterator,
@@ -857,7 +857,7 @@ namespace Ace
         };
 
         const auto token = std::make_shared<const Token>(
-            sourceLocation,
+            srcLocation,
             expTokenKind.Unwrap().Value
         );
 
@@ -887,7 +887,7 @@ namespace Ace
         {
             if (it == end(*context.LineIterator))
             {
-                const SourceLocation sourceLocation
+                const SrcLocation srcLocation
                 {
                     context.FileBuffer,
                     context.CharacterIterator,
@@ -895,7 +895,7 @@ namespace Ace
                 };
 
                 diagnosticBag.Add(CreateUnterminatedStringLiteralError(
-                    sourceLocation
+                    srcLocation
                 ));
 
                 break;
@@ -909,7 +909,7 @@ namespace Ace
             ++it;
         }
 
-        const SourceLocation sourceLocation
+        const SrcLocation srcLocation
         {
             context.FileBuffer,
             context.CharacterIterator,
@@ -917,7 +917,7 @@ namespace Ace
         };
 
         const auto token = std::make_shared<const Token>(
-            sourceLocation,
+            srcLocation,
             TokenKind::String,
             std::string{ context.CharacterIterator + 1, it }
         );
@@ -958,7 +958,7 @@ namespace Ace
 
         if (IsInAlphabet(character) || (character == '_'))
         {
-            return ScanIdentifier(context);
+            return ScanIdent(context);
         }
 
         if (IsNumber(character))
@@ -1041,7 +1041,7 @@ namespace Ace
                 );
 
                 EatCharactersUntil(
-                    tokens.back()->SourceLocation.CharacterEndIterator
+                    tokens.back()->SrcLocation.CharacterEndIterator
                 );
             }
             else
@@ -1051,7 +1051,7 @@ namespace Ace
         }
 
         tokens.push_back(std::make_shared<const Token>(
-            SourceLocation{},
+            SrcLocation{},
             TokenKind::EndOfFile
         ));
 
@@ -1147,7 +1147,7 @@ namespace Ace
         {
             if (IsEndOfFile())
             {
-                const SourceLocation sourceLocation
+                const SrcLocation srcLocation
                 {
                     m_FileBuffer,
                     itBegin,
@@ -1155,7 +1155,7 @@ namespace Ace
                 };
 
                 return diagnosticBag.Add(CreateUnterminatedMultiLineCommentError(
-                    sourceLocation
+                    srcLocation
                 ));
             }
 

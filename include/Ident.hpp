@@ -2,13 +2,13 @@
 
 #include <string>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 
 namespace Ace
 {
-    struct Identifier
+    struct Ident
     {
-        SourceLocation SourceLocation{};
+        SrcLocation SrcLocation{};
         std::string String{};
     };
 }

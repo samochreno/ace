@@ -4,7 +4,7 @@
 #include <string>
 #include <string_view>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "TokenKind.hpp"
 
 namespace Ace
@@ -13,30 +13,30 @@ namespace Ace
     {
         Token(
         ) : String{},
-            SourceLocation{},
+            SrcLocation{},
             Kind{}
         {
         }
         Token(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const TokenKind kind
-        ) : SourceLocation{ sourceLocation },
+        ) : SrcLocation{ srcLocation },
             Kind{ kind },
             String{}
             
         {
         }
         Token(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const TokenKind kind,
             const std::string& string
-        ) : SourceLocation{ sourceLocation },
+        ) : SrcLocation{ srcLocation },
             Kind{ kind },
             String{ string }
         {
         }
 
-        SourceLocation SourceLocation{};
+        SrcLocation SrcLocation{};
         TokenKind Kind{};
         std::string String{};
     };

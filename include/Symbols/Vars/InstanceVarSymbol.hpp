@@ -5,7 +5,7 @@
 #include "Symbols/Vars/VarSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
@@ -15,7 +15,7 @@ namespace Ace
     public:
         InstanceVarSymbol(
             const std::shared_ptr<Scope>& scope,
-            const Identifier& name,
+            const Ident& name,
             const AccessModifier accessModifier,
             ITypeSymbol* const type,
             const size_t index
@@ -23,7 +23,7 @@ namespace Ace
         virtual ~InstanceVarSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
@@ -34,7 +34,7 @@ namespace Ace
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        Identifier m_Name{};
+        Ident m_Name{};
         AccessModifier m_AccessModifier{};
         ITypeSymbol* m_Type{};
         size_t m_Index{};

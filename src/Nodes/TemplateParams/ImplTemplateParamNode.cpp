@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
@@ -13,18 +13,18 @@
 namespace Ace
 {
     ImplTemplateParamNode::ImplTemplateParamNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name
-    ) : m_SourceLocation{ sourceLocation },
+        const Ident& name
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Name{ name }
     {
     }
 
-    auto ImplTemplateParamNode::GetSourceLocation() const -> const SourceLocation&
+    auto ImplTemplateParamNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto ImplTemplateParamNode::GetScope() const -> std::shared_ptr<Scope>
@@ -42,7 +42,7 @@ namespace Ace
     ) const -> std::shared_ptr<const ImplTemplateParamNode>
     {
         return std::make_shared<const ImplTemplateParamNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_Name
         );
@@ -74,7 +74,7 @@ namespace Ace
         };
     }
 
-    auto ImplTemplateParamNode::GetName() const -> const Identifier&
+    auto ImplTemplateParamNode::GetName() const -> const Ident&
     {
         return m_Name;
     }

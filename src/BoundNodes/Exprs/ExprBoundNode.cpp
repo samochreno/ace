@@ -7,8 +7,8 @@
 #include <iterator>
 
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
-#include "BoundNodes/Exprs/ReferenceExprBoundNode.hpp"
-#include "BoundNodes/Exprs/DereferenceExprBoundNode.hpp"
+#include "BoundNodes/Exprs/RefExprBoundNode.hpp"
+#include "BoundNodes/Exprs/DerefExprBoundNode.hpp"
 #include "TypeInfo.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -104,25 +104,25 @@ namespace Ace
             return CreateUnchanged(expr);
         }
 
-        const bool isReference = expr->GetTypeInfo().Symbol->IsReference();
-        const bool isTargetReference = targetTypeInfo.Symbol->IsReference();
+        const bool isRef = expr->GetTypeInfo().Symbol->IsRef();
+        const bool isTargetRef = targetTypeInfo.Symbol->IsRef();
 
-        if (isReference)
+        if (isRef)
         {
-            if (!isTargetReference)
+            if (!isTargetRef)
             {
-                expr = std::make_shared<const DereferenceExprBoundNode>(
-                    expr->GetSourceLocation(),
+                expr = std::make_shared<const DerefExprBoundNode>(
+                    expr->GetSrcLocation(),
                     expr
                 );
             }
         }
         else
         {
-            if (isTargetReference)
+            if (isTargetRef)
             {
-                expr = std::make_shared<const ReferenceExprBoundNode>(
-                    expr->GetSourceLocation(),
+                expr = std::make_shared<const RefExprBoundNode>(
+                    expr->GetSrcLocation(),
                     expr
                 );
             }
@@ -137,14 +137,14 @@ namespace Ace
         }
 
         ACE_TRY(opSymbol, func(
-            expr->GetSourceLocation(),
+            expr->GetSrcLocation(),
             expr->GetScope(), 
             expr->GetTypeInfo().Symbol,
             targetTypeInfo.Symbol
         ));
 
         expr = std::make_shared<const StaticFunctionCallExprBoundNode>(
-            expr->GetSourceLocation(),
+            expr->GetSrcLocation(),
             expr->GetScope(),
             opSymbol,
             std::vector{ expr }

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostic.hpp"
 
@@ -12,7 +12,7 @@ namespace Ace
 {
     ImplTemplateParamTypeSymbol::ImplTemplateParamTypeSymbol(
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name
+        const Ident& name
     ) : m_Scope{ scope },
         m_Name{ name }
     {
@@ -28,7 +28,7 @@ namespace Ace
         ACE_UNREACHABLE();
     }
 
-    auto ImplTemplateParamTypeSymbol::GetName() const -> const Identifier&
+    auto ImplTemplateParamTypeSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }

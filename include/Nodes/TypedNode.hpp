@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Nodes/Node.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
@@ -12,6 +12,6 @@ namespace Ace
     public:
         virtual ~ITypedNode() = default;
 
-        virtual auto GetName() const -> const Identifier& = 0;
+        virtual auto GetName() const -> const Ident& = 0;
     };
 }

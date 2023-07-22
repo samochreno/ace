@@ -94,8 +94,8 @@ namespace Ace
             ITypeSymbol* const typeSymbol
         ) -> void;
         auto EmitDrop(const ExprDropData& dropData) -> void;
-        auto EmitDropTemporaries(
-            const std::vector<ExprDropData>& temporaries
+        auto EmitDropTmps(
+            const std::vector<ExprDropData>& tmps
         ) -> void;
         auto EmitDropLocalVarsBeforeStmt(
             const IStmtBoundNode* const stmt

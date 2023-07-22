@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "Diagnostic.hpp"
@@ -14,16 +14,16 @@
 namespace Ace
 {
     ExprExprBoundNode::ExprExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
     }
 
-    auto ExprExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto ExprExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto ExprExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -52,7 +52,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ExprExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchCheckedExpr.Value
         ));
     }
@@ -76,7 +76,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ExprExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchLoweredExpr.Value
         )->GetOrCreateLowered({}).Value);
     }

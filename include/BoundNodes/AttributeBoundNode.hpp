@@ -5,7 +5,7 @@
 
 #include "BoundNodes/BoundNode.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -20,12 +20,12 @@ namespace Ace
     {
     public:
         AttributeBoundNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<const StructConstructionExprBoundNode>& structConstructionExpr
         );
         virtual ~AttributeBoundNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -36,7 +36,7 @@ namespace Ace
         ) const -> MaybeChanged<std::shared_ptr<const AttributeBoundNode>> final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<const StructConstructionExprBoundNode> m_StructConstructionExpr{};
     };
 }

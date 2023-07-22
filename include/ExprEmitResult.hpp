@@ -16,13 +16,13 @@ namespace Ace
     {
         ExprEmitResult(
             llvm::Value* const value,
-            const std::vector<ExprDropData>& temporaries
+            const std::vector<ExprDropData>& tmps
         ) : Value{ value },
-            Temporaries{ temporaries }
+            Tmps{ tmps }
         {
         }
 
         llvm::Value* Value{};
-        std::vector<ExprDropData> Temporaries{};
+        std::vector<ExprDropData> Tmps{};
     };
 }

@@ -21,13 +21,13 @@
 #include "Scope.hpp"
 #include "Assert.hpp"
 #include "AccessModifier.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Name.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
-    enum class ReferenceParsingKind
+    enum class RefParsingKind
     {
         Allow,
         Disallow,
@@ -273,7 +273,7 @@ namespace Ace
     };
 
     static auto CreateCollapsedPrefixExpr(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprNode>& expr,
         const Op& op
     ) -> std::shared_ptr<const IExprNode>
@@ -283,7 +283,7 @@ namespace Ace
             case TokenKind::Exclamation:
             {
                 return std::make_shared<const LogicalNegationExprNode>(
-                    sourceLocation,
+                    srcLocation,
                     expr
                 );
             }
@@ -291,7 +291,7 @@ namespace Ace
             case TokenKind::BoxKeyword:
             {
                 return std::make_shared<const BoxExprNode>(
-                    sourceLocation,
+                    srcLocation,
                     expr
                 );
             }
@@ -299,7 +299,7 @@ namespace Ace
             case TokenKind::UnboxKeyword:
             {
                 return std::make_shared<const UnboxExprNode>(
-                    sourceLocation,
+                    srcLocation,
                     expr
                 );
             }
@@ -307,7 +307,7 @@ namespace Ace
             default:
             {
                 return std::make_shared<const UserUnaryExprNode>(
-                    sourceLocation,
+                    srcLocation,
                     expr, 
                     op
                 );
@@ -316,7 +316,7 @@ namespace Ace
     }
 
     static auto CreateCollapsedBinaryExpr(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprNode>& lhsExpr,
         const std::shared_ptr<const IExprNode>& rhsExpr,
         const Op& op
@@ -327,7 +327,7 @@ namespace Ace
             case TokenKind::AmpersandAmpersand:
             {
                 return std::make_shared<const AndExprNode>(
-                    sourceLocation,
+                    srcLocation,
                     lhsExpr,
                     rhsExpr
                 );
@@ -336,7 +336,7 @@ namespace Ace
             case TokenKind::VerticalBarVerticalBar:
             {
                 return std::make_shared<const OrExprNode>(
-                    sourceLocation,
+                    srcLocation,
                     lhsExpr,
                     rhsExpr
                 );
@@ -345,7 +345,7 @@ namespace Ace
             default:
             {
                 return std::make_shared<const UserBinaryExprNode>(
-                    sourceLocation,
+                    srcLocation,
                     lhsExpr,
                     rhsExpr,
                     op
@@ -354,27 +354,27 @@ namespace Ace
         }
     }
 
-    static auto CreateSourceLocationRange(
+    static auto CreateSrcLocationRange(
         const std::shared_ptr<const Token>& firstToken,
         const std::shared_ptr<const Token>& lastToken
-    ) -> SourceLocation
+    ) -> SrcLocation
     {
         return
         {
-            firstToken->SourceLocation,
-             lastToken->SourceLocation,
+            firstToken->SrcLocation,
+             lastToken->SrcLocation,
         };
     }
 
-    static auto CreateSourceLocationRange(
+    static auto CreateSrcLocationRange(
         const std::shared_ptr<const INode>& firstToken,
         const std::shared_ptr<const INode>& lastToken
-    ) -> SourceLocation
+    ) -> SrcLocation
     {
         return
         {
-            firstToken->GetSourceLocation(),
-             lastToken->GetSourceLocation(),
+            firstToken->GetSrcLocation(),
+             lastToken->GetSrcLocation(),
         };
     }
 
@@ -403,7 +403,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::Multiplication,
+                    SpecialIdent::Op::Multiplication,
                     diagnosticBag,
                 };
             }
@@ -419,7 +419,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::Division,
+                    SpecialIdent::Op::Division,
                     diagnosticBag,
                 };
             }
@@ -435,7 +435,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::Remainder,
+                    SpecialIdent::Op::Remainder,
                     diagnosticBag,
                 };
             }
@@ -446,7 +446,7 @@ namespace Ace
                 {
                     return
                     {
-                        SpecialIdentifier::Op::UnaryPlus,
+                        SpecialIdent::Op::UnaryPlus,
                         diagnosticBag,
                     };
                 }
@@ -455,7 +455,7 @@ namespace Ace
                 {
                     return
                     {
-                        SpecialIdentifier::Op::Addition,
+                        SpecialIdent::Op::Addition,
                         diagnosticBag,
                     };
                 }
@@ -471,7 +471,7 @@ namespace Ace
                 {
                     return
                     {
-                        SpecialIdentifier::Op::UnaryNegation,
+                        SpecialIdent::Op::UnaryNegation,
                         diagnosticBag,
                     };
                 }
@@ -480,7 +480,7 @@ namespace Ace
                 {
                     return
                     {
-                        SpecialIdentifier::Op::Subtraction,
+                        SpecialIdent::Op::Subtraction,
                         diagnosticBag,
                     };
                 }
@@ -501,7 +501,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::LessThan,
+                    SpecialIdent::Op::LessThan,
                     diagnosticBag,
                 };
             }
@@ -517,7 +517,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::GreaterThan,
+                    SpecialIdent::Op::GreaterThan,
                     diagnosticBag,
                 };
             }
@@ -533,7 +533,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::LessThanEquals,
+                    SpecialIdent::Op::LessThanEquals,
                     diagnosticBag,
                 };
             }
@@ -549,7 +549,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::GreaterThanEquals,
+                    SpecialIdent::Op::GreaterThanEquals,
                     diagnosticBag,
                 };
             }
@@ -565,7 +565,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::RightShift,
+                    SpecialIdent::Op::RightShift,
                     diagnosticBag,
                 };
             }
@@ -581,7 +581,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::LeftShift,
+                    SpecialIdent::Op::LeftShift,
                     diagnosticBag,
                 };
             }
@@ -597,7 +597,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::Equals,
+                    SpecialIdent::Op::Equals,
                     diagnosticBag,
                 };
             }
@@ -613,7 +613,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::NotEquals,
+                    SpecialIdent::Op::NotEquals,
                     diagnosticBag,
                 };
             }
@@ -629,7 +629,7 @@ namespace Ace
     
                 return
                 {
-                    SpecialIdentifier::Op::XOR,
+                    SpecialIdent::Op::XOR,
                     diagnosticBag,
                 };
             }
@@ -645,7 +645,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::OR,
+                    SpecialIdent::Op::OR,
                     diagnosticBag,
                 };
             }
@@ -661,7 +661,7 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::AND,
+                    SpecialIdent::Op::AND,
                     diagnosticBag,
                 };
             }
@@ -677,14 +677,14 @@ namespace Ace
 
                 return
                 {
-                    SpecialIdentifier::Op::OneComplement,
+                    SpecialIdent::Op::OneComplement,
                     diagnosticBag,
                 };
             }
             
-            case TokenKind::Identifier:
+            case TokenKind::Ident:
             {
-                if (opToken->String == SpecialIdentifier::Copy)
+                if (opToken->String == SpecialIdent::Copy)
                 {
                     if (paramCount != 2)
                     {
@@ -695,12 +695,12 @@ namespace Ace
 
                     return
                     {
-                        SpecialIdentifier::Op::Copy,
+                        SpecialIdent::Op::Copy,
                         diagnosticBag,
                     };
                 }
                 
-                if (opToken->String == SpecialIdentifier::Drop)
+                if (opToken->String == SpecialIdent::Drop)
                 {
                     if (paramCount != 1)
                     {
@@ -711,13 +711,13 @@ namespace Ace
 
                     return
                     {
-                        SpecialIdentifier::Op::Drop,
+                        SpecialIdent::Op::Drop,
                         diagnosticBag,
                     };
                 }
 
                 return diagnosticBag.Add(
-                    CreateUnknownIdentifierOpError(opToken)
+                    CreateUnknownIdentOpError(opToken)
                 );
             }
 
@@ -733,18 +733,18 @@ namespace Ace
         const size_t paramCount,
         const AccessModifier accessModifier,
         const bool hasSelfParam
-    ) -> Expected<Identifier>
+    ) -> Expected<Ident>
     {
         DiagnosticBag diagnosticBag{};
 
         if (nameToken.Kind == FunctionOrOpNameKind::Function)
         {
-            ACE_ASSERT(nameToken.Value->Kind == TokenKind::Identifier);
+            ACE_ASSERT(nameToken.Value->Kind == TokenKind::Ident);
             return 
             {
-                Identifier
+                Ident
                 {
-                    nameToken.Value->SourceLocation,
+                    nameToken.Value->SrcLocation,
                     nameToken.Value->String,
                 },
                 diagnosticBag,
@@ -772,9 +772,9 @@ namespace Ace
             );
         }
 
-        return Identifier
+        return Ident
         {
-            nameToken.Value->SourceLocation,
+            nameToken.Value->SrcLocation,
             expName.Unwrap(),
         };
     }
@@ -791,7 +791,7 @@ namespace Ace
         }
 
         return std::make_shared<const SelfParamVarNode>(
-            optSelfToken.value()->SourceLocation,
+            optSelfToken.value()->SrcLocation,
             scope,
             selfTypeName
         );
@@ -902,9 +902,9 @@ namespace Ace
                 return { Modifier::Extern, diagnosticBag };
             }
 
-            case TokenKind::Identifier:
+            case TokenKind::Ident:
             {
-                if (token->String == SpecialIdentifier::Self)
+                if (token->String == SpecialIdent::Self)
                 {
                     return { Modifier::Self, diagnosticBag };
                 }
@@ -945,13 +945,13 @@ namespace Ace
             const auto& firstLine = *firstLineIt;
             const auto&  lastLine = * lastLineIt;
 
-            const SourceLocation leadingSourceLocation
+            const SrcLocation leadingSrcLocation
             {
                 fileBuffer,
                 begin(firstLine),
                 begin(firstLine) + 1,
             };
-            const SourceLocation trailingSourceLocation
+            const SrcLocation trailingSrcLocation
             {
                 fileBuffer,
                 end(lastLine) - 1,
@@ -959,20 +959,20 @@ namespace Ace
             };
 
             m_Tokens.push_back(std::make_shared<const Token>(
-                leadingSourceLocation,
-                TokenKind::Identifier,
+                leadingSrcLocation,
+                TokenKind::Ident,
                 fileBuffer->GetCompilation()->Package.Name
             ));
             m_Tokens.push_back(std::make_shared<const Token>(
-                leadingSourceLocation,
+                leadingSrcLocation,
                 TokenKind::Colon
             ));
             m_Tokens.push_back(std::make_shared<const Token>(
-                leadingSourceLocation,
+                leadingSrcLocation,
                 TokenKind::ModuleKeyword
             ));
             m_Tokens.push_back(std::make_shared<const Token>(
-                leadingSourceLocation,
+                leadingSrcLocation,
                 TokenKind::OpenBrace
             ));
 
@@ -989,7 +989,7 @@ namespace Ace
             m_Tokens.insert(
                 end(m_Tokens) - 1,
                 std::make_shared<const Token>(
-                    trailingSourceLocation,
+                    trailingSrcLocation,
                     TokenKind::CloseBrace
                 )
             );
@@ -1125,7 +1125,7 @@ namespace Ace
         const Parser& parser
     ) -> bool
     {
-        return parser.Peek() == SpecialIdentifier::New;
+        return parser.Peek() == SpecialIdent::New;
     }
 
     static auto IsLiteralExprStart(
@@ -1153,7 +1153,7 @@ namespace Ace
         const Parser& parser
     ) -> bool
     {
-        return parser.Peek() == TokenKind::Identifier;
+        return parser.Peek() == TokenKind::Ident;
     }
 
     static auto IsKeywordStmtStart(
@@ -1179,7 +1179,7 @@ namespace Ace
         const Parser& parser
     ) -> bool
     {
-        if (parser.Peek(0) != TokenKind::Identifier)
+        if (parser.Peek(0) != TokenKind::Ident)
         {
             return false;
         }
@@ -1189,7 +1189,7 @@ namespace Ace
         {
             i++;
 
-            if (parser.Peek(i) != TokenKind::Identifier)
+            if (parser.Peek(i) != TokenKind::Ident)
             {
                 return false;
             }
@@ -1206,7 +1206,7 @@ namespace Ace
         const Parser& parser
     ) -> std::optional<size_t>
     {
-        if (parser.Peek(0) != TokenKind::Identifier)
+        if (parser.Peek(0) != TokenKind::Ident)
         {
             return std::nullopt;
         }
@@ -1232,7 +1232,7 @@ namespace Ace
                 i++;
             }
 
-            if (parser.Peek(i) != TokenKind::Identifier)
+            if (parser.Peek(i) != TokenKind::Ident)
             {
                 return std::nullopt;
             }
@@ -1249,7 +1249,7 @@ namespace Ace
     ) -> bool
     {
         return
-            (parser.Peek(0) == TokenKind::Identifier) &&
+            (parser.Peek(0) == TokenKind::Ident) &&
             (parser.Peek(1) == TokenKind::Colon) &&
             (parser.Peek(2) == TokenKind::StructKeyword);
     }
@@ -1299,7 +1299,7 @@ namespace Ace
         return
             (parser.Peek(0) == TokenKind::OpKeyword) ||
             (
-                (parser.Peek(0) == TokenKind::Identifier) &&
+                (parser.Peek(0) == TokenKind::Ident) &&
                 (parser.Peek(1) == TokenKind::OpenParen)
             );
     }
@@ -1343,7 +1343,7 @@ namespace Ace
     ) -> bool
     {
         return
-            (parser.Peek(0) == TokenKind::Identifier) &&
+            (parser.Peek(0) == TokenKind::Ident) &&
             (parser.Peek(1) == TokenKind::Colon) &&
             (parser.Peek(2) != TokenKind::StructKeyword) &&
             (parser.Peek(2) != TokenKind::ModuleKeyword);
@@ -1372,15 +1372,15 @@ namespace Ace
     static auto ParseName(
         Parser& parser,
         const std::shared_ptr<Scope>& scope
-    ) -> Expected<Identifier>
+    ) -> Expected<Ident>
     {
         DiagnosticBag diagnosticBag{};
 
-        if (parser.Peek() != TokenKind::Identifier)
+        if (parser.Peek() != TokenKind::Ident)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
                 parser.Peek(),
-                TokenKind::Identifier
+                TokenKind::Ident
             ));
         }
 
@@ -1388,9 +1388,9 @@ namespace Ace
 
         return Expected
         {
-            Identifier
+            Ident
             {
-                nameToken->SourceLocation,
+                nameToken->SrcLocation,
                 nameToken->String,
             },
             diagnosticBag,
@@ -1400,11 +1400,11 @@ namespace Ace
     static auto ParseNestedName(
         Parser& parser,
         const std::shared_ptr<Scope>& scope
-    ) -> Expected<std::vector<Identifier>>
+    ) -> Expected<std::vector<Ident>>
     {
         DiagnosticBag diagnosticBag{};
 
-        std::vector<Identifier> nestedName{};
+        std::vector<Ident> nestedName{};
 
         const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
@@ -1520,18 +1520,18 @@ namespace Ace
     static auto ParseTypeName(
         Parser& parser,
         const std::shared_ptr<Scope>& scope,
-        const ReferenceParsingKind referenceParsingKind
+        const RefParsingKind refParsingKind
     ) -> Expected<TypeName>
     {
         DiagnosticBag diagnosticBag{};
 
         std::vector<TypeNameModifier> modifiers{};
 
-        if (referenceParsingKind == ReferenceParsingKind::Allow)
+        if (refParsingKind == RefParsingKind::Allow)
         {
             if (parser.Peek() == TokenKind::Ampersand)
             {
-                modifiers.push_back(TypeNameModifier::Reference);
+                modifiers.push_back(TypeNameModifier::Ref);
                 parser.Eat();
             }
         }
@@ -1540,14 +1540,14 @@ namespace Ace
         {
             if (parser.Peek() == TokenKind::Asterisk)
             {
-                modifiers.push_back(TypeNameModifier::StrongPointer);
+                modifiers.push_back(TypeNameModifier::StrongPtr);
                 parser.Eat();
                 continue;
             }
 
             if (parser.Peek() == TokenKind::Tilde)
             {
-                modifiers.push_back(TypeNameModifier::WeakPointer);
+                modifiers.push_back(TypeNameModifier::WeakPtr);
                 parser.Eat();
                 continue;
             }
@@ -1576,7 +1576,7 @@ namespace Ace
     static auto ParseTemplateParamNames(
         Parser& parser,
         const std::shared_ptr<Scope>& scope
-    ) -> Expected<std::vector<Identifier>>
+    ) -> Expected<std::vector<Ident>>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -1592,7 +1592,7 @@ namespace Ace
 
         parser.Eat();
 
-        std::vector<Identifier> names{};
+        std::vector<Ident> names{};
         while (
             (parser.Peek() != TokenKind::EndOfFile) &&
             (parser.Peek() != TokenKind::CloseBracket)
@@ -1642,7 +1642,7 @@ namespace Ace
         if (names.empty())
         {
             return diagnosticBag.Add(CreateEmptyTemplateParamsError(
-                CreateSourceLocationRange(firstToken, parser.PeekBack())
+                CreateSrcLocationRange(firstToken, parser.PeekBack())
             ));
         }
 
@@ -1668,10 +1668,10 @@ namespace Ace
             begin(expNames.Unwrap()),
             end  (expNames.Unwrap()),
             back_inserter(params),
-            [&](const Identifier& name)
+            [&](const Ident& name)
             {
                 return std::make_shared<const ImplTemplateParamNode>(
-                    name.SourceLocation,
+                    name.SrcLocation,
                     scope,
                     name
                 );
@@ -1700,10 +1700,10 @@ namespace Ace
             begin(expNames.Unwrap()),
             end  (expNames.Unwrap()),
             back_inserter(params),
-            [&](const Identifier& name)
+            [&](const Ident& name)
             {
                 return std::make_shared<const NormalTemplateParamNode>(
-                    name.SourceLocation,
+                    name.SrcLocation,
                     scope,
                     name
                 );
@@ -1799,7 +1799,7 @@ namespace Ace
         if (args.empty())
         {
             return diagnosticBag.Add(CreateEmptyTemplateArgsError(
-                CreateSourceLocationRange(firstToken, parser.PeekBack())
+                CreateSrcLocationRange(firstToken, parser.PeekBack())
             ));
         }
 
@@ -1870,7 +1870,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const AttributeNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 expStructConstructionExpr.Unwrap()
             ),
             diagnosticBag,
@@ -1941,7 +1941,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Allow
+            RefParsingKind::Allow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -1952,7 +1952,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const NormalParamVarNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -2120,7 +2120,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const LiteralExprNode>(
-                literalToken->SourceLocation,
+                literalToken->SrcLocation,
                 scope,
                 expLiteralKind.Unwrap(),
                 literalToken->String
@@ -2148,7 +2148,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const SymbolLiteralExprNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expName.Unwrap()
             ),
@@ -2253,7 +2253,7 @@ namespace Ace
 
         const auto& firstToken = parser.Peek();
 
-        if (parser.Peek() != SpecialIdentifier::New)
+        if (parser.Peek() != SpecialIdent::New)
         {
             return diagnosticBag.Add(CreateUnexpectedTokenExpectedNewError(
                 parser.Peek()
@@ -2282,7 +2282,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const StructConstructionExprNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expTypeName.Unwrap(),
                 std::move(expArgs.Unwrap())
@@ -2323,7 +2323,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Allow
+            RefParsingKind::Allow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -2371,7 +2371,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const CastExprNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 expTypeName.Unwrap(),
                 expExpr.Unwrap()
             ),
@@ -2428,7 +2428,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const AddressOfExprNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 expExpr.Unwrap()
             ),
             diagnosticBag,
@@ -2467,7 +2467,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Allow
+            RefParsingKind::Allow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -2488,7 +2488,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const SizeOfExprNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expTypeName.Unwrap()
             ),
@@ -2528,7 +2528,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Allow
+            RefParsingKind::Allow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -2576,7 +2576,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const DerefAsExprNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 expTypeName.Unwrap(),
                 expExpr.Unwrap()
             ),
@@ -2623,7 +2623,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ExprExprNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 expExpr.Unwrap()
             ),
             diagnosticBag,
@@ -2736,7 +2736,7 @@ namespace Ace
                 }
 
                 expr = std::make_shared<const MemberAccessExprNode>(
-                    CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                    CreateSrcLocationRange(firstToken, parser.PeekBack()),
                     expr,
                     expName.Unwrap()
                 );
@@ -2752,7 +2752,7 @@ namespace Ace
                 }
 
                 expr = std::make_shared<const FunctionCallExprNode>(
-                    CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                    CreateSrcLocationRange(firstToken, parser.PeekBack()),
                     expr,
                     expArgs.Unwrap()
                 );
@@ -2778,7 +2778,7 @@ namespace Ace
         {
             const auto& opToken = parser.Eat();
             ops.push_back(Op{
-                opToken->SourceLocation,
+                opToken->SrcLocation,
                 opToken->Kind
             });
         }
@@ -2795,13 +2795,13 @@ namespace Ace
         {
             const auto& op = ops.back();
 
-            const SourceLocation sourceLocation
+            const SrcLocation srcLocation
             {
-                op.SourceLocation,
-                parser.PeekBack()->SourceLocation,
+                op.SrcLocation,
+                parser.PeekBack()->SrcLocation,
             };
             expr = CreateCollapsedPrefixExpr(
-                sourceLocation,
+                srcLocation,
                 expr,
                 op
             );
@@ -2839,7 +2839,7 @@ namespace Ace
         {
             const auto& opToken = parser.Eat();
             ops.push_back(Op{
-                opToken->SourceLocation,
+                opToken->SrcLocation,
                 opToken->Kind
             });
 
@@ -2891,7 +2891,7 @@ namespace Ace
                         ops.erase(begin(ops) + i);
                         exprs.erase(begin(exprs) + i + 1);
                         exprs.at(i) = CreateCollapsedBinaryExpr(
-                            CreateSourceLocationRange(lhsExpr, rhsExpr),
+                            CreateSrcLocationRange(lhsExpr, rhsExpr),
                             lhsExpr,
                             rhsExpr,
                             op
@@ -2969,7 +2969,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const BlockStmtNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 selfScope,
                 stmts
             ),
@@ -3006,7 +3006,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ExprStmtNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 expExpr.Unwrap()
             ),
             diagnosticBag,
@@ -3059,7 +3059,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const NormalAssignmentStmtNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expLhsExpr.Unwrap(),
                 expRhsExpr.Unwrap()
@@ -3095,7 +3095,7 @@ namespace Ace
 
         const Op op
         {
-            parser.PeekBack()->SourceLocation,
+            parser.PeekBack()->SrcLocation,
             parser.PeekBack()->Kind
         };
 
@@ -3119,7 +3119,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const CompoundAssignmentStmtNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expLhsExpr.Unwrap(),
                 expRhsExpr.Unwrap(),
@@ -3158,7 +3158,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Allow
+            RefParsingKind::Allow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -3194,7 +3194,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const VarStmtNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -3365,7 +3365,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const IfStmtNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 conditions,
                 bodies
@@ -3410,7 +3410,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const WhileStmtNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expCondition.Unwrap(),
                 expBody.Unwrap()
@@ -3464,7 +3464,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ReturnStmtNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 optExpr
             ),
@@ -3504,7 +3504,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ExitStmtNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope
             ),
             diagnosticBag,
@@ -3550,7 +3550,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const AssertStmtNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expCondition.Unwrap()
             ),
@@ -3655,7 +3655,7 @@ namespace Ace
             return Expected
             {
                 std::make_shared<const ExprStmtNode>(
-                    CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                    CreateSrcLocationRange(firstToken, parser.PeekBack()),
                     expExpr.Unwrap()
                 ),
                 diagnosticBag,
@@ -3666,7 +3666,7 @@ namespace Ace
     
         const Op op
         {
-            parser.PeekBack()->SourceLocation,
+            parser.PeekBack()->SrcLocation,
             parser.PeekBack()->Kind,
         };
 
@@ -3694,7 +3694,7 @@ namespace Ace
             return Expected
             {
                 std::make_shared<const NormalAssignmentStmtNode>(
-                    CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                    CreateSrcLocationRange(firstToken, parser.PeekBack()),
                     scope,
                     expExpr.Unwrap(),
                     expRhsExpr.Unwrap()
@@ -3708,7 +3708,7 @@ namespace Ace
             return Expected
             {
                 std::make_shared<const CompoundAssignmentStmtNode>(
-                    CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                    CreateSrcLocationRange(firstToken, parser.PeekBack()),
                     scope,
                     expExpr.Unwrap(),
                     expRhsExpr.Unwrap(),
@@ -3728,7 +3728,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        if (parser.Peek() == TokenKind::Identifier)
+        if (parser.Peek() == TokenKind::Ident)
         {
             return Expected
             {
@@ -3745,14 +3745,14 @@ namespace Ace
         {
             return diagnosticBag.Add(CreateUnexpectedTokenError(
                 parser.Peek(),
-                TokenKind::Identifier
+                TokenKind::Ident
             ));
         }
 
         parser.Eat();
 
         if (
-            (parser.Peek() != TokenKind::Identifier) &&
+            (parser.Peek() != TokenKind::Ident) &&
             !IsUserOp(parser.Peek()->Kind)
             )
         {
@@ -3882,7 +3882,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Disallow
+            RefParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -3979,7 +3979,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const FunctionNode>(
-                CreateSourceLocationRange(firstToken, parser.Peek()),
+                CreateSrcLocationRange(firstToken, parser.Peek()),
                 selfScope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -4048,7 +4048,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Disallow
+            RefParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -4100,7 +4100,7 @@ namespace Ace
         );
 
         const auto function = std::make_shared<const FunctionNode>(
-            CreateSourceLocationRange(firstToken, parser.PeekBack()),
+            CreateSrcLocationRange(firstToken, parser.PeekBack()),
             selfScope,
             expName.Unwrap(),
             expTypeName.Unwrap(),
@@ -4114,7 +4114,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const FunctionTemplateNode>(
-                function->GetSourceLocation(),
+                function->GetSrcLocation(),
                 std::vector<std::shared_ptr<const ImplTemplateParamNode>>{},
                 expTemplateParams.Unwrap(),
                 function
@@ -4165,11 +4165,11 @@ namespace Ace
             if (sectionWithTemplateArgsIt != end(sections))
             {
                 const auto firstSectionSoruceLocation =
-                    expTypeName.Unwrap().Sections.front().Name.SourceLocation;
+                    expTypeName.Unwrap().Sections.front().Name.SrcLocation;
                 const auto lastSectionSoruceLocation =
-                    expTypeName.Unwrap().Sections.back().Name.SourceLocation;
+                    expTypeName.Unwrap().Sections.back().Name.SrcLocation;
 
-                const SourceLocation sourceLocation
+                const SrcLocation srcLocation
                 {
                     firstSectionSoruceLocation.Buffer,
                     firstSectionSoruceLocation.CharacterBeginIterator,
@@ -4177,7 +4177,7 @@ namespace Ace
                 };
 
                 return diagnosticBag.Add(CreateTemplateSpecializationError(
-                    sourceLocation
+                    srcLocation
                 ));
             }
         }
@@ -4255,7 +4255,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ImplNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 selfScope,
                 expTypeName.Unwrap(),
                 functions,
@@ -4324,7 +4324,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Disallow
+            RefParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -4388,7 +4388,7 @@ namespace Ace
         );
 
         const auto function = std::make_shared<const FunctionNode>(
-            CreateSourceLocationRange(firstToken, parser.PeekBack()),
+            CreateSrcLocationRange(firstToken, parser.PeekBack()),
             selfScope,
             expName.Unwrap(),
             expTypeName.Unwrap(),
@@ -4413,7 +4413,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const FunctionTemplateNode>(
-                function->GetSourceLocation(),
+                function->GetSrcLocation(),
                 clonedImplTemplateParams,
                 expTemplateParams.Unwrap(),
                 function
@@ -4514,11 +4514,11 @@ namespace Ace
             if (!expIsNotSpecialized)
             {
                 const auto firstSectionSoruceLocation =
-                    expTypeName.Unwrap().Sections.front().Name.SourceLocation;
+                    expTypeName.Unwrap().Sections.front().Name.SrcLocation;
                 const auto lastSectionSoruceLocation =
-                    expTypeName.Unwrap().Sections.back().Name.SourceLocation;
+                    expTypeName.Unwrap().Sections.back().Name.SrcLocation;
 
-                const SourceLocation sourceLocation
+                const SrcLocation srcLocation
                 {
                     firstSectionSoruceLocation.Buffer,
                     firstSectionSoruceLocation.CharacterBeginIterator,
@@ -4526,7 +4526,7 @@ namespace Ace
                 };
 
                 return diagnosticBag.Add(CreateTemplateSpecializationError(
-                    sourceLocation
+                    srcLocation
                 ));
             }
         }
@@ -4590,14 +4590,14 @@ namespace Ace
         auto typeTemplateName = expTypeName.Unwrap();
         auto& typeTemplateNameLastSection = typeTemplateName.Sections.back();
         typeTemplateNameLastSection.TemplateArgs.clear();
-        typeTemplateNameLastSection.Name.String = SpecialIdentifier::CreateTemplate(
+        typeTemplateNameLastSection.Name.String = SpecialIdent::CreateTemplate(
             typeTemplateNameLastSection.Name.String
         );
 
         return Expected
         {
             std::make_shared<const TemplatedImplNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 selfScope,
                 typeTemplateName,
                 std::vector<std::shared_ptr<const FunctionNode>>{},
@@ -4651,7 +4651,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             selfScope,
-            ReferenceParsingKind::Disallow
+            RefParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -4717,7 +4717,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const FunctionNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 selfScope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -4788,7 +4788,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Disallow
+            RefParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -4828,7 +4828,7 @@ namespace Ace
         }
 
         const auto function = std::make_shared<const FunctionNode>(
-            CreateSourceLocationRange(firstToken, parser.PeekBack()),
+            CreateSrcLocationRange(firstToken, parser.PeekBack()),
             selfScope,
             expName.Unwrap(),
             expTypeName.Unwrap(),
@@ -4842,7 +4842,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const FunctionTemplateNode>(
-                function->GetSourceLocation(),
+                function->GetSrcLocation(),
                 std::vector<std::shared_ptr<const ImplTemplateParamNode>>{},
                 expTemplateParams.Unwrap(),
                 function
@@ -4887,7 +4887,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Disallow
+            RefParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -4927,7 +4927,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const StaticVarNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -4975,7 +4975,7 @@ namespace Ace
         const auto expTypeName = ParseTypeName(
             parser,
             scope,
-            ReferenceParsingKind::Disallow
+            RefParsingKind::Disallow
         );
         diagnosticBag.Add(expTypeName);
         if (!expTypeName)
@@ -5005,7 +5005,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const InstanceVarNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -5166,7 +5166,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const StructTypeNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 selfScope,
                 expName.Unwrap(),
                 expAttributes.Unwrap(),
@@ -5258,7 +5258,7 @@ namespace Ace
         }
 
         const auto type = std::make_shared<const StructTypeNode>(
-            CreateSourceLocationRange(firstToken, parser.PeekBack()),
+            CreateSrcLocationRange(firstToken, parser.PeekBack()),
             selfScope,
             expName.Unwrap(),
             expAttributes.Unwrap(),
@@ -5269,7 +5269,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const TypeTemplateNode>(
-                type->GetSourceLocation(),
+                type->GetSrcLocation(),
                 expTemplateParams.Unwrap(),
                 type
             ),
@@ -5389,7 +5389,7 @@ namespace Ace
             begin(expName.Unwrap()),
             end  (expName.Unwrap()),
             back_inserter(scopes),
-            [&](const Identifier& name)
+            [&](const Ident& name)
             {
                 return scopes.back()->GetOrCreateChild(name.String);
             }
@@ -5540,7 +5540,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ModuleNode>(
-                CreateSourceLocationRange(firstToken, parser.PeekBack()),
+                CreateSrcLocationRange(firstToken, parser.PeekBack()),
                 scopes.front(),
                 scopes.back(),
                 expName.Unwrap(),

@@ -8,7 +8,7 @@
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
 #include "BoundNodes/Stmts/IfStmtBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 
@@ -21,14 +21,14 @@ namespace Ace
     {
     public:
         IfStmtNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             const std::vector<std::shared_ptr<const IExprNode>>& conditions,
             const std::vector<std::shared_ptr<const BlockStmtNode>>& bodies
         );
         virtual ~IfStmtNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -41,7 +41,7 @@ namespace Ace
         auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
         std::vector<std::shared_ptr<const IExprNode>> m_Conditions{};
         std::vector<std::shared_ptr<const BlockStmtNode>> m_Bodies{};

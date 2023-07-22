@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
@@ -14,18 +14,18 @@
 namespace Ace
 {
     LabelStmtNode::LabelStmtNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name
-    ) : m_SourceLocation{ sourceLocation },
+        const Ident& name
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Name{ name }
     {
     }
 
-    auto LabelStmtNode::GetSourceLocation() const -> const SourceLocation&
+    auto LabelStmtNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto LabelStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -43,7 +43,7 @@ namespace Ace
     ) const -> std::shared_ptr<const LabelStmtNode>
     {
         return std::make_shared<const LabelStmtNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_Name
         );
@@ -63,7 +63,7 @@ namespace Ace
         ).Unwrap();
 
         return std::make_shared<const LabelStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             selfSymbol
         );
     }
@@ -99,7 +99,7 @@ namespace Ace
         };
     }
 
-    auto LabelStmtNode::GetName() const -> const Identifier&
+    auto LabelStmtNode::GetName() const -> const Ident&
     {
         return m_Name;
     }

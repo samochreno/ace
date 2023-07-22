@@ -3,30 +3,30 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Op.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "BoundNodes/Exprs/UserUnaryExprBoundNode.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 
 namespace Ace
 {
     UserUnaryExprNode::UserUnaryExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprNode>& expr,
         const Op op
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr },
         m_Op{ op }
     {
     }
 
-    auto UserUnaryExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto UserUnaryExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto UserUnaryExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -48,7 +48,7 @@ namespace Ace
     ) const -> std::shared_ptr<const UserUnaryExprNode>
     {
         return std::make_unique<UserUnaryExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_Expr->CloneInScopeExpr(scope),
             m_Op
         );
@@ -66,7 +66,7 @@ namespace Ace
         ACE_TRY(boundExpresssion, m_Expr->CreateBoundExpr());
 
         const auto& opNameMap =
-            SpecialIdentifier::Op::UnaryNameMap;
+            SpecialIdent::Op::UnaryNameMap;
 
         const auto opNameIt = opNameMap.find(m_Op.TokenKind);
         ACE_TRY_ASSERT(opNameIt != end(opNameMap));
@@ -74,10 +74,10 @@ namespace Ace
         auto* const typeSymbol = boundExpresssion->GetTypeInfo().Symbol;
 
         auto opFullName = typeSymbol->CreateFullyQualifiedName(
-            m_Op.SourceLocation
+            m_Op.SrcLocation
         );
-        opFullName.Sections.emplace_back(Identifier{
-            m_Op.SourceLocation,
+        opFullName.Sections.emplace_back(Ident{
+            m_Op.SrcLocation,
             opNameIt->second,
         });
 
@@ -87,7 +87,7 @@ namespace Ace
         ));
 
         return std::make_shared<const UserUnaryExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             boundExpresssion,
             opSymbol
         );

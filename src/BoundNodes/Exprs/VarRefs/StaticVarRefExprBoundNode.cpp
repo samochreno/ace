@@ -1,11 +1,11 @@
-#include "BoundNodes/Exprs/VarReferences/StaticVarReferenceExprBoundNode.hpp"
+#include "BoundNodes/Exprs/VarRefs/StaticVarRefExprBoundNode.hpp"
 
 #include <memory>
 #include <vector>
 
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/Vars/StaticVarSymbol.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
@@ -22,60 +22,60 @@
 
 namespace Ace
 {
-    StaticVarReferenceExprBoundNode::StaticVarReferenceExprBoundNode(
-        const SourceLocation& sourceLocation,
+    StaticVarRefExprBoundNode::StaticVarRefExprBoundNode(
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         IVarSymbol* const varSymbol
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_VarSymbol{ varSymbol }
     {
     }
 
-    auto StaticVarReferenceExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto StaticVarRefExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
-    auto StaticVarReferenceExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
+    auto StaticVarRefExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;
     }
 
-    auto StaticVarReferenceExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto StaticVarRefExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
     {
         return {};
     }
 
-    auto StaticVarReferenceExprBoundNode::GetOrCreateTypeChecked(
+    auto StaticVarRefExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const StaticVarReferenceExprBoundNode>>>
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const StaticVarRefExprBoundNode>>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
-    auto StaticVarReferenceExprBoundNode::GetOrCreateTypeCheckedExpr(
+    auto StaticVarRefExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
-    auto StaticVarReferenceExprBoundNode::GetOrCreateLowered(
+    auto StaticVarRefExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const StaticVarReferenceExprBoundNode>>
+    ) const -> MaybeChanged<std::shared_ptr<const StaticVarRefExprBoundNode>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
-    auto StaticVarReferenceExprBoundNode::GetOrCreateLoweredExpr(
+    auto StaticVarRefExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }
 
-    auto StaticVarReferenceExprBoundNode::Emit(
+    auto StaticVarRefExprBoundNode::Emit(
         Emitter& emitter
     ) const -> ExprEmitResult
     {
@@ -94,12 +94,12 @@ namespace Ace
         ACE_UNREACHABLE();
     }
 
-    auto StaticVarReferenceExprBoundNode::GetTypeInfo() const -> TypeInfo
+    auto StaticVarRefExprBoundNode::GetTypeInfo() const -> TypeInfo
     {
         return { m_VarSymbol->GetType(), ValueKind::L };
     }
 
-    auto StaticVarReferenceExprBoundNode::GetVarSymbol() const -> IVarSymbol*
+    auto StaticVarRefExprBoundNode::GetVarSymbol() const -> IVarSymbol*
     {
         return m_VarSymbol;
     }

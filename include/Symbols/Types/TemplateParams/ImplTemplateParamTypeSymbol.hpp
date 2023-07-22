@@ -5,7 +5,7 @@
 
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostic.hpp"
 
@@ -16,13 +16,13 @@ namespace Ace
     public:
         ImplTemplateParamTypeSymbol(
             const std::shared_ptr<Scope>& scope,
-            const Identifier& name
+            const Ident& name
         );
         virtual ~ImplTemplateParamTypeSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
@@ -54,6 +54,6 @@ namespace Ace
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        Identifier m_Name{};
+        Ident m_Name{};
     };
 }

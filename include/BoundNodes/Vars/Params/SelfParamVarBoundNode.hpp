@@ -6,7 +6,7 @@
 #include "BoundNodes/BoundNode.hpp"
 #include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
@@ -23,12 +23,12 @@ namespace Ace
     {
     public:
         SelfParamVarBoundNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             SelfParamVarSymbol* const symbol
         );
         virtual ~SelfParamVarBoundNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -41,7 +41,7 @@ namespace Ace
         auto GetSymbol() const -> SelfParamVarSymbol* final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         SelfParamVarSymbol* m_Symbol{};
     };
 }

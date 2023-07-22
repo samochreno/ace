@@ -6,7 +6,7 @@
 #include "Symbols/Symbol.hpp"
 #include "TokenKind.hpp"
 
-namespace Ace::SpecialIdentifier
+namespace Ace::SpecialIdent
 {
     auto CreateAnonymous() -> std::string;
     auto CreateTemplate(const std::string& templateName) -> std::string;
@@ -48,40 +48,40 @@ namespace Ace::SpecialIdentifier
 
         inline const std::unordered_map<TokenKind, std::string> BinaryNameMap
         {
-            { TokenKind::Asterisk, SpecialIdentifier::Op::Multiplication },
-            { TokenKind::Slash, SpecialIdentifier::Op::Division },
-            { TokenKind::Percent, SpecialIdentifier::Op::Remainder },
-            { TokenKind::Plus, SpecialIdentifier::Op::Addition },
-            { TokenKind::Minus, SpecialIdentifier::Op::Subtraction },
-            { TokenKind::LessThan, SpecialIdentifier::Op::LessThan },
-            { TokenKind::GreaterThan, SpecialIdentifier::Op::GreaterThan },
-            { TokenKind::LessThanEquals, SpecialIdentifier::Op::LessThanEquals },
-            { TokenKind::GreaterThanEquals, SpecialIdentifier::Op::GreaterThanEquals },
-            { TokenKind::LessThanLessThan, SpecialIdentifier::Op::LeftShift },
-            { TokenKind::GreaterThanGreaterThan, SpecialIdentifier::Op::RightShift },
-            { TokenKind::EqualsEquals, SpecialIdentifier::Op::Equals },
-            { TokenKind::ExclamationEquals, SpecialIdentifier::Op::NotEquals },
-            { TokenKind::Caret, SpecialIdentifier::Op::XOR },
-            { TokenKind::VerticalBar, SpecialIdentifier::Op::OR },
-            { TokenKind::Ampersand, SpecialIdentifier::Op::AND },
+            { TokenKind::Asterisk, SpecialIdent::Op::Multiplication },
+            { TokenKind::Slash, SpecialIdent::Op::Division },
+            { TokenKind::Percent, SpecialIdent::Op::Remainder },
+            { TokenKind::Plus, SpecialIdent::Op::Addition },
+            { TokenKind::Minus, SpecialIdent::Op::Subtraction },
+            { TokenKind::LessThan, SpecialIdent::Op::LessThan },
+            { TokenKind::GreaterThan, SpecialIdent::Op::GreaterThan },
+            { TokenKind::LessThanEquals, SpecialIdent::Op::LessThanEquals },
+            { TokenKind::GreaterThanEquals, SpecialIdent::Op::GreaterThanEquals },
+            { TokenKind::LessThanLessThan, SpecialIdent::Op::LeftShift },
+            { TokenKind::GreaterThanGreaterThan, SpecialIdent::Op::RightShift },
+            { TokenKind::EqualsEquals, SpecialIdent::Op::Equals },
+            { TokenKind::ExclamationEquals, SpecialIdent::Op::NotEquals },
+            { TokenKind::Caret, SpecialIdent::Op::XOR },
+            { TokenKind::VerticalBar, SpecialIdent::Op::OR },
+            { TokenKind::Ampersand, SpecialIdent::Op::AND },
 
-            { TokenKind::PlusEquals, SpecialIdentifier::Op::Addition },
-            { TokenKind::MinusEquals, SpecialIdentifier::Op::Subtraction },
-            { TokenKind::AsteriskEquals, SpecialIdentifier::Op::Multiplication },
-            { TokenKind::SlashEquals, SpecialIdentifier::Op::Division },
-            { TokenKind::PercentEquals, SpecialIdentifier::Op::Remainder },
-            { TokenKind::LessThanLessThanEquals, SpecialIdentifier::Op::LeftShift },
-            { TokenKind::GreaterThanGreaterThanEquals, SpecialIdentifier::Op::RightShift },
-            { TokenKind::CaretEquals, SpecialIdentifier::Op::XOR },
-            { TokenKind::VerticalBarEquals, SpecialIdentifier::Op::OR },
-            { TokenKind::AmpersandEquals, SpecialIdentifier::Op::AND },
+            { TokenKind::PlusEquals, SpecialIdent::Op::Addition },
+            { TokenKind::MinusEquals, SpecialIdent::Op::Subtraction },
+            { TokenKind::AsteriskEquals, SpecialIdent::Op::Multiplication },
+            { TokenKind::SlashEquals, SpecialIdent::Op::Division },
+            { TokenKind::PercentEquals, SpecialIdent::Op::Remainder },
+            { TokenKind::LessThanLessThanEquals, SpecialIdent::Op::LeftShift },
+            { TokenKind::GreaterThanGreaterThanEquals, SpecialIdent::Op::RightShift },
+            { TokenKind::CaretEquals, SpecialIdent::Op::XOR },
+            { TokenKind::VerticalBarEquals, SpecialIdent::Op::OR },
+            { TokenKind::AmpersandEquals, SpecialIdent::Op::AND },
         };
 
         inline const std::unordered_map<TokenKind, std::string> UnaryNameMap
         {
-            { TokenKind::Plus, SpecialIdentifier::Op::UnaryPlus },
-            { TokenKind::Minus, SpecialIdentifier::Op::UnaryNegation },
-            { TokenKind::Tilde, SpecialIdentifier::Op::OneComplement },
+            { TokenKind::Plus, SpecialIdent::Op::UnaryPlus },
+            { TokenKind::Minus, SpecialIdent::Op::UnaryNegation },
+            { TokenKind::Tilde, SpecialIdent::Op::OneComplement },
         };
     }
 }

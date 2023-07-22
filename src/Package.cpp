@@ -22,11 +22,11 @@ namespace Ace
 {
     namespace Property
     {
-        static const std::string Name            = "name";
-        static const std::string Value           = "value";
-        static const std::string PathMacros      = "path_macros";
-        static const std::string SourceFiles     = "source_files";
-        static const std::string DependencyFiles = "dependency_files";
+        static const std::string Name       = "name";
+        static const std::string Value      = "value";
+        static const std::string PathMacros = "path_macros";
+        static const std::string SrcFiles   = "src_files";
+        static const std::string DepFiles   = "dep_files";
     }
 
     enum class Recursiveness
@@ -291,7 +291,7 @@ namespace Ace
         const auto macroValueIt = pathMacroMap.find(pathMacro);
         if (macroValueIt == end(pathMacroMap))
         {
-            diagnosticBag.Add(CreateUndefinedReferenceToPackagePathMacroError(
+            diagnosticBag.Add(CreateUndefinedRefToPackagePathMacroError(
                 fileBuffer,
                 pathMacro
             ));
@@ -482,7 +482,7 @@ namespace Ace
     }
 
     static auto ReadFilePath(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        std::vector<std::shared_ptr<const ISrcBuffer>>* const srcBuffers,
         const FileBuffer* const fileBuffer,
         const std::filesystem::path& filePath
     ) -> Expected<const FileBuffer*>
@@ -499,7 +499,7 @@ namespace Ace
             return diagnosticBag;
         }
 
-        sourceBuffers->push_back(expFileBuffer.Unwrap());
+        srcBuffers->push_back(expFileBuffer.Unwrap());
 
         return { expFileBuffer.Unwrap().get(), diagnosticBag };
     }
@@ -730,7 +730,7 @@ namespace Ace
     }
 
     static auto ReadFilePaths(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        std::vector<std::shared_ptr<const ISrcBuffer>>* const srcBuffers,
         const FileBuffer* const fileBuffer,
         const std::vector<std::filesystem::path>& filePaths
     ) -> Diagnosed<std::vector<const FileBuffer*>>
@@ -742,7 +742,7 @@ namespace Ace
         [&](const std::filesystem::path& filePath)
         {
             const auto expFileBuffer = ReadFilePath(
-                sourceBuffers,
+                srcBuffers,
                 fileBuffer,
                 filePath
             );
@@ -759,7 +759,7 @@ namespace Ace
     }
 
     static auto ParsePackage(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        std::vector<std::shared_ptr<const ISrcBuffer>>* const srcBuffers,
         const FileBuffer* const fileBuffer
     ) -> Diagnosed<Package>
     {
@@ -774,8 +774,8 @@ namespace Ace
             {
                 Property::Name,
                 Property::PathMacros,
-                Property::SourceFiles,
-                Property::DependencyFiles,
+                Property::SrcFiles,
+                Property::DepFiles,
             }
         ));
 
@@ -794,57 +794,57 @@ namespace Ace
         );
         diagnosticBag.Add(dgnPathMacroMap);
 
-        const auto dgnSourceFiles = ParseFiles(
+        const auto dgnSrcFiles = ParseFiles(
             fileBuffer,
             package,
-            Property::SourceFiles
+            Property::SrcFiles
         );
-        diagnosticBag.Add(dgnSourceFiles);
+        diagnosticBag.Add(dgnSrcFiles);
 
-        const auto dgnDependencyFiles = ParseFiles(
+        const auto dgnDepFiles = ParseFiles(
             fileBuffer,
             package,
-            Property::DependencyFiles
+            Property::DepFiles
         );
-        diagnosticBag.Add(dgnDependencyFiles);
+        diagnosticBag.Add(dgnDepFiles);
 
-        const auto dgnSourceFilePaths = TransformFilePaths(
+        const auto dgnSrcFilePaths = TransformFilePaths(
             fileBuffer,
             fileBuffer->GetPath(),
-            dgnSourceFiles.Unwrap(),
+            dgnSrcFiles.Unwrap(),
             dgnPathMacroMap.Unwrap()
         );
-        diagnosticBag.Add(dgnSourceFilePaths);
+        diagnosticBag.Add(dgnSrcFilePaths);
 
-        const auto dgnDependencyFilePaths = TransformFilePaths(
+        const auto dgnDepFilePaths = TransformFilePaths(
             fileBuffer,
             fileBuffer->GetPath(),
-            dgnDependencyFiles.Unwrap(),
+            dgnDepFiles.Unwrap(),
             dgnPathMacroMap.Unwrap()
         );
-        diagnosticBag.Add(dgnDependencyFilePaths);
+        diagnosticBag.Add(dgnDepFilePaths);
 
-        const auto dgnSourceFileBuffers = ReadFilePaths(
-            sourceBuffers,
+        const auto dgnSrcFileBuffers = ReadFilePaths(
+            srcBuffers,
             fileBuffer,
-            dgnSourceFilePaths.Unwrap()
+            dgnSrcFilePaths.Unwrap()
         );
-        diagnosticBag.Add(dgnSourceFileBuffers);
+        diagnosticBag.Add(dgnSrcFileBuffers);
 
         return
         {
             Package
             {
                 std::move(dgnName.Unwrap()),
-                std::move(dgnSourceFileBuffers.Unwrap()),
-                std::move(dgnDependencyFilePaths.Unwrap()),
+                std::move(dgnSrcFileBuffers.Unwrap()),
+                std::move(dgnDepFilePaths.Unwrap()),
             },
             diagnosticBag,
         };
     }
 
     auto Package::Parse(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        std::vector<std::shared_ptr<const ISrcBuffer>>* const srcBuffers,
         const FileBuffer* const fileBuffer
     ) -> Expected<Package>
     {
@@ -853,7 +853,7 @@ namespace Ace
         try
         {
             const auto dgnPackage = ParsePackage(
-                sourceBuffers,
+                srcBuffers,
                 fileBuffer
             );
             diagnosticBag.Add(dgnPackage);

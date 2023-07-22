@@ -30,7 +30,7 @@
 #include "Assert.hpp"
 #include "DynamicCastFilter.hpp"
 #include "Name.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Compilation.hpp"
 
 namespace Ace
@@ -179,7 +179,7 @@ namespace Ace
         {
             if (
                 functionNode->GetSymbol()->GetName().String != 
-                SpecialIdentifier::Main
+                SpecialIdent::Main
                 ) 
                 return;
 
@@ -512,7 +512,7 @@ namespace Ace
         auto* const type = GetIRType(typeSymbol);
         auto* const ptrType = llvm::PointerType::get(type, 0);
 
-        if (typeSymbol->IsReference())
+        if (typeSymbol->IsRef())
         {
             auto* const loadInst = m_BlockBuilder->Builder.CreateLoad(
                 type,
@@ -543,7 +543,7 @@ namespace Ace
 
     auto Emitter::EmitDrop(const ExprDropData& dropData) -> void
     {
-        if (dropData.TypeSymbol->IsReference())
+        if (dropData.TypeSymbol->IsRef())
         {
             return;
         }
@@ -562,14 +562,14 @@ namespace Ace
         );
     }
 
-    auto Emitter::EmitDropTemporaries(
-        const std::vector<ExprDropData>& temporaries
+    auto Emitter::EmitDropTmps(
+        const std::vector<ExprDropData>& tmps
     ) -> void
     {
-        std::for_each(rbegin(temporaries), rend(temporaries),
-        [&](const ExprDropData& temporary)
+        std::for_each(rbegin(tmps), rend(tmps),
+        [&](const ExprDropData& temp)
         {
-            EmitDrop(temporary);
+            EmitDrop(temp);
         });
     }
 
@@ -649,12 +649,12 @@ namespace Ace
     ) const -> llvm::Type*
     {
         auto* const pureTypeSymbol =
-            typeSymbol->GetWithoutReference()->GetUnaliased();
+            typeSymbol->GetWithoutRef()->GetUnaliased();
         auto* const pureType = m_TypeMap.at(pureTypeSymbol);
 
-        const bool isReference = typeSymbol->IsReference();
+        const bool isRef = typeSymbol->IsRef();
         
-        return isReference ?
+        return isRef ?
             llvm::PointerType::get(pureType, 0) :
             pureType;
     }

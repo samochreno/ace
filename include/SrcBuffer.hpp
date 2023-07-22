@@ -3,22 +3,22 @@
 #include <string>
 #include <string_view>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 
 namespace Ace
 {
     class Compilation;
 
-    class ISourceBuffer
+    class ISrcBuffer
     {
     public:
-        virtual ~ISourceBuffer() = default;
+        virtual ~ISrcBuffer() = default;
 
         virtual auto GetCompilation() const -> const Compilation* = 0;
         virtual auto GetBuffer() const -> const std::string& = 0;
 
         virtual auto FormatLocation(
-            const SourceLocation& location
+            const SrcLocation& location
         ) const -> std::string = 0;
     };
 }

@@ -6,7 +6,7 @@
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
@@ -26,7 +26,7 @@ namespace Ace
         virtual auto CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*>   = 0;
         virtual auto CollectParams()     const -> std::vector<NormalTemplateParamTypeSymbol*> = 0;
 
-        virtual auto GetASTName() const -> const Identifier& = 0;
+        virtual auto GetASTName() const -> const Ident& = 0;
 
         virtual auto SetPlaceholderSymbol(
             ISymbol* const symbol

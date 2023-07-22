@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Stmts/AssertStmtBoundNode.hpp"
@@ -11,18 +11,18 @@
 namespace Ace
 {
     AssertStmtNode::AssertStmtNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprNode>& condition
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Condition{ condition }
     {
     }
 
-    auto AssertStmtNode::GetSourceLocation() const -> const SourceLocation&
+    auto AssertStmtNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto AssertStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -44,7 +44,7 @@ namespace Ace
     ) const -> std::shared_ptr<const AssertStmtNode>
     {
         return std::make_shared<const AssertStmtNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_Condition->CloneInScopeExpr(scope)
         );
@@ -61,7 +61,7 @@ namespace Ace
     {
         ACE_TRY(boundCondition, m_Condition->CreateBoundExpr());
         return std::make_shared<const AssertStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             boundCondition
         );
     }

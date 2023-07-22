@@ -3,32 +3,32 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "Nodes/TemplateParams/ImplTemplateParamNode.hpp"
 #include "Nodes/TemplateParams/NormalTemplateParamNode.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
     FunctionTemplateNode::FunctionTemplateNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::vector<std::shared_ptr<const ImplTemplateParamNode>>& implParams,
         const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& params,
         const std::shared_ptr<const FunctionNode>& ast
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_ImplParams{ implParams },
         m_Params{ params },
         m_AST{ ast }
     {
     }
 
-    auto FunctionTemplateNode::GetSourceLocation() const -> const SourceLocation&
+    auto FunctionTemplateNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto FunctionTemplateNode::GetScope() const -> std::shared_ptr<Scope>
@@ -73,7 +73,7 @@ namespace Ace
         );
 
         return std::make_shared<const FunctionTemplateNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             clonedImplParams,
             clonedParams,
             m_AST->CloneInScope(scope)
@@ -103,9 +103,9 @@ namespace Ace
         };
     }
 
-    auto FunctionTemplateNode::CollectImplParamNames() const -> std::vector<Identifier>
+    auto FunctionTemplateNode::CollectImplParamNames() const -> std::vector<Ident>
     {
-        std::vector<Identifier> names{};
+        std::vector<Ident> names{};
         std::transform(
             begin(m_ImplParams),
             end  (m_ImplParams),
@@ -119,9 +119,9 @@ namespace Ace
         return names;
     }
 
-    auto FunctionTemplateNode::CollectParamNames() const -> std::vector<Identifier>
+    auto FunctionTemplateNode::CollectParamNames() const -> std::vector<Ident>
     {
-        std::vector<Identifier> names{};
+        std::vector<Ident> names{};
         std::transform(
             begin(m_Params),
             end  (m_Params),

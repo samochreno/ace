@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
@@ -13,18 +13,18 @@
 namespace Ace
 {
     NormalTemplateParamNode::NormalTemplateParamNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name
-    ) : m_SourceLocation{ sourceLocation },
+        const Ident& name
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Name{ name }
     {
     }
 
-    auto NormalTemplateParamNode::GetSourceLocation() const -> const SourceLocation&
+    auto NormalTemplateParamNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto NormalTemplateParamNode::GetScope() const -> std::shared_ptr<Scope>
@@ -42,7 +42,7 @@ namespace Ace
     ) const -> std::shared_ptr<const NormalTemplateParamNode>
     {
         return std::make_shared<const NormalTemplateParamNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_Name
         );
@@ -74,7 +74,7 @@ namespace Ace
         };
     }
 
-    auto NormalTemplateParamNode::GetName() const -> const Identifier&
+    auto NormalTemplateParamNode::GetName() const -> const Ident&
     {
         return m_Name;
     }

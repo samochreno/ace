@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Scope.hpp"
@@ -16,18 +16,18 @@
 namespace Ace
 {
     ConditionalJumpStmtBoundNode::ConditionalJumpStmtBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& condition,
         LabelSymbol* const labelSymbol
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Condition{ condition },
         m_LabelSymbol{ labelSymbol }
     {
     }
 
-    auto ConditionalJumpStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto ConditionalJumpStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto ConditionalJumpStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -65,7 +65,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchConvertedAndCheckedCondition.Value,
             m_LabelSymbol
         ));
@@ -91,7 +91,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchLoweredCondition.Value,
             m_LabelSymbol
         )->GetOrCreateLowered(context).Value);
@@ -118,7 +118,7 @@ namespace Ace
             conditionEmitResult.Value
         );
 
-        emitter.EmitDropTemporaries(conditionEmitResult.Temporaries);
+        emitter.EmitDropTmps(conditionEmitResult.Tmps);
 
         emitter.GetBlockBuilder().Builder.CreateCondBr(
             loadInst,

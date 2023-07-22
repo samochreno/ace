@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <functional>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Compilation.hpp"
 #include "Scope.hpp"
 #include "SymbolCreatable.hpp"
@@ -19,7 +19,7 @@ namespace Ace
     public:
         virtual ~INode() = default;
 
-        virtual auto GetSourceLocation() const -> const SourceLocation& = 0;
+        virtual auto GetSrcLocation() const -> const SrcLocation& = 0;
         virtual auto GetCompilation() const -> const Compilation* final;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetChildren() const -> std::vector<const INode*> = 0;

@@ -9,7 +9,7 @@
 
 #include "Assert.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/Vars/Params/ParamVarSymbol.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
@@ -25,7 +25,7 @@ namespace Ace
 {
     FunctionSymbol::FunctionSymbol(
         const std::shared_ptr<Scope>& selfScope,
-        const Identifier& name,
+        const Ident& name,
         const SymbolCategory symbolCategory,
         const AccessModifier accessModifier,
         ITypeSymbol* const type
@@ -47,7 +47,7 @@ namespace Ace
         return m_SelfScope;
     }
 
-    auto FunctionSymbol::GetName() const -> const Identifier&
+    auto FunctionSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }
@@ -186,10 +186,10 @@ namespace Ace
 
     auto FunctionSymbol::GetTemplate() const -> std::optional<FunctionTemplateSymbol*>
     {
-        const Identifier name
+        const Ident name
         {
-            m_Name.SourceLocation,
-            SpecialIdentifier::CreateTemplate(m_Name.String)
+            m_Name.SrcLocation,
+            SpecialIdent::CreateTemplate(m_Name.String)
         };
 
         auto expTemplate =

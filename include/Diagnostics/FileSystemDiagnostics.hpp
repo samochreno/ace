@@ -6,7 +6,7 @@
 #include <filesystem>
 
 #include "Diagnostic.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "String.hpp"
 
 namespace Ace

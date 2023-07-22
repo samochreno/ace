@@ -4,40 +4,42 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
+#include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
-#include "TypeInfo.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "ExprEmitResult.hpp"
+#include "TypeInfo.hpp"
 
 namespace Ace
 {
-    class DereferenceExprBoundNode :
-        public std::enable_shared_from_this<DereferenceExprBoundNode>,
+    class InstanceVarRefExprBoundNode :
+        public std::enable_shared_from_this<InstanceVarRefExprBoundNode>,
         public virtual IExprBoundNode,
-        public virtual ITypeCheckableBoundNode<DereferenceExprBoundNode>,
-        public virtual ILowerableBoundNode<DereferenceExprBoundNode>
+        public virtual ITypeCheckableBoundNode<InstanceVarRefExprBoundNode>,
+        public virtual ILowerableBoundNode<InstanceVarRefExprBoundNode>
     {
     public:
-        DereferenceExprBoundNode(
-            const SourceLocation& sourceLocation,
-            const std::shared_ptr<const IExprBoundNode>& expr
+        InstanceVarRefExprBoundNode(
+            const SrcLocation& srcLocation,
+            const std::shared_ptr<const IExprBoundNode>& expr,
+            InstanceVarSymbol* const varSymbol
         );
-        virtual ~DereferenceExprBoundNode() = default;
+        virtual ~InstanceVarRefExprBoundNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const DereferenceExprBoundNode>>> final;
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const InstanceVarRefExprBoundNode>>> final;
         auto GetOrCreateTypeCheckedExpr(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const DereferenceExprBoundNode>> final;
+        ) const -> MaybeChanged<std::shared_ptr<const InstanceVarRefExprBoundNode>> final;
         auto GetOrCreateLoweredExpr(
             const LoweringContext& context
         ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>> final;
@@ -46,9 +48,11 @@ namespace Ace
         auto GetTypeInfo() const -> TypeInfo final;
 
         auto GetExpr() const -> std::shared_ptr<const IExprBoundNode>;
+        auto GetVarSymbol() const -> InstanceVarSymbol*;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprBoundNode> m_Expr{};
+        InstanceVarSymbol* m_VarSymbol{};
     };
 }

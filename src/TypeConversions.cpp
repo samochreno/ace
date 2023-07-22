@@ -5,9 +5,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Templates/FunctionTemplateSymbol.hpp"
@@ -38,37 +38,35 @@ namespace Ace
         return foundOpIt->second;
     }
 
-    static auto GetImplicitPointerConversionOp(
+    static auto GetImplicitPtrConversionOp(
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
         ITypeSymbol* toType
     ) -> Expected<FunctionSymbol*>
     {
-        fromType = fromType->GetWithoutReference();
-          toType =   toType->GetWithoutReference();
+        fromType = fromType->GetWithoutRef();
+          toType =   toType->GetWithoutRef();
+
+        ACE_TRY_ASSERT(fromType->IsStrongPtr() && toType->IsWeakPtr());
 
         ACE_TRY_ASSERT(
-            fromType->IsStrongPointer() && toType->IsWeakPointer()
-        );
-
-        ACE_TRY_ASSERT(
-            fromType->GetWithoutStrongPointer() ==
-            toType->GetWithoutWeakPointer()
+            fromType->GetWithoutStrongPtr() ==
+            toType->GetWithoutWeakPtr()
         );
 
         auto* const compilation = scope->GetCompilation();
 
         return dynamic_cast<FunctionSymbol*>(Scope::ResolveOrInstantiateTemplateInstance(
             compilation,
-            compilation->Natives->WeakPointer__from.GetSymbol(),
+            compilation->Natives->WeakPtr__from.GetSymbol(),
             std::nullopt,
-            { fromType->GetWithoutStrongPointer()->GetWithoutReference() },
+            { fromType->GetWithoutStrongPtr()->GetWithoutRef() },
             {}
         ).Unwrap());
     }
 
     auto GetImplicitConversionOp(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
         ITypeSymbol* toType
@@ -84,7 +82,7 @@ namespace Ace
             return optNativeOp.value();
         }
 
-        return GetImplicitPointerConversionOp(
+        return GetImplicitPtrConversionOp(
             scope,
             fromType,
             toType
@@ -92,7 +90,7 @@ namespace Ace
     }
 
     auto GetExplicitConversionOp(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
         ITypeSymbol* toType
@@ -118,7 +116,7 @@ namespace Ace
             return optNativeExplicitOp.value();
         }
 
-        return GetImplicitPointerConversionOp(
+        return GetImplicitPtrConversionOp(
             scope,
             fromType,
             toType
@@ -163,7 +161,7 @@ namespace Ace
         for (size_t i = 0; i < fromTypeInfos.size(); i++)
         {
             const auto dummyExpr = std::make_shared<const ConversionPlaceholderExprBoundNode>(
-                SourceLocation{},
+                SrcLocation{},
                 scope,
                 fromTypeInfos.at(i)
             );

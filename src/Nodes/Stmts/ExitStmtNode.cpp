@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Stmts/ExitStmtBoundNode.hpp"
@@ -11,16 +11,16 @@
 namespace Ace
 {
     ExitStmtNode::ExitStmtNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope }
     {
     }
 
-    auto ExitStmtNode::GetSourceLocation() const -> const SourceLocation&
+    auto ExitStmtNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto ExitStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -38,7 +38,7 @@ namespace Ace
     ) const -> std::shared_ptr<const ExitStmtNode>
     {
         return std::make_shared<const ExitStmtNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope
         );
     }
@@ -53,7 +53,7 @@ namespace Ace
     auto ExitStmtNode::CreateBound() const -> Expected<std::shared_ptr<const ExitStmtBoundNode>>
     {
         return std::make_shared<const ExitStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope()
         );
     }

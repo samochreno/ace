@@ -3,33 +3,33 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Vars/Params/SelfParamVarBoundNode.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Symbols/Symbol.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
     SelfParamVarNode::SelfParamVarNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const SymbolName& typeName
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
-        m_Name{ sourceLocation, SpecialIdentifier::Self },
-        m_TypeName{ typeName, std::vector{ TypeNameModifier::Reference } }
+        m_Name{ srcLocation, SpecialIdent::Self },
+        m_TypeName{ typeName, std::vector{ TypeNameModifier::Ref } }
     {
     }
 
-    auto SelfParamVarNode::GetSourceLocation() const -> const SourceLocation&
+    auto SelfParamVarNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto SelfParamVarNode::GetScope() const -> std::shared_ptr<Scope>
@@ -47,7 +47,7 @@ namespace Ace
     ) const -> std::shared_ptr<const SelfParamVarNode>
     {
         return std::make_shared<const SelfParamVarNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_TypeName.SymbolName
         );
@@ -60,12 +60,12 @@ namespace Ace
         ).Unwrap();
 
         return std::make_shared<const SelfParamVarBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             selfSymbol
         );
     }
 
-    auto SelfParamVarNode::GetName() const -> const Identifier&
+    auto SelfParamVarNode::GetName() const -> const Ident&
     {
         return m_Name;
     }
@@ -94,7 +94,7 @@ namespace Ace
         return std::unique_ptr<ISymbol>
         {
             std::make_unique<SelfParamVarSymbol>(
-                m_SourceLocation,
+                m_SrcLocation,
                 m_Scope,
                 typeSymbol
             )

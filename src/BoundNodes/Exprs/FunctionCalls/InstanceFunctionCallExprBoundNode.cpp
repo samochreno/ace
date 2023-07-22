@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "BoundNodes/Exprs/ReferenceExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "BoundNodes/Exprs/RefExprBoundNode.hpp"
+#include "SrcLocation.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
@@ -18,20 +18,20 @@
 namespace Ace
 {
     InstanceFunctionCallExprBoundNode::InstanceFunctionCallExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr,
         FunctionSymbol* const functionSymbol,
         const std::vector<std::shared_ptr<const IExprBoundNode>>& args
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr },
         m_FunctionSymbol{ functionSymbol },
         m_Args{ args }
     {
     }
 
-    auto InstanceFunctionCallExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto InstanceFunctionCallExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto InstanceFunctionCallExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -72,7 +72,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchCheckedExpr.Value,
             m_FunctionSymbol,
             mchConvertedAndCheckedArgs.Value
@@ -107,7 +107,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchLoweredExpr.Value,
             m_FunctionSymbol,
             mchLoweredArgs.Value
@@ -126,19 +126,19 @@ namespace Ace
         Emitter& emitter
     ) const -> ExprEmitResult
     {
-        std::vector<ExprDropData> temporaries{};
+        std::vector<ExprDropData> tmps{};
 
         std::vector<llvm::Value*> args{};
 
         const auto expr = [&]() -> std::shared_ptr<const IExprBoundNode>
         {
-            if (m_Expr->GetTypeInfo().Symbol->IsReference())
+            if (m_Expr->GetTypeInfo().Symbol->IsRef())
             {
                 return m_Expr;
             }
 
-            return std::make_shared<const ReferenceExprBoundNode>(
-                m_Expr->GetSourceLocation(),
+            return std::make_shared<const RefExprBoundNode>(
+                m_Expr->GetSrcLocation(),
                 m_Expr
             );
         }();
@@ -146,10 +146,10 @@ namespace Ace
         auto* const selfType = emitter.GetIRType(expr->GetTypeInfo().Symbol);
         
         const auto selfEmitResult = expr->Emit(emitter);
-        temporaries.insert(
-            end(temporaries),
-            begin(selfEmitResult.Temporaries),
-            end  (selfEmitResult.Temporaries)
+        tmps.insert(
+            end(tmps),
+            begin(selfEmitResult.Tmps),
+            end  (selfEmitResult.Tmps)
         );
 
         args.push_back(selfEmitResult.Value);
@@ -161,10 +161,10 @@ namespace Ace
             [&](const std::shared_ptr<const IExprBoundNode>& arg)
             {
                 const auto argEmitResult = arg->Emit(emitter);
-                temporaries.insert(
-                    end(temporaries),
-                    begin(argEmitResult.Temporaries),
-                    end  (argEmitResult.Temporaries)
+                tmps.insert(
+                    end(tmps),
+                    begin(argEmitResult.Tmps),
+                    end  (argEmitResult.Tmps)
                 );
                 return argEmitResult.Value;
             }
@@ -177,19 +177,19 @@ namespace Ace
 
         if (callInst->getType()->isVoidTy())
         {
-            return { nullptr, temporaries };
+            return { nullptr, tmps };
         }
 
         auto* const allocaInst =
             emitter.GetBlockBuilder().Builder.CreateAlloca(callInst->getType());
-        temporaries.emplace_back(allocaInst, m_FunctionSymbol->GetType());
+        tmps.emplace_back(allocaInst, m_FunctionSymbol->GetType());
 
         emitter.GetBlockBuilder().Builder.CreateStore(
             callInst,
             allocaInst
         );
 
-        return { allocaInst, temporaries };
+        return { allocaInst, tmps };
     }
 
     auto InstanceFunctionCallExprBoundNode::GetTypeInfo() const -> TypeInfo

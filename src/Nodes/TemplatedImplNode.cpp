@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
@@ -13,17 +13,17 @@
 #include "Symbols/TemplatedImplSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 
 namespace Ace
 {
     TemplatedImplNode::TemplatedImplNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& selfScope,
         const SymbolName& typeTemplateName,
         const std::vector<std::shared_ptr<const FunctionNode>>& functions,
         const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_SelfScope{ selfScope },
         m_TypeTemplateName{ typeTemplateName },
         m_Functions{ functions },
@@ -31,9 +31,9 @@ namespace Ace
     {
     }
 
-    auto TemplatedImplNode::GetSourceLocation() const -> const SourceLocation&
+    auto TemplatedImplNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto TemplatedImplNode::GetScope() const -> std::shared_ptr<Scope>
@@ -80,7 +80,7 @@ namespace Ace
         );
 
         return std::make_shared<const TemplatedImplNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             selfScope,
             m_TypeTemplateName,
             clonedFunctions,
@@ -97,7 +97,7 @@ namespace Ace
         }));
 
         return std::make_shared<const ImplBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             boundFunctions
         );

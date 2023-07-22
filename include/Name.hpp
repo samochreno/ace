@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
@@ -14,14 +14,14 @@ namespace Ace
     struct SymbolNameSection
     {
         SymbolNameSection();
-        SymbolNameSection(const Identifier& name);
+        SymbolNameSection(const Ident& name);
         SymbolNameSection(
-            const Identifier& name,
+            const Ident& name,
             const std::vector<SymbolName>& templateArgs
         );
         ~SymbolNameSection();
 
-        Identifier Name;
+        Ident Name;
         std::vector<SymbolName> TemplateArgs;
     };
 
@@ -50,9 +50,9 @@ namespace Ace
 
     enum class TypeNameModifier
     {
-        Reference,
-        StrongPointer,
-        WeakPointer,
+        Ref,
+        StrongPtr,
+        WeakPtr,
     };
 
     struct TypeName

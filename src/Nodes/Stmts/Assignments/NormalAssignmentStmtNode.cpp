@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
@@ -11,20 +11,20 @@
 namespace Ace
 {
     NormalAssignmentStmtNode::NormalAssignmentStmtNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprNode>& lhsExpr,
         const std::shared_ptr<const IExprNode>& rhsExpr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr }
     {
     }
 
-    auto NormalAssignmentStmtNode::GetSourceLocation() const -> const SourceLocation&
+    auto NormalAssignmentStmtNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto NormalAssignmentStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -47,7 +47,7 @@ namespace Ace
     ) const -> std::shared_ptr<const NormalAssignmentStmtNode>
     {
         return std::make_shared<const NormalAssignmentStmtNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_Scope,
             m_LHSExpr->CloneInScopeExpr(scope),
             m_RHSExpr->CloneInScopeExpr(scope)
@@ -66,7 +66,7 @@ namespace Ace
         ACE_TRY(boundLHSExpr, m_LHSExpr->CreateBoundExpr());
         ACE_TRY(boundRHSExpr, m_RHSExpr->CreateBoundExpr());
         return std::make_shared<const NormalAssignmentStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             boundLHSExpr,
             boundRHSExpr
         );

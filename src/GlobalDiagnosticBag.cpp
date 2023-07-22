@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "DiagnosticBag.hpp"
-#include "SourceBuffer.hpp"
+#include "SrcBuffer.hpp"
 #include "Log.hpp"
 
 namespace Ace
@@ -35,12 +35,12 @@ namespace Ace
         Log << termcolor::reset << ": ";
         Log << diagnostic->Message << "\n";
         
-        if (diagnostic->OptSourceLocation.has_value())
+        if (diagnostic->OptSrcLocation.has_value())
         {
             Log << termcolor::bright_blue << " --> ";
             Log << termcolor::reset;
-            Log << diagnostic->OptSourceLocation.value().Buffer->FormatLocation(
-                diagnostic->OptSourceLocation.value()
+            Log << diagnostic->OptSrcLocation.value().Buffer->FormatLocation(
+                diagnostic->OptSrcLocation.value()
             );
             Log << "\n";
         }

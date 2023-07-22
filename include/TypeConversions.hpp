@@ -9,13 +9,13 @@
 namespace Ace
 {
     auto GetImplicitConversionOp(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
         ITypeSymbol* targetType
     ) -> Expected<FunctionSymbol*>;
     auto GetExplicitConversionOp(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
         ITypeSymbol* targetType

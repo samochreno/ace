@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostic.hpp"
 
@@ -11,7 +11,7 @@ namespace Ace
 {
     NormalTemplateArgAliasTypeSymbol::NormalTemplateArgAliasTypeSymbol(
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name,
+        const Ident& name,
         ITypeSymbol* const aliasedType,
         const size_t index
     ) : m_Scope{ scope },
@@ -31,7 +31,7 @@ namespace Ace
         return m_AliasedType->GetSelfScope();
     }
 
-    auto NormalTemplateArgAliasTypeSymbol::GetName() const -> const Identifier&
+    auto NormalTemplateArgAliasTypeSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }

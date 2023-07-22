@@ -13,12 +13,12 @@ namespace Ace
         constexpr unsigned int charBitCount = sizeof(char) * CHAR_BIT;
         constexpr unsigned int sizeBitCount = sizeof(size_t) * CHAR_BIT;
 
-        m_Int           = llvm::IntegerType::get(context, intBitCount);
-        m_Char          = llvm::IntegerType::get(context, charBitCount);
-        m_CharPointer   = llvm::PointerType::get(m_Char, 0);
-        m_Size          = llvm::IntegerType::get(context, sizeBitCount);
-        m_Void          = llvm::Type::getVoidTy(context);
-        m_VoidPointer   = llvm::Type::getInt8PtrTy(context);
+        m_Int     = llvm::IntegerType::get(context, intBitCount);
+        m_Char    = llvm::IntegerType::get(context, charBitCount);
+        m_CharPtr = llvm::PointerType::get(m_Char, 0);
+        m_Size    = llvm::IntegerType::get(context, sizeBitCount);
+        m_Void    = llvm::Type::getVoidTy(context);
+        m_VoidPtr = llvm::Type::getInt8PtrTy(context);
     }
 
     auto CTypes::GetInt() const -> llvm::IntegerType*
@@ -31,9 +31,9 @@ namespace Ace
         return m_Char;
     }
 
-    auto CTypes::GetCharPointer() const -> llvm::PointerType*
+    auto CTypes::GetCharPtr() const -> llvm::PointerType*
     {
-        return m_CharPointer;
+        return m_CharPtr;
     }
 
     auto CTypes::GetSize() const -> llvm::IntegerType*
@@ -46,9 +46,9 @@ namespace Ace
         return m_Void;
     }
 
-    auto CTypes::GetVoidPointer() const -> llvm::PointerType*
+    auto CTypes::GetVoidPtr() const -> llvm::PointerType*
     {
-        return m_VoidPointer;
+        return m_VoidPtr;
     }
 
     static auto LoadCFunction(

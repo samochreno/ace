@@ -4,9 +4,9 @@
 #include <vector>
 #include <optional>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Nodes/Vars/Params/SelfParamVarNode.hpp"
@@ -21,16 +21,16 @@
 namespace Ace
 {
     FunctionNode::FunctionNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& selfScope,
-        const Identifier& name,
+        const Ident& name,
         const TypeName& typeName,
         const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
         const AccessModifier accessModifier,
         const std::optional<std::shared_ptr<const SelfParamVarNode>>& optSelf,
         const std::vector<std::shared_ptr<const NormalParamVarNode>>& params,
         const std::optional<std::shared_ptr<const BlockStmtNode>>& optBody
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_SelfScope{ selfScope },
         m_Name{ name },
         m_TypeName{ typeName },
@@ -42,9 +42,9 @@ namespace Ace
     {
     }
 
-    auto FunctionNode::GetSourceLocation() const -> const SourceLocation&
+    auto FunctionNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto FunctionNode::GetScope() const -> std::shared_ptr<Scope>
@@ -122,7 +122,7 @@ namespace Ace
         }();
 
         return std::make_shared<const FunctionNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             selfScope,
             m_Name,
             m_TypeName,
@@ -171,7 +171,7 @@ namespace Ace
         ).Unwrap();
 
         return std::make_shared<const FunctionBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             selfSymbol,
             boundAttributes,
             boundOptSelf,
@@ -180,7 +180,7 @@ namespace Ace
         );
     }
 
-    auto FunctionNode::GetName() const -> const Identifier&
+    auto FunctionNode::GetName() const -> const Ident&
     {
         return m_Name;
     }

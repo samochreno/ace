@@ -3,31 +3,31 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Op.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/UserBinaryExprBoundNode.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 
 namespace Ace
 {
     UserBinaryExprNode::UserBinaryExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprNode>& lhsExpr,
         const std::shared_ptr<const IExprNode>& rhsExpr,
         const Op& op
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr },
         m_Op{ op }
     {
     }
 
-    auto UserBinaryExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto UserBinaryExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto UserBinaryExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -50,7 +50,7 @@ namespace Ace
     ) const -> std::shared_ptr<const UserBinaryExprNode>
     {
         return std::make_shared<const UserBinaryExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_LHSExpr->CloneInScopeExpr(scope),
             m_RHSExpr->CloneInScopeExpr(scope),
             m_Op
@@ -73,24 +73,24 @@ namespace Ace
         auto* const rhsTypeSymbol = boundRHSExpr->GetTypeInfo().Symbol;
 
         const auto& opNameMap =
-            SpecialIdentifier::Op::BinaryNameMap;
+            SpecialIdent::Op::BinaryNameMap;
 
         const auto opNameIt = opNameMap.find(m_Op.TokenKind);
         ACE_TRY_ASSERT(opNameIt != end(opNameMap));
 
         auto lhsName = lhsTypeSymbol->CreateFullyQualifiedName(
-            m_Op.SourceLocation
+            m_Op.SrcLocation
         );
-        lhsName.Sections.emplace_back(Identifier{
-            m_Op.SourceLocation,
+        lhsName.Sections.emplace_back(Ident{
+            m_Op.SrcLocation,
             opNameIt->second,
         });
 
         auto rhsName = rhsTypeSymbol->CreateFullyQualifiedName(
-            m_Op.SourceLocation
+            m_Op.SrcLocation
         );
-        rhsName.Sections.emplace_back(Identifier{
-            m_Op.SourceLocation,
+        rhsName.Sections.emplace_back(Ident{
+            m_Op.SrcLocation,
             opNameIt->second,
         });
 
@@ -154,7 +154,7 @@ namespace Ace
             expRHSOpSymbol.Unwrap();
 
         return std::make_shared<const UserBinaryExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             boundLHSExpr,
             boundRHSExpr,
             opSymbol

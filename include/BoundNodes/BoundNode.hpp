@@ -7,7 +7,7 @@
 #include <optional>
 
 #include "Compilation.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -28,7 +28,7 @@ namespace Ace
         virtual ~IBoundNode() = default;
 
         virtual auto GetCompilation() const -> const Compilation* final;
-        virtual auto GetSourceLocation() const -> const SourceLocation& = 0;
+        virtual auto GetSrcLocation() const -> const SrcLocation& = 0;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetChildren() const -> std::vector<const IBoundNode*> = 0;
     };

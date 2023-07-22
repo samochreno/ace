@@ -4,7 +4,7 @@
 #include <vector>
 #include <optional>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
@@ -14,11 +14,11 @@
 namespace Ace
 {
     IfStmtNode::IfStmtNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::vector<std::shared_ptr<const IExprNode>>& conditions,
         const std::vector<std::shared_ptr<const BlockStmtNode>>& bodies
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Conditions{ conditions },
         m_Bodies{ bodies }
@@ -26,9 +26,9 @@ namespace Ace
     {
     }
 
-    auto IfStmtNode::GetSourceLocation() const -> const SourceLocation&
+    auto IfStmtNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto IfStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -73,7 +73,7 @@ namespace Ace
         );
 
         return std::make_shared<const IfStmtNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             clonedConditions,
             clonedBodies
@@ -102,7 +102,7 @@ namespace Ace
         }));
 
         return std::make_shared<const IfStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             boundConditions,
             boundBodies

@@ -16,7 +16,7 @@
 #include "Compilation.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Nodes/All.hpp"
 #include "DynamicCastFilter.hpp"
 #include "Scope.hpp"
@@ -261,13 +261,13 @@ namespace Ace::Application
 
         std::vector<std::shared_ptr<const ModuleNode>> asts{};
         std::for_each(
-            begin(compilation->Package.SourceFileBuffers),
-            end  (compilation->Package.SourceFileBuffers),
-            [&](const FileBuffer* const sourceFileBuffer)
+            begin(compilation->Package.SrcFileBuffers),
+            end  (compilation->Package.SrcFileBuffers),
+            [&](const FileBuffer* const srcFileBuffer)
             {
                 const auto expAST = ParseAST(
                     compilation,
-                    sourceFileBuffer
+                    srcFileBuffer
                 );
                 compilation->GlobalDiagnosticBag->Add(expAST);
                 diagnosticBag.Add(expAST);
@@ -381,14 +381,14 @@ namespace Ace::Application
     }
 
     static auto Compile(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        std::vector<std::shared_ptr<const ISrcBuffer>>* const srcBuffers,
         const std::vector<std::string_view>& args
     ) -> Expected<void>
     {
         DiagnosticBag diagnosticBag{};
 
         const auto expCompilation = Compilation::Parse(
-            sourceBuffers,
+            srcBuffers,
             args
         );
         diagnosticBag.Add(expCompilation);
@@ -431,10 +431,10 @@ namespace Ace::Application
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
 
-        std::vector<std::shared_ptr<const ISourceBuffer>> sourceBuffers{};
+        std::vector<std::shared_ptr<const ISrcBuffer>> srcBuffers{};
 
         const auto expDidCompile = Compile(
-            &sourceBuffers,
+            &srcBuffers,
             std::vector<std::string_view>
             {
                 { "-oace/build" },

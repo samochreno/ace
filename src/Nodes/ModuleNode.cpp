@@ -4,9 +4,9 @@
 #include <vector>
 #include <string>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Nodes/Types/TypeNode.hpp"
 #include "Nodes/Templates/TypeTemplateNode.hpp"
@@ -23,10 +23,10 @@
 namespace Ace
 {
     ModuleNode::ModuleNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<Scope>& selfScope,
-        const std::vector<Identifier>& name,
+        const std::vector<Ident>& name,
         const AccessModifier accessModifier,
         const std::vector<std::shared_ptr<const ModuleNode>>& modules,
         const std::vector<std::shared_ptr<const ITypeNode>>& types,
@@ -36,7 +36,7 @@ namespace Ace
         const std::vector<std::shared_ptr<const FunctionNode>>& functions,
         const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates,
         const std::vector<std::shared_ptr<const StaticVarNode>>& vars
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_SelfScope{ selfScope },
         m_Name{ name },
@@ -52,9 +52,9 @@ namespace Ace
     {
     }
 
-    auto ModuleNode::GetSourceLocation() const -> const SourceLocation&
+    auto ModuleNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto ModuleNode::GetScope() const -> std::shared_ptr<Scope>
@@ -173,7 +173,7 @@ namespace Ace
         );
 
         return std::make_shared<const ModuleNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             selfScope,
             m_Name,
@@ -244,7 +244,7 @@ namespace Ace
         );
 
         return std::make_shared<const ModuleBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             selfSymbol,
             boundModules,
             boundTypes,
@@ -312,7 +312,7 @@ namespace Ace
         return Void{}; 
     }
 
-    auto ModuleNode::GetName() const -> const Identifier&
+    auto ModuleNode::GetName() const -> const Ident&
     {
         return m_Name.back();
     }

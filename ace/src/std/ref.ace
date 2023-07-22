@@ -1,11 +1,11 @@
 std: module -> pub {
-    Reference[T]: struct -> pub {
-        ptr: Pointer,
+    Ref[T]: struct -> pub {
+        ptr: Ptr,
     }
 
-    impl[T] Reference[T] {
-        ptr(self: Reference[T]): Pointer {
-            ret __deref_as[Pointer](__address_of(self));
+    impl[T] Ref[T] {
+        ptr(self: Ref[T]): Ptr {
+            ret __deref_as[Ptr](__address_of(self));
         }
     }
 }

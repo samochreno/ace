@@ -146,7 +146,7 @@ impl[T] Template[T] {
 
 type_template_associated_func_template(): int {
     Template[int]::func_normal();
-    Template[int]::func_template[std::Pointer]();
+    Template[int]::func_template[std::Ptr]();
     ret 10;
 }
 
@@ -166,7 +166,7 @@ impl[T] Template[T] {
 
 method_template(): int {
     obj: Template[int] = new Template[int] { field: -12 };
-    obj.print_field[std::Pointer]();
+    obj.print_field[std::Ptr]();
     ret 13;
 }
 
@@ -383,7 +383,7 @@ print_lifetime(): int {
 
 address(): int {
     value: int = 0;
-    address_of_value: std::Pointer = __address_of(value);
+    address_of_value: std::Ptr = __address_of(value);
     ret value;
 }
 
@@ -393,17 +393,17 @@ size_of_vector_2(): int {
 
 memory_allocation(): int {
     size_of_int: int = __size_of[int];
-    block: std::Pointer = std::mem::alloc(size_of_int);
+    block: std::Ptr = std::mem::alloc(size_of_int);
     std::mem::dealloc(block);
     ret 0;
 }
 
 memory_allocation_copy_access(): int {
     vector_2_size: int = __size_of[Vector2];
-    vector_2_ptr: std::Pointer = std::mem::alloc(vector_2_size);
+    vector_2_ptr: std::Ptr = std::mem::alloc(vector_2_size);
 
     init_value: Vector2 = new Vector2 { x: 15, y: 7 };
-    init_value_ptr: std::Pointer = __address_of(init_value);
+    init_value_ptr: std::Ptr = __address_of(init_value);
 
     std::mem::copy(init_value_ptr, vector_2_ptr, vector_2_size);
 
@@ -416,22 +416,22 @@ memory_allocation_copy_access(): int {
     ret vector_2_deref_y;
 }
 
-print_vector_2_strong_pointer_x(value: &*Vector2): void {
+print_vector_2_strong_ptr_x(value: &*Vector2): void {
     print_int(value.x);
 }
 
-print_vector_2_strong_pointer_y(value: &*Vector2): void {
+print_vector_2_strong_ptr_y(value: &*Vector2): void {
     print_int(value.y);
 }
 
 reference_counting(): int {
     strong: *Vector2 = box new Vector2 { x: 16, y: 10 };
-    print_vector_2_strong_pointer_y(strong);
+    print_vector_2_strong_ptr_y(strong);
 
     weak: ~Vector2 = strong;
 
     locked: *Vector2 = weak.lock();
-    print_vector_2_strong_pointer_x(locked);
+    print_vector_2_strong_ptr_x(locked);
 
     unboxed_value: Vector2 = unbox locked;
     print_int(unboxed_value.y);
@@ -569,4 +569,4 @@ main(): int {
 
 print_int(value: int): void -> pub extern;
 
-print_ptr(ptr: std::Pointer): void -> pub extern;
+print_ptr(ptr: std::Ptr): void -> pub extern;

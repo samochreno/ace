@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
-#include "Identifier.hpp"
+#include "SrcLocation.hpp"
+#include "Ident.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
-#include "BoundNodes/Exprs/VarReferences/InstanceVarReferenceExprBoundNode.hpp"
+#include "BoundNodes/Exprs/VarRefs/InstanceVarRefExprBoundNode.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -15,18 +15,18 @@
 namespace Ace
 {
     MemberAccessExprNode::MemberAccessExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprNode>& expr,
         const SymbolNameSection& name
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr },
         m_Name{ name }
     {
     }
 
-    auto MemberAccessExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto MemberAccessExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto MemberAccessExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -48,7 +48,7 @@ namespace Ace
     ) const -> std::shared_ptr<const MemberAccessExprNode>
     {
         return std::make_shared<const MemberAccessExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_Expr->CloneInScopeExpr(scope),
             m_Name
         );
@@ -61,18 +61,18 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto MemberAccessExprNode::CreateBound() const -> Expected<std::shared_ptr<const InstanceVarReferenceExprBoundNode>>
+    auto MemberAccessExprNode::CreateBound() const -> Expected<std::shared_ptr<const InstanceVarRefExprBoundNode>>
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
 
         ACE_TRY_ASSERT(m_Name.TemplateArgs.empty());
         ACE_TRY(memberSymbol, GetScope()->ResolveInstanceSymbol<InstanceVarSymbol>(
-            boundExpr->GetTypeInfo().Symbol->GetWithoutReference(),
+            boundExpr->GetTypeInfo().Symbol->GetWithoutRef(),
             m_Name
         ));
 
-        return std::make_shared<const InstanceVarReferenceExprBoundNode>(
-            GetSourceLocation(),
+        return std::make_shared<const InstanceVarRefExprBoundNode>(
+            GetSrcLocation(),
             boundExpr,
             memberSymbol
         );

@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Nodes/Vars/InstanceVarNode.hpp"
 #include "BoundNodes/Types/StructTypeBoundNode.hpp"
@@ -16,13 +16,13 @@
 namespace Ace
 {
     StructTypeNode::StructTypeNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& selfScope,
-        const Identifier& name,
+        const Ident& name,
         const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
         const AccessModifier accessModifier,
         const std::vector<std::shared_ptr<const InstanceVarNode>>& vars
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_SelfScope{ selfScope },
         m_Name{ name },
         m_Attributes{ attributes },
@@ -31,9 +31,9 @@ namespace Ace
     {
     }
 
-    auto StructTypeNode::GetSourceLocation() const -> const SourceLocation&
+    auto StructTypeNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto StructTypeNode::GetScope() const -> std::shared_ptr<Scope>
@@ -85,7 +85,7 @@ namespace Ace
         );
 
         return std::make_shared<const StructTypeNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             selfScope,
             m_Name,
             clonedAttributes,
@@ -122,7 +122,7 @@ namespace Ace
         ).Unwrap();
 
         return std::make_shared<const StructTypeBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             selfSymbol,
             boundAttributes,
             boundVars
@@ -134,7 +134,7 @@ namespace Ace
         return CreateBound();
     }
 
-    auto StructTypeNode::GetName() const -> const Identifier&
+    auto StructTypeNode::GetName() const -> const Ident&
     {
         return m_Name;
     }

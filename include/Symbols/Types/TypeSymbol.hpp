@@ -45,16 +45,16 @@ namespace Ace
         virtual auto BindDropGlue(FunctionSymbol* const glue) -> void = 0;
         virtual auto GetDropGlue() const -> std::optional<FunctionSymbol*> = 0;
 
-        virtual auto IsReference() const -> bool final;
-        virtual auto GetWithoutReference() -> ITypeSymbol* final;
-        virtual auto GetWithoutReference() const -> const ITypeSymbol* final;
-        virtual auto GetWithReference() -> ITypeSymbol* final;
-        virtual auto IsStrongPointer() const -> bool final;
-        virtual auto GetWithoutStrongPointer() -> ITypeSymbol* final;
-        virtual auto GetWithStrongPointer() -> ITypeSymbol* final;
-        virtual auto IsWeakPointer() const -> bool final;
-        virtual auto GetWithoutWeakPointer() -> ITypeSymbol* final;
-        virtual auto GetWithWeakPointer() -> ITypeSymbol* final;
+        virtual auto IsRef() const -> bool final;
+        virtual auto GetWithoutRef() -> ITypeSymbol* final;
+        virtual auto GetWithoutRef() const -> const ITypeSymbol* final;
+        virtual auto GetWithRef() -> ITypeSymbol* final;
+        virtual auto IsStrongPtr() const -> bool final;
+        virtual auto GetWithoutStrongPtr() -> ITypeSymbol* final;
+        virtual auto GetWithStrongPtr() -> ITypeSymbol* final;
+        virtual auto IsWeakPtr() const -> bool final;
+        virtual auto GetWithoutWeakPtr() -> ITypeSymbol* final;
+        virtual auto GetWithWeakPtr() -> ITypeSymbol* final;
         virtual auto GetUnaliased() -> ITypeSymbol* final;
         virtual auto GetUnaliased() const -> const ITypeSymbol* final;
         virtual auto GetTemplate() const -> std::optional<TypeTemplateSymbol*> final;

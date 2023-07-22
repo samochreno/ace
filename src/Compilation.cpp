@@ -11,11 +11,11 @@
 
 #include "Diagnostic.hpp"
 #include "Diagnostics/CompilationDiagnostics.hpp"
-#include "SourceBuffer.hpp"
+#include "SrcBuffer.hpp"
 #include "FileBuffer.hpp"
 #include "CLIArgBuffer.hpp"
 #include "CLIArgParser.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Package.hpp"
 #include "Natives.hpp"
 #include "Scope.hpp"
@@ -50,7 +50,7 @@ namespace Ace
     }
 
     auto Compilation::Parse(
-        std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+        std::vector<std::shared_ptr<const ISrcBuffer>>* const srcBuffers,
         const std::vector<std::string_view>& args
     ) -> Expected<std::unique_ptr<const Compilation>>
     {
@@ -63,7 +63,7 @@ namespace Ace
             args
         );
         self->CLIArgBuffer = cliArgBuffer.get();
-        sourceBuffers->push_back(std::move(cliArgBuffer));
+        srcBuffers->push_back(std::move(cliArgBuffer));
 
         const auto expCLIArgsParseResult = ParseCommandLineArgs(
             self->CLIArgBuffer,
@@ -91,7 +91,7 @@ namespace Ace
                 end  (positionalArgs),
                 [&](const std::string_view positionalArg)
                 {
-                    const SourceLocation sourceLocation
+                    const SrcLocation srcLocation
                     {
                         self->CLIArgBuffer,
                         begin(positionalArg),
@@ -99,7 +99,7 @@ namespace Ace
                     };
 
                     diagnosticBag.Add(CreateMultiplePackagePathArgsError(
-                        sourceLocation
+                        srcLocation
                     ));
                 }
             );
@@ -118,10 +118,10 @@ namespace Ace
         }
 
         self->PackageFileBuffer = expPackageFileBuffer.Unwrap().get();
-        sourceBuffers->push_back(std::move(expPackageFileBuffer.Unwrap()));
+        srcBuffers->push_back(std::move(expPackageFileBuffer.Unwrap()));
 
         auto expPackage = Package::Parse(
-            sourceBuffers,
+            srcBuffers,
             self->PackageFileBuffer
         );
         diagnosticBag.Add(expPackage);

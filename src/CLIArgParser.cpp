@@ -8,7 +8,7 @@
 #include "Diagnostic.hpp"
 #include "Diagnostics/CLIArgDiagnostics.hpp"
 #include "CLIArgBuffer.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 
 namespace Ace
 {
@@ -107,7 +107,7 @@ namespace Ace
             return diagnosticBag;
         }
 
-        const SourceLocation sourceLocation
+        const SrcLocation srcLocation
         {
             parser.GetArgBuffer(),
             begin(parser.Peek()),
@@ -115,7 +115,7 @@ namespace Ace
         };
 
         return diagnosticBag.Add(CreateMissingCLIOptionNameError(
-            sourceLocation
+            srcLocation
         ));
     }
 
@@ -132,7 +132,7 @@ namespace Ace
             !optValue.has_value()
             )
         {
-            SourceLocation sourceLocation
+            SrcLocation srcLocation
             {
                 parser.GetArgBuffer(),
                 begin(parser.Peek()),
@@ -140,7 +140,7 @@ namespace Ace
             };
 
             return diagnosticBag.Add(CreateMissingCLIOptionValueError(
-                sourceLocation
+                srcLocation
             ));
         }
 
@@ -149,7 +149,7 @@ namespace Ace
             optValue.has_value()
             )
         {
-            SourceLocation sourceLocation
+            SrcLocation srcLocation
             {
                 parser.GetArgBuffer(),
                 begin(optValue.value()),
@@ -157,7 +157,7 @@ namespace Ace
             };
 
             return diagnosticBag.Add(CreateUnexpectedCLIOptionValueError(
-                sourceLocation
+                srcLocation
             ));
         }
 
@@ -194,7 +194,7 @@ namespace Ace
         );
         if (matchedDefinitionIt == end(parser.GetOptionDefinitions()))
         {
-            SourceLocation sourceLocation
+            SrcLocation srcLocation
             {
                 parser.GetArgBuffer(),
                 begin(name),
@@ -202,7 +202,7 @@ namespace Ace
             };
 
             diagnosticBag.Add(CreateUnknownCLIOptionNameError(
-                sourceLocation
+                srcLocation
             ));
         }
 
@@ -289,7 +289,7 @@ namespace Ace
         );
         if (matchedDefinitionIt == end(parser.GetOptionDefinitions()))
         {
-            SourceLocation sourceLocation
+            SrcLocation srcLocation
             {
                 parser.GetArgBuffer(),
                 begin(name),
@@ -297,7 +297,7 @@ namespace Ace
             };
 
             diagnosticBag.Add(CreateUnknownCLIOptionNameError(
-                sourceLocation
+                srcLocation
             ));
         }
 

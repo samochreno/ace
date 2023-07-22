@@ -13,7 +13,7 @@
 #include "Symbols/Vars/Params/NormalParamVarSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "TypeInfo.hpp"
 #include "Emittable.hpp"
@@ -32,7 +32,7 @@ namespace Ace
     public:
         FunctionSymbol(
             const std::shared_ptr<Scope>& selfScope,
-            const Identifier& name,
+            const Ident& name,
             const SymbolCategory symbolCategory,
             const AccessModifier accessModifier,
             ITypeSymbol* const type
@@ -41,7 +41,7 @@ namespace Ace
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
@@ -63,7 +63,7 @@ namespace Ace
 
     private:
         std::shared_ptr<Scope> m_SelfScope{};
-        Identifier m_Name{};
+        Ident m_Name{};
         SymbolCategory m_SymbolCategory{};
         AccessModifier m_AccessModifier{};
         ITypeSymbol* m_Type{};

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -16,20 +16,20 @@
 namespace Ace
 {
     StaticFunctionCallExprBoundNode::StaticFunctionCallExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         FunctionSymbol* const functionSymbol,
         const std::vector<std::shared_ptr<const IExprBoundNode>>& args
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_FunctionSymbol{ functionSymbol },
         m_Args{ args }
     {
     }
 
-    auto StaticFunctionCallExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto StaticFunctionCallExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto StaticFunctionCallExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -64,7 +64,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             m_FunctionSymbol,
             mchConvertedAndCheckedArgs.Value
@@ -94,7 +94,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             m_FunctionSymbol,
             mchLoweredArgs.Value
@@ -112,7 +112,7 @@ namespace Ace
         Emitter& emitter
     ) const -> ExprEmitResult
     {
-        std::vector<ExprDropData> temporaries{};
+        std::vector<ExprDropData> tmps{};
 
         std::vector<llvm::Value*> args{};
         std::transform(
@@ -122,10 +122,10 @@ namespace Ace
             [&](const std::shared_ptr<const IExprBoundNode>& arg)
             {
                 const auto argEmitResult = arg->Emit(emitter);
-                temporaries.insert(
-                    end(temporaries),
-                    begin(argEmitResult.Temporaries),
-                    end(argEmitResult.Temporaries)
+                tmps.insert(
+                    end(tmps),
+                    begin(argEmitResult.Tmps),
+                    end  (argEmitResult.Tmps)
                 );
                 return argEmitResult.Value;
             }
@@ -138,19 +138,19 @@ namespace Ace
 
         if (callInst->getType()->isVoidTy())
         {
-            return { nullptr, temporaries };
+            return { nullptr, tmps };
         }
 
         auto* const allocaInst =
             emitter.GetBlockBuilder().Builder.CreateAlloca(callInst->getType());
-        temporaries.emplace_back(allocaInst, m_FunctionSymbol->GetType());
+        tmps.emplace_back(allocaInst, m_FunctionSymbol->GetType());
 
         emitter.GetBlockBuilder().Builder.CreateStore(
             callInst,
             allocaInst
         );
 
-        return { allocaInst, temporaries };
+        return { allocaInst, tmps };
     }
     
     auto StaticFunctionCallExprBoundNode::GetTypeInfo() const -> TypeInfo

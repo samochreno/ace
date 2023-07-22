@@ -4,7 +4,7 @@
 #include <vector>
 #include <iterator>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
@@ -19,18 +19,18 @@
 namespace Ace
 {
     FunctionCallExprNode::FunctionCallExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprNode>& expr,
         const std::vector<std::shared_ptr<const IExprNode>>& args
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr },
         m_Args{ args }
     {
     }
 
-    auto FunctionCallExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto FunctionCallExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto FunctionCallExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -60,7 +60,7 @@ namespace Ace
         });
 
         return std::make_shared<const FunctionCallExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_Expr->CloneInScopeExpr(scope),
             clonedArgs
         );
@@ -102,7 +102,7 @@ namespace Ace
             return std::shared_ptr<const IExprBoundNode>
             {
                 std::make_shared<const StaticFunctionCallExprBoundNode>(
-                    GetSourceLocation(),
+                    GetSrcLocation(),
                     GetScope(),
                     functionSymbol,
                     boundArgs
@@ -115,7 +115,7 @@ namespace Ace
             ACE_TRY(boundExpr, memberAccessExpr->GetExpr()->CreateBoundExpr());
 
             ACE_TRY(functionSymbol, GetScope()->ResolveInstanceSymbol<FunctionSymbol>(
-                boundExpr->GetTypeInfo().Symbol->GetWithoutReference(),
+                boundExpr->GetTypeInfo().Symbol->GetWithoutRef(),
                 memberAccessExpr->GetName(),
                 Scope::CreateArgTypes(argTypeSymbols)
             ));
@@ -123,7 +123,7 @@ namespace Ace
             return std::shared_ptr<const IExprBoundNode>
             {
                 std::make_shared<const InstanceFunctionCallExprBoundNode>(
-                    GetSourceLocation(),
+                    GetSrcLocation(),
                     boundExpr,
                     functionSymbol,
                     boundArgs

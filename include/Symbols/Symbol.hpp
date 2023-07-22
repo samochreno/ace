@@ -6,11 +6,11 @@
 
 #include "Compilation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "SymbolKind.hpp"
 #include "SymbolCategory.hpp"
 #include "AccessModifier.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Name.hpp"
 
 namespace Ace
@@ -22,7 +22,7 @@ namespace Ace
 
         virtual auto GetCompilation() const -> const Compilation* final;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
-        virtual auto GetName() const -> const Identifier& = 0;
+        virtual auto GetName() const -> const Ident& = 0;
         virtual auto GetSymbolKind() const -> SymbolKind = 0;
         virtual auto GetSymbolCategory() const -> SymbolCategory = 0;
         virtual auto GetAccessModifier() const -> AccessModifier = 0;
@@ -30,7 +30,7 @@ namespace Ace
         virtual auto CreatePartialSignature() const -> std::string final;
         virtual auto CreateSignature() const -> std::string final;
         virtual auto CreateFullyQualifiedName(
-            const SourceLocation& sourceLocation
+            const SrcLocation& srcLocation
         ) const -> SymbolName final;
     };
 }

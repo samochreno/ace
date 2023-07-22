@@ -8,9 +8,9 @@
 #include "Nodes/Vars/InstanceVarNode.hpp"
 #include "BoundNodes/Types/StructTypeBoundNode.hpp"
 #include "Diagnostic.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/Symbol.hpp"
 
@@ -23,16 +23,16 @@ namespace Ace
     {
     public:
         StructTypeNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& selfScope,
-            const Identifier& name,
+            const Ident& name,
             const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
             const AccessModifier accessModifier,
             const std::vector<std::shared_ptr<const InstanceVarNode>>& vars
         );
         virtual ~StructTypeNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
@@ -45,7 +45,7 @@ namespace Ace
         auto CreateBound() const -> Expected<std::shared_ptr<const StructTypeBoundNode>> final;
         auto CreateBoundType() const -> Expected<std::shared_ptr<const ITypeBoundNode>> final;
 
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
         auto GetAccessModifier() const -> AccessModifier final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
@@ -54,9 +54,9 @@ namespace Ace
         auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
         
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_SelfScope{};
-        Identifier m_Name{};
+        Ident m_Name{};
         std::vector<std::shared_ptr<const AttributeNode>> m_Attributes{};
         AccessModifier m_AccessModifier{};
         std::vector<std::shared_ptr<const InstanceVarNode>> m_Vars{};

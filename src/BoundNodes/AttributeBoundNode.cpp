@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
@@ -12,16 +12,16 @@
 namespace Ace
 {
     AttributeBoundNode::AttributeBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const StructConstructionExprBoundNode>& structConstructionExpr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_StructConstructionExpr{ structConstructionExpr }
     {
     }
 
-    auto AttributeBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto AttributeBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto AttributeBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -50,7 +50,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const AttributeBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchCheckedStructureConstructionExpr.Value
         ));
     }
@@ -68,7 +68,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const AttributeBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchLowewredStructConstructionExpr.Value
         )->GetOrCreateLowered({}).Value);
     }

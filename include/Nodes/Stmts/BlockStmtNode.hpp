@@ -5,7 +5,7 @@
 
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 
@@ -18,13 +18,13 @@ namespace Ace
     {
     public:
         BlockStmtNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& selfScope,
             const std::vector<std::shared_ptr<const IStmtNode>>& stmts
         );
         virtual ~BlockStmtNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -37,7 +37,7 @@ namespace Ace
         auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_SelfScope{};
         std::vector<std::shared_ptr<const IStmtNode>> m_Stmts{};
     };

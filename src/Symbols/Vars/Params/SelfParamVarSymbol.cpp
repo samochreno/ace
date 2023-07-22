@@ -2,25 +2,25 @@
 
 #include <memory>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
 {
     SelfParamVarSymbol::SelfParamVarSymbol(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* const type
     ) : m_Scope{ scope },
         m_Type{ type },
         m_Name
         {
-            sourceLocation,
-            SpecialIdentifier::Self,
+            srcLocation,
+            SpecialIdent::Self,
         }
     {
     }
@@ -30,7 +30,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto SelfParamVarSymbol::GetName() const -> const Identifier&
+    auto SelfParamVarSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }

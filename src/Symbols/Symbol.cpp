@@ -10,7 +10,7 @@
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/TemplatableSymbol.hpp"
 #include "Scope.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Name.hpp"
 
 namespace Ace
@@ -113,13 +113,13 @@ namespace Ace
     }
 
     auto ISymbol::CreateFullyQualifiedName(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) const -> SymbolName
     {
         auto* const symbol = UnwrapAlias(this);
         if (symbol != this)
         {
-            return symbol->CreateFullyQualifiedName(sourceLocation);
+            return symbol->CreateFullyQualifiedName(srcLocation);
         }
 
         std::vector<SymbolNameSection> nameSections{};
@@ -142,17 +142,17 @@ namespace Ace
             {
                 return SymbolNameSection
                 {
-                    Identifier
+                    Ident
                     {
-                        sourceLocation,
+                        srcLocation,
                         scope->GetName(),
                     }
                 };
             }
         );
 
-        nameSections.emplace_back(Identifier{
-            sourceLocation,
+        nameSections.emplace_back(Ident{
+            srcLocation,
             GetName().String
         });
 
@@ -167,7 +167,7 @@ namespace Ace
                 [&](ITypeSymbol* const implTemplateArg)
                 {
                     return implTemplateArg->CreateFullyQualifiedName(
-                        sourceLocation
+                        srcLocation
                     );
                 }
             );
@@ -183,7 +183,7 @@ namespace Ace
                 [&](ITypeSymbol* const templateArg)
                 {
                     return templateArg->CreateFullyQualifiedName(
-                        sourceLocation
+                        srcLocation
                     );
                 }
             );

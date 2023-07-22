@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -11,18 +11,18 @@
 namespace Ace
 {
     SizeOfExprNode::SizeOfExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const TypeName& typeName
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope}, 
         m_TypeName{ typeName }
     {
     }
 
-    auto SizeOfExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto SizeOfExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto SizeOfExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -40,7 +40,7 @@ namespace Ace
     ) const -> std::shared_ptr<const SizeOfExprNode>
     {
         return std::make_shared<const SizeOfExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_TypeName
         );
@@ -59,7 +59,7 @@ namespace Ace
             m_TypeName.ToSymbolName(GetCompilation())
         ));
         return std::make_shared<const SizeOfExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             typeSymbol
         );

@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
@@ -13,18 +13,18 @@
 namespace Ace
 {
     CastExprNode::CastExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const TypeName& typeName,
         const std::shared_ptr<const IExprNode>& expr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_TypeName{ typeName },
         m_Expr{ expr }
     {
     }
 
-    auto CastExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto CastExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto CastExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -46,7 +46,7 @@ namespace Ace
     ) const -> std::shared_ptr<const CastExprNode>
     {
         return std::make_shared<const CastExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_TypeName,
             m_Expr->CloneInScopeExpr(scope)
         );

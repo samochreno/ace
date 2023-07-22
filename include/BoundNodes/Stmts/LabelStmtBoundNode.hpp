@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Diagnostic.hpp"
@@ -20,12 +20,12 @@ namespace Ace
     {
     public:
         LabelStmtBoundNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             LabelSymbol* const symbol
         );
         virtual ~LabelStmtBoundNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -45,7 +45,7 @@ namespace Ace
         auto GetLabelSymbol() const -> LabelSymbol*;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         LabelSymbol* m_Symbol{};
     };
 }

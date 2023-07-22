@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "BoundNodes/Stmts/ExprStmtBoundNode.hpp"
 #include "Diagnostic.hpp"
@@ -11,16 +11,16 @@
 namespace Ace
 {
     ExprStmtNode::ExprStmtNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprNode>& expr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
     }
 
-    auto ExprStmtNode::GetSourceLocation() const -> const SourceLocation&
+    auto ExprStmtNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto ExprStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -42,7 +42,7 @@ namespace Ace
     ) const -> std::shared_ptr<const ExprStmtNode>
     {
         return std::make_shared<const ExprStmtNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_Expr->CloneInScopeExpr(scope)
         );
     }
@@ -58,7 +58,7 @@ namespace Ace
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
         return std::make_shared<const ExprStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             boundExpr
         );
     }

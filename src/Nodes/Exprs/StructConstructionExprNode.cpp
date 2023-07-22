@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
@@ -14,20 +14,20 @@
 namespace Ace
 {
     StructConstructionExprNode::StructConstructionExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const SymbolName& typeName,
         std::vector<StructConstructionExprArg>&& args
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_TypeName{ typeName },
         m_Args{ args }
     {
     }
 
-    auto StructConstructionExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto StructConstructionExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto StructConstructionExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -77,7 +77,7 @@ namespace Ace
         });
 
         return std::make_shared<const StructConstructionExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_TypeName,
             std::move(clonedArgs)
@@ -129,7 +129,7 @@ namespace Ace
                 };
 
                 return std::make_shared<const SymbolLiteralExprNode>(
-                    arg.Name.SourceLocation,
+                    arg.Name.SrcLocation,
                     m_Scope,
                     symbolName
                 )->CreateBoundExpr();
@@ -145,7 +145,7 @@ namespace Ace
         }));
 
         return std::make_shared<const StructConstructionExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             structSymbol,
             boundArgs

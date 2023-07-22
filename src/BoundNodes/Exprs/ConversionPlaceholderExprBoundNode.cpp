@@ -3,25 +3,25 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 
 namespace Ace
 {
     ConversionPlaceholderExprBoundNode::ConversionPlaceholderExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const TypeInfo& typeInfo
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_TypeInfo{ typeInfo }
     {
     }
 
-    auto ConversionPlaceholderExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto ConversionPlaceholderExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto ConversionPlaceholderExprBoundNode::GetScope() const -> std::shared_ptr<Scope>

@@ -50,7 +50,7 @@ namespace Ace
     }
 
     auto CLIArgBuffer::FormatLocation(
-        const SourceLocation& location
+        const SrcLocation& location
     ) const -> std::string
     {
         return {};

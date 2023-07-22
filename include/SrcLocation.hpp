@@ -4,13 +4,13 @@
 
 namespace Ace
 {
-    class ISourceBuffer;
+    class ISrcBuffer;
 
-    struct SourceLocation
+    struct SrcLocation
     {
-        SourceLocation() = default;
-        SourceLocation(
-            const ISourceBuffer* const buffer,
+        SrcLocation() = default;
+        SrcLocation(
+            const ISrcBuffer* const buffer,
             const std::string_view::const_iterator characterBeginIt,
             const std::string_view::const_iterator characterEndIt
         ) : Buffer{ buffer },
@@ -18,16 +18,16 @@ namespace Ace
             CharacterEndIterator{ characterEndIt }
         {
         }
-        SourceLocation(
-            const SourceLocation& first,
-            const SourceLocation& last
+        SrcLocation(
+            const SrcLocation& first,
+            const SrcLocation& last
         ) : Buffer{ first.Buffer },
             CharacterBeginIterator{ first.CharacterBeginIterator },
             CharacterEndIterator{ last.CharacterEndIterator }
         {
         }
 
-        auto CreateFirst() const -> SourceLocation
+        auto CreateFirst() const -> SrcLocation
         {
             return
             {
@@ -36,7 +36,7 @@ namespace Ace
                 CharacterBeginIterator + 1,
             };
         }
-        auto CreateLast() const -> SourceLocation
+        auto CreateLast() const -> SrcLocation
         {
             return
             {
@@ -46,7 +46,7 @@ namespace Ace
             };
         }
 
-        const ISourceBuffer* Buffer{};
+        const ISrcBuffer* Buffer{};
         std::string_view::const_iterator CharacterBeginIterator{};
         std::string_view::const_iterator CharacterEndIterator{};
     };

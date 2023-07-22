@@ -10,10 +10,10 @@
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "Emittable.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Emitter.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Diagnostic.hpp"
 
 namespace Ace
@@ -37,7 +37,7 @@ namespace Ace
     };
 
     static auto CreateSymbolName(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::vector<const char*>& nameSectionStrings
     ) -> SymbolName
     {
@@ -50,7 +50,7 @@ namespace Ace
             {
                 return SymbolNameSection
                 {
-                    Identifier{ sourceLocation, nameSectionString }
+                    Ident{ srcLocation, nameSectionString }
                 };
             }
         );
@@ -59,13 +59,13 @@ namespace Ace
     }
 
     static auto CreateAssociatedSymbolName(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const INative& type,
         const char* const name
     ) -> SymbolName
     {
-        auto symbolName = type.CreateFullyQualifiedName(sourceLocation);
-        symbolName.Sections.emplace_back(Identifier{ sourceLocation, name });
+        auto symbolName = type.CreateFullyQualifiedName(srcLocation);
+        symbolName.Sections.emplace_back(Ident{ srcLocation, name });
         return symbolName;
     }
 
@@ -98,11 +98,11 @@ namespace Ace
     }
 
     auto NativeType::CreateFullyQualifiedName(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) const -> SymbolName
     {
         return CreateSymbolName(
-            sourceLocation,
+            srcLocation,
             m_NameSectionStrings
         );
     }
@@ -111,7 +111,7 @@ namespace Ace
     {
         const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
         auto* const symbol = globalScope->ResolveStaticSymbol<ITypeSymbol>(
-            CreateFullyQualifiedName(SourceLocation{})
+            CreateFullyQualifiedName(SrcLocation{})
         ).Unwrap();
 
         if (m_IRTypeGetter.has_value())
@@ -165,19 +165,19 @@ namespace Ace
     }
 
     auto NativeTypeTemplate::CreateFullyQualifiedName(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) const -> SymbolName
     {
         return CreateSymbolName(
-            sourceLocation,
+            srcLocation,
             m_NameSectionStrings
         );
     }
 
     auto NativeTypeTemplate::Initialize() -> void
     {
-        auto name = CreateFullyQualifiedName(SourceLocation{});
-        name.Sections.back().Name.String = SpecialIdentifier::CreateTemplate(
+        auto name = CreateFullyQualifiedName(SrcLocation{});
+        name.Sections.back().Name.String = SpecialIdent::CreateTemplate(
             name.Sections.back().Name.String
         );
 
@@ -210,11 +210,11 @@ namespace Ace
     }
 
     auto NativeFunction::CreateFullyQualifiedName(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) const -> SymbolName
     {
         return CreateSymbolName(
-            sourceLocation,
+            srcLocation,
             m_NameSectionStrings
         );
     }
@@ -223,7 +223,7 @@ namespace Ace
     {
         const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
         auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
-            CreateFullyQualifiedName(SourceLocation{})
+            CreateFullyQualifiedName(SrcLocation{})
         ).Unwrap();
 
         symbol->BindBody(std::make_shared<FunctionEmittableBody>(
@@ -253,11 +253,11 @@ namespace Ace
     }
 
     auto NativeFunctionTemplate::CreateFullyQualifiedName(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) const -> SymbolName
     {
         return CreateSymbolName(
-            sourceLocation,
+            srcLocation,
             m_NameSectionStrings
         );
     }
@@ -266,7 +266,7 @@ namespace Ace
     {
         const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
         auto* const symbol = globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
-            CreateFullyQualifiedName(SourceLocation{})
+            CreateFullyQualifiedName(SrcLocation{})
         ).Unwrap();
 
         m_Symbol = symbol;
@@ -294,11 +294,11 @@ namespace Ace
     }
 
     auto NativeAssociatedFunction::CreateFullyQualifiedName(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) const -> SymbolName
     {
         return CreateAssociatedSymbolName(
-            sourceLocation,
+            srcLocation,
             m_Type,
             m_Name
         );
@@ -308,7 +308,7 @@ namespace Ace
     {
         const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
         auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
-            CreateFullyQualifiedName(SourceLocation{})
+            CreateFullyQualifiedName(SrcLocation{})
         ).Unwrap();
 
         symbol->BindBody(std::make_shared<FunctionEmittableBody>(
@@ -338,11 +338,11 @@ namespace Ace
     }
 
     auto NativeAssociatedFunctionTemplate::CreateFullyQualifiedName(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) const -> SymbolName
     {
         return CreateAssociatedSymbolName(
-            sourceLocation,
+            srcLocation,
             m_Type,
             m_Name
         );
@@ -352,7 +352,7 @@ namespace Ace
     {
         const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
         auto* const symbol = globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
-            CreateFullyQualifiedName(SourceLocation{})
+            CreateFullyQualifiedName(SrcLocation{})
         ).Unwrap();
 
         m_Symbol = symbol;
@@ -575,7 +575,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Division,
+                SpecialIdent::Op::Division,
                 [&](Emitter& emitter)
                 {
                     auto* const value = [&]() -> llvm::Value*
@@ -608,7 +608,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Remainder,
+                SpecialIdent::Op::Remainder,
                 [&](Emitter& emitter)
                 {
                     auto* const value = [&]() -> llvm::Value*
@@ -641,7 +641,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::UnaryPlus,
+                SpecialIdent::Op::UnaryPlus,
                 [&](Emitter& emitter)
                 {
                     emitter.GetBlockBuilder().Builder.CreateRet(
@@ -658,7 +658,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::UnaryNegation,
+                SpecialIdent::Op::UnaryNegation,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateMul(
@@ -679,7 +679,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::OneComplement,
+                SpecialIdent::Op::OneComplement,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateXor(
@@ -699,7 +699,7 @@ namespace Ace
             return 
             {
                 selfType,
-                SpecialIdentifier::Op::Multiplication,
+                SpecialIdent::Op::Multiplication,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateMul(
@@ -719,7 +719,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Addition,
+                SpecialIdent::Op::Addition,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateAdd(
@@ -739,7 +739,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Subtraction,
+                SpecialIdent::Op::Subtraction,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateSub(
@@ -759,7 +759,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::RightShift,
+                SpecialIdent::Op::RightShift,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateAShr(
@@ -779,7 +779,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::LeftShift,
+                SpecialIdent::Op::LeftShift,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateShl(
@@ -799,7 +799,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::LessThan,
+                SpecialIdent::Op::LessThan,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -820,7 +820,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::GreaterThan,
+                SpecialIdent::Op::GreaterThan,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -841,7 +841,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::LessThanEquals,
+                SpecialIdent::Op::LessThanEquals,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -862,7 +862,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::GreaterThanEquals,
+                SpecialIdent::Op::GreaterThanEquals,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -883,7 +883,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Equals,
+                SpecialIdent::Op::Equals,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -904,7 +904,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::NotEquals,
+                SpecialIdent::Op::NotEquals,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
@@ -925,7 +925,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::AND,
+                SpecialIdent::Op::AND,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateAnd(
@@ -945,7 +945,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::XOR,
+                SpecialIdent::Op::XOR,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateXor(
@@ -965,7 +965,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::OR,
+                SpecialIdent::Op::OR,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateOr(
@@ -1131,7 +1131,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::UnaryPlus,
+                SpecialIdent::Op::UnaryPlus,
                 [&](Emitter& emitter)
                 {
                     emitter.GetBlockBuilder().Builder.CreateRet(
@@ -1148,7 +1148,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::UnaryNegation,
+                SpecialIdent::Op::UnaryNegation,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFMul(
@@ -1168,7 +1168,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Multiplication,
+                SpecialIdent::Op::Multiplication,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFMul(
@@ -1188,7 +1188,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Division,
+                SpecialIdent::Op::Division,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFDiv(
@@ -1208,7 +1208,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Remainder,
+                SpecialIdent::Op::Remainder,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFRem(
@@ -1228,7 +1228,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Addition,
+                SpecialIdent::Op::Addition,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFAdd(
@@ -1248,7 +1248,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Subtraction,
+                SpecialIdent::Op::Subtraction,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFSub(
@@ -1268,7 +1268,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::LessThan,
+                SpecialIdent::Op::LessThan,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1289,7 +1289,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::GreaterThan,
+                SpecialIdent::Op::GreaterThan,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1310,7 +1310,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::LessThanEquals,
+                SpecialIdent::Op::LessThanEquals,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1331,7 +1331,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::GreaterThanEquals,
+                SpecialIdent::Op::GreaterThanEquals,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1352,7 +1352,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::Equals,
+                SpecialIdent::Op::Equals,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1373,7 +1373,7 @@ namespace Ace
             return
             {
                 selfType,
-                SpecialIdentifier::Op::NotEquals,
+                SpecialIdent::Op::NotEquals,
                 [&](Emitter& emitter)
                 {
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
@@ -1546,10 +1546,10 @@ namespace Ace
             NativeCopyabilityKind::NonTrivial,
         },
 
-        Pointer
+        Ptr
         {
             compilation,
-            std::vector{ "ace", "std", "Pointer" },
+            std::vector{ "ace", "std", "Ptr" },
             [compilation]() -> llvm::Type*
             {
                 return llvm::Type::getInt8PtrTy(*compilation->LLVMContext);
@@ -1558,20 +1558,20 @@ namespace Ace
             NativeCopyabilityKind::Trivial,
         },
 
-        Reference
+        Ref
         {
             compilation,
-            std::vector{ "ace", "std", "Reference" },
+            std::vector{ "ace", "std", "Ref" },
         },
-        StrongPointer
+        StrongPtr
         {
             compilation,
-            std::vector{ "ace", "std", "rc", "StrongPointer" },
+            std::vector{ "ace", "std", "rc", "StrongPtr" },
         },
-        WeakPointer
+        WeakPtr
         {
             compilation,
-            std::vector{ "ace", "std", "rc", "WeakPointer" },
+            std::vector{ "ace", "std", "rc", "WeakPtr" },
         },
 
         print_int
@@ -1739,11 +1739,11 @@ namespace Ace
                 auto* const freeFunction =
                     emitter.GetC().GetFunctions().GetFree();
 
-                auto* const pointerType = Pointer.GetIRType();
+                auto* const ptrType = Ptr.GetIRType();
 
                 auto* const blockValue = emitter.EmitLoadArg(
                     0,
-                    pointerType
+                    ptrType
                 );
 
                 emitter.GetBlockBuilder().Builder.CreateCall(
@@ -1763,7 +1763,7 @@ namespace Ace
                 auto* const memcpyFunction =
                     emitter.GetC().GetFunctions().GetMemcpy();
 
-                auto* const pointerType = Pointer.GetIRType();
+                auto* const ptrType = Ptr.GetIRType();
 
                 auto* const intTypeSymbol = Int.GetSymbol();
                 auto* const intType = emitter.GetIRType(intTypeSymbol);
@@ -1771,8 +1771,8 @@ namespace Ace
                 auto* const cSizeType =
                     (memcpyFunction->arg_begin() + 2)->getType();
 
-                auto* const srcValue = emitter.EmitLoadArg(0, pointerType);
-                auto* const dstValue = emitter.EmitLoadArg(1, pointerType);
+                auto* const srcValue = emitter.EmitLoadArg(0, ptrType);
+                auto* const dstValue = emitter.EmitLoadArg(1, ptrType);
                 auto* const sizeValue = emitter.EmitLoadArg(2, intType);
 
                 auto* const convertedSizeValue = emitter.GetBlockBuilder().Builder.CreateZExtOrTrunc(
@@ -2133,20 +2133,20 @@ namespace Ace
         f64__equals{ F::Equals(Float64) },
         f64__noequals{ F::NotEquals(Float64) },
 
-        StrongPointer__new
+        StrongPtr__new
         {
-            StrongPointer,
+            StrongPtr,
             "new"
         },
-        StrongPointer__value
+        StrongPtr__value
         {
-            StrongPointer,
+            StrongPtr,
             "value"
         },
 
-        WeakPointer__from
+        WeakPtr__from
         {
-            WeakPointer,
+            WeakPtr,
             "from"
         }
     {
@@ -2213,14 +2213,14 @@ namespace Ace
             &Void,
             &String,
 
-            &Pointer,
+            &Ptr,
         };
 
         m_TypeTemplates = 
         {
-            &Reference,
-            &StrongPointer,
-            &WeakPointer,
+            &Ref,
+            &StrongPtr,
+            &WeakPtr,
         };
 
         m_Functions =
@@ -2560,10 +2560,10 @@ namespace Ace
 
         m_AssociatedFunctionTemplates =
         {
-            &StrongPointer__new,
-            &StrongPointer__value,
+            &StrongPtr__new,
+            &StrongPtr__value,
 
-            &WeakPointer__from,
+            &WeakPtr__from,
         };
 
         m_Natives.insert(

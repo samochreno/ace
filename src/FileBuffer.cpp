@@ -105,7 +105,7 @@ namespace Ace
     }
 
 
-    auto FileBuffer::CreateFirstLocation() const -> SourceLocation
+    auto FileBuffer::CreateFirstLocation() const -> SrcLocation
     {
         return
         {
@@ -116,7 +116,7 @@ namespace Ace
     }
 
     auto FileBuffer::FormatLocation(
-        const SourceLocation& location
+        const SrcLocation& location
     ) const -> std::string
     {
         const auto lineIndex = FindLineIndex(

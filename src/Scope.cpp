@@ -13,7 +13,7 @@
 
 #include "Assert.hpp"
 #include "Diagnostic.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "Symbols/All.hpp"
 #include "SymbolCreatable.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
@@ -189,7 +189,7 @@ namespace Ace
             std::distance(nameSectionsBegin, nameSectionsEnd) == 1
         },
         Name{ nameSectionsBegin->Name.String },
-        TemplateName{ SpecialIdentifier::CreateTemplate(Name) }
+        TemplateName{ SpecialIdent::CreateTemplate(Name) }
     {
     }
 
@@ -489,8 +489,8 @@ namespace Ace
         ITypeSymbol* paramType
     ) -> Expected<std::vector<TemplateArgDeductionResult>>
     {
-        argType = argType->GetWithoutReference();
-        paramType = paramType->GetWithoutReference();
+        argType = argType->GetWithoutRef();
+        paramType = paramType->GetWithoutRef();
 
         auto* const templateParam = dynamic_cast<NormalTemplateParamTypeSymbol*>(
             paramType->GetUnaliased()
@@ -723,9 +723,9 @@ namespace Ace
     }
 
     auto Scope::DefineTemplateArgAliases(
-        const std::vector<Identifier>& implTemplateParamNames, 
+        const std::vector<Ident>& implTemplateParamNames, 
         const std::vector<ITypeSymbol*> implTemplateArgs, 
-        const std::vector<Identifier>& templateParamNames, 
+        const std::vector<Ident>& templateParamNames, 
         const std::vector<ITypeSymbol*> templateArgs
     ) -> Expected<void>
     {
@@ -770,7 +770,7 @@ namespace Ace
     ) : Scope
         {
             compilation,
-            std::string{ SpecialIdentifier::Global },
+            std::string{ SpecialIdent::Global },
             std::nullopt
         }
     {
@@ -802,7 +802,7 @@ namespace Ace
 
         m_Name = optName.has_value() ?
             optName.value() :
-            SpecialIdentifier::CreateAnonymous();
+            SpecialIdent::CreateAnonymous();
     }
 
     auto Scope::AddChild(const std::optional<std::string>& optName) -> std::shared_ptr<Scope>
@@ -1238,17 +1238,17 @@ namespace Ace
     {
         selfType = selfType->GetUnaliased();
 
-        if (selfType->IsReference())
+        if (selfType->IsRef())
         {
             return GetInstanceSymbolResolutionScopes(
-                selfType->GetWithoutReference()
+                selfType->GetWithoutRef()
             );
         }
 
-        if (selfType->IsStrongPointer())
+        if (selfType->IsStrongPtr())
         {
             return GetInstanceSymbolResolutionScopes(
-                selfType->GetWithoutStrongPointer()
+                selfType->GetWithoutStrongPtr()
             );
         }
 
@@ -1293,7 +1293,7 @@ namespace Ace
         const auto& section = name.Sections.front();
 
         const auto& nameString = section.Name.String;
-        const auto templateNameString = SpecialIdentifier::CreateTemplate(
+        const auto templateNameString = SpecialIdent::CreateTemplate(
             nameString
         );
 

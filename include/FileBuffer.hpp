@@ -6,12 +6,12 @@
 #include <string_view>
 #include <filesystem>
 
-#include "SourceBuffer.hpp"
+#include "SrcBuffer.hpp"
 #include "Diagnostic.hpp"
 
 namespace Ace
 {
-    class FileBuffer : public virtual ISourceBuffer
+    class FileBuffer : public virtual ISrcBuffer
     {
     public:
         FileBuffer() = default;
@@ -31,13 +31,13 @@ namespace Ace
         auto GetBuffer() const -> const std::string& final;
 
         auto FormatLocation(
-            const SourceLocation& location
+            const SrcLocation& location
         ) const -> std::string final;
 
         auto GetPath() const -> const std::filesystem::path&;
         auto GetLines() const -> const std::vector<std::string_view>&;
 
-        auto CreateFirstLocation() const -> SourceLocation;
+        auto CreateFirstLocation() const -> SrcLocation;
 
     private:
         FileBuffer(

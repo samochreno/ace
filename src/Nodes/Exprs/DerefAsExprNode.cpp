@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -12,18 +12,18 @@
 namespace Ace
 {
     DerefAsExprNode::DerefAsExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const TypeName& typeName, 
         const std::shared_ptr<const IExprNode>& expr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_TypeName{ typeName },
         m_Expr{ expr }
     {
     }
 
-    auto DerefAsExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto DerefAsExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto DerefAsExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -45,7 +45,7 @@ namespace Ace
     ) const -> std::shared_ptr<const DerefAsExprNode>
     {
         return std::make_shared<const DerefAsExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_TypeName,
             m_Expr->CloneInScopeExpr(scope)
         );
@@ -65,7 +65,7 @@ namespace Ace
             m_TypeName.ToSymbolName(GetCompilation())
         ));
         return std::make_shared<const DerefAsExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             boundExpr,
             typeSymbol
         );

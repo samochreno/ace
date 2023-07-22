@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/OrExprBoundNode.hpp"
@@ -11,18 +11,18 @@
 namespace Ace
 {
     OrExprNode::OrExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprNode>& lhsExpr,
         const std::shared_ptr<const IExprNode>& rhsExpr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr }
     {
     }
 
-    auto OrExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto OrExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto OrExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -45,7 +45,7 @@ namespace Ace
     ) const -> std::shared_ptr<const OrExprNode>
     {
         return std::make_shared<const OrExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_LHSExpr->CloneInScopeExpr(scope),
             m_RHSExpr->CloneInScopeExpr(scope)
         );
@@ -63,7 +63,7 @@ namespace Ace
         ACE_TRY(boundLHSExpr, m_LHSExpr->CreateBoundExpr());
         ACE_TRY(boundRHSExpr, m_RHSExpr->CreateBoundExpr());
         return std::make_shared<const OrExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             boundLHSExpr,
             boundRHSExpr
         );

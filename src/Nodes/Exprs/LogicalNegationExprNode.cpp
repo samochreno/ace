@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Diagnostic.hpp"
@@ -11,16 +11,16 @@
 namespace Ace
 {
     LogicalNegationExprNode::LogicalNegationExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprNode>& expr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
     }
 
-    auto LogicalNegationExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto LogicalNegationExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto LogicalNegationExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -42,7 +42,7 @@ namespace Ace
     ) const -> std::shared_ptr<const LogicalNegationExprNode>
     {
         return std::make_shared<const LogicalNegationExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_Expr->CloneInScopeExpr(scope)
         );
     }
@@ -58,7 +58,7 @@ namespace Ace
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
         return std::make_shared<const LogicalNegationExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             boundExpr
         );
     }

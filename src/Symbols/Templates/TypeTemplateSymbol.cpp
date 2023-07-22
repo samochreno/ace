@@ -4,7 +4,7 @@
 
 #include "Assert.hpp"
 #include "Scope.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Types/Aliases/TemplateArgs/NormalTemplateArgAliasTypeSymbol.hpp"
@@ -19,8 +19,8 @@ namespace Ace
     {
         m_Name =
         {
-            GetASTName().SourceLocation,
-            SpecialIdentifier::CreateTemplate(GetASTName().String),
+            GetASTName().SrcLocation,
+            SpecialIdent::CreateTemplate(GetASTName().String),
         };
     }
 
@@ -34,7 +34,7 @@ namespace Ace
         return m_TemplateNode->GetSelfScope();
     }
 
-    auto TypeTemplateSymbol::GetName() const -> const Identifier&
+    auto TypeTemplateSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }
@@ -64,7 +64,7 @@ namespace Ace
         return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<NormalTemplateParamTypeSymbol>();
     }
 
-    auto TypeTemplateSymbol::GetASTName() const -> const Identifier&
+    auto TypeTemplateSymbol::GetASTName() const -> const Ident&
     {
         return m_TemplateNode->GetAST()->GetName();
     }
@@ -140,23 +140,23 @@ namespace Ace
 
         auto* const selfSymbol = boundAST->GetSymbol();
 
-        const SourceLocation sourceLocation{};
+        const SrcLocation srcLocation{};
 
         auto copyOpName = selfSymbol->CreateFullyQualifiedName(
-            sourceLocation
+            srcLocation
         );
         copyOpName.Sections.push_back(SymbolNameSection{
-            Identifier{ sourceLocation, SpecialIdentifier::Op::Copy }
+            Ident{ srcLocation, SpecialIdent::Op::Copy }
         });
         selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
             copyOpName
         );
 
         auto dropOpName = selfSymbol->CreateFullyQualifiedName(
-            sourceLocation
+            srcLocation
         );
         dropOpName.Sections.push_back(SymbolNameSection{
-            Identifier{ sourceLocation, SpecialIdentifier::Op::Drop }
+            Ident{ srcLocation, SpecialIdent::Op::Drop }
         });
         selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
             dropOpName

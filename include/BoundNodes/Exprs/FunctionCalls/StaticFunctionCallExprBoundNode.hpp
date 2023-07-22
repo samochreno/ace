@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Diagnostic.hpp"
@@ -21,14 +21,14 @@ namespace Ace
     {
     public:
         StaticFunctionCallExprBoundNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             FunctionSymbol* const functionSymbol,
             const std::vector<std::shared_ptr<const IExprBoundNode>>& args
         );
         virtual ~StaticFunctionCallExprBoundNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -48,7 +48,7 @@ namespace Ace
         auto GetTypeInfo() const -> TypeInfo final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
         FunctionSymbol* m_FunctionSymbol{};
         std::vector<std::shared_ptr<const IExprBoundNode>> m_Args{};

@@ -3,50 +3,50 @@
 #include <memory>
 
 #include "Diagnostic.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 
 namespace Ace
 {
     inline auto CreateMissingCLIOptionNameError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "missing option name"
         );
     }
 
     inline auto CreateUnknownCLIOptionNameError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "unknown option name"
         );
     }
 
     inline auto CreateMissingCLIOptionValueError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "missing option argument"
         );
     }
 
     inline auto CreateUnexpectedCLIOptionValueError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "unexpected option argument"
         );
     }

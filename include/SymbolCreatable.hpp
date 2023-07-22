@@ -4,7 +4,7 @@
 
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
@@ -26,7 +26,7 @@ namespace Ace
     public:
         virtual ~IPartiallySymbolCreatable() = default;
 
-        virtual auto GetName() const -> const Identifier& = 0;
+        virtual auto GetName() const -> const Ident& = 0;
         virtual auto ContinueCreatingSymbol(
             ISymbol* const symbol
         ) const -> Expected<void> = 0;

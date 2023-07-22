@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -17,20 +17,20 @@
 namespace Ace
 {
     LiteralExprBoundNode::LiteralExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const LiteralKind kind,
         const std::string& string
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Kind{ kind },
         m_String{ string }
     {
     }
 
-    auto LiteralExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto LiteralExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto LiteralExprBoundNode::GetScope() const -> std::shared_ptr<Scope>

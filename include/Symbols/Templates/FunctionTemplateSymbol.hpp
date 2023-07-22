@@ -10,7 +10,7 @@
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostic.hpp"
 #include "Name.hpp"
@@ -26,7 +26,7 @@ namespace Ace
         virtual ~FunctionTemplateSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
@@ -34,7 +34,7 @@ namespace Ace
         auto CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*>   final;
         auto CollectParams()     const -> std::vector<NormalTemplateParamTypeSymbol*> final;
 
-        auto GetASTName() const -> const Identifier& final;
+        auto GetASTName() const -> const Ident& final;
 
         auto SetPlaceholderSymbol(ISymbol* const symbol) -> void final;
         auto GetPlaceholderSymbol() const -> ISymbol* final;
@@ -48,7 +48,7 @@ namespace Ace
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        Identifier m_Name{};
+        Ident m_Name{};
         const FunctionTemplateNode* m_TemplateNode{};
         ISymbol* m_PlaceholderSymbol{};
         std::vector<std::shared_ptr<const FunctionNode>> m_InstantiatedOnlySymbolsASTs{};

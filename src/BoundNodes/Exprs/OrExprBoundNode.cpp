@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -15,18 +15,18 @@
 namespace Ace
 {
     OrExprBoundNode::OrExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& rhsExpr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr }
     {
     }
 
-    auto OrExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto OrExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto OrExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -73,7 +73,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const OrExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value
         ));
@@ -100,7 +100,7 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
 
         return CreateChanged(std::make_shared<const OrExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchLoweredLHSExpr.Value,
             mchLoweredRHSExpr.Value
         )->GetOrCreateLowered({}).Value);
@@ -115,7 +115,7 @@ namespace Ace
 
     auto OrExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
-        std::vector<ExprDropData> temporaries{};
+        std::vector<ExprDropData> tmps{};
 
         auto* const boolType = GetCompilation()->Natives->Bool.GetIRType();
 
@@ -123,10 +123,10 @@ namespace Ace
             emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
 
         const auto lhsEmitResult = m_LHSExpr->Emit(emitter);
-        temporaries.insert(
-            end(temporaries), 
-            begin(lhsEmitResult.Temporaries), 
-            end  (lhsEmitResult.Temporaries)
+        tmps.insert(
+            end(tmps), 
+            begin(lhsEmitResult.Tmps), 
+            end  (lhsEmitResult.Tmps)
         );
 
         auto* const lhsLoadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
@@ -158,10 +158,10 @@ namespace Ace
         emitter.SetBlockBuilder(std::move(falseBlockBuilder));
 
         const auto rhsEmitResult = m_RHSExpr->Emit(emitter);
-        temporaries.insert(
-            end(temporaries), 
-            begin(rhsEmitResult.Temporaries), 
-            end  (rhsEmitResult.Temporaries)
+        tmps.insert(
+            end(tmps), 
+            begin(rhsEmitResult.Tmps), 
+            end  (rhsEmitResult.Tmps)
         );
 
         auto* const rhsLoadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
@@ -178,7 +178,7 @@ namespace Ace
 
         emitter.SetBlockBuilder(std::move(endBlockBuilder));
 
-        return { allocaInst, temporaries };
+        return { allocaInst, tmps };
     }
 
     auto OrExprBoundNode::GetTypeInfo() const -> TypeInfo

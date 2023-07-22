@@ -3,29 +3,29 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "Nodes/TemplateParams/NormalTemplateParamNode.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
     TypeTemplateNode::TypeTemplateNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::vector<std::shared_ptr<const NormalTemplateParamNode>>& params,
         const std::shared_ptr<const ITypeNode>& ast
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Params{ params },
         m_AST{ ast }
     {
     }
 
-    auto TypeTemplateNode::GetSourceLocation() const -> const SourceLocation&
+    auto TypeTemplateNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto TypeTemplateNode::GetScope() const -> std::shared_ptr<Scope>
@@ -58,7 +58,7 @@ namespace Ace
         );
 
         return std::make_shared<const TypeTemplateNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             clonedParams,
             m_AST->CloneInScopeType(scope)
         );
@@ -87,14 +87,14 @@ namespace Ace
         };
     }
 
-    auto TypeTemplateNode::CollectImplParamNames() const -> std::vector<Identifier>
+    auto TypeTemplateNode::CollectImplParamNames() const -> std::vector<Ident>
     {
         return {};
     }
 
-    auto TypeTemplateNode::CollectParamNames() const -> std::vector<Identifier>
+    auto TypeTemplateNode::CollectParamNames() const -> std::vector<Ident>
     {
-        std::vector<Identifier> names{};
+        std::vector<Ident> names{};
         std::transform(
             begin(m_Params),
             end  (m_Params),

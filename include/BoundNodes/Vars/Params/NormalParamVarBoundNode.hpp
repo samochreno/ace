@@ -6,7 +6,7 @@
 #include "BoundNodes/BoundNode.hpp"
 #include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Symbols/Vars/Params/NormalParamVarSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
@@ -23,13 +23,13 @@ namespace Ace
     {
     public:
         ParamVarBoundNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             NormalParamVarSymbol* const symbol,
             const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes
         );
         virtual ~ParamVarBoundNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -42,7 +42,7 @@ namespace Ace
         auto GetSymbol() const -> NormalParamVarSymbol* final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         NormalParamVarSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const AttributeBoundNode>> m_Attributes{};
     };

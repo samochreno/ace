@@ -7,12 +7,12 @@
 #include "Nodes/TypedNode.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "BoundNodes/Vars/Params/SelfParamVarBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 
 namespace Ace
 {
@@ -24,13 +24,13 @@ namespace Ace
     {
     public:
         SelfParamVarNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             const SymbolName& typeName
         );
         virtual ~SelfParamVarNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -38,7 +38,7 @@ namespace Ace
         ) const -> std::shared_ptr<const SelfParamVarNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const SelfParamVarBoundNode>> final;
 
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
@@ -46,9 +46,9 @@ namespace Ace
         auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
-        Identifier m_Name{};
+        Ident m_Name{};
         TypeName m_TypeName{};
     };
 }

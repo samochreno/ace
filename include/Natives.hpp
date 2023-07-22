@@ -31,7 +31,7 @@ namespace Ace
         virtual auto GetCompilation() const -> const Compilation* = 0;
 
         virtual auto CreateFullyQualifiedName(
-            const SourceLocation& sourceLocation
+            const SrcLocation& srcLocation
         ) const -> SymbolName = 0;
 
         virtual auto Initialize() -> void = 0;
@@ -58,7 +58,7 @@ namespace Ace
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& sourceLocation
+            const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -90,7 +90,7 @@ namespace Ace
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& sourceLocation
+            const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -117,7 +117,7 @@ namespace Ace
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& sourceLocation
+            const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -144,7 +144,7 @@ namespace Ace
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& sourceLocation
+            const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -171,7 +171,7 @@ namespace Ace
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& sourceLocation
+            const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -198,7 +198,7 @@ namespace Ace
         auto GetCompilation() const -> const Compilation*;
 
         auto CreateFullyQualifiedName(
-            const SourceLocation& sourceLocation
+            const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
         auto Initialize() -> void final;
@@ -245,11 +245,11 @@ namespace Ace
         NativeType Void;
         NativeType String;
 
-        NativeType Pointer;
+        NativeType Ptr;
 
-        NativeTypeTemplate Reference;
-        NativeTypeTemplate StrongPointer;
-        NativeTypeTemplate WeakPointer;
+        NativeTypeTemplate Ref;
+        NativeTypeTemplate StrongPtr;
+        NativeTypeTemplate WeakPtr;
 
         NativeFunction print_int;
         NativeFunction print_ptr;
@@ -576,10 +576,10 @@ namespace Ace
         NativeAssociatedFunction f64__equals;
         NativeAssociatedFunction f64__noequals;
 
-        NativeAssociatedFunctionTemplate StrongPointer__new;
-        NativeAssociatedFunctionTemplate StrongPointer__value;
+        NativeAssociatedFunctionTemplate StrongPtr__new;
+        NativeAssociatedFunctionTemplate StrongPtr__value;
 
-        NativeAssociatedFunctionTemplate WeakPointer__from;
+        NativeAssociatedFunctionTemplate WeakPtr__from;
 
     private:
         auto InitializeCollectionsOfNatives() -> void;

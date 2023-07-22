@@ -3,14 +3,14 @@
 #include <memory>
 
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
 {
     StaticVarSymbol::StaticVarSymbol(
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name,
+        const Ident& name,
         const AccessModifier accessModifier,
         ITypeSymbol* const type
     ) : m_Scope{ scope },
@@ -25,7 +25,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto StaticVarSymbol::GetName() const -> const Identifier&
+    auto StaticVarSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }

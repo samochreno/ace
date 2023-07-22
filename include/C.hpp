@@ -12,20 +12,20 @@ namespace Ace
             llvm::Module& module
         ) -> void;
 
-        auto GetInt()         const -> llvm::IntegerType*;
-        auto GetChar()        const -> llvm::IntegerType*;
-        auto GetCharPointer() const -> llvm::PointerType*;
-        auto GetSize()        const -> llvm::IntegerType*;
-        auto GetVoid()        const -> llvm::Type*;
-        auto GetVoidPointer() const -> llvm::PointerType*;
+        auto GetInt()     const -> llvm::IntegerType*;
+        auto GetChar()    const -> llvm::IntegerType*;
+        auto GetCharPtr() const -> llvm::PointerType*;
+        auto GetSize()    const -> llvm::IntegerType*;
+        auto GetVoid()    const -> llvm::Type*;
+        auto GetVoidPtr() const -> llvm::PointerType*;
 
     private:
         llvm::IntegerType* m_Int{};
         llvm::IntegerType* m_Char{};
-        llvm::PointerType* m_CharPointer{};
+        llvm::PointerType* m_CharPtr{};
         llvm::IntegerType* m_Size{};
         llvm::Type*        m_Void{};
-        llvm::PointerType* m_VoidPointer{};
+        llvm::PointerType* m_VoidPtr{};
     };
 
     class CFunctions

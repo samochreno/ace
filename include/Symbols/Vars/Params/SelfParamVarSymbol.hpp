@@ -4,9 +4,9 @@
 
 #include "Symbols/Vars/Params/ParamVarSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
@@ -15,14 +15,14 @@ namespace Ace
     {
     public:
         SelfParamVarSymbol(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             ITypeSymbol* const type
         );
         virtual ~SelfParamVarSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
@@ -30,7 +30,7 @@ namespace Ace
         auto GetType() const -> ITypeSymbol* final;
 
     private:
-        Identifier m_Name{};
+        Ident m_Name{};
         std::shared_ptr<Scope> m_Scope{};
         ITypeSymbol* m_Type{};
     };

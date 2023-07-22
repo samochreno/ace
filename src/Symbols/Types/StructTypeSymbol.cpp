@@ -4,7 +4,7 @@
 #include <optional>
 
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Diagnostic.hpp"
@@ -15,7 +15,7 @@ namespace Ace
 {
     StructTypeSymbol::StructTypeSymbol(
         const std::shared_ptr<Scope>& selfScope,
-        const Identifier& name,
+        const Ident& name,
         const AccessModifier accessModifier
     ) : m_SelfScope{ selfScope },
         m_Name{ name },
@@ -33,7 +33,7 @@ namespace Ace
         return m_SelfScope;
     }
 
-    auto StructTypeSymbol::GetName() const -> const Identifier&
+    auto StructTypeSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }

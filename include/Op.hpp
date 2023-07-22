@@ -1,13 +1,13 @@
 #pragma once
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "TokenKind.hpp"
 
 namespace Ace
 {
     struct Op
     {
-        SourceLocation SourceLocation{};
+        SrcLocation SrcLocation{};
         TokenKind TokenKind{};
     };
 }

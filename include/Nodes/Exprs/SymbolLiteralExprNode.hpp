@@ -4,9 +4,9 @@
 #include <vector>
 
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNodes/Exprs/VarReferences/StaticVarReferenceExprBoundNode.hpp"
+#include "BoundNodes/Exprs/VarRefs/StaticVarRefExprBoundNode.hpp"
 #include "Name.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 
@@ -15,17 +15,17 @@ namespace Ace
     class SymbolLiteralExprNode :
         public virtual IExprNode,
         public virtual ICloneableNode<SymbolLiteralExprNode>, 
-        public virtual IBindableNode<StaticVarReferenceExprBoundNode>
+        public virtual IBindableNode<StaticVarRefExprBoundNode>
     {
     public:
         SymbolLiteralExprNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             const SymbolName& name
         );
         virtual ~SymbolLiteralExprNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -34,13 +34,13 @@ namespace Ace
         auto CloneInScopeExpr(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const StaticVarReferenceExprBoundNode>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const StaticVarRefExprBoundNode>> final;
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
         auto GetName() const -> const SymbolName&;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
         SymbolName m_Name;
     };

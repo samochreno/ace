@@ -7,7 +7,7 @@
 #include "Symbols/Types/Aliases/TemplateArgs/TemplateArgAliasTypeSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Diagnostic.hpp"
 #include "Emittable.hpp"
@@ -20,7 +20,7 @@ namespace Ace
     public:
         ImplTemplateArgAliasTypeSymbol(
             const std::shared_ptr<Scope>& scope,
-            const Identifier& name,
+            const Ident& name,
             ITypeSymbol* const aliasedType,
             const size_t index
         );
@@ -28,7 +28,7 @@ namespace Ace
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
@@ -64,7 +64,7 @@ namespace Ace
 
     private:
         std::shared_ptr<Scope> m_Scope{};
-        Identifier m_Name{};
+        Ident m_Name{};
         ITypeSymbol* m_AliasedType{};
         size_t m_Index{};
     };

@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -12,16 +12,16 @@
 namespace Ace
 {
     LabelStmtBoundNode::LabelStmtBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         LabelSymbol* const symbol
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol }
     {
     }
 
-    auto LabelStmtBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto LabelStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto LabelStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>

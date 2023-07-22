@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 
@@ -11,7 +11,7 @@ namespace Ace
 {
     InstanceVarSymbol::InstanceVarSymbol(
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name,
+        const Ident& name,
         const AccessModifier accessModifier,
         ITypeSymbol* const type,
         const size_t index
@@ -28,7 +28,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto InstanceVarSymbol::GetName() const -> const Identifier&
+    auto InstanceVarSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }

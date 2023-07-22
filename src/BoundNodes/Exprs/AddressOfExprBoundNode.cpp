@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -16,16 +16,16 @@
 namespace Ace
 {
     AddressOfExprBoundNode::AddressOfExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
     }
 
-    auto AddressOfExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto AddressOfExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto AddressOfExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -54,7 +54,7 @@ namespace Ace
         }
          
         return CreateChanged(std::make_shared<const AddressOfExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Expr
         ));
     }
@@ -78,7 +78,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const AddressOfExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             mchLoweredExpr.Value
         )->GetOrCreateLowered({}).Value);
     }
@@ -94,13 +94,13 @@ namespace Ace
         Emitter& emitter
     ) const -> ExprEmitResult
     {
-        std::vector<ExprDropData> temporaries{};
+        std::vector<ExprDropData> tmps{};
 
         const auto exprEmitResult = m_Expr->Emit(emitter);
-        temporaries.insert(
-            end(temporaries),
-            begin(exprEmitResult.Temporaries),
-            end  (exprEmitResult.Temporaries)
+        tmps.insert(
+            end(tmps),
+            begin(exprEmitResult.Tmps),
+            end  (exprEmitResult.Tmps)
         );
 
         auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol;
@@ -111,9 +111,9 @@ namespace Ace
 
         auto* const allocaInst =
             emitter.GetBlockBuilder().Builder.CreateAlloca(type);
-        temporaries.emplace_back(
+        tmps.emplace_back(
             allocaInst, 
-            GetCompilation()->Natives->Pointer.GetSymbol()
+            GetCompilation()->Natives->Ptr.GetSymbol()
         );
 
         emitter.GetBlockBuilder().Builder.CreateStore(
@@ -121,14 +121,14 @@ namespace Ace
             allocaInst
         );
 
-        return { allocaInst, temporaries };
+        return { allocaInst, tmps };
     }
 
     auto AddressOfExprBoundNode::GetTypeInfo() const -> TypeInfo
     {
         return 
         { 
-            GetCompilation()->Natives->Pointer.GetSymbol(), 
+            GetCompilation()->Natives->Ptr.GetSymbol(), 
             ValueKind::R
         };
     }

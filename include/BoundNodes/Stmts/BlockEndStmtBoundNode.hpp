@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
-#include "SourceBuffer.hpp"
+#include "SrcBuffer.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
@@ -19,12 +19,12 @@ namespace Ace
     {
     public:
         BlockEndStmtBoundNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& selfScope
         );
         virtual ~BlockEndStmtBoundNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope>;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
@@ -43,7 +43,7 @@ namespace Ace
         auto Emit(Emitter& emitter) const -> void final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_SelfScope{};
     };
 }

@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -16,20 +16,20 @@
 namespace Ace
 {
     StructConstructionExprBoundNode::StructConstructionExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         StructTypeSymbol* const structSymbol,
         const std::vector<StructConstructionExprBoundArg>& args
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_StructSymbol{ structSymbol },
         m_Args{ args }
     {
     }
 
-    auto StructConstructionExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto StructConstructionExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto StructConstructionExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -76,7 +76,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StructConstructionExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             m_StructSymbol,
             mchCheckedArgs.Value
@@ -117,7 +117,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StructConstructionExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             m_StructSymbol,
             mchLoweredArgs.Value
@@ -135,13 +135,13 @@ namespace Ace
         Emitter& emitter
     ) const -> ExprEmitResult
     {
-        std::vector<ExprDropData> temporaries{};
+        std::vector<ExprDropData> tmps{};
 
         auto* const structureType = emitter.GetIRType(m_StructSymbol);
 
         auto* const allocaInst =
             emitter.GetBlockBuilder().Builder.CreateAlloca(structureType);
-        temporaries.emplace_back(allocaInst, m_StructSymbol);
+        tmps.emplace_back(allocaInst, m_StructSymbol);
 
         std::for_each(begin(m_Args), end(m_Args),
         [&](const StructConstructionExprBoundArg& arg)
@@ -175,10 +175,10 @@ namespace Ace
             );
 
             const auto argEmitResult = arg.Value->Emit(emitter);
-            temporaries.insert(
-                end(temporaries),
-                begin(argEmitResult.Temporaries),
-                end  (argEmitResult.Temporaries)
+            tmps.insert(
+                end(tmps),
+                begin(argEmitResult.Tmps),
+                end  (argEmitResult.Tmps)
             );
 
             emitter.EmitCopy(
@@ -188,7 +188,7 @@ namespace Ace
             );
         });
         
-        return { allocaInst, temporaries };
+        return { allocaInst, tmps };
     }
 
     auto StructConstructionExprBoundNode::GetTypeInfo() const -> TypeInfo

@@ -7,7 +7,7 @@
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "BoundNodes/ImplBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "Diagnostic.hpp"
@@ -21,7 +21,7 @@ namespace Ace
     {
     public:
         ImplNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& selfScope,
             const SymbolName& typeName,
             const std::vector<std::shared_ptr<const FunctionNode>>& functions,
@@ -29,7 +29,7 @@ namespace Ace
         );
         virtual ~ImplNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -40,7 +40,7 @@ namespace Ace
         auto DefineAssociations() const -> Expected<void>;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_SelfScope{};
         SymbolName m_TypeName{};
         std::vector<std::shared_ptr<const FunctionNode>> m_Functions{};

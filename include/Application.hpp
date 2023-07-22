@@ -32,23 +32,23 @@ namespace Ace::Application
 #undef TLowered
 #undef TLoweredTypeChecked
 
-    template<typename TNodeSmartPointer>
-    auto GetAllNodes(const TNodeSmartPointer& ast)
+    template<typename TNodeSmartPtr>
+    auto GetAllNodes(const TNodeSmartPtr& ast)
     {
         auto nodes = ast->GetChildren();
         nodes.push_back(ast.get());
         return nodes;
     }
 
-#define TASTSmartPointer std::remove_reference_t<decltype(*TIt{})>
-#define TNodeIBase std::remove_const_t<std::remove_pointer_t<std::remove_cvref_t<decltype(TASTSmartPointer{}->GetChildren().front())>>>
+#define TASTSmartPtr std::remove_reference_t<decltype(*TIt{})>
+#define TNodeIBase std::remove_const_t<std::remove_pointer_t<std::remove_cvref_t<decltype(TASTSmartPtr{}->GetChildren().front())>>>
 
     template<typename TIt>
     auto GetAllNodes(TIt astsBegin, TIt astsEnd)
     {
         std::vector<const TNodeIBase*> allNodes{};
         std::for_each(astsBegin, astsEnd,
-        [&](const TASTSmartPointer& ast)
+        [&](const TASTSmartPtr& ast)
         {
             const auto nodes = GetAllNodes(ast);
             allNodes.insert(allNodes.end(), nodes.begin(), nodes.end());
@@ -57,7 +57,7 @@ namespace Ace::Application
         return allNodes;
     }
 
-#undef TASTSmartPointer
+#undef TASTSmartPtr
 #undef TNodeIBase
 #define TTypeChecked        std::remove_reference_t<decltype(getOrCreateTypeCheckedFunc(TBound{}).Unwrap().Value)>
 #define TLowered            std::remove_reference_t<decltype(getOrCreateLoweredFunc(TTypeChecked{}).Value)>

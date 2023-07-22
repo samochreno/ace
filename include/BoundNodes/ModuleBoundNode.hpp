@@ -8,7 +8,7 @@
 #include "BoundNodes/ImplBoundNode.hpp"
 #include "BoundNodes/FunctionBoundNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Symbols/ModuleSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
@@ -24,7 +24,7 @@ namespace Ace
     {
     public:
         ModuleBoundNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             ModuleSymbol* const symbol,
             const std::vector<std::shared_ptr<const ModuleBoundNode>>& modules,
             const std::vector<std::shared_ptr<const ITypeBoundNode>>& types,
@@ -34,7 +34,7 @@ namespace Ace
         );
         virtual ~ModuleBoundNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
@@ -45,7 +45,7 @@ namespace Ace
         ) const -> MaybeChanged<std::shared_ptr<const ModuleBoundNode>> final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         ModuleSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const ModuleBoundNode>> m_Modules{};
         std::vector<std::shared_ptr<const ITypeBoundNode>> m_Types{};

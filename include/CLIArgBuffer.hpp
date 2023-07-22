@@ -4,11 +4,11 @@
 #include <string>
 #include <string_view>
 
-#include "SourceBuffer.hpp"
+#include "SrcBuffer.hpp"
 
 namespace Ace
 {
-    class CLIArgBuffer : public virtual ISourceBuffer
+    class CLIArgBuffer : public virtual ISrcBuffer
     {
     public:
         CLIArgBuffer() = default;
@@ -27,7 +27,7 @@ namespace Ace
         auto GetBuffer() const -> const std::string& final;
 
         auto FormatLocation(
-            const SourceLocation& location 
+            const SrcLocation& location 
         ) const -> std::string final;
 
         auto GetArgs() const -> const std::vector<std::string_view>&;

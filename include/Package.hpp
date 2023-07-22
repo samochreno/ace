@@ -4,7 +4,7 @@
 #include <string>
 #include <filesystem>
 
-#include "SourceBuffer.hpp"
+#include "SrcBuffer.hpp"
 #include "FileBuffer.hpp"
 #include "Diagnostic.hpp"
 
@@ -15,12 +15,12 @@ namespace Ace
     struct Package
     {
         static auto Parse(
-            std::vector<std::shared_ptr<const ISourceBuffer>>* const sourceBuffers,
+            std::vector<std::shared_ptr<const ISrcBuffer>>* const srcBuffers,
             const FileBuffer* const fileBuffer
         ) -> Expected<Package>;
 
         std::string Name{};
-        std::vector<const FileBuffer*> SourceFileBuffers{};
-        std::vector<std::filesystem::path> DependencyFilePaths{};
+        std::vector<const FileBuffer*> SrcFileBuffers{};
+        std::vector<std::filesystem::path> DepFilePaths{};
     };
 }

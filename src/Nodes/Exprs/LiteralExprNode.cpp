@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/LiteralExprBoundNode.hpp"
@@ -11,20 +11,20 @@
 namespace Ace
 {
     LiteralExprNode::LiteralExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const LiteralKind kind,
         const std::string& string
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Kind{ kind },
         m_String{ string }
     {
     }
 
-    auto LiteralExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto LiteralExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto LiteralExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -42,7 +42,7 @@ namespace Ace
     ) const -> std::shared_ptr<const LiteralExprNode>
     {
         return std::make_shared<const LiteralExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_Kind,
             m_String
@@ -59,7 +59,7 @@ namespace Ace
     auto LiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const LiteralExprBoundNode>>
     {
         return std::make_shared<const LiteralExprBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             GetScope(),
             m_Kind,
             m_String

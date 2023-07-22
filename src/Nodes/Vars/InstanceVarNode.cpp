@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
@@ -16,14 +16,14 @@
 namespace Ace
 {
     InstanceVarNode::InstanceVarNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
-        const Identifier& name,
+        const Ident& name,
         const TypeName& typeName,
         const std::vector<std::shared_ptr<const AttributeNode>>& attributes,
         const AccessModifier accessModifier,
         const size_t index
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Name{ name },
         m_TypeName{ typeName },
@@ -33,9 +33,9 @@ namespace Ace
     {
     }
 
-    auto InstanceVarNode::GetSourceLocation() const -> const SourceLocation&
+    auto InstanceVarNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto InstanceVarNode::GetScope() const -> std::shared_ptr<Scope>
@@ -68,7 +68,7 @@ namespace Ace
         );
 
         return std::make_shared<const InstanceVarNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_Name,
             m_TypeName,
@@ -91,13 +91,13 @@ namespace Ace
         ).Unwrap();
 
         return std::make_shared<const InstanceVarBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             selfSymbol,
             boundAttributes
         );
     }
 
-    auto InstanceVarNode::GetName() const -> const Identifier&
+    auto InstanceVarNode::GetName() const -> const Ident&
     {
         return m_Name;
     }

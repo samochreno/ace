@@ -5,9 +5,9 @@
 
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
 
@@ -21,13 +21,13 @@ namespace Ace
     {
     public:
         LabelStmtNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
-            const Identifier& name
+            const Ident& name
         );
         virtual ~LabelStmtNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -44,11 +44,11 @@ namespace Ace
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
 
-        auto GetName() const -> const Identifier&;
+        auto GetName() const -> const Ident&;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
-        Identifier m_Name{};
+        Ident m_Name{};
     };
 }

@@ -3,22 +3,22 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Op.hpp"
 #include "Diagnostic.hpp"
 #include "BoundNodes/Stmts/Assignments/CompoundAssignmentStmtBoundNode.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 
 namespace Ace
 {
     CompoundAssignmentStmtNode::CompoundAssignmentStmtNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprNode>& lhsExpr,
         const std::shared_ptr<const IExprNode>& rhsExpr,
         const Op& op
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr },
@@ -26,9 +26,9 @@ namespace Ace
     {
     }
 
-    auto CompoundAssignmentStmtNode::GetSourceLocation() const -> const SourceLocation&
+    auto CompoundAssignmentStmtNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto CompoundAssignmentStmtNode::GetScope() const -> std::shared_ptr<Scope>
@@ -51,7 +51,7 @@ namespace Ace
     ) const -> std::shared_ptr<const CompoundAssignmentStmtNode>
     {
         return std::make_shared<const CompoundAssignmentStmtNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             m_Scope,
             m_LHSExpr->CloneInScopeExpr(scope),
             m_RHSExpr->CloneInScopeExpr(scope),
@@ -75,16 +75,16 @@ namespace Ace
         auto* const rhsTypeSymbol = boundRHSExpr->GetTypeInfo().Symbol;
 
         const auto& opNameMap =
-            SpecialIdentifier::Op::BinaryNameMap;
+            SpecialIdent::Op::BinaryNameMap;
 
         const auto opNameIt = opNameMap.find(m_Op.TokenKind);
         ACE_TRY_ASSERT(opNameIt != end(opNameMap));
 
-        auto opFullName = lhsTypeSymbol->GetWithoutReference()->CreateFullyQualifiedName(
-            m_Op.SourceLocation
+        auto opFullName = lhsTypeSymbol->GetWithoutRef()->CreateFullyQualifiedName(
+            m_Op.SrcLocation
         );
-        opFullName.Sections.emplace_back(Identifier{
-            m_Op.SourceLocation,
+        opFullName.Sections.emplace_back(Ident{
+            m_Op.SrcLocation,
             opNameIt->second,
         });
 
@@ -94,7 +94,7 @@ namespace Ace
         ));
 
         return std::make_shared<const CompoundAssignmentStmtBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             boundLHSExpr,
             boundRHSExpr,
             opSymbol

@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -16,18 +16,18 @@
 namespace Ace
 {
     SizeOfExprBoundNode::SizeOfExprBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* const typeSymbol
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_TypeSymbol{ typeSymbol }
     {
     }
 
-    auto SizeOfExprBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto SizeOfExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto SizeOfExprBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -70,7 +70,7 @@ namespace Ace
 
     auto SizeOfExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult
     {
-        std::vector<ExprDropData> temporaries{};
+        std::vector<ExprDropData> tmps{};
 
         auto* const intTypeSymbol = GetCompilation()->Natives->Int.GetSymbol();
         auto* const intType = emitter.GetIRType(intTypeSymbol);
@@ -83,14 +83,14 @@ namespace Ace
 
         auto* const allocaInst =
             emitter.GetBlockBuilder().Builder.CreateAlloca(intType);
-        temporaries.emplace_back(allocaInst, intTypeSymbol);
+        tmps.emplace_back(allocaInst, intTypeSymbol);
         
         emitter.GetBlockBuilder().Builder.CreateStore(
             value,
             allocaInst
         );
 
-        return { allocaInst, temporaries };
+        return { allocaInst, tmps };
     }
 
     auto SizeOfExprBoundNode::GetTypeInfo() const -> TypeInfo

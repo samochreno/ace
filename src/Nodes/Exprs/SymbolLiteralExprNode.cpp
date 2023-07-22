@@ -3,27 +3,27 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
-#include "BoundNodes/Exprs/VarReferences/StaticVarReferenceExprBoundNode.hpp"
+#include "BoundNodes/Exprs/VarRefs/StaticVarRefExprBoundNode.hpp"
 #include "Symbols/Vars/VarSymbol.hpp"
 
 namespace Ace
 {
     SymbolLiteralExprNode::SymbolLiteralExprNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const SymbolName& name
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Name{ name }
     {
     }
 
-    auto SymbolLiteralExprNode::GetSourceLocation() const -> const SourceLocation&
+    auto SymbolLiteralExprNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto SymbolLiteralExprNode::GetScope() const -> std::shared_ptr<Scope>
@@ -42,7 +42,7 @@ namespace Ace
     ) const -> std::shared_ptr<const SymbolLiteralExprNode>
     {
         return std::make_shared<const SymbolLiteralExprNode>(
-            m_SourceLocation,
+            m_SrcLocation,
             scope,
             m_Name
         );
@@ -55,11 +55,11 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto SymbolLiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const StaticVarReferenceExprBoundNode>>
+    auto SymbolLiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const StaticVarRefExprBoundNode>>
     {
         ACE_TRY(varSymbol, m_Scope->ResolveStaticSymbol<IVarSymbol>(m_Name));
-        return std::make_shared<const StaticVarReferenceExprBoundNode>(
-            GetSourceLocation(),
+        return std::make_shared<const StaticVarRefExprBoundNode>(
+            GetSrcLocation(),
             GetScope(),
             varSymbol
         );

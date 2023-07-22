@@ -2,18 +2,18 @@
     "name": "ace",
     "path_macros": [
         {
-            "name": "sources",
+            "name": "src",
             "value": "src"
         },
         {
-            "name": "dependencies",
+            "name": "dep",
             "value": "lib"
         }
     ],   
-    "source_files": [
-        "$sources/**.ace"
+    "src_files": [
+        "$src/**.ace"
     ],
-    "dependency_files": [
-        "$dependencies/**.dll"
+    "dep_files": [
+        "$dep/**.dll"
     ]
 }

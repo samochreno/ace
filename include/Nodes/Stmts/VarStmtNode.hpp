@@ -8,9 +8,9 @@
 #include "Nodes/TypedNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Name.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
@@ -25,15 +25,15 @@ namespace Ace
     {
     public:
         VarStmtNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
-            const Identifier& name,
+            const Ident& name,
             const TypeName& typeName,
             const std::optional<std::shared_ptr<const IExprNode>>& optAssignedExpr
         );
         virtual ~VarStmtNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -45,7 +45,7 @@ namespace Ace
         auto CreateBound() const -> Expected<std::shared_ptr<const VarStmtBoundNode>> final;
         auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
 
-        auto GetName() const -> const Identifier& final;
+        auto GetName() const -> const Ident& final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
@@ -53,9 +53,9 @@ namespace Ace
         auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
-        Identifier m_Name{};
+        Ident m_Name{};
         TypeName m_TypeName{};
         std::optional<std::shared_ptr<const IExprNode>> m_OptAssignedExpr{};
     };

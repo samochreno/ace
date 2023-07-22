@@ -3,10 +3,10 @@
 #include <memory>
 
 #include "Diagnostic.hpp"
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Token.hpp"
 #include "Keyword.hpp"
-#include "SpecialIdentifier.hpp"
+#include "SpecialIdent.hpp"
 
 namespace Ace
 {
@@ -79,9 +79,9 @@ namespace Ace
                 return "`]`";
             }
 
-            case TokenKind::Identifier:
+            case TokenKind::Ident:
             {
-                return "identifier";
+                return "ident";
             }
 
             case TokenKind::Int8:
@@ -356,7 +356,7 @@ namespace Ace
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            unexpectedToken->SourceLocation,
+            unexpectedToken->SrcLocation,
             message
         );
     }
@@ -373,7 +373,7 @@ namespace Ace
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            unexpectedToken->SourceLocation,
+            unexpectedToken->SrcLocation,
             message
         );
     }
@@ -389,7 +389,7 @@ namespace Ace
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            unexpectedToken->SourceLocation,
+            unexpectedToken->SrcLocation,
             message
         );
     }
@@ -401,11 +401,11 @@ namespace Ace
         const std::string message =
             "unexpected " +
             CreateTokenKindString(unexpectedToken->Kind) +
-            ", expected " + SpecialIdentifier::New;
+            ", expected " + SpecialIdent::New;
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            unexpectedToken->SourceLocation,
+            unexpectedToken->SrcLocation,
             message
         );
     }
@@ -421,7 +421,7 @@ namespace Ace
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            unexpectedToken->SourceLocation,
+            unexpectedToken->SrcLocation,
             message
         );
     }
@@ -437,29 +437,29 @@ namespace Ace
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            unexpectedToken->SourceLocation,
+            unexpectedToken->SrcLocation,
             message
         );
     }
 
     inline auto CreateEmptyTemplateParamsError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "empty template parameters"
         );
     }
 
     inline auto CreateEmptyTemplateArgsError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "empty template arguments"
         );
     }
@@ -470,7 +470,7 @@ namespace Ace
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            externKeywordToken->SourceLocation,
+            externKeywordToken->SrcLocation,
             "extern method"
         );
     }
@@ -481,7 +481,7 @@ namespace Ace
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            modifierToken->SourceLocation,
+            modifierToken->SrcLocation,
             "unknown modifier"
         );
     }
@@ -492,7 +492,7 @@ namespace Ace
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            modifierToken->SourceLocation,
+            modifierToken->SrcLocation,
             "forbidden modifier"
         );
     }
@@ -503,7 +503,7 @@ namespace Ace
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            minusGreaterThanToken->SourceLocation,
+            minusGreaterThanToken->SrcLocation,
             "empty function modifier list"
         );
     }
@@ -513,27 +513,27 @@ namespace Ace
         const TokenKind expectedTokenKind
     ) -> std::shared_ptr<const Diagnostic>
     {
-        const SourceLocation sourceLocation
+        const SrcLocation srcLocation
         {
-            lastToken->SourceLocation.Buffer,
-            lastToken->SourceLocation.CharacterEndIterator - 1,
-            lastToken->SourceLocation.CharacterEndIterator,
+            lastToken->SrcLocation.Buffer,
+            lastToken->SrcLocation.CharacterEndIterator - 1,
+            lastToken->SrcLocation.CharacterEndIterator,
         };
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "missing " + CreateTokenKindString(expectedTokenKind)
         );
     }
 
     inline auto CreateTemplateSpecializationError(
-        const SourceLocation& sourceLocation
+        const SrcLocation& srcLocation
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            sourceLocation,
+            srcLocation,
             "template specialization"
         );
     }
@@ -542,7 +542,7 @@ namespace Ace
         const std::shared_ptr<const Token>& opToken
     ) -> std::string
     {
-        if (opToken->Kind == TokenKind::Identifier)
+        if (opToken->Kind == TokenKind::Ident)
         {
             return "`" + opToken->String + "`";
         }
@@ -560,7 +560,7 @@ namespace Ace
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            opToken->SourceLocation,
+            opToken->SrcLocation,
             message
         );
     }
@@ -575,7 +575,7 @@ namespace Ace
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            opToken->SourceLocation,
+            opToken->SrcLocation,
             message
         );
     }
@@ -590,18 +590,18 @@ namespace Ace
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            opToken->SourceLocation,
+            opToken->SrcLocation,
             message
         );
     }
 
-    inline auto CreateUnknownIdentifierOpError(
+    inline auto CreateUnknownIdentOpError(
         const std::shared_ptr<const Token>& opToken
     ) -> std::shared_ptr<const Diagnostic>
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            opToken->SourceLocation,
+            opToken->SrcLocation,
             "unknown op"
         );
     }
@@ -612,7 +612,7 @@ namespace Ace
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            nameToken->SourceLocation,
+            nameToken->SrcLocation,
             "op must be public"
         );
     }
@@ -623,7 +623,7 @@ namespace Ace
     {
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
-            nameToken->SourceLocation,
+            nameToken->SrcLocation,
             "instance op"
         );
     }

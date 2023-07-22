@@ -26,12 +26,12 @@ namespace Ace::GlueGeneration
         const auto scope     = typeSymbol->GetUnaliased()->GetScope();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto nameString = SpecialIdentifier::CreateCopyGlue(
+        const auto nameString = SpecialIdent::CreateCopyGlue(
             typeSymbol->CreatePartialSignature()
         );
-        const Identifier name
+        const Ident name
         {
-            typeSymbol->GetName().SourceLocation,
+            typeSymbol->GetName().SrcLocation,
             nameString,
         };
 
@@ -48,27 +48,27 @@ namespace Ace::GlueGeneration
         ).Unwrap();
         typeSymbol->BindCopyGlue(glueSymbol);
 
-        const Identifier selfName
+        const Ident selfName
         {
-            typeSymbol->GetName().SourceLocation,
-            SpecialIdentifier::CreateAnonymous(),
+            typeSymbol->GetName().SrcLocation,
+            SpecialIdent::CreateAnonymous(),
         };
         Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
             selfScope,
             selfName,
-            typeSymbol->GetWithReference(),
+            typeSymbol->GetWithRef(),
             0
         )).Unwrap();
 
-        const Identifier otherName
+        const Ident otherName
         {
-            typeSymbol->GetName().SourceLocation,
-            SpecialIdentifier::CreateAnonymous(),
+            typeSymbol->GetName().SrcLocation,
+            SpecialIdent::CreateAnonymous(),
         };
         Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
             selfScope,
             otherName,
-            typeSymbol->GetWithReference(),
+            typeSymbol->GetWithRef(),
             1
         )).Unwrap();
 
@@ -88,12 +88,12 @@ namespace Ace::GlueGeneration
         const auto scope     = typeSymbol->GetUnaliased()->GetScope();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto nameString = SpecialIdentifier::CreateDropGlue(
+        const auto nameString = SpecialIdent::CreateDropGlue(
             typeSymbol->CreatePartialSignature()
         );
-        const Identifier name
+        const Ident name
         {
-            typeSymbol->GetName().SourceLocation,
+            typeSymbol->GetName().SrcLocation,
             nameString,
         };
 
@@ -110,15 +110,15 @@ namespace Ace::GlueGeneration
         ).Unwrap();
         typeSymbol->BindDropGlue(glueSymbol);
 
-        const Identifier selfName
+        const Ident selfName
         {
-            typeSymbol->GetName().SourceLocation,
-            SpecialIdentifier::CreateAnonymous(),
+            typeSymbol->GetName().SrcLocation,
+            SpecialIdent::CreateAnonymous(),
         };
         Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
             selfScope,
             selfName,
-            typeSymbol->GetWithReference(),
+            typeSymbol->GetWithRef(),
             0
         )).Unwrap();
 
@@ -144,7 +144,7 @@ namespace Ace::GlueGeneration
             return std::nullopt;
         }
 
-        if (typeSymbol->IsReference())
+        if (typeSymbol->IsRef())
         {
             return std::nullopt;
         }
@@ -333,23 +333,23 @@ namespace Ace::GlueGeneration
         const auto bodyScope = glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
         const auto paramSymbols = glueSymbol->CollectParams();
-        const auto selfParamReferenceExprNode = std::make_shared<const StaticVarReferenceExprBoundNode>(
-            SourceLocation{},
+        const auto selfParamRefExprNode = std::make_shared<const StaticVarRefExprBoundNode>(
+            SrcLocation{},
             bodyScope,
             paramSymbols.at(0)
         );
-        const auto otherParamReferenceExprNode = std::make_shared<const StaticVarReferenceExprBoundNode>(
-            SourceLocation{},
+        const auto otherParamRefExprNode = std::make_shared<const StaticVarRefExprBoundNode>(
+            SrcLocation{},
             bodyScope,
             paramSymbols.at(1)
         );
 
         auto opName = structSymbol->CreateFullyQualifiedName(
-            structSymbol->GetName().SourceLocation
+            structSymbol->GetName().SrcLocation
         );
-        opName.Sections.push_back(Identifier{
-            structSymbol->GetName().SourceLocation,
-            SpecialIdentifier::Op::Copy,
+        opName.Sections.push_back(Ident{
+            structSymbol->GetName().SrcLocation,
+            SpecialIdent::Op::Copy,
         });
         const auto expOpSymbol = 
             compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(opName);
@@ -358,18 +358,18 @@ namespace Ace::GlueGeneration
         if (expOpSymbol)
         {
             std::vector<std::shared_ptr<const IExprBoundNode>> args{};
-            args.push_back(selfParamReferenceExprNode);
-            args.push_back(otherParamReferenceExprNode);
+            args.push_back(selfParamRefExprNode);
+            args.push_back(otherParamRefExprNode);
 
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
-                SourceLocation{},
+                SrcLocation{},
                 bodyScope,
                 expOpSymbol.Unwrap(),
                 args
             );
 
             const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
-                SourceLocation{},
+                SrcLocation{},
                 functionCallExprNode
             );
 
@@ -385,14 +385,14 @@ namespace Ace::GlueGeneration
                 auto* const varTypeGlueSymbol =
                     varTypeSymbol->GetCopyGlue().value();
                 
-                const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
-                    SourceLocation{},
-                    selfParamReferenceExprNode,
+                const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
+                    SrcLocation{},
+                    selfParamRefExprNode,
                     varSymbol
                 );
-                const auto otherParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
-                    SourceLocation{},
-                    otherParamReferenceExprNode,
+                const auto otherParamVarRerefenceExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
+                    SrcLocation{},
+                    otherParamRefExprNode,
                     varSymbol
                 );
 
@@ -401,14 +401,14 @@ namespace Ace::GlueGeneration
                 args.push_back(otherParamVarRerefenceExprNode);
 
                 const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
-                    SourceLocation{},
+                    SrcLocation{},
                     bodyScope,
                     varTypeGlueSymbol,
                     args
                 );
 
                 const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
-                    SourceLocation{},
+                    SrcLocation{},
                     functionCallExprNode
                 );
 
@@ -417,7 +417,7 @@ namespace Ace::GlueGeneration
         }
 
         const auto bodyNode = std::make_shared<const BlockStmtBoundNode>(
-            SourceLocation{},
+            SrcLocation{},
             bodyScope->GetParent().value(),
             stmts
         );
@@ -456,8 +456,8 @@ namespace Ace::GlueGeneration
         const auto bodyScope = glueSymbol->GetSelfScope()->GetOrCreateChild({});
 
         const auto paramSymbols = glueSymbol->CollectParams();
-        const auto selfParamReferenceExprNode = std::make_shared<const StaticVarReferenceExprBoundNode>(
-            SourceLocation{},
+        const auto selfParamRefExprNode = std::make_shared<const StaticVarRefExprBoundNode>(
+            SrcLocation{},
             bodyScope,
             paramSymbols.at(0)
         );
@@ -465,11 +465,11 @@ namespace Ace::GlueGeneration
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
 
         auto opName = structSymbol->CreateFullyQualifiedName(
-            structSymbol->GetName().SourceLocation
+            structSymbol->GetName().SrcLocation
         );
-        opName.Sections.push_back(Identifier{
-            structSymbol->GetName().SourceLocation,
-            SpecialIdentifier::Op::Drop,
+        opName.Sections.push_back(Ident{
+            structSymbol->GetName().SrcLocation,
+            SpecialIdent::Op::Drop,
         });
         const auto expOpSymbol = 
             compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(opName);
@@ -477,17 +477,17 @@ namespace Ace::GlueGeneration
         if (expOpSymbol)
         {
             std::vector<std::shared_ptr<const IExprBoundNode>> args{};
-            args.push_back(selfParamReferenceExprNode);
+            args.push_back(selfParamRefExprNode);
 
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
-                SourceLocation{},
+                SrcLocation{},
                 bodyScope,
                 expOpSymbol.Unwrap(),
                 args
             );
 
             const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
-                SourceLocation{},
+                SrcLocation{},
                 functionCallExprNode
             );
 
@@ -502,9 +502,9 @@ namespace Ace::GlueGeneration
             auto* const varTypeGlueSymbol = 
                 varTypeSymbol->GetDropGlue().value();
             
-            const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarReferenceExprBoundNode>(
-                SourceLocation{},
-                selfParamReferenceExprNode,
+            const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
+                SrcLocation{},
+                selfParamRefExprNode,
                 varSymbol
             );
 
@@ -512,14 +512,14 @@ namespace Ace::GlueGeneration
             args.push_back(selfParamVarRerefenceExprNode);
 
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
-                SourceLocation{},
+                SrcLocation{},
                 bodyScope,
                 varTypeGlueSymbol,
                 args
             );
 
             const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
-                SourceLocation{},
+                SrcLocation{},
                 functionCallExprNode
             );
 
@@ -527,7 +527,7 @@ namespace Ace::GlueGeneration
         });
 
         const auto bodyNode = std::make_shared<const BlockStmtBoundNode>(
-            SourceLocation{},
+            SrcLocation{},
             bodyScope->GetParent().value(),
             stmts
         );

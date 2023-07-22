@@ -4,10 +4,10 @@
 #include <vector>
 
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNodes/Exprs/VarReferences/InstanceVarReferenceExprBoundNode.hpp"
-#include "SourceLocation.hpp"
+#include "BoundNodes/Exprs/VarRefs/InstanceVarRefExprBoundNode.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Identifier.hpp"
+#include "Ident.hpp"
 #include "Diagnostic.hpp"
 
 namespace Ace
@@ -15,17 +15,17 @@ namespace Ace
     class MemberAccessExprNode :
         public virtual IExprNode,
         public virtual ICloneableNode<MemberAccessExprNode>,
-        public virtual IBindableNode<InstanceVarReferenceExprBoundNode>
+        public virtual IBindableNode<InstanceVarRefExprBoundNode>
     {
     public:
         MemberAccessExprNode(
-            const SourceLocation& sourceLocation,
+            const SrcLocation& srcLocation,
             const std::shared_ptr<const IExprNode>& expr,
             const SymbolNameSection& name
         );
         virtual ~MemberAccessExprNode() = default;
 
-        auto GetSourceLocation() const -> const SourceLocation& final;
+        auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope>;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
@@ -34,14 +34,14 @@ namespace Ace
         auto CloneInScopeExpr(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const InstanceVarReferenceExprBoundNode>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const InstanceVarRefExprBoundNode>> final;
         auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> final;
 
         auto GetExpr() const -> const IExprNode*;
         auto GetName() const -> const SymbolNameSection&;
 
     private:
-        SourceLocation m_SourceLocation{};
+        SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprNode> m_Expr{};
         SymbolNameSection m_Name{};
     };

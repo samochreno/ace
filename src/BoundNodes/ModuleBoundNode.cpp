@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "SourceLocation.hpp"
+#include "SrcLocation.hpp"
 #include "Symbols/ModuleSymbol.hpp"
 #include "BoundNodes/Types/TypeBoundNode.hpp"
 #include "BoundNodes/ImplBoundNode.hpp"
@@ -16,14 +16,14 @@
 namespace Ace
 {
     ModuleBoundNode::ModuleBoundNode(
-        const SourceLocation& sourceLocation,
+        const SrcLocation& srcLocation,
         ModuleSymbol* const symbol,
         const std::vector<std::shared_ptr<const ModuleBoundNode>>& modules,
         const std::vector<std::shared_ptr<const ITypeBoundNode>>& types,
         const std::vector<std::shared_ptr<const ImplBoundNode>>& impls,
         const std::vector<std::shared_ptr<const FunctionBoundNode>>& functions,
         const std::vector<std::shared_ptr<const StaticVarBoundNode>>& vars
-    ) : m_SourceLocation{ sourceLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_Modules{ modules },
         m_Types{ types },
@@ -33,9 +33,9 @@ namespace Ace
     {
     }
 
-    auto ModuleBoundNode::GetSourceLocation() const -> const SourceLocation&
+    auto ModuleBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
-        return m_SourceLocation;
+        return m_SrcLocation;
     }
 
     auto ModuleBoundNode::GetScope() const -> std::shared_ptr<Scope>
@@ -102,7 +102,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ModuleBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Symbol,
             mchCheckedModules.Value,
             mchCheckedTypes.Value,
@@ -158,7 +158,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ModuleBoundNode>(
-            GetSourceLocation(),
+            GetSrcLocation(),
             m_Symbol,
             mchLoweredModules.Value,
             mchLoweredTypes.Value,
