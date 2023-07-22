@@ -1,13 +1,15 @@
-# ✅ Ace To-Do List
+# Ace To-Do List
 
 ## 🛠️ Refactor
 
 - ❓ Change all `Is...` functions in `Parser.cpp` to use `switch`
-- ❓ Change most `const&` constructor to pass by value, and change all r-value reference parameters to value
-- Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)` (I think the current version of TransformExpected(...) is buggy)
+- ❓ Change most `const&` constructors to pass by value, and change all r-value reference parameters to value
+- Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 
 ## 💥 High Priority
 
+- Implement special fast lookup for native types
+- Figure out where to use the `opt` prefix and where not
 - Fix so compilation cannot succeed with parsing errors
 - Check why CLI arg parsing never checks if EOF (Probably a bug)
 - Error messages to make debugging easier:
