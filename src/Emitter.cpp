@@ -94,6 +94,29 @@ namespace Ace
         m_ASTs = asts;
     }
 
+    static auto SaveModuleToFile(
+        const Compilation* const compilation,
+        const llvm::Module* const module,
+        const char* const extension
+    ) -> void
+    {
+        const std::filesystem::path filePath = 
+            compilation->OutputPath /
+            (compilation->Package.Name + "." + extension);
+
+        std::string moduleString{};
+
+        llvm::raw_string_ostream moduleOStream{ moduleString };
+        moduleOStream << *module;
+        moduleOStream.flush();
+
+        std::ofstream irFileStream{ filePath };
+        ACE_ASSERT(irFileStream);
+        irFileStream << moduleString;
+
+        moduleString.clear();
+    }
+
     auto Emitter::Emit() -> Result
     {
         auto* const globalScope = m_Compilation->GlobalScope.Unwrap().get();
@@ -205,6 +228,13 @@ namespace Ace
         originalModuleOStream.flush();
         originalModuleString.clear();
 
+        // TODO: Make this optional with a CLI option
+        SaveModuleToFile(
+            m_Compilation,
+            m_Module.get(),
+            "ll"
+        );
+
         const auto timeIREmittingEnd = now();
 
         const auto timeAnalysesStart = now();
@@ -229,17 +259,12 @@ namespace Ace
 
         const auto timeAnalysesEnd = now();
 
-        std::string moduleString{};
-        llvm::raw_string_ostream moduleOStream{ moduleString };
-        moduleOStream << *m_Module;
-        moduleOStream.flush();
-        std::ofstream irFileStream
-        { 
-            m_Compilation->OutputPath / (packageName + ".ll") 
-        };
-        ACE_ASSERT(irFileStream);
-        irFileStream << moduleString;
-        moduleString.clear();
+        // TODO: Make this optional with a CLI option
+        SaveModuleToFile(
+            m_Compilation,
+            m_Module.get(),
+            "opt.ll"
+        );
 
         std::error_code errorCode{};
         llvm::raw_fd_ostream bitcodeFileOStream
