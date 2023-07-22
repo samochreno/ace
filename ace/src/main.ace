@@ -447,26 +447,8 @@ multiple_indirection(): int {
     ret vec_3.x;
 }
 
-compound_assignment(): int {
-    value: int = 10;
-    increment_int(value);
-    ret value;
-}
-
 increment_int(value: &int): void {
     value += 1;
-}
-
-compound_assignment_struct(): int {
-    value: Vector2 = new Vector2 { x: 3, y: -27 };
-    value.y -= 1;
-    print_int(value.y);
-
-    boxed_value: *Vector2 = box value;
-    boxed_value.x *= 2;
-    print_int(boxed_value.x);
-
-    ret 0;
 }
 
 op_precedence(): int {
@@ -541,10 +523,48 @@ implicit_conversion_with_binary_op(): int {
     ret 0;
 }
 
+compound_assignment(): int {
+    i: int = 10;
+    increment_int(i);
+    ret i;
+}
+
+struct_compound_assignment(): int {
+    value: Vector2 = new Vector2 { x: 0, y: 27 };
+    value.y -= 1;
+    ret value.y;
+}
+
+boxed_struct_compound_assignment(): int {
+    value: Vector2 = new Vector2 { x: 0, y: 2 };
+
+    boxed_value: *Vector2 = box value;
+    boxed_value.y *= 2;
+
+    ret boxed_value.y;
+}
+
+test(): void {
+    i: int = 0;
+
+    i += compound_assignment();
+    print_int(i);
+    assert i == 11;
+
+    i += struct_compound_assignment();
+    print_int(i);
+    assert i == 37;
+
+    i += boxed_struct_compound_assignment();
+    print_int(i);
+    assert i == 41;
+
+    print_int(0);
+}
+
 main(): int {
-    value: int = unwrapper();
-    print_int(value);
-    ret value;
+    test();
+    ret 0;
 }
 
 print_int(value: int): void -> pub extern;

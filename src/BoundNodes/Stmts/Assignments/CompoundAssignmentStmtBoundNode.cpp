@@ -94,188 +94,279 @@ namespace Ace
         return GetOrCreateTypeChecked(context);
     }
 
+    static auto CreateStaticVarReferenceExprLoweredStmts(
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<const IExprBoundNode>& lhsExpr,
+        const std::shared_ptr<const IExprBoundNode>& rhsExpr,
+        FunctionSymbol* const opSymbol
+    ) -> std::vector<std::shared_ptr<const IStmtBoundNode>>
+    {
+        std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
+
+        // From:
+        // lhs += rhs;
+        // 
+        // To:
+        // lhs = lhs + rhs;
+
+        const auto userBinaryExpr = std::make_shared<const UserBinaryExprBoundNode>(
+            sourceLocation,
+            lhsExpr,
+            rhsExpr,
+            opSymbol
+        );
+
+        const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
+            sourceLocation,
+            lhsExpr,
+            userBinaryExpr
+        );
+        stmts.push_back(assignmentStmt);
+
+        return stmts;
+    }
+
+    struct TmpRefExprAndStmts
+    {
+        std::shared_ptr<const IExprBoundNode> Expr{};
+        std::vector<std::shared_ptr<const IStmtBoundNode>> Stmts{};
+    };
+
+    static auto CreateLValueTmpRefExprAndStmts(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const std::shared_ptr<Scope>& scope
+    ) -> TmpRefExprAndStmts 
+    {
+        std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
+
+        if (expr->GetTypeInfo().Symbol->IsReference())
+        {
+            return
+            {
+                expr,
+                stmts,
+            };
+        }
+
+        return
+        {
+            std::make_shared<const ReferenceExprBoundNode>(
+                expr->GetSourceLocation(),
+                expr
+            ),
+            stmts,
+        };
+    }
+
+    static auto CreateRValueTmpRefExprAndStmts(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const std::shared_ptr<Scope>& scope
+    ) -> TmpRefExprAndStmts
+    {
+        std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
+
+        ACE_ASSERT(!expr->GetTypeInfo().Symbol->IsReference());
+
+        const Identifier tmpVarName
+        {
+            expr->GetSourceLocation(),
+            SpecialIdentifier::CreateAnonymous()
+        };
+        auto tmpVarSymbolOwned = std::make_unique<LocalVarSymbol>(
+            scope,
+            tmpVarName,
+            expr->GetTypeInfo().Symbol
+        );
+
+        auto* const tmpVarSymbol = dynamic_cast<LocalVarSymbol*>(
+            scope->DefineSymbol(std::move(tmpVarSymbolOwned)).Unwrap()
+        );
+        ACE_ASSERT(tmpVarSymbol);
+
+        const auto tmpVarStmt = std::make_shared<const VarStmtBoundNode>(
+            expr->GetSourceLocation(),
+            tmpVarSymbol,
+            expr
+        );
+        stmts.push_back(tmpVarStmt);
+
+        const auto tmpVarReferenceExpr = std::make_shared<const StaticVarReferenceExprBoundNode>(
+            expr->GetSourceLocation(),
+            scope,
+            tmpVarSymbol
+        );
+
+        return
+        {
+            std::make_shared<const ReferenceExprBoundNode>(
+                expr->GetSourceLocation(),
+                tmpVarReferenceExpr
+            ),
+            stmts,
+        };
+    }
+
+    static auto CreateTmpRefExprAndStmts(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const std::shared_ptr<Scope>& scope
+    ) -> TmpRefExprAndStmts 
+    {
+        std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
+
+        switch (expr->GetTypeInfo().ValueKind)
+        {
+            case ValueKind::L:
+            {
+                return CreateLValueTmpRefExprAndStmts(expr, scope);
+            }
+
+            case ValueKind::R:
+            {
+                return CreateRValueTmpRefExprAndStmts(expr, scope);
+            }
+
+            default:
+            {
+                ACE_UNREACHABLE();
+            }
+        }
+    }
+
+    static auto CreateInstanceVarReferenceExprLoweredStmts(
+        const SourceLocation& sourceLocation,
+        const std::shared_ptr<Scope>& scope,
+        const InstanceVarReferenceExprBoundNode* const lhsExpr,
+        const std::shared_ptr<const IExprBoundNode>& rhsExpr,
+        FunctionSymbol* const opSymbol
+    ) -> std::vector<std::shared_ptr<const IStmtBoundNode>>
+    {
+        std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
+
+        // From:
+        // lhs.var += rhs;
+        // 
+        // To:
+        //
+        // If lhs is L-value:
+        // {
+        //     tmp_ref: &auto = lhs;
+        //     tmp_ref.var = tmp_ref.field + rhs;
+        // }
+        // 
+        // If lhs is R-value:
+        // {
+        //     tmp: auto = lhs;
+        //     tmp_ref: &auto = tmp;
+        //     tmp_ref.var = tmp_ref.field + rhs;
+        // }
+
+        const auto tmpRefExprAndStmts = CreateTmpRefExprAndStmts(
+            lhsExpr->GetExpr(),
+            scope
+        );
+
+        const auto& tmpRefExpr = tmpRefExprAndStmts.Expr;
+        stmts.insert(
+            stmts.end(),
+            begin(tmpRefExprAndStmts.Stmts),
+            end  (tmpRefExprAndStmts.Stmts)
+        );
+
+        const Identifier tmpRefVarName
+        {
+            tmpRefExpr->GetSourceLocation(),
+            SpecialIdentifier::CreateAnonymous()
+        };
+        auto tmpRefVarSymbolOwned = std::make_unique<LocalVarSymbol>(
+            scope,
+            tmpRefVarName,
+            tmpRefExpr->GetTypeInfo().Symbol
+        );
+
+        auto* const tmpRefVarSymbol = dynamic_cast<LocalVarSymbol*>(
+            scope->DefineSymbol(std::move(tmpRefVarSymbolOwned)).Unwrap()
+        );
+        ACE_ASSERT(tmpRefVarSymbol);
+
+        const auto tmpRefVarStmt = std::make_shared<const VarStmtBoundNode>(
+            tmpRefExpr->GetSourceLocation(),
+            tmpRefVarSymbol,
+            tmpRefExpr
+        );
+        stmts.push_back(tmpRefVarStmt);
+
+        const auto tmpRefVarReferenceExpr = std::make_shared<const StaticVarReferenceExprBoundNode>(
+            tmpRefExpr->GetSourceLocation(),
+            scope,
+            tmpRefVarSymbol
+        );
+
+        const auto tmpRefVarFieldReferenceExpr = std::make_shared<const InstanceVarReferenceExprBoundNode>(
+            lhsExpr->GetSourceLocation(),
+            tmpRefVarReferenceExpr,
+            lhsExpr->GetVarSymbol()
+        );
+
+        const auto userBinaryExpr = std::make_shared<const UserBinaryExprBoundNode>(
+            rhsExpr->GetSourceLocation(),
+            tmpRefVarFieldReferenceExpr,
+            rhsExpr,
+            opSymbol
+        );
+
+        const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
+            sourceLocation,
+            tmpRefVarFieldReferenceExpr,
+            userBinaryExpr
+        );
+        stmts.push_back(assignmentStmt);
+
+        return stmts;
+    }
+
+    static auto IsStaticVarReferenceExpr(
+        const IExprBoundNode* expr
+    ) -> bool
+    {
+        while (const auto* const derefExpr = dynamic_cast<const DereferenceExprBoundNode*>(expr))
+        {
+            expr = derefExpr->GetExpr().get();
+        }
+
+        return
+            dynamic_cast<const StaticVarReferenceExprBoundNode*>(expr) !=
+            nullptr;
+    }
+
     auto CompoundAssignmentStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& context
     ) const -> MaybeChanged<std::shared_ptr<const GroupStmtBoundNode>>
     {
-        std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
-
-        const bool isStaticVarReferenceExpr = [&]() -> bool
+        const auto stmts = [&]() -> std::vector<std::shared_ptr<const IStmtBoundNode>>
         {
-            auto* nextExpr = m_LHSExpr.get();
-            while (const auto* const expr = dynamic_cast<const DereferenceExprBoundNode*>(nextExpr))
+            if (IsStaticVarReferenceExpr(m_LHSExpr.get()))
             {
-                nextExpr = expr->GetExpr().get();
+                return CreateStaticVarReferenceExprLoweredStmts(
+                    GetSourceLocation(),
+                    m_LHSExpr,
+                    m_RHSExpr,
+                    m_OpSymbol
+                );
+            }
+            
+            if (const auto* const instanceVarReferenceExpr = dynamic_cast<const InstanceVarReferenceExprBoundNode*>(m_LHSExpr.get()))
+            {
+                return CreateInstanceVarReferenceExprLoweredStmts(
+                    GetSourceLocation(),
+                    GetScope(),
+                    instanceVarReferenceExpr,
+                    m_RHSExpr,
+                    m_OpSymbol
+                );
             }
 
-            return dynamic_cast<const StaticVarReferenceExprBoundNode*>(nextExpr) != nullptr;
-        }();
-
-        if (isStaticVarReferenceExpr)
-        {
-            // From:
-            // lhs += rhs;
-            // 
-            // To:
-            // lhs = lhs + rhs;
-
-            const auto userBinaryExpr = std::make_shared<const UserBinaryExprBoundNode>(
-                m_RHSExpr->GetSourceLocation(),
-                m_LHSExpr,
-                m_RHSExpr,
-                m_OpSymbol
-            );
-
-            const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
-                GetSourceLocation(),
-                m_LHSExpr,
-                userBinaryExpr
-            );
-            stmts.push_back(assignmentStmt);
-        }
-        else if (const auto* const instanceVarReferenceExpr = dynamic_cast<const InstanceVarReferenceExprBoundNode*>(m_LHSExpr.get()))
-        {
-            // From:
-            // lhs.var += rhs;
-            // 
-            // To:
-            //
-            // If lhs is L-value:
-            // {
-            //     tmp_ref: &auto = lhs;
-            //     tmp_ref.var = tmp_ref.field + rhs;
-            // }
-            // 
-            // If lhs is R-value:
-            // {
-            //     tmp: auto = lhs;
-            //     tmp_ref: &auto = tmp;
-            //     tmp_ref.var = tmp_ref.field + rhs;
-            // }
-
-            std::vector<std::shared_ptr<const IStmtBoundNode>> blockStmts{};
-            const std::shared_ptr<Scope> blockScope = GetScope()->GetOrCreateChild({});
-
-            const auto tmpRefExpr = [&]() -> std::shared_ptr<const IExprBoundNode>
-            {
-                const auto expr = instanceVarReferenceExpr->GetExpr();
-                
-                switch (expr->GetTypeInfo().ValueKind)
-                {
-                    case ValueKind::L:
-                    {
-                        if (expr->GetTypeInfo().Symbol->IsReference())
-                        {
-                            return expr;
-                        }
-
-                        return std::make_shared<const ReferenceExprBoundNode>(
-                            expr->GetSourceLocation(),
-                            expr
-                        );
-                    }
-
-                    case ValueKind::R:
-                    {
-                        ACE_ASSERT(!expr->GetTypeInfo().Symbol->IsReference());
-
-                        const Identifier tmpVarName
-                        {
-                            expr->GetSourceLocation(),
-                            SpecialIdentifier::CreateAnonymous()
-                        };
-                        auto tmpVarSymbolOwned = std::make_unique<LocalVarSymbol>(
-                            blockScope,
-                            tmpVarName,
-                            expr->GetTypeInfo().Symbol
-                        );
-
-                        auto* const tmpVarSymbol = dynamic_cast<LocalVarSymbol*>(
-                            blockScope->DefineSymbol(std::move(tmpVarSymbolOwned)).Unwrap()
-                        );
-                        ACE_ASSERT(tmpVarSymbol);
-
-                        const auto tmpVarStmt = std::make_shared<const VarStmtBoundNode>(
-                            expr->GetSourceLocation(),
-                            tmpVarSymbol,
-                            expr
-                        );
-                        blockStmts.push_back(tmpVarStmt);
-
-                        const auto tmpVarReferenceExpr = std::make_shared<const StaticVarReferenceExprBoundNode>(
-                            expr->GetSourceLocation(),
-                            blockScope,
-                            tmpVarSymbol
-                        );
-
-                        return std::make_shared<const ReferenceExprBoundNode>(
-                            expr->GetSourceLocation(),
-                            tmpVarReferenceExpr
-                        );
-                    }
-                }
-            }();
-
-            const Identifier tmpRefVarName
-            {
-                tmpRefExpr->GetSourceLocation(),
-                SpecialIdentifier::CreateAnonymous()
-            };
-            auto tmpRefVarSymbolOwned = std::make_unique<LocalVarSymbol>(
-                blockScope,
-                tmpRefVarName,
-                tmpRefExpr->GetTypeInfo().Symbol
-            );
-
-            auto* const tmpRefVarSymbol = dynamic_cast<LocalVarSymbol*>(
-                blockScope->DefineSymbol(std::move(tmpRefVarSymbolOwned)).Unwrap()
-            );
-            ACE_ASSERT(tmpRefVarSymbol);
-
-            const auto tmpRefVarStmt = std::make_shared<const VarStmtBoundNode>(
-                tmpRefExpr->GetSourceLocation(),
-                tmpRefVarSymbol,
-                tmpRefExpr
-            );
-            blockStmts.push_back(tmpRefVarStmt);
-
-            const auto tmpRefVarReferenceExpr = std::make_shared<const StaticVarReferenceExprBoundNode>(
-                tmpRefExpr->GetSourceLocation(),
-                blockScope,
-                tmpRefVarSymbol
-            );
-
-            const auto tmpRefVarFieldReferenceExpr = std::make_shared<const InstanceVarReferenceExprBoundNode>(
-                m_LHSExpr->GetSourceLocation(),
-                tmpRefVarReferenceExpr,
-                instanceVarReferenceExpr->GetVarSymbol()
-            );
-
-            const auto userBinaryExpr = std::make_shared<const UserBinaryExprBoundNode>(
-                m_RHSExpr->GetSourceLocation(),
-                tmpRefVarFieldReferenceExpr,
-                m_RHSExpr,
-                m_OpSymbol
-            );
-
-            const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
-                GetSourceLocation(),
-                tmpRefVarFieldReferenceExpr,
-                userBinaryExpr
-            );
-            blockStmts.push_back(assignmentStmt);
-
-            const auto blockStmt = std::make_shared<const BlockStmtBoundNode>(
-                GetSourceLocation(),
-                blockScope,
-                blockStmts
-            );
-            stmts.push_back(blockStmt);
-        }
-        else
-        {
             ACE_UNREACHABLE();
-        }
+        }();
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
             GetSourceLocation(),
