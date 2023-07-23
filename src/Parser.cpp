@@ -1107,11 +1107,21 @@ namespace Ace
         const Parser& parser
     ) -> bool
     {
-        return
-            (parser.Peek() == TokenKind::CastKeyword) ||
-            (parser.Peek() == TokenKind::AddressOfKeyword) ||
-            (parser.Peek() == TokenKind::SizeOfKeyword) ||
-            (parser.Peek() == TokenKind::DerefAsKeyword);
+        switch (parser.Peek()->Kind)
+        {
+            case TokenKind::CastKeyword:
+            case TokenKind::AddressOfKeyword:
+            case TokenKind::SizeOfKeyword:
+            case TokenKind::DerefAsKeyword:
+            {
+                return true;
+            }
+
+            default:
+            {
+                return false;
+            }
+        }
     }
 
     static auto IsExprExprStart(
@@ -1132,21 +1142,31 @@ namespace Ace
         const Parser& parser
     ) -> bool
     {
-        return
-            (parser.Peek() == TokenKind::Int8) ||
-            (parser.Peek() == TokenKind::Int16) ||
-            (parser.Peek() == TokenKind::Int32) ||
-            (parser.Peek() == TokenKind::Int64) ||
-            (parser.Peek() == TokenKind::UInt8) ||
-            (parser.Peek() == TokenKind::UInt16) ||
-            (parser.Peek() == TokenKind::UInt32) ||
-            (parser.Peek() == TokenKind::UInt64) ||
-            (parser.Peek() == TokenKind::Int) ||
-            (parser.Peek() == TokenKind::Float32) ||
-            (parser.Peek() == TokenKind::Float64) ||
-            (parser.Peek() == TokenKind::String) ||
-            (parser.Peek() == TokenKind::TrueKeyword) ||
-            (parser.Peek() == TokenKind::FalseKeyword);
+        switch (parser.Peek()->Kind)
+        {
+            case TokenKind::Int8:
+            case TokenKind::Int16:
+            case TokenKind::Int32:
+            case TokenKind::Int64:
+            case TokenKind::UInt8:
+            case TokenKind::UInt16:
+            case TokenKind::UInt32:
+            case TokenKind::UInt64:
+            case TokenKind::Int:
+            case TokenKind::Float32:
+            case TokenKind::Float64:
+            case TokenKind::String:
+            case TokenKind::TrueKeyword:
+            case TokenKind::FalseKeyword:
+            {
+                return true;
+            }
+
+            default:
+            {
+                return false;
+            }
+        }
     }
 
     static auto IsSymbolLiteralExprStart(
@@ -1160,12 +1180,22 @@ namespace Ace
         const Parser& parser
     ) -> bool
     {
-        return
-            (parser.Peek() == TokenKind::IfKeyword) ||
-            (parser.Peek() == TokenKind::WhileKeyword) ||
-            (parser.Peek() == TokenKind::ReturnKeyword) ||
-            (parser.Peek() == TokenKind::ExitKeyword) ||
-            (parser.Peek() == TokenKind::AssertKeyword);
+        switch (parser.Peek()->Kind)
+        {
+            case TokenKind::IfKeyword:
+            case TokenKind::WhileKeyword:
+            case TokenKind::ReturnKeyword:
+            case TokenKind::ExitKeyword:
+            case TokenKind::AssertKeyword:
+            {
+                return true;
+            }
+
+            default:
+            {
+                return false;
+            }
+        }
     }
 
     static auto IsBlockStmtStart(

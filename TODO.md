@@ -2,7 +2,6 @@
 
 ## 🛠️ Refactor
 
-- ❓ Change all `Is...` functions in `Parser.cpp` to use `switch`
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 
 ## 💥 High Priority
