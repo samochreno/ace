@@ -3,7 +3,6 @@
 ## 🛠️ Refactor
 
 - ❓ Change all `Is...` functions in `Parser.cpp` to use `switch`
-- ❓ Change most `const&` constructors to pass by value, and change all r-value reference parameters to value
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 
 ## 💥 High Priority

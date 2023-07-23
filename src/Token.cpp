@@ -9,10 +9,7 @@ namespace Ace
         return token.Kind == kind;
     }
 
-    auto operator==(
-        const Token& token,
-        const std::string_view string
-    ) -> bool
+    auto operator==(const Token& token, const std::string_view string) -> bool
     {
         if (token.Kind != TokenKind::Ident)
         {

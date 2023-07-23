@@ -167,32 +167,6 @@ namespace Ace
         return symbol->GetSymbolCategory();
     }
 
-    SymbolResolutionData::SymbolResolutionData(
-        const std::shared_ptr<const Scope>& resolvingFromScope,
-        const std::vector<SymbolNameSection>::const_iterator nameSectionsBegin,
-        const std::vector<SymbolNameSection>::const_iterator nameSectionsEnd,
-        const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes,
-        const std::function<bool(const ISymbol* const)>& isCorrectSymbolType,
-        const std::vector<std::shared_ptr<const Scope>>& scopes,
-        const std::vector<ITypeSymbol*>& implTemplateArgs,
-        const bool isTemplate
-    ) : ResolvingFromScope{ resolvingFromScope },
-        NameSectionsBegin{ nameSectionsBegin },
-        NameSectionsEnd{ nameSectionsEnd },
-        OptArgTypes{ optArgTypes },
-        IsCorrectSymbolType{ isCorrectSymbolType },
-        Scopes{ scopes },
-        ImplTemplateArgs{ implTemplateArgs },
-        IsTemplate{ isTemplate },
-        IsLastNameSection
-        {
-            std::distance(nameSectionsBegin, nameSectionsEnd) == 1
-        },
-        Name{ nameSectionsBegin->Name.String },
-        TemplateName{ SpecialIdent::CreateTemplate(Name) }
-    {
-    }
-
     GlobalScope::GlobalScope()
     {
     }

@@ -57,8 +57,9 @@ namespace Ace
         llvm::Function* m_Exit{};
     };
 
-    struct C
+    class C
     {
+    public:
         auto Initialize(
             llvm::LLVMContext& context,
             llvm::Module& module

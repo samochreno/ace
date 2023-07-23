@@ -25,7 +25,6 @@ namespace Ace
         ) : BlockBuilder{ llvm::BasicBlock::Create(context, "", function) }
         {
         }
-
         BlockBuilder(
             llvm::BasicBlock* block
         ) : Block{ block },

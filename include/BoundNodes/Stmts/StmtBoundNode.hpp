@@ -10,14 +10,8 @@
 
 namespace Ace
 {
-    struct StmtTypeCheckingContext : public TypeCheckingContext
+    struct StmtTypeCheckingContext
     {
-        StmtTypeCheckingContext(
-            ITypeSymbol* const parentFunctionType
-        ) : ParentFunctionTypeSymbol{ parentFunctionType }
-        {
-        }
-
         ITypeSymbol* ParentFunctionTypeSymbol{};
     };
 

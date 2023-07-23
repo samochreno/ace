@@ -8,15 +8,6 @@ namespace Ace
 
     struct TypeInfo
     {
-    public:
-        TypeInfo(
-            ITypeSymbol* const symbol,
-            const ValueKind valueKind
-        ) : Symbol{ symbol },
-            ValueKind{ valueKind }
-        {
-        }
-
         ITypeSymbol* Symbol{};
         ValueKind ValueKind{};
     };

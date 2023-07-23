@@ -145,8 +145,9 @@ namespace Ace
         auto copyOpName = selfSymbol->CreateFullyQualifiedName(
             srcLocation
         );
-        copyOpName.Sections.push_back(SymbolNameSection{
-            Ident{ srcLocation, SpecialIdent::Op::Copy }
+        copyOpName.Sections.emplace_back(Ident{
+            srcLocation,
+            SpecialIdent::Op::Copy,
         });
         selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
             copyOpName
@@ -155,8 +156,9 @@ namespace Ace
         auto dropOpName = selfSymbol->CreateFullyQualifiedName(
             srcLocation
         );
-        dropOpName.Sections.push_back(SymbolNameSection{
-            Ident{ srcLocation, SpecialIdent::Op::Drop }
+        dropOpName.Sections.push_back(Ident{
+            srcLocation,
+            SpecialIdent::Op::Drop,
         });
         selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
             dropOpName

@@ -13,6 +13,7 @@
 #include "Name.hpp"
 #include "SymbolCategory.hpp"
 #include "Ident.hpp"
+#include "SpecialIdent.hpp"
 
 namespace Ace
 {
@@ -57,7 +58,22 @@ namespace Ace
             const std::vector<std::shared_ptr<const Scope>>& scopes,
             const std::vector<ITypeSymbol*>& implTemplateArgs,
             const bool isTemplate
-        );
+        ) : ResolvingFromScope{ resolvingFromScope },
+            NameSectionsBegin{ nameSectionsBegin },
+            NameSectionsEnd{ nameSectionsEnd },
+            OptArgTypes{ optArgTypes },
+            IsCorrectSymbolType{ isCorrectSymbolType },
+            Scopes{ scopes },
+            ImplTemplateArgs{ implTemplateArgs },
+            IsTemplate{ isTemplate },
+            IsLastNameSection
+            {
+                std::distance(nameSectionsBegin, nameSectionsEnd) == 1
+            },
+            Name{ nameSectionsBegin->Name.String },
+            TemplateName{ SpecialIdent::CreateTemplate(Name) }
+        {
+        }
 
         std::shared_ptr<const Scope> ResolvingFromScope{};
         std::vector<SymbolNameSection>::const_iterator NameSectionsBegin{};

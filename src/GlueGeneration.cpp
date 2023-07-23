@@ -193,10 +193,10 @@ namespace Ace::GlueGeneration
                 return;
             }
 
-            typeGlueSymbolPairs.push_back(TypeGlueSymbolPair{ 
+            typeGlueSymbolPairs.emplace_back(
                 typeSymbol,
                 optGlueSymbol.value()
-            });
+            );
         });
 
         std::for_each(begin(typeGlueSymbolPairs), end(typeGlueSymbolPairs),
@@ -347,7 +347,7 @@ namespace Ace::GlueGeneration
         auto opName = structSymbol->CreateFullyQualifiedName(
             structSymbol->GetName().SrcLocation
         );
-        opName.Sections.push_back(Ident{
+        opName.Sections.emplace_back(Ident{
             structSymbol->GetName().SrcLocation,
             SpecialIdent::Op::Copy,
         });
@@ -467,7 +467,7 @@ namespace Ace::GlueGeneration
         auto opName = structSymbol->CreateFullyQualifiedName(
             structSymbol->GetName().SrcLocation
         );
-        opName.Sections.push_back(Ident{
+        opName.Sections.emplace_back(Ident{
             structSymbol->GetName().SrcLocation,
             SpecialIdent::Op::Drop,
         });

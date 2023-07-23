@@ -45,16 +45,6 @@ namespace Ace
 
     struct Diagnostic
     {
-        Diagnostic(
-            const DiagnosticSeverity severity,
-            const std::optional<SrcLocation>& optSrcLocation,
-            const std::string& message
-        ) : Severity{ severity },
-            OptSrcLocation{ optSrcLocation },
-            Message{ message }
-        {
-        }
-
         DiagnosticSeverity Severity{};
         std::optional<SrcLocation> OptSrcLocation{};
         std::string Message{};
