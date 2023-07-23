@@ -112,24 +112,12 @@ namespace Ace::Application
             return false;
         });
 
-#if 0
         ACE_TRY_VOID(TransformExpectedVector(symbolCreatableNodes,
         [](const ISymbolCreatableNode* const symbolCreatableNode) -> Expected<void>
         {
             ACE_TRY(symbol, Scope::DefineSymbol(symbolCreatableNode));
             return Void{};
         }));
-#else
-        for (const auto* const symbolCreatableNode : symbolCreatableNodes)
-        {
-            const auto expSymbol = Scope::DefineSymbol(symbolCreatableNode);
-            if (!expSymbol)
-            {
-                [](){}();
-                ACE_TRY_UNREACHABLE();
-            }
-        }
-#endif
 
         return Void{};
     }
