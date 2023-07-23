@@ -1022,8 +1022,8 @@ namespace Ace
 
         auto Eat() -> const std::shared_ptr<const Token>&
         {
-            ACE_ASSERT(m_Iterator <= m_EndIterator);
             m_Iterator++;
+            ACE_ASSERT(m_Iterator <= m_EndIterator);
             UpdateNestLevel();
             return PeekBack();
         }
