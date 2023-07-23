@@ -1054,7 +1054,7 @@ namespace Ace
                     end  (tokenKinds),
                     [&](const TokenKind tokenKind)
                     {
-                        return tokenKind == Peek();
+                        return Peek() == tokenKind;
                     }
                 );
                 if (matchingTokenKindIt == end(tokenKinds))
@@ -2223,10 +2223,10 @@ namespace Ace
                 optValue = expValue.Unwrap();
             }
             
-            args.push_back(StructConstructionExprArg{
+            args.emplace_back(
                 expName.Unwrap(),
                 optValue
-            });
+            );
         }
 
         if (parser.Peek() == TokenKind::CloseBrace)
@@ -2777,10 +2777,10 @@ namespace Ace
         while (IsPrefixOp(parser.Peek()->Kind))
         {
             const auto& opToken = parser.Eat();
-            ops.push_back(Op{
+            ops.emplace_back(
                 opToken->SrcLocation,
                 opToken->Kind
-            });
+            );
         }
 
         const auto expSecondaryExpr = ParseSecondaryExpr(parser, scope);
@@ -2838,10 +2838,10 @@ namespace Ace
         while (IsBinaryOp(parser.Peek()->Kind))
         {
             const auto& opToken = parser.Eat();
-            ops.push_back(Op{
+            ops.emplace_back(
                 opToken->SrcLocation,
                 opToken->Kind
-            });
+            );
 
             const auto expUnaryExpr = ParseUnaryExpr(parser, scope);
             diagnosticBag.Add(expUnaryExpr);
