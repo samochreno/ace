@@ -995,7 +995,7 @@ namespace Ace
             );
 
                m_Iterator = begin(m_Tokens);
-            m_EndIterator = end  (m_Tokens);
+            m_EndIterator = end  (m_Tokens) - 1;
         }
         ~Parser() = default;
 
@@ -1022,6 +1022,7 @@ namespace Ace
 
         auto Eat() -> const std::shared_ptr<const Token>&
         {
+            ACE_ASSERT(m_Iterator <= m_EndIterator);
             m_Iterator++;
             UpdateNestLevel();
             return PeekBack();
@@ -1041,7 +1042,7 @@ namespace Ace
         {
             const auto startNestLevel = GetNestLevel();
 
-            while (Peek() != TokenKind::EndOfFile)
+            while (!IsEnd())
             {
                 if (GetNestLevel() != startNestLevel)
                 {
@@ -1248,7 +1249,7 @@ namespace Ace
 
         size_t i = 2;
         while (
-            (parser.Peek(i) != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek(i) != TokenKind::CloseBracket)
             )
         {
@@ -1624,7 +1625,7 @@ namespace Ace
 
         std::vector<Ident> names{};
         while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBracket)
             )
         {
@@ -1781,7 +1782,7 @@ namespace Ace
 
         std::vector<SymbolName> args{};
         while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBracket)
             )
         {
@@ -2012,7 +2013,7 @@ namespace Ace
 
         std::vector<std::shared_ptr<const NormalParamVarNode>> params{};
         while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseParen)
             )
         {
@@ -2083,7 +2084,7 @@ namespace Ace
 
         std::vector<std::shared_ptr<const IExprNode>> args{};
         while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseParen)
             )
         {
@@ -2207,7 +2208,7 @@ namespace Ace
 
         std::vector<StructConstructionExprArg> args{};
         while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBrace)
             )
         {
@@ -2966,7 +2967,7 @@ namespace Ace
 
         std::vector<std::shared_ptr<const IStmtNode>> stmts{};
         while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBrace)
             )
         {
@@ -3815,10 +3816,7 @@ namespace Ace
         const auto& minusGreaterThanToken = parser.Eat();
 
         std::map<Modifier, std::shared_ptr<const Token>> modifierToTokenMap{};
-        while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
-            !predicate()
-        )
+        while (!parser.IsEnd() && !predicate())
         {
             const auto modifierToken = parser.Eat();
 
@@ -4225,7 +4223,7 @@ namespace Ace
         std::vector<std::shared_ptr<const FunctionNode>> functions{};
         std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
         while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBrace)
             )
         {
@@ -4573,7 +4571,7 @@ namespace Ace
 
         std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
         while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBrace)
             )
         {
@@ -5066,7 +5064,7 @@ namespace Ace
 
         std::vector<std::shared_ptr<const InstanceVarNode>> vars{};
         while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBrace)
             )
         {
@@ -5444,7 +5442,7 @@ namespace Ace
         std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
         std::vector<std::shared_ptr<const StaticVarNode>> vars{};
         while (
-            (parser.Peek() != TokenKind::EndOfFile) &&
+            !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBrace)
             )
         {
@@ -5602,15 +5600,6 @@ namespace Ace
             return diagnosticBag;
         }
 
-        if (parser.Peek() != TokenKind::EndOfFile)
-        {
-            return diagnosticBag.Add(CreateUnexpectedTokenError(
-                parser.Peek(),
-                TokenKind::EndOfFile
-            ));
-        }
-
-        parser.Eat();
         ACE_ASSERT(parser.IsEnd());
 
         return

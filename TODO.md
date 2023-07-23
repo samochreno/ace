@@ -6,7 +6,6 @@
 
 ## 💥 High Priority
 
-- Use `parser.IsEnd()` instead of `parser.Peek() == TokenKind::EndOfFile`
 - Implement special fast lookup for native types
 - Figure out where to use the `opt` prefix and where not
 - Fix so compilation cannot succeed with parsing errors
