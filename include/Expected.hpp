@@ -27,7 +27,7 @@ namespace Ace
         DiagnosticBag DiagnosticBag{};
     };
 
-    template<typename TValue>
+    template<typename T>
     class Expected;
 
     template<>
@@ -108,7 +108,7 @@ namespace Ace
         DiagnosticBag m_DiagnosticBag{};
     };
 
-    template<typename TValue>
+    template<typename T>
     class Expected : public IDiagnosed
     {
     public:
@@ -127,23 +127,23 @@ namespace Ace
         {
         }
         Expected(
-            const TValue& value
+            const T& value
         ) : m_OptValue{ value }
         {
         }
         Expected(
-            const TValue& value,
+            const T& value,
             const DiagnosticBag& diagnosticBag
         ) : m_OptValue{ value },
             m_DiagnosticBag{ diagnosticBag }
         {
         }
-        Expected(TValue&& value) noexcept
+        Expected(T&& value) noexcept
             : m_OptValue{ std::move(value) }
         {
         }
         Expected(
-            TValue&& value,
+            T&& value,
             const DiagnosticBag& diagnosticBag
         ) noexcept
           : m_OptValue{ std::move(value) },
@@ -180,11 +180,11 @@ namespace Ace
             return m_OptValue.has_value();
         }
 
-        auto Unwrap() -> TValue&
+        auto Unwrap() -> T&
         {
             return m_OptValue.value();
         }
-        auto Unwrap() const -> const TValue&
+        auto Unwrap() const -> const T&
         {
             return m_OptValue.value();
         }
@@ -194,21 +194,21 @@ namespace Ace
             return m_DiagnosticBag;
         }
 
-        template<typename TValueNew>
-        operator Expected<TValueNew>() const
+        template<typename TNew>
+        operator Expected<TNew>() const
         {
             if (m_DiagnosticBag.IsEmpty())
             {
-                return Expected<TValueNew>(m_OptValue.value());
+                return Expected<TNew>(m_OptValue.value());
             }
             else
             {
-                return Expected<TValueNew>(m_DiagnosticBag);
+                return Expected<TNew>(m_DiagnosticBag);
             }
         }
 
     private:
-        std::optional<TValue> m_OptValue{};
+        std::optional<T> m_OptValue{};
         DiagnosticBag m_DiagnosticBag{};
     };
 
