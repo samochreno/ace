@@ -42,8 +42,7 @@ namespace Ace::Application
     {
         DiagnosticBag diagnosticBag{};
 
-        Lexer lexer{ fileBuffer };
-        auto dgnTokens = lexer.EatTokens();
+        auto dgnTokens = LexTokens(fileBuffer);
         diagnosticBag.Add(dgnTokens.GetDiagnosticBag());
 
         const auto expAST = ParseAST(

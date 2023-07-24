@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 
+#include "Assert.hpp"
 #include "Diagnostic.hpp"
 #include "Diagnostics/LexDiagnostics.hpp"
 #include "Token.hpp"
@@ -12,29 +13,105 @@
 #include "FileBuffer.hpp"
 #include "Compilation.hpp"
 #include "SrcLocation.hpp"
-#include "Measured.hpp"
 
 namespace Ace
 {
-    struct ScanContext
+    class Lexer
     {
-        ScanContext(
-            const FileBuffer* const fileBuffer,
-            const std::vector<std::string_view>::const_iterator lineIt,
-            const std::string_view::const_iterator characterIt
-        ) : FileBuffer{ fileBuffer },
-            LineIterator{ lineIt },
-            CharacterIterator{ characterIt }
+    public:
+        Lexer(
+            const FileBuffer* const fileBuffer
+        ) : m_FileBuffer{ fileBuffer }
         {
+            m_LineIterator = begin(m_FileBuffer->GetLines());
+
+               m_CharacterIterator = begin(*m_LineIterator);
+            m_EndCharacterIterator = end  (*m_LineIterator);
+
+            m_SrcLocation = CreateSrcLocation();
+        }
+        ~Lexer() = default;
+
+        auto GetFileBuffer() const -> const FileBuffer*
+        {
+            return m_FileBuffer;
+        }
+        auto IsEnd() const -> bool
+        {
+            return m_CharacterIterator == end(m_FileBuffer->GetLines().back());
+        }
+        auto IsEndOfLine() const -> bool
+        {
+            return m_CharacterIterator == m_EndCharacterIterator;
+        }
+        auto Peek(const size_t distance = 0) const -> char
+        {
+            return *(m_CharacterIterator + distance);
         }
 
-        const FileBuffer* FileBuffer{};
-        std::vector<std::string_view>::const_iterator LineIterator{};
-        std::string_view::const_iterator CharacterIterator{};
+        auto GetSrcLocation() const -> SrcLocation
+        {
+            return m_SrcLocation;
+        }
+        auto GetLastSrcLocation() const -> SrcLocation
+        {
+            return m_LastSrcLocation;
+        }
+
+        auto Eat() -> char
+        {
+            const auto startSrcLocation = m_SrcLocation;
+
+            if (m_CharacterIterator == m_EndCharacterIterator)
+            {
+                ACE_ASSERT(!IsEnd());
+
+                m_LineIterator++;
+
+                   m_CharacterIterator = begin(*m_LineIterator);
+                m_EndCharacterIterator = end  (*m_LineIterator);
+            }
+            else
+            {
+                m_CharacterIterator++;
+            }
+
+            m_LastSrcLocation = startSrcLocation;
+            m_SrcLocation = CreateSrcLocation();
+
+            return *startSrcLocation.CharacterBeginIterator;
+        }
+        auto Eat(const size_t count) -> void
+        {
+            for (size_t i = 0; i < count; i++)
+            {
+                Eat();
+            }
+        }
+
+    private:
+        auto CreateSrcLocation() const -> SrcLocation
+        {
+            return
+            {
+                m_FileBuffer,
+                m_CharacterIterator,
+                m_CharacterIterator + 1,
+            };
+        }
+
+        const FileBuffer* m_FileBuffer{};
+
+        std::vector<std::string_view>::const_iterator m_LineIterator{};
+
+        std::string_view::const_iterator m_CharacterIterator{};
+        std::string_view::const_iterator m_EndCharacterIterator{};
+
+        SrcLocation m_SrcLocation{};
+        SrcLocation m_LastSrcLocation{};
     };
 
     static auto CreateNativeTypeName(
-        const ScanContext& context,
         const SrcLocation& srcLocation,
         const NativeType& nativeType
     ) -> std::vector<std::shared_ptr<const Token>>
@@ -74,12 +151,12 @@ namespace Ace
     }
 
     static auto CreateKeyword(
-        const ScanContext& context,
+        const Lexer& lexer,
         const std::string& string,
         const SrcLocation& srcLocation
     ) -> std::optional<std::vector<std::shared_ptr<const Token>>>
     {
-        const auto& natives = context.FileBuffer->GetCompilation()->Natives;
+        const auto& natives = lexer.GetFileBuffer()->GetCompilation()->Natives;
 
         Token token
         {
@@ -175,7 +252,6 @@ namespace Ace
         else if (string == Keyword::Int8)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->Int8
             );
@@ -183,7 +259,6 @@ namespace Ace
         else if (string == Keyword::Int16)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->Int16
             );
@@ -191,7 +266,6 @@ namespace Ace
         else if (string == Keyword::Int32)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->Int32
             );
@@ -199,7 +273,6 @@ namespace Ace
         else if (string == Keyword::Int64)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->Int64
             );
@@ -207,7 +280,6 @@ namespace Ace
         else if (string == Keyword::UInt8)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->UInt8
             );
@@ -215,7 +287,6 @@ namespace Ace
         else if (string == Keyword::UInt16)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->UInt16
             );
@@ -223,7 +294,6 @@ namespace Ace
         else if (string == Keyword::UInt32)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->UInt32
             );
@@ -231,7 +301,6 @@ namespace Ace
         else if (string == Keyword::UInt64)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->UInt64
             );
@@ -239,7 +308,6 @@ namespace Ace
         else if (string == Keyword::Int)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->Int
             );
@@ -247,7 +315,6 @@ namespace Ace
         else if (string == Keyword::Float32)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->Float32
             );
@@ -255,7 +322,6 @@ namespace Ace
         else if (string == Keyword::Float64)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->Float64
             );
@@ -263,7 +329,6 @@ namespace Ace
         else if (string == Keyword::Bool)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->Bool
             );
@@ -271,7 +336,6 @@ namespace Ace
         else if (string == Keyword::Void)
         {
             return CreateNativeTypeName(
-                context,
                 srcLocation,
                 natives->Void
             );
@@ -284,64 +348,11 @@ namespace Ace
         return std::vector{ std::make_shared<const Token>(token) };
     }
 
-    static auto ScanIdent(
-        const ScanContext& context
-    ) -> Measured<std::vector<std::shared_ptr<const Token>>>
-    {
-        auto it = context.CharacterIterator;
-
-        ACE_ASSERT(IsInAlphabet(*it) || (*it == '_'));
-
-        while (it != end(*context.LineIterator))
-        {
-            if (
-                !IsInAlphabet(*it) &&
-                !IsNumber(*it) &&
-                !(*it == '_')
-                )
-                break;
-
-            ++it;
-        }
-
-        const SrcLocation srcLocation
-        {
-            context.FileBuffer,
-            context.CharacterIterator,
-            it,
-        };
-
-        const std::string string{ context.CharacterIterator, it };
-
-        const auto identToken = std::make_shared<const Token>(
-            srcLocation,
-            TokenKind::Ident,
-            string
-        );
-
-        const auto optKeywordTokens = CreateKeyword(
-            context,
-            string,
-            srcLocation
-        );
-
-        const auto tokens = optKeywordTokens.has_value() ?
-            optKeywordTokens.value() :
-            std::vector{ identToken };
-
-        return
-        {
-            tokens,
-            std::distance(context.CharacterIterator, it),
-        };
-    }
-
     static auto CreateNumericLiteralTokenKind(
-        const std::shared_ptr<const Token>& suffix
+        const SrcLocation& srcLocation,
+        const std::string& suffix
     ) -> Expected<TokenKind>
     {
-        DiagnosticBag diagnosticBag{};
-
         if (suffix == "i8")  return TokenKind::Int8;
         if (suffix == "i16") return TokenKind::Int16;
         if (suffix == "i32") return TokenKind::Int32;
@@ -356,140 +367,166 @@ namespace Ace
         if (suffix == "f32") return TokenKind::Float32;
         if (suffix == "f64") return TokenKind::Float64;
 
-        return diagnosticBag.Add(CreateUnknownNumericLiteralTypeSuffixError(
-            suffix->SrcLocation
+        return DiagnosticBag{}.Add(CreateUnknownNumericLiteralTypeSuffixError(
+            srcLocation
         ));
     }
 
-    static auto ScanNumericLiteralNumber(
-        const ScanContext& context
-    ) -> Measured<Token>
+    static auto IsIdentStart(const Lexer& lexer) -> bool
     {
-        auto it = context.CharacterIterator;
+        return
+            IsInAlphabet(lexer.Peek()) ||
+            (lexer.Peek() == '_');
+    }
 
-        ACE_ASSERT(IsNumber(*it));
+    static auto IsIdentContinue(const Lexer& lexer) -> bool
+    {
+        return
+            IsIdentStart(lexer) ||
+            IsNumber(lexer.Peek());
+    }
 
-        std::string string{};
-        bool hasDecimalPoint = false;
-        while (
-            IsNumber(*it) ||
-            (!hasDecimalPoint && (*it == '.') && IsNumber(*(it + 1)))
-            )
+    static auto IsNumericLiteralNumberStart(const Lexer& lexer) -> bool
+    {
+        return IsNumber(lexer.Peek());
+    }
+
+    static auto IsNumericLiteralNumberContinue(
+        const Lexer& lexer,
+        const bool hasDecimalPoint
+    ) -> bool
+    {
+        if (IsNumericLiteralNumberStart(lexer))
         {
-            if (*it == '.')
+            return true;
+        }
+
+        return
+            (lexer.Peek(0) == '.') &&
+            IsNumber(lexer.Peek(1)) &&
+            !hasDecimalPoint;
+    }
+
+    static auto IsNumericLiteralSuffixStart(const Lexer& lexer) -> bool
+    {
+        return IsInAlphabet(lexer.Peek());
+    }
+
+    static auto IsNumericLiteralSuffixContinue(const Lexer& lexer) -> bool
+    {
+        return IsNumber(lexer.Peek());
+    }
+
+    static auto IsNumericLiteralStart(const Lexer& lexer) -> bool
+    {
+        return IsNumericLiteralNumberStart(lexer);
+    }
+
+    static auto IsWhitespace(const Lexer& lexer) -> bool
+    {
+        return 
+            (lexer.Peek() == ' ') ||
+            (lexer.Peek() == '\f') || 
+            (lexer.Peek() == '\t') ||
+            (lexer.Peek() == '\v');
+    }
+
+    static auto IsCommentStart(const Lexer& lexer) -> bool
+    {
+        return lexer.Peek() == '#';
+    }
+
+    static auto IsMultiLineCommentEnd(const Lexer& lexer) -> bool
+    {
+        return
+            (lexer.Peek(0) == ':') &&
+            (lexer.Peek(1) == '#');
+    }
+
+    static auto LexIdent(
+        Lexer& lexer
+    ) -> std::vector<std::shared_ptr<const Token>>
+    {
+        const auto startSrcLocation = lexer.GetSrcLocation();
+
+        ACE_ASSERT(IsIdentStart(lexer));
+        std::string string{ lexer.Eat() };
+        while (IsIdentContinue(lexer))
+        {
+            string += lexer.Eat();
+        }
+
+        const auto identToken = std::make_shared<const Token>(
+            SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() },
+            TokenKind::Ident,
+            string
+        );
+
+        const auto optKeywordTokens = CreateKeyword(
+            lexer,
+            string,
+            identToken->SrcLocation
+        );
+
+        const auto tokens = optKeywordTokens.has_value() ?
+            optKeywordTokens.value() :
+            std::vector{ identToken };
+
+        return tokens;
+    }
+
+    static auto LexNumericLiteral(
+        Lexer& lexer
+    ) -> Diagnosed<std::shared_ptr<const Token>>
+    {
+        DiagnosticBag diagnosticBag{};
+
+        const auto startSrcLocation = lexer.GetSrcLocation();
+
+        ACE_ASSERT(IsNumericLiteralNumberStart(lexer));
+        std::string numberString{ lexer.Eat() };
+        bool hasDecimalPoint = false;
+        while (IsNumericLiteralNumberContinue(lexer, hasDecimalPoint))
+        {
+            if (lexer.Peek() == '.')
             {
                 hasDecimalPoint = true;
             }
 
-            string += *it;
-            ++it;
+            numberString += lexer.Eat();
         }
 
-        const SrcLocation srcLocation
+        const auto suffixStartSrcLocation = lexer.GetSrcLocation();
+        std::string suffix{};
+        if (IsNumericLiteralSuffixStart(lexer))
         {
-            context.FileBuffer,
-            context.CharacterIterator,
-            it,
-        };
-
-        return
-        {
-            Token
+            suffix += lexer.Eat();
+            while (IsNumericLiteralSuffixContinue(lexer))
             {
-                srcLocation,
-                TokenKind::Int,
-                string,
-            },
-            std::distance(context.CharacterIterator, it),
-        };
-    }
-
-    static auto ScanNumericLiteralSuffix(
-        const ScanContext& context
-    ) -> Measured<std::shared_ptr<const Token>>
-    {
-        auto it = context.CharacterIterator;
-
-        ACE_ASSERT(IsInAlphabet(*it));
-        ++it;
-
-        while (IsNumber(*it))
-        {
-            ++it;
-        }
-
-        const SrcLocation srcLocation
-        {
-            context.FileBuffer,
-            context.CharacterIterator,
-            it,
-        };
-
-        return
-        {
-            std::make_shared<const Token>(
-                srcLocation,
-                TokenKind::Ident,
-                std::string{ context.CharacterIterator, it }
-            ),
-            std::distance(context.CharacterIterator, it),
-        };
-    }
-
-    static auto ScanNumericLiteral(
-        const ScanContext& context
-    ) -> Diagnosed<Measured<std::shared_ptr<const Token>>>
-    {
-        DiagnosticBag diagnosticBag{};
-        auto it = context.CharacterIterator;
-
-        auto numberToken = ScanNumericLiteralNumber({
-            context.FileBuffer,
-            context.LineIterator,
-            it,
-        });
-        it += numberToken.Length;
-
-        const auto optTypeSuffix = [&]() -> std::optional<Measured<std::shared_ptr<const Token>>>
-        {
-            if (!IsInAlphabet(*it))
-            {
-                return std::nullopt;
+                suffix += lexer.Eat();
             }
-
-            return ScanNumericLiteralSuffix({
-                context.FileBuffer,
-                context.LineIterator,
-                it,
-            });
-        }();
-        if (optTypeSuffix.has_value())
-        {
-            it += optTypeSuffix.value().Length;
         }
 
-        const auto tokenKind = [&]() -> TokenKind
+        auto tokenKind = TokenKind::Int;
+        if (!suffix.empty())
         {
-            if (!optTypeSuffix.has_value())
+            const SrcLocation suffixSrcLocation
             {
-                return TokenKind::Int;
-            }
-
+                suffixStartSrcLocation,
+                lexer.GetLastSrcLocation(),
+            };
             const auto expTokenKind = CreateNumericLiteralTokenKind(
-                optTypeSuffix.value().Value
+                suffixSrcLocation,
+                suffix
             );
-            if (!expTokenKind)
+            diagnosticBag.Add(expTokenKind);
+            if (expTokenKind)
             {
-                diagnosticBag.Add(expTokenKind);
-                return TokenKind::Int;
+                tokenKind = expTokenKind.Unwrap();
             }
+        }
 
-            return expTokenKind.Unwrap();
-        }();
-
-        const auto decimalPointPos =
-            numberToken.Value.String.find_first_of('.');
-
+        const auto decimalPointPos = numberString.find_first_of('.');
         if (decimalPointPos != std::string::npos)
         {
             const bool isFloatKind =
@@ -498,485 +535,452 @@ namespace Ace
 
             if (!isFloatKind)
             {
-                const SrcLocation srcLocation
+                const SrcLocation decimalPointSrcLocation
                 {
-                    context.FileBuffer,
-                    context.CharacterIterator + decimalPointPos,
-                    context.CharacterIterator + decimalPointPos + 1,
+                    startSrcLocation.Buffer,
+                    startSrcLocation.CharacterBeginIterator + decimalPointPos,
+                    startSrcLocation.CharacterBeginIterator + decimalPointPos + 1,
                 };
 
                 diagnosticBag.Add(CreateDecimalPointInNonFloatNumericLiteralError(
-                    srcLocation
+                    decimalPointSrcLocation
                 ));
 
-                numberToken.Value.String.erase(decimalPointPos);
+                numberString.erase(decimalPointPos);
             } 
         }
 
-        const SrcLocation srcLocation
-        {
-            context.FileBuffer,
-            context.CharacterIterator,
-            it, 
-        };
-
         const auto token = std::make_shared<const Token>(
-            srcLocation,
+            SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() },
             tokenKind,
-            numberToken.Value.String
+            numberString
         );
 
         return
         {
-            Measured
-            {
-                token,
-                std::distance(context.CharacterIterator, it),
-            },
+            token,
             diagnosticBag,
         };
     }
 
-    static auto ScanDefaultTokenKind(
-        const ScanContext& context
-    ) -> Expected<Measured<TokenKind>>
+    static auto LexDefaultTokenKind(
+        Lexer& lexer
+    ) -> Expected<TokenKind>
     {
-        DiagnosticBag diagnosticBag{};
-        
-        auto it = context.CharacterIterator;
-
-        switch (*it)
+        switch (lexer.Peek())
         {
             case '=':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '=')
+                if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::EqualsEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::EqualsEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::Equals, size_t{ 1 } };
+                    return TokenKind::Equals;
                 }
             }
 
             case '+':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '=')
+                if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::PlusEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::PlusEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::Plus, size_t{ 1 } };
+                    return TokenKind::Plus;
                 }
             }
 
             case '-':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '=')
+                if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::MinusEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::MinusEquals;
                 }
-                else if (*it == '>')
+                else if (lexer.Peek() == '>')
                 {
-                    return Measured{ TokenKind::MinusGreaterThan, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::MinusGreaterThan;
                 }
                 else
                 {
-                    return Measured{ TokenKind::Minus, size_t{ 1 } };
+                    return TokenKind::Minus;
                 }
             }
 
             case '*':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '=')
+                if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::AsteriskEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::AsteriskEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::Asterisk, size_t{ 1 } };
+                    return TokenKind::Asterisk;
                 }
             }
 
             case '/':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '=')
+                if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::SlashEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::SlashEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::Slash, size_t{ 1 } };
+                    return TokenKind::Slash;
                 }
             }
 
             case '%':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '=')
+                if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::PercentEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::PercentEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::Percent, size_t{ 1 } };
+                    return TokenKind::Percent;
                 }
             }
 
             case '<':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '<')
+                if (lexer.Peek() == '<')
                 {
-                    ++it;
+                    lexer.Eat();
 
-                    if (*it == '=')
+                    if (lexer.Peek() == '=')
                     {
-                        return Measured{ TokenKind::LessThanLessThanEquals, size_t{ 3 } };
+                        lexer.Eat();
+                        return TokenKind::LessThanLessThanEquals;
                     }
                     else
                     {
-                        return Measured{ TokenKind::LessThanLessThan, size_t{ 2 } };
+                        return TokenKind::LessThanLessThan;
                     }
                 }
-                else if (*it == '=')
+                else if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::LessThanEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::LessThanEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::LessThan, size_t{ 1 } };
+                    return TokenKind::LessThan;
                 }
             }
 
             case '>':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '>')
+                if (lexer.Peek() == '>')
                 {
-                    ++it;
+                    lexer.Eat();
 
-                    if (*it == '=')
+                    if (lexer.Peek() == '=')
                     {
-                        return Measured{ TokenKind::GreaterThanGreaterThanEquals, size_t{ 3 } };
+                        lexer.Eat();
+                        return TokenKind::GreaterThanGreaterThanEquals;
                     }
                     else
                     {
-                        return Measured{ TokenKind::GreaterThanGreaterThan, size_t{ 2 } };
+                        return TokenKind::GreaterThanGreaterThan;
                     }
                 }
-                else if (*it == '=')
+                else if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::GreaterThanEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::GreaterThanEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::GreaterThan, size_t{ 1 } };
+                    return TokenKind::GreaterThan;
                 }
             }
 
             case '&':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '&')
+                if (lexer.Peek() == '&')
                 {
-                    return Measured{ TokenKind::AmpersandAmpersand, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::AmpersandAmpersand;
                 }
-                else if (*it == '=')
+                else if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::AmpersandEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::AmpersandEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::Ampersand, size_t{ 1 } };
+                    return TokenKind::Ampersand;
                 }
             }
 
             case '^':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '=')
+                if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::CaretEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::CaretEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::Caret, size_t{ 1 } };
+                    return TokenKind::Caret;
                 }
             }
 
             case '|':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '|')
+                if (lexer.Peek() == '|')
                 {
-                    return Measured{ TokenKind::VerticalBarVerticalBar, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::VerticalBarVerticalBar;
                 }
-                else if (*it == '=')
+                else if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::VerticalBarEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::VerticalBarEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::VerticalBar, size_t{ 1 } };
+                    return TokenKind::VerticalBar;
                 }
             }
 
             case ':':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == ':')
+                if (lexer.Peek() == ':')
                 {
-                    return Measured{ TokenKind::ColonColon, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::ColonColon;
                 }
                 else
                 {
-                    return Measured{ TokenKind::Colon, size_t{ 1 } };
+                    return TokenKind::Colon;
                 }
             }
 
             case '.':
             {
-                return Measured{ TokenKind::Dot, size_t{ 1 } };
+                lexer.Eat();
+                return TokenKind::Dot;
             }
 
             case ',':
             {
-                return Measured{ TokenKind::Comma, size_t{ 1 } };
+                lexer.Eat();
+                return TokenKind::Comma;
             }
 
             case ';':
             {
-                return Measured{ TokenKind::Semicolon, size_t{ 1 } };
+                lexer.Eat();
+                return TokenKind::Semicolon;
             }
 
             case '!':
             {
-                ++it;
+                lexer.Eat();
 
-                if (*it == '=')
+                if (lexer.Peek() == '=')
                 {
-                    return Measured{ TokenKind::ExclamationEquals, size_t{ 2 } };
+                    lexer.Eat();
+                    return TokenKind::ExclamationEquals;
                 }
                 else
                 {
-                    return Measured{ TokenKind::Exclamation, size_t{ 1 } };
+                    return TokenKind::Exclamation;
                 }
             }
 
             case '~':
             {
-                return Measured{ TokenKind::Tilde, size_t{ 1 } };
+                lexer.Eat();
+                return TokenKind::Tilde;
             }
 
             case '(':
             {
-                return Measured{ TokenKind::OpenParen, size_t{ 1 } };
+                lexer.Eat();
+                return TokenKind::OpenParen;
             }
 
             case ')':
             {
-                return Measured{ TokenKind::CloseParen, size_t{ 1 } };
+                lexer.Eat();
+                return TokenKind::CloseParen;
             }
 
             case '{':
             {
-                return Measured{ TokenKind::OpenBrace, size_t{ 1 } };
+                lexer.Eat();
+                return TokenKind::OpenBrace;
             }
 
             case '}':
             {
-                return Measured{ TokenKind::CloseBrace, size_t{ 1 } };
+                lexer.Eat();
+                return TokenKind::CloseBrace;
             }
 
             case '[':
             {
-                return Measured{ TokenKind::OpenBracket, size_t{ 1 } };
+                lexer.Eat();
+                return TokenKind::OpenBracket;
             }
 
             case ']':
             {
-                return Measured{ TokenKind::CloseBracket, size_t{ 1 } };
+                lexer.Eat();
+                return TokenKind::CloseBracket;
             }
 
             default:
             {
-                const SrcLocation srcLocation
-                {
-                    context.FileBuffer,
-                    it,
-                    it + 1,
-                };
-
-                return diagnosticBag.Add(CreateUnexpectedCharacterError(
-                    srcLocation
+                return DiagnosticBag{}.Add(CreateUnexpectedCharacterError(
+                    lexer.GetSrcLocation()
                 ));
             }
         }
     }
 
-    static auto ScanDefault(
-        const ScanContext& context
-    ) -> Expected<Measured<std::shared_ptr<const Token>>>
+    static auto LexDefault(
+        Lexer& lexer
+    ) -> Expected<std::shared_ptr<const Token>>
     {
         DiagnosticBag diagnosticBag{};
 
-        auto it = context.CharacterIterator;
+        const auto startSrcLocation = lexer.GetSrcLocation();
 
-        const auto expTokenKind = ScanDefaultTokenKind(context);
+        const auto expTokenKind = LexDefaultTokenKind(lexer);
         diagnosticBag.Add(expTokenKind);
         if (!expTokenKind)
         {
             return diagnosticBag;
         }
-        it += expTokenKind.Unwrap().Length;
-
-        const SrcLocation srcLocation
-        {
-            context.FileBuffer,
-            context.CharacterIterator,
-            it,
-        };
 
         const auto token = std::make_shared<const Token>(
-            srcLocation,
-            expTokenKind.Unwrap().Value
+            SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() },
+            expTokenKind.Unwrap()
         );
 
         return
         {
-            Measured
-            {
-                token,
-                std::distance(context.CharacterIterator, it),
-            },
+            token,
             diagnosticBag,
         };
     }
 
-    static auto ScanString(
-        const ScanContext& context
-    ) -> Diagnosed<Measured<std::shared_ptr<const Token>>>
+    static auto LexString(
+        Lexer& lexer
+    ) -> Diagnosed<std::shared_ptr<const Token>>
     {
         DiagnosticBag diagnosticBag{};
 
-        auto it = context.CharacterIterator;
+        const auto startSrcLocation = lexer.GetSrcLocation();
 
-        ACE_ASSERT(*it == '"');
-        ++it;
+        ACE_ASSERT(lexer.Peek() == '"');
+        lexer.Eat();
 
-        while (*it != '"')
+        std::string value{};
+        while (
+            !lexer.IsEndOfLine() &&
+            (lexer.Peek() != '"')
+            )
         {
-            if (it == end(*context.LineIterator))
-            {
-                const SrcLocation srcLocation
-                {
-                    context.FileBuffer,
-                    context.CharacterIterator,
-                    it,
-                };
-
-                diagnosticBag.Add(CreateUnterminatedStringLiteralError(
-                    srcLocation
-                ));
-
-                break;
-            }
-
-            ++it;
+            value += lexer.Eat();
         }
 
-        if (*it == '"')
+        if (lexer.Peek() == '"')
         {
-            ++it;
+            lexer.Eat();
         }
-
-        const SrcLocation srcLocation
+        else
         {
-            context.FileBuffer,
-            context.CharacterIterator,
-            it,
-        };
+            diagnosticBag.Add(CreateUnterminatedStringLiteralError(
+                SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() }
+            ));
+        }
 
         const auto token = std::make_shared<const Token>(
-            srcLocation,
+            SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() },
             TokenKind::String,
-            std::string{ context.CharacterIterator + 1, it }
+            value
         );
 
         return
         {
-            Measured
-            {
-                token,
-                std::distance(context.CharacterIterator, it),
-            },
+            token,
             diagnosticBag,
         };
     }
 
-    static auto Scan(
-        const ScanContext& context
-    ) -> Expected<Measured<std::vector<std::shared_ptr<const Token>>>>
+    static auto Lex(
+        Lexer& lexer
+    ) -> Expected<std::vector<std::shared_ptr<const Token>>>
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto character = *context.CharacterIterator;
-
-        if (character == '"')
+        if (lexer.Peek() == '"')
         {
-            const auto dgnString = ScanString(context);
+            const auto dgnString = LexString(lexer);
             diagnosticBag.Add(dgnString);
             return
             {
-                Measured
-                {
-                    std::vector{ dgnString.Unwrap().Value },
-                    dgnString.Unwrap().Length,
-                },
+                std::vector{ dgnString.Unwrap() },
                 diagnosticBag,
             };
         }
 
-        if (IsInAlphabet(character) || (character == '_'))
+        if (IsIdentStart(lexer))
         {
-            return ScanIdent(context);
+            return LexIdent(lexer);
         }
 
-        if (IsNumber(character))
+        if (IsNumericLiteralStart(lexer))
         {
-            const auto dgnNumericLiteral = ScanNumericLiteral(context);
+            const auto dgnNumericLiteral = LexNumericLiteral(lexer);
             diagnosticBag.Add(dgnNumericLiteral);
             return
             {
-                Measured
-                {
-                    std::vector{ dgnNumericLiteral.Unwrap().Value },
-                    dgnNumericLiteral.Unwrap().Length
-                },
+                std::vector{ dgnNumericLiteral.Unwrap() },
                 diagnosticBag,
             };
         }
 
-        const auto expDefault = ScanDefault(context);
+        const auto expDefault = LexDefault(lexer);
         diagnosticBag.Add(expDefault);
         if (!expDefault)
         {
@@ -985,73 +989,127 @@ namespace Ace
 
         return
         {
-            Measured
-            {
-                std::vector{ expDefault.Unwrap().Value },
-                expDefault.Unwrap().Length,
-            },
+            std::vector{ expDefault.Unwrap() },
             diagnosticBag,
         };
     }
 
-    Lexer::Lexer(const FileBuffer* const fileBuffer)
-        : m_FileBuffer{ fileBuffer }
-    {
-        m_LineIterator = begin(m_FileBuffer->GetLines());
-        ResetCharacterIterator();
-    }
-
-    auto Lexer::EatTokens() -> Diagnosed<std::vector<std::shared_ptr<const Token>>>
+    static auto DiscardMultiLineComment(Lexer& lexer) -> Diagnosed<void>
     {
         DiagnosticBag diagnosticBag{};
 
-        std::vector<std::shared_ptr<const Token>> tokens{};
+        const auto startSrcLocation = lexer.GetSrcLocation();
 
-        while (!IsEndOfFile())
+        ACE_ASSERT(IsCommentStart(lexer));
+        lexer.Eat();
+
+        ACE_ASSERT(lexer.Peek() == ':');
+        lexer.Eat();
+
+        while (
+            !lexer.IsEnd() &&
+            !IsMultiLineCommentEnd(lexer)
+            )
         {
-            if (GetLine().empty())
+            lexer.Eat();
+        }
+
+        if (IsMultiLineCommentEnd(lexer))
+        {
+            lexer.Eat(2);
+        }
+        else
+        {
+            diagnosticBag.Add(CreateUnterminatedMultiLineCommentError(
+                SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() }
+            ));
+        }
+
+        return Diagnosed<void>{ diagnosticBag };
+    }
+
+    static auto DiscardSingleLineComment(Lexer& lexer) -> void
+    {
+        ACE_ASSERT(IsCommentStart(lexer));
+        lexer.Eat();
+
+        ACE_ASSERT(lexer.Peek() != ':');
+
+        while (!lexer.IsEndOfLine())
+        {
+            lexer.Eat();
+        }
+    }
+
+    static auto DiscardComment(Lexer& lexer) -> Diagnosed<void>
+    {
+        ACE_ASSERT(IsCommentStart(lexer));
+
+        if (lexer.Peek(1) == ':')
+        {
+            return DiscardMultiLineComment(lexer);
+        }
+        else
+        {
+            DiscardSingleLineComment(lexer);
+        }
+
+        return { DiagnosticBag{} };
+    }
+
+    static auto DiscardWhitespace(
+        Lexer& lexer
+    ) -> void
+    {
+        while (IsWhitespace(lexer))
+        {
+            lexer.Eat();
+        }
+    }
+
+    auto LexTokens(
+        const FileBuffer* const fileBuffer
+    ) -> Diagnosed<std::vector<std::shared_ptr<const Token>>>
+    {
+        DiagnosticBag diagnosticBag{};
+
+        Lexer lexer{ fileBuffer };
+
+        std::vector<std::shared_ptr<const Token>> tokens{};
+        while (!lexer.IsEnd())
+        {
+            DiscardWhitespace(lexer);
+
+            if (lexer.IsEndOfLine())
             {
-                EatLine();
+                lexer.Eat();
                 continue;
             }
 
-            EatWhitespace();
-
-            if (IsEndOfLine())
+            if (IsCommentStart(lexer))
             {
-                EatLine();
+                DiscardComment(lexer);
                 continue;
             }
 
-            if (IsCommentStart())
-            {
-                EatComment();
-                continue;
-            }
-
-            const auto expTokens = ScanTokenSequence();
+            const auto expTokens = Lex(lexer);
             diagnosticBag.Add(expTokens);
-
             if (expTokens)
             {
                 tokens.insert(
                     end(tokens),
-                    begin(expTokens.Unwrap().Value),
-                    end  (expTokens.Unwrap().Value)
-                );
-
-                EatCharactersUntil(
-                    tokens.back()->SrcLocation.CharacterEndIterator
+                    begin(expTokens.Unwrap()),
+                    end  (expTokens.Unwrap())
                 );
             }
             else
             {
-                EatCharacter();
+                lexer.Eat();
             }
         }
 
         tokens.push_back(std::make_shared<const Token>(
-            SrcLocation{},
+            lexer.GetLastSrcLocation(),
             TokenKind::EndOfFile
         ));
 
@@ -1060,171 +1118,5 @@ namespace Ace
             tokens,
             diagnosticBag,
         };
-    }
-
-    static auto IsWhitespace(const char character) -> bool
-    {
-        return 
-            (character == ' ') ||
-            (character == '\f') || 
-            (character == '\t') ||
-            (character == '\v');
-    }
-
-    auto Lexer::EatCharacter() -> void
-    {
-        EatCharacters(1);
-    }
-
-    auto Lexer::EatCharacters(const size_t count) -> void
-    {
-        m_CharacterIterator += count;
-    }
-
-    auto Lexer::EatCharactersUntil(
-        const std::string_view::const_iterator it
-    ) -> void
-    {
-        while (m_CharacterIterator != it)
-        {
-            m_CharacterIterator++;
-        }
-    }
-
-    auto Lexer::EatWhitespace() -> void
-    {
-        while (IsWhitespace(GetCharacter()))
-        {
-            EatCharacter();
-        }
-    }
-
-    auto Lexer::EatComment() -> Diagnosed<void>
-    {
-        ACE_ASSERT(GetCharacter() == '#');
-
-        if (GetCharacter(1) == ':')
-        {
-            return EatMultiLineComment();
-        }
-        else
-        {
-            return EatSingleLineComment();
-        }
-    }
-
-    auto Lexer::EatSingleLineComment() -> Diagnosed<void>
-    {
-        ACE_ASSERT(GetCharacter() == '#');
-        EatCharacter();
-
-        ACE_ASSERT(GetCharacter() != ':');
-
-        while (!IsEndOfLine())
-        {
-            EatCharacter();
-        }
-
-        return {};
-    }
-
-    auto Lexer::EatMultiLineComment() -> Diagnosed<void>
-    {
-        DiagnosticBag diagnosticBag{};
-
-        const auto itBegin = m_CharacterIterator;
-
-        ACE_ASSERT(GetCharacter() == '#');
-        EatCharacter();
-
-        ACE_ASSERT(GetCharacter() == ':');
-        EatCharacter();
-
-        while (
-            (GetCharacter(0) != ':') ||
-            (GetCharacter(1) != '#')
-            )
-        {
-            if (IsEndOfFile())
-            {
-                const SrcLocation srcLocation
-                {
-                    m_FileBuffer,
-                    itBegin,
-                    m_CharacterIterator,
-                };
-
-                return diagnosticBag.Add(CreateUnterminatedMultiLineCommentError(
-                    srcLocation
-                ));
-            }
-
-            EatCharacter();
-        }
-
-        EatCharacters(2);
-        return {};
-    }
-
-    auto Lexer::EatLine() -> void
-    {
-        m_LineIterator++;
-        ResetCharacterIterator();
-    }
-
-    auto Lexer::ResetCharacterIterator() -> void
-    {
-        m_CharacterIterator = begin(GetLine());
-    }
-
-    auto Lexer::ScanTokenSequence() const -> Expected<Measured<std::vector<std::shared_ptr<const Token>>>>
-    {
-        return Ace::Scan({
-            m_FileBuffer,
-            m_LineIterator,
-            m_CharacterIterator
-        });
-    }
-
-    auto Lexer::GetCharacter() const -> char
-    {
-        return *m_CharacterIterator;
-    }
-
-    auto Lexer::GetCharacter(const size_t offset) const -> char
-    {
-        const auto remainingCharactersCount = std::distance(
-            m_CharacterIterator,
-            end(GetLine())
-        );
-        if (offset > remainingCharactersCount)
-        {
-            return '\0';
-        }
-
-        return *(m_CharacterIterator + offset);
-    }
-
-    auto Lexer::GetLine() const -> const std::string_view
-    {
-        return *m_LineIterator;
-    }
-
-    auto Lexer::IsEndOfLine() const -> bool
-    {
-        return m_CharacterIterator == end(GetLine());
-    }
-
-    auto Lexer::IsEndOfFile() const -> bool
-    {
-        const bool isLastLine =
-            m_LineIterator == (end(m_FileBuffer->GetLines()) - 1);
-
-        return isLastLine && IsEndOfLine();
-    }
-
-    auto Lexer::IsCommentStart() const -> bool
-    {
-        return GetCharacter() == '#';
     }
 }
