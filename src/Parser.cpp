@@ -1007,6 +1007,14 @@ namespace Ace
         {
             return m_NestLevel;
         }
+        auto GetSrcLocation() const -> const SrcLocation&
+        {
+            return Peek()->SrcLocation;
+        }
+        auto GetLastSrcLocation() const -> const SrcLocation&
+        {
+            return m_LastSrcLocation;
+        }
         auto IsEnd() const -> bool
         {
             return m_Iterator == m_EndIterator;
@@ -1015,17 +1023,16 @@ namespace Ace
         {
             return *(m_Iterator + distance);
         }
-        auto PeekBack() const -> const std::shared_ptr<const Token>&
-        {
-            return *(m_Iterator - 1);
-        }
 
         auto Eat() -> const std::shared_ptr<const Token>&
         {
+            m_LastSrcLocation = GetSrcLocation();
+
             m_Iterator++;
             ACE_ASSERT(m_Iterator <= m_EndIterator);
             UpdateNestLevel();
-            return PeekBack();
+
+            return *(m_Iterator - 1);
         }
 
         auto DiscardUntil(
@@ -1102,6 +1109,7 @@ namespace Ace
         std::vector<std::shared_ptr<const Token>>::const_iterator m_Iterator{};
         std::vector<std::shared_ptr<const Token>>::const_iterator m_EndIterator{};
         size_t m_NestLevel{};
+        SrcLocation m_LastSrcLocation{};
     };
 
     static auto IsKeywordExprStart(
@@ -1611,7 +1619,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::OpenBracket)
         {
@@ -1638,7 +1646,7 @@ namespace Ace
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        parser.PeekBack(),
+                        parser.GetLastSrcLocation(),
                         TokenKind::Comma
                     ));
                 }
@@ -1665,7 +1673,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::CloseBracket
             ));
         }
@@ -1673,7 +1681,7 @@ namespace Ace
         if (names.empty())
         {
             return diagnosticBag.Add(CreateEmptyTemplateParamsError(
-                CreateSrcLocationRange(firstToken, parser.PeekBack())
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() }
             ));
         }
 
@@ -1768,7 +1776,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::OpenBracket)
         {
@@ -1795,7 +1803,7 @@ namespace Ace
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        parser.PeekBack(),
+                        parser.GetLastSrcLocation(),
                         TokenKind::Comma
                     ));
                 }
@@ -1822,7 +1830,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::CloseBracket
             ));
         }
@@ -1830,7 +1838,7 @@ namespace Ace
         if (args.empty())
         {
             return diagnosticBag.Add(CreateEmptyTemplateArgsError(
-                CreateSrcLocationRange(firstToken, parser.PeekBack())
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() }
             ));
         }
 
@@ -1866,7 +1874,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::OpenBracket)
         {
@@ -1901,7 +1909,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const AttributeNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 expStructConstructionExpr.Unwrap()
             ),
             diagnosticBag,
@@ -1943,7 +1951,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
@@ -1983,7 +1991,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const NormalParamVarNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -2026,7 +2034,7 @@ namespace Ace
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        parser.PeekBack(),
+                        parser.GetLastSrcLocation(),
                         TokenKind::Comma
                     ));
                 }
@@ -2057,7 +2065,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::CloseParen
             ));
         }
@@ -2097,7 +2105,7 @@ namespace Ace
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        parser.PeekBack(),
+                        parser.GetLastSrcLocation(),
                         TokenKind::Comma
                     ));
                 }
@@ -2124,7 +2132,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::CloseParen
             ));
         }
@@ -2167,7 +2175,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expName = ParseSymbolName(parser, scope);
         diagnosticBag.Add(expName);
@@ -2179,7 +2187,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const SymbolLiteralExprNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expName.Unwrap()
             ),
@@ -2194,7 +2202,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::OpenBrace)
         {
@@ -2221,7 +2229,7 @@ namespace Ace
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        parser.PeekBack(),
+                        parser.GetLastSrcLocation(),
                         TokenKind::Comma
                     ));
                 }
@@ -2267,7 +2275,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::CloseBrace
             ));
         }
@@ -2282,7 +2290,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != SpecialIdent::New)
         {
@@ -2313,7 +2321,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const StructConstructionExprNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expTypeName.Unwrap(),
                 std::move(expArgs.Unwrap())
@@ -2329,7 +2337,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::CastKeyword)
         {
@@ -2402,7 +2410,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const CastExprNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 expTypeName.Unwrap(),
                 expExpr.Unwrap()
             ),
@@ -2417,7 +2425,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::AddressOfKeyword)
         {
@@ -2459,7 +2467,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const AddressOfExprNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 expExpr.Unwrap()
             ),
             diagnosticBag,
@@ -2473,7 +2481,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::SizeOfKeyword)
         {
@@ -2519,7 +2527,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const SizeOfExprNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expTypeName.Unwrap()
             ),
@@ -2534,7 +2542,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::DerefAsKeyword)
         {
@@ -2607,7 +2615,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const DerefAsExprNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 expTypeName.Unwrap(),
                 expExpr.Unwrap()
             ),
@@ -2622,7 +2630,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::OpenParen)
         {
@@ -2654,7 +2662,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ExprExprNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 expExpr.Unwrap()
             ),
             diagnosticBag,
@@ -2739,7 +2747,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expPrimaryExpr = ParsePrimaryExpr(parser, scope);
         diagnosticBag.Add(expPrimaryExpr);
@@ -2767,7 +2775,7 @@ namespace Ace
                 }
 
                 expr = std::make_shared<const MemberAccessExprNode>(
-                    CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                    SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                     expr,
                     expName.Unwrap()
                 );
@@ -2783,7 +2791,7 @@ namespace Ace
                 }
 
                 expr = std::make_shared<const FunctionCallExprNode>(
-                    CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                    SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                     expr,
                     expArgs.Unwrap()
                 );
@@ -2829,7 +2837,7 @@ namespace Ace
             const SrcLocation srcLocation
             {
                 op.SrcLocation,
-                parser.PeekBack()->SrcLocation,
+                parser.GetLastSrcLocation(),
             };
             expr = CreateCollapsedPrefixExpr(
                 srcLocation,
@@ -2930,7 +2938,7 @@ namespace Ace
 
                         break;
                     }
-            }
+                }
             }
             
         }
@@ -2952,7 +2960,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
         if (parser.Peek() != TokenKind::OpenBrace)
@@ -2992,7 +3000,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::CloseBrace
             ));
         }
@@ -3000,7 +3008,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const BlockStmtNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 selfScope,
                 stmts
             ),
@@ -3015,7 +3023,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expExpr);
@@ -3037,7 +3045,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ExprStmtNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 expExpr.Unwrap()
             ),
             diagnosticBag,
@@ -3051,7 +3059,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expLhsExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expLhsExpr);
@@ -3090,7 +3098,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const NormalAssignmentStmtNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expLhsExpr.Unwrap(),
                 expRhsExpr.Unwrap()
@@ -3106,7 +3114,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expLhsExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expLhsExpr);
@@ -3122,12 +3130,11 @@ namespace Ace
             );
         }
 
-        parser.Eat();
-
+        const auto opToken = parser.Eat();
         const Op op
         {
-            parser.PeekBack()->SrcLocation,
-            parser.PeekBack()->Kind
+            opToken->SrcLocation,
+            opToken->Kind,
         };
 
         const auto expRhsExpr = ParseExpr(parser, scope);
@@ -3150,7 +3157,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const CompoundAssignmentStmtNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expLhsExpr.Unwrap(),
                 expRhsExpr.Unwrap(),
@@ -3167,7 +3174,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expName = ParseName(parser, scope);
         diagnosticBag.Add(expName);
@@ -3225,7 +3232,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const VarStmtNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -3353,7 +3360,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         std::vector<std::shared_ptr<const IExprNode>> conditions{};
         std::vector<std::shared_ptr<const BlockStmtNode>> bodies{};
@@ -3396,7 +3403,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const IfStmtNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 conditions,
                 bodies
@@ -3412,7 +3419,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::WhileKeyword)
         {
@@ -3441,7 +3448,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const WhileStmtNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expCondition.Unwrap(),
                 expBody.Unwrap()
@@ -3457,7 +3464,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::ReturnKeyword)
         {
@@ -3495,7 +3502,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ReturnStmtNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 optExpr
             ),
@@ -3510,7 +3517,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::ExitKeyword)
         {
@@ -3535,7 +3542,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ExitStmtNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope
             ),
             diagnosticBag,
@@ -3549,7 +3556,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         if (parser.Peek() != TokenKind::AssertKeyword)
         {
@@ -3581,7 +3588,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const AssertStmtNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expCondition.Unwrap()
             ),
@@ -3651,7 +3658,7 @@ namespace Ace
 
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expExpr);
@@ -3678,7 +3685,7 @@ namespace Ace
             else
             {
                 diagnosticBag.Add(CreateMissingTokenError(
-                    parser.PeekBack(),
+                    parser.GetLastSrcLocation(),
                     TokenKind::Semicolon
                 ));
             }
@@ -3686,21 +3693,20 @@ namespace Ace
             return Expected
             {
                 std::make_shared<const ExprStmtNode>(
-                    CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                    SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                     expExpr.Unwrap()
                 ),
                 diagnosticBag,
             };
         }
 
-        parser.Eat();
-    
+        const auto opToken = parser.Eat();
         const Op op
         {
-            parser.PeekBack()->SrcLocation,
-            parser.PeekBack()->Kind,
+            opToken->SrcLocation,
+            opToken->Kind,
         };
-
+    
         const auto expRhsExpr = ParseExpr(parser, scope);
         diagnosticBag.Add(expRhsExpr);
         if (!expRhsExpr)
@@ -3715,7 +3721,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::Semicolon
             ));
         }
@@ -3725,7 +3731,7 @@ namespace Ace
             return Expected
             {
                 std::make_shared<const NormalAssignmentStmtNode>(
-                    CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                    SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                     scope,
                     expExpr.Unwrap(),
                     expRhsExpr.Unwrap()
@@ -3739,7 +3745,7 @@ namespace Ace
             return Expected
             {
                 std::make_shared<const CompoundAssignmentStmtNode>(
-                    CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                    SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                     scope,
                     expExpr.Unwrap(),
                     expRhsExpr.Unwrap(),
@@ -3870,7 +3876,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
         const auto expAttributes = ParseAttributes(parser, scope);
@@ -4007,7 +4013,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const FunctionNode>(
-                CreateSrcLocationRange(firstToken, parser.Peek()),
+                SrcLocation{ startSrcLocation, parser.GetSrcLocation() },
                 selfScope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -4029,7 +4035,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
         const auto expAttributes = ParseAttributes(parser, scope);
@@ -4128,7 +4134,7 @@ namespace Ace
         );
 
         const auto function = std::make_shared<const FunctionNode>(
-            CreateSrcLocationRange(firstToken, parser.PeekBack()),
+            SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
             selfScope,
             expName.Unwrap(),
             expTypeName.Unwrap(),
@@ -4158,7 +4164,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
         if (parser.Peek() != TokenKind::ImplKeyword)
@@ -4275,7 +4281,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::CloseBrace
             ));
         }
@@ -4283,7 +4289,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ImplNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 selfScope,
                 expTypeName.Unwrap(),
                 functions,
@@ -4302,7 +4308,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
         const auto expAttributes = ParseAttributes(parser, scope);
@@ -4416,7 +4422,7 @@ namespace Ace
         );
 
         const auto function = std::make_shared<const FunctionNode>(
-            CreateSrcLocationRange(firstToken, parser.PeekBack()),
+            SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
             selfScope,
             expName.Unwrap(),
             expTypeName.Unwrap(),
@@ -4457,7 +4463,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
         if (parser.Peek() != TokenKind::ImplKeyword)
@@ -4610,7 +4616,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::CloseBrace
             ));
         }
@@ -4625,7 +4631,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const TemplatedImplNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 selfScope,
                 typeTemplateName,
                 std::vector<std::shared_ptr<const FunctionNode>>{},
@@ -4642,7 +4648,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
         const auto expAttributes = ParseAttributes(parser, scope);
@@ -4745,7 +4751,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const FunctionNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 selfScope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -4766,7 +4772,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
         const auto expAttributes = ParseAttributes(parser, scope);
@@ -4856,7 +4862,7 @@ namespace Ace
         }
 
         const auto function = std::make_shared<const FunctionNode>(
-            CreateSrcLocationRange(firstToken, parser.PeekBack()),
+            SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
             selfScope,
             expName.Unwrap(),
             expTypeName.Unwrap(),
@@ -4886,7 +4892,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
@@ -4955,7 +4961,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const StaticVarNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -4974,7 +4980,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expAttributes = ParseAttributes(parser, scope);
         diagnosticBag.Add(expAttributes);
@@ -5033,7 +5039,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const InstanceVarNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 expName.Unwrap(),
                 expTypeName.Unwrap(),
@@ -5077,7 +5083,7 @@ namespace Ace
                 else
                 {
                     diagnosticBag.Add(CreateMissingTokenError(
-                        parser.PeekBack(),
+                        parser.GetLastSrcLocation(),
                         TokenKind::Comma
                     ));
                 }
@@ -5113,7 +5119,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::CloseBrace
             ));
         }
@@ -5128,7 +5134,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
         const auto expAttributes = ParseAttributes(parser, scope);
@@ -5194,7 +5200,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const StructTypeNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 selfScope,
                 expName.Unwrap(),
                 expAttributes.Unwrap(),
@@ -5212,7 +5218,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
         const auto expAttributes = ParseAttributes(parser, scope);
@@ -5286,7 +5292,7 @@ namespace Ace
         }
 
         const auto type = std::make_shared<const StructTypeNode>(
-            CreateSrcLocationRange(firstToken, parser.PeekBack()),
+            SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
             selfScope,
             expName.Unwrap(),
             expAttributes.Unwrap(),
@@ -5363,7 +5369,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto& firstToken = parser.Peek();
+        const auto startSrcLocation = parser.GetSrcLocation();
 
         const auto expName = ParseNestedName(parser, scope);
         diagnosticBag.Add(expName);
@@ -5560,7 +5566,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateMissingTokenError(
-                parser.PeekBack(),
+                parser.GetLastSrcLocation(),
                 TokenKind::CloseBrace
             ));
         }
@@ -5568,7 +5574,7 @@ namespace Ace
         return Expected
         {
             std::make_shared<const ModuleNode>(
-                CreateSrcLocationRange(firstToken, parser.PeekBack()),
+                SrcLocation{ startSrcLocation, parser.GetLastSrcLocation() },
                 scopes.front(),
                 scopes.back(),
                 expName.Unwrap(),

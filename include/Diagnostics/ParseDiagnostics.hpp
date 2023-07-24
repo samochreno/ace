@@ -509,15 +509,15 @@ namespace Ace
     }
 
     inline auto CreateMissingTokenError(
-        const std::shared_ptr<const Token>& lastToken,
+        const SrcLocation& lastTokenSrcLocation,
         const TokenKind expectedTokenKind
     ) -> std::shared_ptr<const Diagnostic>
     {
         const SrcLocation srcLocation
         {
-            lastToken->SrcLocation.Buffer,
-            lastToken->SrcLocation.CharacterEndIterator - 1,
-            lastToken->SrcLocation.CharacterEndIterator,
+            lastTokenSrcLocation.Buffer,
+            lastTokenSrcLocation.CharacterEndIterator - 1,
+            lastTokenSrcLocation.CharacterEndIterator,
         };
 
         return std::make_shared<const Diagnostic>(
