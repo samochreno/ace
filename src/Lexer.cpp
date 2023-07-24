@@ -60,7 +60,7 @@ namespace Ace
 
         auto Eat() -> char
         {
-            const auto startSrcLocation = m_SrcLocation;
+            const auto beginSrcLocation = m_SrcLocation;
 
             if (m_CharacterIterator == m_EndCharacterIterator)
             {
@@ -76,10 +76,10 @@ namespace Ace
                 m_CharacterIterator++;
             }
 
-            m_LastSrcLocation = startSrcLocation;
+            m_LastSrcLocation = beginSrcLocation;
             m_SrcLocation = CreateSrcLocation();
 
-            return *startSrcLocation.CharacterBeginIterator;
+            return *beginSrcLocation.CharacterBeginIterator;
         }
         auto Eat(const size_t count) -> void
         {
@@ -372,7 +372,7 @@ namespace Ace
         ));
     }
 
-    static auto IsIdentStart(const Lexer& lexer) -> bool
+    static auto IsIdentBegin(const Lexer& lexer) -> bool
     {
         return
             IsInAlphabet(lexer.Peek()) ||
@@ -382,11 +382,11 @@ namespace Ace
     static auto IsIdentContinue(const Lexer& lexer) -> bool
     {
         return
-            IsIdentStart(lexer) ||
+            IsIdentBegin(lexer) ||
             IsNumber(lexer.Peek());
     }
 
-    static auto IsNumericLiteralNumberStart(const Lexer& lexer) -> bool
+    static auto IsNumericLiteralNumberBegin(const Lexer& lexer) -> bool
     {
         return IsNumber(lexer.Peek());
     }
@@ -396,7 +396,7 @@ namespace Ace
         const bool hasDecimalPoint
     ) -> bool
     {
-        if (IsNumericLiteralNumberStart(lexer))
+        if (IsNumericLiteralNumberBegin(lexer))
         {
             return true;
         }
@@ -407,7 +407,7 @@ namespace Ace
             !hasDecimalPoint;
     }
 
-    static auto IsNumericLiteralSuffixStart(const Lexer& lexer) -> bool
+    static auto IsNumericLiteralSuffixBegin(const Lexer& lexer) -> bool
     {
         return IsInAlphabet(lexer.Peek());
     }
@@ -417,9 +417,9 @@ namespace Ace
         return IsNumber(lexer.Peek());
     }
 
-    static auto IsNumericLiteralStart(const Lexer& lexer) -> bool
+    static auto IsNumericLiteralBegin(const Lexer& lexer) -> bool
     {
-        return IsNumericLiteralNumberStart(lexer);
+        return IsNumericLiteralNumberBegin(lexer);
     }
 
     static auto IsWhitespace(const Lexer& lexer) -> bool
@@ -431,7 +431,7 @@ namespace Ace
             (lexer.Peek() == '\v');
     }
 
-    static auto IsCommentStart(const Lexer& lexer) -> bool
+    static auto IsCommentBegin(const Lexer& lexer) -> bool
     {
         return lexer.Peek() == '#';
     }
@@ -447,9 +447,9 @@ namespace Ace
         Lexer& lexer
     ) -> std::vector<std::shared_ptr<const Token>>
     {
-        const auto startSrcLocation = lexer.GetSrcLocation();
+        const auto beginSrcLocation = lexer.GetSrcLocation();
 
-        ACE_ASSERT(IsIdentStart(lexer));
+        ACE_ASSERT(IsIdentBegin(lexer));
         std::string string{ lexer.Eat() };
         while (IsIdentContinue(lexer))
         {
@@ -457,7 +457,7 @@ namespace Ace
         }
 
         const auto identToken = std::make_shared<const Token>(
-            SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() },
+            SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
             TokenKind::Ident,
             string
         );
@@ -481,9 +481,9 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto startSrcLocation = lexer.GetSrcLocation();
+        const auto beginSrcLocation = lexer.GetSrcLocation();
 
-        ACE_ASSERT(IsNumericLiteralNumberStart(lexer));
+        ACE_ASSERT(IsNumericLiteralNumberBegin(lexer));
         std::string numberString{ lexer.Eat() };
         bool hasDecimalPoint = false;
         while (IsNumericLiteralNumberContinue(lexer, hasDecimalPoint))
@@ -496,9 +496,9 @@ namespace Ace
             numberString += lexer.Eat();
         }
 
-        const auto suffixStartSrcLocation = lexer.GetSrcLocation();
+        const auto suffixBeginSrcLocation = lexer.GetSrcLocation();
         std::string suffix{};
-        if (IsNumericLiteralSuffixStart(lexer))
+        if (IsNumericLiteralSuffixBegin(lexer))
         {
             suffix += lexer.Eat();
             while (IsNumericLiteralSuffixContinue(lexer))
@@ -512,7 +512,7 @@ namespace Ace
         {
             const SrcLocation suffixSrcLocation
             {
-                suffixStartSrcLocation,
+                suffixBeginSrcLocation,
                 lexer.GetLastSrcLocation(),
             };
             const auto expTokenKind = CreateNumericLiteralTokenKind(
@@ -537,9 +537,9 @@ namespace Ace
             {
                 const SrcLocation decimalPointSrcLocation
                 {
-                    startSrcLocation.Buffer,
-                    startSrcLocation.CharacterBeginIterator + decimalPointPos,
-                    startSrcLocation.CharacterBeginIterator + decimalPointPos + 1,
+                    beginSrcLocation.Buffer,
+                    beginSrcLocation.CharacterBeginIterator + decimalPointPos,
+                    beginSrcLocation.CharacterBeginIterator + decimalPointPos + 1,
                 };
 
                 diagnosticBag.Add(CreateDecimalPointInNonFloatNumericLiteralError(
@@ -551,7 +551,7 @@ namespace Ace
         }
 
         const auto token = std::make_shared<const Token>(
-            SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() },
+            SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
             tokenKind,
             numberString
         );
@@ -882,7 +882,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto startSrcLocation = lexer.GetSrcLocation();
+        const auto beginSrcLocation = lexer.GetSrcLocation();
 
         const auto expTokenKind = LexDefaultTokenKind(lexer);
         diagnosticBag.Add(expTokenKind);
@@ -892,7 +892,7 @@ namespace Ace
         }
 
         const auto token = std::make_shared<const Token>(
-            SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() },
+            SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
             expTokenKind.Unwrap()
         );
 
@@ -909,7 +909,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto startSrcLocation = lexer.GetSrcLocation();
+        const auto beginSrcLocation = lexer.GetSrcLocation();
 
         ACE_ASSERT(lexer.Peek() == '"');
         lexer.Eat();
@@ -930,12 +930,12 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateUnterminatedStringLiteralError(
-                SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() }
+                SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() }
             ));
         }
 
         const auto token = std::make_shared<const Token>(
-            SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() },
+            SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
             TokenKind::String,
             value
         );
@@ -964,12 +964,12 @@ namespace Ace
             };
         }
 
-        if (IsIdentStart(lexer))
+        if (IsIdentBegin(lexer))
         {
             return LexIdent(lexer);
         }
 
-        if (IsNumericLiteralStart(lexer))
+        if (IsNumericLiteralBegin(lexer))
         {
             const auto dgnNumericLiteral = LexNumericLiteral(lexer);
             diagnosticBag.Add(dgnNumericLiteral);
@@ -998,9 +998,9 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        const auto startSrcLocation = lexer.GetSrcLocation();
+        const auto beginSrcLocation = lexer.GetSrcLocation();
 
-        ACE_ASSERT(IsCommentStart(lexer));
+        ACE_ASSERT(IsCommentBegin(lexer));
         lexer.Eat();
 
         ACE_ASSERT(lexer.Peek() == ':');
@@ -1021,7 +1021,7 @@ namespace Ace
         else
         {
             diagnosticBag.Add(CreateUnterminatedMultiLineCommentError(
-                SrcLocation{ startSrcLocation, lexer.GetLastSrcLocation() }
+                SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() }
             ));
         }
 
@@ -1030,7 +1030,7 @@ namespace Ace
 
     static auto DiscardSingleLineComment(Lexer& lexer) -> void
     {
-        ACE_ASSERT(IsCommentStart(lexer));
+        ACE_ASSERT(IsCommentBegin(lexer));
         lexer.Eat();
 
         ACE_ASSERT(lexer.Peek() != ':');
@@ -1043,7 +1043,7 @@ namespace Ace
 
     static auto DiscardComment(Lexer& lexer) -> Diagnosed<void>
     {
-        ACE_ASSERT(IsCommentStart(lexer));
+        ACE_ASSERT(IsCommentBegin(lexer));
 
         if (lexer.Peek(1) == ':')
         {
@@ -1086,7 +1086,7 @@ namespace Ace
                 continue;
             }
 
-            if (IsCommentStart(lexer))
+            if (IsCommentBegin(lexer))
             {
                 DiscardComment(lexer);
                 continue;

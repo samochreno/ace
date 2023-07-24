@@ -105,23 +105,23 @@ namespace Ace
         // 
         // To:
         // goto continue;
-        // start:
+        // begin:
         // body;
         // continue:
-        // gotoif condition start;
+        // gotoif condition begin;
 
-        const Ident startLabelName
+        const Ident beginLabelName
         {
             GetSrcLocation().CreateFirst(),
             SpecialIdent::CreateAnonymous(),
         };
-        auto startLabelSymbolOwned = std::make_unique<LabelSymbol>(
+        auto beginLabelSymbolOwned = std::make_unique<LabelSymbol>(
             m_Scope,
-            startLabelName
+            beginLabelName
         );
 
-        auto* const startLabelSymbol = dynamic_cast<LabelSymbol*>(
-            m_Scope->DefineSymbol(std::move(startLabelSymbolOwned)).Unwrap()
+        auto* const beginLabelSymbol = dynamic_cast<LabelSymbol*>(
+            m_Scope->DefineSymbol(std::move(beginLabelSymbolOwned)).Unwrap()
         );
 
         const Ident continueLabelName
@@ -147,8 +147,8 @@ namespace Ace
         ));
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-            startLabelSymbol->GetName().SrcLocation,
-            startLabelSymbol
+            beginLabelSymbol->GetName().SrcLocation,
+            beginLabelSymbol
         ));
 
         stmts.push_back(m_Body);
@@ -161,7 +161,7 @@ namespace Ace
         stmts.push_back(std::make_shared<const ConditionalJumpStmtBoundNode>(
             m_Condition->GetSrcLocation(),
             m_Condition,
-            startLabelSymbol
+            beginLabelSymbol
         ));
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(

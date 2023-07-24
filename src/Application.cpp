@@ -242,9 +242,9 @@ namespace Ace::Application
 
         const auto& now = std::chrono::steady_clock::now;
 
-        const auto timeStart = now();
-        const auto timeFrontendStart = now();
-        const auto timeParsingStart = now();
+        const auto timeBegin = now();
+        const auto timeFrontendBegin = now();
+        const auto timeParsingBegin = now();
 
         std::vector<std::shared_ptr<const ModuleNode>> asts{};
         std::for_each(
@@ -271,7 +271,7 @@ namespace Ace::Application
 
         const auto nodes = GetAllNodes(begin(asts), end(asts));
 
-        const auto timeSymbolCreationStart = now();
+        const auto timeSymbolCreationBegin = now();
 
         ACE_TRY_VOID(CreateAndDefineSymbols(compilation, nodes));
         ACE_TRY_VOID(DefineAssociations(compilation, nodes));
@@ -282,7 +282,7 @@ namespace Ace::Application
         compilation->TemplateInstantiator->SetSymbols(templateSymbols);
         ACE_TRY_VOID(compilation->TemplateInstantiator->InstantiatePlaceholderSymbols());
 
-        const auto timeBindingAndVerificationStart = now();
+        const auto timeBindingAndVerificationBegin = now();
 
         compilation->Natives->Initialize();
 
@@ -326,7 +326,7 @@ namespace Ace::Application
 
         const auto timeFrontendEnd = now();
 
-        const auto timeBackendStart = now();
+        const auto timeBackendBegin = now();
 
         Emitter emitter{ compilation };
         emitter.SetASTs(boundASTs);
@@ -353,12 +353,12 @@ namespace Ace::Application
             return value;
         };
 
-        LogDebug << getFormattedDuration(timeEnd - timeStart) + " - total\n";
-        LogDebug << getFormattedDuration(timeFrontendEnd - timeFrontendStart) + " - frontend\n";
-        LogDebug << getFormattedDuration(timeParsingEnd - timeParsingStart) + " - frontend | parsing\n";
-        LogDebug << getFormattedDuration(timeSymbolCreationEnd - timeSymbolCreationStart) + " - frontend | symbol creation\n";
-        LogDebug << getFormattedDuration(timeBindingAndVerificationEnd - timeBindingAndVerificationStart) + " - frontend | binding and verification\n";
-        LogDebug << getFormattedDuration(timeBackendEnd - timeBackendStart) + " - backend\n";
+        LogDebug << getFormattedDuration(timeEnd - timeBegin) + " - total\n";
+        LogDebug << getFormattedDuration(timeFrontendEnd - timeFrontendBegin) + " - frontend\n";
+        LogDebug << getFormattedDuration(timeParsingEnd - timeParsingBegin) + " - frontend | parsing\n";
+        LogDebug << getFormattedDuration(timeSymbolCreationEnd - timeSymbolCreationBegin) + " - frontend | symbol creation\n";
+        LogDebug << getFormattedDuration(timeBindingAndVerificationEnd - timeBindingAndVerificationBegin) + " - frontend | binding and verification\n";
+        LogDebug << getFormattedDuration(timeBackendEnd - timeBackendBegin) + " - backend\n";
         LogDebug << getFormattedDuration(emitterResult.Durations.IREmitting) + " - backend | ir emitting\n";
         LogDebug << getFormattedDuration(emitterResult.Durations.Analyses) + " - backend | analyses\n";
         LogDebug << getFormattedDuration(emitterResult.Durations.LLC) + " - backend | llc\n";

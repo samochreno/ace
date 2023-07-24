@@ -24,10 +24,10 @@
 namespace Ace
 {
     auto FindTemplatedImplContext(
-        const std::shared_ptr<const Scope>& startScope
+        const std::shared_ptr<const Scope>& beginScope
     ) -> std::optional<TemplatedImplSymbol*>
     {
-        std::shared_ptr<const Scope> scope = startScope;
+        std::shared_ptr<const Scope> scope = beginScope;
         for (
             ; 
             scope->GetParent().has_value(); 
@@ -1252,7 +1252,7 @@ namespace Ace
         return selfType->CollectTemplateArgs();
     }
 
-    auto Scope::GetStaticSymbolResolutionStartScope(
+    auto Scope::GetStaticSymbolResolutionBeginScope(
         const SymbolName& name
     ) const -> Expected<std::shared_ptr<const Scope>>
     {
@@ -1294,11 +1294,11 @@ namespace Ace
     }
 
     auto Scope::GetStaticSymbolResolutionImplTemplateArgs(
-        const std::shared_ptr<const Scope>& startScope
+        const std::shared_ptr<const Scope>& beginScope
     ) -> std::vector<ITypeSymbol*>
     {
         for (
-            std::optional<std::shared_ptr<const Scope>> optScope = startScope;
+            std::optional<std::shared_ptr<const Scope>> optScope = beginScope;
             optScope.has_value(); 
             optScope = optScope.value()->GetParent()
             )

@@ -127,7 +127,7 @@ namespace Ace
 
         const auto& now = std::chrono::steady_clock::now;
 
-        const auto timeIREmittingStart = now();
+        const auto timeIREmittingBegin = now();
 
         const auto symbols = globalScope->CollectAllDefinedSymbolsRecursive();
 
@@ -237,7 +237,7 @@ namespace Ace
 
         const auto timeIREmittingEnd = now();
 
-        const auto timeAnalysesStart = now();
+        const auto timeAnalysesBegin = now();
 
         llvm::LoopAnalysisManager lam{};
         llvm::FunctionAnalysisManager fam{};
@@ -277,7 +277,7 @@ namespace Ace
         llvm::WriteBitcodeToFile(*m_Module, bitcodeFileOStream);
         bitcodeFileOStream.close();
         
-        const auto timeLLCStart = now();
+        const auto timeLLCBegin = now();
 
         const std::string llc = 
             "llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj "
@@ -287,7 +287,7 @@ namespace Ace
 
         const auto timeLLCEnd = now();
 
-        const auto timeClangStart = now();
+        const auto timeClangBegin = now();
 
         const std::string clang = 
             "clang -lc -lm "
@@ -301,10 +301,10 @@ namespace Ace
         {
             Result::DurationInfo
             {
-                timeIREmittingEnd - timeIREmittingStart,
-                timeAnalysesEnd - timeAnalysesStart,
-                timeLLCEnd - timeLLCStart,
-                timeClangEnd - timeClangStart
+                timeIREmittingEnd - timeIREmittingBegin,
+                timeAnalysesEnd - timeAnalysesBegin,
+                timeLLCEnd - timeLLCBegin,
+                timeClangEnd - timeClangBegin,
             }
         };
     }
@@ -370,7 +370,7 @@ namespace Ace
             }
         );
 
-        const auto blockStartIndicies = [&]() -> std::vector<size_t>
+        const auto blockBeginIndicies = [&]() -> std::vector<size_t>
         {
             std::vector<size_t> indicies{};
 
@@ -394,14 +394,14 @@ namespace Ace
             return indicies;
         }();
 
-        for (size_t i = 0; i < blockStartIndicies.size(); i++)
+        for (size_t i = 0; i < blockBeginIndicies.size(); i++)
         {
-            const bool isLastBlock = i == (blockStartIndicies.size() - 1);
+            const bool isLastBlock = i == (blockBeginIndicies.size() - 1);
 
-            const auto beginStmtIt = begin(stmts) + blockStartIndicies.at(i);
+            const auto beginStmtIt = begin(stmts) + blockBeginIndicies.at(i);
             const auto endStmtIt   = isLastBlock ?
                                           end  (stmts) :
-                                          begin(stmts) + blockStartIndicies.at(i + 1);
+                                          begin(stmts) + blockBeginIndicies.at(i + 1);
 
             std::for_each(beginStmtIt, endStmtIt,
             [&](const std::shared_ptr<const IStmtBoundNode>& stmt)

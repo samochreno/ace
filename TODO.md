@@ -2,7 +2,6 @@
 
 ## 🛠️ Refactor
 
-- Rename all start to begin
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 
 ## 💥 High Priority

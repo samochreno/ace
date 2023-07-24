@@ -189,14 +189,14 @@ namespace Ace
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
-            ACE_TRY(startScope, GetStaticSymbolResolutionStartScope(name));
+            ACE_TRY(beginScope, GetStaticSymbolResolutionBeginScope(name));
 
-            std::vector<std::shared_ptr<const Scope>> startScopes{};
-            startScopes.push_back(startScope);
-            startScopes.insert(
-                end(startScopes), 
-                begin(startScope->m_Associations), 
-                end  (startScope->m_Associations)
+            std::vector<std::shared_ptr<const Scope>> beginScopes{};
+            beginScopes.push_back(beginScope);
+            beginScopes.insert(
+                end(beginScopes), 
+                begin(beginScope->m_Associations), 
+                end  (beginScope->m_Associations)
             );
 
             ACE_TRY(symbol, ResolveSymbolInScopes(SymbolResolutionData{
@@ -205,7 +205,7 @@ namespace Ace
                 name.Sections.end(),
                 optArgTypes,
                 IsCorrectSymbolType<TSymbol>,
-                startScopes,
+                beginScopes,
                 GetStaticSymbolResolutionImplTemplateArgs(shared_from_this()),
                 IsTemplate<TSymbol>()
             }));
@@ -460,11 +460,11 @@ namespace Ace
             ITypeSymbol* const selfType
         ) -> std::vector<ITypeSymbol*>;
 
-        auto GetStaticSymbolResolutionStartScope(
+        auto GetStaticSymbolResolutionBeginScope(
             const SymbolName& name
         ) const -> Expected<std::shared_ptr<const Scope>>;
         static auto GetStaticSymbolResolutionImplTemplateArgs(
-            const std::shared_ptr<const Scope>& startScope
+            const std::shared_ptr<const Scope>& beginScope
         ) -> std::vector<ITypeSymbol*>;
 
         const Compilation* m_Compilation{};
