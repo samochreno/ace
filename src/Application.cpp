@@ -392,7 +392,10 @@ namespace Ace::Application
 
         const auto expDidCompile = Compile(expCompilation.Unwrap().get());
         diagnosticBag.Add(expDidCompile);
-        if (!expDidCompile)
+        if (
+            !expDidCompile ||
+            (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error)
+            )
         {
             Log << CreateIndent() << termcolor::bright_red << "Failed";
             Log << termcolor::reset << " to compile\n";
@@ -404,11 +407,6 @@ namespace Ace::Application
         Log << CreateIndent() << termcolor::bright_green << "Finished";
         Log << termcolor::reset << " compilation\n";
         IndentLevel++;
-
-        if (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error)
-        {
-            return diagnosticBag;
-        }
 
         return Void{ diagnosticBag };
     }

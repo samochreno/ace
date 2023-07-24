@@ -6,12 +6,9 @@
 
 ## 💥 High Priority
 
+- Error messages to make debugging easier
 - Implement special fast lookup for native types
 - Figure out where to use the `opt` prefix and where not
-- Fix so compilation cannot succeed with parsing errors
-- Check why CLI arg parsing never checks if EOF (Probably a bug)
-- Error messages to make debugging easier:
-  - Improve parsing, for example: if we already know we are parsing a function, we should do the best we can to actually parse it, so for example insert missing name token or something, allow semicolon between function header and body just discard it
 - Give template symbols shared ownership of the nodes
 - String interning and maybe put `Token`s on the stack
 - `*self`
@@ -37,13 +34,13 @@
 
 - Rewrite Package.json to package.ace:
   ```rs
-  import std::build::*;
+  import std::build;
 
-  package(): Package {
-      ret new Package {
+  package(): std::Package {
+      ret new std::Package {
           name: "ace",
           path_macros: [
-              new PathMacro {
+              new std::PathMacro {
                   name: "$project_path",
                   value: "/home/samo/repos/ace/ace/src/",
               },
