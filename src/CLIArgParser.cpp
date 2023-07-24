@@ -14,22 +14,6 @@ namespace Ace
 {
     using CLIArgParseIterator = std::vector<std::string_view>::const_iterator;
 
-    template<typename T>
-    class CLIArgParseResult
-    {
-    public:
-        CLIArgParseResult(
-            const T& value,
-            const CLIArgParseIterator endIt
-        ) : Value{ value },
-            EndIterator{ endIt }
-        {
-        }
-
-        T Value{};
-        CLIArgParseIterator EndIterator{};
-    };
-
     class CLIArgParser
     {
     public:
@@ -38,7 +22,6 @@ namespace Ace
             std::vector<const CLIOptionDefinition*>&& optionDefinitions
         ) : m_ArgBuffer{ argBuffer },
             m_OptionDefinitions{ std::move(optionDefinitions) },
-            m_BeginIterator{ begin(argBuffer->GetArgs()) },
             m_Iterator{ begin(argBuffer->GetArgs()) },
             m_EndIterator{ end(argBuffer->GetArgs()) }
         {
@@ -53,39 +36,26 @@ namespace Ace
         {
             return m_OptionDefinitions;
         }
-
         auto IsEnd() const -> bool
         {
             return m_Iterator == m_EndIterator;
         }
-
         auto Peek(const size_t distance = 1) const -> std::string_view
         {
             return *((m_Iterator - 1) + distance);
         }
 
-        auto Eat(const size_t count = 1) -> void
+        auto Eat() -> void
         {
-            m_Iterator += count;
-        }
-        template<typename T>
-        auto Eat(const CLIArgParseResult<T>& result) -> void
-        {
-            m_Iterator = result.EndIterator;
-        }
-
-        template<typename T>
-        auto Build(const T& value) -> CLIArgParseResult<T>
-        {
-            return CLIArgParseResult<T>{ value, m_Iterator };
+            m_Iterator++;
+            ACE_ASSERT(m_Iterator <= m_EndIterator);
         }
 
     private:
         const CLIArgBuffer* m_ArgBuffer{};
         std::vector<const CLIOptionDefinition*> m_OptionDefinitions{};
-        CLIArgParseIterator m_BeginIterator{};
-        CLIArgParseIterator m_Iterator{};
-        CLIArgParseIterator m_EndIterator{};
+        std::vector<std::string_view>::const_iterator m_Iterator{};
+        std::vector<std::string_view>::const_iterator m_EndIterator{};
     };
 
     static const CLIOptionDefinition ErrorOptionDefinition
@@ -165,8 +135,8 @@ namespace Ace
     }
 
     static auto ParseLongOption(
-        CLIArgParser parser
-    ) -> Diagnosed<CLIArgParseResult<CLIOption>>
+        CLIArgParser& parser
+    ) -> Diagnosed<CLIOption>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -236,7 +206,7 @@ namespace Ace
                 return std::nullopt;
             }
 
-            return parser.Peek(2);
+            return parser.Peek(1);
         }();
 
         diagnosticBag.Add(DiagnoseMissingOrUnexpectedOptionValue(
@@ -251,17 +221,18 @@ namespace Ace
             optValue,
         };
 
-        const size_t length =
-            (!optValue.has_value() || isValueInFirstArg) ? 1 : 2;
+        parser.Eat();
+        if (optValue.has_value() && !isValueInFirstArg)
+        {
+            parser.Eat();
+        }
 
-        parser.Eat(length);
-
-        return Diagnosed{ parser.Build(option), diagnosticBag };
+        return Diagnosed{ option, diagnosticBag };
     }
 
     static auto ParseShortOption(
-        CLIArgParser parser
-    ) -> Diagnosed<CLIArgParseResult<CLIOption>>
+        CLIArgParser& parser
+    ) -> Diagnosed<CLIOption>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -324,7 +295,7 @@ namespace Ace
                 return std::nullopt;
             }
 
-            return parser.Peek(2);
+            return parser.Peek(1);
         }();
 
         diagnosticBag.Add(DiagnoseMissingOrUnexpectedOptionValue(
@@ -339,17 +310,18 @@ namespace Ace
             optValue,
         };
 
-        const size_t length =
-            (!optValue.has_value() || isValueInFirstArg) ? 1 : 2;
+        parser.Eat();
+        if (optValue.has_value() && !isValueInFirstArg)
+        {
+            parser.Eat();
+        }
 
-        parser.Eat(length);
-
-        return Diagnosed{ parser.Build(option), diagnosticBag };
+        return Diagnosed{ option, diagnosticBag };
     }
 
     static auto ParseOption(
-        const CLIArgParser& parser
-    ) -> Diagnosed<CLIArgParseResult<CLIOption>>
+        CLIArgParser& parser
+    ) -> Diagnosed<CLIOption>
     {
         ACE_ASSERT(parser.Peek().at(0) == '-');
 
@@ -412,10 +384,7 @@ namespace Ace
             const auto dgnOption = ParseOption(parser);
             diagnosticBag.Add(dgnOption);
 
-            optionMap[dgnOption.Unwrap().Value.Definition] =
-                dgnOption.Unwrap().Value;
-
-            parser.Eat(dgnOption.Unwrap());
+            optionMap[dgnOption.Unwrap().Definition] = dgnOption.Unwrap();
         }
 
         return Expected
