@@ -55,7 +55,7 @@ namespace Ace
         );
         ~NativeType() = default;
 
-        auto GetCompilation() const -> const Compilation*;
+        auto GetCompilation() const -> const Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -87,7 +87,7 @@ namespace Ace
         );
         ~NativeTypeTemplate() = default;
 
-        auto GetCompilation() const -> const Compilation*;
+        auto GetCompilation() const -> const Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -114,7 +114,7 @@ namespace Ace
         );
         ~NativeFunction() = default;
 
-        auto GetCompilation() const -> const Compilation*;
+        auto GetCompilation() const -> const Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -141,7 +141,7 @@ namespace Ace
         );
         ~NativeFunctionTemplate() = default;
 
-        auto GetCompilation() const -> const Compilation*;
+        auto GetCompilation() const -> const Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -168,7 +168,7 @@ namespace Ace
         );
         ~NativeAssociatedFunction() = default;
 
-        auto GetCompilation() const -> const Compilation*;
+        auto GetCompilation() const -> const Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -195,7 +195,7 @@ namespace Ace
         );
         ~NativeAssociatedFunctionTemplate() = default;
 
-        auto GetCompilation() const -> const Compilation*;
+        auto GetCompilation() const -> const Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
