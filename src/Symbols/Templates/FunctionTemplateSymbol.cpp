@@ -124,7 +124,6 @@ namespace Ace
     ) -> void
     {
         const auto boundAST = Application::CreateBoundTransformedAndVerifiedAST(
-            GetCompilation(),
             std::dynamic_pointer_cast<const FunctionNode>(ast),
             [](const std::shared_ptr<const FunctionNode>& ast)
             {

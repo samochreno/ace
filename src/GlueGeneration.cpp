@@ -423,7 +423,6 @@ namespace Ace::GlueGeneration
         );
 
         return Application::CreateTransformedAndVerifiedAST(
-            compilation,
             bodyNode,
             [&](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
             { 
@@ -533,7 +532,6 @@ namespace Ace::GlueGeneration
         );
 
         return Application::CreateTransformedAndVerifiedAST(
-            compilation,
             bodyNode,
             [&](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
             { 

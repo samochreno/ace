@@ -68,7 +68,6 @@ namespace Ace::Application
         typename TGetOrCreateLoweredFunc
     >
     auto CreateTransformedAndVerifiedAST(
-        const Compilation* const compilation,
         const TBound& boundAST,
         TGetOrCreateTypeCheckedFunc&& getOrCreateTypeCheckedFunc,
         TGetOrCreateLoweredFunc&& getOrCreateLoweredFunc
@@ -81,6 +80,8 @@ namespace Ace::Application
 
         auto& finalAST = mchLoweredAST.Value;
         const auto nodes = GetAllNodes(finalAST);
+
+        const auto* const compilation = finalAST->GetCompilation();
         
         ACE_TRY_VOID(ValidateControlFlow(compilation, nodes));
         BindFunctionSymbolsBodies(compilation, nodes);
@@ -97,7 +98,6 @@ namespace Ace::Application
         typename TGetOrCreateLoweredFunc
     >
     auto CreateBoundTransformedAndVerifiedAST(
-        const Compilation* const compilation,
         const T& ast,
         TCreateBoundFunc&& createBoundFunc,
         TGetOrCreateTypeCheckedFunc&& getOrCreateTypeCheckedFunc,
@@ -107,7 +107,6 @@ namespace Ace::Application
         ACE_TRY(boundAST, createBoundFunc(ast));
 
         ACE_TRY(finalAST, CreateTransformedAndVerifiedAST(
-            compilation,
             boundAST,
             getOrCreateTypeCheckedFunc,
             getOrCreateLoweredFunc
