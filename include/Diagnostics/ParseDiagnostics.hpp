@@ -417,7 +417,7 @@ namespace Ace
         const std::string message =
             "unexpected " +
             CreateTokenKindString(unexpectedToken->Kind) +
-            ", expected a compound assignment op";
+            ", expected a compound assignment operator";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
@@ -433,7 +433,7 @@ namespace Ace
         const std::string message =
             "unexpected " +
             CreateTokenKindString(unexpectedToken->Kind) +
-            ", expected an overloadable op";
+            ", expected an overloadable operator";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
@@ -555,8 +555,8 @@ namespace Ace
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = 
-            "op" + CreateOpString(opToken) +
-            "must have 1 parameter";
+            "operator " + CreateOpString(opToken) +
+            " must have 1 parameter";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
@@ -570,8 +570,8 @@ namespace Ace
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = 
-            "op" + CreateOpString(opToken) +
-            "must have 2 parameters";
+            "operator " + CreateOpString(opToken) +
+            " must have 2 parameters";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
@@ -585,8 +585,8 @@ namespace Ace
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = 
-            "op" + CreateOpString(opToken) +
-            "must have 1 or 2 parameters";
+            "operator " + CreateOpString(opToken) +
+            " must have 1 or 2 parameters";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
@@ -602,7 +602,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             opToken->SrcLocation,
-            "unknown op"
+            "unknown operator"
         );
     }
 
@@ -613,7 +613,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             nameToken->SrcLocation,
-            "op must be public"
+            "operator must be public"
         );
     }
 
@@ -624,7 +624,7 @@ namespace Ace
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             nameToken->SrcLocation,
-            "instance op"
+            "instance operator"
         );
     }
 }
