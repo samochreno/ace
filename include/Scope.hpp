@@ -20,7 +20,6 @@ namespace Ace
     class ISymbol;
     class ISelfScopedSymbol;
     class ModuleSymbol;
-    class TemplatedImplSymbol;
     class ITypeSymbol;
     class ITemplateSymbol;
 

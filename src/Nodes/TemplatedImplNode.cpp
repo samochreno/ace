@@ -10,7 +10,6 @@
 #include "BoundNodes/ImplBoundNode.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
-#include "Symbols/TemplatedImplSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "SpecialIdent.hpp"
@@ -101,36 +100,6 @@ namespace Ace
             GetScope(),
             boundFunctions
         );
-    }
-
-    auto TemplatedImplNode::GetSymbolScope() const -> std::shared_ptr<Scope>
-    {
-        return GetScope();
-    }
-
-    auto TemplatedImplNode::GetSymbolKind() const -> SymbolKind
-    {
-        return SymbolKind::TemplatedImpl;
-    }
-
-    auto TemplatedImplNode::GetSymbolCreationSuborder() const -> size_t
-    {
-        return 0;
-    }
-
-    auto TemplatedImplNode::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
-    {
-        ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(m_TypeTemplateName));
-        templateSymbol->GetSelfScope()->DefineAssociation(m_SelfScope);
-
-        return std::unique_ptr<ISymbol>
-        {
-            std::make_unique<TemplatedImplSymbol>(
-                GetScope(),
-                m_SelfScope,
-                templateSymbol
-            )
-        };
     }
 
     auto TemplatedImplNode::DefineAssociations() const -> Expected<void>

@@ -23,55 +23,6 @@
 
 namespace Ace
 {
-    auto FindTemplatedImplContext(
-        const std::shared_ptr<const Scope>& beginScope
-    ) -> std::optional<TemplatedImplSymbol*>
-    {
-        std::shared_ptr<const Scope> scope = beginScope;
-        for (
-            ; 
-            scope->GetParent().has_value(); 
-            scope = scope->GetParent().value()
-            )
-        {
-            const auto parentScope = scope->GetParent().value();
-
-            const auto templatedImplSymbols =
-                parentScope->CollectSymbols<TemplatedImplSymbol>();
-
-            const auto matchingTemplatedImplIt = std::find_if(
-                begin(templatedImplSymbols),
-                end  (templatedImplSymbols),
-                [&](TemplatedImplSymbol* const templatedImpl)
-                {
-                    return templatedImpl->GetSelfScope().get() == scope.get();
-                }
-            );
-
-            if (matchingTemplatedImplIt == end(templatedImplSymbols))
-            {
-                continue;
-            }
-
-            return *matchingTemplatedImplIt;
-        }
-
-        return nullptr;
-    }
-
-    static auto IsSameTemplatedImplContext(
-        const std::shared_ptr<const Scope>& scopeA, 
-        const std::shared_ptr<const Scope>& scopeB
-    ) -> bool
-    {
-        const auto contextA = FindTemplatedImplContext(scopeA).value();
-        const auto contextB = FindTemplatedImplContext(scopeB).value();
-
-        return
-            contextA->GetImplementedTypeTemplate() == 
-            contextB->GetImplementedTypeTemplate();
-    }
-
     static auto ResolveTemplateArgs(
         const std::shared_ptr<const Scope>& scope,
         const std::vector<SymbolName>& templateArgNames

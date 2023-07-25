@@ -18,8 +18,7 @@ namespace Ace
     class TemplatedImplNode :
         public virtual INode,
         public virtual ICloneableNode<TemplatedImplNode>,
-        public virtual IBindableNode<ImplBoundNode>,
-        public virtual ISymbolCreatableNode
+        public virtual IBindableNode<ImplBoundNode>
     {
     public:
         TemplatedImplNode(
@@ -38,11 +37,6 @@ namespace Ace
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const TemplatedImplNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>> final;
-
-        auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
-        auto GetSymbolKind() const -> SymbolKind final;
-        auto GetSymbolCreationSuborder() const -> size_t final;
-        auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
 
         auto DefineAssociations() const -> Expected<void>;
 
