@@ -17,7 +17,6 @@ namespace Ace
         { SymbolKind::ImplTemplateParam, 0 },
         { SymbolKind::TemplateParam,     0 },
         { SymbolKind::TypeAlias,         1 },
-        { SymbolKind::TemplatedImpl,     1 },
         { SymbolKind::Function,          3 },
         { SymbolKind::FunctionTemplate,  3 },
         { SymbolKind::StaticVar,         3 },

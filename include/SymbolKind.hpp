@@ -19,9 +19,9 @@ namespace Ace
         FunctionTemplate,
         TypeTemplate,
         TypeAlias,
-        TemplatedImpl,
         ImplTemplateParam,
         TemplateParam,
+        ErrorType,
     };
 
     constexpr auto operator&(
