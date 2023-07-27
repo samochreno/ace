@@ -47,6 +47,11 @@ namespace Ace
         return m_Severity;
     }
 
+    auto DiagnosticBag::HasErrors() const -> bool
+    {
+        return m_Severity == DiagnosticSeverity::Error;
+    }
+
     auto DiagnosticBag::AddSeverity(
         const DiagnosticSeverity& severity
     ) -> void

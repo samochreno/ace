@@ -176,8 +176,7 @@ namespace Ace
             ));
         }
 
-        const auto* const definition =
-            (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error) ?
+        const auto* const definition = diagnosticBag.HasErrors() ?
             &ErrorOptionDefinition : 
             *matchedDefinitionIt;
 
@@ -272,8 +271,7 @@ namespace Ace
             ));
         }
 
-        const auto* const definition =
-            (diagnosticBag.GetSeverity() == DiagnosticSeverity::Error) ?
+        const auto* const definition = diagnosticBag.HasErrors() ?
             &ErrorOptionDefinition : 
             *matchedDefinitionIt;
 

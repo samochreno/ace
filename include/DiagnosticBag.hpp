@@ -28,6 +28,7 @@ namespace Ace
         auto IsEmpty() const -> bool;
         auto GetDiagnostics() const -> const std::vector<std::shared_ptr<const Diagnostic>>&;
         auto GetSeverity() const -> DiagnosticSeverity;
+        auto HasErrors() const -> bool;
 
     private:
         auto AddSeverity(const DiagnosticSeverity& severity) -> void;
