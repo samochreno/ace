@@ -188,6 +188,17 @@ namespace Ace
         {
             return m_OptValue.value();
         }
+        auto UnwrapOr(T value) const -> T
+        {
+            if (m_OptValue.has_value())
+            {
+                return m_OptValue.value();
+            }
+            else
+            {
+                return value;
+            }
+        }
 
         auto GetDiagnosticBag() const -> const DiagnosticBag& final
         {
