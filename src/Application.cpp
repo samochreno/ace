@@ -379,9 +379,9 @@ namespace Ace::Application
             args
         );
         diagnosticBag.Add(expCompilation);
+        GlobalDiagnosticBag{}.Add(expCompilation);
         if (!expCompilation)
         {
-            GlobalDiagnosticBag{}.Add(expCompilation);
             return diagnosticBag;
         }
 
