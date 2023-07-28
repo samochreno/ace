@@ -81,7 +81,7 @@ namespace Ace
 
             case TokenKind::Ident:
             {
-                return "ident";
+                return "identifier";
             }
 
             case TokenKind::Int8:
