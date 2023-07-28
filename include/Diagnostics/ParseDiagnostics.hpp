@@ -346,6 +346,46 @@ namespace Ace
         }
     }
 
+    inline auto CreateTokenKindStringWithArticle(
+        const TokenKind tokenKind
+    ) -> std::string
+    {
+        switch (tokenKind)
+        {
+            case TokenKind::EndOfFile:
+            {
+                return "the end of the file";
+            }
+
+            case TokenKind::UInt8:
+            case TokenKind::UInt16:
+            case TokenKind::UInt32:
+            case TokenKind::UInt64:
+            case TokenKind::String:
+            case TokenKind::Bool:
+            {
+                return "a " + CreateTokenKindString(tokenKind);
+            }
+
+            case TokenKind::Ident:
+            case TokenKind::Int8:
+            case TokenKind::Int16:
+            case TokenKind::Int32:
+            case TokenKind::Int64:
+            case TokenKind::Int:
+            case TokenKind::Float32:
+            case TokenKind::Float64:
+            {
+                return "an " + CreateTokenKindString(tokenKind);
+            }
+
+            default:
+            {
+                return CreateTokenKindString(tokenKind);
+            }
+        }
+    }
+
     inline auto CreateUnexpectedTokenError(
         const std::shared_ptr<const Token>& unexpectedToken
     ) -> std::shared_ptr<const Diagnostic>
@@ -369,7 +409,7 @@ namespace Ace
         const std::string message =
             "unexpected " +
             CreateTokenKindString(unexpectedToken->Kind) + ", expected " +
-            CreateTokenKindString(expectedTokenKind);
+            CreateTokenKindStringWithArticle(expectedTokenKind);
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
@@ -401,7 +441,7 @@ namespace Ace
         const std::string message =
             "unexpected " +
             CreateTokenKindString(unexpectedToken->Kind) +
-            ", expected " + SpecialIdent::New;
+            ", expected `" + SpecialIdent::New + "`";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
