@@ -37,7 +37,7 @@ namespace Ace::Application
 
     static auto ParseAST(
         const Compilation* const compilation,
-    const FileBuffer* const fileBuffer
+        const FileBuffer* const fileBuffer
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
         DiagnosticBag diagnosticBag{};
@@ -65,8 +65,10 @@ namespace Ace::Application
     auto CreateAndDefineSymbols(
         const Compilation* const compilation,
         const std::vector<const INode*>& nodes
-    ) -> Expected<void>
+    ) -> Diagnosed<void>
     {
+        DiagnosticBag diagnosticBag{};
+
         auto symbolCreatableNodes =
             DynamicCastFilter<const ISymbolCreatableNode*>(nodes);
 
@@ -231,9 +233,7 @@ namespace Ace::Application
         return Void{};
     }
 
-    static auto Compile(
-        const Compilation* const compilation
-    ) -> Expected<void>
+    static auto Compile(const Compilation* const compilation) -> Expected<void>
     {
         DiagnosticBag diagnosticBag{};
 
