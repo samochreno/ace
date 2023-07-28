@@ -1,6 +1,8 @@
-# Ace
+# The Ace Programming Language
 
-## Naming
+Ace is a memory safe, statically-typed programming language with consistent syntax.
+
+## Contributing
 
 ### Abbreviations
 
@@ -21,7 +23,7 @@ Only abbreviate the following words:
 | statement | stmt |
 | variable | var |
 
-### Errors
+### Error Naming
 
 Try to name errors using these adjectives:
 - Empty
