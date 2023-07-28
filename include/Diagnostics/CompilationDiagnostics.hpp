@@ -60,17 +60,113 @@ namespace Ace
     {
         switch (type)
         {
-            case nlohmann::json::value_t::null:            return "null";
-            case nlohmann::json::value_t::object:          return "object";
-            case nlohmann::json::value_t::array:           return "array";
-            case nlohmann::json::value_t::string:          return "string";
-            case nlohmann::json::value_t::boolean:         return "boolean";
-            case nlohmann::json::value_t::number_integer:  return "signed integer";
-            case nlohmann::json::value_t::number_unsigned: return "unsigned integer";
-            case nlohmann::json::value_t::number_float:    return "float";
-            case nlohmann::json::value_t::binary:          return "binary array";
+            case nlohmann::json::value_t::null:
+            {
+                return "null";
+            }
 
-            case nlohmann::json::value_t::discarded:       ACE_UNREACHABLE();
+            case nlohmann::json::value_t::object:
+            {
+                return "object";
+            }
+
+            case nlohmann::json::value_t::array:
+            {
+                return "array";
+            }
+
+            case nlohmann::json::value_t::string:
+            {
+                return "string";
+            }
+
+            case nlohmann::json::value_t::boolean:
+            {
+                return "boolean";
+            }
+
+            case nlohmann::json::value_t::number_integer:
+            {
+                return "signed integer";
+            }
+
+            case nlohmann::json::value_t::number_unsigned:
+            {
+                return "unsigned integer";
+            }
+
+            case nlohmann::json::value_t::number_float:
+            {
+                return "float";
+            }
+
+            case nlohmann::json::value_t::binary:
+            {
+                return "binary array";
+            }
+
+            case nlohmann::json::value_t::discarded:
+            {
+                ACE_UNREACHABLE();
+            }
+        }
+    }
+
+    inline auto CreateJsonTypeStringWithArticle(
+        const nlohmann::json::value_t type
+    ) -> const char* 
+    {
+        switch (type)
+        {
+            case nlohmann::json::value_t::null:
+            {
+                return "a null";
+            }
+
+            case nlohmann::json::value_t::object:
+            {
+                return "an object";
+            }
+
+            case nlohmann::json::value_t::array:
+            {
+                return "an array";
+            }
+
+            case nlohmann::json::value_t::string:
+            {
+                return "a string";
+            }
+
+            case nlohmann::json::value_t::boolean:
+            {
+                return "a boolean";
+            }
+
+            case nlohmann::json::value_t::number_integer:
+            {
+                return "a signed integer";
+            }
+
+            case nlohmann::json::value_t::number_unsigned:
+            {
+                return "an unsigned integer";
+            }
+
+            case nlohmann::json::value_t::number_float:
+            {
+                return "a float";
+            }
+
+            case nlohmann::json::value_t::binary:
+            {
+                return "a binary array";
+            }
+
+            case nlohmann::json::value_t::discarded:
+            {
+                ACE_UNREACHABLE();
+            }
         }
     }
 
@@ -82,9 +178,9 @@ namespace Ace
     ) -> std::shared_ptr<const Diagnostic>
     {
         const std::string message = std::string{} +
-            "unexpected type `" + CreateJsonTypeString(type) + 
+            "unexpected `" + CreateJsonTypeString(type) + 
             "` of property `" + propertyName +  "`, expected `" +
-            CreateJsonTypeString(expectedType) + "`";
+            CreateJsonTypeStringWithArticle(expectedType) + "`";
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
@@ -110,10 +206,14 @@ namespace Ace
         const std::string_view characters
     ) -> std::shared_ptr<const Diagnostic>
     {
+        const std::string message = std::string{} +
+            "trailing characters in path before extension `" +
+            std::string{ characters } + "`";
+
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,
             packageFileBuffer->CreateFirstLocation(),
-            "trailing characters in path before extension `" + std::string{ characters } + "`"
+            message
         );
     }
 }
