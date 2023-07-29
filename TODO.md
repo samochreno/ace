@@ -9,13 +9,12 @@
 
 ## 💥 High Priority
 
+- Figure out how to stop cascading diagnostics in binding and verification with `Compilation::ErrorTypeSymbol`, then add diagnostics
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
-- Fix `$op_noequals` &rarr; `$op_not_equals`
-- Remove TODO comments
 - Add [[nodiscard]] to `Expected` and `Diagnosed`
 - Error messages to make debugging easier
 - Implement special fast lookup for native types
-- Give template symbols shared ownership of the nodes
+- ❓ Give template symbols shared ownership of the nodes
 
 ## 🔔 Medium Priority
 
