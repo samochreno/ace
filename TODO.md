@@ -3,7 +3,6 @@
 ## 🛠️ Refactor
 
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
-- Rename `ISymbol::GetSymbolKind` &rarr; `ISymbol::GetKind`, `ISymbol::GetSymbolCategory` &rarr; `ISymbol::GetCategory`
 - Figure out where to use the `opt` prefix and where not
 - String interning and maybe put `Token`s on the stack
 

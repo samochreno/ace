@@ -24,12 +24,12 @@ namespace Ace
         return m_Name;
     }
 
-    auto LabelSymbol::GetSymbolKind() const -> SymbolKind
+    auto LabelSymbol::GetKind() const -> SymbolKind
     {
         return SymbolKind::Label;
     }
 
-    auto LabelSymbol::GetSymbolCategory() const -> SymbolCategory
+    auto LabelSymbol::GetCategory() const -> SymbolCategory
     {
         return SymbolCategory::Static;
     }

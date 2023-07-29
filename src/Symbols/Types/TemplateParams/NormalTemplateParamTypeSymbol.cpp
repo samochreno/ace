@@ -32,12 +32,12 @@ namespace Ace
         return m_Name;
     }
 
-    auto NormalTemplateParamTypeSymbol::GetSymbolKind() const -> SymbolKind
+    auto NormalTemplateParamTypeSymbol::GetKind() const -> SymbolKind
     {
         return SymbolKind::TemplateParam;
     }
 
-    auto NormalTemplateParamTypeSymbol::GetSymbolCategory() const -> SymbolCategory
+    auto NormalTemplateParamTypeSymbol::GetCategory() const -> SymbolCategory
     {
         return SymbolCategory::Static;
     }

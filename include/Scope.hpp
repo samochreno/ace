@@ -244,7 +244,7 @@ namespace Ace
                 auto* const sameSymbol = optSameSymbol.value();
 
                 const bool isSameKind = 
-                    sameSymbol->GetSymbolKind() == symbol->GetSymbolKind();
+                    sameSymbol->GetKind() == symbol->GetKind();
 
                 auto* const castedSameSymbol = dynamic_cast<TSymbol*>(
                     sameSymbol

@@ -39,12 +39,12 @@ namespace Ace
         return m_Name;
     }
 
-    auto FunctionTemplateSymbol::GetSymbolKind() const -> SymbolKind
+    auto FunctionTemplateSymbol::GetKind() const -> SymbolKind
     {
         return SymbolKind::FunctionTemplate;
     }
 
-    auto FunctionTemplateSymbol::GetSymbolCategory() const -> SymbolCategory
+    auto FunctionTemplateSymbol::GetCategory() const -> SymbolCategory
     {
         return SymbolCategory::Static;
     }

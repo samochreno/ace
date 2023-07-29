@@ -192,10 +192,7 @@ namespace Ace
             mainFunctionSymbol->GetType()->GetUnaliased() == 
             natives->Int.GetSymbol()
         );
-        ACE_ASSERT(
-            mainFunctionSymbol->GetSymbolCategory() ==
-            SymbolCategory::Static
-        );
+        ACE_ASSERT(mainFunctionSymbol->GetCategory() == SymbolCategory::Static);
         ACE_ASSERT(mainFunctionSymbol->CollectAllParams().empty());
 
         auto* const mainType = llvm::FunctionType::get(

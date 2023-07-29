@@ -22,8 +22,8 @@ namespace Ace
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetName() const -> const Ident& final;
-        auto GetSymbolKind() const -> SymbolKind final;
-        auto GetSymbolCategory() const -> SymbolCategory final;
+        auto GetKind() const -> SymbolKind final;
+        auto GetCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
 
         auto GetType() const -> ITypeSymbol* final;

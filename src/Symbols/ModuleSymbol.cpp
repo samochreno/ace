@@ -32,12 +32,12 @@ namespace Ace
         return m_Name;
     }
 
-    auto ModuleSymbol::GetSymbolKind() const -> SymbolKind
+    auto ModuleSymbol::GetKind() const -> SymbolKind
     {
         return SymbolKind::Module;
     }
 
-    auto ModuleSymbol::GetSymbolCategory() const -> SymbolCategory
+    auto ModuleSymbol::GetCategory() const -> SymbolCategory
     {
         return SymbolCategory::Static;
     }

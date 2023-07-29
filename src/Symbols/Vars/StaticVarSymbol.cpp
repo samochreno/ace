@@ -30,12 +30,12 @@ namespace Ace
         return m_Name;
     }
 
-    auto StaticVarSymbol::GetSymbolKind() const -> SymbolKind
+    auto StaticVarSymbol::GetKind() const -> SymbolKind
     {
         return SymbolKind::StaticVar;
     }
 
-    auto StaticVarSymbol::GetSymbolCategory() const -> SymbolCategory
+    auto StaticVarSymbol::GetCategory() const -> SymbolCategory
     {
         return SymbolCategory::Static;
     }

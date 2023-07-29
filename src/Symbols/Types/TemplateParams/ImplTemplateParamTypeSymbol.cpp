@@ -33,12 +33,12 @@ namespace Ace
         return m_Name;
     }
 
-    auto ImplTemplateParamTypeSymbol::GetSymbolKind() const -> SymbolKind
+    auto ImplTemplateParamTypeSymbol::GetKind() const -> SymbolKind
     {
         return SymbolKind::ImplTemplateParam;
     }
 
-    auto ImplTemplateParamTypeSymbol::GetSymbolCategory() const -> SymbolCategory
+    auto ImplTemplateParamTypeSymbol::GetCategory() const -> SymbolCategory
     {
         return SymbolCategory::Static;
     }

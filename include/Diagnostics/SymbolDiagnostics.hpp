@@ -216,7 +216,7 @@ namespace Ace
     {
         const std::string message =
             "scope access of " +
-            CreateSymbolKindStringWithArticle(symbol->GetSymbolKind());
+            CreateSymbolKindStringWithArticle(symbol->GetKind());
 
         return std::make_shared<const Diagnostic>(
             DiagnosticSeverity::Error,

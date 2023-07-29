@@ -52,12 +52,12 @@ namespace Ace
         return m_Name;
     }
 
-    auto FunctionSymbol::GetSymbolKind() const -> SymbolKind
+    auto FunctionSymbol::GetKind() const -> SymbolKind
     {
         return SymbolKind::Function;
     }
 
-    auto FunctionSymbol::GetSymbolCategory() const -> SymbolCategory
+    auto FunctionSymbol::GetCategory() const -> SymbolCategory
     {
         return m_SymbolCategory;
     }

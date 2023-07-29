@@ -29,12 +29,12 @@ namespace Ace
         return m_Name;
     }
 
-    auto ErrorTypeSymbol::GetSymbolKind() const -> SymbolKind
+    auto ErrorTypeSymbol::GetKind() const -> SymbolKind
     {
         return SymbolKind::ErrorType;
     }
 
-    auto ErrorTypeSymbol::GetSymbolCategory() const -> SymbolCategory
+    auto ErrorTypeSymbol::GetCategory() const -> SymbolCategory
     {
         return SymbolCategory::Static;
     }

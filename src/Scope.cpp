@@ -130,7 +130,7 @@ namespace Ace
     {
         DiagnosticBag diagnosticBag{};
 
-        if (symbol->GetSymbolCategory() != symbolCategory)
+        if (symbol->GetCategory() != symbolCategory)
         {
             diagnosticBag.Add(CreateIncorrectSymbolCategoryError(
                 srcLocation,

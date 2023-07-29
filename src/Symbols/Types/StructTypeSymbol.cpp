@@ -38,12 +38,12 @@ namespace Ace
         return m_Name;
     }
 
-    auto StructTypeSymbol::GetSymbolKind() const -> SymbolKind
+    auto StructTypeSymbol::GetKind() const -> SymbolKind
     {
         return SymbolKind::Struct;
     }
 
-    auto StructTypeSymbol::GetSymbolCategory() const -> SymbolCategory
+    auto StructTypeSymbol::GetCategory() const -> SymbolCategory
     {
         return SymbolCategory::Static;
     }

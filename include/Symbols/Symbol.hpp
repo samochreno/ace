@@ -23,8 +23,8 @@ namespace Ace
         virtual auto GetCompilation() const -> const Compilation* final;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetName() const -> const Ident& = 0;
-        virtual auto GetSymbolKind() const -> SymbolKind = 0;
-        virtual auto GetSymbolCategory() const -> SymbolCategory = 0;
+        virtual auto GetKind() const -> SymbolKind = 0;
+        virtual auto GetCategory() const -> SymbolCategory = 0;
         virtual auto GetAccessModifier() const -> AccessModifier = 0;
 
         virtual auto CreatePartialSignature() const -> std::string final;
