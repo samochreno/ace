@@ -1088,7 +1088,7 @@ namespace Ace
 
             if (IsCommentBegin(lexer))
             {
-                DiscardComment(lexer);
+                diagnosticBag.Add(DiscardComment(lexer));
                 continue;
             }
 
