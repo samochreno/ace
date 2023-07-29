@@ -28,10 +28,10 @@ namespace Ace
     };
 
     template<typename T>
-    class Expected;
+    class [[nodiscard]] Expected;
 
     template<>
-    class Expected<void> : public IDiagnosed
+    class [[nodiscard]] Expected<void> : public IDiagnosed
     {
     public:
         Expected() = default;
@@ -109,7 +109,7 @@ namespace Ace
     };
 
     template<typename T>
-    class Expected : public IDiagnosed
+    class [[nodiscard]] Expected : public IDiagnosed
     {
     public:
         Expected()

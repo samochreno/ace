@@ -10,10 +10,10 @@
 namespace Ace
 {
     template<typename TValue>
-    class Diagnosed;
+    class [[nodiscard]] Diagnosed;
 
     template<>
-    class Diagnosed<void> : public IDiagnosed
+    class [[nodiscard]] Diagnosed<void> : public IDiagnosed
     {
     public:
         Diagnosed() = default;
@@ -33,7 +33,7 @@ namespace Ace
     };
 
     template<typename TValue>
-    class Diagnosed : public IDiagnosed
+    class [[nodiscard]] Diagnosed : public IDiagnosed
     {
     public:
         Diagnosed(
