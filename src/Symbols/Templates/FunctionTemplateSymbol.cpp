@@ -84,19 +84,21 @@ namespace Ace
     auto FunctionTemplateSymbol::InstantiateSymbols(
         const std::vector<ITypeSymbol*>& implArgs,
         const std::vector<ITypeSymbol*>& args
-    ) -> Expected<TemplateSymbolsInstantationResult>
+    ) -> Diagnosed<TemplateSymbolsInstantationResult>
     {
+        DiagnosticBag diagnosticBag{};
+
         const auto implParamNames = m_TemplateNode->CollectImplParamNames();
         const auto paramNames = m_TemplateNode->CollectParamNames();
 
-        ACE_TRY_ASSERT(implArgs.size() == implParamNames.size());
-        ACE_TRY_ASSERT(args.size() == paramNames.size());
+        ACE_ASSERT(implArgs.size() == implParamNames.size());
+        ACE_ASSERT(args.size() == paramNames.size());
 
         const auto ast = m_TemplateNode->GetAST()->CloneInScope(
             m_TemplateNode->GetScope()
         );
 
-        ACE_TRY_VOID(ast->GetSelfScope()->DefineTemplateArgAliases(
+        diagnosticBag.Add(ast->GetSelfScope()->DefineTemplateArgAliases(
             implParamNames,
             implArgs,
             paramNames,
@@ -105,18 +107,29 @@ namespace Ace
 
         const auto nodes = Application::GetAllNodes(ast);
 
-        ACE_TRY_VOID(Application::CreateAndDefineSymbols(GetCompilation(), nodes));
-        ACE_TRY_VOID(Application::DefineAssociations(GetCompilation(), nodes));
+        diagnosticBag.Add(Application::CreateAndDefineSymbols(
+            GetCompilation(),
+            nodes
+        ));
+
+        diagnosticBag.Add(Application::DefineAssociations(
+            GetCompilation(),
+            nodes
+        ));
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            GetCompilation(),
+            SrcLocation{},
             this,
             std::nullopt,
             implArgs,
             args
         ).Unwrap();
 
-        return TemplateSymbolsInstantationResult{ symbol, ast };
+        return Diagnosed
+        {
+            TemplateSymbolsInstantationResult{ symbol, ast },
+            diagnosticBag,
+        };
     }
 
     auto FunctionTemplateSymbol::InstantiateSemanticsForSymbols(

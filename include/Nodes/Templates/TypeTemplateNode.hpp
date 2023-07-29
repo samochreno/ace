@@ -36,7 +36,7 @@ namespace Ace
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCreationSuborder() const -> size_t final;
-        auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
+        auto CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>> final;
 
         auto CollectImplParamNames() const -> std::vector<Ident> final;
         auto CollectParamNames()     const -> std::vector<Ident> final;

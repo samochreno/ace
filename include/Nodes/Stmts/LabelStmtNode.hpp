@@ -42,7 +42,7 @@ namespace Ace
         auto GetSymbolScope() const -> std::shared_ptr<Scope>;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCreationSuborder() const -> size_t final;
-        auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
+        auto CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>> final;
 
         auto GetName() const -> const Ident&;
 

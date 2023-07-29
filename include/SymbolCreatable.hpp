@@ -18,7 +18,7 @@ namespace Ace
         virtual auto GetSymbolScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetSymbolKind() const -> SymbolKind = 0;
         virtual auto GetSymbolCreationSuborder() const -> size_t = 0;
-        virtual auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> = 0;
+        virtual auto CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>> = 0;
     };
 
     class IPartiallySymbolCreatable : public virtual ISymbolCreatable
@@ -29,6 +29,6 @@ namespace Ace
         virtual auto GetName() const -> const Ident& = 0;
         virtual auto ContinueCreatingSymbol(
             ISymbol* const symbol
-        ) const -> Expected<void> = 0;
+        ) const -> Diagnosed<void> = 0;
     };
 }

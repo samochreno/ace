@@ -22,6 +22,8 @@ namespace llvm
 
 namespace Ace
 {
+    class ITypeSymbol;
+
     struct Compilation
     {
         static auto Parse(
@@ -38,5 +40,6 @@ namespace Ace
         std::unique_ptr<TemplateInstantiator> TemplateInstantiator{};
         std::unique_ptr<llvm::LLVMContext> LLVMContext{};
         std::unique_ptr<GlobalDiagnosticBag> GlobalDiagnosticBag{};
+        ITypeSymbol* ErrorTypeSymbol{};
     };
 }

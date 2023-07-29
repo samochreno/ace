@@ -1,4 +1,4 @@
-#include "Nodes/TemplatedImplNode.hpp"
+#include "Nodes/Impls/NormalImplNode.hpp"
 
 #include <memory>
 #include <vector>
@@ -16,31 +16,30 @@
 
 namespace Ace
 {
-    TemplatedImplNode::TemplatedImplNode(
+    NormalImplNode::NormalImplNode(
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& selfScope,
-        const SymbolName& typeTemplateName,
+        const SymbolName& typeName,
         const std::vector<std::shared_ptr<const FunctionNode>>& functions,
         const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates
-    ) : m_SrcLocation{ srcLocation },
-        m_SelfScope{ selfScope },
-        m_TypeTemplateName{ typeTemplateName },
+    ) : m_SelfScope{ selfScope },
+        m_TypeName{ typeName },
         m_Functions{ functions },
         m_FunctionTemplates{ functionTemplates }
     {
     }
 
-    auto TemplatedImplNode::GetSrcLocation() const -> const SrcLocation&
+    auto NormalImplNode::GetSrcLocation() const -> const SrcLocation&
     {
         return m_SrcLocation;
     }
 
-    auto TemplatedImplNode::GetScope() const -> std::shared_ptr<Scope>
+    auto NormalImplNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_SelfScope->GetParent().value();
     }
 
-    auto TemplatedImplNode::GetChildren() const -> std::vector<const INode*>
+    auto NormalImplNode::GetChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 
@@ -50,9 +49,9 @@ namespace Ace
         return children;
     }
 
-    auto TemplatedImplNode::CloneInScope(
+    auto NormalImplNode::CloneInScope(
         const std::shared_ptr<Scope>& scope
-    ) const -> std::shared_ptr<const TemplatedImplNode>
+    ) const -> std::shared_ptr<const NormalImplNode>
     {
         const auto selfScope = scope->GetOrCreateChild({});
 
@@ -78,16 +77,16 @@ namespace Ace
             }
         );
 
-        return std::make_shared<const TemplatedImplNode>(
+        return std::make_shared<const NormalImplNode>(
             m_SrcLocation,
             selfScope,
-            m_TypeTemplateName,
+            m_TypeName,
             clonedFunctions,
             clonedFunctionTemplates
         );
     }
 
-    auto TemplatedImplNode::CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>>
+    auto NormalImplNode::CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>>
     {
         ACE_TRY(boundFunctions, TransformExpectedVector(m_Functions,
         [](const std::shared_ptr<const FunctionNode>& function)
@@ -102,10 +101,22 @@ namespace Ace
         );
     }
 
-    auto TemplatedImplNode::DefineAssociations() const -> Expected<void>
-    { 
-        ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(m_TypeTemplateName));
-        templateSymbol->GetSelfScope()->DefineAssociation(m_SelfScope);
-        return Void{};
+    auto NormalImplNode::DefineAssociations() const -> Expected<void>
+    {
+        DiagnosticBag diagnosticBag{};
+
+        ACE_ASSERT(m_TypeName.Sections.back().TemplateArgs.empty());
+
+        const auto expTypeSymbol = GetScope()->ResolveStaticSymbol<ITypeSymbol>(
+            m_TypeName
+        );
+        diagnosticBag.Add(expTypeSymbol);
+        if (!expTypeSymbol)
+        {
+            return diagnosticBag;
+        }
+
+        expTypeSymbol.Unwrap()->GetSelfScope()->DefineAssociation(m_SelfScope);
+        return Void{ diagnosticBag };
     }
 }

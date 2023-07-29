@@ -13,11 +13,11 @@ namespace Ace::Application
     auto CreateAndDefineSymbols(
         const Compilation* const compilation,
         const std::vector<const INode*>& nodes
-    ) -> Expected<void>;
+    ) -> Diagnosed<void>;
     auto DefineAssociations(
         const Compilation* const compilation,
         const std::vector<const INode*>& nodes
-    ) -> Expected<void>;
+    ) -> Diagnosed<void>;
     auto ValidateControlFlow(
         const Compilation* const compilation,
         const std::vector<const IBoundNode*>& nodes

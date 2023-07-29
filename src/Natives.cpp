@@ -5,8 +5,9 @@
 #include <algorithm>
 
 #include "Diagnostic.hpp"
-#include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/ErrorTypeSymbol.hpp"
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "Emittable.hpp"

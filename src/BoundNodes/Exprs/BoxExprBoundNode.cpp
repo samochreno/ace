@@ -48,7 +48,7 @@ namespace Ace
     ) const -> Expected<MaybeChanged<std::shared_ptr<const BoxExprBoundNode>>> 
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            GetCompilation(),
+            SrcLocation{},
             GetCompilation()->Natives->StrongPtr__new.GetSymbol(),
             std::nullopt,
             { m_Expr->GetTypeInfo().Symbol->GetWithoutRef() },
@@ -93,7 +93,7 @@ namespace Ace
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            GetCompilation(),
+            SrcLocation{},
             GetCompilation()->Natives->StrongPtr__new.GetSymbol(),
             std::nullopt,
             { mchLoweredExpr.Value->GetTypeInfo().Symbol->GetWithoutRef() },

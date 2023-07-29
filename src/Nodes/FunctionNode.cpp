@@ -200,23 +200,29 @@ namespace Ace
         return 0;
     }
 
-    auto FunctionNode::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
+    auto FunctionNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<ITypeSymbol>(
-            m_TypeName.ToSymbolName(GetCompilation())
-        ));
+        DiagnosticBag diagnosticBag{};
 
-        return std::unique_ptr<ISymbol>
+        const auto symbolCategory = m_OptSelf.has_value() ?
+            SymbolCategory::Instance :
+            SymbolCategory::Static;
+
+        const auto expTypeSymbol = m_SelfScope->ResolveStaticSymbol<ITypeSymbol>(
+            m_TypeName.ToSymbolName(GetCompilation())
+        );
+        diagnosticBag.Add(expTypeSymbol);
+
+        return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<FunctionSymbol>(
                 m_SelfScope,
                 m_Name,
-                m_OptSelf.has_value() ?
-                    SymbolCategory::Instance :
-                    SymbolCategory::Static,
+                symbolCategory,
                 m_AccessModifier,
-                typeSymbol
-            )
+                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorTypeSymbol)
+            ),
+            diagnosticBag,
         };
     }
     

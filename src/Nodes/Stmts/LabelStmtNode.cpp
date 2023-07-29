@@ -88,14 +88,15 @@ namespace Ace
         return 0;
     }
 
-    auto LabelStmtNode::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
+    auto LabelStmtNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        return std::unique_ptr<ISymbol>
+        return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<LabelSymbol>(
                 m_Scope, 
                 m_Name
-            )
+            ),
+            DiagnosticBag{},
         };
     }
 

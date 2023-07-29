@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Nodes/Node.hpp"
+#include "Nodes/Impls/ImplNode.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "BoundNodes/ImplBoundNode.hpp"
@@ -17,6 +18,7 @@ namespace Ace
 {
     class TemplatedImplNode :
         public virtual INode,
+        public virtual IImplNode,
         public virtual ICloneableNode<TemplatedImplNode>,
         public virtual IBindableNode<ImplBoundNode>
     {
@@ -38,7 +40,7 @@ namespace Ace
         ) const -> std::shared_ptr<const TemplatedImplNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>> final;
 
-        auto DefineAssociations() const -> Expected<void>;
+        auto DefineAssociations() const -> Expected<void> final;
 
     private:
         SrcLocation m_SrcLocation{};

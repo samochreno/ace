@@ -7,8 +7,8 @@
 #include "Nodes/Node.hpp"
 #include "Nodes/Types/TypeNode.hpp"
 #include "Nodes/Templates/TypeTemplateNode.hpp"
-#include "Nodes/ImplNode.hpp"
-#include "Nodes/TemplatedImplNode.hpp"
+#include "Nodes/Impls/NormalImplNode.hpp"
+#include "Nodes/Impls/TemplatedImplNode.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "Nodes/Vars/StaticVarNode.hpp"
@@ -38,7 +38,7 @@ namespace Ace
             const std::vector<std::shared_ptr<const ModuleNode>>& modules,
             const std::vector<std::shared_ptr<const ITypeNode>>& types,
             const std::vector<std::shared_ptr<const TypeTemplateNode>>& typeTemplates,
-            const std::vector<std::shared_ptr<const ImplNode>>& impls,
+            const std::vector<std::shared_ptr<const NormalImplNode>>& normalImpls,
             const std::vector<std::shared_ptr<const TemplatedImplNode>>& templatedImpls,
             const std::vector<std::shared_ptr<const FunctionNode>>& functions,
             const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates,
@@ -57,10 +57,10 @@ namespace Ace
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCreationSuborder() const -> size_t final;
-        auto CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>> final;
+        auto CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>> final;
         auto ContinueCreatingSymbol(
             ISymbol* const symbol
-        ) const -> Expected<void> final;
+        ) const -> Diagnosed<void> final;
         auto GetName() const -> const Ident& final;
 
     private:
@@ -72,7 +72,7 @@ namespace Ace
         std::vector<std::shared_ptr<const ModuleNode>> m_Modules{};
         std::vector<std::shared_ptr<const ITypeNode>> m_Types{};
         std::vector<std::shared_ptr<const TypeTemplateNode>> m_TypeTemplates{};
-        std::vector<std::shared_ptr<const ImplNode>> m_Impls{};
+        std::vector<std::shared_ptr<const NormalImplNode>> m_NormalImpls{};
         std::vector<std::shared_ptr<const TemplatedImplNode>> m_TemplatedImpls{};
         std::vector<std::shared_ptr<const FunctionNode>> m_Functions{};
         std::vector<std::shared_ptr<const FunctionTemplateNode>> m_FunctionTemplates{};

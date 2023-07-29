@@ -172,7 +172,10 @@ namespace Ace
                 }
             );
 
-            (rbegin(nameSections) + 1)->TemplateArgs = implTemplateArgNames;
+            if (!implTemplateArgNames.empty())
+            {
+                (rbegin(nameSections) + 1)->TemplateArgs = implTemplateArgNames;
+            }
 
             const auto templateArgs = templatableSymbol->CollectTemplateArgs();
             std::vector<SymbolName> templateArgNames{};
@@ -188,7 +191,10 @@ namespace Ace
                 }
             );
 
-            rbegin(nameSections)->TemplateArgs = templateArgNames;
+            if (!templateArgNames.empty())
+            {
+                rbegin(nameSections)->TemplateArgs = templateArgNames;
+            }
         }
 
         return SymbolName

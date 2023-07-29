@@ -63,14 +63,15 @@ namespace Ace
         return 0;
     }
 
-    auto ImplTemplateParamNode::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
+    auto ImplTemplateParamNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        return std::unique_ptr<ISymbol>
+        return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<ImplTemplateParamTypeSymbol>(
                 m_Scope,
                 m_Name
-            )
+            ),
+            DiagnosticBag{},
         };
     }
 

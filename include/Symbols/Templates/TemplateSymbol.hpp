@@ -36,7 +36,7 @@ namespace Ace
         virtual auto InstantiateSymbols(
             const std::vector<ITypeSymbol*>& implArgs,
             const std::vector<ITypeSymbol*>& args
-        ) -> Expected<TemplateSymbolsInstantationResult> = 0;
+        ) -> Diagnosed<TemplateSymbolsInstantationResult> = 0;
         virtual auto InstantiateSemanticsForSymbols(
             const std::shared_ptr<const INode>& ast
         ) -> void = 0;

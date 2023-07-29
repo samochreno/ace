@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Nodes/Node.hpp"
+#include "Nodes/Impls/ImplNode.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "BoundNodes/ImplBoundNode.hpp"
@@ -14,30 +15,31 @@
 
 namespace Ace
 {
-    class ImplNode :
+    class NormalImplNode :
         public virtual INode,
-        public virtual ICloneableNode<ImplNode>,
+        public virtual IImplNode,
+        public virtual ICloneableNode<NormalImplNode>,
         public virtual IBindableNode<ImplBoundNode>
     {
     public:
-        ImplNode(
+        NormalImplNode(
             const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& selfScope,
             const SymbolName& typeName,
             const std::vector<std::shared_ptr<const FunctionNode>>& functions,
             const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates
         );
-        virtual ~ImplNode() = default;
+        virtual ~NormalImplNode() = default;
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
             const std::shared_ptr<Scope>& scope
-        ) const -> std::shared_ptr<const ImplNode> final;
+        ) const -> std::shared_ptr<const NormalImplNode> final;
         auto CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>> final;
 
-        auto DefineAssociations() const -> Expected<void>;
+        auto DefineAssociations() const -> Expected<void> final;
 
     private:
         SrcLocation m_SrcLocation{};

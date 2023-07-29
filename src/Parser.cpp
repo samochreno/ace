@@ -4160,7 +4160,7 @@ namespace Ace
     static auto ParseImpl(
         Parser& parser,
         const std::shared_ptr<Scope>& scope
-    ) -> Expected<std::shared_ptr<const ImplNode>>
+    ) -> Expected<std::shared_ptr<const NormalImplNode>>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -4288,7 +4288,7 @@ namespace Ace
 
         return Expected
         {
-            std::make_shared<const ImplNode>(
+            std::make_shared<const NormalImplNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 selfScope,
                 expTypeName.Unwrap(),
@@ -5442,7 +5442,7 @@ namespace Ace
         std::vector<std::shared_ptr<const ModuleNode>> modules{};
         std::vector<std::shared_ptr<const ITypeNode>> types{};
         std::vector<std::shared_ptr<const TypeTemplateNode>> typeTemplates{};
-        std::vector<std::shared_ptr<const ImplNode>> impls{};
+        std::vector<std::shared_ptr<const NormalImplNode>> normalImpls{};
         std::vector<std::shared_ptr<const TemplatedImplNode>> templatedImpls{};
         std::vector<std::shared_ptr<const FunctionNode>> functions{};
         std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
@@ -5496,7 +5496,7 @@ namespace Ace
                 diagnosticBag.Add(expImpl);
                 if (expImpl)
                 {
-                    impls.push_back(expImpl.Unwrap());
+                    normalImpls.push_back(expImpl.Unwrap());
                     continue;
                 }
             }
@@ -5582,7 +5582,7 @@ namespace Ace
                 modules,
                 types,
                 typeTemplates,
-                impls,
+                normalImpls,
                 templatedImpls,
                 functions,
                 functionTemplates,

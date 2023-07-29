@@ -3,14 +3,22 @@
 ## 🛠️ Refactor
 
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
+- Rename `ISymbol::GetSymbolKind` &rarr; `ISymbol::GetKind`, `ISymbol::GetSymbolCategory` &rarr; `ISymbol::GetCategory`
+- Figure out where to use the `opt` prefix and where not
+- String interning and maybe put `Token`s on the stack
 
 ## 💥 High Priority
 
+- Make it so defining two associated functions with a same name causes a symbol redefinition error
+- Fix `$op_noequals` &rarr; `$op_not_equals`
+- Remove TODO comments
+- Add [[nodiscard]] to `Expected` and `Diagnosed`
 - Error messages to make debugging easier
 - Implement special fast lookup for native types
-- Figure out where to use the `opt` prefix and where not
 - Give template symbols shared ownership of the nodes
-- String interning and maybe put `Token`s on the stack
+
+## 🔔 Medium Priority
+
 - `*self`
 - Traits:
   - Parsing
@@ -23,37 +31,13 @@
   - After compilation, do semantic analysis on templates that have never been instantiated
   - ❓ Create unique signatures for template instances
   - Default template arguments
+  - Specialization
 - Conversion operators with traits:
   - Change `__deref_as[T](...)` to take any type convertible to `std::Pointer` and remove `std::Reference[T]::ptr(...)`
 - Strings
 - Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; This could maybe be fixed by forcing the copy trait to also implement default trait)
 - Lifetime trait: default, copy, drop
 - Check if there is any better way to not use external programs like `llc` and `clang`
-
-## 🔔 Medium Priority
-
-- Rewrite Package.json to package.ace:
-  ```rs
-  import std::build;
-
-  package(): std::Package {
-      ret new std::Package {
-          name: "ace",
-          path_macros: [
-              new std::PathMacro {
-                  name: "$project_path",
-                  value: "/home/samo/repos/ace/ace/src/",
-              },
-          ],
-          file_paths: [
-              "$project_path/**.ace",
-          ],
-          dependency_file_paths: [
-              "$project_path/**.dll"
-          ],
-      };
-  }
-  ```
 - Check out LLVM attributes
 - Struct update constructor syntax
 - Mutability/Immutability:
@@ -62,7 +46,6 @@
 - Struct construction syntax:
   - New syntax for struct construction. The current `new Struct { ... }` and `Struct::new(...)` are too similiar
   - Struct update constructor syntax
-- Full and partial template specialization
 - Associated variables
 -  Remove duplicate module filepaths: `./dawg/../dawg/` is the same as `./dawg/`
 - Operator verification:
@@ -89,6 +72,28 @@
 - Enums
 - Figure out how to share globals between dlls
 - ❓ Remove local variable shadowing, it causes more mistakes than usefulness
+- Rewrite Package.json to package.ace:
+  ```rs
+  import std::build;
+
+  package(): std::Package {
+      ret new std::Package {
+          name: "ace",
+          path_macros: [
+              new std::PathMacro {
+                  name: "$project_path",
+                  value: "/home/samo/repos/ace/ace/src/",
+              },
+          ],
+          file_paths: [
+              "$project_path/**.ace",
+          ],
+          dependency_file_paths: [
+              "$project_path/**.dll"
+          ],
+      };
+  }
+  ```
 
 ## 💡 Ideas
 

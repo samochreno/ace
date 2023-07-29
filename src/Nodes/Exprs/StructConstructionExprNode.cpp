@@ -135,7 +135,12 @@ namespace Ace
                 )->CreateBoundExpr();
             }()));
 
-            ACE_TRY_ASSERT(IsSymbolVisibleFromScope(varSymbol, m_Scope));
+            // TODO: Add to diagnosticBag
+            DiagnoseSymbolNotVisible(
+                arg.Name.SrcLocation,
+                varSymbol,
+                m_Scope
+            );
 
             return StructConstructionExprBoundArg
             {

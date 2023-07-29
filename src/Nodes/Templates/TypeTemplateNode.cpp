@@ -79,11 +79,12 @@ namespace Ace
         return 0;
     }
 
-    auto TypeTemplateNode::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
+    auto TypeTemplateNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        return std::unique_ptr<ISymbol>
+        return Diagnosed<std::unique_ptr<ISymbol>>
         {
-            std::make_unique<TypeTemplateSymbol>(this)
+            std::make_unique<TypeTemplateSymbol>(this),
+            DiagnosticBag{},
         };
     }
 

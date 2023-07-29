@@ -85,19 +85,23 @@ namespace Ace
         return 0;
     }
 
-    auto SelfParamVarNode::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
+    auto SelfParamVarNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<ITypeSymbol>(
-            m_TypeName.ToSymbolName(GetCompilation())
-        ));
+        DiagnosticBag diagnosticBag{};
 
-        return std::unique_ptr<ISymbol>
+        const auto expTypeSymbol = m_Scope->ResolveStaticSymbol<ITypeSymbol>(
+            m_TypeName.ToSymbolName(GetCompilation())
+        );
+        diagnosticBag.Add(expTypeSymbol);
+
+        return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<SelfParamVarSymbol>(
                 m_SrcLocation,
                 m_Scope,
-                typeSymbol
-            )
+                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorTypeSymbol)
+            ),
+            diagnosticBag,
         };
     }
 }

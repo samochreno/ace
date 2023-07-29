@@ -57,7 +57,7 @@ namespace Ace
         auto* const compilation = scope->GetCompilation();
 
         return dynamic_cast<FunctionSymbol*>(Scope::ResolveOrInstantiateTemplateInstance(
-            compilation,
+            SrcLocation{},
             compilation->Natives->WeakPtr__from.GetSymbol(),
             std::nullopt,
             { fromType->GetWithoutStrongPtr()->GetWithoutRef() },

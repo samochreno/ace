@@ -113,32 +113,31 @@ namespace Ace::Application
             return false;
         });
 
-        ACE_TRY_VOID(TransformExpectedVector(symbolCreatableNodes,
-        [](const ISymbolCreatableNode* const symbolCreatableNode) -> Expected<void>
+        std::for_each(begin(symbolCreatableNodes), end(symbolCreatableNodes),
+        [&](const ISymbolCreatableNode* const symbolCreatableNode)
         {
-            ACE_TRY(symbol, Scope::DefineSymbol(symbolCreatableNode));
-            return Void{};
-        }));
+            diagnosticBag.Add(Scope::DefineSymbol(symbolCreatableNode));
+        });
 
-        return Void{};
+        return Diagnosed<void>{ diagnosticBag };
     }
 
     auto DefineAssociations(
         const Compilation* const compilation,
         const std::vector<const INode*>& nodes
-    ) -> Expected<void>
+    ) -> Diagnosed<void>
     {
-        const auto implNodes = DynamicCastFilter<const ImplNode*>(nodes);
+        DiagnosticBag diagnosticBag{};
 
-        const auto didCreateAssociations = TransformExpectedVector(implNodes,
-        [](const ImplNode* const implNode) -> Expected<void>
+        const auto implNodes = DynamicCastFilter<const IImplNode*>(nodes);
+
+        std::for_each(begin(implNodes), end(implNodes),
+        [&](const IImplNode* const implNode)
         {
-            ACE_TRY_VOID(implNode->DefineAssociations());
-            return Void{};
+            diagnosticBag.Add(implNode->DefineAssociations());
         });
-        ACE_TRY_ASSERT(didCreateAssociations);
 
-        return Void{};
+        return Diagnosed<void>{ diagnosticBag };
     }
 
     auto ValidateControlFlow(
@@ -273,14 +272,27 @@ namespace Ace::Application
 
         const auto timeSymbolCreationBegin = now();
 
-        ACE_TRY_VOID(CreateAndDefineSymbols(compilation, nodes));
-        ACE_TRY_VOID(DefineAssociations(compilation, nodes));
+        const auto dgnCreateAndDefineSymbols = CreateAndDefineSymbols(
+            compilation,
+            nodes
+        );
+        compilation->GlobalDiagnosticBag->Add(dgnCreateAndDefineSymbols);
+        diagnosticBag.Add(dgnCreateAndDefineSymbols);
+
+        const auto dgnDefineAssociations = DefineAssociations(
+            compilation,
+            nodes
+        );
+        compilation->GlobalDiagnosticBag->Add(dgnDefineAssociations);
+        diagnosticBag.Add(dgnDefineAssociations);
 
         const auto timeSymbolCreationEnd = now();
 
         const auto templateSymbols = globalScope->CollectSymbolsRecursive<ITemplateSymbol>();
         compilation->TemplateInstantiator->SetSymbols(templateSymbols);
-        ACE_TRY_VOID(compilation->TemplateInstantiator->InstantiatePlaceholderSymbols());
+        diagnosticBag.Add(
+            compilation->TemplateInstantiator->InstantiatePlaceholderSymbols()
+        );
 
         const auto timeBindingAndVerificationBegin = now();
 
@@ -291,7 +303,6 @@ namespace Ace::Application
         [&](const std::shared_ptr<const ModuleNode>& ast)
         {
             const auto expBoundAST = CreateBoundTransformedAndVerifiedAST(
-                compilation,
                 ast,
                 [](const std::shared_ptr<const ModuleNode>& ast)
                 {
@@ -317,6 +328,11 @@ namespace Ace::Application
         });
 
         compilation->TemplateInstantiator->InstantiateSemanticsForSymbols();
+
+        if (diagnosticBag.HasErrors())
+        {
+            return diagnosticBag;
+        }
 
         GlueGeneration::GenerateAndBindGlue(compilation);
 

@@ -25,10 +25,12 @@ namespace Ace
         m_Symbols = symbols;
     }
 
-    auto TemplateInstantiator::InstantiatePlaceholderSymbols() -> Expected<void>
+    auto TemplateInstantiator::InstantiatePlaceholderSymbols() -> Diagnosed<void>
     {
-        return TransformExpectedVector(m_Symbols,
-        [&](ITemplateSymbol* const symbol) -> Expected<void>
+        DiagnosticBag diagnosticBag{};
+
+        std::for_each(begin(m_Symbols), end(m_Symbols),
+        [&](ITemplateSymbol* const symbol)
         {
             const auto implParams = symbol->CollectImplParams();
             std::vector<ITypeSymbol*> upcastedImplParams
@@ -44,15 +46,16 @@ namespace Ace
                 end  (params),
             };
 
-            ACE_TRY(placeholderSymbol, InstantiateSymbols(
+            const auto dgnPlaceholderSymbol = InstantiateSymbols(
                 symbol,
                 upcastedImplParams,
                 upcastedParams
-            ));
-            symbol->SetPlaceholderSymbol(placeholderSymbol);
-
-            return Void{};
+            );
+            diagnosticBag.Add(dgnPlaceholderSymbol);
+            symbol->SetPlaceholderSymbol(dgnPlaceholderSymbol.Unwrap());
         });
+
+        return Diagnosed<void>{ diagnosticBag };
     }
 
     static auto IsArgPlaceholder(
@@ -122,12 +125,15 @@ namespace Ace
         ITemplateSymbol* const t3mplate,
         const std::vector<ITypeSymbol*>& implArgs,
         const std::vector<ITypeSymbol*>& args
-    ) -> Expected<ISymbol*>
+    ) -> Diagnosed<ISymbol*>
     {
-        ACE_TRY(symbolsInstantiationResult, t3mplate->InstantiateSymbols(
+        DiagnosticBag diagnosticBag{};
+
+        const auto dgnSymbolsInstantiationResult = t3mplate->InstantiateSymbols(
             implArgs,
             args
-        ));
+        );
+        diagnosticBag.Add(dgnSymbolsInstantiationResult);
 
         const bool areArgsPlaceholders = AreArgsPlaceholders(
             implArgs,
@@ -136,11 +142,15 @@ namespace Ace
         if (!areArgsPlaceholders)
         {
             m_SymbolOnlyInstantiatedASTsMap[t3mplate].push_back(
-                symbolsInstantiationResult.AST
+                dgnSymbolsInstantiationResult.Unwrap().AST
             );
         }
         
-        return symbolsInstantiationResult.Symbol;
+        return Diagnosed
+        {
+            dgnSymbolsInstantiationResult.Unwrap().Symbol,
+            diagnosticBag,
+        };
     }
 
     auto TemplateInstantiator::InstantiateSemanticsForSymbols() -> void

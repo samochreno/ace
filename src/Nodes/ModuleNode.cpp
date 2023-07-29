@@ -10,12 +10,13 @@
 #include "AccessModifier.hpp"
 #include "Nodes/Types/TypeNode.hpp"
 #include "Nodes/Templates/TypeTemplateNode.hpp"
-#include "Nodes/ImplNode.hpp"
-#include "Nodes/TemplatedImplNode.hpp"
+#include "Nodes/Impls/NormalImplNode.hpp"
+#include "Nodes/Impls/TemplatedImplNode.hpp"
 #include "Nodes/FunctionNode.hpp"
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "Nodes/Vars/StaticVarNode.hpp"
 #include "Diagnostic.hpp"
+#include "Diagnostics/SymbolDiagnostics.hpp"
 #include "BoundNodes/ModuleBoundNode.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/ModuleSymbol.hpp"
@@ -31,7 +32,7 @@ namespace Ace
         const std::vector<std::shared_ptr<const ModuleNode>>& modules,
         const std::vector<std::shared_ptr<const ITypeNode>>& types,
         const std::vector<std::shared_ptr<const TypeTemplateNode>>& typeTemplates,
-        const std::vector<std::shared_ptr<const ImplNode>>& impls,
+        const std::vector<std::shared_ptr<const NormalImplNode>>& normalImpls,
         const std::vector<std::shared_ptr<const TemplatedImplNode>>& templatedImpls,
         const std::vector<std::shared_ptr<const FunctionNode>>& functions,
         const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates,
@@ -44,7 +45,7 @@ namespace Ace
         m_Modules{ modules },
         m_Types{ types },
         m_TypeTemplates{ typeTemplates },
-        m_Impls{ impls },
+        m_NormalImpls{ normalImpls },
         m_TemplatedImpls{ templatedImpls },
         m_Functions{ functions },
         m_FunctionTemplates{ functionTemplates },
@@ -69,7 +70,7 @@ namespace Ace
         AddChildren(children, m_Modules);
         AddChildren(children, m_Types);
         AddChildren(children, m_TypeTemplates);
-        AddChildren(children, m_Impls);
+        AddChildren(children, m_NormalImpls);
         AddChildren(children, m_TemplatedImpls);
         AddChildren(children, m_Functions);
         AddChildren(children, m_FunctionTemplates);
@@ -117,14 +118,14 @@ namespace Ace
             }
         );
 
-        std::vector<std::shared_ptr<const ImplNode>> clonedImpls{};
+        std::vector<std::shared_ptr<const NormalImplNode>> clonedNormalImpls{};
         std::transform(
-            begin(m_Impls),
-            end  (m_Impls),
-            back_inserter(clonedImpls),
-            [&](const std::shared_ptr<const ImplNode>& impl)
+            begin(m_NormalImpls),
+            end  (m_NormalImpls),
+            back_inserter(clonedNormalImpls),
+            [&](const std::shared_ptr<const NormalImplNode>& normalImpl)
             {
-                return impl->CloneInScope(selfScope);
+                return normalImpl->CloneInScope(selfScope);
             }
         );
 
@@ -181,7 +182,7 @@ namespace Ace
             clonedModules,
             clonedTypes,
             clonedTypeTemplates,
-            clonedImpls,
+            clonedNormalImpls,
             clonedTemplatedImpls,
             clonedFunctions,
             clonedFunctionTemplates,
@@ -203,10 +204,10 @@ namespace Ace
             return type->CreateBoundType();
         }));
 
-        ACE_TRY(boundImpls, TransformExpectedVector(m_Impls,
-        [](const std::shared_ptr<const ImplNode>& impl)
+        ACE_TRY(boundImpls, TransformExpectedVector(m_NormalImpls,
+        [](const std::shared_ptr<const NormalImplNode>& normalImpl)
         {
-            return impl->CreateBound();
+            return normalImpl->CreateBound();
         }));
 
         ACE_TRY(boundTemplateImpls, TransformExpectedVector(m_TemplatedImpls,
@@ -269,47 +270,44 @@ namespace Ace
         return m_SelfScope->GetNestLevel();
     }
 
-    auto ModuleNode::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
+    auto ModuleNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        if (m_Name.size() > 1)
-        {
-            std::shared_ptr<Scope> scope =
-                GetSymbolScope()->GetParent().value();
-
-            auto nameIt = rbegin(m_Name) + 1;
-
-            for (
-                ; 
-                nameIt != rend(m_Name); 
-                [&](){ scope = scope->GetParent().value(); nameIt++; }()
-                )
-            {
-                ACE_TRY(symbol, scope->ExclusiveResolveSymbol<ModuleSymbol>(
-                    *nameIt
-                ));
-            }
-        }
-
-        return std::unique_ptr<ISymbol>
+        return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<ModuleSymbol>(
                 m_SelfScope,
                 GetName(),
                 m_AccessModifier
-            )
+            ),
+            DiagnosticBag{},
         };
     }
 
     auto ModuleNode::ContinueCreatingSymbol(
         ISymbol* const symbol
-    ) const -> Expected<void>
+    ) const -> Diagnosed<void>
     {
+        DiagnosticBag diagnosticBag{};
+
         auto* const moduleSymbol = dynamic_cast<ModuleSymbol*>(symbol);
         ACE_ASSERT(moduleSymbol);
 
-        ACE_TRY_ASSERT(moduleSymbol->GetAccessModifier() == m_AccessModifier);
+        if (moduleSymbol->GetAccessModifier() != m_AccessModifier)
+        {
+            const SrcLocation nameSrcLocation
+            {
+                m_Name.begin()->SrcLocation,
+                m_Name.back().SrcLocation,
+            };
 
-        return Void{}; 
+            diagnosticBag.Add(CreateMismatchedAccessModifierError(
+                nameSrcLocation,
+                moduleSymbol,
+                m_AccessModifier
+            ));
+        }
+
+        return Diagnosed<void>{ diagnosticBag };
     }
 
     auto ModuleNode::GetName() const -> const Ident&

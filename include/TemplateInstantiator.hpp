@@ -22,13 +22,13 @@ namespace Ace
             const std::vector<ITemplateSymbol*>& symbols
         ) -> void;
 
-        auto InstantiatePlaceholderSymbols() -> Expected<void>;
+        auto InstantiatePlaceholderSymbols() -> Diagnosed<void>;
 
         auto InstantiateSymbols(
             ITemplateSymbol* const templateSymbol,
             const std::vector<ITypeSymbol*>& implArgs,
             const std::vector<ITypeSymbol*>& args
-        ) -> Expected<ISymbol*>;
+        ) -> Diagnosed<ISymbol*>;
         auto InstantiateSemanticsForSymbols() -> void;
 
     private:

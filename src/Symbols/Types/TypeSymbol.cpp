@@ -62,7 +62,7 @@ namespace Ace
         ACE_ASSERT(!IsRef());
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            GetCompilation(),
+            SrcLocation{},
             GetCompilation()->Natives->Ref.GetSymbol(),
             std::nullopt,
             {},
@@ -111,7 +111,7 @@ namespace Ace
     auto ITypeSymbol::GetWithStrongPtr() -> ITypeSymbol*
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            GetCompilation(),
+            SrcLocation{},
             GetCompilation()->Natives->StrongPtr.GetSymbol(),
             std::nullopt,
             {},
@@ -160,7 +160,7 @@ namespace Ace
     auto ITypeSymbol::GetWithWeakPtr() -> ITypeSymbol*
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            GetCompilation(),
+            SrcLocation{},
             GetCompilation()->Natives->WeakPtr.GetSymbol(),
             std::nullopt,
             {},

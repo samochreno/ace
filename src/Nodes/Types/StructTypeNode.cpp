@@ -159,15 +159,16 @@ namespace Ace
         return 0;
     }
 
-    auto StructTypeNode::CreateSymbol() const -> Expected<std::unique_ptr<ISymbol>>
+    auto StructTypeNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        return std::unique_ptr<ISymbol>
+        return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<StructTypeSymbol>(
                 m_SelfScope,
                 m_Name,
                 m_AccessModifier
-            )
+            ),
+            DiagnosticBag{},
         };
     }
 }

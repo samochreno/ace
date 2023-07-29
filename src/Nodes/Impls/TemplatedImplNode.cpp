@@ -1,4 +1,4 @@
-#include "Nodes/ImplNode.hpp"
+#include "Nodes/Impls/TemplatedImplNode.hpp"
 
 #include <memory>
 #include <vector>
@@ -16,30 +16,31 @@
 
 namespace Ace
 {
-    ImplNode::ImplNode(
+    TemplatedImplNode::TemplatedImplNode(
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& selfScope,
-        const SymbolName& typeName,
+        const SymbolName& typeTemplateName,
         const std::vector<std::shared_ptr<const FunctionNode>>& functions,
         const std::vector<std::shared_ptr<const FunctionTemplateNode>>& functionTemplates
-    ) : m_SelfScope{ selfScope },
-        m_TypeName{ typeName },
+    ) : m_SrcLocation{ srcLocation },
+        m_SelfScope{ selfScope },
+        m_TypeTemplateName{ typeTemplateName },
         m_Functions{ functions },
         m_FunctionTemplates{ functionTemplates }
     {
     }
 
-    auto ImplNode::GetSrcLocation() const -> const SrcLocation&
+    auto TemplatedImplNode::GetSrcLocation() const -> const SrcLocation&
     {
         return m_SrcLocation;
     }
 
-    auto ImplNode::GetScope() const -> std::shared_ptr<Scope>
+    auto TemplatedImplNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_SelfScope->GetParent().value();
     }
 
-    auto ImplNode::GetChildren() const -> std::vector<const INode*>
+    auto TemplatedImplNode::GetChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 
@@ -49,9 +50,9 @@ namespace Ace
         return children;
     }
 
-    auto ImplNode::CloneInScope(
+    auto TemplatedImplNode::CloneInScope(
         const std::shared_ptr<Scope>& scope
-    ) const -> std::shared_ptr<const ImplNode>
+    ) const -> std::shared_ptr<const TemplatedImplNode>
     {
         const auto selfScope = scope->GetOrCreateChild({});
 
@@ -77,16 +78,16 @@ namespace Ace
             }
         );
 
-        return std::make_shared<const ImplNode>(
+        return std::make_shared<const TemplatedImplNode>(
             m_SrcLocation,
             selfScope,
-            m_TypeName,
+            m_TypeTemplateName,
             clonedFunctions,
             clonedFunctionTemplates
         );
     }
 
-    auto ImplNode::CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>>
+    auto TemplatedImplNode::CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>>
     {
         ACE_TRY(boundFunctions, TransformExpectedVector(m_Functions,
         [](const std::shared_ptr<const FunctionNode>& function)
@@ -101,31 +102,22 @@ namespace Ace
         );
     }
 
-    auto ImplNode::DefineAssociations() const -> Expected<void>
-    {
-        ACE_TRY(scope, [&]() -> Expected<std::shared_ptr<Scope>>
+    auto TemplatedImplNode::DefineAssociations() const -> Expected<void>
+    { 
+        DiagnosticBag diagnosticBag{};
+
+        const auto expTemplateSymbol = GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(
+            m_TypeTemplateName
+        );
+        diagnosticBag.Add(expTemplateSymbol);
+        if (!expTemplateSymbol)
         {
-            if (m_TypeName.Sections.back().TemplateArgs.empty())
-            {
-                ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<ITypeSymbol>(m_TypeName));
-                return typeSymbol->GetSelfScope();
-            }
-            else
-            {
-                auto typeName = m_TypeName;
+            return diagnosticBag;
+        }
 
-                auto& lastNameSection = typeName.Sections.back();
-                lastNameSection.TemplateArgs.clear();
-                lastNameSection.Name.String = SpecialIdent::CreateTemplate(
-                    lastNameSection.Name.String
-                );
-
-                ACE_TRY(templateSymbol, GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(typeName));
-                return templateSymbol->GetSelfScope();
-            }
-        }());
-
-        scope->DefineAssociation(m_SelfScope);
-        return Void{};
+        expTemplateSymbol.Unwrap()->GetSelfScope()->DefineAssociation(
+            m_SelfScope
+        );
+        return Void{ diagnosticBag };
     }
 }

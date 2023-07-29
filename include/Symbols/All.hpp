@@ -9,7 +9,6 @@
 #include "Symbols/Templates/TemplateSymbol.hpp"
 #include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
-#include "Symbols/TemplatedImplSymbol.hpp"
 #include "Symbols/Types/Aliases/AliasTypeSymbol.hpp"
 #include "Symbols/Types/Aliases/TemplateArgs/TemplateArgAliasTypeSymbol.hpp"
 #include "Symbols/Types/Aliases/TemplateArgs/ImplTemplateArgAliasTypeSymbol.hpp"

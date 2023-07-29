@@ -50,7 +50,7 @@ namespace Ace
         ACE_TRY_ASSERT(m_Expr->GetTypeInfo().Symbol->IsStrongPtr());
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            GetCompilation(),
+            SrcLocation{},
             GetCompilation()->Natives->StrongPtr__value.GetSymbol(),
             std::nullopt,
             { m_Expr->GetTypeInfo().Symbol->GetWithoutRef()->GetWithoutStrongPtr() },
@@ -95,7 +95,7 @@ namespace Ace
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            GetCompilation(),
+            SrcLocation{},
             GetCompilation()->Natives->StrongPtr__value.GetSymbol(),
             std::nullopt,
             { mchLoweredExpr.Value->GetTypeInfo().Symbol->GetWithoutRef()->GetWithoutStrongPtr() },
