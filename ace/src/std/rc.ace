@@ -107,11 +107,7 @@ std::rc: module -> pub {
             ret new StrongPtr[T] { internal_data };
         }
 
-        op copy(
-            self:  &StrongPtr[T],
-            other: &StrongPtr[T]
-        ): void -> pub
-        {
+        op copy(self: &StrongPtr[T], other: &StrongPtr[T]): void -> pub {
             set_value_ptr        (self, value_ptr(other));
             set_control_block_ptr(self, control_block_ptr(other));
 
@@ -147,11 +143,7 @@ std::rc: module -> pub {
             ret new WeakPtr[T] { control_block_ptr };
         }
  
-        op copy(
-            self:  &WeakPtr[T],
-            other: &WeakPtr[T]
-        ): void -> pub
-        {
+        op copy(self: &WeakPtr[T], other: &WeakPtr[T]): void -> pub {
             self.control_block_ptr = other.control_block_ptr;
 
             ControlBlock::increment_weak_count(self.control_block_ptr);
