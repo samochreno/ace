@@ -232,7 +232,9 @@ namespace Ace::Application
         return Void{};
     }
 
-    static auto Compile(const Compilation* const compilation) -> Expected<void>
+    static auto CompileCompilation(
+        const Compilation* const compilation
+    ) -> Expected<void>
     {
         DiagnosticBag diagnosticBag{};
 
@@ -406,7 +408,9 @@ namespace Ace::Application
         Log << expCompilation.Unwrap()->Package.Name << "\n";
         IndentLevel++;
 
-        const auto expDidCompile = Compile(expCompilation.Unwrap().get());
+        const auto expDidCompile = CompileCompilation(
+            expCompilation.Unwrap().get()
+        );
         diagnosticBag.Add(expDidCompile);
         if (!expDidCompile || diagnosticBag.HasErrors())
         {
