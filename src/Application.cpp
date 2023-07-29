@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <fstream>
 #include <chrono>
-#include <fmt/format.h>
 #include <llvm/Support/TargetSelect.h>
 
 #include "Log.hpp"
@@ -354,33 +353,33 @@ namespace Ace::Application
         
         const auto timeEnd = now();
 
-        const auto getFormattedDuration = [](std::chrono::nanoseconds duration) -> std::string
+        const auto createDurationString = [](std::chrono::nanoseconds duration) -> std::string
         {
             const auto minutes     = std::chrono::duration_cast<std::chrono::minutes>     (duration);
             const auto seconds     = std::chrono::duration_cast<std::chrono::seconds>     (duration -= minutes);
             const auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration -= seconds);
 
             std::string value{};
-
-            value += fmt::format("{:0>2}", minutes.count());
-            value += ":";
-            value += fmt::format("{:0>2}", seconds.count());
-            value += ".";
-            value += fmt::format("{:0>3}", miliseconds.count());
+            value += minutes.count();
+            value += "m ";
+            value += seconds.count();
+            value += "s ";
+            value += miliseconds.count();
+            value += "ms";
 
             return value;
         };
 
-        LogDebug << getFormattedDuration(timeEnd - timeBegin) + " - total\n";
-        LogDebug << getFormattedDuration(timeFrontendEnd - timeFrontendBegin) + " - frontend\n";
-        LogDebug << getFormattedDuration(timeParsingEnd - timeParsingBegin) + " - frontend | parsing\n";
-        LogDebug << getFormattedDuration(timeSymbolCreationEnd - timeSymbolCreationBegin) + " - frontend | symbol creation\n";
-        LogDebug << getFormattedDuration(timeBindingAndVerificationEnd - timeBindingAndVerificationBegin) + " - frontend | binding and verification\n";
-        LogDebug << getFormattedDuration(timeBackendEnd - timeBackendBegin) + " - backend\n";
-        LogDebug << getFormattedDuration(emitterResult.Durations.IREmitting) + " - backend | ir emitting\n";
-        LogDebug << getFormattedDuration(emitterResult.Durations.Analyses) + " - backend | analyses\n";
-        LogDebug << getFormattedDuration(emitterResult.Durations.LLC) + " - backend | llc\n";
-        LogDebug << getFormattedDuration(emitterResult.Durations.Clang) + " - backend | clang\n";
+        LogDebug << createDurationString(timeEnd - timeBegin) + " - total\n";
+        LogDebug << createDurationString(timeFrontendEnd - timeFrontendBegin) + " - frontend\n";
+        LogDebug << createDurationString(timeParsingEnd - timeParsingBegin) + " - frontend | parsing\n";
+        LogDebug << createDurationString(timeSymbolCreationEnd - timeSymbolCreationBegin) + " - frontend | symbol creation\n";
+        LogDebug << createDurationString(timeBindingAndVerificationEnd - timeBindingAndVerificationBegin) + " - frontend | binding and verification\n";
+        LogDebug << createDurationString(timeBackendEnd - timeBackendBegin) + " - backend\n";
+        LogDebug << createDurationString(emitterResult.Durations.IREmitting) + " - backend | ir emitting\n";
+        LogDebug << createDurationString(emitterResult.Durations.Analyses) + " - backend | analyses\n";
+        LogDebug << createDurationString(emitterResult.Durations.LLC) + " - backend | llc\n";
+        LogDebug << createDurationString(emitterResult.Durations.Clang) + " - backend | clang\n";
 
         return Void{ diagnosticBag };
     }

@@ -20,9 +20,6 @@ llvm_map_components_to_libnames(LLVM_LIBS
     native
 )
 
-find_package(fmt REQUIRED)
-message(STATUS "Found fmt ${FMT_VERSION}")
-
 find_package(termcolor REQUIRED)
 message(STATUS "Found termcolor")
 
@@ -32,9 +29,7 @@ target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 target_include_directories(${PROJECT_NAME}
     PUBLIC include
     PRIVATE ${LLVM_INCLUDE_DIRS}
-    PRIVATE ${FMT_INC_DIR}
 )
 target_link_libraries(${PROJECT_NAME}
-    fmt::fmt
     ${LLVM_LIBS}
 )
