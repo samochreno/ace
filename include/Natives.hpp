@@ -283,7 +283,7 @@ namespace Ace
         NativeAssociatedFunction i8__less_than_equals;
         NativeAssociatedFunction i8__greater_than_equals;
         NativeAssociatedFunction i8__equals;
-        NativeAssociatedFunction i8__noequals;
+        NativeAssociatedFunction i8__not_equals;
         NativeAssociatedFunction i8__AND;
         NativeAssociatedFunction i8__XOR;
         NativeAssociatedFunction i8__OR;
@@ -313,7 +313,7 @@ namespace Ace
         NativeAssociatedFunction i16__less_than_equals;
         NativeAssociatedFunction i16__greater_than_equals;
         NativeAssociatedFunction i16__equals;
-        NativeAssociatedFunction i16__noequals;
+        NativeAssociatedFunction i16__not_equals;
         NativeAssociatedFunction i16__AND;
         NativeAssociatedFunction i16__XOR;
         NativeAssociatedFunction i16__OR;
@@ -343,7 +343,7 @@ namespace Ace
         NativeAssociatedFunction i32__less_than_equals;
         NativeAssociatedFunction i32__greater_than_equals;
         NativeAssociatedFunction i32__equals;
-        NativeAssociatedFunction i32__noequals;
+        NativeAssociatedFunction i32__not_equals;
         NativeAssociatedFunction i32__AND;
         NativeAssociatedFunction i32__XOR;
         NativeAssociatedFunction i32__OR;
@@ -373,7 +373,7 @@ namespace Ace
         NativeAssociatedFunction i64__less_than_equals;
         NativeAssociatedFunction i64__greater_than_equals;
         NativeAssociatedFunction i64__equals;
-        NativeAssociatedFunction i64__noequals;
+        NativeAssociatedFunction i64__not_equals;
         NativeAssociatedFunction i64__AND;
         NativeAssociatedFunction i64__XOR;
         NativeAssociatedFunction i64__OR;
@@ -403,7 +403,7 @@ namespace Ace
         NativeAssociatedFunction u8__less_than_equals;
         NativeAssociatedFunction u8__greater_than_equals;
         NativeAssociatedFunction u8__equals;
-        NativeAssociatedFunction u8__noequals;
+        NativeAssociatedFunction u8__not_equals;
         NativeAssociatedFunction u8__AND;
         NativeAssociatedFunction u8__XOR;
         NativeAssociatedFunction u8__OR;
@@ -433,7 +433,7 @@ namespace Ace
         NativeAssociatedFunction u16__less_than_equals;
         NativeAssociatedFunction u16__greater_than_equals;
         NativeAssociatedFunction u16__equals;
-        NativeAssociatedFunction u16__noequals;
+        NativeAssociatedFunction u16__not_equals;
         NativeAssociatedFunction u16__AND;
         NativeAssociatedFunction u16__XOR;
         NativeAssociatedFunction u16__OR;
@@ -463,7 +463,7 @@ namespace Ace
         NativeAssociatedFunction u32__less_than_equals;
         NativeAssociatedFunction u32__greater_than_equals;
         NativeAssociatedFunction u32__equals;
-        NativeAssociatedFunction u32__noequals;
+        NativeAssociatedFunction u32__not_equals;
         NativeAssociatedFunction u32__AND;
         NativeAssociatedFunction u32__XOR;
         NativeAssociatedFunction u32__OR;
@@ -493,7 +493,7 @@ namespace Ace
         NativeAssociatedFunction u64__less_than_equals;
         NativeAssociatedFunction u64__greater_than_equals;
         NativeAssociatedFunction u64__equals;
-        NativeAssociatedFunction u64__noequals;
+        NativeAssociatedFunction u64__not_equals;
         NativeAssociatedFunction u64__AND;
         NativeAssociatedFunction u64__XOR;
         NativeAssociatedFunction u64__OR;
@@ -523,7 +523,7 @@ namespace Ace
         NativeAssociatedFunction int_less_than_equals;
         NativeAssociatedFunction int_greater_than_equals;
         NativeAssociatedFunction int_equals;
-        NativeAssociatedFunction int_noequals;
+        NativeAssociatedFunction int_not_equals;
         NativeAssociatedFunction int_AND;
         NativeAssociatedFunction int_XOR;
         NativeAssociatedFunction int_OR;
@@ -550,7 +550,7 @@ namespace Ace
         NativeAssociatedFunction f32__less_than_equals;
         NativeAssociatedFunction f32__greater_than_equals;
         NativeAssociatedFunction f32__equals;
-        NativeAssociatedFunction f32__noequals;
+        NativeAssociatedFunction f32__not_equals;
 
         NativeAssociatedFunction f64__from_i8;
         NativeAssociatedFunction f64__from_i16;
@@ -574,7 +574,7 @@ namespace Ace
         NativeAssociatedFunction f64__less_than_equals;
         NativeAssociatedFunction f64__greater_than_equals;
         NativeAssociatedFunction f64__equals;
-        NativeAssociatedFunction f64__noequals;
+        NativeAssociatedFunction f64__not_equals;
 
         NativeAssociatedFunctionTemplate StrongPtr__new;
         NativeAssociatedFunctionTemplate StrongPtr__value;

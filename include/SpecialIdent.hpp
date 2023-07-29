@@ -40,7 +40,7 @@ namespace Ace::SpecialIdent
         inline constexpr const char* LessThanEquals    = "$op_less_than_equals";
         inline constexpr const char* GreaterThanEquals = "$op_greater_than_equals";
         inline constexpr const char* Equals            = "$op_equals";
-        inline constexpr const char* NotEquals         = "$op_noequals";
+        inline constexpr const char* NotEquals         = "$op_not_equals";
         inline constexpr const char* AND               = "$op_AND";
         inline constexpr const char* XOR               = "$op_XOR";
         inline constexpr const char* OR                = "$op_OR";
