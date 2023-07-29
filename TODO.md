@@ -4,14 +4,14 @@
 
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 - Figure out where to use the `opt` prefix and where not
-- String interning and maybe put `Token`s on the stack
+- String interning, maybe put `Token`s on the stack
+- Special fast lookup for native types
 
 ## 💥 High Priority
 
 - Figure out how to stop cascading diagnostics in binding and verification with `Compilation::ErrorTypeSymbol`, then add diagnostics
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
-- Error messages to make debugging easier
-- Implement special fast lookup for native types
+- Finish diagnostics
 - ❓ Give template symbols shared ownership of the nodes
 
 ## 🔔 Medium Priority
