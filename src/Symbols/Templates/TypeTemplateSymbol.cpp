@@ -161,7 +161,7 @@ namespace Ace
             srcLocation,
             SpecialIdent::Op::Copy,
         });
-        selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
+        (void)selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
             copyOpName
         );
 
@@ -172,7 +172,7 @@ namespace Ace
             srcLocation,
             SpecialIdent::Op::Drop,
         });
-        selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
+        (void)selfSymbol->GetScope()->ResolveStaticSymbol<FunctionSymbol>(
             dropOpName
         );
     }

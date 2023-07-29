@@ -136,7 +136,7 @@ namespace Ace
             }()));
 
             // TODO: Add to diagnosticBag
-            DiagnoseSymbolNotVisible(
+            (void)DiagnoseSymbolNotVisible(
                 arg.Name.SrcLocation,
                 varSymbol,
                 m_Scope
