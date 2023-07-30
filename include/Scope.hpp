@@ -29,10 +29,6 @@ namespace Ace
     class ITemplateSymbol;
     class ITemplatableSymbol;
 
-    auto CreateNameSectionSrcLocation(
-        const SymbolNameSection& nameSection
-    ) -> SrcLocation;
-
     auto DiagnoseInaccessibleSymbol(
         const SrcLocation& srcLocation,
         ISymbol* const symbol,
@@ -320,9 +316,7 @@ namespace Ace
         {
             DiagnosticBag diagnostics{};
 
-            const auto srcLocation = CreateNameSectionSrcLocation(
-                name.Sections.front()
-            );
+            const auto srcLocation = name.Sections.front().CreateSrcLocation();
 
             const auto expBeginScope = GetStaticSymbolResolutionBeginScope(
                 srcLocation,
@@ -401,9 +395,7 @@ namespace Ace
 
             const std::vector nameSections{ name };
 
-            const auto srcLocation = CreateNameSectionSrcLocation(
-                nameSections.front()
-            );
+            const auto srcLocation = nameSections.front().CreateSrcLocation();
 
             const auto expSymbol = ResolveSymbolInScopes(SymbolResolutionData{
                 srcLocation,
@@ -490,9 +482,7 @@ namespace Ace
                 SymbolNameSection{ name }
             };
 
-            const auto srcLocation = CreateNameSectionSrcLocation(
-                nameSections.front()
-            );
+            const auto srcLocation = nameSections.front().CreateSrcLocation();
 
             const auto expSymbol = ResolveSymbolInScopes(SymbolResolutionData{
                 srcLocation,

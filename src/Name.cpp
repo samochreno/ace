@@ -10,6 +10,64 @@
 
 namespace Ace
 {
+    static auto CreateFirstSrcLocation(
+        const SymbolName& symbolName
+    ) -> SrcLocation
+    {
+        return symbolName.Sections.front().CreateSrcLocation();
+    }
+
+    SymbolNameSection::SymbolNameSection()
+        : Name{}, TemplateArgs{}
+    {
+    }
+
+    SymbolNameSection::SymbolNameSection(const Ident& name)
+        : Name{ name }, TemplateArgs{}
+    {
+    }
+
+    SymbolNameSection::SymbolNameSection(
+        const Ident& name,
+        const std::vector<SymbolName>& templateArgs
+    ) : Name{ name }, TemplateArgs{ templateArgs }
+    {
+    }
+
+    SymbolNameSection::~SymbolNameSection()
+    {
+    }
+
+    static auto CreateFirstSrcLocation(
+        const SymbolNameSection& symbolNameSection
+    ) -> SrcLocation
+    {
+        return symbolNameSection.Name.SrcLocation.CreateFirst();
+    }
+
+    static auto CreateLastSrcLocation(
+        const SymbolNameSection& symbolNameSection
+    ) -> SrcLocation
+    {
+        if (!symbolNameSection.TemplateArgs.empty())
+        {
+            return CreateLastSrcLocation(
+                symbolNameSection.TemplateArgs.back().Sections.back()
+            );
+        }
+        
+        return symbolNameSection.Name.SrcLocation.CreateLast();
+    }
+
+    auto SymbolNameSection::CreateSrcLocation() const -> SrcLocation
+    {
+        return
+        {
+            CreateFirstSrcLocation(*this),
+            CreateLastSrcLocation (*this),
+        };
+    }
+
     SymbolName::SymbolName()
         : Sections{}, IsGlobal{}
     {
@@ -44,26 +102,14 @@ namespace Ace
     SymbolName::~SymbolName()
     {
     }
-
-    SymbolNameSection::SymbolNameSection()
-        : Name{}, TemplateArgs{}
+    
+    auto SymbolName::CreateSrcLocation() const -> SrcLocation
     {
-    }
-
-    SymbolNameSection::SymbolNameSection(const Ident& name)
-        : Name{ name }, TemplateArgs{}
-    {
-    }
-
-    SymbolNameSection::SymbolNameSection(
-        const Ident& name,
-        const std::vector<SymbolName>& templateArgs
-    ) : Name{ name }, TemplateArgs{ templateArgs }
-    {
-    }
-
-    SymbolNameSection::~SymbolNameSection()
-    {
+        return
+        {
+            Sections.front().CreateSrcLocation(),
+            Sections.back().CreateSrcLocation(),
+        };
     }
 
     TypeName::TypeName()

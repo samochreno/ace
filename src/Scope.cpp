@@ -24,38 +24,6 @@
 
 namespace Ace
 {
-    static auto CreateNameSectionFirstSrcLocation(
-        const SymbolNameSection& nameSection
-    ) -> SrcLocation
-    {
-        return nameSection.Name.SrcLocation.CreateFirst();
-    }
-
-    static auto CreateNameSectionLastSrcLocation(
-        const SymbolNameSection& nameSection
-    ) -> SrcLocation
-    {
-        if (!nameSection.TemplateArgs.empty())
-        {
-            return CreateNameSectionLastSrcLocation(
-                nameSection.TemplateArgs.back().Sections.back()
-            );
-        }
-        
-        return nameSection.Name.SrcLocation.CreateLast();
-    }
-
-    auto CreateNameSectionSrcLocation(
-        const SymbolNameSection& nameSection
-    ) -> SrcLocation
-    {
-        return
-        {
-            CreateNameSectionFirstSrcLocation(nameSection),
-            CreateNameSectionLastSrcLocation (nameSection)
-        };
-    }
-
     static auto IsSymbolAccessibleFromScope(
         ISymbol* const symbol,
         const std::shared_ptr<const Scope>& scope
@@ -1518,7 +1486,7 @@ namespace Ace
         }
 
         const auto expSymbol = ResolveSymbolInScopes(SymbolResolutionData{
-            CreateNameSectionSrcLocation(*(data.NameSectionsBegin + 1)),
+            (data.NameSectionsBegin + 1)->CreateSrcLocation(),
             data.BeginScope,
             data.NameSectionsBegin + 1,
             data.NameSectionsEnd,

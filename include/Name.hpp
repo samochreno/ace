@@ -4,6 +4,7 @@
 #include <string>
 
 #include "Ident.hpp"
+#include "SrcLocation.hpp"
 
 namespace Ace
 {
@@ -20,6 +21,8 @@ namespace Ace
             const std::vector<SymbolName>& templateArgs
         );
         ~SymbolNameSection();
+
+        auto CreateSrcLocation() const -> SrcLocation;
 
         Ident Name;
         std::vector<SymbolName> TemplateArgs;
@@ -43,6 +46,8 @@ namespace Ace
             const SymbolNameResolutionScope& resolutionScope
         );
         ~SymbolName();
+
+        auto CreateSrcLocation() const -> SrcLocation;
 
         std::vector<SymbolNameSection> Sections;
         bool IsGlobal;
