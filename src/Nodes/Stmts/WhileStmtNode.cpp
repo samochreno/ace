@@ -35,7 +35,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto WhileStmtNode::GetChildren() const -> std::vector<const INode*>
+    auto WhileStmtNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

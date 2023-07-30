@@ -34,7 +34,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto UserUnaryExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto UserUnaryExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

@@ -28,7 +28,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto ExprExprNode::GetChildren() const -> std::vector<const INode*>
+    auto ExprExprNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

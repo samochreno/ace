@@ -42,7 +42,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto StaticVarRefExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto StaticVarRefExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         return {};
     }

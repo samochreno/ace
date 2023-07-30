@@ -37,7 +37,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto SelfParamVarNode::GetChildren() const -> std::vector<const INode*>
+    auto SelfParamVarNode::CollectChildren() const -> std::vector<const INode*>
     {
         return {};
     }

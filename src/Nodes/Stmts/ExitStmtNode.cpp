@@ -28,7 +28,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto ExitStmtNode::GetChildren() const -> std::vector<const INode*> 
+    auto ExitStmtNode::CollectChildren() const -> std::vector<const INode*> 
     {
         return {};
     }

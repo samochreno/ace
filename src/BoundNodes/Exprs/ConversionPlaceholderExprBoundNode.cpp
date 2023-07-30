@@ -29,7 +29,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto ConversionPlaceholderExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto ConversionPlaceholderExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         ACE_UNREACHABLE();
     }

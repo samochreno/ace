@@ -46,7 +46,7 @@ namespace Ace
         return m_SelfScope;
     }
 
-    auto StructTypeNode::GetChildren() const -> std::vector<const INode*>
+    auto StructTypeNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

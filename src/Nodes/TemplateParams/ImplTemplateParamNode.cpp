@@ -32,7 +32,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto ImplTemplateParamNode::GetChildren() const -> std::vector<const INode*>
+    auto ImplTemplateParamNode::CollectChildren() const -> std::vector<const INode*>
     {
         return {};
     }

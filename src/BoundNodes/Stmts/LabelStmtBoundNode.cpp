@@ -29,7 +29,7 @@ namespace Ace
         return m_Symbol->GetScope();
     }
 
-    auto LabelStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto LabelStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         return {};
     }

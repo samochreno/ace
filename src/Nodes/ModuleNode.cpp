@@ -63,7 +63,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto ModuleNode::GetChildren() const -> std::vector<const INode*> 
+    auto ModuleNode::CollectChildren() const -> std::vector<const INode*> 
     {
         std::vector<const INode*> children{};
 

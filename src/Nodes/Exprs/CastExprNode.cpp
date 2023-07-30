@@ -32,7 +32,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto CastExprNode::GetChildren() const -> std::vector<const INode*>
+    auto CastExprNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

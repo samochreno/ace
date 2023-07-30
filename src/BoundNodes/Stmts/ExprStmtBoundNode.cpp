@@ -27,7 +27,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto ExprStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto ExprStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

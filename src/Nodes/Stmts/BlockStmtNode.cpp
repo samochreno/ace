@@ -31,7 +31,7 @@ namespace Ace
         return m_SelfScope->GetParent().value();
     }
 
-    auto BlockStmtNode::GetChildren() const -> std::vector<const INode*>
+    auto BlockStmtNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

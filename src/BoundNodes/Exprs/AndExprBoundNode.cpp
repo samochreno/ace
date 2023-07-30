@@ -34,7 +34,7 @@ namespace Ace
         return m_LHSExpr->GetScope();
     }
 
-    auto AndExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto AndExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

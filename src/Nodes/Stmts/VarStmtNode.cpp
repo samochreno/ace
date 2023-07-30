@@ -37,7 +37,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto VarStmtNode::GetChildren() const -> std::vector<const INode*>
+    auto VarStmtNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

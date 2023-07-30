@@ -32,7 +32,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto LogicalNegationExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto LogicalNegationExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

@@ -28,7 +28,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto LogicalNegationExprNode::GetChildren() const -> std::vector<const INode*>
+    auto LogicalNegationExprNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

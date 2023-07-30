@@ -45,7 +45,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto IfStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto IfStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

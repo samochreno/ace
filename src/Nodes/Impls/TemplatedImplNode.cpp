@@ -40,7 +40,7 @@ namespace Ace
         return m_SelfScope->GetParent().value();
     }
 
-    auto TemplatedImplNode::GetChildren() const -> std::vector<const INode*>
+    auto TemplatedImplNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

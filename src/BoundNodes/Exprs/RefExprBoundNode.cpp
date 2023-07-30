@@ -33,7 +33,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto RefExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto RefExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

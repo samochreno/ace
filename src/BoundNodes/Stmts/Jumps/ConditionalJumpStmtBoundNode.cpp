@@ -35,7 +35,7 @@ namespace Ace
         return m_Condition->GetScope();
     }
 
-    auto ConditionalJumpStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto ConditionalJumpStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

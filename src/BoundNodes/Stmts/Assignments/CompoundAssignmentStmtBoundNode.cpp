@@ -44,7 +44,7 @@ namespace Ace
         return m_LHSExpr->GetScope();
     }
 
-    auto CompoundAssignmentStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto CompoundAssignmentStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

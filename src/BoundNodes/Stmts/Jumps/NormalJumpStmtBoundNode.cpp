@@ -31,7 +31,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto NormalJumpStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto NormalJumpStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         return {};
     }

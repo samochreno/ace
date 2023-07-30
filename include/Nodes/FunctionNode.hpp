@@ -42,7 +42,7 @@ namespace Ace
 
         auto GetSrcLocation() const -> const SrcLocation&;
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto GetChildren() const -> std::vector<const INode*> final;
+        auto CollectChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const FunctionNode> final;

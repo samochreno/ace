@@ -33,7 +33,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto LabelStmtNode::GetChildren() const -> std::vector<const INode*>
+    auto LabelStmtNode::CollectChildren() const -> std::vector<const INode*>
     {
         return {};
     }

@@ -32,7 +32,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto NormalAssignmentStmtNode::GetChildren() const -> std::vector<const INode*>
+    auto NormalAssignmentStmtNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

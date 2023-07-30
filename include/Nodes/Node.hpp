@@ -22,7 +22,7 @@ namespace Ace
         virtual auto GetSrcLocation() const -> const SrcLocation& = 0;
         virtual auto GetCompilation() const -> const Compilation* final;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
-        virtual auto GetChildren() const -> std::vector<const INode*> = 0;
+        virtual auto CollectChildren() const -> std::vector<const INode*> = 0;
     };
 
     template<typename T>
@@ -70,7 +70,7 @@ namespace Ace
         ACE_ASSERT(node);
 
         vec.push_back(node);
-        std::vector<const INode*> childChildren = node->GetChildren();
+        std::vector<const INode*> childChildren = node->CollectChildren();
         vec.insert(end(vec), begin(childChildren), end(childChildren));
     }
 

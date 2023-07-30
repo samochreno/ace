@@ -30,7 +30,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto SizeOfExprNode::GetChildren() const -> std::vector<const INode*>
+    auto SizeOfExprNode::CollectChildren() const -> std::vector<const INode*>
     {
         return {};
     }

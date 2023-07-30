@@ -35,13 +35,13 @@ namespace Ace::Application
     template<typename TNodeSmartPtr>
     auto GetAllNodes(const TNodeSmartPtr& ast)
     {
-        auto nodes = ast->GetChildren();
+        auto nodes = ast->CollectChildren();
         nodes.push_back(ast.get());
         return nodes;
     }
 
 #define TASTSmartPtr std::remove_reference_t<decltype(*TIt{})>
-#define TNodeIBase std::remove_const_t<std::remove_pointer_t<std::remove_cvref_t<decltype(TASTSmartPtr{}->GetChildren().front())>>>
+#define TNodeIBase std::remove_const_t<std::remove_pointer_t<std::remove_cvref_t<decltype(TASTSmartPtr{}->CollectChildren().front())>>>
 
     template<typename TIt>
     auto GetAllNodes(TIt astsBegin, TIt astsEnd)

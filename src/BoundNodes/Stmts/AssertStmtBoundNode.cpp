@@ -37,7 +37,7 @@ namespace Ace
         return m_Condition->GetScope();
     }
 
-    auto AssertStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto AssertStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

@@ -33,7 +33,7 @@ namespace Ace
         return m_AST->GetScope();
     }
 
-    auto TypeTemplateNode::GetChildren() const -> std::vector<const INode*>
+    auto TypeTemplateNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

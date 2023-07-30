@@ -34,7 +34,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto BoxExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto BoxExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

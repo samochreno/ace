@@ -40,7 +40,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto NormalParamVarNode::GetChildren() const -> std::vector<const INode*>
+    auto NormalParamVarNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

@@ -37,7 +37,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto InstanceVarRefExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto InstanceVarRefExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

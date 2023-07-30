@@ -35,7 +35,7 @@ namespace Ace
         return m_LHSExpr->GetScope();
     }
 
-    auto UserBinaryExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto UserBinaryExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

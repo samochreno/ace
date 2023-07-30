@@ -44,7 +44,7 @@ namespace Ace
         return m_SelfScope->GetParent().value();
     }
 
-    auto BlockStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto BlockStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

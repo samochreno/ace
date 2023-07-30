@@ -30,7 +30,7 @@ namespace Ace
         return m_LHSExpr->GetScope();
     }
 
-    auto OrExprNode::GetChildren() const -> std::vector<const INode*>
+    auto OrExprNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

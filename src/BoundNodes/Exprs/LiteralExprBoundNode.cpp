@@ -38,7 +38,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto LiteralExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto LiteralExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         return {};
     }

@@ -36,7 +36,7 @@ namespace Ace
         return m_SelfScope;
     }
 
-    auto BlockEndStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto BlockEndStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         return {};
     }

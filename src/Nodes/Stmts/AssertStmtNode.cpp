@@ -30,7 +30,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto AssertStmtNode::GetChildren() const -> std::vector<const INode*>
+    auto AssertStmtNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

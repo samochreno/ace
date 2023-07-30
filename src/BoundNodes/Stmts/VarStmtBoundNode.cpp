@@ -38,7 +38,7 @@ namespace Ace
         return m_Symbol->GetScope();
     }
 
-    auto VarStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto VarStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

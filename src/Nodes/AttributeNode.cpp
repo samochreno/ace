@@ -28,7 +28,7 @@ namespace Ace
         return m_StructConstructionExpr->GetScope();
     }
 
-    auto AttributeNode::GetChildren() const -> std::vector<const INode*>
+    auto AttributeNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

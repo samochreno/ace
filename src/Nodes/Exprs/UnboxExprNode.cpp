@@ -29,7 +29,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto UnboxExprNode::GetChildren() const -> std::vector<const INode*>
+    auto UnboxExprNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

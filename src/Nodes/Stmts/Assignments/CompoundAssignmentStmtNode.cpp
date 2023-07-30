@@ -36,7 +36,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto CompoundAssignmentStmtNode::GetChildren() const -> std::vector<const INode*>
+    auto CompoundAssignmentStmtNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

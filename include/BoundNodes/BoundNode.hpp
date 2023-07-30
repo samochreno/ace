@@ -30,7 +30,7 @@ namespace Ace
         virtual auto GetCompilation() const -> const Compilation* final;
         virtual auto GetSrcLocation() const -> const SrcLocation& = 0;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
-        virtual auto GetChildren() const -> std::vector<const IBoundNode*> = 0;
+        virtual auto CollectChildren() const -> std::vector<const IBoundNode*> = 0;
     };
 
     template<typename TNode, typename TContext = TypeCheckingContext>
@@ -67,7 +67,7 @@ namespace Ace
         }
 
         vec.push_back(node.get());
-        std::vector<const IBoundNode*> childChildren = node->GetChildren();
+        std::vector<const IBoundNode*> childChildren = node->CollectChildren();
         vec.insert(end(vec), begin(childChildren), end(childChildren));
     }
 
@@ -82,7 +82,7 @@ namespace Ace
         {
             vec.push_back(node.get());
 
-            auto children = node->GetChildren();
+            auto children = node->CollectChildren();
             vec.insert(end(vec), begin(children), end(children));
         });
     }

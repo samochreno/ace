@@ -52,7 +52,7 @@ namespace Ace
         return m_SelfScope->GetParent().value();
     }
 
-    auto FunctionNode::GetChildren() const -> std::vector<const INode*>
+    auto FunctionNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

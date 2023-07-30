@@ -37,7 +37,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto StaticFunctionCallExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto StaticFunctionCallExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

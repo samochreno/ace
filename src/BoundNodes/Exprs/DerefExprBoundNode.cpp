@@ -34,7 +34,7 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto DerefExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto DerefExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

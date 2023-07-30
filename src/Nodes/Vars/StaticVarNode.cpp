@@ -42,7 +42,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto StaticVarNode::GetChildren() const -> std::vector<const INode*>
+    auto StaticVarNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 

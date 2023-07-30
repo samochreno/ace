@@ -37,7 +37,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto StructConstructionExprBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto StructConstructionExprBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

@@ -29,7 +29,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto ExitStmtBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto ExitStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         return {};
     }

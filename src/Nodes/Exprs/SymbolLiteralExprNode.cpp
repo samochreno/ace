@@ -31,7 +31,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto SymbolLiteralExprNode::GetChildren() const -> std::vector<const INode*>
+    auto SymbolLiteralExprNode::CollectChildren() const -> std::vector<const INode*>
     {
         return {};
 

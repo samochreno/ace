@@ -32,7 +32,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto LiteralExprNode::GetChildren() const -> std::vector<const INode*>
+    auto LiteralExprNode::CollectChildren() const -> std::vector<const INode*>
     {
         return {};
     }

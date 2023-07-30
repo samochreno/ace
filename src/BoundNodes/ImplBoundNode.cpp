@@ -32,7 +32,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto ImplBoundNode::GetChildren() const -> std::vector<const IBoundNode*>
+    auto ImplBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 

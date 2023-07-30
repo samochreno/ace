@@ -150,7 +150,7 @@ namespace Ace
         std::for_each(begin(m_ASTs), end(m_ASTs),
         [&](const std::shared_ptr<const ModuleBoundNode>& ast)
         {
-            const auto children = ast->GetChildren();
+            const auto children = ast->CollectChildren();
             nodes.insert(end(nodes), begin(children), end(children));
         });
         const auto functionNodes = DynamicCastFilter<const FunctionBoundNode*>(nodes);
