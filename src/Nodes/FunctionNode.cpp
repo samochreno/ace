@@ -202,7 +202,7 @@ namespace Ace
 
     auto FunctionNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto symbolCategory = m_OptSelf.has_value() ?
             SymbolCategory::Instance :
@@ -211,7 +211,7 @@ namespace Ace
         const auto expTypeSymbol = m_SelfScope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         );
-        diagnosticBag.Add(expTypeSymbol);
+        diagnostics.Add(expTypeSymbol);
 
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
@@ -222,7 +222,7 @@ namespace Ace
                 m_AccessModifier,
                 expTypeSymbol.UnwrapOr(GetCompilation()->ErrorTypeSymbol)
             ),
-            diagnosticBag,
+            diagnostics,
         };
     }
     

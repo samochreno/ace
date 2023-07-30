@@ -45,16 +45,16 @@ namespace Ace
         const ISymbol* const symbol
     ) -> Expected<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         if (dynamic_cast<const TSymbol*>(symbol) == nullptr)
         {
-            return diagnosticBag.Add(CreateIncorrectSymbolTypeError<TSymbol>(
+            return diagnostics.Add(CreateIncorrectSymbolTypeError<TSymbol>(
                 srcLocation
             ));
         }
 
-        return Void{ diagnosticBag };
+        return Void{ diagnostics };
     }
 
     auto IsCorrectSymbolCategory(
@@ -193,7 +193,7 @@ namespace Ace
             std::unique_ptr<TSymbol> ownedSymbol
         ) -> Diagnosed<TSymbol*>
         {
-            DiagnosticBag diagnosticBag{};
+            DiagnosticBag diagnostics{};
 
             // TODO: Dont allow private types to leak in public interface
             /*
@@ -239,7 +239,7 @@ namespace Ace
             );
             if (optSameSymbol.has_value())
             {
-                diagnosticBag.Add(CreateSymbolRedefinitionError(symbol));
+                diagnostics.Add(CreateSymbolRedefinitionError(symbol));
 
                 auto* const sameSymbol = optSameSymbol.value();
 
@@ -253,7 +253,7 @@ namespace Ace
 
                 if (isSameKind && isSameType)
                 {
-                    return Diagnosed{ castedSameSymbol, diagnosticBag };
+                    return Diagnosed{ castedSameSymbol, diagnostics };
                 }
             }
 
@@ -261,7 +261,7 @@ namespace Ace
                 std::move(ownedSymbol)
             );
 
-            return Diagnosed{ symbol, diagnosticBag };
+            return Diagnosed{ symbol, diagnostics };
         }
         static auto DefineSymbol(
             const ISymbolCreatable* const creatable
@@ -318,7 +318,7 @@ namespace Ace
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
-            DiagnosticBag diagnosticBag{};
+            DiagnosticBag diagnostics{};
 
             const auto srcLocation = CreateNameSectionSrcLocation(
                 name.Sections.front()
@@ -328,10 +328,10 @@ namespace Ace
                 srcLocation,
                 name
             );
-            diagnosticBag.Add(expBeginScope);
+            diagnostics.Add(expBeginScope);
             if (!expBeginScope)
             {
-                return diagnosticBag;
+                return diagnostics;
             }
 
             std::vector<std::shared_ptr<const Scope>> beginScopes{};
@@ -353,10 +353,10 @@ namespace Ace
                 GetStaticSymbolResolutionImplTemplateArgs(shared_from_this()),
                 IsTemplate<TSymbol>()
             });
-            diagnosticBag.Add(expSymbol);
+            diagnostics.Add(expSymbol);
             if (!expSymbol)
             {
-                return diagnosticBag;
+                return diagnostics;
             }
 
             auto* const symbol = expSymbol.Unwrap();
@@ -366,16 +366,16 @@ namespace Ace
                 symbol,
                 SymbolCategory::Static
             );
-            diagnosticBag.Add(expIsCorrectSymbolCategory);
+            diagnostics.Add(expIsCorrectSymbolCategory);
             if (!expIsCorrectSymbolCategory)
             {
-                return diagnosticBag;
+                return diagnostics;
             }
 
             auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
             ACE_ASSERT(castedSymbol);
 
-            return Expected{ castedSymbol, diagnosticBag };
+            return Expected{ castedSymbol, diagnostics };
         }
 
         template<typename TSymbol>
@@ -397,7 +397,7 @@ namespace Ace
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
-            DiagnosticBag diagnosticBag{};
+            DiagnosticBag diagnostics{};
 
             const std::vector nameSections{ name };
 
@@ -416,10 +416,10 @@ namespace Ace
                 CollectInstanceSymbolResolutionImplTemplateArgs(selfType),
                 IsTemplate<TSymbol>()
             });
-            diagnosticBag.Add(expSymbol);
+            diagnostics.Add(expSymbol);
             if (!expSymbol)
             {
-                return diagnosticBag;
+                return diagnostics;
             }
 
             auto* const symbol = expSymbol.Unwrap();
@@ -429,16 +429,16 @@ namespace Ace
                 symbol,
                 SymbolCategory::Instance
             );
-            diagnosticBag.Add(expIsCorrectSymbolCategory);
+            diagnostics.Add(expIsCorrectSymbolCategory);
             if (!expIsCorrectSymbolCategory)
             {
-                return diagnosticBag;
+                return diagnostics;
             }
 
             auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
             ACE_ASSERT(castedSymbol);
 
-            return Expected{ castedSymbol, diagnosticBag };
+            return Expected{ castedSymbol, diagnostics };
         }
 
         template<typename TSymbol>
@@ -483,7 +483,7 @@ namespace Ace
             const std::vector<ITypeSymbol*>& templateArgs
         ) const -> Expected<TSymbol*>
         {
-            DiagnosticBag diagnosticBag{};
+            DiagnosticBag diagnostics{};
 
             const std::vector nameSections
             { 
@@ -506,10 +506,10 @@ namespace Ace
                 templateArgs,
                 IsTemplate<TSymbol>()
             });
-            diagnosticBag.Add(expSymbol);
+            diagnostics.Add(expSymbol);
             if (!expSymbol)
             {
-                return diagnosticBag;
+                return diagnostics;
             }
 
             auto* const symbol = expSymbol.Unwrap();
@@ -517,7 +517,7 @@ namespace Ace
             auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
             ACE_ASSERT(castedSymbol);
 
-            return Expected{ castedSymbol, diagnosticBag };
+            return Expected{ castedSymbol, diagnostics };
         }
 
         template<typename TSymbol>

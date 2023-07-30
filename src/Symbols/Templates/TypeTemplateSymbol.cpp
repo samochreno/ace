@@ -86,7 +86,7 @@ namespace Ace
         const std::vector<ITypeSymbol*>& args
     ) -> Diagnosed<TemplateSymbolsInstantationResult>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto paramNames = m_TemplateNode->CollectParamNames();
 
@@ -96,7 +96,7 @@ namespace Ace
             m_TemplateNode->GetScope()
         );
 
-        diagnosticBag.Add(ast->GetSelfScope()->DefineTemplateArgAliases(
+        diagnostics.Add(ast->GetSelfScope()->DefineTemplateArgAliases(
             {},
             {},
             paramNames,
@@ -105,12 +105,12 @@ namespace Ace
 
         const auto nodes = Application::GetAllNodes(ast);
 
-        diagnosticBag.Add(Application::CreateAndDefineSymbols(
+        diagnostics.Add(Application::CreateAndDefineSymbols(
             GetCompilation(),
             nodes
         ));
 
-        diagnosticBag.Add(Application::DefineAssociations(
+        diagnostics.Add(Application::DefineAssociations(
             GetCompilation(),
             nodes
         ));
@@ -126,7 +126,7 @@ namespace Ace
         return Diagnosed
         {
             TemplateSymbolsInstantationResult{ symbol, ast },
-            diagnosticBag,
+            diagnostics,
         };
     }
 

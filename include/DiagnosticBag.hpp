@@ -23,7 +23,7 @@ namespace Ace
         {
             return Add(diagnosed.GetDiagnosticBag());
         }
-        auto Add(const DiagnosticBag& diagnosticBag) -> DiagnosticBag&;
+        auto Add(const DiagnosticBag& diagnostics) -> DiagnosticBag&;
 
         auto IsEmpty() const -> bool;
         auto GetDiagnostics() const -> const std::vector<std::shared_ptr<const Diagnostic>>&;

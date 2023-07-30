@@ -135,7 +135,7 @@ namespace Ace
                 )->CreateBoundExpr();
             }()));
 
-            // TODO: Add to diagnosticBag
+            // TODO: Add to diagnostics
             (void)DiagnoseSymbolNotVisible(
                 arg.Name.SrcLocation,
                 varSymbol,

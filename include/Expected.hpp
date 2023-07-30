@@ -19,8 +19,8 @@ namespace Ace
     {
         Void() = default;
         Void(
-            const DiagnosticBag& diagnosticBag
-        ) : DiagnosticBag{ diagnosticBag }
+            const DiagnosticBag& diagnostics
+        ) : DiagnosticBag{ diagnostics }
         {
         }
 
@@ -38,45 +38,45 @@ namespace Ace
         Expected(
             const Expected& other
         ) : m_IsFatal{ other.m_IsFatal },
-            m_DiagnosticBag{ other.m_DiagnosticBag }
+            m_Diagnostics{ other.m_Diagnostics }
         {
         }
         Expected(Expected&& other) noexcept
           : m_IsFatal{ other.m_IsFatal },
-            m_DiagnosticBag{ std::move(other.m_DiagnosticBag) }
+            m_Diagnostics{ std::move(other.m_Diagnostics) }
         {
             other.m_IsFatal = false;
         }
         Expected(
             Void&& value
-        ) : m_DiagnosticBag{ std::move(value.DiagnosticBag) }
+        ) : m_Diagnostics{ std::move(value.DiagnosticBag) }
         {
         }
         Expected(
             const std::shared_ptr<const Diagnostic>& diagnostic
         ) : m_IsFatal{ true }
         {
-            m_DiagnosticBag.Add(diagnostic);
+            m_Diagnostics.Add(diagnostic);
         }
         Expected(
-            const DiagnosticBag& diagnosticBag
+            const DiagnosticBag& diagnostics
         ) : m_IsFatal{ true }
         {
-            m_DiagnosticBag.Add(diagnosticBag);
+            m_Diagnostics.Add(diagnostics);
         }
         ~Expected() = default;
 
         auto operator=(const Expected& other) -> Expected&
         {
             m_IsFatal = other.m_IsFatal;
-            m_DiagnosticBag = other.m_DiagnosticBag;
+            m_Diagnostics = other.m_Diagnostics;
 
             return *this;
         }
         auto operator=(Expected&& other) noexcept -> Expected&
         {
             m_IsFatal = other.m_IsFatal;
-            m_DiagnosticBag = std::move(other.m_DiagnosticBag);
+            m_Diagnostics = std::move(other.m_Diagnostics);
 
             other.m_IsFatal = false;
 
@@ -100,12 +100,12 @@ namespace Ace
 
         auto GetDiagnosticBag() const -> const DiagnosticBag&
         {
-            return m_DiagnosticBag;
+            return m_Diagnostics;
         }
 
     private:
         bool m_IsFatal{};
-        DiagnosticBag m_DiagnosticBag{};
+        DiagnosticBag m_Diagnostics{};
     };
 
     template<typename T>
@@ -118,12 +118,12 @@ namespace Ace
         Expected(
             const Expected& other
         ) : m_OptValue{ other.m_OptValue },
-            m_DiagnosticBag{ other.m_DiagnosticBag }
+            m_Diagnostics{ other.m_Diagnostics }
         {
         }
         Expected(Expected&& other) noexcept
           : m_OptValue{ std::move(other.m_OptValue) },
-            m_DiagnosticBag{ std::move(other.m_DiagnosticBag) }
+            m_Diagnostics{ std::move(other.m_Diagnostics) }
         {
         }
         Expected(
@@ -133,9 +133,9 @@ namespace Ace
         }
         Expected(
             const T& value,
-            const DiagnosticBag& diagnosticBag
+            const DiagnosticBag& diagnostics
         ) : m_OptValue{ value },
-            m_DiagnosticBag{ diagnosticBag }
+            m_Diagnostics{ diagnostics }
         {
         }
         Expected(T&& value) noexcept
@@ -144,33 +144,33 @@ namespace Ace
         }
         Expected(
             T&& value,
-            const DiagnosticBag& diagnosticBag
+            const DiagnosticBag& diagnostics
         ) noexcept
           : m_OptValue{ std::move(value) },
-            m_DiagnosticBag{ diagnosticBag }
+            m_Diagnostics{ diagnostics }
         {
         }
         Expected(const std::shared_ptr<const Diagnostic>& diagnostic)
         {
-            m_DiagnosticBag.Add(diagnostic);
+            m_Diagnostics.Add(diagnostic);
         }
-        Expected(const DiagnosticBag& diagnosticBag)
+        Expected(const DiagnosticBag& diagnostics)
         {
-            m_DiagnosticBag.Add(diagnosticBag);
+            m_Diagnostics.Add(diagnostics);
         }
         ~Expected() = default;
 
         auto operator=(const Expected& other) -> Expected&
         {
             m_OptValue = other.m_OptValue;
-            m_DiagnosticBag = other.m_DiagnosticBag;
+            m_Diagnostics = other.m_Diagnostics;
 
             return *this;
         }
         auto operator=(Expected&& other) noexcept -> Expected&
         {
             m_OptValue = std::move(other.m_OptValue);
-            m_DiagnosticBag = std::move(other.m_DiagnosticBag);
+            m_Diagnostics = std::move(other.m_Diagnostics);
 
             return *this;
         }
@@ -202,25 +202,25 @@ namespace Ace
 
         auto GetDiagnosticBag() const -> const DiagnosticBag& final
         {
-            return m_DiagnosticBag;
+            return m_Diagnostics;
         }
 
         template<typename TNew>
         operator Expected<TNew>() const
         {
-            if (m_DiagnosticBag.IsEmpty())
+            if (m_Diagnostics.IsEmpty())
             {
                 return Expected<TNew>(m_OptValue.value());
             }
             else
             {
-                return Expected<TNew>(m_DiagnosticBag);
+                return Expected<TNew>(m_Diagnostics);
             }
         }
 
     private:
         std::optional<T> m_OptValue{};
-        DiagnosticBag m_DiagnosticBag{};
+        DiagnosticBag m_Diagnostics{};
     };
 
 #define TIn  typename std::decay_t<decltype(*TBegin{})>
@@ -233,14 +233,14 @@ namespace Ace
         F&& func
     ) -> std::enable_if_t<!std::is_same_v<TOut, void>, Expected<std::vector<TOut>>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         std::vector<TOut> outVec{};
         const auto unexpectedIt = std::find_if_not(begin, end,
         [&](const TIn& element)
         {
             auto expOut = func(element);
-            diagnosticBag.Add(expOut);
+            diagnostics.Add(expOut);
             if (!expOut)
             {
                 return false;
@@ -260,10 +260,10 @@ namespace Ace
 
         if (unexpectedIt != end)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
-        return { outVec, diagnosticBag };
+        return { outVec, diagnostics };
     }
 
 #undef TOut
@@ -277,13 +277,13 @@ namespace Ace
         F&& func
     ) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto unexpectedIt = std::find_if_not(begin, end,
         [&](const TIn& element)
         {
             const auto expOut = func(element);
-            diagnosticBag.Add(expOut);
+            diagnostics.Add(expOut);
             if (!expOut)
             {
                 return false;
@@ -294,10 +294,10 @@ namespace Ace
 
         if (unexpectedIt != end)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
-        return Void{ diagnosticBag };
+        return Void{ diagnostics };
     }
 
 #undef TIn
@@ -310,7 +310,7 @@ namespace Ace
         F&& func
     ) -> std::enable_if_t<!std::is_same_v<TOut, void>, Expected<std::vector<TOut>>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         std::vector<TOut> outVec{};
         outVec.reserve(inVec.size());
@@ -321,7 +321,7 @@ namespace Ace
             [&](const TIn& element)
             {
                 auto expOut = func(element);
-                diagnosticBag.Add(expOut);
+                diagnostics.Add(expOut);
                 if (!expOut)
                 {
                     return false;
@@ -342,10 +342,10 @@ namespace Ace
 
         if (unexpectedIt != end(inVec))
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
-        return { outVec, diagnosticBag };
+        return { outVec, diagnostics };
     }
 
 #undef TOut
@@ -357,7 +357,7 @@ namespace Ace
         F&& func
     ) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto unexpectedIt = std::find_if_not(
             begin(inVec),
@@ -365,7 +365,7 @@ namespace Ace
             [&](const TIn& element)
             {
                 const auto expOut = func(element);
-                diagnosticBag.Add(expOut);
+                diagnostics.Add(expOut);
                 if (!expOut)
                 {
                     return false;
@@ -377,10 +377,10 @@ namespace Ace
 
         if (unexpectedIt != end(inVec))
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
-        return Void{ diagnosticBag };
+        return Void{ diagnostics };
     }
 
 #undef TOut
@@ -410,7 +410,7 @@ namespace Ace
         F&& func
     ) -> Expected<MaybeChanged<std::vector<TOut>>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         bool isChanged = false;
         std::vector<TOut> outVec{};
@@ -422,7 +422,7 @@ namespace Ace
             [&](const TIn& element)
             {
                 auto expMchElement = func(element);
-                diagnosticBag.Add(expMchElement);
+                diagnostics.Add(expMchElement);
                 if (!expMchElement)
                 {
                     return false;
@@ -448,7 +448,7 @@ namespace Ace
 
         if (unexpectedIt != end(inVec))
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         if (!isChanged)

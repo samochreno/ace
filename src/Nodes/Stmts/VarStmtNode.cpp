@@ -125,12 +125,12 @@ namespace Ace
 
     auto VarStmtNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto expTypeSymbol = m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         );
-        diagnosticBag.Add(expTypeSymbol);
+        diagnostics.Add(expTypeSymbol);
 
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
@@ -139,7 +139,7 @@ namespace Ace
                 m_Name,
                 expTypeSymbol.UnwrapOr(GetCompilation()->ErrorTypeSymbol)
             ),
-            diagnosticBag,
+            diagnostics,
         };
     }
 }

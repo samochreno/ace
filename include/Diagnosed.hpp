@@ -18,18 +18,18 @@ namespace Ace
     public:
         Diagnosed() = default;
         Diagnosed(
-            const DiagnosticBag& diagnosticBag
-        ) : m_DiagnosticBag{ diagnosticBag }
+            const DiagnosticBag& diagnostics
+        ) : m_Diagnostics{ diagnostics }
         {
         }
 
         auto GetDiagnosticBag() const -> const DiagnosticBag& final
         {
-            return m_DiagnosticBag;
+            return m_Diagnostics;
         }
 
     private:
-        DiagnosticBag m_DiagnosticBag{};
+        DiagnosticBag m_Diagnostics{};
     };
 
     template<typename TValue>
@@ -38,16 +38,16 @@ namespace Ace
     public:
         Diagnosed(
             const TValue& value,
-            const DiagnosticBag& diagnosticBag
+            const DiagnosticBag& diagnostics
         ) : m_Value{ value },
-            m_DiagnosticBag{ diagnosticBag }
+            m_Diagnostics{ diagnostics }
         {
         }
         Diagnosed(
             TValue&& value,
-            const DiagnosticBag& diagnosticBag
+            const DiagnosticBag& diagnostics
         ) : m_Value{ std::move(value) },
-            m_DiagnosticBag{ diagnosticBag }
+            m_Diagnostics{ diagnostics }
         {
         }
 
@@ -62,11 +62,11 @@ namespace Ace
 
         auto GetDiagnosticBag() const -> const DiagnosticBag& final
         {
-            return m_DiagnosticBag;
+            return m_Diagnostics;
         }
 
     private:
         TValue m_Value{};
-        DiagnosticBag m_DiagnosticBag{};
+        DiagnosticBag m_Diagnostics{};
     };
 }

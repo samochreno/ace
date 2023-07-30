@@ -55,7 +55,7 @@ namespace Ace
         const std::vector<std::string_view>& args
     ) -> Expected<std::unique_ptr<const Compilation>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         auto self = std::make_unique<Compilation>();
 
@@ -70,10 +70,10 @@ namespace Ace
             self->CLIArgBuffer,
             GetOptionDefinitions()
         );
-        diagnosticBag.Add(expCLIArgsParseResult);
+        diagnostics.Add(expCLIArgsParseResult);
         if (!expCLIArgsParseResult)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         const auto& positionalArgs =
@@ -82,7 +82,7 @@ namespace Ace
 
         if (positionalArgs.empty())
         {
-            return diagnosticBag.Add(CreateMissingPackagePathArgError());
+            return diagnostics.Add(CreateMissingPackagePathArgError());
         }
 
         if (positionalArgs.size() > 1)
@@ -99,7 +99,7 @@ namespace Ace
                         end  (positionalArg),
                     };
 
-                    diagnosticBag.Add(CreateMultiplePackagePathArgsError(
+                    diagnostics.Add(CreateMultiplePackagePathArgsError(
                         srcLocation
                     ));
                 }
@@ -112,10 +112,10 @@ namespace Ace
             self.get(),
             packagePath
         );
-        diagnosticBag.Add(expPackageFileBuffer);
+        diagnostics.Add(expPackageFileBuffer);
         if (!expPackageFileBuffer)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         self->PackageFileBuffer = expPackageFileBuffer.Unwrap().get();
@@ -125,10 +125,10 @@ namespace Ace
             srcBuffers,
             self->PackageFileBuffer
         );
-        diagnosticBag.Add(expPackage);
+        diagnostics.Add(expPackage);
         if (!expPackage)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         self->Package = std::move(expPackage.Unwrap());
@@ -149,7 +149,7 @@ namespace Ace
         self->GlobalScope = { self.get() };
         self->TemplateInstantiator = std::make_unique<Ace::TemplateInstantiator>();
         self->LLVMContext = std::make_unique<llvm::LLVMContext>();
-        self->GlobalDiagnosticBag = std::make_unique<Ace::GlobalDiagnosticBag>();
+        self->Diagnostics = std::make_unique<GlobalDiagnosticBag>();
 
         auto errorTypeSymbol = std::make_unique<Ace::ErrorTypeSymbol>(
             self->GlobalScope.Unwrap()
@@ -158,15 +158,15 @@ namespace Ace
             std::move(errorTypeSymbol)
         ).Unwrap();
          
-        if (diagnosticBag.HasErrors())
+        if (diagnostics.HasErrors())
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         return
         {
             std::unique_ptr<const Compilation>{ std::move(self) },
-            diagnosticBag,
+            diagnostics,
         };
     }
 }

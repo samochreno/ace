@@ -287,7 +287,7 @@ namespace Ace
         ISymbol* const symbol
     ) const -> Diagnosed<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         auto* const moduleSymbol = dynamic_cast<ModuleSymbol*>(symbol);
         ACE_ASSERT(moduleSymbol);
@@ -300,14 +300,14 @@ namespace Ace
                 m_Name.back().SrcLocation,
             };
 
-            diagnosticBag.Add(CreateMismatchedAccessModifierError(
+            diagnostics.Add(CreateMismatchedAccessModifierError(
                 nameSrcLocation,
                 moduleSymbol,
                 m_AccessModifier
             ));
         }
 
-        return Diagnosed<void>{ diagnosticBag };
+        return Diagnosed<void>{ diagnostics };
     }
 
     auto ModuleNode::GetName() const -> const Ident&

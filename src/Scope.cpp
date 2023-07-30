@@ -110,16 +110,16 @@ namespace Ace
         const std::shared_ptr<const Scope>& beginScope
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         if (!IsSymbolVisibleFromScope(symbol, beginScope))
         {
-            diagnosticBag.Add(CreateInaccessibleSymbolError(
+            diagnostics.Add(CreateInaccessibleSymbolError(
                 srcLocation
             ));
         }
 
-        return Diagnosed<void>{ diagnosticBag };
+        return Diagnosed<void>{ diagnostics };
     }
 
     auto IsCorrectSymbolCategory(
@@ -128,17 +128,17 @@ namespace Ace
         const SymbolCategory symbolCategory
     ) -> Expected<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         if (symbol->GetCategory() != symbolCategory)
         {
-            diagnosticBag.Add(CreateIncorrectSymbolCategoryError(
+            diagnostics.Add(CreateIncorrectSymbolCategoryError(
                 srcLocation,
                 symbolCategory
             ));
         }
 
-        return Void{ diagnosticBag };
+        return Void{ diagnostics };
     }
 
     auto CastToTemplatableSymbol(
@@ -335,7 +335,7 @@ namespace Ace
         const ISymbolCreatable* const creatable
     ) -> Diagnosed<ISymbol*>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto scope = creatable->GetSymbolScope();
 
@@ -349,21 +349,21 @@ namespace Ace
 
             if (optDefinedSymbol.has_value())
             {
-                diagnosticBag.Add(partiallyCreatable->ContinueCreatingSymbol(
+                diagnostics.Add(partiallyCreatable->ContinueCreatingSymbol(
                     optDefinedSymbol.value()
                 ));
 
-                return Diagnosed{ optDefinedSymbol.value(), diagnosticBag };
+                return Diagnosed{ optDefinedSymbol.value(), diagnostics };
             }
         }
 
         auto dgnOwnedSymbol = creatable->CreateSymbol();
-        diagnosticBag.Add(dgnOwnedSymbol);
+        diagnostics.Add(dgnOwnedSymbol);
 
         const auto dgnSymbol = DefineSymbol(std::move(dgnOwnedSymbol.Unwrap()));
-        diagnosticBag.Add(dgnSymbol);
+        diagnostics.Add(dgnSymbol);
 
-        return Diagnosed{ dgnSymbol.Unwrap(), diagnosticBag };
+        return Diagnosed{ dgnSymbol.Unwrap(), diagnostics };
     }
 
     auto Scope::RemoveSymbol(ISymbol* const symbol) -> void
@@ -526,7 +526,7 @@ namespace Ace
         const std::vector<NormalTemplateParamTypeSymbol*>& templateParams
     ) -> Expected<std::vector<ITypeSymbol*>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         std::vector<ITypeSymbol*> templateArgs{};
         std::for_each(begin(templateParams), end(templateParams),
@@ -540,7 +540,7 @@ namespace Ace
 
             if (!hasMatchingTemplateArg)
             {
-                diagnosticBag.Add(CreateUnableToDeduceTemplateArgError(
+                diagnostics.Add(CreateUnableToDeduceTemplateArgError(
                     srcLocation,
                     templateParam
                 ));
@@ -555,12 +555,12 @@ namespace Ace
             templateArgs.push_back(templateArg);
         });
 
-        if (diagnosticBag.HasErrors())
+        if (diagnostics.HasErrors())
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
-        return Expected{ templateArgs, diagnosticBag };
+        return Expected{ templateArgs, diagnostics };
     }
 
     static auto VerifyTemplateArgDeductionResult(
@@ -569,7 +569,7 @@ namespace Ace
         const std::map<NormalTemplateParamTypeSymbol*, ITypeSymbol*>& paramToArgMap
     ) -> Expected<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto deducedArgIt = paramToArgMap.find(deductionResult.Param);
         const bool isAlreadyDeduced = deducedArgIt != end(paramToArgMap);
@@ -579,7 +579,7 @@ namespace Ace
 
             if (alreadyDeducedArg != deductionResult.Arg)
             {
-                return diagnosticBag.Add(CreateTemplateArgDeductionConflict(
+                return diagnostics.Add(CreateTemplateArgDeductionConflict(
                     srcLocation,
                     deductionResult.Param,
                     alreadyDeducedArg,
@@ -588,7 +588,7 @@ namespace Ace
             }
         }
 
-        return Void{ diagnosticBag };
+        return Void{ diagnostics };
     }
 
     static auto CreateKnownTemplateParamToArgMap(
@@ -614,7 +614,7 @@ namespace Ace
         const std::vector<ITypeSymbol*>& paramTypes
     ) -> Expected<std::vector<ITypeSymbol*>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         if (knownTemplateArgs.size() > templateParams.size())
         {
@@ -622,7 +622,7 @@ namespace Ace
                 begin(knownTemplateArgs) + templateParams.size(),
                 end  (knownTemplateArgs)
             );
-            diagnosticBag.Add(CreateTooManyTemplateArgsError(srcLocation));
+            diagnostics.Add(CreateTooManyTemplateArgsError(srcLocation));
         }
 
         auto templateParamToArgMap = CreateKnownTemplateParamToArgMap(
@@ -652,7 +652,7 @@ namespace Ace
                 deductionResult,
                 templateParamToArgMap
             );
-            diagnosticBag.Add(expDidVerifyDeductionResult);
+            diagnostics.Add(expDidVerifyDeductionResult);
             if (!expDidVerifyDeductionResult)
             {
                 return;
@@ -666,13 +666,13 @@ namespace Ace
             templateParamToArgMap,
             templateParams
         );
-        diagnosticBag.Add(expTemplateArgs);
+        diagnostics.Add(expTemplateArgs);
         if (!expTemplateArgs)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
-        return Expected{ expTemplateArgs.Unwrap(), diagnosticBag };
+        return Expected{ expTemplateArgs.Unwrap(), diagnostics };
     }
 
     static auto DeduceTemplateArgs(
@@ -682,7 +682,7 @@ namespace Ace
         const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
     ) -> Expected<std::vector<ITypeSymbol*>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto templateParams = t3mplate->CollectParams();
         if (templateParams.size() == knownTemplateArgs.size())
@@ -692,7 +692,7 @@ namespace Ace
 
         if (!optArgTypes.has_value())
         {
-            return diagnosticBag.Add(CreateUnableToDeduceTemplateArgsError(
+            return diagnostics.Add(CreateUnableToDeduceTemplateArgsError(
                 srcLocation
             ));
         }
@@ -702,7 +702,7 @@ namespace Ace
         );
         if (!parametrized)
         {
-            return diagnosticBag.Add(CreateUnableToDeduceTemplateArgsError(
+            return diagnostics.Add(CreateUnableToDeduceTemplateArgsError(
                 srcLocation
             ));
         }
@@ -710,7 +710,7 @@ namespace Ace
         const auto paramTypes = parametrized->CollectParamTypes();
         if (paramTypes.empty())
         {
-            return diagnosticBag.Add(CreateUnableToDeduceTemplateArgsError(
+            return diagnostics.Add(CreateUnableToDeduceTemplateArgsError(
                 srcLocation
             ));
         }
@@ -722,16 +722,16 @@ namespace Ace
             optArgTypes.value(),
             paramTypes
         );
-        diagnosticBag.Add(expTemplateArg);
+        diagnostics.Add(expTemplateArg);
         if (!expTemplateArg)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         return Expected
         {
             expTemplateArg.Unwrap(),
-            diagnosticBag,
+            diagnostics,
         };
     }
     
@@ -743,7 +743,7 @@ namespace Ace
         const std::vector<ITypeSymbol*>& templateArgs
     ) -> Expected<ISymbol*>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto expDeducedTemplateArgs = DeduceTemplateArgs(
             srcLocation,
@@ -751,10 +751,10 @@ namespace Ace
             templateArgs,
             optArgTypes
         );
-        diagnosticBag.Add(expDeducedTemplateArgs);
+        diagnostics.Add(expDeducedTemplateArgs);
         if (!expDeducedTemplateArgs)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         const auto expResolvedInstance = ResolveTemplateInstance(
@@ -765,8 +765,8 @@ namespace Ace
         );
         if (expResolvedInstance)
         {
-            diagnosticBag.Add(expResolvedInstance);
-            return Expected{ expResolvedInstance.Unwrap(), diagnosticBag };
+            diagnostics.Add(expResolvedInstance);
+            return Expected{ expResolvedInstance.Unwrap(), diagnostics };
         }
 
         const auto* const compilation = t3mplate->GetCompilation();
@@ -776,9 +776,9 @@ namespace Ace
             implTemplateArgs,
             expDeducedTemplateArgs.Unwrap()
         );
-        diagnosticBag.Add(dgnSymbol);
+        diagnostics.Add(dgnSymbol);
 
-        return Expected{ dgnSymbol.Unwrap(), diagnosticBag };
+        return Expected{ dgnSymbol.Unwrap(), diagnostics };
     }
 
     auto Scope::CollectTemplateArgs() const -> std::vector<ITypeSymbol*>
@@ -839,7 +839,7 @@ namespace Ace
         const std::vector<ITypeSymbol*> templateArgs
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         ACE_ASSERT(implTemplateParamNames.size() == implTemplateArgs.size());
         ACE_ASSERT(templateParamNames.size() == templateArgs.size());
@@ -853,7 +853,7 @@ namespace Ace
                 i
             );
 
-            diagnosticBag.Add(DefineSymbol(std::move(aliasSymbol)));
+            diagnostics.Add(DefineSymbol(std::move(aliasSymbol)));
         }
 
         for (size_t i = 0; i < templateParamNames.size(); i++)
@@ -865,10 +865,10 @@ namespace Ace
                 i
             );
 
-            diagnosticBag.Add(DefineSymbol(std::move(aliasSymbol)));
+            diagnostics.Add(DefineSymbol(std::move(aliasSymbol)));
         }
 
-        return Diagnosed<void>{ diagnosticBag };
+        return Diagnosed<void>{ diagnostics };
     }
 
     Scope::Scope(
@@ -993,11 +993,11 @@ namespace Ace
         const std::vector<ISymbol*>& matchingSymbols
     ) -> Expected<ISymbol*>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         if (matchingSymbols.empty())
         {
-            return diagnosticBag.Add(CreateUndefinedSymbolRefError(
+            return diagnostics.Add(CreateUndefinedSymbolRefError(
                 data.SrcLocation
             ));
         }
@@ -1024,7 +1024,7 @@ namespace Ace
 
         if (symbols.empty())
         {
-            return diagnosticBag.Add(data.IsCorrectSymbolType(
+            return diagnostics.Add(data.IsCorrectSymbolType(
                 data.SrcLocation,
                 matchingSymbols.front()
             ));
@@ -1032,17 +1032,17 @@ namespace Ace
 
         if (symbols.size() > 1)
         {
-            diagnosticBag.Add(CreateAmbiguousSymbolRefError(data.SrcLocation));
+            diagnostics.Add(CreateAmbiguousSymbolRefError(data.SrcLocation));
         }
 
         auto* const symbol = symbols.front();
-        diagnosticBag.Add(DiagnoseSymbolNotVisible(
+        diagnostics.Add(DiagnoseSymbolNotVisible(
             data.SrcLocation,
             symbol,
             data.BeginScope
         ));
 
-        return Expected{ symbols.front(), diagnosticBag };
+        return Expected{ symbols.front(), diagnostics };
     }
 
     static auto HasResolvedTemplateArgs(
@@ -1058,7 +1058,7 @@ namespace Ace
         const SymbolResolutionData& data
     ) -> Expected<std::vector<ITypeSymbol*>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto& scope = data.BeginScope;
         const auto& argNames = data.NameSectionsBegin->TemplateArgs;
@@ -1070,16 +1070,16 @@ namespace Ace
             const auto expArg = scope->ResolveStaticSymbol<ITypeSymbol>(
                 argName
             );
-            diagnosticBag.Add(expArg);
+            diagnostics.Add(expArg);
             return expArg.UnwrapOr(scope->GetCompilation()->ErrorTypeSymbol);
         });
 
-        if (diagnosticBag.HasErrors())
+        if (diagnostics.HasErrors())
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
-        return Expected{ args, diagnosticBag };
+        return Expected{ args, diagnostics };
     }
 
     static auto HasSrcLocation(
@@ -1094,38 +1094,38 @@ namespace Ace
         SymbolResolutionData data
     ) -> Expected<ISymbol*>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         if (!HasResolvedTemplateArgs(data))
         {
             const auto expTemplateArgs = ResolveTemplateArgs(data);
-            diagnosticBag.Add(expTemplateArgs);
+            diagnostics.Add(expTemplateArgs);
             if (!expTemplateArgs)
             {
-                return diagnosticBag;
+                return diagnostics;
             }
 
             data.TemplateArgs = expTemplateArgs.Unwrap();
         }
 
         const auto dgnMatchingSymbols = CollectMatchingSymbolsInScopes(data);
-        diagnosticBag.Add(dgnMatchingSymbols);
+        diagnostics.Add(dgnMatchingSymbols);
 
         const auto expSymbol = data.IsLastNameSection ?
             ResolveLastNameSectionSymbol(data, dgnMatchingSymbols.Unwrap()) :
             ResolveNameSectionSymbol    (data, dgnMatchingSymbols.Unwrap());
-        diagnosticBag.Add(expSymbol);
+        diagnostics.Add(expSymbol);
         if (!expSymbol)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
-        if (diagnosticBag.HasErrors())
+        if (diagnostics.HasErrors())
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
-        return Expected{ expSymbol.Unwrap(), diagnosticBag };
+        return Expected{ expSymbol.Unwrap(), diagnostics };
     }
 
     static auto IsInstanceVar(
@@ -1151,14 +1151,14 @@ namespace Ace
         const SymbolResolutionData& data
     ) -> Diagnosed<std::vector<ISymbol*>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         std::vector<ISymbol*> matchingSymbols{};
         std::for_each(begin(data.Scopes), end(data.Scopes),
         [&](const std::shared_ptr<const Scope>& scope)
         {
             const auto expMatchingSymbols = scope->CollectMatchingSymbols(data);
-            diagnosticBag.Add(expMatchingSymbols);
+            diagnostics.Add(expMatchingSymbols);
             if (!expMatchingSymbols)
             {
                 return;
@@ -1171,14 +1171,14 @@ namespace Ace
             );
         });
 
-        return Diagnosed{ matchingSymbols, diagnosticBag };
+        return Diagnosed{ matchingSymbols, diagnostics };
     }
 
     auto Scope::CollectMatchingSymbols(
         const SymbolResolutionData& data
     ) const -> Expected<std::vector<ISymbol*>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto matchingTemplateNameSymbolsIt =
             m_SymbolMap.find(data.TemplateName);
@@ -1192,7 +1192,7 @@ namespace Ace
 
         if (matchingNameSymbolsIt == end(m_SymbolMap))
         {
-            return Expected{ std::vector<ISymbol*>{}, diagnosticBag };
+            return Expected{ std::vector<ISymbol*>{}, diagnostics };
         }
 
         const auto& matchingNameSymbols = matchingNameSymbolsIt->second;
@@ -1255,7 +1255,7 @@ namespace Ace
         const std::vector<std::unique_ptr<ISymbol>>& matchingNameSymbols
     ) const -> Expected<std::vector<ISymbol*>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         auto* const t3mplate = dynamic_cast<ITemplateSymbol*>(
             matchingNameSymbols.front().get()
@@ -1267,7 +1267,7 @@ namespace Ace
             return Expected
             {
                 std::vector<ISymbol*>{ t3mplate },
-                diagnosticBag,
+                diagnostics,
             };
         }
 
@@ -1278,16 +1278,16 @@ namespace Ace
             data.ImplTemplateArgs,
             data.TemplateArgs
         );
-        diagnosticBag.Add(expTemplateInstance);
+        diagnostics.Add(expTemplateInstance);
         if (!expTemplateInstance)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         return Expected
         {
             std::vector<ISymbol*>{ expTemplateInstance.Unwrap() },
-            diagnosticBag,
+            diagnostics,
         };
     }
 
@@ -1336,7 +1336,7 @@ namespace Ace
         const std::vector<ITypeSymbol*>& templateArgs
     ) -> Expected<ISymbol*>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto& symbolMap = t3mplate->GetScope()->m_SymbolMap;
 
@@ -1345,7 +1345,7 @@ namespace Ace
         );
         if (matchingNameSymbolsIt == end(symbolMap))
         {
-            return diagnosticBag.Add(CreateUndefinedTemplateInstanceRefError(
+            return diagnostics.Add(CreateUndefinedTemplateInstanceRefError(
                 srcLocation
             ));
         }
@@ -1366,12 +1366,12 @@ namespace Ace
         );
         if (perfectMatchIt == end(symbols))
         {
-            return diagnosticBag.Add(CreateUndefinedTemplateInstanceRefError(
+            return diagnostics.Add(CreateUndefinedTemplateInstanceRefError(
                 srcLocation
             ));
         }
 
-        return Expected{ perfectMatchIt->get(), diagnosticBag };
+        return Expected{ perfectMatchIt->get(), diagnostics };
     }
 
     auto Scope::GetInstanceSymbolResolutionScopes(
@@ -1425,14 +1425,14 @@ namespace Ace
         const SymbolName& name
     ) const -> Expected<std::shared_ptr<const Scope>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         if (name.IsGlobal)
         {
             return Expected
             {
                 m_Compilation->GlobalScope.Unwrap(),
-                diagnosticBag,
+                diagnostics,
             };
         }
 
@@ -1459,10 +1459,10 @@ namespace Ace
                 continue;
             }
 
-            return Expected{ scope, diagnosticBag };
+            return Expected{ scope, diagnostics };
         }
 
-        return diagnosticBag.Add(CreateUndefinedSymbolRefError(srcLocation));
+        return diagnostics.Add(CreateUndefinedSymbolRefError(srcLocation));
     }
 
     auto Scope::GetStaticSymbolResolutionImplTemplateArgs(
@@ -1492,18 +1492,18 @@ namespace Ace
         const std::vector<ISymbol*>& matchingSymbols
     ) -> Expected<ISymbol*>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         if (matchingSymbols.empty())
         {
-            return diagnosticBag.Add(CreateUndefinedSymbolRefError(
+            return diagnostics.Add(CreateUndefinedSymbolRefError(
                 data.SrcLocation
             ));
         }
 
         if (matchingSymbols.size() > 1)
         {
-            diagnosticBag.Add(CreateAmbiguousSymbolRefError(data.SrcLocation));
+            diagnostics.Add(CreateAmbiguousSymbolRefError(data.SrcLocation));
         }
 
         auto* const selfScopedSymbol = dynamic_cast<ISelfScopedSymbol*>(
@@ -1511,7 +1511,7 @@ namespace Ace
         );
         if (!selfScopedSymbol)
         {
-            return diagnosticBag.Add(CreateNonSelfScopedSymbolScopeAccessError(
+            return diagnostics.Add(CreateNonSelfScopedSymbolScopeAccessError(
                 data.SrcLocation,
                 matchingSymbols.front()
             ));
@@ -1528,13 +1528,13 @@ namespace Ace
             data.TemplateArgs,
             data.IsTemplate,
         });   
-        diagnosticBag.Add(expSymbol);
+        diagnostics.Add(expSymbol);
         if (!expSymbol)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
-        return Expected{ expSymbol.Unwrap(), diagnosticBag };
+        return Expected{ expSymbol.Unwrap(), diagnostics };
     }
 
     auto Scope::CollectSelfAndAssociations() const -> std::vector<std::shared_ptr<const Scope>>

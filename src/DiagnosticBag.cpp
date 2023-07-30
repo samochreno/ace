@@ -17,12 +17,12 @@ namespace Ace
     }
 
     auto DiagnosticBag::Add(
-        const DiagnosticBag& diagnosticBag
+        const DiagnosticBag& diagnostics
     ) -> DiagnosticBag&
     {
         std::for_each(
-            begin(diagnosticBag.GetDiagnostics()),
-            end  (diagnosticBag.GetDiagnostics()),
+            begin(diagnostics.GetDiagnostics()),
+            end  (diagnostics.GetDiagnostics()),
             [&](const std::shared_ptr<const Diagnostic>& diagnostic)
             {
                 Add(diagnostic);

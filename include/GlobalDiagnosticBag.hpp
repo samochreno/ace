@@ -8,7 +8,7 @@
 namespace Ace
 {
     auto LogGlobalDiagnostics(
-        const DiagnosticBag& diagnosticBag,
+        const DiagnosticBag& diagnostics,
         const size_t lastLogSize
     ) -> void;
 

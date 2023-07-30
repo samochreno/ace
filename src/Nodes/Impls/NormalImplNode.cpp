@@ -103,20 +103,20 @@ namespace Ace
 
     auto NormalImplNode::DefineAssociations() const -> Expected<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         ACE_ASSERT(m_TypeName.Sections.back().TemplateArgs.empty());
 
         const auto expTypeSymbol = GetScope()->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName
         );
-        diagnosticBag.Add(expTypeSymbol);
+        diagnostics.Add(expTypeSymbol);
         if (!expTypeSymbol)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         expTypeSymbol.Unwrap()->GetSelfScope()->DefineAssociation(m_SelfScope);
-        return Void{ diagnosticBag };
+        return Void{ diagnostics };
     }
 }

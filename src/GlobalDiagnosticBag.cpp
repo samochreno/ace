@@ -47,16 +47,16 @@ namespace Ace
     }
 
     auto LogGlobalDiagnostics(
-        const DiagnosticBag& diagnosticBag,
+        const DiagnosticBag& diagnostics,
         const size_t lastLogSize
     ) -> void
     {
         std::for_each(
-            begin(diagnosticBag.GetDiagnostics()) + lastLogSize,
-            end  (diagnosticBag.GetDiagnostics()),
+            begin(diagnostics.GetDiagnostics()) + lastLogSize,
+            end  (diagnostics.GetDiagnostics()),
             [&](const std::shared_ptr<const Diagnostic>& diagnostic)
             {
-                if (diagnostic != *begin(diagnosticBag.GetDiagnostics()))
+                if (diagnostic != *begin(diagnostics.GetDiagnostics()))
                 {
                     Log << "\n";
                 }

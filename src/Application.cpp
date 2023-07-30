@@ -39,25 +39,25 @@ namespace Ace::Application
         const FileBuffer* const fileBuffer
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         auto dgnTokens = LexTokens(fileBuffer);
-        diagnosticBag.Add(dgnTokens.GetDiagnosticBag());
+        diagnostics.Add(dgnTokens.GetDiagnosticBag());
 
         const auto expAST = ParseAST(
             fileBuffer,
             std::move(dgnTokens.Unwrap())
         );
-        diagnosticBag.Add(expAST);
+        diagnostics.Add(expAST);
         if (!expAST)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         return Expected
         {
             expAST.Unwrap(),
-            diagnosticBag,
+            diagnostics,
         };
     }
 
@@ -66,7 +66,7 @@ namespace Ace::Application
         const std::vector<const INode*>& nodes
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         auto symbolCreatableNodes =
             DynamicCastFilter<const ISymbolCreatableNode*>(nodes);
@@ -115,10 +115,10 @@ namespace Ace::Application
         std::for_each(begin(symbolCreatableNodes), end(symbolCreatableNodes),
         [&](const ISymbolCreatableNode* const symbolCreatableNode)
         {
-            diagnosticBag.Add(Scope::DefineSymbol(symbolCreatableNode));
+            diagnostics.Add(Scope::DefineSymbol(symbolCreatableNode));
         });
 
-        return Diagnosed<void>{ diagnosticBag };
+        return Diagnosed<void>{ diagnostics };
     }
 
     auto DefineAssociations(
@@ -126,17 +126,17 @@ namespace Ace::Application
         const std::vector<const INode*>& nodes
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto implNodes = DynamicCastFilter<const IImplNode*>(nodes);
 
         std::for_each(begin(implNodes), end(implNodes),
         [&](const IImplNode* const implNode)
         {
-            diagnosticBag.Add(implNode->DefineAssociations());
+            diagnostics.Add(implNode->DefineAssociations());
         });
 
-        return Diagnosed<void>{ diagnosticBag };
+        return Diagnosed<void>{ diagnostics };
     }
 
     auto ValidateControlFlow(
@@ -235,7 +235,7 @@ namespace Ace::Application
         const Compilation* const compilation
     ) -> Expected<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto& packageName = compilation->Package.Name;
         auto* const globalScope = compilation->GlobalScope.Unwrap().get();
@@ -256,8 +256,8 @@ namespace Ace::Application
                     compilation,
                     srcFileBuffer
                 );
-                compilation->GlobalDiagnosticBag->Add(expAST);
-                diagnosticBag.Add(expAST);
+                compilation->Diagnostics->Add(expAST);
+                diagnostics.Add(expAST);
                 if (!expAST)
                 {
                     return;
@@ -277,21 +277,21 @@ namespace Ace::Application
             compilation,
             nodes
         );
-        compilation->GlobalDiagnosticBag->Add(dgnCreateAndDefineSymbols);
-        diagnosticBag.Add(dgnCreateAndDefineSymbols);
+        compilation->Diagnostics->Add(dgnCreateAndDefineSymbols);
+        diagnostics.Add(dgnCreateAndDefineSymbols);
 
         const auto dgnDefineAssociations = DefineAssociations(
             compilation,
             nodes
         );
-        compilation->GlobalDiagnosticBag->Add(dgnDefineAssociations);
-        diagnosticBag.Add(dgnDefineAssociations);
+        compilation->Diagnostics->Add(dgnDefineAssociations);
+        diagnostics.Add(dgnDefineAssociations);
 
         const auto timeSymbolCreationEnd = now();
 
         const auto templateSymbols = globalScope->CollectSymbolsRecursive<ITemplateSymbol>();
         compilation->TemplateInstantiator->SetSymbols(templateSymbols);
-        diagnosticBag.Add(
+        diagnostics.Add(
             compilation->TemplateInstantiator->InstantiatePlaceholderSymbols()
         );
 
@@ -320,8 +320,8 @@ namespace Ace::Application
             );
             if (!expBoundAST)
             {
-                diagnosticBag.Add(expBoundAST);
-                compilation->GlobalDiagnosticBag->Add(expBoundAST);
+                diagnostics.Add(expBoundAST);
+                compilation->Diagnostics->Add(expBoundAST);
                 return;
             }
 
@@ -330,9 +330,9 @@ namespace Ace::Application
 
         compilation->TemplateInstantiator->InstantiateSemanticsForSymbols();
 
-        if (diagnosticBag.HasErrors())
+        if (diagnostics.HasErrors())
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         GlueGeneration::GenerateAndBindGlue(compilation);
@@ -381,7 +381,7 @@ namespace Ace::Application
         LogDebug << createDurationString(emitterResult.Durations.LLC) + " - backend | llc\n";
         LogDebug << createDurationString(emitterResult.Durations.Clang) + " - backend | clang\n";
 
-        return Void{ diagnosticBag };
+        return Void{ diagnostics };
     }
 
     static auto Compile(
@@ -389,17 +389,17 @@ namespace Ace::Application
         const std::vector<std::string_view>& args
     ) -> Expected<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto expCompilation = Compilation::Parse(
             srcBuffers,
             args
         );
-        diagnosticBag.Add(expCompilation);
+        diagnostics.Add(expCompilation);
         GlobalDiagnosticBag{}.Add(expCompilation);
         if (!expCompilation)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         Log << CreateIndent() << termcolor::bright_green << "Compiling ";
@@ -410,21 +410,21 @@ namespace Ace::Application
         const auto expDidCompile = CompileCompilation(
             expCompilation.Unwrap().get()
         );
-        diagnosticBag.Add(expDidCompile);
-        if (!expDidCompile || diagnosticBag.HasErrors())
+        diagnostics.Add(expDidCompile);
+        if (!expDidCompile || diagnostics.HasErrors())
         {
             Log << CreateIndent() << termcolor::bright_red << "Failed";
             Log << termcolor::reset << " to compile\n";
             IndentLevel++;
 
-            return diagnosticBag;
+            return diagnostics;
         }
 
         Log << CreateIndent() << termcolor::bright_green << "Finished";
         Log << termcolor::reset << " compilation\n";
         IndentLevel++;
 
-        return Void{ diagnosticBag };
+        return Void{ diagnostics };
     }
 
     auto Main(const std::vector<std::string_view>& args) -> void

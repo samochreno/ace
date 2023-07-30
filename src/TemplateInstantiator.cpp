@@ -27,7 +27,7 @@ namespace Ace
 
     auto TemplateInstantiator::InstantiatePlaceholderSymbols() -> Diagnosed<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         std::for_each(begin(m_Symbols), end(m_Symbols),
         [&](ITemplateSymbol* const symbol)
@@ -51,11 +51,11 @@ namespace Ace
                 upcastedImplParams,
                 upcastedParams
             );
-            diagnosticBag.Add(dgnPlaceholderSymbol);
+            diagnostics.Add(dgnPlaceholderSymbol);
             symbol->SetPlaceholderSymbol(dgnPlaceholderSymbol.Unwrap());
         });
 
-        return Diagnosed<void>{ diagnosticBag };
+        return Diagnosed<void>{ diagnostics };
     }
 
     static auto IsArgPlaceholder(
@@ -127,13 +127,13 @@ namespace Ace
         const std::vector<ITypeSymbol*>& args
     ) -> Diagnosed<ISymbol*>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto dgnSymbolsInstantiationResult = t3mplate->InstantiateSymbols(
             implArgs,
             args
         );
-        diagnosticBag.Add(dgnSymbolsInstantiationResult);
+        diagnostics.Add(dgnSymbolsInstantiationResult);
 
         const bool areArgsPlaceholders = AreArgsPlaceholders(
             implArgs,
@@ -149,7 +149,7 @@ namespace Ace
         return Diagnosed
         {
             dgnSymbolsInstantiationResult.Unwrap().Symbol,
-            diagnosticBag,
+            diagnostics,
         };
     }
 

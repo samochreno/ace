@@ -479,7 +479,7 @@ namespace Ace
         Lexer& lexer
     ) -> Diagnosed<std::shared_ptr<const Token>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
@@ -519,7 +519,7 @@ namespace Ace
                 suffixSrcLocation,
                 suffix
             );
-            diagnosticBag.Add(expTokenKind);
+            diagnostics.Add(expTokenKind);
             if (expTokenKind)
             {
                 tokenKind = expTokenKind.Unwrap();
@@ -542,7 +542,7 @@ namespace Ace
                     beginSrcLocation.CharacterBeginIterator + decimalPointPos + 1,
                 };
 
-                diagnosticBag.Add(CreateDecimalPointInNonFloatNumericLiteralError(
+                diagnostics.Add(CreateDecimalPointInNonFloatNumericLiteralError(
                     decimalPointSrcLocation
                 ));
 
@@ -559,7 +559,7 @@ namespace Ace
         return
         {
             token,
-            diagnosticBag,
+            diagnostics,
         };
     }
 
@@ -880,15 +880,15 @@ namespace Ace
         Lexer& lexer
     ) -> Expected<std::shared_ptr<const Token>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
         const auto expTokenKind = LexDefaultTokenKind(lexer);
-        diagnosticBag.Add(expTokenKind);
+        diagnostics.Add(expTokenKind);
         if (!expTokenKind)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         const auto token = std::make_shared<const Token>(
@@ -899,7 +899,7 @@ namespace Ace
         return
         {
             token,
-            diagnosticBag,
+            diagnostics,
         };
     }
 
@@ -907,7 +907,7 @@ namespace Ace
         Lexer& lexer
     ) -> Diagnosed<std::shared_ptr<const Token>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
@@ -929,7 +929,7 @@ namespace Ace
         }
         else
         {
-            diagnosticBag.Add(CreateUnterminatedStringLiteralError(
+            diagnostics.Add(CreateUnterminatedStringLiteralError(
                 SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() }
             ));
         }
@@ -943,7 +943,7 @@ namespace Ace
         return
         {
             token,
-            diagnosticBag,
+            diagnostics,
         };
     }
 
@@ -951,16 +951,16 @@ namespace Ace
         Lexer& lexer
     ) -> Expected<std::vector<std::shared_ptr<const Token>>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         if (lexer.Peek() == '"')
         {
             const auto dgnString = LexString(lexer);
-            diagnosticBag.Add(dgnString);
+            diagnostics.Add(dgnString);
             return
             {
                 std::vector{ dgnString.Unwrap() },
-                diagnosticBag,
+                diagnostics,
             };
         }
 
@@ -972,31 +972,31 @@ namespace Ace
         if (IsNumericLiteralBegin(lexer))
         {
             const auto dgnNumericLiteral = LexNumericLiteral(lexer);
-            diagnosticBag.Add(dgnNumericLiteral);
+            diagnostics.Add(dgnNumericLiteral);
             return
             {
                 std::vector{ dgnNumericLiteral.Unwrap() },
-                diagnosticBag,
+                diagnostics,
             };
         }
 
         const auto expDefault = LexDefault(lexer);
-        diagnosticBag.Add(expDefault);
+        diagnostics.Add(expDefault);
         if (!expDefault)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         return
         {
             std::vector{ expDefault.Unwrap() },
-            diagnosticBag,
+            diagnostics,
         };
     }
 
     static auto DiscardMultiLineComment(Lexer& lexer) -> Diagnosed<void>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
@@ -1020,12 +1020,12 @@ namespace Ace
         }
         else
         {
-            diagnosticBag.Add(CreateUnterminatedMultiLineCommentError(
+            diagnostics.Add(CreateUnterminatedMultiLineCommentError(
                 SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() }
             ));
         }
 
-        return Diagnosed<void>{ diagnosticBag };
+        return Diagnosed<void>{ diagnostics };
     }
 
     static auto DiscardSingleLineComment(Lexer& lexer) -> void
@@ -1071,7 +1071,7 @@ namespace Ace
         const FileBuffer* const fileBuffer
     ) -> Diagnosed<std::vector<std::shared_ptr<const Token>>>
     {
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         Lexer lexer{ fileBuffer };
 
@@ -1088,12 +1088,12 @@ namespace Ace
 
             if (IsCommentBegin(lexer))
             {
-                diagnosticBag.Add(DiscardComment(lexer));
+                diagnostics.Add(DiscardComment(lexer));
                 continue;
             }
 
             const auto expTokens = Lex(lexer);
-            diagnosticBag.Add(expTokens);
+            diagnostics.Add(expTokens);
             if (expTokens)
             {
                 tokens.insert(
@@ -1116,7 +1116,7 @@ namespace Ace
         return Diagnosed
         {
             tokens,
-            diagnosticBag,
+            diagnostics,
         };
     }
 }

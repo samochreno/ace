@@ -104,20 +104,20 @@ namespace Ace
 
     auto TemplatedImplNode::DefineAssociations() const -> Expected<void>
     { 
-        DiagnosticBag diagnosticBag{};
+        DiagnosticBag diagnostics{};
 
         const auto expTemplateSymbol = GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(
             m_TypeTemplateName
         );
-        diagnosticBag.Add(expTemplateSymbol);
+        diagnostics.Add(expTemplateSymbol);
         if (!expTemplateSymbol)
         {
-            return diagnosticBag;
+            return diagnostics;
         }
 
         expTemplateSymbol.Unwrap()->GetSelfScope()->DefineAssociation(
             m_SelfScope
         );
-        return Void{ diagnosticBag };
+        return Void{ diagnostics };
     }
 }
