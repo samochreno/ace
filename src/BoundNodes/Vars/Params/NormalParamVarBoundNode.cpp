@@ -11,7 +11,7 @@
 
 namespace Ace
 {
-    ParamVarBoundNode::ParamVarBoundNode(
+    NormalParamVarBoundNode::NormalParamVarBoundNode(
         const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         NormalParamVarSymbol* const symbol,
@@ -23,22 +23,22 @@ namespace Ace
     {
     }
 
-    auto ParamVarBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    auto NormalParamVarBoundNode::GetDiagnostics() const -> const DiagnosticBag&
     {
         return m_Diagnostics;
     }
 
-    auto ParamVarBoundNode::GetSrcLocation() const -> const SrcLocation&
+    auto NormalParamVarBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
         return m_SrcLocation;
     }
 
-    auto ParamVarBoundNode::GetScope() const -> std::shared_ptr<Scope>
+    auto NormalParamVarBoundNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_Symbol->GetScope();
     }
 
-    auto ParamVarBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
+    auto NormalParamVarBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 
@@ -47,9 +47,9 @@ namespace Ace
         return children;
     }
 
-    auto ParamVarBoundNode::GetOrCreateTypeChecked(
+    auto NormalParamVarBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const ParamVarBoundNode>>>
+    ) const -> Expected<MaybeChanged<std::shared_ptr<const NormalParamVarBoundNode>>>
     {
         ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
         ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
@@ -65,7 +65,7 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        return CreateChanged(std::make_shared<const ParamVarBoundNode>(
+        return CreateChanged(std::make_shared<const NormalParamVarBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
@@ -73,9 +73,9 @@ namespace Ace
         ));
     }
 
-    auto ParamVarBoundNode::GetOrCreateLowered(
+    auto NormalParamVarBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const ParamVarBoundNode>>
+    ) const -> MaybeChanged<std::shared_ptr<const NormalParamVarBoundNode>>
     {
         const auto mchLoweredAttributes = TransformMaybeChangedVector(m_Attributes,
         [](const std::shared_ptr<const AttributeBoundNode>& attribute)
@@ -88,7 +88,7 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
         }
 
-        return CreateChanged(std::make_shared<const ParamVarBoundNode>(
+        return CreateChanged(std::make_shared<const NormalParamVarBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
@@ -96,7 +96,7 @@ namespace Ace
         )->GetOrCreateLowered({}).Value);
     }
 
-    auto ParamVarBoundNode::GetSymbol() const -> NormalParamVarSymbol*
+    auto NormalParamVarBoundNode::GetSymbol() const -> NormalParamVarSymbol*
     {
         return m_Symbol;
     }

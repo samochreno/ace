@@ -22,7 +22,7 @@ namespace Ace
         FunctionSymbol* const symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
         const std::optional<const std::shared_ptr<const SelfParamVarBoundNode>>& optSelf,
-        const std::vector<std::shared_ptr<const ParamVarBoundNode>>& params,
+        const std::vector<std::shared_ptr<const NormalParamVarBoundNode>>& params,
         const std::optional<std::shared_ptr<const BlockStmtBoundNode>>& optBody
     ) : m_Diagnostics{ diagnostics },
         m_SrcLocation{ srcLocation },
@@ -87,7 +87,7 @@ namespace Ace
         }));
 
         ACE_TRY(mchCheckedParams, TransformExpectedMaybeChangedVector(m_Params,
-        [](const std::shared_ptr<const ParamVarBoundNode>& param)
+        [](const std::shared_ptr<const NormalParamVarBoundNode>& param)
         {
             return param->GetOrCreateTypeChecked({});
         }));
@@ -136,7 +136,7 @@ namespace Ace
         });
 
         const auto mchLoweredParams = TransformMaybeChangedVector(m_Params,
-        [](const std::shared_ptr<const ParamVarBoundNode>& param)
+        [](const std::shared_ptr<const NormalParamVarBoundNode>& param)
         {
             return param->GetOrCreateLowered({});
         });

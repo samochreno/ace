@@ -14,21 +14,21 @@
 
 namespace Ace
 {
-    class ParamVarBoundNode : 
-        public std::enable_shared_from_this<ParamVarBoundNode>,
+    class NormalParamVarBoundNode : 
+        public std::enable_shared_from_this<NormalParamVarBoundNode>,
         public virtual IBoundNode,
         public virtual ITypedBoundNode<NormalParamVarSymbol>,
-        public virtual ITypeCheckableBoundNode<ParamVarBoundNode>,
-        public virtual ILowerableBoundNode<ParamVarBoundNode>
+        public virtual ITypeCheckableBoundNode<NormalParamVarBoundNode>,
+        public virtual ILowerableBoundNode<NormalParamVarBoundNode>
     {
     public:
-        ParamVarBoundNode(
+        NormalParamVarBoundNode(
             const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             NormalParamVarSymbol* const symbol,
             const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes
         );
-        virtual ~ParamVarBoundNode() = default;
+        virtual ~NormalParamVarBoundNode() = default;
 
         auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
@@ -36,10 +36,10 @@ namespace Ace
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const ParamVarBoundNode>>> final;
+        ) const -> Expected<MaybeChanged<std::shared_ptr<const NormalParamVarBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const ParamVarBoundNode>> final;
+        ) const -> MaybeChanged<std::shared_ptr<const NormalParamVarBoundNode>> final;
 
         auto GetSymbol() const -> NormalParamVarSymbol* final;
 

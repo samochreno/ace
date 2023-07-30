@@ -74,7 +74,7 @@ namespace Ace
         );
     }
 
-    auto NormalParamVarNode::CreateBound() const -> Expected<std::shared_ptr<const ParamVarBoundNode>>
+    auto NormalParamVarNode::CreateBound() const -> Expected<std::shared_ptr<const NormalParamVarBoundNode>>
     {
         ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
         [](const std::shared_ptr<const AttributeNode>& attribute)
@@ -86,7 +86,7 @@ namespace Ace
             m_Name
         ).Unwrap();
 
-        return std::make_shared<const ParamVarBoundNode>(
+        return std::make_shared<const NormalParamVarBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
             selfSymbol,

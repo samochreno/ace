@@ -20,7 +20,7 @@ namespace Ace
         public virtual INode,
         public virtual ITypedNode,
         public virtual ICloneableNode<NormalParamVarNode>,
-        public virtual IBindableNode<ParamVarBoundNode>
+        public virtual IBindableNode<NormalParamVarBoundNode>
     {
     public:
         NormalParamVarNode(
@@ -39,7 +39,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const NormalParamVarNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const ParamVarBoundNode>> final;
+        auto CreateBound() const -> Expected<std::shared_ptr<const NormalParamVarBoundNode>> final;
 
         auto GetName() const -> const Ident& final;
 

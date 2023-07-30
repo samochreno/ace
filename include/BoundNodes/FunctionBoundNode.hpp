@@ -32,7 +32,7 @@ namespace Ace
             FunctionSymbol* const symbol,
             const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
             const std::optional<const std::shared_ptr<const SelfParamVarBoundNode>>& optSelf,
-            const std::vector<std::shared_ptr<const ParamVarBoundNode>>& params,
+            const std::vector<std::shared_ptr<const NormalParamVarBoundNode>>& params,
             const std::optional<std::shared_ptr<const BlockStmtBoundNode>>& optBody
         );
         virtual ~FunctionBoundNode() = default;
@@ -58,7 +58,7 @@ namespace Ace
         FunctionSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const AttributeBoundNode>> m_Attributes{};
         std::optional<std::shared_ptr<const SelfParamVarBoundNode>> m_OptSelf{};
-        std::vector<std::shared_ptr<const ParamVarBoundNode>> m_Params{};
+        std::vector<std::shared_ptr<const NormalParamVarBoundNode>> m_Params{};
         std::optional<std::shared_ptr<const BlockStmtBoundNode>> m_OptBody{};
     };
 }
