@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/ModuleSymbol.hpp"
 #include "BoundNodes/Types/TypeBoundNode.hpp"
@@ -10,12 +11,12 @@
 #include "BoundNodes/FunctionBoundNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
 {
     ModuleBoundNode::ModuleBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         ModuleSymbol* const symbol,
         const std::vector<std::shared_ptr<const ModuleBoundNode>>& modules,
@@ -23,7 +24,8 @@ namespace Ace
         const std::vector<std::shared_ptr<const ImplBoundNode>>& impls,
         const std::vector<std::shared_ptr<const FunctionBoundNode>>& functions,
         const std::vector<std::shared_ptr<const StaticVarBoundNode>>& vars
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_Modules{ modules },
         m_Types{ types },
@@ -31,6 +33,11 @@ namespace Ace
         m_Functions{ functions },
         m_Vars{ vars }
     {
+    }
+
+    auto ModuleBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto ModuleBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -102,6 +109,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ModuleBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
             mchCheckedModules.Value,
@@ -158,6 +166,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ModuleBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
             mchLoweredModules.Value,

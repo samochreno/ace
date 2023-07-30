@@ -4,10 +4,10 @@
 #include <vector>
 
 #include "BoundNodes/Stmts/Jumps/JumpStmtBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/LabelSymbol.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
@@ -20,12 +20,14 @@ namespace Ace
     {
     public:
         NormalJumpStmtBoundNode(
+            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             LabelSymbol* const labelSymbol
         );
         virtual ~NormalJumpStmtBoundNode() = default;
 
+        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
@@ -46,6 +48,7 @@ namespace Ace
         auto GetLabelSymbol() const -> LabelSymbol* final;
 
     private:
+        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
         LabelSymbol* m_LabelSymbol{};

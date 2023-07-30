@@ -96,6 +96,7 @@ namespace Ace
         }));
 
         return std::make_shared<const ImplBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             boundFunctions

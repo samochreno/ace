@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/LogicalNegationExprBoundNode.hpp"
@@ -12,7 +13,6 @@
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/ExitStmtBoundNode.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -20,11 +20,18 @@
 namespace Ace
 {
     AssertStmtBoundNode::AssertStmtBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& condition
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Condition{ condition }
     {
+    }
+
+    auto AssertStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto AssertStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -67,6 +74,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const AssertStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchConvertedAndCheckedCondition.Value
         ));
@@ -87,6 +95,7 @@ namespace Ace
             m_Condition->GetOrCreateLoweredExpr({});
 
         const auto condition = std::make_shared<const LogicalNegationExprBoundNode>(
+            DiagnosticBag{},
             mchLoweredCondition.Value->GetSrcLocation(),
             mchLoweredCondition.Value
         );
@@ -94,17 +103,20 @@ namespace Ace
         const auto bodyScope = GetScope()->GetOrCreateChild({});
 
         const auto exitStmt = std::make_shared<const ExitStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             bodyScope
         );
 
         const auto bodyStmt = std::make_shared<const BlockStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             bodyScope,
             std::vector<std::shared_ptr<const IStmtBoundNode>>{ exitStmt }
         );
 
         return CreateChanged(std::make_shared<const IfStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             std::vector<std::shared_ptr<const IExprBoundNode>>{ condition },

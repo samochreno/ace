@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
@@ -17,15 +18,22 @@
 namespace Ace
 {
     LiteralExprBoundNode::LiteralExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const LiteralKind kind,
         const std::string& string
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Kind{ kind },
         m_String{ string }
     {
+    }
+    
+    auto LiteralExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto LiteralExprBoundNode::GetSrcLocation() const -> const SrcLocation&

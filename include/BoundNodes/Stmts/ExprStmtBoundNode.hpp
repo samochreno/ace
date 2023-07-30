@@ -5,9 +5,9 @@
 
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
@@ -20,11 +20,13 @@ namespace Ace
     {
     public:
         ExprStmtBoundNode(
+            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             const std::shared_ptr<const IExprBoundNode>& expr
         );
         virtual ~ExprStmtBoundNode() = default;
 
+        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
@@ -43,6 +45,7 @@ namespace Ace
         auto Emit(Emitter& emitter) const -> void final;
 
     private:
+        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprBoundNode> m_Expr{};
     };

@@ -5,10 +5,10 @@
 
 #include "BoundNodes/Stmts/Jumps/JumpStmtBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
@@ -21,12 +21,14 @@ namespace Ace
     {
     public:
         ConditionalJumpStmtBoundNode(
+            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             const std::shared_ptr<const IExprBoundNode>& condition,
             LabelSymbol* const labelSymbol
         );
         virtual ~ConditionalJumpStmtBoundNode() = default;
 
+        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
@@ -47,6 +49,7 @@ namespace Ace
         auto GetLabelSymbol() const -> LabelSymbol* final;
 
     private:
+        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprBoundNode> m_Condition{};
         LabelSymbol* m_LabelSymbol{};

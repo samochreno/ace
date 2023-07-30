@@ -4,24 +4,31 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Assert.hpp"
 
 namespace Ace
 {
     UserUnaryExprBoundNode::UserUnaryExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr,
         FunctionSymbol* const opSymbol
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Expr{ expr },
         m_OpSymbol{ opSymbol }
     {
+    }
+
+    auto UserUnaryExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto UserUnaryExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -55,6 +62,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const UserUnaryExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchCheckedExpr.Value,
             m_OpSymbol
@@ -75,6 +83,7 @@ namespace Ace
         const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             m_OpSymbol,

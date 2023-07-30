@@ -150,6 +150,7 @@ namespace Ace
         }));
 
         return std::make_shared<const StructConstructionExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             structSymbol,

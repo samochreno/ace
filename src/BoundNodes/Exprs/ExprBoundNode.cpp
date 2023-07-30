@@ -112,6 +112,7 @@ namespace Ace
             if (!isTargetRef)
             {
                 expr = std::make_shared<const DerefExprBoundNode>(
+                    DiagnosticBag{},
                     expr->GetSrcLocation(),
                     expr
                 );
@@ -122,6 +123,7 @@ namespace Ace
             if (isTargetRef)
             {
                 expr = std::make_shared<const RefExprBoundNode>(
+                    DiagnosticBag{},
                     expr->GetSrcLocation(),
                     expr
                 );
@@ -144,6 +146,7 @@ namespace Ace
         ));
 
         expr = std::make_shared<const StaticFunctionCallExprBoundNode>(
+            DiagnosticBag{},
             expr->GetSrcLocation(),
             expr->GetScope(),
             opSymbol,

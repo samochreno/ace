@@ -5,10 +5,10 @@
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/RefExprBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
@@ -18,15 +18,22 @@
 namespace Ace
 {
     InstanceFunctionCallExprBoundNode::InstanceFunctionCallExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr,
         FunctionSymbol* const functionSymbol,
         const std::vector<std::shared_ptr<const IExprBoundNode>>& args
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Expr{ expr },
         m_FunctionSymbol{ functionSymbol },
         m_Args{ args }
     {
+    }
+
+    auto InstanceFunctionCallExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto InstanceFunctionCallExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -72,6 +79,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchCheckedExpr.Value,
             m_FunctionSymbol,
@@ -107,6 +115,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchLoweredExpr.Value,
             m_FunctionSymbol,
@@ -138,6 +147,7 @@ namespace Ace
             }
 
             return std::make_shared<const RefExprBoundNode>(
+                DiagnosticBag{},
                 m_Expr->GetSrcLocation(),
                 m_Expr
             );

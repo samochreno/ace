@@ -5,7 +5,8 @@
 #include <functional>
 #include <unordered_map>
 
-#include "SrcBuffer.hpp"
+#include "Diagnostic.hpp"
+#include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
@@ -18,20 +19,26 @@
 #include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 
 namespace Ace
 {
     BlockStmtBoundNode::BlockStmtBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& selfScope,
         const std::vector<std::shared_ptr<const IStmtBoundNode>>& stmts
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_SelfScope{ selfScope },
         m_Stmts{ stmts }
     {
+    }
+
+    auto BlockStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto BlockStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -71,6 +78,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const BlockStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_SelfScope,
             mchCheckedContent.Value
@@ -100,6 +108,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const BlockStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_SelfScope,
             mchLoweredStmts.Value
@@ -124,6 +133,7 @@ namespace Ace
         auto stmts = m_Stmts;
 
         const auto blockEnd = std::make_shared<const BlockEndStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation().CreateLast(),
             m_SelfScope
         );

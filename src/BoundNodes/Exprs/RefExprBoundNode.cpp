@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -16,11 +16,18 @@
 namespace Ace
 {
     RefExprBoundNode::RefExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
+    }
+
+    auto RefExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto RefExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -54,6 +61,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const RefExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchCheckedExpr.Value
         ));
@@ -78,6 +86,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const RefExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchLoweredExpr.Value
         )->GetOrCreateLowered({}).Value);

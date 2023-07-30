@@ -10,10 +10,10 @@
 #include "BoundNodes/Vars/Params/SelfParamVarBoundNode.hpp"
 #include "BoundNodes/Vars/Params/NormalParamVarBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
@@ -27,6 +27,7 @@ namespace Ace
     {
     public:
         FunctionBoundNode(
+            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             FunctionSymbol* const symbol,
             const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
@@ -36,6 +37,7 @@ namespace Ace
         );
         virtual ~FunctionBoundNode() = default;
 
+        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
@@ -51,6 +53,7 @@ namespace Ace
         auto GetBody() const -> std::optional<std::shared_ptr<const BlockStmtBoundNode>>;
 
     private:
+        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         FunctionSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const AttributeBoundNode>> m_Attributes{};

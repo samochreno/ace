@@ -58,6 +58,7 @@ namespace Ace
     {
         ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
         return std::make_shared<const ExprStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             boundExpr
         );

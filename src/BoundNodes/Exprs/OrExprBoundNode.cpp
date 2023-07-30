@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
@@ -15,13 +15,20 @@
 namespace Ace
 {
     OrExprBoundNode::OrExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& rhsExpr
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr }
     {
+    }
+
+    auto OrExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto OrExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -73,6 +80,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const OrExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value
@@ -100,6 +108,7 @@ namespace Ace
             return CreateUnchanged(shared_from_this());
 
         return CreateChanged(std::make_shared<const OrExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchLoweredLHSExpr.Value,
             mchLoweredRHSExpr.Value

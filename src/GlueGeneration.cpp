@@ -334,11 +334,13 @@ namespace Ace::GlueGeneration
 
         const auto paramSymbols = glueSymbol->CollectParams();
         const auto selfParamRefExprNode = std::make_shared<const StaticVarRefExprBoundNode>(
+            DiagnosticBag{},
             SrcLocation{},
             bodyScope,
             paramSymbols.at(0)
         );
         const auto otherParamRefExprNode = std::make_shared<const StaticVarRefExprBoundNode>(
+            DiagnosticBag{},
             SrcLocation{},
             bodyScope,
             paramSymbols.at(1)
@@ -362,6 +364,7 @@ namespace Ace::GlueGeneration
             args.push_back(otherParamRefExprNode);
 
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
+                DiagnosticBag{},
                 SrcLocation{},
                 bodyScope,
                 expOpSymbol.Unwrap(),
@@ -369,6 +372,7 @@ namespace Ace::GlueGeneration
             );
 
             const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
+                DiagnosticBag{},
                 SrcLocation{},
                 functionCallExprNode
             );
@@ -386,11 +390,13 @@ namespace Ace::GlueGeneration
                     varTypeSymbol->GetCopyGlue().value();
                 
                 const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
+                    DiagnosticBag{},
                     SrcLocation{},
                     selfParamRefExprNode,
                     varSymbol
                 );
                 const auto otherParamVarRerefenceExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
+                    DiagnosticBag{},
                     SrcLocation{},
                     otherParamRefExprNode,
                     varSymbol
@@ -401,6 +407,7 @@ namespace Ace::GlueGeneration
                 args.push_back(otherParamVarRerefenceExprNode);
 
                 const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
+                    DiagnosticBag{},
                     SrcLocation{},
                     bodyScope,
                     varTypeGlueSymbol,
@@ -408,6 +415,7 @@ namespace Ace::GlueGeneration
                 );
 
                 const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
+                    DiagnosticBag{},
                     SrcLocation{},
                     functionCallExprNode
                 );
@@ -417,6 +425,7 @@ namespace Ace::GlueGeneration
         }
 
         const auto bodyNode = std::make_shared<const BlockStmtBoundNode>(
+            DiagnosticBag{},
             SrcLocation{},
             bodyScope->GetParent().value(),
             stmts
@@ -456,6 +465,7 @@ namespace Ace::GlueGeneration
 
         const auto paramSymbols = glueSymbol->CollectParams();
         const auto selfParamRefExprNode = std::make_shared<const StaticVarRefExprBoundNode>(
+            DiagnosticBag{},
             SrcLocation{},
             bodyScope,
             paramSymbols.at(0)
@@ -479,6 +489,7 @@ namespace Ace::GlueGeneration
             args.push_back(selfParamRefExprNode);
 
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
+                DiagnosticBag{},
                 SrcLocation{},
                 bodyScope,
                 expOpSymbol.Unwrap(),
@@ -486,6 +497,7 @@ namespace Ace::GlueGeneration
             );
 
             const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
+                DiagnosticBag{},
                 SrcLocation{},
                 functionCallExprNode
             );
@@ -502,6 +514,7 @@ namespace Ace::GlueGeneration
                 varTypeSymbol->GetDropGlue().value();
             
             const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
+                DiagnosticBag{},
                 SrcLocation{},
                 selfParamRefExprNode,
                 varSymbol
@@ -511,6 +524,7 @@ namespace Ace::GlueGeneration
             args.push_back(selfParamVarRerefenceExprNode);
 
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
+                DiagnosticBag{},
                 SrcLocation{},
                 bodyScope,
                 varTypeGlueSymbol,
@@ -518,6 +532,7 @@ namespace Ace::GlueGeneration
             );
 
             const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
+                DiagnosticBag{},
                 SrcLocation{},
                 functionCallExprNode
             );
@@ -526,6 +541,7 @@ namespace Ace::GlueGeneration
         });
 
         const auto bodyNode = std::make_shared<const BlockStmtBoundNode>(
+            DiagnosticBag{},
             SrcLocation{},
             bodyScope->GetParent().value(),
             stmts

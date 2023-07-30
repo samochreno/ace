@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
@@ -13,7 +14,6 @@
 #include "BoundNodes/Stmts/Jumps/ConditionalJumpStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "SpecialIdent.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -21,15 +21,22 @@
 namespace Ace
 {
     WhileStmtBoundNode::WhileStmtBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprBoundNode>& condition,
         const std::shared_ptr<const BlockStmtBoundNode>& body
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Condition{ condition },
         m_Body{ body }
     {
+    }
+
+    auto WhileStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto WhileStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -80,6 +87,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const WhileStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Scope,
             mchConvertedAndCheckedCondition.Value,
@@ -141,12 +149,14 @@ namespace Ace
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
 
         stmts.push_back(std::make_shared<const NormalJumpStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation().CreateFirst(),
             m_Scope,
             continueLabelSymbol
         ));
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
+            DiagnosticBag{},
             beginLabelSymbol->GetName().SrcLocation,
             beginLabelSymbol
         ));
@@ -154,17 +164,20 @@ namespace Ace
         stmts.push_back(m_Body);
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
+            DiagnosticBag{},
             continueLabelSymbol->GetName().SrcLocation,
             continueLabelSymbol
         ));
 
         stmts.push_back(std::make_shared<const ConditionalJumpStmtBoundNode>(
+            DiagnosticBag{},
             m_Condition->GetSrcLocation(),
             m_Condition,
             beginLabelSymbol
         ));
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Scope,
             stmts

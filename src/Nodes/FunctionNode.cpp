@@ -171,6 +171,7 @@ namespace Ace
         ).Unwrap();
 
         return std::make_shared<const FunctionBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             selfSymbol,
             boundAttributes,

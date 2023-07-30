@@ -3,12 +3,12 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
 #include "Assert.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
@@ -18,13 +18,20 @@
 namespace Ace
 {
     InstanceVarRefExprBoundNode::InstanceVarRefExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr,
         InstanceVarSymbol* const varSymbol
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Expr{ expr },
         m_VarSymbol{ varSymbol }
     {
+    }
+
+    auto InstanceVarRefExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto InstanceVarRefExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -58,6 +65,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceVarRefExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchCheckedExpr.Value,
             m_VarSymbol
@@ -83,6 +91,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceVarRefExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchLoweredExpr.Value,
             m_VarSymbol
@@ -108,6 +117,7 @@ namespace Ace
         if (isRef)
         {
             return GetOrCreateDerefd(std::make_shared<const DerefAsExprBoundNode>(
+                DiagnosticBag{},
                 expr->GetSrcLocation(),
                 expr,
                 typeSymbol->GetWithoutRef()
@@ -117,6 +127,7 @@ namespace Ace
         if (isStrongPtr)
         {
             return GetOrCreateDerefd(std::make_shared<const DerefAsExprBoundNode>(
+                DiagnosticBag{},
                 expr->GetSrcLocation(),
                 expr,
                 typeSymbol->GetWithoutStrongPtr()

@@ -59,6 +59,7 @@ namespace Ace
     {
         ACE_TRY(varSymbol, m_Scope->ResolveStaticSymbol<IVarSymbol>(m_Name));
         return std::make_shared<const StaticVarRefExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             varSymbol

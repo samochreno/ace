@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
@@ -14,11 +14,18 @@
 namespace Ace
 {
     BlockEndStmtBoundNode::BlockEndStmtBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& selfScope
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_SelfScope{ selfScope }
     {
+    }
+
+    auto BlockEndStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto BlockEndStmtBoundNode::GetSrcLocation() const -> const SrcLocation&

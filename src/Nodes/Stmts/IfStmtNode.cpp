@@ -102,6 +102,7 @@ namespace Ace
         }));
 
         return std::make_shared<const IfStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             boundConditions,

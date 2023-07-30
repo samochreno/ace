@@ -3,10 +3,10 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
@@ -15,13 +15,20 @@
 namespace Ace
 {
     DerefAsExprBoundNode::DerefAsExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr,
         ITypeSymbol* const typeSymbol
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_TypeSymbol{ typeSymbol },
         m_Expr{ expr }
     {
+    }
+
+    auto DerefAsExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto DerefAsExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -62,6 +69,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const DerefAsExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Expr,
             m_TypeSymbol
@@ -87,6 +95,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const DerefAsExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Expr,
             m_TypeSymbol

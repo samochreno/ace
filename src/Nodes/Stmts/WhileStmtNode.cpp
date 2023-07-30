@@ -69,6 +69,7 @@ namespace Ace
         ACE_TRY(boundCondition, m_Condition->CreateBoundExpr());
         ACE_TRY(boundBody, m_Body->CreateBound());
         return std::make_shared<const WhileStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             boundCondition,

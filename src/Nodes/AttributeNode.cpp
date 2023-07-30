@@ -52,6 +52,7 @@ namespace Ace
         ACE_TRY(boundStructConstructionExpr, m_StructConstructionExpr->CreateBound());
 
         return std::make_shared<const AttributeBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             boundStructConstructionExpr
         );

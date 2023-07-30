@@ -3,20 +3,27 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
 {
     AttributeBoundNode::AttributeBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const StructConstructionExprBoundNode>& structConstructionExpr
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_StructConstructionExpr{ structConstructionExpr }
     {
+    }
+
+    auto AttributeBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto AttributeBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -50,6 +57,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const AttributeBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchCheckedStructureConstructionExpr.Value
         ));
@@ -68,6 +76,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const AttributeBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchLowewredStructConstructionExpr.Value
         )->GetOrCreateLowered({}).Value);

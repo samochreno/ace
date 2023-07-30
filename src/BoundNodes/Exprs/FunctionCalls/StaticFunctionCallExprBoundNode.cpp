@@ -4,9 +4,9 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
@@ -16,15 +16,22 @@
 namespace Ace
 {
     StaticFunctionCallExprBoundNode::StaticFunctionCallExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         FunctionSymbol* const functionSymbol,
         const std::vector<std::shared_ptr<const IExprBoundNode>>& args
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_FunctionSymbol{ functionSymbol },
         m_Args{ args }
     {
+    }
+
+    auto StaticFunctionCallExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto StaticFunctionCallExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -64,6 +71,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             m_FunctionSymbol,
@@ -94,6 +102,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             m_FunctionSymbol,

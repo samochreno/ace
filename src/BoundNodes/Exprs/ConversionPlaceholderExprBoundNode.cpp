@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
@@ -10,13 +11,20 @@
 namespace Ace
 {
     ConversionPlaceholderExprBoundNode::ConversionPlaceholderExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const TypeInfo& typeInfo
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_TypeInfo{ typeInfo }
     {
+    }
+
+    auto ConversionPlaceholderExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto ConversionPlaceholderExprBoundNode::GetSrcLocation() const -> const SrcLocation&

@@ -6,10 +6,10 @@
 #include "BoundNodes/BoundNode.hpp"
 #include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
@@ -23,11 +23,13 @@ namespace Ace
     {
     public:
         SelfParamVarBoundNode(
+            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             SelfParamVarSymbol* const symbol
         );
         virtual ~SelfParamVarBoundNode() = default;
 
+        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
@@ -41,6 +43,7 @@ namespace Ace
         auto GetSymbol() const -> SelfParamVarSymbol* final;
 
     private:
+        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         SelfParamVarSymbol* m_Symbol{};
     };

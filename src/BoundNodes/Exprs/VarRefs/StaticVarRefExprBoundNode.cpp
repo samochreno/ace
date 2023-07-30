@@ -5,6 +5,7 @@
 
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/Vars/StaticVarSymbol.hpp"
@@ -13,7 +14,6 @@
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Vars/VarSymbol.hpp"
 #include "Assert.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
@@ -23,13 +23,20 @@
 namespace Ace
 {
     StaticVarRefExprBoundNode::StaticVarRefExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         IVarSymbol* const varSymbol
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_VarSymbol{ varSymbol }
     {
+    }
+
+    auto StaticVarRefExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto StaticVarRefExprBoundNode::GetSrcLocation() const -> const SrcLocation&

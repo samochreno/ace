@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
@@ -15,11 +15,18 @@
 namespace Ace
 {
     LogicalNegationExprBoundNode::LogicalNegationExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
+    }
+
+    auto LogicalNegationExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto LogicalNegationExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -62,6 +69,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchConvertedAndCheckedExpr.Value
         ));
@@ -86,6 +94,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchLoweredExpr.Value
         )->GetOrCreateLowered({}).Value);

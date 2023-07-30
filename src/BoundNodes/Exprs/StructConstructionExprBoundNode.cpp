@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 #include "Assert.hpp"
@@ -16,15 +16,22 @@
 namespace Ace
 {
     StructConstructionExprBoundNode::StructConstructionExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         StructTypeSymbol* const structSymbol,
         const std::vector<StructConstructionExprBoundArg>& args
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_StructSymbol{ structSymbol },
         m_Args{ args }
     {
+    }
+
+    auto StructConstructionExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto StructConstructionExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -76,6 +83,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StructConstructionExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             m_StructSymbol,
@@ -117,6 +125,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StructConstructionExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             m_StructSymbol,

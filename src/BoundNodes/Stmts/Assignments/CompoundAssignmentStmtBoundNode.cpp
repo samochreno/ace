@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "BoundNodes/Exprs/RefExprBoundNode.hpp"
 #include "BoundNodes/Exprs/DerefExprBoundNode.hpp"
@@ -23,15 +23,22 @@
 namespace Ace
 {
     CompoundAssignmentStmtBoundNode::CompoundAssignmentStmtBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& rhsExpr,
         FunctionSymbol* const opSymbol
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr },
         m_OpSymbol{ opSymbol }
     {
+    }
+
+    auto CompoundAssignmentStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto CompoundAssignmentStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -80,6 +87,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const CompoundAssignmentStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchConvertedAndCheckedLHSExpr.Value,
             mchConvertedAndCheckedRHSExpr.Value,
@@ -110,6 +118,7 @@ namespace Ace
         // lhs = lhs + rhs;
 
         const auto userBinaryExpr = std::make_shared<const UserBinaryExprBoundNode>(
+            DiagnosticBag{},
             srcLocation,
             lhsExpr,
             rhsExpr,
@@ -117,6 +126,7 @@ namespace Ace
         );
 
         const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
+            DiagnosticBag{},
             srcLocation,
             lhsExpr,
             userBinaryExpr
@@ -151,6 +161,7 @@ namespace Ace
         return
         {
             std::make_shared<const RefExprBoundNode>(
+                DiagnosticBag{},
                 expr->GetSrcLocation(),
                 expr
             ),
@@ -184,6 +195,7 @@ namespace Ace
         ACE_ASSERT(tempVarSymbol);
 
         const auto tempVarStmt = std::make_shared<const VarStmtBoundNode>(
+            DiagnosticBag{},
             expr->GetSrcLocation(),
             tempVarSymbol,
             expr
@@ -191,6 +203,7 @@ namespace Ace
         stmts.push_back(tempVarStmt);
 
         const auto tempVarRefExpr = std::make_shared<const StaticVarRefExprBoundNode>(
+            DiagnosticBag{},
             expr->GetSrcLocation(),
             scope,
             tempVarSymbol
@@ -199,6 +212,7 @@ namespace Ace
         return
         {
             std::make_shared<const RefExprBoundNode>(
+                DiagnosticBag{},
                 expr->GetSrcLocation(),
                 tempVarRefExpr
             ),
@@ -289,6 +303,7 @@ namespace Ace
         ACE_ASSERT(tempRefVarSymbol);
 
         const auto tempRefVarStmt = std::make_shared<const VarStmtBoundNode>(
+            DiagnosticBag{},
             tempRefExpr->GetSrcLocation(),
             tempRefVarSymbol,
             tempRefExpr
@@ -296,18 +311,21 @@ namespace Ace
         stmts.push_back(tempRefVarStmt);
 
         const auto tempRefVarRefExpr = std::make_shared<const StaticVarRefExprBoundNode>(
+            DiagnosticBag{},
             tempRefExpr->GetSrcLocation(),
             scope,
             tempRefVarSymbol
         );
 
         const auto tempRefVarFieldRefExpr = std::make_shared<const InstanceVarRefExprBoundNode>(
+            DiagnosticBag{},
             lhsExpr->GetSrcLocation(),
             tempRefVarRefExpr,
             lhsExpr->GetVarSymbol()
         );
 
         const auto userBinaryExpr = std::make_shared<const UserBinaryExprBoundNode>(
+            DiagnosticBag{},
             rhsExpr->GetSrcLocation(),
             tempRefVarFieldRefExpr,
             rhsExpr,
@@ -315,6 +333,7 @@ namespace Ace
         );
 
         const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
+            DiagnosticBag{},
             srcLocation,
             tempRefVarFieldRefExpr,
             userBinaryExpr
@@ -369,6 +388,7 @@ namespace Ace
         }();
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             stmts

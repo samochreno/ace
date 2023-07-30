@@ -81,6 +81,7 @@ namespace Ace
         }));
 
         return std::make_shared<const ReturnStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             boundOptExpr

@@ -3,23 +3,30 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
 {
     InstanceVarBoundNode::InstanceVarBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         InstanceVarSymbol* const symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_Attributes{ attributes }
     {
+    }
+
+    auto InstanceVarBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto InstanceVarBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -60,6 +67,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceVarBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
             mchCheckedAttributes.Value
@@ -82,6 +90,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const InstanceVarBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
             mchLoweredAttributes.Value

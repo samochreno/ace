@@ -5,11 +5,11 @@
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "TypeInfo.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "Assert.hpp"
 #include "ExprEmitResult.hpp"
@@ -24,6 +24,7 @@ namespace Ace
     {
     public:
         UserBinaryExprBoundNode(
+            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             const std::shared_ptr<const IExprBoundNode>& lhsExpr,
             const std::shared_ptr<const IExprBoundNode>& rhsExpr,
@@ -31,6 +32,7 @@ namespace Ace
         );
         virtual ~UserBinaryExprBoundNode() = default;
 
+        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
@@ -51,6 +53,7 @@ namespace Ace
         auto GetTypeInfo() const -> TypeInfo final;
 
     private:
+        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprBoundNode> m_LHSExpr{};
         std::shared_ptr<const IExprBoundNode> m_RHSExpr{};

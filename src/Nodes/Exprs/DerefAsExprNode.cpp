@@ -65,6 +65,7 @@ namespace Ace
             m_TypeName.ToSymbolName(GetCompilation())
         ));
         return std::make_shared<const DerefAsExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             boundExpr,
             typeSymbol

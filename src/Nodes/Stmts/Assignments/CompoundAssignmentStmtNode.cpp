@@ -94,6 +94,7 @@ namespace Ace
         ));
 
         return std::make_shared<const CompoundAssignmentStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             boundLHSExpr,
             boundRHSExpr,

@@ -60,6 +60,7 @@ namespace Ace
         ).Unwrap();
 
         return std::make_shared<const SelfParamVarBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             selfSymbol
         );

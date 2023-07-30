@@ -61,6 +61,7 @@ namespace Ace
     {
         ACE_TRY(boundCondition, m_Condition->CreateBoundExpr());
         return std::make_shared<const AssertStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             boundCondition
         );

@@ -3,18 +3,25 @@
 #include <memory>
 #include <vector>
 
-#include "SrcLocation.hpp"
 #include "Diagnostic.hpp"
+#include "SrcLocation.hpp"
 #include "MaybeChanged.hpp"
 #include "Emitter.hpp"
 
 namespace Ace
 {
     ExprStmtBoundNode::ExprStmtBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_Expr{ expr }
+    ) : m_Diagnostics{ diagnostics },
+        m_Expr{ expr }
     {
+    }
+
+    auto ExprStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto ExprStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -48,6 +55,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ExprStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchCheckedExpr.Value
         ));
@@ -72,6 +80,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ExprStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchLoweredExpr.Value
         )->GetOrCreateLowered(context).Value);

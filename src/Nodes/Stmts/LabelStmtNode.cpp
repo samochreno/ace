@@ -63,6 +63,7 @@ namespace Ace
         ).Unwrap();
 
         return std::make_shared<const LabelStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             selfSymbol
         );

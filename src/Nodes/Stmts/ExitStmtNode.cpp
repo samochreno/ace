@@ -53,6 +53,7 @@ namespace Ace
     auto ExitStmtNode::CreateBound() const -> Expected<std::shared_ptr<const ExitStmtBoundNode>>
     {
         return std::make_shared<const ExitStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope()
         );

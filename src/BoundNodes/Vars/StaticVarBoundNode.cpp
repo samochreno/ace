@@ -4,21 +4,28 @@
 #include <vector>
 
 #include "BoundNodes/AttributeBoundNode.hpp"
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/StaticVarSymbol.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
 {
     StaticVarBoundNode::StaticVarBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         StaticVarSymbol* const symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_Attributes{ attributes }
     {
+    }
+
+    auto StaticVarBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto StaticVarBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -59,6 +66,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StaticVarBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
             mchCheckedAttributes.Value
@@ -81,6 +89,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const StaticVarBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
             mchLoweredAttributes.Value

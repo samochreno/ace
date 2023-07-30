@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
 #include "Symbols/FunctionSymbol.hpp"
@@ -17,11 +17,18 @@
 namespace Ace
 {
     UnboxExprBoundNode::UnboxExprBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
+    }
+
+    auto UnboxExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto UnboxExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -76,6 +83,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const UnboxExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchCheckedAndConvertedExpr.Value
         ));
@@ -105,6 +113,7 @@ namespace Ace
         ACE_ASSERT(functionSymbol);
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             functionSymbol,

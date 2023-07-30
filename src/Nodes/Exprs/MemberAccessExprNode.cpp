@@ -72,6 +72,7 @@ namespace Ace
         ));
 
         return std::make_shared<const InstanceVarRefExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             boundExpr,
             memberSymbol

@@ -19,13 +19,20 @@
 namespace Ace
 {
     VarStmtBoundNode::VarStmtBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         LocalVarSymbol* const symbol,
         const std::optional<std::shared_ptr<const IExprBoundNode>>& optAssignedExpr
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_OptAssignedExpr{ optAssignedExpr }
     {
+    }
+
+    auto VarStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto VarStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -68,6 +75,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const VarStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
             mchConvertedAndCheckedOptAssignedExpr.Value
@@ -97,6 +105,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const VarStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
             mchLoweredOptAssignedExpr.Value
@@ -118,6 +127,7 @@ namespace Ace
         }
 
         const auto varRefExpr = std::make_shared<const StaticVarRefExprBoundNode>(
+            DiagnosticBag{},
             m_Symbol->GetName().SrcLocation,
             GetScope(),
             m_Symbol
@@ -126,6 +136,7 @@ namespace Ace
         // Without type checking and implicit conversions,
         // refs can be initialized too
         const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             varRefExpr,
             m_OptAssignedExpr.value()

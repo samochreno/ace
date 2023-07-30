@@ -154,6 +154,7 @@ namespace Ace
             expRHSOpSymbol.Unwrap();
 
         return std::make_shared<const UserBinaryExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             boundLHSExpr,
             boundRHSExpr,

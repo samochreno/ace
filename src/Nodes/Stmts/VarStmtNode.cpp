@@ -92,6 +92,7 @@ namespace Ace
         }));
 
         return std::make_shared<const VarStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             selfSymbol,
             boundOptAssignedExpr

@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -16,13 +16,20 @@
 namespace Ace
 {
     ConditionalJumpStmtBoundNode::ConditionalJumpStmtBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& condition,
         LabelSymbol* const labelSymbol
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Condition{ condition },
         m_LabelSymbol{ labelSymbol }
     {
+    }
+
+    auto ConditionalJumpStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto ConditionalJumpStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -65,6 +72,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchConvertedAndCheckedCondition.Value,
             m_LabelSymbol
@@ -91,6 +99,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             mchLoweredCondition.Value,
             m_LabelSymbol

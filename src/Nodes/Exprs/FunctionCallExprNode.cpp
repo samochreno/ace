@@ -102,6 +102,7 @@ namespace Ace
             return std::shared_ptr<const IExprBoundNode>
             {
                 std::make_shared<const StaticFunctionCallExprBoundNode>(
+                    DiagnosticBag{},
                     GetSrcLocation(),
                     GetScope(),
                     functionSymbol,
@@ -123,6 +124,7 @@ namespace Ace
             return std::shared_ptr<const IExprBoundNode>
             {
                 std::make_shared<const InstanceFunctionCallExprBoundNode>(
+                    DiagnosticBag{},
                     GetSrcLocation(),
                     boundExpr,
                     functionSymbol,

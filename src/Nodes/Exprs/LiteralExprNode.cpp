@@ -59,6 +59,7 @@ namespace Ace
     auto LiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const LiteralExprBoundNode>>
     {
         return std::make_shared<const LiteralExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             m_Kind,

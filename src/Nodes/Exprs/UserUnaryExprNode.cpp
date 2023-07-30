@@ -87,6 +87,7 @@ namespace Ace
         ));
 
         return std::make_shared<const UserUnaryExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             boundExpresssion,
             opSymbol

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
@@ -17,7 +18,6 @@
 #include "Symbols/LabelSymbol.hpp"
 #include "SpecialIdent.hpp"
 #include "Assert.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -25,14 +25,21 @@
 namespace Ace
 {
     IfStmtBoundNode::IfStmtBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::vector<std::shared_ptr<const IExprBoundNode>>& conditions,
         const std::vector<std::shared_ptr<const BlockStmtBoundNode>>& bodies
-    ) : m_Scope{ scope },
+    ) : m_Diagnostics{ diagnostics },
+        m_Scope{ scope },
         m_Conditions{ conditions },
         m_Bodies{ bodies }
     {
+    }
+
+    auto IfStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto IfStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -87,6 +94,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const IfStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             mchConvertedAndCheckedConditions.Value,
@@ -185,17 +193,20 @@ namespace Ace
             {
                 auto* const labelSymbol = labelSymbols.at(i - 1);
                 stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
+                    DiagnosticBag{},
                     labelSymbol->GetName().SrcLocation,
                     labelSymbol
                 ));
             }
 
             const auto condition = std::make_shared<const LogicalNegationExprBoundNode>(
+                DiagnosticBag{},
                 m_Conditions.at(i)->GetSrcLocation(),
                 m_Conditions.at(i)
             );
 
             stmts.push_back(std::make_shared<const ConditionalJumpStmtBoundNode>(
+                DiagnosticBag{},
                 condition->GetSrcLocation(),
                 condition,
                 labelSymbols.at(i)
@@ -207,6 +218,7 @@ namespace Ace
             if (!isLastBody)
             {
                 stmts.push_back(std::make_shared<const NormalJumpStmtBoundNode>(
+                    DiagnosticBag{},
                     body->GetSrcLocation().CreateLast(),
                     GetScope(),
                     lastLabelSymbol
@@ -219,6 +231,7 @@ namespace Ace
             auto* const elseLabelSymbol = labelSymbols.rbegin()[1];
 
             stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
+                DiagnosticBag{},
                 elseLabelSymbol->GetName().SrcLocation,
                 elseLabelSymbol
             ));
@@ -227,11 +240,13 @@ namespace Ace
         }
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
+            DiagnosticBag{},
             lastLabelSymbol->GetName().SrcLocation,
             lastLabelSymbol
         ));
 
         return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Scope,
             stmts

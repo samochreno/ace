@@ -4,6 +4,7 @@
 #include <vector>
 #include <optional>
 
+#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
@@ -11,25 +12,31 @@
 #include "BoundNodes/Vars/Params/NormalParamVarBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "MaybeChanged.hpp"
 
 namespace Ace
 {
     FunctionBoundNode::FunctionBoundNode(
+        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         FunctionSymbol* const symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
         const std::optional<const std::shared_ptr<const SelfParamVarBoundNode>>& optSelf,
         const std::vector<std::shared_ptr<const ParamVarBoundNode>>& params,
         const std::optional<std::shared_ptr<const BlockStmtBoundNode>>& optBody
-    ) : m_SrcLocation{ srcLocation },
+    ) : m_Diagnostics{ diagnostics },
+        m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_Attributes{ attributes },
         m_OptSelf{ optSelf },
         m_Params{ params },
         m_OptBody{ optBody }
     {
+    }
+
+    auto FunctionBoundNode::GetDiagnostics() const -> const DiagnosticBag&
+    {
+        return m_Diagnostics;
     }
 
     auto FunctionBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -102,6 +109,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const FunctionBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
             mchCheckedAttributes.Value,
@@ -150,6 +158,7 @@ namespace Ace
         }
 
         return CreateChanged(std::make_shared<const FunctionBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
             mchLoweredAttributes.Value,

@@ -59,6 +59,7 @@ namespace Ace
             m_TypeName.ToSymbolName(GetCompilation())
         ));
         return std::make_shared<const SizeOfExprBoundNode>(
+            DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             typeSymbol
