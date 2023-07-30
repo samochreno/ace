@@ -56,7 +56,7 @@ namespace Ace
         };
     }
 
-    static auto IsSymbolVisibleFromScope(
+    static auto IsSymbolAccessibleFromScope(
         ISymbol* const symbol,
         const std::shared_ptr<const Scope>& scope
     ) -> bool
@@ -104,7 +104,7 @@ namespace Ace
         }
     }
 
-    auto DiagnoseSymbolNotVisible(
+    auto DiagnoseInaccessibleSymbol(
         const SrcLocation& srcLocation,
         ISymbol* const symbol,
         const std::shared_ptr<const Scope>& beginScope
@@ -112,7 +112,7 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        if (!IsSymbolVisibleFromScope(symbol, beginScope))
+        if (!IsSymbolAccessibleFromScope(symbol, beginScope))
         {
             diagnostics.Add(CreateInaccessibleSymbolError(
                 srcLocation
@@ -1036,7 +1036,7 @@ namespace Ace
         }
 
         auto* const symbol = symbols.front();
-        diagnostics.Add(DiagnoseSymbolNotVisible(
+        diagnostics.Add(DiagnoseInaccessibleSymbol(
             data.SrcLocation,
             symbol,
             data.BeginScope

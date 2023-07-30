@@ -33,7 +33,7 @@ namespace Ace
         const SymbolNameSection& nameSection
     ) -> SrcLocation;
 
-    auto DiagnoseSymbolNotVisible(
+    auto DiagnoseInaccessibleSymbol(
         const SrcLocation& srcLocation,
         ISymbol* const symbol,
         const std::shared_ptr<const Scope>& beginScope
