@@ -4,29 +4,12 @@
 #include <string>
 
 #include "Diagnostic.hpp"
+#include "DiagnosticStringConversions.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/All.hpp"
 
 namespace Ace
 {
-    auto CreateAccessModifierString(
-        const AccessModifier accessModifier
-    ) -> std::string
-    {
-        switch (accessModifier)
-        {
-            case AccessModifier::Public:
-            {
-                return "public";
-            }
-
-            case AccessModifier::Private:
-            {
-                return "private";
-            }
-        }
-    }
-
     auto CreateMismatchedAccessModifierError(
         const SrcLocation& newSymbolNameLocation,
         const ISymbol* const originalSymbol,
@@ -133,80 +116,6 @@ namespace Ace
             srcLocation,
             "ambiguous symbol reference"
         );
-    }
-
-    auto CreateSymbolKindStringWithArticle(
-        const SymbolKind symbolKind
-    ) -> std::string
-    {
-        switch (symbolKind)
-        {
-            case SymbolKind::Module:
-            {
-                return "a module";
-            }
-
-            case SymbolKind::Struct:
-            {
-                return "a struct";
-            }
-
-            case SymbolKind::Label:
-            {
-                return "a label";
-            }
-
-            case SymbolKind::Function:
-            {
-                return "a function";
-            }
-
-            case SymbolKind::StaticVar:
-            {
-                return "a global variable";
-            }
-
-            case SymbolKind::InstanceVar:
-            {
-                return "a field";
-            }
-
-            case SymbolKind::LocalVar:
-            {
-                return "a local variable";
-            }
-
-            case SymbolKind::ParamVar:
-            {
-                return "a parameter";
-            }
-
-            case SymbolKind::FunctionTemplate:
-            {
-                return "a function template";
-            }
-
-            case SymbolKind::TypeTemplate:
-            {
-                return "a type template";
-            }
-            
-            case SymbolKind::TypeAlias:
-            {
-                return "a type alias";
-            }
-
-            case SymbolKind::ImplTemplateParam:
-            case SymbolKind::TemplateParam:
-            {
-                return "a template parameter";
-            }
-
-            case SymbolKind::ErrorType:
-            {
-                ACE_UNREACHABLE();
-            }
-        }
     }
 
     auto CreateNonSelfScopedSymbolScopeAccessError(
