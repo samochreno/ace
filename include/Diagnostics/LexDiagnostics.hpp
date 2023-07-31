@@ -7,58 +7,23 @@
 
 namespace Ace
 {
-    inline auto CreateUnterminatedMultiLineCommentError(
+    auto CreateUnterminatedMultiLineCommentError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
-    {
-        return std::make_shared<const Diagnostic>(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "unterminated multiline comment"
-        );
-    }
+    ) -> std::shared_ptr<const Diagnostic>;
 
-    inline auto CreateUnterminatedStringLiteralError(
+    auto CreateUnterminatedStringLiteralError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
-    {
-        return std::make_shared<const Diagnostic>(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "unterminated string literal"
-        );
-    }
+    ) -> std::shared_ptr<const Diagnostic>;
 
-    inline auto CreateUnexpectedCharacterError(
+    auto CreateUnexpectedCharacterError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
-    {
-        return std::make_shared<const Diagnostic>(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "unexpected character"
-        );
-    }
+    ) -> std::shared_ptr<const Diagnostic>;
 
-    inline auto CreateUnknownNumericLiteralTypeSuffixError(
+    auto CreateUnknownNumericLiteralTypeSuffixError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
-    {
-        return std::make_shared<const Diagnostic>(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "unknown numeric literal type suffix"
-        );
-    }
+    ) -> std::shared_ptr<const Diagnostic>;
 
-    inline auto CreateDecimalPointInNonFloatNumericLiteralError(
+    auto CreateDecimalPointInNonFloatNumericLiteralError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
-    {
-        return std::make_shared<const Diagnostic>(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "decimal point in non-float numeric literal"
-        );
-    }   
+    ) -> std::shared_ptr<const Diagnostic>;
 }
