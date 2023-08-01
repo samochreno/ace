@@ -8,7 +8,6 @@
 - String interning, maybe put `Token`s on the stack
 - Special fast lookup for native types
 - Rename `MemberAccess` to `FieldAccess` or `InstanceVarAccess`
-- Rename `Parse` to `Parsing` and `Lex` to `Lexing`
 - Rename `ICloneableNode` to something like `ICloneableInScopeNode`
 - Rename `MaybeChanged` to something like `Cached`
 - Rename `LabelStmtBoundNode::GetLabelSymbol` to `GetSymbol`

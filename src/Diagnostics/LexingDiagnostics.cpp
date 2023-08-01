@@ -1,4 +1,4 @@
-#include "Diagnostics/LexDiagnostics.hpp"
+#include "Diagnostics/LexingDiagnostics.hpp"
 
 #include <memory>
 

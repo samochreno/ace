@@ -6,7 +6,7 @@
 
 #include "Assert.hpp"
 #include "Diagnostic.hpp"
-#include "Diagnostics/LexDiagnostics.hpp"
+#include "Diagnostics/LexingDiagnostics.hpp"
 #include "Token.hpp"
 #include "Keyword.hpp"
 #include "String.hpp"
