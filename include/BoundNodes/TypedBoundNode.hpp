@@ -11,9 +11,9 @@ namespace Ace
     template<typename TSymbol>
     class ITypedBoundNode : public virtual IBoundNode
     {
-    public:
         static_assert(std::is_base_of_v<ITypedSymbol, TSymbol>);
 
+    public:
         virtual ~ITypedBoundNode() = default;
 
         virtual auto GetSymbol() const -> TSymbol* = 0;
