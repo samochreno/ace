@@ -16,6 +16,7 @@ namespace Ace
     class GroupStmtBoundNode : 
         public std::enable_shared_from_this<GroupStmtBoundNode>,
         public virtual IStmtBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<GroupStmtBoundNode>,
         public virtual IExpandableStmtBoundNode,
         public virtual ITypeCheckableBoundNode<GroupStmtBoundNode, StmtTypeCheckingContext>,
         public virtual ILowerableBoundNode<GroupStmtBoundNode>
@@ -33,6 +34,12 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const GroupStmtBoundNode> final;
+        auto CloneWithDiagnosticsStmt(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IStmtBoundNode> final;
         auto GetOrCreateTypeChecked(
             const StmtTypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const GroupStmtBoundNode>>> final;

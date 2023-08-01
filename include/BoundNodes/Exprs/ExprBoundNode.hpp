@@ -26,6 +26,9 @@ namespace Ace
     public:
         virtual ~IExprBoundNode() = default;
 
+        virtual auto CloneWithDiagnosticsExpr(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IExprBoundNode> = 0;
         virtual auto GetOrCreateTypeCheckedExpr(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>> = 0;

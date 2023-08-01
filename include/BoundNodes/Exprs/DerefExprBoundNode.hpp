@@ -16,6 +16,7 @@ namespace Ace
     class DerefExprBoundNode :
         public std::enable_shared_from_this<DerefExprBoundNode>,
         public virtual IExprBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<DerefExprBoundNode>,
         public virtual ITypeCheckableBoundNode<DerefExprBoundNode>,
         public virtual ILowerableBoundNode<DerefExprBoundNode>
     {
@@ -31,6 +32,12 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const DerefExprBoundNode> final;
+        auto CloneWithDiagnosticsExpr(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IExprBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const DerefExprBoundNode>>> final;

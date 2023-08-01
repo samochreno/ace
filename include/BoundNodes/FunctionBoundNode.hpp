@@ -21,6 +21,7 @@ namespace Ace
     class FunctionBoundNode : 
         public std::enable_shared_from_this<FunctionBoundNode>,
         public virtual IBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<FunctionBoundNode>,
         public virtual ITypedBoundNode<FunctionSymbol>,
         public virtual ITypeCheckableBoundNode<FunctionBoundNode>,
         public virtual ILowerableBoundNode<FunctionBoundNode>
@@ -41,6 +42,9 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const FunctionBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const FunctionBoundNode>>> final;

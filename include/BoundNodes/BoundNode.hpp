@@ -36,6 +36,17 @@ namespace Ace
         virtual auto CollectChildren() const -> std::vector<const IBoundNode*> = 0;
     };
 
+    template<typename T>
+    class ICloneableWithDiagnosticsBoundNode : public virtual IBoundNode
+    {
+    public:
+        virtual ~ICloneableWithDiagnosticsBoundNode() = default;
+
+        virtual auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const T> = 0;
+    };
+
     template<typename TNode, typename TContext = TypeCheckingContext>
     class ITypeCheckableBoundNode : public virtual IBoundNode
     {

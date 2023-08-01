@@ -22,6 +22,9 @@ namespace Ace
     public:
         virtual ~IStmtBoundNode() = default;
 
+        virtual auto CloneWithDiagnosticsStmt(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IStmtBoundNode> = 0;
         virtual auto GetOrCreateTypeCheckedStmt(
             const StmtTypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>> = 0;

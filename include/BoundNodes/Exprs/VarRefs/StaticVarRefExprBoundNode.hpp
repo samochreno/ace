@@ -17,6 +17,7 @@ namespace Ace
     class StaticVarRefExprBoundNode :
         public std::enable_shared_from_this<StaticVarRefExprBoundNode>,
         public virtual IExprBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<StaticVarRefExprBoundNode>,
         public virtual ITypeCheckableBoundNode<StaticVarRefExprBoundNode>,
         public virtual ILowerableBoundNode<StaticVarRefExprBoundNode>
     {
@@ -33,6 +34,12 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const StaticVarRefExprBoundNode> final;
+        auto CloneWithDiagnosticsExpr(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IExprBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const StaticVarRefExprBoundNode>>> final;

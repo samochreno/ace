@@ -24,6 +24,7 @@ namespace Ace
     class StructConstructionExprBoundNode :
         public std::enable_shared_from_this<StructConstructionExprBoundNode>,
         public virtual IExprBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<StructConstructionExprBoundNode>,
         public virtual ITypeCheckableBoundNode<StructConstructionExprBoundNode>,
         public virtual ILowerableBoundNode<StructConstructionExprBoundNode>
     {
@@ -41,6 +42,12 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const StructConstructionExprBoundNode> final;
+        auto CloneWithDiagnosticsExpr(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IExprBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const StructConstructionExprBoundNode>>> final;

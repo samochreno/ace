@@ -15,6 +15,7 @@ namespace Ace
     class AttributeBoundNode : 
         public std::enable_shared_from_this<AttributeBoundNode>,
         public virtual IBoundNode, 
+        public virtual ICloneableWithDiagnosticsBoundNode<AttributeBoundNode>,
         public virtual ITypeCheckableBoundNode<AttributeBoundNode>, 
         public virtual ILowerableBoundNode<AttributeBoundNode>
     {
@@ -30,6 +31,9 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const AttributeBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const AttributeBoundNode>>> final;

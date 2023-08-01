@@ -14,6 +14,7 @@ namespace Ace
     class BlockEndStmtBoundNode : 
         public std::enable_shared_from_this<BlockEndStmtBoundNode>,
         public virtual IStmtBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<BlockEndStmtBoundNode>,
         public virtual ITypeCheckableBoundNode<BlockEndStmtBoundNode, StmtTypeCheckingContext>,
         public virtual ILowerableBoundNode<BlockEndStmtBoundNode>
     {
@@ -30,6 +31,12 @@ namespace Ace
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope>;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const BlockEndStmtBoundNode> final;
+        auto CloneWithDiagnosticsStmt(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IStmtBoundNode> final;
         auto GetOrCreateTypeChecked(
             const StmtTypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const BlockEndStmtBoundNode>>> final;

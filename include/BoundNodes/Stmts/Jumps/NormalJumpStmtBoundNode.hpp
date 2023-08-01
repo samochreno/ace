@@ -15,6 +15,7 @@ namespace Ace
     class NormalJumpStmtBoundNode :
         public std::enable_shared_from_this<NormalJumpStmtBoundNode>,
         public virtual IJumpStmtBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<NormalJumpStmtBoundNode>,
         public virtual ITypeCheckableBoundNode<NormalJumpStmtBoundNode, StmtTypeCheckingContext>,
         public virtual ILowerableBoundNode<NormalJumpStmtBoundNode>
     {
@@ -31,6 +32,12 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const NormalJumpStmtBoundNode> final;
+        auto CloneWithDiagnosticsStmt(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IStmtBoundNode> final;
         auto GetOrCreateTypeChecked(
             const StmtTypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const NormalJumpStmtBoundNode>>> final;

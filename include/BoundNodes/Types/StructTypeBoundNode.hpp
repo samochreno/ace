@@ -16,6 +16,7 @@ namespace Ace
     class StructTypeBoundNode : 
         public std::enable_shared_from_this<StructTypeBoundNode>,
         public virtual ITypeBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<StructTypeBoundNode>,
         public virtual ITypeCheckableBoundNode<StructTypeBoundNode>,
         public virtual ILowerableBoundNode<StructTypeBoundNode>
     {
@@ -33,6 +34,12 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const StructTypeBoundNode> final;
+        auto CloneWithDiagnosticsType(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const ITypeBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const StructTypeBoundNode>>> final;

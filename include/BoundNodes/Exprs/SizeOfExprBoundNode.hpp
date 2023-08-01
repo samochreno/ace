@@ -17,6 +17,7 @@ namespace Ace
     class SizeOfExprBoundNode :
         public std::enable_shared_from_this<SizeOfExprBoundNode>,
         public virtual IExprBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<SizeOfExprBoundNode>,
         public virtual ITypeCheckableBoundNode<SizeOfExprBoundNode>,
         public virtual ILowerableBoundNode<SizeOfExprBoundNode>
     {
@@ -33,6 +34,12 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const SizeOfExprBoundNode> final;
+        auto CloneWithDiagnosticsExpr(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IExprBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const SizeOfExprBoundNode>>> final;

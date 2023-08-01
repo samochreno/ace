@@ -14,6 +14,9 @@ namespace Ace
     public:
         virtual ~ITypeBoundNode() = default;
 
+        virtual auto CloneWithDiagnosticsType(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const ITypeBoundNode> = 0;
         virtual auto GetOrCreateTypeCheckedType(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const ITypeBoundNode>>> = 0;

@@ -19,6 +19,7 @@ namespace Ace
     class UserBinaryExprBoundNode :
         public std::enable_shared_from_this<UserBinaryExprBoundNode>,
         public virtual IExprBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<UserBinaryExprBoundNode>,
         public virtual ITypeCheckableBoundNode<UserBinaryExprBoundNode>,
         public virtual ILowerableBoundNode<StaticFunctionCallExprBoundNode>
     {
@@ -36,6 +37,12 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const UserBinaryExprBoundNode> final;
+        auto CloneWithDiagnosticsExpr(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IExprBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const UserBinaryExprBoundNode>>> final;

@@ -16,6 +16,7 @@ namespace Ace
     class InstanceFunctionCallExprBoundNode :
         public std::enable_shared_from_this<InstanceFunctionCallExprBoundNode>,
         public virtual IExprBoundNode,
+        public virtual ICloneableWithDiagnosticsBoundNode<InstanceFunctionCallExprBoundNode>,
         public virtual ITypeCheckableBoundNode<InstanceFunctionCallExprBoundNode>,
         public virtual ILowerableBoundNode<InstanceFunctionCallExprBoundNode>
     {
@@ -33,6 +34,12 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
+        auto CloneWithDiagnostics(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const InstanceFunctionCallExprBoundNode> final;
+        auto CloneWithDiagnosticsExpr(
+            DiagnosticBag diagnostics
+        ) const -> std::shared_ptr<const IExprBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
         ) const -> Expected<MaybeChanged<std::shared_ptr<const InstanceFunctionCallExprBoundNode>>> final;
