@@ -31,6 +31,40 @@ namespace Ace
         return typeSymbol->GetUnaliased();
     }
 
+    static auto CreateTemplateArgsSignature(
+        const ITemplatableSymbol* const symbol
+    ) -> std::string
+    {
+        std::string signature{};
+
+        const auto templateArgs = symbol->CollectTemplateArgs();
+
+        if (!templateArgs.empty())
+        {
+            signature += "[";
+
+            bool isFirstTemplateArg = true;
+            std::for_each(begin(templateArgs), end(templateArgs),
+            [&](const ITypeSymbol* const templateArg)
+            {
+                if (isFirstTemplateArg)
+                {
+                    isFirstTemplateArg = false;
+                }
+                else
+                {
+                    signature += ", ";
+                }
+
+                signature += templateArg->CreateSignature();
+            });
+
+            signature += "]";
+        }
+
+        return signature;
+    }
+
     auto ISymbol::CreatePartialSignature() const -> std::string
     {
         auto* const symbol = UnwrapAlias(this);
@@ -43,20 +77,7 @@ namespace Ace
 
         if (auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(this))
         {
-            const auto templateArgs = templatableSymbol->CollectTemplateArgs();
-
-            if (!templateArgs.empty())
-            {
-                signature += "[";
-
-                std::for_each(begin(templateArgs), end(templateArgs),
-                [&](const ITypeSymbol* const templateArg)
-                {
-                    signature += templateArg->CreateSignature();
-                });
-
-                signature += "]";
-            }
+            signature += CreateTemplateArgsSignature(templatableSymbol);
         }
 
         return signature;
@@ -82,7 +103,7 @@ namespace Ace
 
         std::string signature{};
         bool isFirstScope = true;
-        std::for_each(rbegin(scopes), rend(scopes),
+        std::for_each(rbegin(scopes) + 1, rend(scopes),
         [&](const std::shared_ptr<Scope>& scope)
         {
             if (isFirstScope)
