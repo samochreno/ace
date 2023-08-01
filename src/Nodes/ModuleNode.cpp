@@ -16,7 +16,7 @@
 #include "Nodes/Templates/FunctionTemplateNode.hpp"
 #include "Nodes/Vars/StaticVarNode.hpp"
 #include "Diagnostic.hpp"
-#include "Diagnostics/SymbolDiagnostics.hpp"
+#include "Diagnostics/BindingDiagnostics.hpp"
 #include "BoundNodes/ModuleBoundNode.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/ModuleSymbol.hpp"
@@ -190,43 +190,69 @@ namespace Ace
         );
     }
 
-    auto ModuleNode::CreateBound() const -> Expected<std::shared_ptr<const ModuleBoundNode>>
+    auto ModuleNode::CreateBound() const -> std::shared_ptr<const ModuleBoundNode>
     {
-        ACE_TRY(boundModules, TransformExpectedVector(m_Modules,
-        [](const std::shared_ptr<const ModuleNode>& module)
-        {
-            return module->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const ModuleBoundNode>> boundModules{};
+        std::transform(
+            begin(m_Modules),
+            end  (m_Modules),
+            back_inserter(boundModules),
+            [&](const std::shared_ptr<const ModuleNode>& module)
+            {
+                return module->CreateBound();
+            }
+        );
 
-        ACE_TRY(boundTypes, TransformExpectedVector(m_Types,
-        [](const std::shared_ptr<const ITypeNode>& type)
+        std::vector<std::shared_ptr<const ITypeBoundNode>> boundTypes{};
+        std::transform(begin(m_Types), end(m_Types), back_inserter(boundTypes),
+        [&](const std::shared_ptr<const ITypeNode>& type)
         {
             return type->CreateBoundType();
-        }));
+        });
 
-        ACE_TRY(boundImpls, TransformExpectedVector(m_NormalImpls,
-        [](const std::shared_ptr<const NormalImplNode>& normalImpl)
-        {
-            return normalImpl->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const ImplBoundNode>> boundImpls{};
+        std::transform(
+            begin(m_NormalImpls),
+            end  (m_NormalImpls),
+            back_inserter(boundImpls),
+            [&](const std::shared_ptr<const NormalImplNode>& normalImpl)
+            {
+                return normalImpl->CreateBound();
+            }
+        );
 
-        ACE_TRY(boundTemplateImpls, TransformExpectedVector(m_TemplatedImpls,
-        [](const std::shared_ptr<const TemplatedImplNode>& templatedImpl)
-        {
-            return templatedImpl->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const ImplBoundNode>> boundTemplatedImpls{};
+        std::transform(
+            begin(m_TemplatedImpls),
+            end  (m_TemplatedImpls),
+            back_inserter(boundTemplatedImpls),
+            [&](const std::shared_ptr<const TemplatedImplNode>& templatedImpl)
+            {
+                return templatedImpl->CreateBound();
+            }
+        );
 
-        ACE_TRY(boundFunctions, TransformExpectedVector(m_Functions,
-        [](const std::shared_ptr<const FunctionNode>& function)
-        {
-            return function->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const FunctionBoundNode>> boundFunctions{};
+        std::transform(
+            begin(m_Functions),
+            end  (m_Functions),
+            back_inserter(boundFunctions),
+            [&](const std::shared_ptr<const FunctionNode>& function)
+            {
+                return function->CreateBound();
+            }
+        );
 
-        ACE_TRY(boundVars, TransformExpectedVector(m_Vars,
-        [](const std::shared_ptr<const StaticVarNode>& var)
-        {
-            return var->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const StaticVarBoundNode>> boundVars{};
+        std::transform(
+            begin(m_Vars),
+            end  (m_Vars),
+            back_inserter(boundVars),
+            [&](const std::shared_ptr<const StaticVarNode>& var)
+            {
+                return var->CreateBound();
+            }
+        );
 
         auto* const selfSymbol = GetSymbolScope()->ExclusiveResolveSymbol<ModuleSymbol>(
             GetName()
@@ -240,8 +266,8 @@ namespace Ace
         );
         allBoundImpls.insert(
             end(allBoundImpls),
-            begin(boundTemplateImpls),
-            end  (boundTemplateImpls)
+            begin(boundTemplatedImpls),
+            end  (boundTemplatedImpls)
         );
 
         return std::make_shared<const ModuleBoundNode>(

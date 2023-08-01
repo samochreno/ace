@@ -54,9 +54,10 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto ExprExprNode::CreateBound() const -> Expected<std::shared_ptr<const ExprExprBoundNode>>
+    auto ExprExprNode::CreateBound() const -> std::shared_ptr<const ExprExprBoundNode>
     {
-        ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
+        const auto boundExpr = m_Expr->CreateBoundExpr();
+
         return std::make_shared<const ExprExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
@@ -64,7 +65,7 @@ namespace Ace
         );
     }
 
-    auto ExprExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto ExprExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
     {
         return CreateBound();
     }

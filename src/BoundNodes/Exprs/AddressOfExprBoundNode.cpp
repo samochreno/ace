@@ -49,6 +49,29 @@ namespace Ace
         return children;
     }
 
+    auto AddressOfExprBoundNode::CloneWithDiagnostics(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const AddressOfExprBoundNode>
+    {
+        if (diagnostics.IsEmpty())
+        {
+            return shared_from_this();
+        }
+
+        return std::make_shared<const AddressOfExprBoundNode>(
+            diagnostics.Add(GetDiagnostics()),
+            GetSrcLocation(),
+            m_Expr
+        );
+    }
+
+    auto AddressOfExprBoundNode::CloneWithDiagnosticsExpr(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const IExprBoundNode>
+    {
+        return CloneWithDiagnostics(std::move(diagnostics));
+    }
+
     auto AddressOfExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const AddressOfExprBoundNode>>>

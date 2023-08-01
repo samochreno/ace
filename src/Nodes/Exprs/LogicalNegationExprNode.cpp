@@ -54,9 +54,10 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto LogicalNegationExprNode::CreateBound() const -> Expected<std::shared_ptr<const LogicalNegationExprBoundNode>>
+    auto LogicalNegationExprNode::CreateBound() const -> std::shared_ptr<const LogicalNegationExprBoundNode>
     {
-        ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
+        const auto boundExpr = m_Expr->CreateBoundExpr();
+
         return std::make_shared<const LogicalNegationExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
@@ -64,7 +65,7 @@ namespace Ace
         );
     }
 
-    auto LogicalNegationExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto LogicalNegationExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
     {
         return CreateBound();
     }

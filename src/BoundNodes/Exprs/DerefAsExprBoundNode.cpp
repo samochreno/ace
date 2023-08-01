@@ -50,6 +50,30 @@ namespace Ace
         return children;
     }
 
+    auto DerefAsExprBoundNode::CloneWithDiagnostics(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const DerefAsExprBoundNode>
+    {
+        if (diagnostics.IsEmpty())
+        {
+            return shared_from_this();
+        }
+
+        return std::make_shared<const DerefAsExprBoundNode>(
+            diagnostics.Add(GetDiagnostics()),
+            GetSrcLocation(),
+            m_Expr,
+            m_TypeSymbol
+        );
+    }
+
+    auto DerefAsExprBoundNode::CloneWithDiagnosticsExpr(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const IExprBoundNode>
+    {
+        return CloneWithDiagnostics(std::move(diagnostics));
+    }
+
     auto DerefAsExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const DerefAsExprBoundNode>>>

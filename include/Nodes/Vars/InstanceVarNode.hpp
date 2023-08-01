@@ -41,7 +41,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const InstanceVarNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const InstanceVarBoundNode>> final;
+        auto CreateBound() const -> std::shared_ptr<const InstanceVarBoundNode> final;
 
         auto GetName() const -> const Ident& final;
 

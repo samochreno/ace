@@ -7,6 +7,8 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Ident.hpp"
+#include "Diagnostic.hpp"
+#include "Symbols/Symbol.hpp"
 
 namespace Ace
 {

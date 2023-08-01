@@ -50,7 +50,7 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto ExitStmtNode::CreateBound() const -> Expected<std::shared_ptr<const ExitStmtBoundNode>>
+    auto ExitStmtNode::CreateBound() const -> std::shared_ptr<const ExitStmtBoundNode>
     {
         return std::make_shared<const ExitStmtBoundNode>(
             DiagnosticBag{},
@@ -59,7 +59,7 @@ namespace Ace
         );
     }
 
-    auto ExitStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
+    auto ExitStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
     {
         return CreateBound();
     }

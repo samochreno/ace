@@ -43,6 +43,30 @@ namespace Ace
         return {};
     }
 
+    auto NormalJumpStmtBoundNode::CloneWithDiagnostics(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const NormalJumpStmtBoundNode>
+    {
+        if (diagnostics.IsEmpty())
+        {
+            return shared_from_this();
+        }
+
+        return std::make_shared<const NormalJumpStmtBoundNode>(
+            diagnostics.Add(GetDiagnostics()),
+            GetSrcLocation(),
+            GetScope(),
+            GetLabelSymbol()
+        );
+    }
+
+    auto NormalJumpStmtBoundNode::CloneWithDiagnosticsStmt(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const IStmtBoundNode>
+    {
+        return CloneWithDiagnostics(std::move(diagnostics));
+    }
+
     auto NormalJumpStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const NormalJumpStmtBoundNode>>>

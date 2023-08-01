@@ -4,7 +4,6 @@
 
 #include "Nodes/Node.hpp"
 #include "BoundNodes/Types/TypeBoundNode.hpp"
-#include "Diagnostic.hpp"
 #include "Scope.hpp"
 #include "Ident.hpp"
 #include "AccessModifier.hpp"
@@ -24,7 +23,7 @@ namespace Ace
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const ITypeNode> = 0;
 
-        virtual auto CreateBoundType() const -> Expected<std::shared_ptr<const ITypeBoundNode>> = 0;
+        virtual auto CreateBoundType() const -> std::shared_ptr<const ITypeBoundNode> = 0;
 
         virtual auto GetName() const -> const Ident& = 0;
         virtual auto GetAccessModifier() const -> AccessModifier = 0;

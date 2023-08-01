@@ -8,7 +8,6 @@
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 
 namespace Ace
 {
@@ -30,7 +29,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const AttributeNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const AttributeBoundNode>> final;
+        auto CreateBound() const -> std::shared_ptr<const AttributeBoundNode> final;
 
     private:
         SrcLocation m_SrcLocation{};

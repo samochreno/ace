@@ -7,6 +7,7 @@
 #include "TokenKind.hpp"
 #include "AccessModifier.hpp"
 #include "SymbolKind.hpp"
+#include "SymbolCategory.hpp"
 #include "Token.hpp"
 
 namespace Ace
@@ -30,6 +31,10 @@ namespace Ace
     ) -> std::string;
     auto CreateJsonTypeStringWithArticle(
         const nlohmann::json::value_t type
+    ) -> std::string;
+
+    auto CreateSymbolCategoryStringWithArticle(
+        const SymbolCategory symbolCategory
     ) -> std::string;
 
     auto CreateOpString(

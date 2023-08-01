@@ -57,6 +57,30 @@ namespace Ace
         return children;
     }
 
+    auto VarStmtBoundNode::CloneWithDiagnostics(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const VarStmtBoundNode>
+    {
+        if (diagnostics.IsEmpty())
+        {
+            return shared_from_this();
+        }
+
+        return std::make_shared<const VarStmtBoundNode>(
+            diagnostics.Add(GetDiagnostics()),
+            GetSrcLocation(),
+            GetSymbol(),
+            m_OptAssignedExpr
+        );
+    }
+
+    auto VarStmtBoundNode::CloneWithDiagnosticsStmt(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const IStmtBoundNode>
+    {
+        return CloneWithDiagnostics(std::move(diagnostics));
+    }
+
     auto VarStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const VarStmtBoundNode>>>

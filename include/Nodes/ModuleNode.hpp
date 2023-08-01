@@ -52,7 +52,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const ModuleNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const ModuleBoundNode>> final;
+        auto CreateBound() const -> std::shared_ptr<const ModuleBoundNode> final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;

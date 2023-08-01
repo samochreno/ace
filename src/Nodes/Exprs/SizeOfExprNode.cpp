@@ -53,20 +53,28 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto SizeOfExprNode::CreateBound() const -> Expected<std::shared_ptr<const SizeOfExprBoundNode>>
+    auto SizeOfExprNode::CreateBound() const -> std::shared_ptr<const SizeOfExprBoundNode>
     {
-        ACE_TRY(typeSymbol, m_Scope->ResolveStaticSymbol<ITypeSymbol>(
+        DiagnosticBag diagnostics{};
+
+        const auto expTypeSymbol = m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
-        ));
+        );
+        diagnostics.Add(expTypeSymbol);
+
+        auto* const typeSymbol = expTypeSymbol.UnwrapOr(
+            GetCompilation()->ErrorSymbols->GetType()
+        );
+
         return std::make_shared<const SizeOfExprBoundNode>(
-            DiagnosticBag{},
+            diagnostics,
             GetSrcLocation(),
             GetScope(),
             typeSymbol
         );
     }
 
-    auto SizeOfExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto SizeOfExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
     {
         return CreateBound();
     }

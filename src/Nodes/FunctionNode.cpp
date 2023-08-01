@@ -134,35 +134,37 @@ namespace Ace
         );
     }
 
-    auto FunctionNode::CreateBound() const -> Expected<std::shared_ptr<const FunctionBoundNode>>
+    auto FunctionNode::CreateBound() const -> std::shared_ptr<const FunctionBoundNode>
     {
-        ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeNode>& attribute)
-        {
-            return attribute->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const AttributeBoundNode>> boundAttributes{};
+        std::transform(
+            begin(m_Attributes),
+            end  (m_Attributes),
+            back_inserter(boundAttributes),
+            [&](const std::shared_ptr<const AttributeNode>& attribute)
+            {
+                return attribute->CreateBound();
+            }
+        );
 
-        ACE_TRY(boundOptSelf, TransformExpectedOptional(m_OptSelf,
-        [](const std::shared_ptr<const SelfParamVarNode>& param)
-        {
-            return param->CreateBound();
-        }));
+        const auto boundOptSelf = m_OptSelf.has_value() ?
+            std::optional{ m_OptSelf.value()->CreateBound() } :
+            std::nullopt;
 
-        ACE_TRY(boundParams, TransformExpectedVector(m_Params,
-        [](const std::shared_ptr<const NormalParamVarNode>& param)
-        {
-            return param->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const NormalParamVarBoundNode>> boundParams{};
+        std::transform(
+            begin(m_Params),
+            end  (m_Params),
+            back_inserter(boundParams),
+            [&](const std::shared_ptr<const NormalParamVarNode>& param)
+            {
+                return param->CreateBound();
+            }
+        );
 
-        ACE_TRY(boundOptBody, TransformExpectedOptional(m_OptBody,
-        [](const std::shared_ptr<const BlockStmtNode>& body)
-        {
-            return body->CreateBound();
-        }));
-
-        ACE_TRY(typeSymbol, m_SelfScope->ResolveStaticSymbol<ITypeSymbol>(
-            m_TypeName.ToSymbolName(GetCompilation())
-        ));
+        const auto boundOptBody = m_OptBody.has_value() ?
+            std::optional{ m_OptBody.value()->CreateBound() } :
+            std::nullopt;
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<FunctionSymbol>(
             m_Name,
@@ -221,7 +223,7 @@ namespace Ace
                 m_Name,
                 symbolCategory,
                 m_AccessModifier,
-                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorTypeSymbol)
+                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorSymbols->GetType())
             ),
             diagnostics,
         };

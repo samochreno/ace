@@ -9,6 +9,7 @@
 #include "Nodes/TemplateParams/NormalTemplateParamNode.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Ident.hpp"
 

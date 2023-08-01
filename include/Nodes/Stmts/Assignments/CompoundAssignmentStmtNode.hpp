@@ -9,7 +9,6 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Op.hpp"
-#include "Diagnostic.hpp"
 
 namespace Ace
 {
@@ -37,8 +36,8 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const CompoundAssignmentStmtBoundNode>> final;
-        auto CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>> final;
+        auto CreateBound() const -> std::shared_ptr<const CompoundAssignmentStmtBoundNode> final;
+        auto CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode> final;
 
     private:
         SrcLocation m_SrcLocation{};

@@ -47,9 +47,10 @@ namespace Ace
         );
     }
 
-    auto AttributeNode::CreateBound() const -> Expected<std::shared_ptr<const AttributeBoundNode>>
+    auto AttributeNode::CreateBound() const -> std::shared_ptr<const AttributeBoundNode>
     {
-        ACE_TRY(boundStructConstructionExpr, m_StructConstructionExpr->CreateBound());
+        const auto boundStructConstructionExpr =
+            m_StructConstructionExpr->CreateBound();
 
         return std::make_shared<const AttributeBoundNode>(
             DiagnosticBag{},

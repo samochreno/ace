@@ -101,19 +101,25 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto StructTypeNode::CreateBound() const -> Expected<std::shared_ptr<const StructTypeBoundNode>>
+    auto StructTypeNode::CreateBound() const -> std::shared_ptr<const StructTypeBoundNode>
     {
-        ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeNode>& attribute)
-        {
-            return attribute->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const AttributeBoundNode>> boundAttributes{};
+        std::transform(
+            begin(m_Attributes),
+            end  (m_Attributes),
+            back_inserter(boundAttributes),
+            [&](const std::shared_ptr<const AttributeNode>& attribute)
+            {
+                return attribute->CreateBound();
+            }
+        );
 
-        ACE_TRY(boundVars, TransformExpectedVector(m_Vars,
-        [](const std::shared_ptr<const InstanceVarNode>& var)
+        std::vector<std::shared_ptr<const InstanceVarBoundNode>> boundVars{};
+        std::transform(begin(m_Vars), end(m_Vars), back_inserter(boundVars),
+        [&](const std::shared_ptr<const InstanceVarNode>& var)
         {
             return var->CreateBound();
-        }));
+        });
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<StructTypeSymbol>(
             m_Name,
@@ -130,7 +136,7 @@ namespace Ace
         );
     }
 
-    auto StructTypeNode::CreateBoundType() const -> Expected<std::shared_ptr<const ITypeBoundNode>>
+    auto StructTypeNode::CreateBoundType() const -> std::shared_ptr<const ITypeBoundNode>
     {
         return CreateBound();
     }

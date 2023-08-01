@@ -773,12 +773,16 @@ namespace Ace
         };
 
         std::vector<FunctionSymbolBlockPair> functionsSymbolBlockPairs{};
-        std::transform(
+        std::for_each(
             begin(functionSymbols), 
             end  (functionSymbols), 
-            back_inserter(functionsSymbolBlockPairs), 
             [&](FunctionSymbol* const functionSymbol)
             {
+                if (functionSymbol->IsError())
+                {
+                    return;
+                }
+
                 std::vector<llvm::Type*> paramTypes{};
                 const auto paramSymbols =
                     functionSymbol->CollectAllParams();
@@ -816,12 +820,11 @@ namespace Ace
                     function
                 );
 
-                return FunctionSymbolBlockPair
-                { 
+                functionsSymbolBlockPairs.emplace_back(
                     function,
                     functionSymbol,
                     block
-                };
+                );
             }
         );
 

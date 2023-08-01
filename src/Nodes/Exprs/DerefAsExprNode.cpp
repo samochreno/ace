@@ -58,21 +58,30 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto DerefAsExprNode::CreateBound() const -> Expected<std::shared_ptr<const DerefAsExprBoundNode>>
+    auto DerefAsExprNode::CreateBound() const -> std::shared_ptr<const DerefAsExprBoundNode>
     {
-        ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
-        ACE_TRY(typeSymbol, GetScope()->ResolveStaticSymbol<ITypeSymbol>(
+        DiagnosticBag diagnostics{};
+
+        const auto boundExpr = m_Expr->CreateBoundExpr();
+
+        const auto expTypeSymbol = GetScope()->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
-        ));
+        );
+        diagnostics.Add(expTypeSymbol);
+
+        auto* const typeSymbol = expTypeSymbol.UnwrapOr(
+            GetCompilation()->ErrorSymbols->GetType()
+        );
+
         return std::make_shared<const DerefAsExprBoundNode>(
-            DiagnosticBag{},
+            diagnostics,
             GetSrcLocation(),
             boundExpr,
             typeSymbol
         );
     }
 
-    auto DerefAsExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto DerefAsExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
     {
         return CreateBound();
     }

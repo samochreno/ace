@@ -70,6 +70,26 @@ namespace Ace
         return children;
     }
 
+    auto FunctionBoundNode::CloneWithDiagnostics(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const FunctionBoundNode>
+    {
+        if (diagnostics.IsEmpty())
+        {
+            return shared_from_this();
+        }
+
+        return std::make_shared<const FunctionBoundNode>(
+            diagnostics.Add(GetDiagnostics()),
+            GetSrcLocation(),
+            GetSymbol(),
+            m_Attributes,
+            m_OptSelf,
+            m_Params,
+            GetBody()
+        );
+    }
+
     auto FunctionBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const FunctionBoundNode>>>

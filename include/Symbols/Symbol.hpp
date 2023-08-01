@@ -32,5 +32,7 @@ namespace Ace
         virtual auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
         ) const -> SymbolName final;
+
+        virtual auto IsError() const -> bool final;
     };
 }

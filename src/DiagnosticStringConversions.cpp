@@ -7,6 +7,7 @@
 #include "Keyword.hpp"
 #include "AccessModifier.hpp"
 #include "SymbolKind.hpp"
+#include "SymbolCategory.hpp"
 #include "TokenKind.hpp"
 
 namespace Ace
@@ -579,6 +580,24 @@ namespace Ace
             case nlohmann::json::value_t::discarded:
             {
                 ACE_UNREACHABLE();
+            }
+        }
+    }
+
+    auto CreateSymbolCategoryStringWithArticle(
+        const SymbolCategory symbolCategory
+    ) -> std::string
+    {
+        switch (symbolCategory)
+        {
+            case SymbolCategory::Instance:
+            {
+                return "an instance";
+            }
+
+            case SymbolCategory::Static:
+            {
+                return "static";
             }
         }
     }

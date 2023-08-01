@@ -63,6 +63,27 @@ namespace Ace
         return children;
     }
 
+    auto ModuleBoundNode::CloneWithDiagnostics(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const ModuleBoundNode>
+    {
+        if (diagnostics.IsEmpty())
+        {
+            return shared_from_this();
+        }
+
+        return std::make_shared<const ModuleBoundNode>(
+            diagnostics.Add(GetDiagnostics()),
+            GetSrcLocation(),
+            m_Symbol,
+            m_Modules,
+            m_Types,
+            m_Impls,
+            m_Functions,
+            m_Vars
+        );
+    }
+
     auto ModuleBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const ModuleBoundNode>>>

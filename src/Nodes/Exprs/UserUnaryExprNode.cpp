@@ -7,6 +7,7 @@
 #include "Op.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
+#include "Diagnostics/BindingDiagnostics.hpp"
 #include "SpecialIdent.hpp"
 #include "BoundNodes/Exprs/UserUnaryExprBoundNode.hpp"
 #include "SpecialIdent.hpp"
@@ -61,40 +62,79 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto UserUnaryExprNode::CreateBound() const -> Expected<std::shared_ptr<const UserUnaryExprBoundNode>>
+    static auto CreateFullyQualifiedOpName(
+        const Op& op,
+        ITypeSymbol* const typeSymbol
+    ) -> SymbolName
     {
-        ACE_TRY(boundExpresssion, m_Expr->CreateBoundExpr());
+        const auto& name = SpecialIdent::Op::UnaryNameMap.at(op.TokenKind);
 
-        const auto& opNameMap =
-            SpecialIdent::Op::UnaryNameMap;
+        auto fullyQualifiedName = typeSymbol->GetWithoutRef()->CreateFullyQualifiedName(
+            op.SrcLocation
+        );
+        fullyQualifiedName.Sections.emplace_back(Ident{
+            op.SrcLocation,
+            name,
+        });
 
-        const auto opNameIt = opNameMap.find(m_Op.TokenKind);
-        ACE_TRY_ASSERT(opNameIt != end(opNameMap));
+        return fullyQualifiedName;
+    }
+
+    static auto ResolveOpSymbol(
+        const std::shared_ptr<Scope>& scope,
+        const Op& op,
+        ITypeSymbol* const typeSymbol
+    ) -> Diagnosed<FunctionSymbol*>
+    {
+        DiagnosticBag diagnostics{};
+
+        const auto expSymbol = scope->ResolveStaticSymbol<FunctionSymbol>(
+            CreateFullyQualifiedOpName(op, typeSymbol),
+            Scope::CreateArgTypes(typeSymbol)
+        );
+        if (!expSymbol)
+        {
+            diagnostics.Add(CreateUndefinedUnaryOpRefError(
+                op,
+                typeSymbol
+            ));
+
+            auto* const compilation = scope->GetCompilation();
+            return Diagnosed
+            {
+                compilation->ErrorSymbols->GetFunction(),
+                diagnostics,
+            };
+        }
+
+        diagnostics.Add(expSymbol);
+        return Diagnosed{ expSymbol.Unwrap(), diagnostics };
+    }
+
+    auto UserUnaryExprNode::CreateBound() const -> std::shared_ptr<const UserUnaryExprBoundNode>
+    {
+        DiagnosticBag diagnostics{};
+
+        const auto boundExpresssion = m_Expr->CreateBoundExpr();
 
         auto* const typeSymbol = boundExpresssion->GetTypeInfo().Symbol;
 
-        auto opFullName = typeSymbol->CreateFullyQualifiedName(
-            m_Op.SrcLocation
+        const auto dgnOpSymbol = ResolveOpSymbol(
+            GetScope(),
+            m_Op,
+            typeSymbol
         );
-        opFullName.Sections.emplace_back(Ident{
-            m_Op.SrcLocation,
-            opNameIt->second,
-        });
-
-        ACE_TRY(opSymbol, GetScope()->ResolveStaticSymbol<FunctionSymbol>(
-            opFullName,
-            Scope::CreateArgTypes(typeSymbol)
-        ));
+        diagnostics.Add(dgnOpSymbol);
 
         return std::make_shared<const UserUnaryExprBoundNode>(
-            DiagnosticBag{},
+            diagnostics,
             GetSrcLocation(),
             boundExpresssion,
-            opSymbol
+            dgnOpSymbol.Unwrap()
         );
     }
 
-    auto UserUnaryExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto UserUnaryExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
     {
         return CreateBound();
     }

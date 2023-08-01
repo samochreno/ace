@@ -7,6 +7,7 @@
 #include "Scope.hpp"
 #include "Op.hpp"
 #include "Diagnostic.hpp"
+#include "Diagnostics/BindingDiagnostics.hpp"
 #include "BoundNodes/Stmts/Assignments/CompoundAssignmentStmtBoundNode.hpp"
 #include "SpecialIdent.hpp"
 
@@ -66,43 +67,85 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto CompoundAssignmentStmtNode::CreateBound() const -> Expected<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>
+    static auto CreateFullyQualifiedOpName(
+        const Op& op,
+        ITypeSymbol* const typeSymbol
+    ) -> SymbolName
     {
-        ACE_TRY(boundLHSExpr, m_LHSExpr->CreateBoundExpr());
-        ACE_TRY(boundRHSExpr, m_RHSExpr->CreateBoundExpr());
+        const auto& name = SpecialIdent::Op::BinaryNameMap.at(op.TokenKind);
+
+        auto fullyQualifiedName = typeSymbol->GetWithoutRef()->CreateFullyQualifiedName(
+            op.SrcLocation
+        );
+        fullyQualifiedName.Sections.emplace_back(Ident{
+            op.SrcLocation,
+            name,
+        });
+
+        return fullyQualifiedName;
+    }
+
+    static auto ResolveOpSymbol(
+        const std::shared_ptr<Scope>& scope,
+        const Op& op,
+        ITypeSymbol* const lhsTypeSymbol,
+        ITypeSymbol* const rhsTypeSymbol
+    ) -> Diagnosed<FunctionSymbol*>
+    {
+        DiagnosticBag diagnostics{};
+
+        const auto expSymbol = scope->ResolveStaticSymbol<FunctionSymbol>(
+            CreateFullyQualifiedOpName(op, lhsTypeSymbol),
+            Scope::CreateArgTypes({ lhsTypeSymbol, rhsTypeSymbol })
+        );
+        if (!expSymbol)
+        {
+            diagnostics.Add(CreateUndefinedBinaryOpRefError(
+                op,
+                lhsTypeSymbol,
+                rhsTypeSymbol
+            ));
+
+            auto* const compilation = scope->GetCompilation();
+            return Diagnosed
+            {
+                compilation->ErrorSymbols->GetFunction(),
+                diagnostics,
+            };
+        }
+
+        diagnostics.Add(expSymbol);
+        return Diagnosed{ expSymbol.Unwrap(), diagnostics };
+    }
+
+    auto CompoundAssignmentStmtNode::CreateBound() const -> std::shared_ptr<const CompoundAssignmentStmtBoundNode>
+    {
+        DiagnosticBag diagnostics{};
+
+        const auto boundLHSExpr = m_LHSExpr->CreateBoundExpr();
+        const auto boundRHSExpr = m_RHSExpr->CreateBoundExpr();
 
         auto* const lhsTypeSymbol = boundLHSExpr->GetTypeInfo().Symbol;
         auto* const rhsTypeSymbol = boundRHSExpr->GetTypeInfo().Symbol;
 
-        const auto& opNameMap =
-            SpecialIdent::Op::BinaryNameMap;
-
-        const auto opNameIt = opNameMap.find(m_Op.TokenKind);
-        ACE_TRY_ASSERT(opNameIt != end(opNameMap));
-
-        auto opFullName = lhsTypeSymbol->GetWithoutRef()->CreateFullyQualifiedName(
-            m_Op.SrcLocation
+        const auto dgnOpSymbol = ResolveOpSymbol(
+            GetScope(),
+            m_Op,
+            lhsTypeSymbol,
+            rhsTypeSymbol
         );
-        opFullName.Sections.emplace_back(Ident{
-            m_Op.SrcLocation,
-            opNameIt->second,
-        });
-
-        ACE_TRY(opSymbol, m_Scope->ResolveStaticSymbol<FunctionSymbol>(
-            opFullName,
-            Scope::CreateArgTypes({ lhsTypeSymbol, rhsTypeSymbol })
-        ));
+        diagnostics.Add(dgnOpSymbol);
 
         return std::make_shared<const CompoundAssignmentStmtBoundNode>(
-            DiagnosticBag{},
+            diagnostics,
             GetSrcLocation(),
             boundLHSExpr,
             boundRHSExpr,
-            opSymbol
+            dgnOpSymbol.Unwrap()
         );
     }
 
-    auto CompoundAssignmentStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
+    auto CompoundAssignmentStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
     {
         return CreateBound();
     }

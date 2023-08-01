@@ -42,8 +42,8 @@ namespace Ace
         auto CloneInScopeType(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const ITypeNode> final;
-        auto CreateBound() const -> Expected<std::shared_ptr<const StructTypeBoundNode>> final;
-        auto CreateBoundType() const -> Expected<std::shared_ptr<const ITypeBoundNode>> final;
+        auto CreateBound() const -> std::shared_ptr<const StructTypeBoundNode> final;
+        auto CreateBoundType() const -> std::shared_ptr<const ITypeBoundNode> final;
 
         auto GetName() const -> const Ident& final;
         auto GetAccessModifier() const -> AccessModifier final;

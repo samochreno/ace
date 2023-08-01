@@ -9,6 +9,8 @@ namespace Ace
         return GetScope()->GetCompilation();
     }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
     auto IBoundNode::CollectDiagnostics() const -> DiagnosticBag
     {
         DiagnosticBag diagnostics{};
@@ -24,4 +26,5 @@ namespace Ace
 
         return diagnostics;
     }
+#pragma clang diagnostic pop
 }

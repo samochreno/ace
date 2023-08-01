@@ -9,7 +9,6 @@
 #include "Compilation.hpp"
 #include "Scope.hpp"
 #include "SymbolCreatable.hpp"
-#include "Diagnostic.hpp"
 #include "Assert.hpp"
 
 namespace Ace
@@ -42,7 +41,7 @@ namespace Ace
     public:
         virtual ~IBindableNode() = default;
 
-        virtual auto CreateBound() const -> Expected<std::shared_ptr<const T>> = 0;
+        virtual auto CreateBound() const -> std::shared_ptr<const T> = 0;
     };
 
     class ISymbolCreatableNode :

@@ -64,10 +64,11 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto WhileStmtNode::CreateBound() const -> Expected<std::shared_ptr<const WhileStmtBoundNode>>
+    auto WhileStmtNode::CreateBound() const -> std::shared_ptr<const WhileStmtBoundNode>
     {
-        ACE_TRY(boundCondition, m_Condition->CreateBoundExpr());
-        ACE_TRY(boundBody, m_Body->CreateBound());
+        const auto boundCondition = m_Condition->CreateBoundExpr();
+        const auto boundBody = m_Body->CreateBound();
+
         return std::make_shared<const WhileStmtBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
@@ -77,7 +78,7 @@ namespace Ace
         );
     }
 
-    auto WhileStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
+    auto WhileStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
     {
         return CreateBound();
     }

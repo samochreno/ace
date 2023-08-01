@@ -72,13 +72,11 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto ReturnStmtNode::CreateBound() const -> Expected<std::shared_ptr<const ReturnStmtBoundNode>>
+    auto ReturnStmtNode::CreateBound() const -> std::shared_ptr<const ReturnStmtBoundNode>
     {
-        ACE_TRY(boundOptExpr, TransformExpectedOptional(m_OptExpr,
-        [](const std::shared_ptr<const IExprNode>& expr)
-        {
-            return expr->CreateBoundExpr();
-        }));
+        const auto boundOptExpr = m_OptExpr.has_value() ?
+            std::optional{ m_OptExpr.value()->CreateBoundExpr() } :
+            std::nullopt;
 
         return std::make_shared<const ReturnStmtBoundNode>(
             DiagnosticBag{},
@@ -88,7 +86,7 @@ namespace Ace
         );
     }
 
-    auto ReturnStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
+    auto ReturnStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
     {
         return CreateBound();
     }

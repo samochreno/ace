@@ -136,12 +136,11 @@ namespace Ace
         const std::shared_ptr<const INode>& ast
     ) -> void
     {
-        const auto boundAST = Application::CreateBoundTransformedAndVerifiedAST(
-            std::dynamic_pointer_cast<const FunctionNode>(ast),
-            [](const std::shared_ptr<const FunctionNode>& ast)
-            {
-                return ast->CreateBound();
-            },
+        const auto boundAST =
+            std::dynamic_pointer_cast<const FunctionNode>(ast)->CreateBound();
+
+        const auto finalAST = Application::CreateTransformedAndVerifiedAST(
+            boundAST,
             [](const std::shared_ptr<const FunctionBoundNode>& ast)
             {
                 return ast->GetOrCreateTypeChecked({});

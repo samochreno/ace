@@ -71,13 +71,14 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto BlockStmtNode::CreateBound() const -> Expected<std::shared_ptr<const BlockStmtBoundNode>>
+    auto BlockStmtNode::CreateBound() const -> std::shared_ptr<const BlockStmtBoundNode>
     {
-        ACE_TRY(boundStmts, TransformExpectedVector(m_Stmts,
-        [](const std::shared_ptr<const IStmtNode>& stmt)
+        std::vector<std::shared_ptr<const IStmtBoundNode>> boundStmts{};
+        std::transform(begin(m_Stmts), end(m_Stmts), back_inserter(boundStmts),
+        [&](const std::shared_ptr<const IStmtNode>& stmt)
         {
             return stmt->CreateBoundStmt();
-        }));
+        });
 
         return std::make_shared<const BlockStmtBoundNode>(
             DiagnosticBag{},
@@ -87,7 +88,7 @@ namespace Ace
         );
     }
 
-    auto BlockStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
+    auto BlockStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
     {
         return CreateBound();
     }

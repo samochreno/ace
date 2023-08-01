@@ -52,6 +52,31 @@ namespace Ace
         return children;
     }
 
+    auto StructTypeBoundNode::CloneWithDiagnostics(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const StructTypeBoundNode>
+    {
+        if (diagnostics.IsEmpty())
+        {
+            return shared_from_this();
+        }
+
+        return std::make_shared<const StructTypeBoundNode>(
+            diagnostics.Add(GetDiagnostics()),
+            GetSrcLocation(),
+            GetSymbol(),
+            m_Attributes,
+            m_Vars
+        );
+    }
+
+    auto StructTypeBoundNode::CloneWithDiagnosticsType(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const ITypeBoundNode>
+    {
+        return CloneWithDiagnostics(std::move(diagnostics));
+    }
+
     auto StructTypeBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const StructTypeBoundNode>>>

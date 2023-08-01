@@ -134,12 +134,11 @@ namespace Ace
         const std::shared_ptr<const INode>& ast
     ) -> void
     {
-        const auto boundAST = Application::CreateBoundTransformedAndVerifiedAST(
-            std::dynamic_pointer_cast<const ITypeNode>(ast),
-            [](const std::shared_ptr<const ITypeNode>& ast)
-            {
-                return ast->CreateBoundType();
-            },
+        const auto boundAST =
+            std::dynamic_pointer_cast<const ITypeNode>(ast)->CreateBoundType();
+
+        const auto finalAST = Application::CreateTransformedAndVerifiedAST(
+            boundAST,
             [](const std::shared_ptr<const ITypeBoundNode>& ast)
             {
                 return ast->GetOrCreateTypeCheckedType({});
@@ -150,7 +149,7 @@ namespace Ace
             }
         ).Unwrap();
 
-        auto* const selfSymbol = boundAST->GetSymbol();
+        auto* const selfSymbol = finalAST->GetSymbol();
 
         const SrcLocation srcLocation{};
 

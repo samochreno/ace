@@ -21,7 +21,6 @@ namespace Ace
         TypeAlias,
         ImplTemplateParam,
         TemplateParam,
-        ErrorType,
     };
 
     constexpr auto operator&(

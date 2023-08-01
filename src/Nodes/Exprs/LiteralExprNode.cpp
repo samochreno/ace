@@ -56,7 +56,7 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto LiteralExprNode::CreateBound() const -> Expected<std::shared_ptr<const LiteralExprBoundNode>>
+    auto LiteralExprNode::CreateBound() const -> std::shared_ptr<const LiteralExprBoundNode>
     {
         return std::make_shared<const LiteralExprBoundNode>(
             DiagnosticBag{},
@@ -67,7 +67,7 @@ namespace Ace
         );
     }
 
-    auto LiteralExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto LiteralExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
     {
         return CreateBound();
     }

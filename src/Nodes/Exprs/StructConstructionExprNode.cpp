@@ -6,6 +6,7 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
+#include "Diagnostics/BindingDiagnostics.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
 #include "Nodes/Exprs/SymbolLiteralExprNode.hpp"
@@ -91,66 +92,281 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto StructConstructionExprNode::CreateBound() const -> Expected<std::shared_ptr<const StructConstructionExprBoundNode>>
+    static auto CreateBoundArgValue(
+        const std::shared_ptr<Scope>& scope,
+        const StructConstructionExprArg& arg
+    ) -> std::shared_ptr<const IExprBoundNode>
     {
-        ACE_TRY(structSymbol, m_Scope->ResolveStaticSymbol<StructTypeSymbol>(m_TypeName));
+        if (arg.OptValue.has_value())
+        {
+            return arg.OptValue.value()->CreateBoundExpr();
+        }
+
+        const SymbolName symbolName
+        {
+            SymbolNameSection{ arg.Name },
+            SymbolNameResolutionScope::Local,
+        };
+
+        return std::make_shared<const SymbolLiteralExprNode>(
+            arg.Name.SrcLocation,
+            scope,
+            symbolName
+        )->CreateBoundExpr();
+    }
+
+    static auto CreateVarSymbolToUseSrcLocationsMap(
+        const std::vector<InstanceVarSymbol*>& varSymbols
+    ) -> std::map<InstanceVarSymbol*, std::vector<SrcLocation>>
+    {
+        std::map<InstanceVarSymbol*, std::vector<SrcLocation>> map{};
+
+        std::for_each(begin(varSymbols), end(varSymbols),
+        [&](InstanceVarSymbol* const varSymbol)
+        {
+            map[varSymbol] = std::vector<SrcLocation>{};
+        });
+
+        return map;
+    }
+
+    static auto DiagnoseInaccessibleVar(
+        const std::shared_ptr<Scope>& scope,
+        InstanceVarSymbol* const varSymbol,
+        const std::vector<SrcLocation>& varUseSrcLocations
+    ) -> Diagnosed<void>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::for_each(begin(varUseSrcLocations), end(varUseSrcLocations),
+        [&](const SrcLocation& varUseSrcLocation)
+        {
+            diagnostics.Add(DiagnoseInaccessibleSymbol(
+                varUseSrcLocation,
+                varSymbol,
+                scope
+            ));
+        });
+
+        return Diagnosed<void>{ diagnostics };
+    }
+
+    static auto DiagnoseInaccessibleVars(
+        const std::shared_ptr<Scope>& scope,
+        const std::vector<InstanceVarSymbol*>& varSymbols,
+        const std::map<InstanceVarSymbol*, std::vector<SrcLocation>>& varSymbolToUseSrcLocationsMap
+    ) -> Diagnosed<void>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::for_each(begin(varSymbols), end(varSymbols),
+        [&](InstanceVarSymbol* const varSymbol)
+        {
+            diagnostics.Add(DiagnoseInaccessibleVar(
+                scope,
+                varSymbol,
+                varSymbolToUseSrcLocationsMap.at(varSymbol)
+            ));
+        });
+
+        return Diagnosed<void>{ diagnostics };
+    }
+
+    static auto DiagnoseMissingVars(
+        const SrcLocation& srcLocation,
+        StructTypeSymbol* const structSymbol,
+        const std::vector<InstanceVarSymbol*>& varSymbols,
+        const std::map<InstanceVarSymbol*, std::vector<SrcLocation>>& varSymbolToUseSrcLocationsMap
+    ) -> Diagnosed<void>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::vector<InstanceVarSymbol*> missingVarSymbols{};
+        std::for_each(begin(varSymbols), end(varSymbols),
+        [&](InstanceVarSymbol* const varSymbol)
+        {
+            if (varSymbolToUseSrcLocationsMap.at(varSymbol).empty())
+            {
+                missingVarSymbols.push_back(varSymbol);
+            }
+        });
+
+        if (!missingVarSymbols.empty())
+        {
+            diagnostics.Add(CreateMissingStructConstructionVarsError(
+                srcLocation,
+                structSymbol,
+                missingVarSymbols
+            ));
+        }
+
+        return Diagnosed<void>{ diagnostics };
+    }
+
+    static auto DiagnoseStructConstructionVarSpecifiedMoreThanOnce(
+        StructTypeSymbol* const structSymbol,
+        InstanceVarSymbol* const varSymbol,
+        const std::vector<SrcLocation>& varUseSrcLocations
+    ) -> Diagnosed<void>
+    {
+        DiagnosticBag diagnostics{};
+
+        if (varUseSrcLocations.size() > 1)
+        {
+            std::for_each(
+                begin(varUseSrcLocations) + 1,
+                end  (varUseSrcLocations),
+                [&](const SrcLocation& varUseSrcLocation)
+                {
+                    diagnostics.Add(CreateStructConstructionVarSpecifiedMoreThanOnceError(
+                        varUseSrcLocation,
+                        structSymbol,
+                        varSymbol
+                    ));
+                }
+            );
+        }
+
+        return Diagnosed<void>{ diagnostics };
+    }
+
+    static auto DiagnoseVarsSpecifiedMoreThanOnce(
+        StructTypeSymbol* const structSymbol,
+        const std::vector<InstanceVarSymbol*>& varSymbols,
+        const std::map<InstanceVarSymbol*, std::vector<SrcLocation>>& varSymbolToUseSrcLocationsMap
+    ) -> Diagnosed<void>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::for_each(begin(varSymbols), end(varSymbols),
+        [&](InstanceVarSymbol* const varSymbol)
+        {
+            diagnostics.Add(DiagnoseStructConstructionVarSpecifiedMoreThanOnce(
+                structSymbol,
+                varSymbol,
+                varSymbolToUseSrcLocationsMap.at(varSymbol)
+            ));
+        });
+
+        return Diagnosed<void>{ diagnostics };
+    }
+
+    static auto CreateBoundArgs(
+        const SrcLocation& srcLocation,
+        const std::shared_ptr<Scope>& scope,
+        StructTypeSymbol* const structSymbol,
+        const std::vector<StructConstructionExprArg>& args
+    ) -> Diagnosed<std::vector<StructConstructionExprBoundArg>>
+    {
+        DiagnosticBag diagnostics{};
 
         const auto varSymbols = structSymbol->GetVars();
-        ACE_TRY_ASSERT(varSymbols.size() == m_Args.size());
 
-        ACE_TRY(boundArgs, TransformExpectedVector(m_Args,
-        [&](const StructConstructionExprArg& arg) -> Expected<StructConstructionExprBoundArg>
+        auto varSymbolToUseSrcLocationsMap =
+            CreateVarSymbolToUseSrcLocationsMap(varSymbols);
+
+        std::vector<StructConstructionExprBoundArg> boundArgs{};
+        std::transform(begin(args), end(args), back_inserter(boundArgs),
+        [&](const StructConstructionExprArg& arg) -> StructConstructionExprBoundArg
         {
             const auto matchingVarSymbolIt = std::find_if(
-                begin(varSymbols),
-                end  (varSymbols),
-                [&](const InstanceVarSymbol* const varSymbol)
+                begin(varSymbolToUseSrcLocationsMap),
+                end  (varSymbolToUseSrcLocationsMap),
+                [&](const std::pair<InstanceVarSymbol* const, const std::vector<SrcLocation>&>& varSymbolAndUseSrcLocationsPair)
                 {
-                    return
-                        varSymbol->GetName().String ==
-                        arg.Name.String;
+                    auto* const varSymbol =
+                        varSymbolAndUseSrcLocationsPair.first;
+
+                    return varSymbol->GetName().String == arg.Name.String;
                 }
             );
 
-            ACE_TRY_ASSERT(matchingVarSymbolIt != end(varSymbols));
-            auto* const varSymbol = *matchingVarSymbolIt;
+            const bool hasMatchingVarSymbol =
+                matchingVarSymbolIt != end(varSymbolToUseSrcLocationsMap);
 
-            ACE_TRY(boundValue, ([&]() -> Expected<std::shared_ptr<const IExprBoundNode>>
+            if (hasMatchingVarSymbol)
             {
-                if (arg.OptValue.has_value())
-                {
-                    return arg.OptValue.value()->CreateBoundExpr();
-                }
+                auto* const varSymbol = matchingVarSymbolIt->first;
+                varSymbolToUseSrcLocationsMap.at(varSymbol).push_back(
+                    arg.Name.SrcLocation
+                );
+            }
+            else
+            {
+                diagnostics.Add(CreateStructHasNoVarNamedError(
+                    structSymbol,
+                    arg.Name
+                ));
+            }
 
-                const SymbolName symbolName
-                {
-                    SymbolNameSection{ arg.Name },
-                    SymbolNameResolutionScope::Local,
-                };
+            auto* const compilation = scope->GetCompilation();
 
-                return std::make_shared<const SymbolLiteralExprNode>(
-                    arg.Name.SrcLocation,
-                    m_Scope,
-                    symbolName
-                )->CreateBoundExpr();
-            }()));
+            auto* const varSymbol = hasMatchingVarSymbol ?
+                matchingVarSymbolIt->first :
+                compilation->ErrorSymbols->GetInstanceVar();
 
-            // TODO: Add to diagnostics
-            (void)DiagnoseInaccesibleSymbol(
-                arg.Name.SrcLocation,
-                varSymbol,
-                m_Scope
-            );
+            const auto boundValue = CreateBoundArgValue(scope, arg);
 
             return StructConstructionExprBoundArg
             {
                 varSymbol,
                 boundValue,
             };
-        }));
+        });
+
+        diagnostics.Add(DiagnoseInaccessibleVars(
+            scope,
+            varSymbols,
+            varSymbolToUseSrcLocationsMap
+        ));
+        diagnostics.Add(DiagnoseMissingVars(
+            srcLocation,
+            structSymbol,
+            varSymbols,
+            varSymbolToUseSrcLocationsMap
+        ));
+        diagnostics.Add(DiagnoseVarsSpecifiedMoreThanOnce(
+            structSymbol,
+            varSymbols,
+            varSymbolToUseSrcLocationsMap
+        ));
+
+        return Diagnosed{ boundArgs, diagnostics };
+    }
+
+    auto StructConstructionExprNode::CreateBound() const -> std::shared_ptr<const StructConstructionExprBoundNode>
+    {
+        DiagnosticBag diagnostics{};
+
+        const auto expStructSymbol = m_Scope->ResolveStaticSymbol<StructTypeSymbol>(
+            m_TypeName
+        );
+        diagnostics.Add(expStructSymbol);
+
+        const auto boundArgs = [&]() -> std::vector<StructConstructionExprBoundArg>
+        {
+            if (!expStructSymbol)
+            {
+                return {};
+            }
+
+            const auto dgnBoundArgs = CreateBoundArgs(
+                m_TypeName.CreateSrcLocation(),
+                GetScope(),
+                expStructSymbol.Unwrap(),
+                m_Args
+            );
+            diagnostics.Add(dgnBoundArgs);
+
+            return dgnBoundArgs.Unwrap();
+        }();
+
+        auto* const structSymbol = expStructSymbol.UnwrapOr(
+            GetCompilation()->ErrorSymbols->GetStructType()
+        );
 
         return std::make_shared<const StructConstructionExprBoundNode>(
-            DiagnosticBag{},
+            diagnostics,
             GetSrcLocation(),
             GetScope(),
             structSymbol,
@@ -158,7 +374,7 @@ namespace Ace
         );
     }
 
-    auto StructConstructionExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto StructConstructionExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
     {
         return CreateBound();
     }

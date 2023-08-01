@@ -56,7 +56,7 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto LabelStmtNode::CreateBound() const -> Expected<std::shared_ptr<const LabelStmtBoundNode>>
+    auto LabelStmtNode::CreateBound() const -> std::shared_ptr<const LabelStmtBoundNode>
     {
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<LabelSymbol>(
             m_Name
@@ -69,7 +69,7 @@ namespace Ace
         );
     }
 
-    auto LabelStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
+    auto LabelStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
     {
         return CreateBound();
     }

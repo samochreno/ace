@@ -53,7 +53,7 @@ namespace Ace
         );
     }
 
-    auto SelfParamVarNode::CreateBound() const -> Expected<std::shared_ptr<const SelfParamVarBoundNode>>
+    auto SelfParamVarNode::CreateBound() const -> std::shared_ptr<const SelfParamVarBoundNode>
     {
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<SelfParamVarSymbol>(
             m_Name
@@ -100,7 +100,7 @@ namespace Ace
             std::make_unique<SelfParamVarSymbol>(
                 m_SrcLocation,
                 m_Scope,
-                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorTypeSymbol)
+                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorSymbols->GetType())
             ),
             diagnostics,
         };

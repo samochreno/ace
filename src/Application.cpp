@@ -212,6 +212,11 @@ namespace Ace::Application
             end  (typeSymbols),
             [](const ITypeSymbol* const typeSymbol) -> bool
             {
+                if (typeSymbol->IsError())
+                {
+                    return true;
+                }
+
                 auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(
                     typeSymbol
                 );
@@ -300,15 +305,24 @@ namespace Ace::Application
         compilation->Natives->Initialize();
 
         std::vector<std::shared_ptr<const ModuleBoundNode>> boundASTs{};
-        std::for_each(begin(asts), end(asts),
+        std::transform(begin(asts), end(asts), back_inserter(boundASTs),
         [&](const std::shared_ptr<const ModuleNode>& ast)
         {
-            const auto expBoundAST = CreateBoundTransformedAndVerifiedAST(
-                ast,
-                [](const std::shared_ptr<const ModuleNode>& ast)
-                {
-                    return ast->CreateBound(); 
-                },
+            const auto boundAST = ast->CreateBound();
+
+            const auto astDiagnostics = boundAST->CollectDiagnostics();
+            compilation->Diagnostics->Add(astDiagnostics);
+            diagnostics.Add(astDiagnostics);
+
+            return boundAST;
+        });
+
+        std::vector<std::shared_ptr<const ModuleBoundNode>> finalASTs{};
+        std::for_each(begin(boundASTs), end(boundASTs),
+        [&](const std::shared_ptr<const ModuleBoundNode>& boundAST)
+        {
+            const auto expFinalAST = CreateTransformedAndVerifiedAST(
+                boundAST,
                 [](const std::shared_ptr<const ModuleBoundNode>& ast)
                 { 
                     return ast->GetOrCreateTypeChecked({});
@@ -318,14 +332,14 @@ namespace Ace::Application
                     return ast->GetOrCreateLowered({});
                 }
             );
-            if (!expBoundAST)
+            diagnostics.Add(expFinalAST);
+            compilation->Diagnostics->Add(expFinalAST);
+            if (!expFinalAST)
             {
-                diagnostics.Add(expBoundAST);
-                compilation->Diagnostics->Add(expBoundAST);
                 return;
             }
 
-            boundASTs.push_back(expBoundAST.Unwrap());
+            finalASTs.push_back(expFinalAST.Unwrap());
         });
 
         compilation->TemplateInstantiator->InstantiateSemanticsForSymbols();
@@ -346,7 +360,7 @@ namespace Ace::Application
         const auto timeBackendBegin = now();
 
         Emitter emitter{ compilation };
-        emitter.SetASTs(boundASTs);
+        emitter.SetASTs(finalASTs);
         const auto emitterResult = emitter.Emit();
 
         const auto timeBackendEnd = now();

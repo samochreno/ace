@@ -2,14 +2,26 @@
 
 ## 🛠️ Refactor
 
+- Rewrite local lambdas and ternary optionals
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 - Figure out where to use the `opt` prefix and where not
 - String interning, maybe put `Token`s on the stack
 - Special fast lookup for native types
+- Rename `MemberAccess` to `FieldAccess` or `InstanceVarAccess`
+- Rename `Parse` to `Parsing` and `Lex` to `Lexing`
+- Rename `ICloneableNode` to something like `ICloneableInScopeNode`
+- Rename `MaybeChanged` to something like `Cached`
+- Rename `LabelStmtBoundNode::GetLabelSymbol` to `GetSymbol`
+- Rename `StructTypeSymbol::GetVars` to `CollectVars`
 
 ## 💥 High Priority
 
-- Figure out how to stop cascading diagnostics in binding and verification with `Compilation::ErrorTypeSymbol`, then add diagnostics
+- Make `Compilation` mutable directly
+- Add conversion diagnostics
+- Add `IsErrorSymbol`
+- Add notes with source locations to diagnostics, add them for example to ambiguous operator
+- ❓ Add symbol signatures and kinds to errors
+- ❓ Move scoping from parsing to a separate pass
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
 - Finish diagnostics
 - ❓ Give template symbols shared ownership of the nodes
@@ -21,6 +33,7 @@
   - Parsing
   - Symbols
   - Binding
+  - Replace operators with traits
   - ❓ Rust's orphan rule
 - Templates:
   - Constraints

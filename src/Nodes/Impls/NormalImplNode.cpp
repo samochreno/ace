@@ -86,13 +86,18 @@ namespace Ace
         );
     }
 
-    auto NormalImplNode::CreateBound() const -> Expected<std::shared_ptr<const ImplBoundNode>>
+    auto NormalImplNode::CreateBound() const -> std::shared_ptr<const ImplBoundNode>
     {
-        ACE_TRY(boundFunctions, TransformExpectedVector(m_Functions,
-        [](const std::shared_ptr<const FunctionNode>& function)
-        {
-            return function->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const FunctionBoundNode>> boundFunctions{};
+        std::transform(
+            begin(m_Functions),
+            end  (m_Functions),
+            back_inserter(boundFunctions),
+            [&](const std::shared_ptr<const FunctionNode>& function)
+            {
+                return function->CreateBound();
+            }
+        );
 
         return std::make_shared<const ImplBoundNode>(
             DiagnosticBag{},

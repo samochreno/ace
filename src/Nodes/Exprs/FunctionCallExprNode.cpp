@@ -7,6 +7,7 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
+#include "Diagnostics/BindingDiagnostics.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "Nodes/Exprs/SymbolLiteralExprNode.hpp"
 #include "Nodes/Exprs/MemberAccessExprNode.hpp"
@@ -73,13 +74,20 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto FunctionCallExprNode::CreateBound() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto FunctionCallExprNode::CreateBound() const -> std::shared_ptr<const IExprBoundNode>
     {
-        ACE_TRY(boundArgs, TransformExpectedVector(m_Args,
-        [](const std::shared_ptr<const IExprNode>& arg)
-        {
-            return arg->CreateBoundExpr();
-        }));
+        DiagnosticBag diagnostics{};
+
+        std::vector<std::shared_ptr<const IExprBoundNode>> boundArgs{};
+        std::transform(
+            begin(m_Args),
+            end  (m_Args),
+            back_inserter(boundArgs),
+            [](const std::shared_ptr<const IExprNode>& arg)
+            {
+                return arg->CreateBoundExpr();
+            }
+        );
 
         std::vector<ITypeSymbol*> argTypeSymbols{};
         std::transform(
@@ -94,37 +102,45 @@ namespace Ace
 
         if (const auto* const symbolLiteralExpr = dynamic_cast<const SymbolLiteralExprNode*>(m_Expr.get()))
         {
-            ACE_TRY(functionSymbol, GetScope()->ResolveStaticSymbol<FunctionSymbol>(
+            const auto expFunctionSymbol = GetScope()->ResolveStaticSymbol<FunctionSymbol>(
                 symbolLiteralExpr->GetName(),
                 Scope::CreateArgTypes(argTypeSymbols)
-            ));
+            );
+            diagnostics.Add(expFunctionSymbol);
 
-            return std::shared_ptr<const IExprBoundNode>
-            {
-                std::make_shared<const StaticFunctionCallExprBoundNode>(
-                    DiagnosticBag{},
-                    GetSrcLocation(),
-                    GetScope(),
-                    functionSymbol,
-                    boundArgs
-                )
-            };
+            auto* const functionSymbol = expFunctionSymbol.UnwrapOr(
+                GetCompilation()->ErrorSymbols->GetFunction()
+            );
+
+            return std::make_shared<const StaticFunctionCallExprBoundNode>(
+                diagnostics,
+                GetSrcLocation(),
+                GetScope(),
+                functionSymbol,
+                boundArgs
+            );
         }
         
         if (const auto* const memberAccessExpr = dynamic_cast<const MemberAccessExprNode*>(m_Expr.get()))
         {
-            ACE_TRY(boundExpr, memberAccessExpr->GetExpr()->CreateBoundExpr());
+            const auto boundExpr =
+                memberAccessExpr->GetExpr()->CreateBoundExpr();
 
-            ACE_TRY(functionSymbol, GetScope()->ResolveInstanceSymbol<FunctionSymbol>(
+            const auto expFunctionSymbol = GetScope()->ResolveInstanceSymbol<FunctionSymbol>(
                 boundExpr->GetTypeInfo().Symbol->GetWithoutRef(),
                 memberAccessExpr->GetName(),
                 Scope::CreateArgTypes(argTypeSymbols)
-            ));
+            );
+            diagnostics.Add(expFunctionSymbol);
+
+            auto* const functionSymbol = expFunctionSymbol.UnwrapOr(
+                GetCompilation()->ErrorSymbols->GetFunction()
+            );
 
             return std::shared_ptr<const IExprBoundNode>
             {
                 std::make_shared<const InstanceFunctionCallExprBoundNode>(
-                    DiagnosticBag{},
+                    diagnostics,
                     GetSrcLocation(),
                     boundExpr,
                     functionSymbol,
@@ -133,10 +149,17 @@ namespace Ace
             };
         }
 
-        ACE_TRY_UNREACHABLE();
+        const auto boundExpr = m_Expr->CreateBoundExpr();
+
+        diagnostics.Add(CreateExpectedFunctionError(
+            boundExpr->GetSrcLocation(),
+            boundExpr->GetTypeInfo().Symbol
+        ));
+
+        return boundExpr->CloneWithDiagnosticsExpr(diagnostics);
     }
 
-    auto FunctionCallExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto FunctionCallExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
     {
         return CreateBound();
     }

@@ -61,11 +61,40 @@ namespace Ace
         return children;
     }
 
+    auto CompoundAssignmentStmtBoundNode::CloneWithDiagnostics(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const CompoundAssignmentStmtBoundNode>
+    {
+        if (diagnostics.IsEmpty())
+        {
+            return shared_from_this();
+        }
+
+        return std::make_shared<const CompoundAssignmentStmtBoundNode>(
+            diagnostics.Add(GetDiagnostics()),
+            GetSrcLocation(),
+            m_LHSExpr,
+            m_RHSExpr,
+            m_OpSymbol
+        );
+    }
+
+    auto CompoundAssignmentStmtBoundNode::CloneWithDiagnosticsStmt(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const IStmtBoundNode>
+    {
+        return CloneWithDiagnostics(std::move(diagnostics));
+    }
+
     auto CompoundAssignmentStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
     ) const -> Expected<MaybeChanged<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>>
     {
         const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
+        if (m_OpSymbol == GetCompilation()->ErrorSymbols->GetFunction())
+        {
+            return CreateUnchanged(shared_from_this());
+        }
         ACE_ASSERT(argTypeInfos.size() == 2);
 
         ACE_TRY(mchConvertedAndCheckedLHSExpr, CreateImplicitlyConvertedAndTypeChecked(

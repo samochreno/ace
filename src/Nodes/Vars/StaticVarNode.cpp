@@ -76,13 +76,18 @@ namespace Ace
         );
     }
 
-    auto StaticVarNode::CreateBound() const -> Expected<std::shared_ptr<const StaticVarBoundNode>>
+    auto StaticVarNode::CreateBound() const -> std::shared_ptr<const StaticVarBoundNode>
     {
-        ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeNode>& attribute)
-        {
-            return attribute->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const AttributeBoundNode>> boundAttributes{};
+        std::transform(
+            begin(m_Attributes),
+            end  (m_Attributes),
+            back_inserter(boundAttributes),
+            [&](const std::shared_ptr<const AttributeNode>& attribute)
+            {
+                return attribute->CreateBound();
+            }
+        );
 
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<StaticVarSymbol>(
             m_Name
@@ -131,7 +136,7 @@ namespace Ace
                 m_Scope,
                 m_Name,
                 m_AccessModifier,
-                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorTypeSymbol)
+                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorSymbols->GetType())
             ),
             diagnostics,
         };

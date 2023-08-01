@@ -36,6 +36,22 @@ namespace Ace
         return m_StructConstructionExpr->GetScope();
     }
 
+    auto AttributeBoundNode::CloneWithDiagnostics(
+        DiagnosticBag diagnostics
+    ) const -> std::shared_ptr<const AttributeBoundNode>
+    {
+        if (diagnostics.IsEmpty())
+        {
+            return shared_from_this();
+        }
+
+        return std::make_shared<const AttributeBoundNode>(
+            diagnostics.Add(GetDiagnostics()),
+            GetSrcLocation(),
+            m_StructConstructionExpr
+        );
+    }
+
     auto AttributeBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};

@@ -14,6 +14,7 @@ namespace Ace
 
     template<>
     class [[nodiscard]] Diagnosed<void> : public IDiagnosed
+
     {
     public:
         Diagnosed() = default;

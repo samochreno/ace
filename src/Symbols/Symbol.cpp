@@ -224,4 +224,9 @@ namespace Ace
             SymbolNameResolutionScope::Global,
         };
     }
+
+    auto ISymbol::IsError() const -> bool
+    {
+        return GetCompilation()->ErrorSymbols->Contains(this);
+    }
 }

@@ -79,17 +79,15 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto VarStmtNode::CreateBound() const -> Expected<std::shared_ptr<const VarStmtBoundNode>>
+    auto VarStmtNode::CreateBound() const -> std::shared_ptr<const VarStmtBoundNode>
     {
         auto* selfSymbol = m_Scope->ExclusiveResolveSymbol<LocalVarSymbol>(
             m_Name
         ).Unwrap();
 
-        ACE_TRY(boundOptAssignedExpr, TransformExpectedOptional(m_OptAssignedExpr,
-        [](const std::shared_ptr<const IExprNode>& expr)
-        {
-            return expr->CreateBoundExpr();
-        }));
+        const auto boundOptAssignedExpr = m_OptAssignedExpr.has_value() ?
+            std::optional{ m_OptAssignedExpr.value()->CreateBoundExpr() } :
+            std::nullopt;
 
         return std::make_shared<const VarStmtBoundNode>(
             DiagnosticBag{},
@@ -99,7 +97,7 @@ namespace Ace
         );
     }
 
-    auto VarStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
+    auto VarStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
     {
         return CreateBound();
     }
@@ -138,7 +136,7 @@ namespace Ace
             std::make_unique<LocalVarSymbol>(
                 m_Scope,
                 m_Name,
-                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorTypeSymbol)
+                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorSymbols->GetType())
             ),
             diagnostics,
         };

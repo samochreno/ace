@@ -5,7 +5,6 @@
 #include "Nodes/Node.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 
 namespace Ace
 {
@@ -18,6 +17,6 @@ namespace Ace
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> = 0;
 
-        virtual auto CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>> = 0;
+        virtual auto CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode> = 0;
     };
 }

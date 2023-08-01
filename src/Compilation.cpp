@@ -21,7 +21,7 @@
 #include "Scope.hpp"
 #include "TemplateInstantiator.hpp"
 #include "GlobalDiagnosticBag.hpp"
-#include "Symbols/Types/ErrorTypeSymbol.hpp"
+#include "ErrorSymbols.hpp"
 
 namespace Ace
 {
@@ -150,14 +150,8 @@ namespace Ace
         self->TemplateInstantiator = std::make_unique<Ace::TemplateInstantiator>();
         self->LLVMContext = std::make_unique<llvm::LLVMContext>();
         self->Diagnostics = std::make_unique<GlobalDiagnosticBag>();
+        self->ErrorSymbols = std::make_unique<Ace::ErrorSymbols>(self.get());
 
-        auto errorTypeSymbol = std::make_unique<Ace::ErrorTypeSymbol>(
-            self->GlobalScope.Unwrap()
-        );
-        self->ErrorTypeSymbol = self->GlobalScope.Unwrap()->DefineSymbol(
-            std::move(errorTypeSymbol)
-        ).Unwrap();
-         
         if (diagnostics.HasErrors())
         {
             return diagnostics;

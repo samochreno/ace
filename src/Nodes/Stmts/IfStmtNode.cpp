@@ -87,19 +87,29 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto IfStmtNode::CreateBound() const -> Expected<std::shared_ptr<const IfStmtBoundNode>>
+    auto IfStmtNode::CreateBound() const -> std::shared_ptr<const IfStmtBoundNode>
     {
-        ACE_TRY(boundConditions, TransformExpectedVector(m_Conditions,
-        [](const std::shared_ptr<const IExprNode>& condition)
-        {
-            return condition->CreateBoundExpr();
-        }));
+        std::vector<std::shared_ptr<const IExprBoundNode>> boundConditions{};
+        std::transform(
+            begin(m_Conditions),
+            end  (m_Conditions),
+            back_inserter(boundConditions),
+            [&](const std::shared_ptr<const IExprNode>& condition)
+            {
+                return condition->CreateBoundExpr();
+            }
+        );
 
-        ACE_TRY(boundBodies, TransformExpectedVector(m_Bodies,
-        [](const std::shared_ptr<const BlockStmtNode>& body)
-        {
-            return body->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const BlockStmtBoundNode>> boundBodies{};
+        std::transform(
+            begin(m_Bodies),
+            end  (m_Bodies),
+            back_inserter(boundBodies),
+            [&](const std::shared_ptr<const BlockStmtNode>& body)
+            {
+                return body->CreateBound();
+            }
+        );
 
         return std::make_shared<const IfStmtBoundNode>(
             DiagnosticBag{},
@@ -110,7 +120,7 @@ namespace Ace
         );
     }
 
-    auto IfStmtNode::CreateBoundStmt() const -> Expected<std::shared_ptr<const IStmtBoundNode>>
+    auto IfStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
     {
         return CreateBound();
     }

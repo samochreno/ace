@@ -74,13 +74,18 @@ namespace Ace
         );
     }
 
-    auto NormalParamVarNode::CreateBound() const -> Expected<std::shared_ptr<const NormalParamVarBoundNode>>
+    auto NormalParamVarNode::CreateBound() const -> std::shared_ptr<const NormalParamVarBoundNode>
     {
-        ACE_TRY(boundAttributes, TransformExpectedVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeNode>& attribute)
-        {
-            return attribute->CreateBound();
-        }));
+        std::vector<std::shared_ptr<const AttributeBoundNode>> boundAttributes{};
+        std::transform(
+            begin(m_Attributes),
+            end  (m_Attributes),
+            back_inserter(boundAttributes),
+            [&](const std::shared_ptr<const AttributeNode>& attribute)
+            {
+                return attribute->CreateBound();
+            }
+        );
 
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<NormalParamVarSymbol>(
             m_Name
@@ -128,7 +133,7 @@ namespace Ace
             std::make_unique<NormalParamVarSymbol>(
                 m_Scope,
                 m_Name,
-                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorTypeSymbol),
+                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorSymbols->GetType()),
                 m_Index
             ),
             diagnostics,

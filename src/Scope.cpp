@@ -13,7 +13,7 @@
 
 #include "Assert.hpp"
 #include "Diagnostic.hpp"
-#include "Diagnostics/SymbolDiagnostics.hpp"
+#include "Diagnostics/BindingDiagnostics.hpp"
 #include "SpecialIdent.hpp"
 #include "Symbols/All.hpp"
 #include "SymbolCreatable.hpp"
@@ -518,7 +518,7 @@ namespace Ace
 
             auto* const templateArg = hasMatchingTemplateArg ?
                 matchingTemplateArgIt->second :
-                compilation->ErrorTypeSymbol;
+                compilation->ErrorSymbols->GetType();
 
             templateArgs.push_back(templateArg);
         });
@@ -1039,7 +1039,7 @@ namespace Ace
                 argName
             );
             diagnostics.Add(expArg);
-            return expArg.UnwrapOr(scope->GetCompilation()->ErrorTypeSymbol);
+            return expArg.UnwrapOr(scope->GetCompilation()->ErrorSymbols->GetType());
         });
 
         if (diagnostics.HasErrors())

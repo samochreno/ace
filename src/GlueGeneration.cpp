@@ -131,6 +131,11 @@ namespace Ace::GlueGeneration
         const std::function<FunctionSymbol*(const Compilation* const, ITypeSymbol* const)>& getOrDefineAndBindGlueSymbols
     ) -> std::optional<FunctionSymbol*>
     {
+        if (typeSymbol->IsError())
+        {
+            return std::nullopt;
+        }
+
         auto* const templatableSymbol = dynamic_cast<ITemplatableSymbol*>(
             typeSymbol
         );

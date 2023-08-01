@@ -61,25 +61,31 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto MemberAccessExprNode::CreateBound() const -> Expected<std::shared_ptr<const InstanceVarRefExprBoundNode>>
+    auto MemberAccessExprNode::CreateBound() const -> std::shared_ptr<const InstanceVarRefExprBoundNode>
     {
-        ACE_TRY(boundExpr, m_Expr->CreateBoundExpr());
+        DiagnosticBag diagnostics{};
 
-        ACE_TRY_ASSERT(m_Name.TemplateArgs.empty());
-        ACE_TRY(memberSymbol, GetScope()->ResolveInstanceSymbol<InstanceVarSymbol>(
+        const auto boundExpr = m_Expr->CreateBoundExpr();
+
+        const auto expMemberSymbol = GetScope()->ResolveInstanceSymbol<InstanceVarSymbol>(
             boundExpr->GetTypeInfo().Symbol->GetWithoutRef(),
             m_Name
-        ));
+        );
+        diagnostics.Add(expMemberSymbol);
+
+        auto* const memberSymbol = expMemberSymbol.UnwrapOr(
+            GetCompilation()->ErrorSymbols->GetInstanceVar()
+        );
 
         return std::make_shared<const InstanceVarRefExprBoundNode>(
-            DiagnosticBag{},
+            diagnostics,
             GetSrcLocation(),
             boundExpr,
             memberSymbol
         );
     }
 
-    auto MemberAccessExprNode::CreateBoundExpr() const -> Expected<std::shared_ptr<const IExprBoundNode>>
+    auto MemberAccessExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
     {
         return CreateBound();
     }

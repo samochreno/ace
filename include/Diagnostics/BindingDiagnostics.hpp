@@ -1,10 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/All.hpp"
+#include "Op.hpp"
 
 namespace Ace
 {
@@ -62,5 +64,44 @@ namespace Ace
     auto CreateIncorrectSymbolCategoryError(
         const SrcLocation& srcLocation,
         const SymbolCategory expectedCategory
+    ) -> std::shared_ptr<const Diagnostic>;
+
+    auto CreateMissingStructConstructionVarsError(
+        const SrcLocation& srcLocation,
+        StructTypeSymbol* const structSymbol,
+        const std::vector<InstanceVarSymbol*>& missingVarSymbols
+    ) -> std::shared_ptr<const Diagnostic>;
+
+    auto CreateStructHasNoVarNamedError(
+        StructTypeSymbol* const structSymbol,
+        const Ident& fieldName
+    ) -> std::shared_ptr<const Diagnostic>;
+
+    auto CreateStructConstructionVarSpecifiedMoreThanOnceError(
+        const SrcLocation& srcLocation,
+        StructTypeSymbol* const structSymbol,
+        InstanceVarSymbol* const varSymbol
+    ) -> std::shared_ptr<const Diagnostic>;
+
+    auto CreateUndefinedUnaryOpRefError(
+        const Op& op,
+        ITypeSymbol* const type
+    ) -> std::shared_ptr<const Diagnostic>;
+
+    auto CreateUndefinedBinaryOpRefError(
+        const Op& op,
+        ITypeSymbol* const lhsType,
+        ITypeSymbol* const rhsType
+    ) -> std::shared_ptr<const Diagnostic>;
+
+    auto CreateAmbiguousBinaryOpRefError(
+        const Op& op,
+        ITypeSymbol* const lhsType,
+        ITypeSymbol* const rhsType
+    ) -> std::shared_ptr<const Diagnostic>;
+
+    auto CreateExpectedFunctionError(
+        const SrcLocation& srcLocation,
+        ITypeSymbol* const type
     ) -> std::shared_ptr<const Diagnostic>;
 }

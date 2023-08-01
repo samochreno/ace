@@ -89,32 +89,6 @@ namespace Ace::Application
         return finalAST;
     }
 
-#define TBound std::remove_reference_t<decltype(createBoundFunc(T{}).Unwrap())>
-
-    template<
-        typename T, 
-        typename TCreateBoundFunc, 
-        typename TGetOrCreateTypeCheckedFunc, 
-        typename TGetOrCreateLoweredFunc
-    >
-    auto CreateBoundTransformedAndVerifiedAST(
-        const T& ast,
-        TCreateBoundFunc&& createBoundFunc,
-        TGetOrCreateTypeCheckedFunc&& getOrCreateTypeCheckedFunc,
-        TGetOrCreateLoweredFunc&& getOrCreateLoweredFunc
-    ) -> Expected<TLowered>
-    {
-        ACE_TRY(boundAST, createBoundFunc(ast));
-
-        ACE_TRY(finalAST, CreateTransformedAndVerifiedAST(
-            boundAST,
-            getOrCreateTypeCheckedFunc,
-            getOrCreateLoweredFunc
-        ));
-
-        return finalAST;
-    }
-
-#undef TBound
 #undef TTypeChecked
+#undef TLowered
 }
