@@ -260,7 +260,7 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto varSymbols = structSymbol->GetVars();
+        const auto varSymbols = structSymbol->CollectVars();
 
         auto varSymbolToUseSrcLocationsMap =
             CreateVarSymbolToUseSrcLocationsMap(varSymbols);

@@ -725,7 +725,7 @@ namespace Ace
 
             std::vector<llvm::Type*> elements{};
 
-            const auto varSymbols = structSymbol->GetVars();
+            const auto varSymbols = structSymbol->CollectVars();
             std::for_each(begin(varSymbols), end(varSymbols),
             [&](const InstanceVarSymbol* const varSymbol)
             {

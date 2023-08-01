@@ -57,7 +57,7 @@ namespace Ace
         auto CollectTemplateArgs() const -> std::vector<ITypeSymbol*> final;
         auto CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*> final;
 
-        auto GetVars() const -> std::vector<InstanceVarSymbol*>;
+        auto CollectVars() const -> std::vector<InstanceVarSymbol*>;
 
     private:
         std::shared_ptr<Scope> m_SelfScope{};

@@ -2,8 +2,8 @@
 
 ## 🛠️ Refactor
 
-- Rewrite local lambdas and ternary optionals
-- Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
+- ❓ Eliminate local lambdas
+- Rewrite ternary optionals to use `std::nullopt`
 - Figure out where to use the `opt` prefix and where not
 - String interning, maybe put `Token`s on the stack
 - Special fast lookup for native types
@@ -12,7 +12,7 @@
 - Rename `ICloneableNode` to something like `ICloneableInScopeNode`
 - Rename `MaybeChanged` to something like `Cached`
 - Rename `LabelStmtBoundNode::GetLabelSymbol` to `GetSymbol`
-- Rename `StructTypeSymbol::GetVars` to `CollectVars`
+- Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 
 ## 💥 High Priority
 

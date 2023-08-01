@@ -386,7 +386,7 @@ namespace Ace::GlueGeneration
         }
         else
         {
-            const auto varSymbols = structSymbol->GetVars();
+            const auto varSymbols = structSymbol->CollectVars();
             std::for_each(begin(varSymbols), end(varSymbols),
             [&](InstanceVarSymbol* const varSymbol)
             {
@@ -510,7 +510,7 @@ namespace Ace::GlueGeneration
             stmts.push_back(exprStmtNode);
         }
 
-        const auto varSymbols = structSymbol->GetVars();
+        const auto varSymbols = structSymbol->CollectVars();
         std::for_each(rbegin(varSymbols), rend(varSymbols),
         [&](InstanceVarSymbol* const varSymbol)
         {

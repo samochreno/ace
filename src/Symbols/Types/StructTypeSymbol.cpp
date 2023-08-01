@@ -77,9 +77,7 @@ namespace Ace
                 return TypeSizeKind::Unsized;
             }
 
-            const auto vars = GetVars();
-
-            const auto canResolveSize = TransformExpectedVector(GetVars(),
+            const auto canResolveSize = TransformExpectedVector(CollectVars(),
             [](const InstanceVarSymbol* const var) -> Expected<void>
             {
                 ACE_TRY(sizeKind, var->GetType()->GetSizeKind());
@@ -186,7 +184,7 @@ namespace Ace
         return m_SelfScope->CollectImplTemplateArgs();
     }
 
-    auto StructTypeSymbol::GetVars() const -> std::vector<InstanceVarSymbol*>
+    auto StructTypeSymbol::CollectVars() const -> std::vector<InstanceVarSymbol*>
     {
         auto vars = m_SelfScope->CollectSymbols<InstanceVarSymbol>();
         std::sort(begin(vars), end(vars),
