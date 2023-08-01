@@ -12,7 +12,7 @@
 #include <tuple>
 
 #include "Diagnostic.hpp"
-#include "Diagnostics/ParseDiagnostics.hpp"
+#include "Diagnostics/ParsingDiagnostics.hpp"
 #include "Measured.hpp"
 #include "Token.hpp"
 #include "Nodes/All.hpp"

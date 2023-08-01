@@ -18,7 +18,6 @@
 
 - Make `Compilation` mutable directly
 - Add conversion diagnostics
-- Add `IsErrorSymbol`
 - Add notes with source locations to diagnostics, add them for example to ambiguous operator
 - ❓ Add symbol signatures and kinds to errors
 - ❓ Move scoping from parsing to a separate pass

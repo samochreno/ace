@@ -1,4 +1,4 @@
-#include "Diagnostics/ParseDiagnostics.hpp"
+#include "Diagnostics/ParsingDiagnostics.hpp"
 
 #include <memory>
 
