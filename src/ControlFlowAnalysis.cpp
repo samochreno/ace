@@ -20,7 +20,7 @@ namespace Ace
         if (const auto* const labelStmt = dynamic_cast<const LabelStmtBoundNode*>(stmtNode.get()))
         {
             self.Kind = ControlFlowStmtKind::Label;
-            self.LabelSymbol = labelStmt->GetLabelSymbol();
+            self.LabelSymbol = labelStmt->GetSymbol();
         }
         else if (const auto* const normalJumpStmt = dynamic_cast<const NormalJumpStmtBoundNode*>(stmtNode.get()))
         {

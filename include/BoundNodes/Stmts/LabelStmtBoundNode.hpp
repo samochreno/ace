@@ -51,7 +51,7 @@ namespace Ace
         ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>> final;
         auto Emit(Emitter& emitter) const -> void final;
 
-        auto GetLabelSymbol() const -> LabelSymbol*;
+        auto GetSymbol() const -> LabelSymbol*;
 
     private:
         DiagnosticBag m_Diagnostics{};

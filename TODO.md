@@ -10,7 +10,6 @@
 - Rename `MemberAccess` to `FieldAccess` or `InstanceVarAccess`
 - Rename `ICloneableNode` to something like `ICloneableInScopeNode`
 - Rename `MaybeChanged` to something like `Cached`
-- Rename `LabelStmtBoundNode::GetLabelSymbol` to `GetSymbol`
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 
 ## 💥 High Priority

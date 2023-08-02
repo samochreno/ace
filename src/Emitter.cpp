@@ -411,7 +411,7 @@ namespace Ace
                     if (labelStmt)
                     {
                         auto* const block = GetLabelBlockMap().GetOrCreateAt(
-                            labelStmt->GetLabelSymbol()
+                            labelStmt->GetSymbol()
                         );
 
                         auto blockBuilder = std::make_unique<BlockBuilder>(block);

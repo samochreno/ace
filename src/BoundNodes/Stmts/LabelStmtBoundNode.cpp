@@ -53,7 +53,7 @@ namespace Ace
         return std::make_shared<const LabelStmtBoundNode>(
             diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
-            GetLabelSymbol()
+            GetSymbol()
         );
     }
 
@@ -96,7 +96,7 @@ namespace Ace
     {
     }
 
-    auto LabelStmtBoundNode::GetLabelSymbol() const -> LabelSymbol*
+    auto LabelStmtBoundNode::GetSymbol() const -> LabelSymbol*
     {
         return m_Symbol;
     }
