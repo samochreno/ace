@@ -7,7 +7,7 @@
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -43,7 +43,7 @@ namespace Ace
 
     auto SelfParamVarBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const SelfParamVarBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const SelfParamVarBoundNode>>>
     {
         ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
         ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
@@ -53,7 +53,7 @@ namespace Ace
 
     auto SelfParamVarBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const SelfParamVarBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const SelfParamVarBoundNode>>
     {
         return CreateUnchanged(shared_from_this());
     }

@@ -9,7 +9,7 @@
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -79,23 +79,23 @@ namespace Ace
 
     auto StructTypeBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const StructTypeBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const StructTypeBoundNode>>>
     {
-        ACE_TRY(mchCheckedAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
+        ACE_TRY(cchCheckedAttributes, TransformExpectedCacheableVector(m_Attributes,
         [](const std::shared_ptr<const AttributeBoundNode>& attribute)
         {
             return attribute->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedVars, TransformExpectedMaybeChangedVector(m_Vars,
+        ACE_TRY(cchCheckedVars, TransformExpectedCacheableVector(m_Vars,
         [](const std::shared_ptr<const InstanceVarBoundNode>& var)
         {
             return var->GetOrCreateTypeChecked({});
         }));
 
         if (
-            !mchCheckedAttributes.IsChanged &&
-            !mchCheckedVars.IsChanged
+            !cchCheckedAttributes.IsChanged &&
+            !cchCheckedVars.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -105,37 +105,37 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            mchCheckedAttributes.Value,
-            mchCheckedVars.Value
+            cchCheckedAttributes.Value,
+            cchCheckedVars.Value
         ));
     }
 
     auto StructTypeBoundNode::GetOrCreateTypeCheckedType(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const ITypeBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const ITypeBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto StructTypeBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const StructTypeBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const StructTypeBoundNode>>
     {
-        const auto mchLoweredAttributes = TransformMaybeChangedVector(m_Attributes,
+        const auto cchLoweredAttributes = TransformCacheableVector(m_Attributes,
         [](const std::shared_ptr<const AttributeBoundNode>& attribute)
         {
             return attribute->GetOrCreateLowered({});
         });
 
-        const auto mchLoweredVars = TransformMaybeChangedVector(m_Vars,
+        const auto cchLoweredVars = TransformCacheableVector(m_Vars,
         [](const std::shared_ptr<const InstanceVarBoundNode>& var)
         {
             return var->GetOrCreateLowered({});
         });
 
         if (
-            !mchLoweredAttributes.IsChanged &&
-            !mchLoweredVars.IsChanged
+            !cchLoweredAttributes.IsChanged &&
+            !cchLoweredVars.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -145,14 +145,14 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            mchLoweredAttributes.Value,
-            mchLoweredVars.Value
+            cchLoweredAttributes.Value,
+            cchLoweredVars.Value
         )->GetOrCreateLowered({}).Value);
     }
 
     auto StructTypeBoundNode::GetOrCreateLoweredType(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const ITypeBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const ITypeBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

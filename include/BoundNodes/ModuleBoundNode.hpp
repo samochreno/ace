@@ -12,7 +12,7 @@
 #include "SrcLocation.hpp"
 #include "Symbols/ModuleSymbol.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -45,10 +45,10 @@ namespace Ace
         ) const -> std::shared_ptr<const ModuleBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const ModuleBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const ModuleBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const ModuleBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const ModuleBoundNode>> final;
 
     private:
         DiagnosticBag m_Diagnostics{};

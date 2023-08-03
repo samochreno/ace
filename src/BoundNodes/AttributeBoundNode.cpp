@@ -7,7 +7,7 @@
 #include "SrcLocation.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -63,11 +63,11 @@ namespace Ace
 
     auto AttributeBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const AttributeBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const AttributeBoundNode>>>
     {
-        ACE_TRY(mchCheckedStructureConstructionExpr, m_StructConstructionExpr->GetOrCreateTypeChecked({}));
+        ACE_TRY(cchCheckedStructureConstructionExpr, m_StructConstructionExpr->GetOrCreateTypeChecked({}));
 
-        if (!mchCheckedStructureConstructionExpr.IsChanged)
+        if (!cchCheckedStructureConstructionExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -75,18 +75,18 @@ namespace Ace
         return CreateChanged(std::make_shared<const AttributeBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchCheckedStructureConstructionExpr.Value
+            cchCheckedStructureConstructionExpr.Value
         ));
     }
 
     auto AttributeBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const AttributeBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const AttributeBoundNode>>
     {
-        const auto mchLowewredStructConstructionExpr =
+        const auto cchLowewredStructConstructionExpr =
             m_StructConstructionExpr->GetOrCreateLowered({});
 
-        if (!mchLowewredStructConstructionExpr.IsChanged)
+        if (!cchLowewredStructConstructionExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -94,7 +94,7 @@ namespace Ace
         return CreateChanged(std::make_shared<const AttributeBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchLowewredStructConstructionExpr.Value
+            cchLowewredStructConstructionExpr.Value
         )->GetOrCreateLowered({}).Value);
     }
 }

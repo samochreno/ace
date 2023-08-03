@@ -9,7 +9,7 @@
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "Assert.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "ExprEmitResult.hpp"
 
 namespace Ace
@@ -42,16 +42,16 @@ namespace Ace
         ) const -> std::shared_ptr<const IExprBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const ConversionPlaceholderExprBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const ConversionPlaceholderExprBoundNode>>> final;
         auto GetOrCreateTypeCheckedExpr(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const ConversionPlaceholderExprBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const ConversionPlaceholderExprBoundNode>> final;
         auto GetOrCreateLoweredExpr(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>> final;
         auto Emit(Emitter& emitter) const -> ExprEmitResult final;
 
         auto GetTypeInfo() const -> TypeInfo final;

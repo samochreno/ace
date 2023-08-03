@@ -8,7 +8,7 @@
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 
@@ -73,7 +73,7 @@ namespace Ace
 
     auto LogicalNegationExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const LogicalNegationExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const LogicalNegationExprBoundNode>>>
     {
         const TypeInfo typeInfo
         {
@@ -81,12 +81,12 @@ namespace Ace
             ValueKind::R,
         };
 
-        ACE_TRY(mchConvertedAndCheckedExpr, CreateImplicitlyConvertedAndTypeChecked(
+        ACE_TRY(cchConvertedAndCheckedExpr, CreateImplicitlyConvertedAndTypeChecked(
             m_Expr,
             typeInfo
         ));
 
-        if (!mchConvertedAndCheckedExpr.IsChanged)
+        if (!cchConvertedAndCheckedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -94,24 +94,24 @@ namespace Ace
         return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchConvertedAndCheckedExpr.Value
+            cchConvertedAndCheckedExpr.Value
         ));
     }
 
     auto LogicalNegationExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto LogicalNegationExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const LogicalNegationExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const LogicalNegationExprBoundNode>>
     {
-        const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
+        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
-        if (!mchLoweredExpr.IsChanged)
+        if (!cchLoweredExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -119,13 +119,13 @@ namespace Ace
         return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchLoweredExpr.Value
+            cchLoweredExpr.Value
         )->GetOrCreateLowered({}).Value);
     }
 
     auto LogicalNegationExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

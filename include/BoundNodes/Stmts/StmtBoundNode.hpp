@@ -6,7 +6,7 @@
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Emittable.hpp"
 #include "Diagnostic.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -27,9 +27,9 @@ namespace Ace
         ) const -> std::shared_ptr<const IStmtBoundNode> = 0;
         virtual auto GetOrCreateTypeCheckedStmt(
             const StmtTypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>> = 0;
+        ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>> = 0;
         virtual auto GetOrCreateLoweredStmt(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>> = 0;
+        ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>> = 0;
     };
 }

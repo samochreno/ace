@@ -10,7 +10,7 @@
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "ValueKind.hpp"
 #include "Assert.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "String.hpp"
@@ -78,28 +78,28 @@ namespace Ace
 
     auto LiteralExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const LiteralExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const LiteralExprBoundNode>>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto LiteralExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto LiteralExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const LiteralExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const LiteralExprBoundNode>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto LiteralExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

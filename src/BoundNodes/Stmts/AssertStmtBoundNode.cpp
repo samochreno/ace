@@ -13,7 +13,7 @@
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/ExitStmtBoundNode.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 
@@ -78,7 +78,7 @@ namespace Ace
 
     auto AssertStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const AssertStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const AssertStmtBoundNode>>>
     {
         const TypeInfo typeInfo
         {
@@ -86,12 +86,12 @@ namespace Ace
             ValueKind::R,
         };
 
-        ACE_TRY(mchConvertedAndCheckedCondition, CreateImplicitlyConvertedAndTypeChecked(
+        ACE_TRY(cchConvertedAndCheckedCondition, CreateImplicitlyConvertedAndTypeChecked(
             m_Condition,
             typeInfo
         ));
 
-        if (!mchConvertedAndCheckedCondition.IsChanged)
+        if (!cchConvertedAndCheckedCondition.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -99,28 +99,28 @@ namespace Ace
         return CreateChanged(std::make_shared<const AssertStmtBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchConvertedAndCheckedCondition.Value
+            cchConvertedAndCheckedCondition.Value
         ));
     }
 
     auto AssertStmtBoundNode::GetOrCreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto AssertStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const GroupStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const GroupStmtBoundNode>>
     {
-        const auto mchLoweredCondition =
+        const auto cchLoweredCondition =
             m_Condition->GetOrCreateLoweredExpr({});
 
         const auto condition = std::make_shared<const LogicalNegationExprBoundNode>(
             DiagnosticBag{},
-            mchLoweredCondition.Value->GetSrcLocation(),
-            mchLoweredCondition.Value
+            cchLoweredCondition.Value->GetSrcLocation(),
+            cchLoweredCondition.Value
         );
 
         const auto bodyScope = GetScope()->GetOrCreateChild({});
@@ -149,7 +149,7 @@ namespace Ace
 
     auto AssertStmtBoundNode::GetOrCreateLoweredStmt(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

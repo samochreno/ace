@@ -12,7 +12,7 @@
 #include "BoundNodes/Vars/Params/NormalParamVarBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -92,37 +92,37 @@ namespace Ace
 
     auto FunctionBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const FunctionBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const FunctionBoundNode>>>
     {
-        ACE_TRY(mchCheckedAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
+        ACE_TRY(cchCheckedAttributes, TransformExpectedCacheableVector(m_Attributes,
         [](const std::shared_ptr<const AttributeBoundNode>& attribute)
         {
             return attribute->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedOptSelf, TransformExpectedMaybeChangedOptional(m_OptSelf,
+        ACE_TRY(cchCheckedOptSelf, TransformExpectedCacheableOptional(m_OptSelf,
         [](const std::shared_ptr<const SelfParamVarBoundNode>& self)
         {
             return self->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedParams, TransformExpectedMaybeChangedVector(m_Params,
+        ACE_TRY(cchCheckedParams, TransformExpectedCacheableVector(m_Params,
         [](const std::shared_ptr<const NormalParamVarBoundNode>& param)
         {
             return param->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedOptBody, TransformExpectedMaybeChangedOptional(m_OptBody,
+        ACE_TRY(cchCheckedOptBody, TransformExpectedCacheableOptional(m_OptBody,
         [&](const std::shared_ptr<const BlockStmtBoundNode>& body)
         {
             return body->GetOrCreateTypeChecked({ m_Symbol->GetType() });
         }));
 
         if (
-            !mchCheckedAttributes.IsChanged &&
-            !mchCheckedOptSelf.IsChanged && 
-            !mchCheckedParams.IsChanged && 
-            !mchCheckedOptBody.IsChanged
+            !cchCheckedAttributes.IsChanged &&
+            !cchCheckedOptSelf.IsChanged && 
+            !cchCheckedParams.IsChanged && 
+            !cchCheckedOptBody.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -132,46 +132,46 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            mchCheckedAttributes.Value,
-            mchCheckedOptSelf.Value,
-            mchCheckedParams.Value,
-            mchCheckedOptBody.Value
+            cchCheckedAttributes.Value,
+            cchCheckedOptSelf.Value,
+            cchCheckedParams.Value,
+            cchCheckedOptBody.Value
         ));
     }
 
     auto FunctionBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const FunctionBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const FunctionBoundNode>>
     {
-        const auto mchLoweredAttributes = TransformMaybeChangedVector(m_Attributes,
+        const auto cchLoweredAttributes = TransformCacheableVector(m_Attributes,
         [](const std::shared_ptr<const AttributeBoundNode>& attribute)
         {
             return attribute->GetOrCreateLowered({});
         });
         
-        const auto mchLoweredOptSelf = TransformMaybeChangedOptional(m_OptSelf,
+        const auto cchLoweredOptSelf = TransformCacheableOptional(m_OptSelf,
         [](const std::shared_ptr<const SelfParamVarBoundNode>& self)
         {
             return self->GetOrCreateLowered({});
         });
 
-        const auto mchLoweredParams = TransformMaybeChangedVector(m_Params,
+        const auto cchLoweredParams = TransformCacheableVector(m_Params,
         [](const std::shared_ptr<const NormalParamVarBoundNode>& param)
         {
             return param->GetOrCreateLowered({});
         });
 
-        const auto mchLoweredOptBody = TransformMaybeChangedOptional(m_OptBody,
+        const auto cchLoweredOptBody = TransformCacheableOptional(m_OptBody,
         [](const std::shared_ptr<const BlockStmtBoundNode>& body)
         {
             return body->GetOrCreateLowered({});
         });
 
         if (
-            !mchLoweredAttributes.IsChanged && 
-            !mchLoweredOptSelf.IsChanged &&
-            !mchLoweredParams.IsChanged && 
-            !mchLoweredOptBody.IsChanged
+            !cchLoweredAttributes.IsChanged && 
+            !cchLoweredOptSelf.IsChanged &&
+            !cchLoweredParams.IsChanged && 
+            !cchLoweredOptBody.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -181,10 +181,10 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            mchLoweredAttributes.Value,
-            mchLoweredOptSelf.Value,
-            mchLoweredParams.Value,
-            mchLoweredOptBody.Value
+            cchLoweredAttributes.Value,
+            cchLoweredOptSelf.Value,
+            cchLoweredParams.Value,
+            cchLoweredOptBody.Value
         )->GetOrCreateLowered({}).Value);
     }
 

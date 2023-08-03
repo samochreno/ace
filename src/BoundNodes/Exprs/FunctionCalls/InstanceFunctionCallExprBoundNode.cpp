@@ -9,7 +9,7 @@
 #include "SrcLocation.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
@@ -83,21 +83,21 @@ namespace Ace
 
     auto InstanceFunctionCallExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const InstanceFunctionCallExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const InstanceFunctionCallExprBoundNode>>>
     {
-        ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
+        ACE_TRY(cchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
 
         const auto argTypeInfos = m_FunctionSymbol->CollectArgTypeInfos();
         ACE_TRY_ASSERT(m_Args.size() == argTypeInfos.size());
 
-        ACE_TRY(mchConvertedAndCheckedArgs, CreateImplicitlyConvertedAndTypeCheckedVector(
+        ACE_TRY(cchConvertedAndCheckedArgs, CreateImplicitlyConvertedAndTypeCheckedVector(
             m_Args,
             m_FunctionSymbol->CollectArgTypeInfos()
         ));
 
         if (
-            !mchCheckedExpr.IsChanged &&
-            !mchConvertedAndCheckedArgs.IsChanged
+            !cchCheckedExpr.IsChanged &&
+            !cchConvertedAndCheckedArgs.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -106,34 +106,34 @@ namespace Ace
         return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchCheckedExpr.Value,
+            cchCheckedExpr.Value,
             m_FunctionSymbol,
-            mchConvertedAndCheckedArgs.Value
+            cchConvertedAndCheckedArgs.Value
         ));
     }
 
     auto InstanceFunctionCallExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto InstanceFunctionCallExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const InstanceFunctionCallExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const InstanceFunctionCallExprBoundNode>>
     {
-        const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
+        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
-        const auto mchLoweredArgs = TransformMaybeChangedVector(m_Args,
+        const auto cchLoweredArgs = TransformCacheableVector(m_Args,
         [&](const std::shared_ptr<const IExprBoundNode>& arg)
         {
             return arg->GetOrCreateLoweredExpr({});
         });
 
         if (
-            !mchLoweredExpr.IsChanged && 
-            !mchLoweredArgs.IsChanged
+            !cchLoweredExpr.IsChanged && 
+            !cchLoweredArgs.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -142,16 +142,16 @@ namespace Ace
         return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchLoweredExpr.Value,
+            cchLoweredExpr.Value,
             m_FunctionSymbol,
-            mchLoweredArgs.Value
+            cchLoweredArgs.Value
         )->GetOrCreateLowered({}).Value);
     }
 
 
     auto InstanceFunctionCallExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

@@ -11,7 +11,7 @@
 #include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
@@ -83,17 +83,17 @@ namespace Ace
 
     auto VarStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const VarStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const VarStmtBoundNode>>>
     {
         ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
         ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
 
-        ACE_TRY(mchConvertedAndCheckedOptAssignedExpr, CreateImplicitlyConvertedAndTypeCheckedOptional(
+        ACE_TRY(cchConvertedAndCheckedOptAssignedExpr, CreateImplicitlyConvertedAndTypeCheckedOptional(
             m_OptAssignedExpr,
             TypeInfo{ m_Symbol->GetType(), ValueKind::R }
         ));
 
-        if (!mchConvertedAndCheckedOptAssignedExpr.IsChanged)
+        if (!cchConvertedAndCheckedOptAssignedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -102,28 +102,28 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            mchConvertedAndCheckedOptAssignedExpr.Value
+            cchConvertedAndCheckedOptAssignedExpr.Value
         ));
     }
 
     auto VarStmtBoundNode::GetOrCreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto VarStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const VarStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const VarStmtBoundNode>>
     {
-        const auto mchLoweredOptAssignedExpr = TransformMaybeChangedOptional(m_OptAssignedExpr,
+        const auto cchLoweredOptAssignedExpr = TransformCacheableOptional(m_OptAssignedExpr,
         [](const std::shared_ptr<const IExprBoundNode>& expr)
         {
             return expr->GetOrCreateLoweredExpr({});
         });
 
-        if (!mchLoweredOptAssignedExpr.IsChanged)
+        if (!cchLoweredOptAssignedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -132,13 +132,13 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            mchLoweredOptAssignedExpr.Value
+            cchLoweredOptAssignedExpr.Value
         )->GetOrCreateLowered(context).Value);
     }
 
     auto VarStmtBoundNode::GetOrCreateLoweredStmt(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

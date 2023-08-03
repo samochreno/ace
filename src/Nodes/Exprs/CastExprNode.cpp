@@ -74,13 +74,13 @@ namespace Ace
             GetCompilation()->GetErrorSymbols().GetType()
         );
 
-        const auto expMchConvertedBoundExpr = CreateExplicitlyConverted(
+        const auto expCchConvertedBoundExpr = CreateExplicitlyConverted(
             boundExpr, 
             TypeInfo{ typeSymbol, ValueKind::R }
         );
-        diagnostics.Add(expMchConvertedBoundExpr);
+        diagnostics.Add(expCchConvertedBoundExpr);
 
-        return expMchConvertedBoundExpr.Unwrap().Value->CloneWithDiagnosticsExpr(
+        return expCchConvertedBoundExpr.Unwrap().Value->CloneWithDiagnosticsExpr(
             diagnostics
         );
     }

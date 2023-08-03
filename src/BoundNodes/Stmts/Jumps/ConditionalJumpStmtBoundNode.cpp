@@ -8,7 +8,7 @@
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
@@ -77,7 +77,7 @@ namespace Ace
 
     auto ConditionalJumpStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const ConditionalJumpStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const ConditionalJumpStmtBoundNode>>>
     {
         const TypeInfo typeInfo
         {
@@ -85,12 +85,12 @@ namespace Ace
             ValueKind::R,
         };
 
-        ACE_TRY(mchConvertedAndCheckedCondition, CreateImplicitlyConvertedAndTypeChecked(
+        ACE_TRY(cchConvertedAndCheckedCondition, CreateImplicitlyConvertedAndTypeChecked(
             m_Condition,
             typeInfo
         ));
 
-        if (!mchConvertedAndCheckedCondition.IsChanged)
+        if (!cchConvertedAndCheckedCondition.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -98,26 +98,26 @@ namespace Ace
         return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchConvertedAndCheckedCondition.Value,
+            cchConvertedAndCheckedCondition.Value,
             m_LabelSymbol
         ));
     }
 
     auto ConditionalJumpStmtBoundNode::GetOrCreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto ConditionalJumpStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const ConditionalJumpStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const ConditionalJumpStmtBoundNode>>
     {
-        const auto mchLoweredCondition =
+        const auto cchLoweredCondition =
             m_Condition->GetOrCreateLoweredExpr({});
 
-        if (!mchLoweredCondition.IsChanged)
+        if (!cchLoweredCondition.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -125,14 +125,14 @@ namespace Ace
         return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchLoweredCondition.Value,
+            cchLoweredCondition.Value,
             m_LabelSymbol
         )->GetOrCreateLowered(context).Value);
     }
 
     auto ConditionalJumpStmtBoundNode::GetOrCreateLoweredStmt(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

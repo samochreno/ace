@@ -8,7 +8,7 @@
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "ExprDropData.hpp"
@@ -73,28 +73,28 @@ namespace Ace
 
     auto SizeOfExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const SizeOfExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const SizeOfExprBoundNode>>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto SizeOfExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto SizeOfExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const SizeOfExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const SizeOfExprBoundNode>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto SizeOfExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

@@ -1,26 +1,31 @@
 #pragma once
 
+#include <vector>
+#include <optional>
 #include <type_traits>
 
 namespace Ace
 {
     template<typename T>
-    struct MaybeChanged
+    struct Cacheable 
     {
-        MaybeChanged()
-            : IsChanged{ true }
+        Cacheable(
+        ) : IsChanged{ true }
         {
         }
 
-        MaybeChanged(bool isChanged, const T& value)
-            : IsChanged{ isChanged }, Value{ value }
+        Cacheable(
+            bool isChanged,
+            const T& value
+        ) : IsChanged{ isChanged },
+            Value{ value }
         {
         }
 
         template<typename TNew>
-        operator MaybeChanged<TNew>() const
+        operator Cacheable<TNew>() const
         {
-            return MaybeChanged<TNew>(IsChanged, Value);
+            return Cacheable<TNew>(IsChanged, Value);
         }
 
         bool IsChanged{};
@@ -30,22 +35,22 @@ namespace Ace
 #define TOut typename std::decay_t<decltype(func(TIn{}).Value)>
 
     template<typename TIn, typename F>
-    auto CreateChanged(const TIn& node, F&& func) -> MaybeChanged<TOut>
+    auto CreateChanged(const TIn& node, F&& func) -> Cacheable<TOut>
     {
-        auto mchNode = func(node);
-        return { true, mchNode.Value };
+        auto cchNode = func(node);
+        return { true, cchNode.Value };
     }
 
 #undef TOut
 
     template<typename T>
-    auto CreateChanged(const T& node) -> MaybeChanged<T>
+    auto CreateChanged(const T& node) -> Cacheable<T>
     {
         return { true, node };
     }
 
     template<typename T>
-    auto CreateUnchanged(const T& node) -> MaybeChanged<T>
+    auto CreateUnchanged(const T& node) -> Cacheable<T>
     {
         return { false, node };
     }
@@ -53,18 +58,18 @@ namespace Ace
 #define TOut typename std::decay_t<decltype(func(TIn{}).Value)>
 
     template<typename TIn, typename F>
-    auto TransformMaybeChangedVector(
+    auto TransformCacheableVector(
         const std::vector<TIn>& inVec,
         F&& func
-    ) -> MaybeChanged<std::vector<TOut>>
+    ) -> Cacheable<std::vector<TOut>>
     {
         std::vector<TOut> vec{};
         bool isChanged = false;
 
         for (size_t i = 0; i < inVec.size(); i++)
         {
-            auto mchLowered = func(inVec.at(i));
-            if (!mchLowered.IsChanged)
+            auto cchLowered = func(inVec.at(i));
+            if (!cchLowered.IsChanged)
             {
                 continue;
             }
@@ -75,7 +80,7 @@ namespace Ace
                 vec = inVec;
             }
 
-            vec.at(i) = mchLowered.Value;
+            vec.at(i) = cchLowered.Value;
         }
 
         if (!isChanged)
@@ -90,18 +95,18 @@ namespace Ace
 #define TOut typename std::decay_t<decltype(func(TIn{}).Value)>
 
     template<typename TIn, typename F>
-    auto TransformMaybeChangedOptional(
+    auto TransformCacheableOptional(
         const std::optional<TIn>& optNode,
         F&& func
-    ) -> MaybeChanged<std::optional<TOut>>
+    ) -> Cacheable<std::optional<TOut>>
     {
         if (!optNode)
         {
             return CreateUnchanged(std::optional<TOut>{});
         }
 
-        auto mchNode = func(optNode.value());
-        return { mchNode.IsChanged, std::optional<TOut>{ mchNode.Value } };
+        auto cchNode = func(optNode.value());
+        return { cchNode.IsChanged, std::optional<TOut>{ cchNode.Value } };
     }
 
 #undef TOut

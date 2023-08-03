@@ -6,7 +6,7 @@
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "BoundNodes/Exprs/RefExprBoundNode.hpp"
 #include "BoundNodes/Exprs/DerefExprBoundNode.hpp"
 #include "BoundNodes/Exprs/VarRefs/StaticVarRefExprBoundNode.hpp"
@@ -88,7 +88,7 @@ namespace Ace
 
     auto CompoundAssignmentStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>>
     {
         const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
         if (m_OpSymbol == GetCompilation()->GetErrorSymbols().GetFunction())
@@ -97,19 +97,19 @@ namespace Ace
         }
         ACE_ASSERT(argTypeInfos.size() == 2);
 
-        ACE_TRY(mchConvertedAndCheckedLHSExpr, CreateImplicitlyConvertedAndTypeChecked(
+        ACE_TRY(cchConvertedAndCheckedLHSExpr, CreateImplicitlyConvertedAndTypeChecked(
             m_LHSExpr,
             TypeInfo{ argTypeInfos.at(0).Symbol, ValueKind::L }
         ));
 
-        ACE_TRY(mchConvertedAndCheckedRHSExpr, CreateImplicitlyConvertedAndTypeChecked(
+        ACE_TRY(cchConvertedAndCheckedRHSExpr, CreateImplicitlyConvertedAndTypeChecked(
             m_RHSExpr,
             TypeInfo{ argTypeInfos.at(1).Symbol, ValueKind::R }
         ));
 
         if (
-            !mchConvertedAndCheckedLHSExpr.IsChanged &&
-            !mchConvertedAndCheckedRHSExpr.IsChanged
+            !cchConvertedAndCheckedLHSExpr.IsChanged &&
+            !cchConvertedAndCheckedRHSExpr.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -118,15 +118,15 @@ namespace Ace
         return CreateChanged(std::make_shared<const CompoundAssignmentStmtBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchConvertedAndCheckedLHSExpr.Value,
-            mchConvertedAndCheckedRHSExpr.Value,
+            cchConvertedAndCheckedLHSExpr.Value,
+            cchConvertedAndCheckedRHSExpr.Value,
             m_OpSymbol
         ));
     }
 
     auto CompoundAssignmentStmtBoundNode::GetOrCreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
@@ -388,7 +388,7 @@ namespace Ace
 
     auto CompoundAssignmentStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const GroupStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const GroupStmtBoundNode>>
     {
         const auto stmts = [&]() -> std::vector<std::shared_ptr<const IStmtBoundNode>>
         {
@@ -426,7 +426,7 @@ namespace Ace
 
     auto CompoundAssignmentStmtBoundNode::GetOrCreateLoweredStmt(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

@@ -10,7 +10,7 @@
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/StaticVarSymbol.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -36,10 +36,10 @@ namespace Ace
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const StaticVarBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const StaticVarBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const StaticVarBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const StaticVarBoundNode>> final;
 
         auto GetSymbol() const -> StaticVarSymbol* final;
 

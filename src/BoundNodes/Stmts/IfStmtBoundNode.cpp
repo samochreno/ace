@@ -18,7 +18,7 @@
 #include "Symbols/LabelSymbol.hpp"
 #include "SpecialIdent.hpp"
 #include "Assert.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 
@@ -89,7 +89,7 @@ namespace Ace
 
     auto IfStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IfStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IfStmtBoundNode>>>
     {
         const TypeInfo typeInfo
         {
@@ -97,12 +97,12 @@ namespace Ace
             ValueKind::R,
         };
 
-        ACE_TRY(mchConvertedAndCheckedConditions, CreateImplicitlyConvertedAndTypeCheckedVector(
+        ACE_TRY(cchConvertedAndCheckedConditions, CreateImplicitlyConvertedAndTypeCheckedVector(
             m_Conditions,
             typeInfo
         ));
 
-        ACE_TRY(mchCheckedBodies, TransformExpectedMaybeChangedVector(m_Bodies,
+        ACE_TRY(cchCheckedBodies, TransformExpectedCacheableVector(m_Bodies,
         [&](const std::shared_ptr<const BlockStmtBoundNode>& body)
         {
             return body->GetOrCreateTypeChecked({
@@ -111,8 +111,8 @@ namespace Ace
         }));
 
         if (
-            !mchConvertedAndCheckedConditions.IsChanged &&
-            !mchCheckedBodies.IsChanged
+            !cchConvertedAndCheckedConditions.IsChanged &&
+            !cchCheckedBodies.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -122,21 +122,21 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
-            mchConvertedAndCheckedConditions.Value,
-            mchCheckedBodies.Value
+            cchConvertedAndCheckedConditions.Value,
+            cchCheckedBodies.Value
         ));
     }
 
     auto IfStmtBoundNode::GetOrCreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto IfStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const GroupStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const GroupStmtBoundNode>>
     {
         // From:
         // if condition_0 {
@@ -280,7 +280,7 @@ namespace Ace
 
     auto IfStmtBoundNode::GetOrCreateLoweredStmt(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

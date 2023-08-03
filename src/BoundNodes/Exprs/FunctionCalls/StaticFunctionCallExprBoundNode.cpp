@@ -7,7 +7,7 @@
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
@@ -80,17 +80,17 @@ namespace Ace
 
     auto StaticFunctionCallExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const StaticFunctionCallExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const StaticFunctionCallExprBoundNode>>>
     {
         const auto argTypeInfos = m_FunctionSymbol->CollectArgTypeInfos();
         ACE_TRY_ASSERT(m_Args.size() == argTypeInfos.size());
 
-        ACE_TRY(mchConvertedAndCheckedArgs, CreateImplicitlyConvertedAndTypeCheckedVector(
+        ACE_TRY(cchConvertedAndCheckedArgs, CreateImplicitlyConvertedAndTypeCheckedVector(
             m_Args,
             argTypeInfos
         ));
 
-        if (!mchConvertedAndCheckedArgs.IsChanged)
+        if (!cchConvertedAndCheckedArgs.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -100,28 +100,28 @@ namespace Ace
             GetSrcLocation(),
             GetScope(),
             m_FunctionSymbol,
-            mchConvertedAndCheckedArgs.Value
+            cchConvertedAndCheckedArgs.Value
         ));
     }
 
     auto StaticFunctionCallExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto StaticFunctionCallExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
     {
-        const auto mchLoweredArgs = TransformMaybeChangedVector(m_Args,
+        const auto cchLoweredArgs = TransformCacheableVector(m_Args,
         [&](const std::shared_ptr<const IExprBoundNode>& arg)
         {
             return arg->GetOrCreateLoweredExpr({});
         });
 
-        if (!mchLoweredArgs.IsChanged)
+        if (!cchLoweredArgs.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -131,13 +131,13 @@ namespace Ace
             GetSrcLocation(),
             GetScope(),
             m_FunctionSymbol,
-            mchLoweredArgs.Value
+            cchLoweredArgs.Value
         )->GetOrCreateLowered({}).Value);
     }
 
     auto StaticFunctionCallExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

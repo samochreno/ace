@@ -8,7 +8,7 @@
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -37,10 +37,10 @@ namespace Ace
         ) const -> std::shared_ptr<const ImplBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const ImplBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const ImplBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const ImplBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const ImplBoundNode>> final;
 
     private:
         DiagnosticBag m_Diagnostics{};

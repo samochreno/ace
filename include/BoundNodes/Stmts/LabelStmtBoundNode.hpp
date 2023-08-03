@@ -8,7 +8,7 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/LabelSymbol.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -39,16 +39,16 @@ namespace Ace
         ) const -> std::shared_ptr<const IStmtBoundNode> final;
         auto GetOrCreateTypeChecked(
             const StmtTypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const LabelStmtBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const LabelStmtBoundNode>>> final;
         auto GetOrCreateTypeCheckedStmt(
             const StmtTypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const LabelStmtBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const LabelStmtBoundNode>> final;
         auto GetOrCreateLoweredStmt(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>> final;
         auto Emit(Emitter& emitter) const -> void final;
 
         auto GetSymbol() const -> LabelSymbol*;

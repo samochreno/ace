@@ -42,16 +42,16 @@ namespace Ace
         ) const -> std::shared_ptr<const ITypeBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const StructTypeBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const StructTypeBoundNode>>> final;
         auto GetOrCreateTypeCheckedType(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const ITypeBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const ITypeBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const StructTypeBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const StructTypeBoundNode>> final;
         auto GetOrCreateLoweredType(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const ITypeBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const ITypeBoundNode>> final;
 
         auto GetSymbol() const -> StructTypeSymbol* final;
 

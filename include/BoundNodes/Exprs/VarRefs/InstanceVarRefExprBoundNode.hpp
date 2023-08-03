@@ -8,7 +8,7 @@
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
 
@@ -42,16 +42,16 @@ namespace Ace
         ) const -> std::shared_ptr<const IExprBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const InstanceVarRefExprBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const InstanceVarRefExprBoundNode>>> final;
         auto GetOrCreateTypeCheckedExpr(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const InstanceVarRefExprBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const InstanceVarRefExprBoundNode>> final;
         auto GetOrCreateLoweredExpr(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>> final;
         auto Emit(Emitter& emitter) const -> ExprEmitResult final;
 
         auto GetTypeInfo() const -> TypeInfo final;

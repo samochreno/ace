@@ -8,7 +8,7 @@
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Templates/FunctionTemplateSymbol.hpp"
@@ -75,7 +75,7 @@ namespace Ace
 
     auto UnboxExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const UnboxExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const UnboxExprBoundNode>>>
     {
         ACE_TRY_ASSERT(m_Expr->GetTypeInfo().Symbol->IsStrongPtr());
 
@@ -95,12 +95,12 @@ namespace Ace
             ValueKind::R,
         };
 
-        ACE_TRY(mchCheckedAndConvertedExpr, CreateImplicitlyConvertedAndTypeChecked(
+        ACE_TRY(cchCheckedAndConvertedExpr, CreateImplicitlyConvertedAndTypeChecked(
             m_Expr,
             typeInfo
         ));
 
-        if (!mchCheckedAndConvertedExpr.IsChanged)
+        if (!cchCheckedAndConvertedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -108,28 +108,28 @@ namespace Ace
         return CreateChanged(std::make_shared<const UnboxExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchCheckedAndConvertedExpr.Value
+            cchCheckedAndConvertedExpr.Value
         ));
     }
 
     auto UnboxExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto UnboxExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
     {
-        const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
+        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             SrcLocation{},
             GetCompilation()->GetNatives()->StrongPtr__value.GetSymbol(),
             std::nullopt,
-            { mchLoweredExpr.Value->GetTypeInfo().Symbol->GetWithoutRef()->GetWithoutStrongPtr() },
+            { cchLoweredExpr.Value->GetTypeInfo().Symbol->GetWithoutRef()->GetWithoutStrongPtr() },
             {}
         ).Unwrap();
         auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
@@ -140,13 +140,13 @@ namespace Ace
             GetSrcLocation(),
             GetScope(),
             functionSymbol,
-            std::vector{ mchLoweredExpr.Value }
+            std::vector{ cchLoweredExpr.Value }
         )->GetOrCreateLowered({}).Value);
     }
 
     auto UnboxExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

@@ -6,7 +6,7 @@
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 
 namespace Ace
@@ -66,28 +66,28 @@ namespace Ace
 
     auto ExitStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const ExitStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const ExitStmtBoundNode>>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto ExitStmtBoundNode::GetOrCreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto ExitStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const ExitStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const ExitStmtBoundNode>>
     {
         return CreateUnchanged(shared_from_this());
     }
     
     auto ExitStmtBoundNode::GetOrCreateLoweredStmt(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

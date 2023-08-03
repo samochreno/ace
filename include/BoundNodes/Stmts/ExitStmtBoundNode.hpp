@@ -7,7 +7,7 @@
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -38,16 +38,16 @@ namespace Ace
         ) const -> std::shared_ptr<const IStmtBoundNode> final;
         auto GetOrCreateTypeChecked(
             const StmtTypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const ExitStmtBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const ExitStmtBoundNode>>> final;
         auto GetOrCreateTypeCheckedStmt(
             const StmtTypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const ExitStmtBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const ExitStmtBoundNode>> final;
         auto GetOrCreateLoweredStmt(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>> final;
         auto Emit(Emitter& emitter) const -> void final;
 
     private:

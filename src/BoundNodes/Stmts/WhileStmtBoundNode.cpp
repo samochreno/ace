@@ -14,7 +14,7 @@
 #include "BoundNodes/Stmts/Jumps/ConditionalJumpStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "SpecialIdent.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 
@@ -86,7 +86,7 @@ namespace Ace
 
     auto WhileStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const WhileStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const WhileStmtBoundNode>>>
     {
         const TypeInfo typeInfo
         {
@@ -94,18 +94,18 @@ namespace Ace
             ValueKind::R,
         };
 
-        ACE_TRY(mchConvertedAndCheckedCondition, CreateImplicitlyConvertedAndTypeChecked(
+        ACE_TRY(cchConvertedAndCheckedCondition, CreateImplicitlyConvertedAndTypeChecked(
             m_Condition,
             typeInfo
         ));
 
-        ACE_TRY(mchCheckedBody, m_Body->GetOrCreateTypeChecked({
+        ACE_TRY(cchCheckedBody, m_Body->GetOrCreateTypeChecked({
             context.ParentFunctionTypeSymbol
         }));
 
         if (
-            !mchConvertedAndCheckedCondition.IsChanged &&
-            !mchCheckedBody.IsChanged
+            !cchConvertedAndCheckedCondition.IsChanged &&
+            !cchCheckedBody.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -115,21 +115,21 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Scope,
-            mchConvertedAndCheckedCondition.Value,
-            mchCheckedBody.Value
+            cchConvertedAndCheckedCondition.Value,
+            cchCheckedBody.Value
         ));
     }
 
     auto WhileStmtBoundNode::GetOrCreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto WhileStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const GroupStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const GroupStmtBoundNode>>
     {
         // From:
         // while condition {
@@ -211,7 +211,7 @@ namespace Ace
 
     auto WhileStmtBoundNode::GetOrCreateLoweredStmt(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

@@ -10,7 +10,7 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -55,7 +55,7 @@ namespace Ace
 
         virtual auto GetOrCreateTypeChecked(
             const TContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const TNode>>> = 0;
+        ) const -> Expected<Cacheable<std::shared_ptr<const TNode>>> = 0;
     };
 
     template<typename TNode, typename TContext = LoweringContext>
@@ -66,7 +66,7 @@ namespace Ace
 
         virtual auto GetOrCreateLowered(
             const TContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const TNode>> = 0;
+        ) const -> Cacheable<std::shared_ptr<const TNode>> = 0;
     };
 
     template<typename T>

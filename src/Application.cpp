@@ -10,7 +10,7 @@
 
 #include "Log.hpp"
 #include "Diagnostic.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "FileBuffer.hpp"
 #include "Compilation.hpp"
 #include "Lexer.hpp"

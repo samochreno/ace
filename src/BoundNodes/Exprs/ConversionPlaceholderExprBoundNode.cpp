@@ -68,28 +68,28 @@ namespace Ace
 
     auto ConversionPlaceholderExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const ConversionPlaceholderExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const ConversionPlaceholderExprBoundNode>>>
     {
         ACE_UNREACHABLE();
     }
 
     auto ConversionPlaceholderExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         ACE_UNREACHABLE();
     }
 
     auto ConversionPlaceholderExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const ConversionPlaceholderExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const ConversionPlaceholderExprBoundNode>>
     {
         ACE_UNREACHABLE();
     }
 
     auto ConversionPlaceholderExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         ACE_UNREACHABLE();
     }

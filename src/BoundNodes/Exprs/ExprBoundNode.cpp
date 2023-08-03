@@ -11,7 +11,7 @@
 #include "BoundNodes/Exprs/DerefExprBoundNode.hpp"
 #include "TypeInfo.hpp"
 #include "Diagnostic.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -19,7 +19,7 @@ namespace Ace
         const std::vector<std::shared_ptr<const IExprBoundNode>>& exprs,
         const TypeInfo& targetTypeInfo,
         ConversionFunction func
-    ) -> Expected<MaybeChanged<std::vector<std::shared_ptr<const IExprBoundNode>>>>
+    ) -> Expected<Cacheable<std::vector<std::shared_ptr<const IExprBoundNode>>>>
     {
         bool isChanged = false;
         std::vector<std::shared_ptr<const IExprBoundNode>> convertedExprs{};
@@ -28,18 +28,18 @@ namespace Ace
         ACE_TRY_ASSERT(std::find_if_not(begin(exprs), end(exprs),
         [&](const std::shared_ptr<const IExprBoundNode>& expr)
         {
-            auto expMchConvertedExpr = func(expr, targetTypeInfo);
-            if (!expMchConvertedExpr)
+            auto expCchConvertedExpr = func(expr, targetTypeInfo);
+            if (!expCchConvertedExpr)
             {
                 return false;
             }
 
-            if (expMchConvertedExpr.Unwrap().IsChanged)
+            if (expCchConvertedExpr.Unwrap().IsChanged)
             {
                 isChanged = true;
             }
 
-            convertedExprs.push_back(expMchConvertedExpr.Unwrap().Value);
+            convertedExprs.push_back(expCchConvertedExpr.Unwrap().Value);
             return true;
 
         }) == end(exprs));
@@ -56,7 +56,7 @@ namespace Ace
         const std::vector<std::shared_ptr<const IExprBoundNode>>& exprs,
         const std::vector<TypeInfo>& targetTypeInfos,
         ConversionFunction func
-    ) -> Expected<MaybeChanged<std::vector<std::shared_ptr<const IExprBoundNode>>>>
+    ) -> Expected<Cacheable<std::vector<std::shared_ptr<const IExprBoundNode>>>>
     {
         bool isChanged = false;
         std::vector<std::shared_ptr<const IExprBoundNode>> convertedExprs{};
@@ -64,17 +64,17 @@ namespace Ace
 
         for (size_t i = 0; i < exprs.size(); i++)
         {
-            ACE_TRY(mchConvertedExpr, func(
+            ACE_TRY(cchConvertedExpr, func(
                 exprs.at(i),
                 targetTypeInfos.at(i)
             ));
 
-            if (mchConvertedExpr.IsChanged)
+            if (cchConvertedExpr.IsChanged)
             {
                 isChanged = true;
             }
 
-            convertedExprs.push_back(mchConvertedExpr.Value);
+            convertedExprs.push_back(cchConvertedExpr.Value);
         }
 
         if (!isChanged)
@@ -89,7 +89,7 @@ namespace Ace
         std::shared_ptr<const IExprBoundNode> expr,
         TypeInfo targetTypeInfo,
         ConversionOpGetterFunction func
-    ) -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         if (targetTypeInfo.ValueKind == ValueKind::L)
         {
@@ -159,30 +159,30 @@ namespace Ace
     auto CreateImplicitlyConvertedAndTypeChecked(
         const std::shared_ptr<const IExprBoundNode>& expr,
         const TypeInfo& targetTypeInfo
-    ) -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
-        ACE_TRY(mchConverted, CreateImplicitlyConverted(
+        ACE_TRY(cchConverted, CreateImplicitlyConverted(
             expr,
             targetTypeInfo
         ));
 
-        ACE_TRY(mchChecked, mchConverted.Value->GetOrCreateTypeCheckedExpr({}));
+        ACE_TRY(cchChecked, cchConverted.Value->GetOrCreateTypeCheckedExpr({}));
 
         if (
-            !mchConverted.IsChanged &&
-            !mchChecked.IsChanged
+            !cchConverted.IsChanged &&
+            !cchChecked.IsChanged
             )
         {
             return CreateUnchanged(expr);
         }
 
-        return CreateChanged(mchChecked.Value);
+        return CreateChanged(cchChecked.Value);
     }
 
     auto CreateImplicitlyConvertedAndTypeCheckedOptional(
         const std::optional<std::shared_ptr<const IExprBoundNode>>& optExpr,
         const TypeInfo& targetTypeInfo
-    ) -> Expected<MaybeChanged<std::optional<std::shared_ptr<const IExprBoundNode>>>>
+    ) -> Expected<Cacheable<std::optional<std::shared_ptr<const IExprBoundNode>>>>
     {
         if (!optExpr.has_value())
         {
@@ -191,15 +191,15 @@ namespace Ace
             );
         }
 
-        ACE_TRY(mchConvertedAndChecked, CreateImplicitlyConvertedAndTypeChecked(
+        ACE_TRY(cchConvertedAndChecked, CreateImplicitlyConvertedAndTypeChecked(
             optExpr.value(),
             targetTypeInfo
         ));
 
-        return MaybeChanged<std::optional<std::shared_ptr<const IExprBoundNode>>>
+        return Cacheable<std::optional<std::shared_ptr<const IExprBoundNode>>>
         {
-            mchConvertedAndChecked.IsChanged,
-            mchConvertedAndChecked.Value,
+            cchConvertedAndChecked.IsChanged,
+            cchConvertedAndChecked.Value,
         };
     }
 }

@@ -8,7 +8,6 @@
 - String interning, maybe put `Token`s on the stack
 - Special fast lookup for native types
 - Rename `MemberAccess` to `FieldAccess` or `InstanceVarAccess`
-- Rename `MaybeChanged` to something like `Cached`
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 
 ## 💥 High Priority

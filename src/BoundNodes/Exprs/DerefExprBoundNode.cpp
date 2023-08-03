@@ -8,7 +8,7 @@
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "SpecialIdent.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -75,11 +75,11 @@ namespace Ace
 
     auto DerefExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const DerefExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const DerefExprBoundNode>>>
     {
-        ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
+        ACE_TRY(cchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
 
-        if (!mchCheckedExpr.IsChanged)
+        if (!cchCheckedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -87,23 +87,23 @@ namespace Ace
         return CreateChanged(std::make_shared<const DerefExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchCheckedExpr.Value
+            cchCheckedExpr.Value
         ));
     }
     auto DerefExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto DerefExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const DerefExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const DerefExprBoundNode>>
     {
-        const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
+        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
-        if (!mchLoweredExpr.IsChanged)
+        if (!cchLoweredExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -111,13 +111,13 @@ namespace Ace
         return CreateChanged(std::make_shared<const DerefExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchLoweredExpr.Value
+            cchLoweredExpr.Value
         )->GetOrCreateLowered({}).Value);
     }
 
     auto DerefExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

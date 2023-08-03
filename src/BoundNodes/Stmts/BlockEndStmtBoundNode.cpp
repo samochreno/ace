@@ -6,7 +6,7 @@
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "ExprDropData.hpp"
@@ -73,28 +73,28 @@ namespace Ace
 
     auto BlockEndStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const BlockEndStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const BlockEndStmtBoundNode>>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto BlockEndStmtBoundNode::GetOrCreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto BlockEndStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const BlockEndStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const BlockEndStmtBoundNode>>
     {
         return CreateUnchanged(shared_from_this());
     }
 
     auto BlockEndStmtBoundNode::GetOrCreateLoweredStmt(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

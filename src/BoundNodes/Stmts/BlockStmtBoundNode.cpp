@@ -19,7 +19,7 @@
 #include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 
 namespace Ace
@@ -86,9 +86,9 @@ namespace Ace
 
     auto BlockStmtBoundNode::GetOrCreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const BlockStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const BlockStmtBoundNode>>>
     {
-        ACE_TRY(mchCheckedContent, TransformExpectedMaybeChangedVector(m_Stmts,
+        ACE_TRY(cchCheckedContent, TransformExpectedCacheableVector(m_Stmts,
         [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
         {
             return stmt->GetOrCreateTypeCheckedStmt({
@@ -96,7 +96,7 @@ namespace Ace
             });
         }));
 
-        if (!mchCheckedContent.IsChanged)
+        if (!cchCheckedContent.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -105,28 +105,28 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_SelfScope,
-            mchCheckedContent.Value
+            cchCheckedContent.Value
         ));
     }
 
     auto BlockStmtBoundNode::GetOrCreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto BlockStmtBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const BlockStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const BlockStmtBoundNode>>
     {
-        const auto mchLoweredStmts = TransformMaybeChangedVector(m_Stmts,
+        const auto cchLoweredStmts = TransformCacheableVector(m_Stmts,
         [](const std::shared_ptr<const IStmtBoundNode>& stmt)
         {
             return stmt->GetOrCreateLoweredStmt({});
         });
 
-        if (!mchLoweredStmts.IsChanged)
+        if (!cchLoweredStmts.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -135,13 +135,13 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_SelfScope,
-            mchLoweredStmts.Value
+            cchLoweredStmts.Value
         )->GetOrCreateLowered(context).Value);
     }
 
     auto BlockStmtBoundNode::GetOrCreateLoweredStmt(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

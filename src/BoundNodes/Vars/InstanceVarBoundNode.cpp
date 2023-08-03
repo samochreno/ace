@@ -8,7 +8,7 @@
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -50,18 +50,18 @@ namespace Ace
 
     auto InstanceVarBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const InstanceVarBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const InstanceVarBoundNode>>>
     {
         ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
         ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
 
-        ACE_TRY(mchCheckedAttributes, TransformExpectedMaybeChangedVector(m_Attributes,
+        ACE_TRY(cchCheckedAttributes, TransformExpectedCacheableVector(m_Attributes,
         [](const std::shared_ptr<const AttributeBoundNode>& attribute)
         {
             return attribute->GetOrCreateTypeChecked({});
         }));
 
-        if (!mchCheckedAttributes.IsChanged)
+        if (!cchCheckedAttributes.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -70,21 +70,21 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            mchCheckedAttributes.Value
+            cchCheckedAttributes.Value
         ));
     }
 
     auto InstanceVarBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const InstanceVarBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const InstanceVarBoundNode>>
     {
-        const auto mchLoweredAttributes = TransformMaybeChangedVector(m_Attributes,
+        const auto cchLoweredAttributes = TransformCacheableVector(m_Attributes,
         [](const std::shared_ptr<const AttributeBoundNode>& attribute)
         {
             return attribute->GetOrCreateLowered({});
         });
 
-        if (!mchLoweredAttributes.IsChanged)
+        if (!cchLoweredAttributes.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -93,7 +93,7 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            mchLoweredAttributes.Value
+            cchLoweredAttributes.Value
         )->GetOrCreateLowered({}).Value);
     }
 

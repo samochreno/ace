@@ -7,7 +7,7 @@
 #include "SrcLocation.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "ExprDropData.hpp"
@@ -76,7 +76,7 @@ namespace Ace
 
     auto DerefAsExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const DerefAsExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const DerefAsExprBoundNode>>>
     {
         auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol->GetUnaliased();
 
@@ -85,9 +85,9 @@ namespace Ace
             (typeSymbol->IsRef())
         );
 
-        ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
+        ACE_TRY(cchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
 
-        if (!mchCheckedExpr.IsChanged)
+        if (!cchCheckedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -102,18 +102,18 @@ namespace Ace
 
     auto DerefAsExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto DerefAsExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const DerefAsExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const DerefAsExprBoundNode>>
     {
-        const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
+        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
-        if (!mchLoweredExpr.IsChanged)
+        if (!cchLoweredExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -128,7 +128,7 @@ namespace Ace
 
     auto DerefAsExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

@@ -7,7 +7,7 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 
@@ -72,11 +72,11 @@ namespace Ace
 
     auto ExprExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const ExprExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const ExprExprBoundNode>>>
     {
-        ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
+        ACE_TRY(cchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
 
-        if (!mchCheckedExpr.IsChanged)
+        if (!cchCheckedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -84,24 +84,24 @@ namespace Ace
         return CreateChanged(std::make_shared<const ExprExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchCheckedExpr.Value
+            cchCheckedExpr.Value
         ));
     }
 
     auto ExprExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto ExprExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const ExprExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const ExprExprBoundNode>>
     {
-        const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
+        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
-        if (!mchLoweredExpr.IsChanged)
+        if (!cchLoweredExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -109,13 +109,13 @@ namespace Ace
         return CreateChanged(std::make_shared<const ExprExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchLoweredExpr.Value
+            cchLoweredExpr.Value
         )->GetOrCreateLowered({}).Value);
     }
 
     auto ExprExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

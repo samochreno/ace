@@ -9,7 +9,7 @@
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -79,23 +79,23 @@ namespace Ace
 
     auto UserBinaryExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const UserBinaryExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const UserBinaryExprBoundNode>>>
     {
         const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
 
-        ACE_TRY(mchConvertedAndCheckedLHSExpr, CreateImplicitlyConvertedAndTypeChecked(
+        ACE_TRY(cchConvertedAndCheckedLHSExpr, CreateImplicitlyConvertedAndTypeChecked(
             m_LHSExpr,
             argTypeInfos.at(0)
         ));
 
-        ACE_TRY(mchConvertedAndCheckedRHSExpr, CreateImplicitlyConvertedAndTypeChecked(
+        ACE_TRY(cchConvertedAndCheckedRHSExpr, CreateImplicitlyConvertedAndTypeChecked(
             m_RHSExpr,
             argTypeInfos.at(1)
         ));
 
         if (
-            !mchConvertedAndCheckedLHSExpr.IsChanged &&
-            !mchConvertedAndCheckedRHSExpr.IsChanged
+            !cchConvertedAndCheckedLHSExpr.IsChanged &&
+            !cchConvertedAndCheckedRHSExpr.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -104,25 +104,25 @@ namespace Ace
         return CreateChanged(std::make_shared<const UserBinaryExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchConvertedAndCheckedLHSExpr.Value,
-            mchConvertedAndCheckedRHSExpr.Value,
+            cchConvertedAndCheckedLHSExpr.Value,
+            cchConvertedAndCheckedRHSExpr.Value,
             m_OpSymbol
         ));
     }
 
     auto UserBinaryExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto UserBinaryExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
     {
-        const auto mchLoweredLHSExpr = m_LHSExpr->GetOrCreateLoweredExpr({});
-        const auto mchLoweredRHSExpr = m_RHSExpr->GetOrCreateLoweredExpr({});
+        const auto cchLoweredLHSExpr = m_LHSExpr->GetOrCreateLoweredExpr({});
+        const auto cchLoweredRHSExpr = m_RHSExpr->GetOrCreateLoweredExpr({});
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
             DiagnosticBag{},
@@ -131,15 +131,15 @@ namespace Ace
             m_OpSymbol,
             std::vector
             {
-                mchLoweredLHSExpr.Value,
-                mchLoweredRHSExpr.Value
+                cchLoweredLHSExpr.Value,
+                cchLoweredRHSExpr.Value
             }
         )->GetOrCreateLowered({}).Value);
     }
 
     auto UserBinaryExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

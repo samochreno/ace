@@ -5,7 +5,7 @@
 
 #include "BoundNodes/BoundNode.hpp"
 #include "Diagnostic.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -19,10 +19,10 @@ namespace Ace
         ) const -> std::shared_ptr<const ITypeBoundNode> = 0;
         virtual auto GetOrCreateTypeCheckedType(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const ITypeBoundNode>>> = 0;
+        ) const -> Expected<Cacheable<std::shared_ptr<const ITypeBoundNode>>> = 0;
         virtual auto GetOrCreateLoweredType(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const ITypeBoundNode>> = 0;
+        ) const -> Cacheable<std::shared_ptr<const ITypeBoundNode>> = 0;
 
         virtual auto GetSymbol() const -> ITypeSymbol* = 0;
     };

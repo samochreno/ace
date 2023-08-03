@@ -8,7 +8,7 @@
 #include "Scope.hpp"
 #include "BoundNodes/FunctionBoundNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -67,15 +67,15 @@ namespace Ace
 
     auto ImplBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const ImplBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const ImplBoundNode>>>
     {
-        ACE_TRY(mchCheckedFunctions, TransformExpectedMaybeChangedVector(m_Functions,
+        ACE_TRY(cchCheckedFunctions, TransformExpectedCacheableVector(m_Functions,
         [](const std::shared_ptr<const FunctionBoundNode>& function)
         {
             return function->GetOrCreateTypeChecked({});
         }));
 
-        if (!mchCheckedFunctions.IsChanged)
+        if (!cchCheckedFunctions.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -84,21 +84,21 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
-            mchCheckedFunctions.Value
+            cchCheckedFunctions.Value
         ));
     }
 
     auto ImplBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const ImplBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const ImplBoundNode>>
     {
-        const auto mchLoweredFunctions = TransformMaybeChangedVector(m_Functions,
+        const auto cchLoweredFunctions = TransformCacheableVector(m_Functions,
         [](const std::shared_ptr<const FunctionBoundNode>& function)
         {
             return function->GetOrCreateLowered({});
         });
 
-        if (!mchLoweredFunctions.IsChanged)
+        if (!cchLoweredFunctions.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -107,7 +107,7 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
-            mchLoweredFunctions.Value
+            cchLoweredFunctions.Value
         )->GetOrCreateLowered({}).Value);
     }
 }

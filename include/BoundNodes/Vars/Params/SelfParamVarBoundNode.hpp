@@ -10,7 +10,7 @@
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -35,10 +35,10 @@ namespace Ace
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const SelfParamVarBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const SelfParamVarBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const SelfParamVarBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const SelfParamVarBoundNode>> final;
 
         auto GetSymbol() const -> SelfParamVarSymbol* final;
 

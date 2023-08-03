@@ -11,7 +11,7 @@
 #include "BoundNodes/FunctionBoundNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -86,44 +86,44 @@ namespace Ace
 
     auto ModuleBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const ModuleBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const ModuleBoundNode>>>
     {
-        ACE_TRY(mchCheckedModules, TransformExpectedMaybeChangedVector(m_Modules,
+        ACE_TRY(cchCheckedModules, TransformExpectedCacheableVector(m_Modules,
         [](const std::shared_ptr<const ModuleBoundNode>& module)
         {
             return module->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedTypes, TransformExpectedMaybeChangedVector(m_Types,
+        ACE_TRY(cchCheckedTypes, TransformExpectedCacheableVector(m_Types,
         [](const std::shared_ptr<const ITypeBoundNode>& type)
         {
             return type->GetOrCreateTypeCheckedType({});
         }));
 
-        ACE_TRY(mchCheckedImpls, TransformExpectedMaybeChangedVector(m_Impls,
+        ACE_TRY(cchCheckedImpls, TransformExpectedCacheableVector(m_Impls,
         [](const std::shared_ptr<const ImplBoundNode>& impl)
         {
             return impl->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedFunctions, TransformExpectedMaybeChangedVector(m_Functions,
+        ACE_TRY(cchCheckedFunctions, TransformExpectedCacheableVector(m_Functions,
         [](const std::shared_ptr<const FunctionBoundNode>& function)
         {
             return function->GetOrCreateTypeChecked({});
         }));
 
-        ACE_TRY(mchCheckedVars, TransformExpectedMaybeChangedVector(m_Vars,
+        ACE_TRY(cchCheckedVars, TransformExpectedCacheableVector(m_Vars,
         [](const std::shared_ptr<const StaticVarBoundNode>& var)
         {
             return var->GetOrCreateTypeChecked({});
         }));
 
         if (
-            !mchCheckedModules.IsChanged &&
-            !mchCheckedTypes.IsChanged &&
-            !mchCheckedImpls.IsChanged &&
-            !mchCheckedFunctions.IsChanged && 
-            !mchCheckedVars.IsChanged
+            !cchCheckedModules.IsChanged &&
+            !cchCheckedTypes.IsChanged &&
+            !cchCheckedImpls.IsChanged &&
+            !cchCheckedFunctions.IsChanged && 
+            !cchCheckedVars.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -133,54 +133,54 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            mchCheckedModules.Value,
-            mchCheckedTypes.Value,
-            mchCheckedImpls.Value,
-            mchCheckedFunctions.Value,
-            mchCheckedVars.Value
+            cchCheckedModules.Value,
+            cchCheckedTypes.Value,
+            cchCheckedImpls.Value,
+            cchCheckedFunctions.Value,
+            cchCheckedVars.Value
         ));
     }
 
     auto ModuleBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const ModuleBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const ModuleBoundNode>>
     {
-        const auto mchLoweredModules = TransformMaybeChangedVector(m_Modules,
+        const auto cchLoweredModules = TransformCacheableVector(m_Modules,
         [](const std::shared_ptr<const ModuleBoundNode>& module)
         {
             return module->GetOrCreateLowered({});
         });
 
-        const auto mchLoweredTypes = TransformMaybeChangedVector(m_Types,
+        const auto cchLoweredTypes = TransformCacheableVector(m_Types,
         [](const std::shared_ptr<const ITypeBoundNode>& type)
         {
             return type->GetOrCreateLoweredType({});
         });
 
-        const auto mchLoweredImpls = TransformMaybeChangedVector(m_Impls,
+        const auto cchLoweredImpls = TransformCacheableVector(m_Impls,
         [](const std::shared_ptr<const ImplBoundNode>& impl)
         {
             return impl->GetOrCreateLowered({});
         });
 
-        const auto mchLoweredFunctions = TransformMaybeChangedVector(m_Functions,
+        const auto cchLoweredFunctions = TransformCacheableVector(m_Functions,
         [](const std::shared_ptr<const FunctionBoundNode>& function)
         {
             return function->GetOrCreateLowered({});
         });
 
-        const auto mchLoweredVars = TransformMaybeChangedVector(m_Vars,
+        const auto cchLoweredVars = TransformCacheableVector(m_Vars,
         [](const std::shared_ptr<const StaticVarBoundNode>& var)
         {
             return var->GetOrCreateLowered({});
         });
 
         if (
-            !mchLoweredModules.IsChanged &&
-            !mchLoweredTypes.IsChanged &&
-            !mchLoweredImpls.IsChanged && 
-            !mchLoweredFunctions.IsChanged && 
-            !mchLoweredVars.IsChanged
+            !cchLoweredModules.IsChanged &&
+            !cchLoweredTypes.IsChanged &&
+            !cchLoweredImpls.IsChanged && 
+            !cchLoweredFunctions.IsChanged && 
+            !cchLoweredVars.IsChanged
             )
         {
             return CreateUnchanged(shared_from_this());
@@ -190,11 +190,11 @@ namespace Ace
             DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            mchLoweredModules.Value,
-            mchLoweredTypes.Value,
-            mchLoweredImpls.Value,
-            mchLoweredFunctions.Value,
-            mchLoweredVars.Value
+            cchLoweredModules.Value,
+            cchLoweredTypes.Value,
+            cchLoweredImpls.Value,
+            cchLoweredFunctions.Value,
+            cchLoweredVars.Value
         )->GetOrCreateLowered({}).Value);
     }
 }

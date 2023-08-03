@@ -9,7 +9,7 @@
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Assert.hpp"
 
 namespace Ace
@@ -76,11 +76,11 @@ namespace Ace
 
     auto UserUnaryExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const UserUnaryExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const UserUnaryExprBoundNode>>>
     {
-        ACE_TRY(mchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
+        ACE_TRY(cchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
 
-        if (!mchCheckedExpr.IsChanged)
+        if (!cchCheckedExpr.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -88,36 +88,36 @@ namespace Ace
         return CreateChanged(std::make_shared<const UserUnaryExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
-            mchCheckedExpr.Value,
+            cchCheckedExpr.Value,
             m_OpSymbol
         ));
     }
 
     auto UserUnaryExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto UserUnaryExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
     {
-        const auto mchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
+        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
 
         return CreateChanged(std::make_shared<const StaticFunctionCallExprBoundNode>(
             DiagnosticBag{},
             GetSrcLocation(),
             GetScope(),
             m_OpSymbol,
-            std::vector{ mchLoweredExpr.Value }
+            std::vector{ cchLoweredExpr.Value }
         )->GetOrCreateLowered({}).Value);
     }
 
     auto UserUnaryExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

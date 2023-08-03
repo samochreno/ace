@@ -8,7 +8,7 @@
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "Assert.hpp"
 #include "ExprEmitResult.hpp"
@@ -84,25 +84,25 @@ namespace Ace
 
     auto StructConstructionExprBoundNode::GetOrCreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const StructConstructionExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const StructConstructionExprBoundNode>>>
     {
-        ACE_TRY(mchCheckedArgs, TransformExpectedMaybeChangedVector(m_Args,
-        [](const StructConstructionExprBoundArg& arg) -> Expected<MaybeChanged<StructConstructionExprBoundArg>>
+        ACE_TRY(cchCheckedArgs, TransformExpectedCacheableVector(m_Args,
+        [](const StructConstructionExprBoundArg& arg) -> Expected<Cacheable<StructConstructionExprBoundArg>>
         {
-            ACE_TRY(mchCheckedValue, arg.Value->GetOrCreateTypeCheckedExpr({}));
+            ACE_TRY(cchCheckedValue, arg.Value->GetOrCreateTypeCheckedExpr({}));
 
-            if (!mchCheckedValue.IsChanged)
+            if (!cchCheckedValue.IsChanged)
             {
                 return CreateUnchanged(arg);
             }
 
             return CreateChanged(StructConstructionExprBoundArg{
                 arg.Symbol,
-                mchCheckedValue.Value,
+                cchCheckedValue.Value,
             });
         }));
 
-        if (!mchCheckedArgs.IsChanged)
+        if (!cchCheckedArgs.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -112,39 +112,39 @@ namespace Ace
             GetSrcLocation(),
             GetScope(),
             m_StructSymbol,
-            mchCheckedArgs.Value
+            cchCheckedArgs.Value
         ));
     }
 
     auto StructConstructionExprBoundNode::GetOrCreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<MaybeChanged<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
     {
         return GetOrCreateTypeChecked(context);
     }
 
     auto StructConstructionExprBoundNode::GetOrCreateLowered(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const StructConstructionExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const StructConstructionExprBoundNode>>
     {
-        const auto mchLoweredArgs = TransformMaybeChangedVector(m_Args,
-        [&](const StructConstructionExprBoundArg& arg) -> MaybeChanged<StructConstructionExprBoundArg>
+        const auto cchLoweredArgs = TransformCacheableVector(m_Args,
+        [&](const StructConstructionExprBoundArg& arg) -> Cacheable<StructConstructionExprBoundArg>
         {
-            const auto mchLoweredValue =
+            const auto cchLoweredValue =
                 arg.Value->GetOrCreateLoweredExpr({});
 
-            if (!mchLoweredValue.IsChanged)
+            if (!cchLoweredValue.IsChanged)
             {
                 return CreateUnchanged(arg);
             }
 
             return CreateChanged(StructConstructionExprBoundArg{
                 arg.Symbol,
-                mchLoweredValue.Value,
+                cchLoweredValue.Value,
             });
         });
 
-        if (!mchLoweredArgs.IsChanged)
+        if (!cchLoweredArgs.IsChanged)
         {
             return CreateUnchanged(shared_from_this());
         }
@@ -154,13 +154,13 @@ namespace Ace
             GetSrcLocation(),
             GetScope(),
             m_StructSymbol,
-            mchLoweredArgs.Value
+            cchLoweredArgs.Value
         )->GetOrCreateLowered({}).Value);
     }
 
     auto StructConstructionExprBoundNode::GetOrCreateLoweredExpr(
         const LoweringContext& context
-    ) const -> MaybeChanged<std::shared_ptr<const IExprBoundNode>>
+    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
     {
         return GetOrCreateLowered(context);
     }

@@ -73,12 +73,12 @@ namespace Ace::Application
         TGetOrCreateLoweredFunc&& getOrCreateLoweredFunc
     ) -> Expected<TLowered>
     {
-        ACE_TRY(mchTypeCheckedAST, getOrCreateTypeCheckedFunc(boundAST));
-        const auto mchLoweredAST = getOrCreateLoweredFunc(
-            mchTypeCheckedAST.Value
+        ACE_TRY(cchTypeCheckedAST, getOrCreateTypeCheckedFunc(boundAST));
+        const auto cchLoweredAST = getOrCreateLoweredFunc(
+            cchTypeCheckedAST.Value
         );
 
-        auto& finalAST = mchLoweredAST.Value;
+        auto& finalAST = cchLoweredAST.Value;
         const auto nodes = GetAllNodes(finalAST);
 
         auto* const compilation = finalAST->GetCompilation();

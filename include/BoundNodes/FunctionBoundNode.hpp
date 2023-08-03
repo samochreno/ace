@@ -14,7 +14,7 @@
 #include "SrcLocation.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
-#include "MaybeChanged.hpp"
+#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -47,10 +47,10 @@ namespace Ace
         ) const -> std::shared_ptr<const FunctionBoundNode> final;
         auto GetOrCreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<MaybeChanged<std::shared_ptr<const FunctionBoundNode>>> final;
+        ) const -> Expected<Cacheable<std::shared_ptr<const FunctionBoundNode>>> final;
         auto GetOrCreateLowered(
             const LoweringContext& context
-        ) const -> MaybeChanged<std::shared_ptr<const FunctionBoundNode>> final;
+        ) const -> Cacheable<std::shared_ptr<const FunctionBoundNode>> final;
 
         auto GetSymbol() const -> FunctionSymbol* final;
 
