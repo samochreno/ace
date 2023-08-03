@@ -1280,7 +1280,8 @@ namespace Ace
         }
 
         return (parser.Peek(i) == TokenKind::CloseBracket) ?
-            i : std::optional<size_t>{};
+            std::optional{ i } :
+            std::nullopt;
     }
 
     static auto IsStructBegin(

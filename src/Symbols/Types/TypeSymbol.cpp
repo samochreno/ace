@@ -209,7 +209,7 @@ namespace Ace
             GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(name);
         
         return expTemplate ?
-            expTemplate.Unwrap() :
-            std::optional<TypeTemplateSymbol*>{};
+            std::optional{ expTemplate.Unwrap() } :
+            std::nullopt;
     }
 }

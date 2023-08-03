@@ -3,8 +3,6 @@
 ## 🛠️ Refactor
 
 - ❓ Eliminate local lambdas
-- Rewrite ternary optionals to use `std::nullopt`
-- Figure out where to use the `opt` prefix and where not
 - String interning, maybe put `Token`s on the stack
 - Special fast lookup for native types
 - Rename `MemberAccess` to `FieldAccess` or `InstanceVarAccess`

@@ -196,8 +196,8 @@ namespace Ace
             GetScope()->ResolveStaticSymbol<FunctionTemplateSymbol>(name);
 
         return expTemplate ?
-            expTemplate.Unwrap() :
-            std::optional<FunctionTemplateSymbol*>{};
+            std::optional{ expTemplate.Unwrap() } :
+            std::nullopt;
     }
     
     auto FunctionSymbol::CollectTemplateArgs() const -> std::vector<ITypeSymbol*>
