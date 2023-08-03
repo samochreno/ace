@@ -65,7 +65,7 @@ namespace Ace
         diagnostics.Add(expVarSymbol);
 
         auto* const varSymbol = expVarSymbol.UnwrapOr(
-            GetCompilation()->ErrorSymbols->GetVar()
+            GetCompilation()->GetErrorSymbols().GetVar()
         );
 
         return std::make_shared<const StaticVarRefExprBoundNode>(

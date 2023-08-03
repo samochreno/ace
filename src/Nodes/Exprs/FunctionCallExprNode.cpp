@@ -109,7 +109,7 @@ namespace Ace
             diagnostics.Add(expFunctionSymbol);
 
             auto* const functionSymbol = expFunctionSymbol.UnwrapOr(
-                GetCompilation()->ErrorSymbols->GetFunction()
+                GetCompilation()->GetErrorSymbols().GetFunction()
             );
 
             return std::make_shared<const StaticFunctionCallExprBoundNode>(
@@ -134,7 +134,7 @@ namespace Ace
             diagnostics.Add(expFunctionSymbol);
 
             auto* const functionSymbol = expFunctionSymbol.UnwrapOr(
-                GetCompilation()->ErrorSymbols->GetFunction()
+                GetCompilation()->GetErrorSymbols().GetFunction()
             );
 
             return std::shared_ptr<const IExprBoundNode>

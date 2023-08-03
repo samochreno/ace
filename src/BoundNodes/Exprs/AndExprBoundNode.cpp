@@ -81,7 +81,7 @@ namespace Ace
     {
         const TypeInfo typeInfo
         {
-            GetCompilation()->Natives->Bool.GetSymbol(),
+            GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
 
@@ -153,7 +153,7 @@ namespace Ace
     {
         std::vector<ExprDropData> tmps{};
 
-        auto* const boolType = GetCompilation()->Natives->Bool.GetIRType();
+        auto* const boolType = GetCompilation()->GetNatives()->Bool.GetIRType();
 
         auto* const allocaInst =
             emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
@@ -176,12 +176,12 @@ namespace Ace
         );
 
         auto trueBlockBuilder = std::make_unique<BlockBuilder>(
-            *GetCompilation()->LLVMContext,
+            GetCompilation()->GetLLVMContext(),
             emitter.GetFunction()
         );
 
         auto endBlockBuilder = std::make_unique<BlockBuilder>(
-            *GetCompilation()->LLVMContext,
+            GetCompilation()->GetLLVMContext(),
             emitter.GetFunction()
         );
 
@@ -221,7 +221,7 @@ namespace Ace
     {
         return
         {
-            GetCompilation()->Natives->Bool.GetSymbol(),
+            GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R
         };
     }

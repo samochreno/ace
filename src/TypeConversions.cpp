@@ -54,11 +54,11 @@ namespace Ace
             toType->GetWithoutWeakPtr()
         );
 
-        auto* const compilation = scope->GetCompilation();
+        auto* compilation = scope->GetCompilation();
 
         return dynamic_cast<FunctionSymbol*>(Scope::ResolveOrInstantiateTemplateInstance(
             SrcLocation{},
-            compilation->Natives->WeakPtr__from.GetSymbol(),
+            compilation->GetNatives()->WeakPtr__from.GetSymbol(),
             std::nullopt,
             { fromType->GetWithoutStrongPtr()->GetWithoutRef() },
             {}
@@ -75,7 +75,7 @@ namespace Ace
         const auto optNativeOp = GetNativeConversionOp(
             fromType,
             toType,
-            scope->GetCompilation()->Natives->GetImplicitFromOpMap()
+            scope->GetCompilation()->GetNatives()->GetImplicitFromOpMap()
         );
         if (optNativeOp.has_value())
         {
@@ -99,7 +99,7 @@ namespace Ace
         const auto optNativeImplicitOp = GetNativeConversionOp(
             fromType,
             toType,
-            scope->GetCompilation()->Natives->GetImplicitFromOpMap()
+            scope->GetCompilation()->GetNatives()->GetImplicitFromOpMap()
         );
         if (optNativeImplicitOp.has_value())
         {
@@ -109,7 +109,7 @@ namespace Ace
         const auto optNativeExplicitOp = GetNativeConversionOp(
             fromType,
             toType,
-            scope->GetCompilation()->Natives->GetExplicitFromOpMap()
+            scope->GetCompilation()->GetNatives()->GetExplicitFromOpMap()
         );
         if (optNativeExplicitOp)
         {

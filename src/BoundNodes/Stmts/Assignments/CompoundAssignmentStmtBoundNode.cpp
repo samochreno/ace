@@ -91,7 +91,7 @@ namespace Ace
     ) const -> Expected<MaybeChanged<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>>
     {
         const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
-        if (m_OpSymbol == GetCompilation()->ErrorSymbols->GetFunction())
+        if (m_OpSymbol == GetCompilation()->GetErrorSymbols().GetFunction())
         {
             return CreateUnchanged(shared_from_this());
         }

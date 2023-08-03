@@ -19,7 +19,7 @@ namespace Ace
         virtual ~INode() = default;
 
         virtual auto GetSrcLocation() const -> const SrcLocation& = 0;
-        virtual auto GetCompilation() const -> const Compilation* final;
+        virtual auto GetCompilation() const -> Compilation* final;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto CollectChildren() const -> std::vector<const INode*> = 0;
     };

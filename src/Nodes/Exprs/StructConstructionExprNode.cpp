@@ -295,11 +295,11 @@ namespace Ace
                 ));
             }
 
-            auto* const compilation = scope->GetCompilation();
+            auto* compilation = scope->GetCompilation();
 
             auto* const varSymbol = hasMatchingVarSymbol ?
                 matchingVarSymbolIt->first :
-                compilation->ErrorSymbols->GetInstanceVar();
+                compilation->GetErrorSymbols().GetInstanceVar();
 
             const auto boundValue = CreateBoundArgValue(scope, arg);
 
@@ -358,7 +358,7 @@ namespace Ace
         }();
 
         auto* const structSymbol = expStructSymbol.UnwrapOr(
-            GetCompilation()->ErrorSymbols->GetStructType()
+            GetCompilation()->GetErrorSymbols().GetStructType()
         );
 
         return std::make_shared<const StructConstructionExprBoundNode>(

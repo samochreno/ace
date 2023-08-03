@@ -14,7 +14,7 @@
 namespace Ace::GlueGeneration
 {
     static auto GetOrDefineAndBindCopyGlueSymbols(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         ITypeSymbol* const typeSymbol
     ) -> FunctionSymbol*
     {
@@ -40,7 +40,7 @@ namespace Ace::GlueGeneration
             name,
             SymbolCategory::Static,
             AccessModifier::Public,
-            compilation->Natives->Void.GetSymbol()
+            compilation->GetNatives()->Void.GetSymbol()
         );
 
         auto* const glueSymbol = Scope::DefineSymbol(
@@ -76,7 +76,7 @@ namespace Ace::GlueGeneration
     }
 
     static auto GetOrDefineAndBindDropGlueSymbols(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         ITypeSymbol* const typeSymbol
     ) -> FunctionSymbol*
     {
@@ -102,7 +102,7 @@ namespace Ace::GlueGeneration
             name,
             SymbolCategory::Static,
             AccessModifier::Public,
-            compilation->Natives->Void.GetSymbol()
+            compilation->GetNatives()->Void.GetSymbol()
         );
 
         auto* const glueSymbol = Scope::DefineSymbol(
@@ -126,9 +126,9 @@ namespace Ace::GlueGeneration
     }
 
     static auto TryDefineAndBindGlueSymbols(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         ITypeSymbol* const typeSymbol,
-        const std::function<FunctionSymbol*(const Compilation* const, ITypeSymbol* const)>& getOrDefineAndBindGlueSymbols
+        const std::function<FunctionSymbol*(Compilation* const, ITypeSymbol* const)>& getOrDefineAndBindGlueSymbols
     ) -> std::optional<FunctionSymbol*>
     {
         if (typeSymbol->IsError())
@@ -158,7 +158,7 @@ namespace Ace::GlueGeneration
     }
 
     static auto CreateAndBindGlueBody(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::function<std::shared_ptr<const IEmittable<void>>(ITypeSymbol* const, FunctionSymbol* const)>& createGlueBody,
         ITypeSymbol* const typeSymbol,
         FunctionSymbol* const glueSymbol
@@ -169,13 +169,13 @@ namespace Ace::GlueGeneration
     }
 
     static auto GenerateAndBindGlue(
-        const Compilation* const compilation,
-        const std::function<FunctionSymbol*(const Compilation* const, ITypeSymbol* const)>& getOrDefineGlueSymbols,
+        Compilation* const compilation,
+        const std::function<FunctionSymbol*(Compilation* const, ITypeSymbol* const)>& getOrDefineGlueSymbols,
         const std::function<std::shared_ptr<const IEmittable<void>>(ITypeSymbol* const, FunctionSymbol* const)>& createGlueBody
     ) -> void
     {
         const auto typeSymbols =
-            compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<ITypeSymbol>();
+            compilation->GetGlobalScope()->CollectSymbolsRecursive<ITypeSymbol>();
 
         struct TypeGlueSymbolPair
         {
@@ -217,7 +217,7 @@ namespace Ace::GlueGeneration
     }
 
     auto GenerateAndBindGlue(
-        const Compilation* const compilation
+        Compilation* const compilation
     ) -> void
     {
         GenerateAndBindGlue(
@@ -245,7 +245,7 @@ namespace Ace::GlueGeneration
     }
 
     static auto CreateTrivialCopyGlueBody(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         FunctionSymbol* const glueSymbol,
         StructTypeSymbol* const structSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
@@ -300,7 +300,7 @@ namespace Ace::GlueGeneration
     }
 
     static auto CreateTrivialDropGlueBody(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         FunctionSymbol* const glueSymbol,
         ITypeSymbol* const typeSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
@@ -321,7 +321,7 @@ namespace Ace::GlueGeneration
     }
 
     auto CreateCopyGlueBody(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         FunctionSymbol* const glueSymbol,
         StructTypeSymbol* const structSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
@@ -359,7 +359,7 @@ namespace Ace::GlueGeneration
             SpecialIdent::Op::Copy,
         });
         const auto expOpSymbol = 
-            compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(opName);
+            compilation->GetGlobalScope()->ResolveStaticSymbol<FunctionSymbol>(opName);
 
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
         if (expOpSymbol)
@@ -441,7 +441,7 @@ namespace Ace::GlueGeneration
             [&](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
             { 
                 return bodyNode->GetOrCreateTypeChecked(
-                    { compilation->Natives->Void.GetSymbol() }
+                    { compilation->GetNatives()->Void.GetSymbol() }
                 ); 
             },
             [](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
@@ -452,7 +452,7 @@ namespace Ace::GlueGeneration
     }
 
     auto CreateDropGlueBody(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         FunctionSymbol* const glueSymbol,
         StructTypeSymbol* const structSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
@@ -486,7 +486,7 @@ namespace Ace::GlueGeneration
             SpecialIdent::Op::Drop,
         });
         const auto expOpSymbol = 
-            compilation->GlobalScope.Unwrap()->ResolveStaticSymbol<FunctionSymbol>(opName);
+            compilation->GetGlobalScope()->ResolveStaticSymbol<FunctionSymbol>(opName);
 
         if (expOpSymbol)
         {
@@ -557,7 +557,7 @@ namespace Ace::GlueGeneration
             [&](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
             { 
                 return bodyNode->GetOrCreateTypeChecked(
-                    { compilation->Natives->Void.GetSymbol() }
+                    { compilation->GetNatives()->Void.GetSymbol() }
                 ); 
             },
             [](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)

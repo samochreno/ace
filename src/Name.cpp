@@ -135,7 +135,7 @@ namespace Ace
     ) -> SymbolName
     {
         const auto& natives =
-            srcLocation.Buffer->GetCompilation()->Natives;
+            srcLocation.Buffer->GetCompilation()->GetNatives();
 
         switch (modifier)
         {
@@ -163,7 +163,7 @@ namespace Ace
     }
 
     auto TypeName::ToSymbolName(
-        const Compilation* const compilation
+        Compilation* const compilation
     ) const -> Ace::SymbolName
     {
         if (Modifiers.empty())

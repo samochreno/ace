@@ -11,19 +11,19 @@
 namespace Ace::Application
 {
     auto CreateAndDefineSymbols(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::vector<const INode*>& nodes
     ) -> Diagnosed<void>;
     auto DefineAssociations(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::vector<const INode*>& nodes
     ) -> Diagnosed<void>;
     auto ValidateControlFlow(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::vector<const IBoundNode*>& nodes
     ) -> Expected<void>;
     auto BindFunctionSymbolsBodies(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::vector<const IBoundNode*>& nodes
     ) -> void;
 
@@ -81,7 +81,7 @@ namespace Ace::Application
         auto& finalAST = mchLoweredAST.Value;
         const auto nodes = GetAllNodes(finalAST);
 
-        const auto* const compilation = finalAST->GetCompilation();
+        auto* const compilation = finalAST->GetCompilation();
         
         ACE_TRY_VOID(ValidateControlFlow(compilation, nodes));
         BindFunctionSymbolsBodies(compilation, nodes);

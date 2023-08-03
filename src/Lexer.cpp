@@ -156,7 +156,7 @@ namespace Ace
         const SrcLocation& srcLocation
     ) -> std::optional<std::vector<std::shared_ptr<const Token>>>
     {
-        const auto& natives = lexer.GetFileBuffer()->GetCompilation()->Natives;
+        const auto& natives = lexer.GetFileBuffer()->GetCompilation()->GetNatives();
 
         Token token
         {

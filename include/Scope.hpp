@@ -156,7 +156,7 @@ namespace Ace
     {
     public:
         GlobalScope();
-        GlobalScope(const Compilation* const compilation);
+        GlobalScope(Compilation* const compilation);
         ~GlobalScope();
 
         auto Unwrap() const -> const std::shared_ptr<Scope>&;
@@ -172,7 +172,7 @@ namespace Ace
     public:
         ~Scope();
         
-        auto GetCompilation() const -> const Compilation*;
+        auto GetCompilation() const -> Compilation*;
         auto GetNestLevel() const -> size_t;
         auto GetParent() const -> const std::optional<std::shared_ptr<Scope>>&;
         auto GetName() const -> const std::string&;
@@ -580,11 +580,11 @@ namespace Ace
         ) -> Diagnosed<void>;
 
     private:
-        Scope(const Compilation* const compilation);
+        Scope(Compilation* const compilation);
         auto Clear() -> void;
 
         Scope(
-            const Compilation* const compilation,
+            Compilation* const compilation,
             const std::optional<std::string>& optName,
             const std::optional<std::shared_ptr<Scope>>& optParent
         );
@@ -646,7 +646,7 @@ namespace Ace
 
         auto CollectSelfAndAssociations() const -> std::vector<std::shared_ptr<const Scope>>;
 
-        const Compilation* m_Compilation{};
+        Compilation* m_Compilation{};
         size_t m_NestLevel{};
         std::string m_Name{};
         std::optional<std::shared_ptr<Scope>> m_OptParent{};

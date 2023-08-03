@@ -136,7 +136,7 @@ namespace Ace
     {
     }
 
-    GlobalScope::GlobalScope(const Compilation* const compilation)
+    GlobalScope::GlobalScope(Compilation* const compilation)
         : m_Scope{ new Scope(compilation) }
     {
     }
@@ -186,7 +186,7 @@ namespace Ace
         ACE_ASSERT(FindExpiredChild(parentChildren) == end(parentChildren));
     }
 
-    auto Scope::GetCompilation() const -> const Compilation*
+    auto Scope::GetCompilation() const -> Compilation*
     {
         return m_Compilation;
     }
@@ -516,11 +516,11 @@ namespace Ace
                 ));
             }
 
-            auto* const compilation = srcLocation.Buffer->GetCompilation();
+            auto* compilation = srcLocation.Buffer->GetCompilation();
 
             auto* const templateArg = hasMatchingTemplateArg ?
                 matchingTemplateArgIt->second :
-                compilation->ErrorSymbols->GetType();
+                compilation->GetErrorSymbols().GetType();
 
             templateArgs.push_back(templateArg);
         });
@@ -738,9 +738,9 @@ namespace Ace
             return Expected{ optResolvedInstance.value(), diagnostics };
         }
 
-        const auto* const compilation = t3mplate->GetCompilation();
+        auto* const compilation = t3mplate->GetCompilation();
 
-        const auto dgnSymbol = compilation->TemplateInstantiator->InstantiateSymbols(
+        const auto dgnSymbol = compilation->GetTemplateInstantiator().InstantiateSymbols(
             t3mplate,
             implTemplateArgs,
             expDeducedTemplateArgs.Unwrap()
@@ -841,7 +841,7 @@ namespace Ace
     }
 
     Scope::Scope(
-        const Compilation* const compilation
+        Compilation* const compilation
     ) : Scope
         {
             compilation,
@@ -864,7 +864,7 @@ namespace Ace
     }
 
     Scope::Scope(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::optional<std::string>& optName,
         const std::optional<std::shared_ptr<Scope>>& optParent
     ) : m_Compilation{ compilation },
@@ -1043,7 +1043,9 @@ namespace Ace
                 argName
             );
             diagnostics.Add(expArg);
-            return expArg.UnwrapOr(scope->GetCompilation()->ErrorSymbols->GetType());
+            return expArg.UnwrapOr(
+                scope->GetCompilation()->GetErrorSymbols().GetType()
+            );
         });
 
         if (diagnostics.HasErrors())
@@ -1397,7 +1399,7 @@ namespace Ace
         {
             return Expected
             {
-                m_Compilation->GlobalScope.Unwrap(),
+                m_Compilation->GetGlobalScope(),
                 diagnostics,
             };
         }

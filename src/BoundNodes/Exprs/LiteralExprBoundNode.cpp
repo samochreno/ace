@@ -175,7 +175,7 @@ namespace Ace
 
     auto LiteralExprBoundNode::GetTypeInfo() const -> TypeInfo
     {
-        auto& natives = GetCompilation()->Natives;
+        auto* const natives = GetCompilation()->GetNatives();
 
         auto* const typeSymbol = [&]() -> ITypeSymbol*
         {

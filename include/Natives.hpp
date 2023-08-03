@@ -28,7 +28,7 @@ namespace Ace
     public:
         virtual ~INative() = default;
 
-        virtual auto GetCompilation() const -> const Compilation* = 0;
+        virtual auto GetCompilation() const -> Compilation* = 0;
 
         virtual auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -47,7 +47,7 @@ namespace Ace
     {
     public:
         NativeType(
-            const Compilation* const compilation,
+            Compilation* const compilation,
             std::vector<const char*>&& nameSectionStrings,
             std::optional<std::function<llvm::Type*()>>&& irTypeGetter,
             const TypeSizeKind sizeKind,
@@ -55,7 +55,7 @@ namespace Ace
         );
         ~NativeType() = default;
 
-        auto GetCompilation() const -> const Compilation* final;
+        auto GetCompilation() const -> Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -69,7 +69,7 @@ namespace Ace
         auto GetIRType() const -> llvm::Type*;
         
     private:
-        const Compilation* m_Compilation{};
+        Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
         std::optional<std::function<llvm::Type*()>> m_IRTypeGetter{};
         bool m_IsSized{};
@@ -82,12 +82,12 @@ namespace Ace
     {
     public:
         NativeTypeTemplate(
-            const Compilation* const compilation,
+            Compilation* const compilation,
             std::vector<const char*>&& nameSectionStrings
         );
         ~NativeTypeTemplate() = default;
 
-        auto GetCompilation() const -> const Compilation* final;
+        auto GetCompilation() const -> Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -98,7 +98,7 @@ namespace Ace
         auto GetSymbol() const -> TypeTemplateSymbol*;
 
     private:
-        const Compilation* m_Compilation{};
+        Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
 
         TypeTemplateSymbol* m_Symbol{};
@@ -108,13 +108,13 @@ namespace Ace
     {
     public:
         NativeFunction(
-            const Compilation* const compilation,
+            Compilation* const compilation,
             std::vector<const char*>&& nameSectionStrings,
             FunctionBodyEmitter&& bodyEmitter
         );
         ~NativeFunction() = default;
 
-        auto GetCompilation() const -> const Compilation* final;
+        auto GetCompilation() const -> Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -125,7 +125,7 @@ namespace Ace
         auto GetSymbol() const -> FunctionSymbol*;
         
     private:
-        const Compilation* m_Compilation{};
+        Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
         FunctionBodyEmitter m_BodyEmitter{};
 
@@ -136,12 +136,12 @@ namespace Ace
     {
     public:
         NativeFunctionTemplate(
-            const Compilation* const compilation,
+            Compilation* const compilation,
             std::vector<const char*>&& nameSectionStrings
         );
         ~NativeFunctionTemplate() = default;
 
-        auto GetCompilation() const -> const Compilation* final;
+        auto GetCompilation() const -> Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -152,7 +152,7 @@ namespace Ace
         auto GetSymbol() const -> FunctionTemplateSymbol*;
 
     private:
-        const Compilation* m_Compilation{};
+        Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
 
         FunctionTemplateSymbol* m_Symbol{};
@@ -168,7 +168,7 @@ namespace Ace
         );
         ~NativeAssociatedFunction() = default;
 
-        auto GetCompilation() const -> const Compilation* final;
+        auto GetCompilation() const -> Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -195,7 +195,7 @@ namespace Ace
         );
         ~NativeAssociatedFunctionTemplate() = default;
 
-        auto GetCompilation() const -> const Compilation* final;
+        auto GetCompilation() const -> Compilation* final;
 
         auto CreateFullyQualifiedName(
             const SrcLocation& srcLocation
@@ -215,7 +215,7 @@ namespace Ace
     class Natives
     {
     public:
-        Natives(const Compilation* const compilation);
+        Natives(Compilation* const compilation);
         ~Natives() = default;
 
         auto Initialize() -> void;

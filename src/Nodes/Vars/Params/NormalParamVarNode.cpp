@@ -128,12 +128,16 @@ namespace Ace
         );
         diagnostics.Add(expTypeSymbol);
 
+        auto* const typeSymbol = expTypeSymbol.UnwrapOr(
+            GetCompilation()->GetErrorSymbols().GetType()
+        );
+
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<NormalParamVarSymbol>(
                 m_Scope,
                 m_Name,
-                expTypeSymbol.UnwrapOr(GetCompilation()->ErrorSymbols->GetType()),
+                typeSymbol,
                 m_Index
             ),
             diagnostics,

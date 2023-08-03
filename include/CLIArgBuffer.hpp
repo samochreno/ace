@@ -15,7 +15,7 @@ namespace Ace
         CLIArgBuffer(const CLIArgBuffer&) = delete;
         CLIArgBuffer(CLIArgBuffer&&) = default;
         CLIArgBuffer(
-            const Compilation* const compilation,
+            Compilation* const compilation,
             const std::vector<std::string_view>& args
         );
         ~CLIArgBuffer() = default;
@@ -23,7 +23,7 @@ namespace Ace
         auto operator=(const CLIArgBuffer&) -> CLIArgBuffer& = delete;
         auto operator=(CLIArgBuffer&&) -> CLIArgBuffer& = default;
 
-        auto GetCompilation() const -> const Compilation*;
+        auto GetCompilation() const -> Compilation*;
         auto GetBuffer() const -> const std::string& final;
 
         auto FormatLocation(
@@ -33,7 +33,7 @@ namespace Ace
         auto GetArgs() const -> const std::vector<std::string_view>&;
 
     private:
-        const Compilation* m_Compilation{};
+        Compilation* m_Compilation{};
         std::string m_Buffer{};
         std::vector<std::string_view> m_Args{};
     };

@@ -187,7 +187,7 @@ namespace Ace
             const auto varIndex = arg.Symbol->GetIndex();
 
             auto* const int32Type = llvm::Type::getInt32Ty(
-                *GetCompilation()->LLVMContext
+                GetCompilation()->GetLLVMContext()
             );
 
             std::vector<llvm::Value*> indexList{};

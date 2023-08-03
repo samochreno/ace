@@ -70,7 +70,7 @@ namespace Ace
     }
 
     NativeType::NativeType(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         std::vector<const char*>&& nameSectionStrings,
         std::optional<std::function<llvm::Type*()>>&& irTypeGetter,
         const TypeSizeKind sizeKind,
@@ -92,7 +92,7 @@ namespace Ace
         );
     }
 
-    auto NativeType::GetCompilation() const -> const Compilation*
+    auto NativeType::GetCompilation() const -> Compilation*
     {
         return m_Compilation;
     }
@@ -109,7 +109,7 @@ namespace Ace
 
     auto NativeType::Initialize() -> void
     {
-        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        const auto globalScope = GetCompilation()->GetGlobalScope();
         auto* const symbol = globalScope->ResolveStaticSymbol<ITypeSymbol>(
             CreateFullyQualifiedName(SrcLocation{})
         ).Unwrap();
@@ -152,14 +152,14 @@ namespace Ace
     }
 
     NativeTypeTemplate::NativeTypeTemplate(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         std::vector<const char*>&& nameSectionStrings
     ) : m_Compilation{ compilation },
         m_NameSectionStrings{ std::move(nameSectionStrings) }
     {
     }
 
-    auto NativeTypeTemplate::GetCompilation() const -> const Compilation*
+    auto NativeTypeTemplate::GetCompilation() const -> Compilation*
     {
         return m_Compilation;
     }
@@ -181,7 +181,7 @@ namespace Ace
             name.Sections.back().Name.String
         );
 
-        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        const auto globalScope = GetCompilation()->GetGlobalScope();
         auto* const symbol =
             globalScope->ResolveStaticSymbol<TypeTemplateSymbol>(name).Unwrap();
 
@@ -195,7 +195,7 @@ namespace Ace
     }
 
     NativeFunction::NativeFunction(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         std::vector<const char*>&& nameSectionStrings,
         FunctionBodyEmitter&& bodyEmitter
     ) : m_Compilation{ compilation },
@@ -204,7 +204,7 @@ namespace Ace
     {
     }
 
-    auto NativeFunction::GetCompilation() const -> const Compilation*
+    auto NativeFunction::GetCompilation() const -> Compilation*
     {
         return m_Compilation;
     }
@@ -221,7 +221,7 @@ namespace Ace
 
     auto NativeFunction::Initialize() -> void
     {
-        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        const auto globalScope = GetCompilation()->GetGlobalScope();
         auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
             CreateFullyQualifiedName(SrcLocation{})
         ).Unwrap();
@@ -240,14 +240,14 @@ namespace Ace
     }
 
     NativeFunctionTemplate::NativeFunctionTemplate(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         std::vector<const char*>&& nameSectionStrings
     ) : m_Compilation{ compilation },
         m_NameSectionStrings{ std::move(nameSectionStrings) }
     {
     }
 
-    auto NativeFunctionTemplate::GetCompilation() const -> const Compilation*
+    auto NativeFunctionTemplate::GetCompilation() const -> Compilation*
     {
         return m_Compilation;
     }
@@ -264,7 +264,7 @@ namespace Ace
 
     auto NativeFunctionTemplate::Initialize() -> void
     {
-        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        const auto globalScope = GetCompilation()->GetGlobalScope();
         auto* const symbol = globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
             CreateFullyQualifiedName(SrcLocation{})
         ).Unwrap();
@@ -288,7 +288,7 @@ namespace Ace
     {
     }
 
-    auto NativeAssociatedFunction::GetCompilation() const -> const Compilation*
+    auto NativeAssociatedFunction::GetCompilation() const -> Compilation*
     {
         return m_Type.GetCompilation();
     }
@@ -306,7 +306,7 @@ namespace Ace
 
     auto NativeAssociatedFunction::Initialize() -> void
     {
-        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        const auto globalScope = GetCompilation()->GetGlobalScope();
         auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
             CreateFullyQualifiedName(SrcLocation{})
         ).Unwrap();
@@ -332,7 +332,7 @@ namespace Ace
     {
     }
 
-    auto NativeAssociatedFunctionTemplate::GetCompilation() const -> const Compilation*
+    auto NativeAssociatedFunctionTemplate::GetCompilation() const -> Compilation*
     {
         return m_Type.GetCompilation();
     }
@@ -350,7 +350,7 @@ namespace Ace
 
     auto NativeAssociatedFunctionTemplate::Initialize() -> void
     {
-        const auto globalScope = GetCompilation()->GlobalScope.Unwrap();
+        const auto globalScope = GetCompilation()->GetGlobalScope();
         auto* const symbol = globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
             CreateFullyQualifiedName(SrcLocation{})
         ).Unwrap();
@@ -380,7 +380,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (fromType.GetCompilation()->Natives->IsIntTypeSigned(fromType))
+                        if (fromType.GetCompilation()->GetNatives()->IsIntTypeSigned(fromType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSExtOrTrunc(
                                 emitter.EmitLoadArg(0, fromType.GetIRType()),
@@ -523,7 +523,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (fromType.GetCompilation()->Natives->IsIntTypeSigned(toType))
+                        if (fromType.GetCompilation()->GetNatives()->IsIntTypeSigned(toType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateFPToSI(
                                 emitter.EmitLoadArg(0, fromType.GetIRType()),
@@ -580,7 +580,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (selfType.GetCompilation()->Natives->IsIntTypeSigned(selfType))
+                        if (selfType.GetCompilation()->GetNatives()->IsIntTypeSigned(selfType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSDiv(
                                 emitter.EmitLoadArg(0, selfType.GetIRType()),
@@ -613,7 +613,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (selfType.GetCompilation()->Natives->IsIntTypeSigned(selfType))
+                        if (selfType.GetCompilation()->GetNatives()->IsIntTypeSigned(selfType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSRem(
                                 emitter.EmitLoadArg(0, selfType.GetIRType()),
@@ -995,7 +995,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (fromType.GetCompilation()->Natives->IsIntTypeSigned(fromType))
+                        if (fromType.GetCompilation()->GetNatives()->IsIntTypeSigned(fromType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSIToFP(
                                 emitter.EmitLoadArg(0, fromType.GetIRType()),
@@ -1389,14 +1389,14 @@ namespace Ace
     }
 
     Natives::Natives(
-        const Compilation* const compilation
+        Compilation* const compilation
     ) : Int8
         {
             compilation,
             std::vector{ "ace", "std", "Int8" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt8Ty(*compilation->LLVMContext);
+                return llvm::Type::getInt8Ty(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1407,7 +1407,7 @@ namespace Ace
             std::vector{ "ace", "std", "Int16" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt16Ty(*compilation->LLVMContext);
+                return llvm::Type::getInt16Ty(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1418,7 +1418,7 @@ namespace Ace
             std::vector{ "ace", "std", "Int32" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt32Ty(*compilation->LLVMContext);
+                return llvm::Type::getInt32Ty(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1429,7 +1429,7 @@ namespace Ace
             std::vector{ "ace", "std", "Int64" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt64Ty(*compilation->LLVMContext);
+                return llvm::Type::getInt64Ty(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1441,7 +1441,7 @@ namespace Ace
             std::vector{ "ace", "std", "UInt8" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt8Ty(*compilation->LLVMContext);
+                return llvm::Type::getInt8Ty(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1452,7 +1452,7 @@ namespace Ace
             std::vector{ "ace", "std", "UInt16" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt16Ty(*compilation->LLVMContext);
+                return llvm::Type::getInt16Ty(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1463,7 +1463,7 @@ namespace Ace
             std::vector{ "ace", "std", "UInt32" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt32Ty(*compilation->LLVMContext);
+                return llvm::Type::getInt32Ty(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1474,7 +1474,7 @@ namespace Ace
             std::vector{ "ace", "std", "UInt64" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt64Ty(*compilation->LLVMContext);
+                return llvm::Type::getInt64Ty(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1486,7 +1486,7 @@ namespace Ace
             std::vector{ "ace", "std", "Int" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt32Ty(*compilation->LLVMContext);
+                return llvm::Type::getInt32Ty(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1498,7 +1498,7 @@ namespace Ace
             std::vector{ "ace", "std", "Float32" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getFloatTy(*compilation->LLVMContext);
+                return llvm::Type::getFloatTy(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1509,7 +1509,7 @@ namespace Ace
             std::vector{ "ace", "std", "Float64" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getDoubleTy(*compilation->LLVMContext);
+                return llvm::Type::getDoubleTy(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1521,7 +1521,7 @@ namespace Ace
             std::vector{ "ace", "std", "Bool" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt1Ty(*compilation->LLVMContext);
+                return llvm::Type::getInt1Ty(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1532,7 +1532,7 @@ namespace Ace
             std::vector{ "ace", "std", "Void" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getVoidTy(*compilation->LLVMContext);
+                return llvm::Type::getVoidTy(compilation->GetLLVMContext());
             },
             TypeSizeKind::Unsized,
             NativeCopyabilityKind::NonTrivial,
@@ -1552,7 +1552,7 @@ namespace Ace
             std::vector{ "ace", "std", "Ptr" },
             [compilation]() -> llvm::Type*
             {
-                return llvm::Type::getInt8PtrTy(*compilation->LLVMContext);
+                return llvm::Type::getInt8PtrTy(compilation->GetLLVMContext());
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1583,7 +1583,7 @@ namespace Ace
                 std::string string{ "%" PRId32 "\n" };
 
                 auto* const charType = llvm::Type::getInt8Ty(
-                    *compilation->LLVMContext
+                    compilation->GetLLVMContext()
                 );
 
                 std::vector<llvm::Constant*> chars(string.size());
@@ -1646,7 +1646,7 @@ namespace Ace
                 std::string string{ "0x%" PRIXPTR "\n" };
 
                 auto* const charType = llvm::Type::getInt8Ty(
-                    *compilation->LLVMContext
+                    compilation->GetLLVMContext()
                 );
 
                 std::vector<llvm::Constant*> chars(string.size());
@@ -1689,7 +1689,7 @@ namespace Ace
                 ));
                 args.push_back(emitter.EmitLoadArg(
                     0,
-                    llvm::Type::getInt8PtrTy(*compilation->LLVMContext)
+                    llvm::Type::getInt8PtrTy(compilation->GetLLVMContext())
                 ));
 
                 emitter.GetBlockBuilder().Builder.CreateCall(
@@ -2076,7 +2076,7 @@ namespace Ace
             {
                 auto* const value = emitter.GetBlockBuilder().Builder.CreateFPTrunc(
                     emitter.EmitLoadArg(0, Float64.GetIRType()),
-                    llvm::Type::getFloatTy(*compilation->LLVMContext)
+                    llvm::Type::getFloatTy(compilation->GetLLVMContext())
                 );
 
                 emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -2113,7 +2113,7 @@ namespace Ace
             {
                 auto* const value = emitter.GetBlockBuilder().Builder.CreateFPExt(
                     emitter.EmitLoadArg(0, Float32.GetIRType()),
-                    llvm::Type::getDoubleTy(*compilation->LLVMContext)
+                    llvm::Type::getDoubleTy(compilation->GetLLVMContext())
                 );
 
                 emitter.GetBlockBuilder().Builder.CreateRet(value);

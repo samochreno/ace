@@ -15,7 +15,7 @@
 
 namespace Ace
 {
-    auto ISymbol::GetCompilation() const -> const Compilation*
+    auto ISymbol::GetCompilation() const -> Compilation*
     {
         return GetScope()->GetCompilation();
     }
@@ -227,6 +227,6 @@ namespace Ace
 
     auto ISymbol::IsError() const -> bool
     {
-        return GetCompilation()->ErrorSymbols->Contains(this);
+        return GetCompilation()->GetErrorSymbols().Contains(this);
     }
 }

@@ -81,7 +81,7 @@ namespace Ace
         auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol->GetUnaliased();
 
         ACE_TRY_ASSERT(
-            (typeSymbol == GetCompilation()->Natives->Ptr.GetSymbol()) ||
+            (typeSymbol == GetCompilation()->GetNatives()->Ptr.GetSymbol()) ||
             (typeSymbol->IsRef())
         );
 
@@ -144,7 +144,7 @@ namespace Ace
             end  (exprEmitResult.Tmps)
         );
 
-        auto* const ptrType = GetCompilation()->Natives->Ptr.GetIRType();
+        auto* const ptrType = GetCompilation()->GetNatives()->Ptr.GetIRType();
 
         auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             ptrType,

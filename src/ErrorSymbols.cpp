@@ -6,10 +6,10 @@
 namespace Ace
 {
     ErrorSymbols::ErrorSymbols(
-        Compilation* const compilation
+        Compilation* compilation
     ) : m_Compilation{ compilation }
     {
-        const auto scope = m_Compilation->GlobalScope.Unwrap();
+        const auto scope = m_Compilation->GetGlobalScope();
         const auto selfScope = scope->GetOrCreateChild({});
 
         m_StructType = scope->DefineSymbol(std::make_unique<StructTypeSymbol>(

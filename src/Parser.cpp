@@ -961,7 +961,7 @@ namespace Ace
             m_Tokens.push_back(std::make_shared<const Token>(
                 leadingSrcLocation,
                 TokenKind::Ident,
-                fileBuffer->GetCompilation()->Package.Name
+                fileBuffer->GetCompilation()->GetPackage().Name
             ));
             m_Tokens.push_back(std::make_shared<const Token>(
                 leadingSrcLocation,
@@ -5623,7 +5623,7 @@ namespace Ace
         Parser parser{ fileBuffer, tokens };
         return ParseAST(
             parser,
-            fileBuffer->GetCompilation()->GlobalScope.Unwrap()
+            fileBuffer->GetCompilation()->GetGlobalScope()
         );
     }
 }

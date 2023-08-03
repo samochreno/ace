@@ -149,10 +149,10 @@ namespace Ace
                 rhsTypeSymbol
             ));
             
-            auto* const compilation = op.SrcLocation.Buffer->GetCompilation();
+            auto* compilation = op.SrcLocation.Buffer->GetCompilation();
             return Diagnosed
             {
-                compilation->ErrorSymbols->GetFunction(),
+                compilation->GetErrorSymbols().GetFunction(),
                 diagnostics,
             };
         }

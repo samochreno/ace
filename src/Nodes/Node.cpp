@@ -4,7 +4,7 @@
 
 namespace Ace
 {
-    auto INode::GetCompilation() const -> const Compilation*
+    auto INode::GetCompilation() const -> Compilation*
     {
         return GetScope()->GetCompilation();
     }

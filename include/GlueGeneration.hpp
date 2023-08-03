@@ -10,16 +10,16 @@
 namespace Ace::GlueGeneration
 {
     auto GenerateAndBindGlue(
-        const Compilation* const compilation
+        Compilation* const compilation
     ) -> void;
 
     auto CreateCopyGlueBody(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         FunctionSymbol* const glueSymbol,
         StructTypeSymbol* const structSymbol
     ) -> std::shared_ptr<const IEmittable<void>>;
     auto CreateDropGlueBody(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         FunctionSymbol* const glueSymbol,
         StructTypeSymbol* const structSymbol
     ) -> std::shared_ptr<const IEmittable<void>>;

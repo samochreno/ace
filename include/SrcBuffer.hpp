@@ -14,7 +14,7 @@ namespace Ace
     public:
         virtual ~ISrcBuffer() = default;
 
-        virtual auto GetCompilation() const -> const Compilation* = 0;
+        virtual auto GetCompilation() const -> Compilation* = 0;
         virtual auto GetBuffer() const -> const std::string& = 0;
 
         virtual auto FormatLocation(

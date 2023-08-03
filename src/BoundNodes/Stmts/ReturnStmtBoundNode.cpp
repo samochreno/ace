@@ -82,7 +82,7 @@ namespace Ace
     {
         const bool isFunctionTypeVoid = 
             context.ParentFunctionTypeSymbol == 
-            GetCompilation()->Natives->Void.GetSymbol();
+            GetCompilation()->GetNatives()->Void.GetSymbol();
 
         ACE_TRY_ASSERT(m_OptExpr.has_value() != isFunctionTypeVoid);
 
@@ -93,7 +93,7 @@ namespace Ace
 
             const bool isExprTypeVoid = 
                 exprTypeSymbol ==
-                GetCompilation()->Natives->Void.GetSymbol();
+                GetCompilation()->GetNatives()->Void.GetSymbol();
 
             ACE_TRY_ASSERT(!isExprTypeVoid);
         }

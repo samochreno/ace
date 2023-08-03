@@ -103,7 +103,7 @@ namespace Ace
     {
         std::vector<ExprDropData> tmps{};
 
-        auto* const intTypeSymbol = GetCompilation()->Natives->Int.GetSymbol();
+        auto* const intTypeSymbol = GetCompilation()->GetNatives()->Int.GetSymbol();
         auto* const intType = emitter.GetIRType(intTypeSymbol);
         auto* const type = emitter.GetIRType(m_TypeSymbol);
 
@@ -128,7 +128,7 @@ namespace Ace
     {
         return
         {
-            GetCompilation()->Natives->Int.GetSymbol(),
+            GetCompilation()->GetNatives()->Int.GetSymbol(),
             ValueKind::R
         };
     }

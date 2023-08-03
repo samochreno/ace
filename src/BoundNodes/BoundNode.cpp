@@ -4,7 +4,7 @@
 
 namespace Ace
 {
-    auto IBoundNode::GetCompilation() const -> const Compilation*
+    auto IBoundNode::GetCompilation() const -> Compilation*
     {
         return GetScope()->GetCompilation();
     }

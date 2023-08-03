@@ -23,22 +23,39 @@ namespace llvm
 
 namespace Ace
 {
-    struct Compilation
+    class Compilation
     {
+    public:
         static auto Parse(
             std::vector<std::shared_ptr<const ISrcBuffer>>* const srcBuffers,
             const std::vector<std::string_view>& args
-        ) -> Expected<std::unique_ptr<const Compilation>>;
+        ) -> Expected<std::unique_ptr<Compilation>>;
 
-        const CLIArgBuffer* CLIArgBuffer{};
-        const FileBuffer* PackageFileBuffer{};
-        Package Package{};
-        std::filesystem::path OutputPath{};
-        std::unique_ptr<Natives> Natives{};
-        GlobalScope GlobalScope{};
-        std::unique_ptr<TemplateInstantiator> TemplateInstantiator{};
-        std::unique_ptr<llvm::LLVMContext> LLVMContext{};
-        std::unique_ptr<GlobalDiagnosticBag> Diagnostics{};
-        std::unique_ptr<ErrorSymbols> ErrorSymbols{};
+        auto GetCLIArgBuffer() const -> const CLIArgBuffer*;
+        auto GetPackageFileBuffer() const -> const FileBuffer*;
+        auto GetPackage() const -> const Package&;
+        auto GetOutputPath() const -> const std::filesystem::path&;
+        auto GetNatives() const -> const Natives*;
+        auto GetNatives()       ->       Natives*;
+        auto GetGlobalScope() const -> const std::shared_ptr<Scope>&;
+        auto GetTemplateInstantiator() const -> const TemplateInstantiator&;
+        auto GetTemplateInstantiator()       ->       TemplateInstantiator&;
+        auto GetLLVMContext() const -> const llvm::LLVMContext&;
+        auto GetLLVMContext()       ->       llvm::LLVMContext&;
+        auto GetDiagnostics() const -> const GlobalDiagnosticBag&;
+        auto GetDiagnostics()       ->       GlobalDiagnosticBag&;
+        auto GetErrorSymbols() const -> const ErrorSymbols&;
+
+    private:
+        const CLIArgBuffer* m_CLIArgBuffer{};
+        const FileBuffer* m_PackageFileBuffer{};
+        Package m_Package{};
+        std::filesystem::path m_OutputPath{};
+        std::unique_ptr<Natives> m_Natives{};
+        GlobalScope m_GlobalScope{};
+        TemplateInstantiator m_TemplateInstantiator{};
+        llvm::LLVMContext m_LLVMContext{};
+        GlobalDiagnosticBag m_Diagnostics{};
+        ErrorSymbols m_ErrorSymbols{};
     };
 }

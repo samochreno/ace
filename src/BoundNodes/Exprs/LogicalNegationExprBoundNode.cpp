@@ -77,7 +77,7 @@ namespace Ace
     {
         const TypeInfo typeInfo
         {
-            GetCompilation()->Natives->Bool.GetSymbol(),
+            GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
 
@@ -143,7 +143,7 @@ namespace Ace
             end  (exprEmitResult.Tmps)
         );
 
-        auto* const boolType = GetCompilation()->Natives->Bool.GetIRType();
+        auto* const boolType = GetCompilation()->GetNatives()->Bool.GetIRType();
 
         auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,
@@ -169,6 +169,6 @@ namespace Ace
 
     auto LogicalNegationExprBoundNode::GetTypeInfo() const -> TypeInfo
     {
-        return { GetCompilation()->Natives->Bool.GetSymbol(), ValueKind::R };
+        return { GetCompilation()->GetNatives()->Bool.GetSymbol(), ValueKind::R };
     }
 }

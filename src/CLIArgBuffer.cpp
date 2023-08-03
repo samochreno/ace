@@ -8,7 +8,7 @@
 namespace Ace
 {
     CLIArgBuffer::CLIArgBuffer(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::vector<std::string_view>& args
     ) : m_Compilation{ compilation }
     {
@@ -39,7 +39,7 @@ namespace Ace
         );
     }
 
-    auto CLIArgBuffer::GetCompilation() const -> const Compilation*
+    auto CLIArgBuffer::GetCompilation() const -> Compilation*
     {
         return m_Compilation;
     }

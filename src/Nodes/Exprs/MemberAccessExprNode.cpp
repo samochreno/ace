@@ -74,7 +74,7 @@ namespace Ace
         diagnostics.Add(expMemberSymbol);
 
         auto* const memberSymbol = expMemberSymbol.UnwrapOr(
-            GetCompilation()->ErrorSymbols->GetInstanceVar()
+            GetCompilation()->GetErrorSymbols().GetInstanceVar()
         );
 
         return std::make_shared<const InstanceVarRefExprBoundNode>(

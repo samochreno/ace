@@ -27,7 +27,7 @@ namespace Ace
     public:
         virtual ~IBoundNode() = default;
 
-        virtual auto GetCompilation() const -> const Compilation* final;
+        virtual auto GetCompilation() const -> Compilation* final;
         [[deprecated]]
         virtual auto GetDiagnostics() const -> const DiagnosticBag& = 0;
         virtual auto CollectDiagnostics() const -> DiagnosticBag final;

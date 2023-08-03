@@ -71,7 +71,7 @@ namespace Ace
             size_t StmtIndex{};
         };
 
-        Emitter(const Compilation* const compilation);
+        Emitter(Compilation* const compilation);
         ~Emitter();
 
         auto SetASTs(
@@ -101,7 +101,7 @@ namespace Ace
         ) -> void;
         auto EmitDropArgs() -> void;
 
-        auto GetCompilation() const -> const Compilation*;
+        auto GetCompilation() const -> Compilation*;
         auto GetModule() const -> llvm::Module&;
         auto GetC() const -> const C&;
 
@@ -136,7 +136,7 @@ namespace Ace
             const std::vector<FunctionSymbol*>& functionSymbols
         ) -> void;
 
-        const Compilation* m_Compilation{};
+        Compilation* m_Compilation{};
 
         std::vector<std::shared_ptr<const ModuleBoundNode>> m_ASTs{};
 

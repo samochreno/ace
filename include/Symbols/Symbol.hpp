@@ -20,7 +20,7 @@ namespace Ace
     public:
         virtual ~ISymbol() = default;
 
-        virtual auto GetCompilation() const -> const Compilation* final;
+        virtual auto GetCompilation() const -> Compilation* final;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto GetName() const -> const Ident& = 0;
         virtual auto GetKind() const -> SymbolKind = 0;

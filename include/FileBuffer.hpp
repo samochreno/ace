@@ -23,11 +23,11 @@ namespace Ace
         auto operator=(FileBuffer&&) -> FileBuffer& = default;
 
         static auto Read(
-            const Compilation* const compilation,
+            Compilation* const compilation,
             const std::filesystem::path& path
         ) -> Expected<std::shared_ptr<const FileBuffer>>;
 
-        auto GetCompilation() const -> const Compilation* final;
+        auto GetCompilation() const -> Compilation* final;
         auto GetBuffer() const -> const std::string& final;
 
         auto FormatLocation(
@@ -41,7 +41,7 @@ namespace Ace
 
     private:
         FileBuffer(
-            const Compilation* const compilation,
+            Compilation* const compilation,
             const std::filesystem::path& path,
             std::string&& buffer,
             std::vector<std::string_view>&& lines,
@@ -56,7 +56,7 @@ namespace Ace
             const std::string_view::const_iterator characterIt
         ) const -> size_t;
 
-        const Compilation* m_Compilation{};
+        Compilation* m_Compilation{};
         std::filesystem::path m_Path{};
         std::string m_Buffer{};
         std::vector<std::string_view> m_Lines{};

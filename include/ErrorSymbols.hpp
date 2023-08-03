@@ -14,7 +14,8 @@ namespace Ace
     class ErrorSymbols
     {
     public:
-        ErrorSymbols(Compilation* const compilation);
+        ErrorSymbols() = default;
+        ErrorSymbols(Compilation* compilation);
         ~ErrorSymbols() = default;
 
         auto Contains(const ISymbol* const symbol) const -> bool;

@@ -12,7 +12,7 @@
 namespace Ace
 {
     auto FileBuffer::Read(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::filesystem::path& path
     ) -> Expected<std::shared_ptr<const FileBuffer>>
     {
@@ -84,7 +84,7 @@ namespace Ace
         };
     }
 
-    auto FileBuffer::GetCompilation() const -> const Compilation*
+    auto FileBuffer::GetCompilation() const -> Compilation*
     {
         return m_Compilation;
     }
@@ -136,7 +136,7 @@ namespace Ace
 
 
     FileBuffer::FileBuffer(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::filesystem::path& path,
         std::string&& buffer,
         std::vector<std::string_view>&& lines,

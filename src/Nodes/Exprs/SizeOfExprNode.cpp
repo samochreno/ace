@@ -63,7 +63,7 @@ namespace Ace
         diagnostics.Add(expTypeSymbol);
 
         auto* const typeSymbol = expTypeSymbol.UnwrapOr(
-            GetCompilation()->ErrorSymbols->GetType()
+            GetCompilation()->GetErrorSymbols().GetType()
         );
 
         return std::make_shared<const SizeOfExprBoundNode>(

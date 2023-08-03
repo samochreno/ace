@@ -14,7 +14,6 @@
 
 ## 💥 High Priority
 
-- Make `Compilation` mutable directly
 - Add conversion diagnostics
 - ❓ Add symbol signatures and kinds to errors
 - ❓ Move scoping from parsing to a separate pass

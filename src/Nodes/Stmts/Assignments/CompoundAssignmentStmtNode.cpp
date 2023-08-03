@@ -106,10 +106,10 @@ namespace Ace
                 rhsTypeSymbol
             ));
 
-            auto* const compilation = scope->GetCompilation();
+            auto* compilation = scope->GetCompilation();
             return Diagnosed
             {
-                compilation->ErrorSymbols->GetFunction(),
+                compilation->GetErrorSymbols().GetFunction(),
                 diagnostics,
             };
         }

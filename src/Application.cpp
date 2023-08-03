@@ -35,7 +35,7 @@ namespace Ace::Application
     }
 
     static auto ParseAST(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const FileBuffer* const fileBuffer
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
@@ -62,7 +62,7 @@ namespace Ace::Application
     }
 
     auto CreateAndDefineSymbols(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::vector<const INode*>& nodes
     ) -> Diagnosed<void>
     {
@@ -122,7 +122,7 @@ namespace Ace::Application
     }
 
     auto DefineAssociations(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::vector<const INode*>& nodes
     ) -> Diagnosed<void>
     {
@@ -140,7 +140,7 @@ namespace Ace::Application
     }
 
     auto ValidateControlFlow(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::vector<const IBoundNode*>& nodes
     ) -> Expected<void>
     {
@@ -154,7 +154,7 @@ namespace Ace::Application
             {
                 if (
                     functionNode->GetSymbol()->GetType()->GetUnaliased() == 
-                    compilation->Natives->Void.GetSymbol()
+                    compilation->GetNatives()->Void.GetSymbol()
                     )
                 {
                     return false;
@@ -179,7 +179,7 @@ namespace Ace::Application
     }
 
     auto BindFunctionSymbolsBodies(
-        const Compilation* const compilation,
+        Compilation* const compilation,
         const std::vector<const IBoundNode*>& nodes
     ) -> void
     {
@@ -201,11 +201,11 @@ namespace Ace::Application
     }
 
     static auto ValidateTypeSizes(
-        const Compilation* const compilation
+        Compilation* const compilation
     ) -> Expected<void>
     {
         const auto typeSymbols =
-            compilation->GlobalScope.Unwrap()->CollectSymbolsRecursive<ITypeSymbol>();
+            compilation->GetGlobalScope()->CollectSymbolsRecursive<ITypeSymbol>();
 
         const bool didValidateTypeSizes = std::find_if_not(
             begin(typeSymbols), 
@@ -237,13 +237,13 @@ namespace Ace::Application
     }
 
     static auto CompileCompilation(
-        const Compilation* const compilation
+        Compilation* const compilation
     ) -> Expected<void>
     {
         DiagnosticBag diagnostics{};
 
-        const auto& packageName = compilation->Package.Name;
-        auto* const globalScope = compilation->GlobalScope.Unwrap().get();
+        const auto& packageName = compilation->GetPackage().Name;
+        const auto globalScope = compilation->GetGlobalScope();
 
         const auto& now = std::chrono::steady_clock::now;
 
@@ -253,15 +253,15 @@ namespace Ace::Application
 
         std::vector<std::shared_ptr<const ModuleNode>> asts{};
         std::for_each(
-            begin(compilation->Package.SrcFileBuffers),
-            end  (compilation->Package.SrcFileBuffers),
+            begin(compilation->GetPackage().SrcFileBuffers),
+            end  (compilation->GetPackage().SrcFileBuffers),
             [&](const FileBuffer* const srcFileBuffer)
             {
                 const auto expAST = ParseAST(
                     compilation,
                     srcFileBuffer
                 );
-                compilation->Diagnostics->Add(expAST);
+                compilation->GetDiagnostics().Add(expAST);
                 diagnostics.Add(expAST);
                 if (!expAST)
                 {
@@ -282,27 +282,27 @@ namespace Ace::Application
             compilation,
             nodes
         );
-        compilation->Diagnostics->Add(dgnCreateAndDefineSymbols);
+        compilation->GetDiagnostics().Add(dgnCreateAndDefineSymbols);
         diagnostics.Add(dgnCreateAndDefineSymbols);
 
         const auto dgnDefineAssociations = DefineAssociations(
             compilation,
             nodes
         );
-        compilation->Diagnostics->Add(dgnDefineAssociations);
+        compilation->GetDiagnostics().Add(dgnDefineAssociations);
         diagnostics.Add(dgnDefineAssociations);
 
         const auto timeSymbolCreationEnd = now();
 
         const auto templateSymbols = globalScope->CollectSymbolsRecursive<ITemplateSymbol>();
-        compilation->TemplateInstantiator->SetSymbols(templateSymbols);
+        compilation->GetTemplateInstantiator().SetSymbols(templateSymbols);
         diagnostics.Add(
-            compilation->TemplateInstantiator->InstantiatePlaceholderSymbols()
+            compilation->GetTemplateInstantiator().InstantiatePlaceholderSymbols()
         );
 
         const auto timeBindingAndVerificationBegin = now();
 
-        compilation->Natives->Initialize();
+        compilation->GetNatives()->Initialize();
 
         std::vector<std::shared_ptr<const ModuleBoundNode>> boundASTs{};
         std::transform(begin(asts), end(asts), back_inserter(boundASTs),
@@ -311,7 +311,7 @@ namespace Ace::Application
             const auto boundAST = ast->CreateBound();
 
             const auto astDiagnostics = boundAST->CollectDiagnostics();
-            compilation->Diagnostics->Add(astDiagnostics);
+            compilation->GetDiagnostics().Add(astDiagnostics);
             diagnostics.Add(astDiagnostics);
 
             return boundAST;
@@ -333,7 +333,7 @@ namespace Ace::Application
                 }
             );
             diagnostics.Add(expFinalAST);
-            compilation->Diagnostics->Add(expFinalAST);
+            compilation->GetDiagnostics().Add(expFinalAST);
             if (!expFinalAST)
             {
                 return;
@@ -342,7 +342,7 @@ namespace Ace::Application
             finalASTs.push_back(expFinalAST.Unwrap());
         });
 
-        compilation->TemplateInstantiator->InstantiateSemanticsForSymbols();
+        compilation->GetTemplateInstantiator().InstantiateSemanticsForSymbols();
 
         if (diagnostics.HasErrors())
         {
@@ -418,7 +418,7 @@ namespace Ace::Application
 
         Log << CreateIndent() << termcolor::bright_green << "Compiling ";
         Log << termcolor::reset;
-        Log << expCompilation.Unwrap()->Package.Name << "\n";
+        Log << expCompilation.Unwrap()->GetPackage().Name << "\n";
         IndentLevel++;
 
         const auto expDidCompile = CompileCompilation(
