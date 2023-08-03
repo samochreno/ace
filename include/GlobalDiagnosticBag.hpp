@@ -20,7 +20,7 @@ namespace Ace
         {
             m_DiagnosticBag.Add(value);
             LogGlobalDiagnostics(m_DiagnosticBag, m_LastLogSize);
-            m_LastLogSize = m_DiagnosticBag.GetDiagnostics().size();
+            m_LastLogSize = m_DiagnosticBag.GetDiagnosticGroups().size();
             return *this;
         }
 

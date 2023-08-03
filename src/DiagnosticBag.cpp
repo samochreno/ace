@@ -7,11 +7,19 @@
 namespace Ace
 {
     auto DiagnosticBag::Add(
-        const std::shared_ptr<const Diagnostic>& diagnostic
+        const std::shared_ptr<const DiagnosticGroup>& diagnosticGroup
     ) -> DiagnosticBag&
     {
-        m_Diagnostics.push_back(diagnostic);
-        AddSeverity(diagnostic->Severity);
+        m_DiagnosticGroups.push_back(diagnosticGroup);
+
+        std::for_each(
+            begin(diagnosticGroup->Diagnostics),
+            end  (diagnosticGroup->Diagnostics),
+            [&](const Diagnostic& diagnostic)
+            {
+                AddSeverity(diagnostic.Severity);
+            }
+        );
 
         return *this;
     }
@@ -21,11 +29,11 @@ namespace Ace
     ) -> DiagnosticBag&
     {
         std::for_each(
-            begin(diagnostics.GetDiagnostics()),
-            end  (diagnostics.GetDiagnostics()),
-            [&](const std::shared_ptr<const Diagnostic>& diagnostic)
+            begin(diagnostics.GetDiagnosticGroups()),
+            end  (diagnostics.GetDiagnosticGroups()),
+            [&](const std::shared_ptr<const DiagnosticGroup>& diagnosticGroup)
             {
-                Add(diagnostic);
+                Add(diagnosticGroup);
             }
         );
 
@@ -34,12 +42,12 @@ namespace Ace
 
     auto DiagnosticBag::IsEmpty() const -> bool
     {
-        return m_Diagnostics.empty();
+        return m_DiagnosticGroups.empty();
     }
 
-    auto DiagnosticBag::GetDiagnostics() const -> const std::vector<std::shared_ptr<const Diagnostic>>&
+    auto DiagnosticBag::GetDiagnosticGroups() const -> const std::vector<std::shared_ptr<const DiagnosticGroup>>&
     {
-        return m_Diagnostics;
+        return m_DiagnosticGroups;
     }
 
     auto DiagnosticBag::GetSeverity() const -> DiagnosticSeverity
@@ -63,9 +71,22 @@ namespace Ace
                 break;
             }
 
-            case DiagnosticSeverity::Warning:
+            case DiagnosticSeverity::Note:
             {
                 if (m_Severity == DiagnosticSeverity::Info)
+                {
+                    m_Severity = DiagnosticSeverity::Note;
+                }
+
+                break;
+            }
+
+            case DiagnosticSeverity::Warning:
+            {
+                if (
+                    (m_Severity == DiagnosticSeverity::Info) ||
+                    (m_Severity == DiagnosticSeverity::Note)
+                    )
                 {
                     m_Severity = DiagnosticSeverity::Warning;
                 }

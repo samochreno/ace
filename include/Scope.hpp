@@ -60,8 +60,9 @@ namespace Ace
     ) -> Expected<void>;
 
     auto CreateSymbolRedefinitionError(
+        const ISymbol* const originalSymbol,
         const ISymbol* const redefinedSymbol
-    ) -> std::shared_ptr<const Diagnostic>;
+    ) -> std::shared_ptr<const DiagnosticGroup>;
 
     template<typename TSymbol>
     constexpr auto IsTemplate() -> bool
@@ -235,7 +236,10 @@ namespace Ace
             );
             if (optSameSymbol.has_value())
             {
-                diagnostics.Add(CreateSymbolRedefinitionError(symbol));
+                diagnostics.Add(CreateSymbolRedefinitionError(
+                    optSameSymbol.value(),
+                    symbol
+                ));
 
                 auto* const sameSymbol = optSameSymbol.value();
 
@@ -618,7 +622,7 @@ namespace Ace
             const ITemplateSymbol* const t3mplate,
             const std::vector<ITypeSymbol*>& implTemplateArgs,
             const std::vector<ITypeSymbol*>& templateArgs
-        ) -> Expected<ISymbol*>;
+        ) -> std::optional<ISymbol*>;
 
         static auto GetInstanceSymbolResolutionScopes(
             ITypeSymbol* selfType

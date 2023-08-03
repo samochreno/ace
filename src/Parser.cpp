@@ -1098,7 +1098,7 @@ namespace Ace
                 }
             }
 
-            if (Peek() == TokenKind::OpenBrace)
+            if (*(m_Iterator - 1) == TokenKind::OpenBrace)
             {
                 m_NestLevel++;
             }
@@ -1878,10 +1878,10 @@ namespace Ace
 
         if (parser.Peek() != TokenKind::OpenBracket)
         {
-            return CreateUnexpectedTokenError(
+            return diagnostics.Add(CreateUnexpectedTokenError(
                 parser.Peek(),
                 TokenKind::OpenBracket
-            );
+            ));
         }
 
         parser.Eat();
@@ -1898,10 +1898,10 @@ namespace Ace
 
         if (parser.Peek() != TokenKind::CloseBracket)
         {
-            return CreateUnexpectedTokenError(
+            return diagnostics.Add(CreateUnexpectedTokenError(
                 parser.Peek(),
                 TokenKind::CloseBracket
-            );
+            ));
         }
 
         parser.Eat();
@@ -1969,10 +1969,10 @@ namespace Ace
 
         if (parser.Peek() != TokenKind::Colon)
         {
-            return CreateUnexpectedTokenError(
+            return diagnostics.Add(CreateUnexpectedTokenError(
                 parser.Peek(),
                 TokenKind::Colon
-            );
+            ));
         }
 
         parser.Eat();

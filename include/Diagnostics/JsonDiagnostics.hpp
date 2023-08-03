@@ -14,5 +14,5 @@ namespace Ace
     auto CreateJsonError(
         const FileBuffer* const fileBuffer,
         const nlohmann::json::exception& jsonException
-    ) -> std::shared_ptr<const Diagnostic>;
+    ) -> std::shared_ptr<const DiagnosticGroup>;
 }

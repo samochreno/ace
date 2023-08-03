@@ -597,7 +597,7 @@ namespace Ace
 
             case SymbolCategory::Static:
             {
-                return "static";
+                return "a static";
             }
         }
     }

@@ -6,12 +6,16 @@
 
 namespace Ace
 {
-    auto CreateEmptyError() -> std::shared_ptr<const Diagnostic>
+    auto CreateEmptyError() -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             std::nullopt,
             "<Empty error>"
         );
+
+        return group;
     }
 }

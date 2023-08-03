@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <string>
 #include <optional>
 
@@ -19,11 +20,11 @@ auto resultVarName = std::move(ACE_MACRO_CONCAT(_exp_, resultVarName).Unwrap())
 #define ACE_TRY_ASSERT(boolExpr) \
 if (!(boolExpr)) \
 { \
-    return CreateEmptyError(); \
+    return EmptyError{}; \
 }
 
 #define ACE_TRY_UNREACHABLE() \
-return CreateEmptyError();
+return EmptyError{};
 
 #define ACE_TRY_VOID(inExpExpr) \
 { \
@@ -39,6 +40,7 @@ namespace Ace
     enum class DiagnosticSeverity
     {
         Info,
+        Note,
         Warning,
         Error,
     };
@@ -48,6 +50,11 @@ namespace Ace
         DiagnosticSeverity Severity{};
         std::optional<SrcLocation> OptSrcLocation{};
         std::string Message{};
+    };
+
+    struct DiagnosticGroup
+    {
+        std::vector<Diagnostic> Diagnostics{};
     };
 
     class DiagnosticBag;

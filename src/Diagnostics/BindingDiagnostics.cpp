@@ -13,69 +13,98 @@
 namespace Ace
 {
     auto CreateMismatchedAccessModifierError(
-        const SrcLocation& newSymbolNameLocation,
         const ISymbol* const originalSymbol,
+        const SrcLocation& newSymbolNameLocation,
         const AccessModifier newSymbolAccessModifier
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        const std::string message =
-            "mismatched access modifier, previously defined as " +
-            CreateAccessModifierString(newSymbolAccessModifier);
+        auto group = std::make_shared<DiagnosticGroup>();
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             newSymbolNameLocation,
-            message
+            "mismatched access modifier"
         );
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            originalSymbol->GetName().SrcLocation,
+            "previous definition"
+        );
+
+        return group;
     }
 
     auto CreateSymbolRedefinitionError(
+        const ISymbol* const originalSymbol,
         const ISymbol* const redefinedSymbol
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             redefinedSymbol->GetName().SrcLocation,
             "symbol redefinition"
         );
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            originalSymbol->GetName().SrcLocation,
+            "previous definition"
+        );
+
+        return group;
     }
 
     auto CreateUnableToDeduceTemplateArgsError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "unable to deduce template arguments"
         );
+
+        return group;
     }
 
     auto CreateUnableToDeduceTemplateArgError(
         const SrcLocation& srcLocation,
         const NormalTemplateParamTypeSymbol* const templateParam
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
             "unable to deduce template argument for parameter `" +
             templateParam->GetName().String + "`";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateTooManyTemplateArgsError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "too many template arguments"
         );
+
+        return group;
     }
 
     auto CreateTemplateArgDeductionConflict(
@@ -83,105 +112,150 @@ namespace Ace
         const NormalTemplateParamTypeSymbol* const templateParam,
         const ITypeSymbol* const deducedArg,
         const ITypeSymbol* const conflictingDeducedArg
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
             "template argument deduction conflict for parameter `" + 
             templateParam->GetName().String + "`: `" +
             deducedArg->GetName().String + "` and `" +
             conflictingDeducedArg->GetName().String + "`";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateUndefinedSymbolRefError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "undefined symbol reference"
+            "undefined reference to symbol"
         );
+
+        return group;
     }
 
     auto CreateAmbiguousSymbolRefError(
-        const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+        const SrcLocation& srcLocation,
+        const std::vector<ISymbol*>& candidateSymbols
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "ambiguous symbol reference"
+            "ambiguous reference to symbol"
         );
+
+        std::for_each(begin(candidateSymbols), end(candidateSymbols),
+        [&](const ISymbol* const symbol)
+        {
+            group->Diagnostics.emplace_back(
+                DiagnosticSeverity::Note,
+                symbol->GetName().SrcLocation,
+                "candidate symbol declaration"
+            );
+        });
+
+        return group;
     }
 
-    auto CreateNonSelfScopedSymbolScopeAccessError(
+    auto CreateScopeAccessOfNonSelfScopedSymbolError(
         const SrcLocation& srcLocation,
         const ISymbol* const symbol
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
             "scope access of " +
             CreateSymbolKindStringWithArticle(symbol->GetKind());
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             message
         );
-    }
 
-    auto CreateUndefinedTemplateInstanceRefError(
-        const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
-    {
-        return std::make_shared<const Diagnostic>(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "undefined template instance reference"
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            symbol->GetName().SrcLocation,
+            CreateSymbolKindString(symbol->GetKind()) + " declaration"
         );
+
+        return group;
     }
 
     auto CreateInaccessibleSymbolError(
-        const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+        const SrcLocation& srcLocation,
+        ISymbol* const symbol
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "inaccessible symbol"
+            "inaccessible " + CreateSymbolKindString(symbol->GetKind())
         );
-    }
 
-    
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            symbol->GetName().SrcLocation,
+            CreateSymbolKindString(symbol->GetKind()) + " declaration"
+        );
+
+        return group;
+    }
 
     auto CreateIncorrectSymbolCategoryError(
         const SrcLocation& srcLocation,
+        const ISymbol* const symbol,
         const SymbolCategory expectedCategory
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        const std::string message = 
-            "symbol is not " +
-            CreateSymbolCategoryStringWithArticle(expectedCategory);
+        auto group = std::make_shared<DiagnosticGroup>();
 
-        return std::make_shared<const Diagnostic>(
+        const std::string message = 
+            "not " +
+            CreateSymbolCategoryStringWithArticle(expectedCategory) +
+            " symbol";
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             message
         );
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            symbol->GetName().SrcLocation,
+            "symbol declaration"
+        );
+
+        return group;
     }
 
-    auto CreateMissingStructConstructionVarsError(
+    auto CreateMissingStructVarsError(
         const SrcLocation& srcLocation,
         StructTypeSymbol* const structSymbol,
         const std::vector<InstanceVarSymbol*>& missingVarSymbols
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         std::string message{};
 
         message += "missing field";
@@ -215,130 +289,164 @@ namespace Ace
             message += "`" + missingVarSymbol->GetName().String + "`";
         });
 
-        message += " in construction of struct `";
-        message += structSymbol->CreateSignature();
-        message += "`";
-
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             message
         );
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            structSymbol->GetName().SrcLocation,
+            "struct declaration"
+        );
+
+        return group;
     }
 
     auto CreateStructHasNoVarNamedError(
         StructTypeSymbol* const structSymbol,
         const Ident& fieldName
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
-            "struct `" + structSymbol->CreateSignature() +
+            "`" + structSymbol->CreateSignature() +
             "` has no field named `" + fieldName.String + "`";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             fieldName.SrcLocation,
             message
         );
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            structSymbol->GetName().SrcLocation,
+            "`" + structSymbol->CreateSignature() +  "` declaration"
+        );
+
+        return group;
     }
 
-    auto CreateStructConstructionVarSpecifiedMoreThanOnceError(
+    auto CreateStructVarInitializedMoreThanOnceError(
         const SrcLocation& srcLocation,
-        StructTypeSymbol* const structSymbol,
-        InstanceVarSymbol* const varSymbol
-    ) -> std::shared_ptr<const Diagnostic>
+        const SrcLocation& previousSrcLocation
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        const std::string message =
-            "field `" + varSymbol->GetName().String +
-            "` specified more than once in construction of struct `" +
-            structSymbol->CreateSignature() + "`";
+        auto group = std::make_shared<DiagnosticGroup>();
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            message
+            "field initialized more than once"
         );
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            previousSrcLocation,
+            "previous initialization"
+        );
+
+        return group;
     }
 
     auto CreateUndefinedUnaryOpRefError(
         const Op& op,
         ITypeSymbol* const type
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const auto opToken = std::make_shared<const Token>(
             op.SrcLocation,
             op.TokenKind
         );
 
         const std::string message =
-            "undefined operator " + CreateOpString(opToken) +
-            " reference for type `" + type->CreateSignature() + "`";
+            "undefined reference to operator " + CreateOpString(opToken) +
+            " for type `" + type->CreateSignature() + "`";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             op.SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateUndefinedBinaryOpRefError(
         const Op& op,
         ITypeSymbol* const lhsType,
         ITypeSymbol* const rhsType
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const auto opToken = std::make_shared<const Token>(
             op.SrcLocation,
             op.TokenKind
         );
 
         const std::string message =
-            "undefined operator " + CreateOpString(opToken) +
-            " reference for types `" + lhsType->CreateSignature() + "` and `" +
+            "undefined reference to operator " + CreateOpString(opToken) +
+            " for types `" + lhsType->CreateSignature() + "` and `" +
             rhsType->CreateSignature() + "`";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             op.SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateAmbiguousBinaryOpRefError(
         const Op& op,
         ITypeSymbol* const lhsType,
         ITypeSymbol* const rhsType
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const auto opToken = std::make_shared<const Token>(
             op.SrcLocation,
             op.TokenKind
         );
 
         const std::string message =
-            "ambiguous operator " + CreateOpString(opToken) +
-            " reference for types `" + lhsType->CreateSignature() + "` and `" +
+            "ambiguous reference to operator " + CreateOpString(opToken) +
+            " for types `" + lhsType->CreateSignature() + "` and `" +
             rhsType->CreateSignature() + "`";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             op.SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateExpectedFunctionError(
         const SrcLocation& srcLocation,
         ITypeSymbol* const type
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
             "expected a function, found `" + type->CreateSignature() + "`";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             message
         );
+
+        return group;
     }
 }

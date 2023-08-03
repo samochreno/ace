@@ -13,7 +13,11 @@
 
 namespace Ace
 {
-    auto CreateEmptyError() -> std::shared_ptr<const Diagnostic>;
+    struct EmptyError
+    {
+    };
+
+    auto CreateEmptyError() -> std::shared_ptr<const DiagnosticGroup>;
 
     struct Void
     {
@@ -53,10 +57,10 @@ namespace Ace
         {
         }
         Expected(
-            const std::shared_ptr<const Diagnostic>& diagnostic
+            const EmptyError& emptyError
         ) : m_IsFatal{ true }
         {
-            m_Diagnostics.Add(diagnostic);
+            m_Diagnostics.Add(CreateEmptyError());
         }
         Expected(
             const DiagnosticBag& diagnostics
@@ -150,9 +154,9 @@ namespace Ace
             m_Diagnostics{ diagnostics }
         {
         }
-        Expected(const std::shared_ptr<const Diagnostic>& diagnostic)
+        Expected(const EmptyError& error)
         {
-            m_Diagnostics.Add(diagnostic);
+            m_Diagnostics.Add(CreateEmptyError());
         }
         Expected(const DiagnosticBag& diagnostics)
         {

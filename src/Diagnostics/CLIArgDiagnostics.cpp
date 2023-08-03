@@ -9,45 +9,61 @@ namespace Ace
 {
     auto CreateMissingCLIOptionNameError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "missing option name"
         );
+
+        return group;
     }
 
     auto CreateUnknownCLIOptionNameError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "unknown option name"
         );
+
+        return group;
     }
 
     auto CreateMissingCLIOptionValueError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "missing option argument"
         );
+
+        return group;
     }
 
     auto CreateUnexpectedCLIOptionValueError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "unexpected option argument"
         );
+
+        return group;
     }
 }

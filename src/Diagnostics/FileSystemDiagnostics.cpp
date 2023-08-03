@@ -14,48 +14,64 @@ namespace Ace
     auto CreateFileSystemError(
         const std::filesystem::path& path,
         const std::filesystem::filesystem_error& error
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         std::string what{ std::string_view{ error.what() }.substr(18) };
         MakeLowercase(what);
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             std::nullopt,
             "file system: " + what + ": " + path.string()
         );
+
+        return group;
     }
 
     auto CreateFileNotFoundError(
         const std::filesystem::path& path
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             std::nullopt,
             "file not found: " + path.string()
         );
+
+        return group;
     }
 
     auto CreateFileOpenError(
         const std::filesystem::path& path
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             std::nullopt,
             "unable to open file: " + path.string()
         );
+
+        return group;
     }
 
     auto CreateFilePathEndsWithSeparatorError(
         const std::filesystem::path& path
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             std::nullopt,
             "file path ends with separator: " + path.string()
         );
+
+        return group;
     }   
 }

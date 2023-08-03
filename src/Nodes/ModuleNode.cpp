@@ -328,8 +328,8 @@ namespace Ace
             };
 
             diagnostics.Add(CreateMismatchedAccessModifierError(
-                nameSrcLocation,
                 moduleSymbol,
+                nameSrcLocation,
                 m_AccessModifier
             ));
         }

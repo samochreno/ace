@@ -193,7 +193,7 @@ namespace Ace
 
         if (!missingVarSymbols.empty())
         {
-            diagnostics.Add(CreateMissingStructConstructionVarsError(
+            diagnostics.Add(CreateMissingStructVarsError(
                 srcLocation,
                 structSymbol,
                 missingVarSymbols
@@ -213,18 +213,14 @@ namespace Ace
 
         if (varUseSrcLocations.size() > 1)
         {
-            std::for_each(
-                begin(varUseSrcLocations) + 1,
-                end  (varUseSrcLocations),
-                [&](const SrcLocation& varUseSrcLocation)
-                {
-                    diagnostics.Add(CreateStructConstructionVarSpecifiedMoreThanOnceError(
-                        varUseSrcLocation,
-                        structSymbol,
-                        varSymbol
-                    ));
-                }
-            );
+            std::for_each(begin(varUseSrcLocations) + 1, end(varUseSrcLocations),
+            [&](const SrcLocation& varUseSrcLocation)
+            {
+                diagnostics.Add(CreateStructVarInitializedMoreThanOnceError(
+                    varUseSrcLocation,
+                    varUseSrcLocations.front()
+                ));
+            });
         }
 
         return Diagnosed<void>{ diagnostics };

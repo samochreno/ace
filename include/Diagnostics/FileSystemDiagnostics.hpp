@@ -10,17 +10,17 @@ namespace Ace
     auto CreateFileSystemError(
         const std::filesystem::path& path,
         const std::filesystem::filesystem_error& error
-    ) -> std::shared_ptr<const Diagnostic>;
+    ) -> std::shared_ptr<const DiagnosticGroup>;
 
     auto CreateFileNotFoundError(
         const std::filesystem::path& path
-    ) -> std::shared_ptr<const Diagnostic>;
+    ) -> std::shared_ptr<const DiagnosticGroup>;
 
     auto CreateFileOpenError(
         const std::filesystem::path& path
-    ) -> std::shared_ptr<const Diagnostic>;
+    ) -> std::shared_ptr<const DiagnosticGroup>;
 
     auto CreateFilePathEndsWithSeparatorError(
         const std::filesystem::path& path
-    ) -> std::shared_ptr<const Diagnostic>;
+    ) -> std::shared_ptr<const DiagnosticGroup>;
 }

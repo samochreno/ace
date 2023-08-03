@@ -83,7 +83,8 @@ namespace Ace
         if (!IsSymbolAccessibleFromScope(symbol, beginScope))
         {
             diagnostics.Add(CreateInaccessibleSymbolError(
-                srcLocation
+                srcLocation,
+                symbol
             ));
         }
 
@@ -102,6 +103,7 @@ namespace Ace
         {
             diagnostics.Add(CreateIncorrectSymbolCategoryError(
                 srcLocation,
+                symbol,
                 symbolCategory
             ));
         }
@@ -725,16 +727,15 @@ namespace Ace
             return diagnostics;
         }
 
-        const auto expResolvedInstance = ResolveTemplateInstance(
+        const auto optResolvedInstance = ResolveTemplateInstance(
             srcLocation,
             t3mplate,
             implTemplateArgs,
             expDeducedTemplateArgs.Unwrap()
         );
-        if (expResolvedInstance)
+        if (optResolvedInstance)
         {
-            diagnostics.Add(expResolvedInstance);
-            return Expected{ expResolvedInstance.Unwrap(), diagnostics };
+            return Expected{ optResolvedInstance.value(), diagnostics };
         }
 
         const auto* const compilation = t3mplate->GetCompilation();
@@ -1000,7 +1001,10 @@ namespace Ace
 
         if (symbols.size() > 1)
         {
-            diagnostics.Add(CreateAmbiguousSymbolRefError(data.SrcLocation));
+            diagnostics.Add(CreateAmbiguousSymbolRefError(
+                data.SrcLocation,
+                symbols
+            ));
         }
 
         auto* const symbol = symbols.front();
@@ -1302,10 +1306,8 @@ namespace Ace
         const ITemplateSymbol* const t3mplate,
         const std::vector<ITypeSymbol*>& implTemplateArgs,
         const std::vector<ITypeSymbol*>& templateArgs
-    ) -> Expected<ISymbol*>
+    ) -> std::optional<ISymbol*>
     {
-        DiagnosticBag diagnostics{};
-
         const auto& symbolMap = t3mplate->GetScope()->m_SymbolMap;
 
         const auto matchingNameSymbolsIt = symbolMap.find(
@@ -1313,9 +1315,7 @@ namespace Ace
         );
         if (matchingNameSymbolsIt == end(symbolMap))
         {
-            return diagnostics.Add(CreateUndefinedTemplateInstanceRefError(
-                srcLocation
-            ));
+            return std::nullopt;
         }
 
         auto& symbols = matchingNameSymbolsIt->second;
@@ -1334,12 +1334,10 @@ namespace Ace
         );
         if (perfectMatchIt == end(symbols))
         {
-            return diagnostics.Add(CreateUndefinedTemplateInstanceRefError(
-                srcLocation
-            ));
+            return std::nullopt;
         }
 
-        return Expected{ perfectMatchIt->get(), diagnostics };
+        return perfectMatchIt->get();
     }
 
     auto Scope::GetInstanceSymbolResolutionScopes(
@@ -1471,7 +1469,10 @@ namespace Ace
 
         if (matchingSymbols.size() > 1)
         {
-            diagnostics.Add(CreateAmbiguousSymbolRefError(data.SrcLocation));
+            diagnostics.Add(CreateAmbiguousSymbolRefError(
+                data.SrcLocation,
+                matchingSymbols
+            ));
         }
 
         auto* const selfScopedSymbol = dynamic_cast<ISelfScopedSymbol*>(
@@ -1479,7 +1480,7 @@ namespace Ace
         );
         if (!selfScopedSymbol)
         {
-            return diagnostics.Add(CreateNonSelfScopedSymbolScopeAccessError(
+            return diagnostics.Add(CreateScopeAccessOfNonSelfScopedSymbolError(
                 data.SrcLocation,
                 matchingSymbols.front()
             ));

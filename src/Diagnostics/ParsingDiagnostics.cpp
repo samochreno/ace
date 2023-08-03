@@ -13,165 +13,215 @@ namespace Ace
 {
     auto CreateUnexpectedTokenError(
         const std::shared_ptr<const Token>& unexpectedToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
             "unexpected " + CreateTokenKindString(unexpectedToken->Kind);
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             unexpectedToken->SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateUnexpectedTokenError(
         const std::shared_ptr<const Token>& unexpectedToken,
         const TokenKind expectedTokenKind
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
             "unexpected " + CreateTokenKindString(unexpectedToken->Kind) +
             ", expected " + CreateTokenKindStringWithArticle(expectedTokenKind);
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             unexpectedToken->SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateUnexpectedTokenExpectedLiteralError(
         const std::shared_ptr<const Token>& unexpectedToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
             "unexpected " + CreateTokenKindString(unexpectedToken->Kind) +
             ", expected a literal";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             unexpectedToken->SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateUnexpectedTokenExpectedNewError(
         const std::shared_ptr<const Token>& unexpectedToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
             "unexpected " + CreateTokenKindString(unexpectedToken->Kind) +
             ", expected `" + SpecialIdent::New + "`";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             unexpectedToken->SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateUnexpectedTokenExpectedCompoundAssignmentOpError(
         const std::shared_ptr<const Token>& unexpectedToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
             "unexpected " + CreateTokenKindString(unexpectedToken->Kind) +
             ", expected a compound assignment operator";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             unexpectedToken->SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateUnexpectedTokenExpectedOverloadableOpError(
         const std::shared_ptr<const Token>& unexpectedToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message =
             "unexpected " + CreateTokenKindString(unexpectedToken->Kind) +
             ", expected an overloadable operator";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             unexpectedToken->SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateEmptyTemplateParamsError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "empty template parameters"
         );
+
+        return group;
     }
 
     auto CreateEmptyTemplateArgsError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "empty template arguments"
         );
+
+        return group;
     }
 
     auto CreateExternInstanceFunctionError(
         const std::shared_ptr<const Token>& externKeywordToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             externKeywordToken->SrcLocation,
-            "extern method"
+            "extern instance function"
         );
+
+        return group;
     }
 
     auto CreateUnknownModifierError(
         const std::shared_ptr<const Token>& modifierToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             modifierToken->SrcLocation,
             "unknown modifier"
         );
+
+        return group;
     }
 
     auto CreateForbiddenModifierError(
         const std::shared_ptr<const Token>& modifierToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             modifierToken->SrcLocation,
             "forbidden modifier"
         );
+
+        return group;
     }
 
     auto CreateEmptyModifiersError(
         const std::shared_ptr<const Token>& minusGreaterThanToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             minusGreaterThanToken->SrcLocation,
-            "empty function modifier list"
+            "empty modifier list"
         );
+
+        return group;
     }
 
     auto CreateMissingTokenError(
         const SrcLocation& lastTokenSrcLocation,
         const TokenKind expectedTokenKind
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const SrcLocation srcLocation
         {
             lastTokenSrcLocation.Buffer,
@@ -179,97 +229,127 @@ namespace Ace
             lastTokenSrcLocation.CharacterEndIterator,
         };
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "missing " + CreateTokenKindString(expectedTokenKind)
         );
+
+        return group;
     }
 
     auto CreateTemplateSpecializationError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "template specialization"
         );
+
+        return group;
     }
 
     auto CreateUnexpectedUnaryOpParamCountError(
         const std::shared_ptr<const Token>& opToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message = 
             "operator " + CreateOpString(opToken) + " must have 1 parameter";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             opToken->SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateUnexpectedBinaryOpParamCountError(
         const std::shared_ptr<const Token>& opToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message = 
             "operator " + CreateOpString(opToken) + " must have 2 parameters";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             opToken->SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateUnexpectedUnaryOrBinaryOpParamCountError(
         const std::shared_ptr<const Token>& opToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         const std::string message = 
             "operator " + CreateOpString(opToken) +
             " must have 1 or 2 parameters";
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             opToken->SrcLocation,
             message
         );
+
+        return group;
     }
 
     auto CreateUnknownIdentOpError(
         const std::shared_ptr<const Token>& opToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             opToken->SrcLocation,
             "unknown operator"
         );
+
+        return group;
     }
 
     auto CreateOpMustBePublicError(
         const std::shared_ptr<const Token>& nameToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             nameToken->SrcLocation,
-            "operator must be public"
+            "operator is not public"
         );
+
+        return group;
     }
 
     auto CreateInstanceOpError(
         const std::shared_ptr<const Token>& nameToken
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
-        return std::make_shared<const Diagnostic>(
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             nameToken->SrcLocation,
             "instance operator"
         );
+
+        return group;
     }
 }

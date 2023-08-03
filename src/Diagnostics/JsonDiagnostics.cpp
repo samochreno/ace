@@ -14,8 +14,10 @@ namespace Ace
     auto CreateJsonError(
         const FileBuffer* const fileBuffer,
         const nlohmann::json::exception& jsonException
-    ) -> std::shared_ptr<const Diagnostic>
+    ) -> std::shared_ptr<const DiagnosticGroup>
     {
+        auto group = std::make_shared<DiagnosticGroup>();
+
         std::string what = jsonException.what();
         MakeLowercase(what);
 
@@ -94,10 +96,12 @@ namespace Ace
         message.at(0) = std::toupper(message.at(0));
         message = "json: " + message;
 
-        return std::make_shared<const Diagnostic>(
+        group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             message
         );
+
+        return group;
     }   
 }
