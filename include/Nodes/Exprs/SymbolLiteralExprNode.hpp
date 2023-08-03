@@ -13,7 +13,7 @@ namespace Ace
 {
     class SymbolLiteralExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<SymbolLiteralExprNode>, 
+        public virtual ICloneableInScopeNode<SymbolLiteralExprNode>, 
         public virtual IBindableNode<StaticVarRefExprBoundNode>
     {
     public:

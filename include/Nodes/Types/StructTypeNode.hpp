@@ -18,7 +18,7 @@ namespace Ace
 {
     class StructTypeNode :
         public virtual ITypeNode,
-        public virtual ICloneableNode<StructTypeNode>,
+        public virtual ICloneableInScopeNode<StructTypeNode>,
         public virtual IBindableNode<StructTypeBoundNode>
     {
     public:

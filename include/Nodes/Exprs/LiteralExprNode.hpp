@@ -14,7 +14,7 @@ namespace Ace
 {
     class LiteralExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<LiteralExprNode>, 
+        public virtual ICloneableInScopeNode<LiteralExprNode>, 
         public virtual IBindableNode<LiteralExprBoundNode>
     {
     public:

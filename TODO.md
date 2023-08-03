@@ -8,21 +8,19 @@
 - String interning, maybe put `Token`s on the stack
 - Special fast lookup for native types
 - Rename `MemberAccess` to `FieldAccess` or `InstanceVarAccess`
-- Rename `ICloneableNode` to something like `ICloneableInScopeNode`
 - Rename `MaybeChanged` to something like `Cached`
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 
 ## 💥 High Priority
 
 - Add conversion diagnostics
-- ❓ Add symbol signatures and kinds to errors
 - ❓ Move scoping from parsing to a separate pass
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
 - Finish diagnostics
-- ❓ Give template symbols shared ownership of the nodes
 
 ## 🔔 Medium Priority
 
+- ❓ Give template symbols shared ownership of the nodes
 - `*self`
 - Traits:
   - Parsing

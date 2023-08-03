@@ -13,7 +13,7 @@ namespace Ace
 {
     class ExprStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<ExprStmtNode>,
+        public virtual ICloneableInScopeNode<ExprStmtNode>,
         public virtual IBindableNode<ExprStmtBoundNode>
     {
     public:

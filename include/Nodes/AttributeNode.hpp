@@ -13,7 +13,7 @@ namespace Ace
 {
     class AttributeNode :
         public virtual INode,
-        public virtual ICloneableNode<AttributeNode>,
+        public virtual ICloneableInScopeNode<AttributeNode>,
         public virtual IBindableNode<AttributeBoundNode>
     {
     public:

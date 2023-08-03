@@ -20,7 +20,7 @@ namespace Ace
     class InstanceVarNode :
         public virtual INode,
         public virtual ITypedNode,
-        public virtual ICloneableNode<InstanceVarNode>,
+        public virtual ICloneableInScopeNode<InstanceVarNode>,
         public virtual IBindableNode<InstanceVarBoundNode>
     {
     public:

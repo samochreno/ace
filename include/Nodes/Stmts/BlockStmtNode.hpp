@@ -12,7 +12,7 @@ namespace Ace
 {
     class BlockStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<BlockStmtNode>,
+        public virtual ICloneableInScopeNode<BlockStmtNode>,
         public virtual IBindableNode<BlockStmtBoundNode>
     {
     public:

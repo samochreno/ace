@@ -15,7 +15,7 @@ namespace Ace
 {
     class IfStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<IfStmtNode>,
+        public virtual ICloneableInScopeNode<IfStmtNode>,
         public virtual IBindableNode<IfStmtBoundNode>
     {
     public:

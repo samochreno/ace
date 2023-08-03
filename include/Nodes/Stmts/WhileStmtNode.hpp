@@ -14,7 +14,7 @@ namespace Ace
 {
     class WhileStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<WhileStmtNode>,
+        public virtual ICloneableInScopeNode<WhileStmtNode>,
         public virtual IBindableNode<WhileStmtBoundNode>
     {
     public:

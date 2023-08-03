@@ -15,7 +15,7 @@ namespace Ace
 {
     class LabelStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<LabelStmtNode>,
+        public virtual ICloneableInScopeNode<LabelStmtNode>,
         public virtual IBindableNode<LabelStmtBoundNode>,
         public virtual ISymbolCreatableNode
     {

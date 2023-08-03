@@ -19,7 +19,7 @@ namespace Ace
     class SelfParamVarNode :
         public virtual INode,
         public virtual ITypedNode,
-        public virtual ICloneableNode<SelfParamVarNode>,
+        public virtual ICloneableInScopeNode<SelfParamVarNode>,
         public virtual IBindableNode<SelfParamVarBoundNode>
     {
     public:

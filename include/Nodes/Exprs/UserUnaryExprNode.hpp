@@ -13,7 +13,7 @@ namespace Ace
 {
     class UserUnaryExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<UserUnaryExprNode>,
+        public virtual ICloneableInScopeNode<UserUnaryExprNode>,
         public virtual IBindableNode<UserUnaryExprBoundNode>
     {
     public:

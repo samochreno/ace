@@ -12,7 +12,7 @@ namespace Ace
 {
     class LogicalNegationExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<LogicalNegationExprNode>, 
+        public virtual ICloneableInScopeNode<LogicalNegationExprNode>, 
         public virtual IBindableNode<LogicalNegationExprBoundNode>
     {
     public:

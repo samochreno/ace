@@ -25,10 +25,10 @@ namespace Ace
     };
 
     template<typename T>
-    class ICloneableNode : public virtual INode
+    class ICloneableInScopeNode : public virtual INode
     {
     public:
-        virtual ~ICloneableNode() = default;
+        virtual ~ICloneableInScopeNode() = default;
 
         virtual auto CloneInScope(
             const std::shared_ptr<Scope>& scope

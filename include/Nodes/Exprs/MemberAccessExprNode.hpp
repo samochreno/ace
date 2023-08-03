@@ -13,7 +13,7 @@ namespace Ace
 {
     class MemberAccessExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<MemberAccessExprNode>,
+        public virtual ICloneableInScopeNode<MemberAccessExprNode>,
         public virtual IBindableNode<InstanceVarRefExprBoundNode>
     {
     public:

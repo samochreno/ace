@@ -12,7 +12,7 @@ namespace Ace
 {
     class ExitStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<ExitStmtNode>,
+        public virtual ICloneableInScopeNode<ExitStmtNode>,
         public virtual IBindableNode<ExitStmtBoundNode>
     {
     public:

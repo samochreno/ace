@@ -17,7 +17,7 @@ namespace Ace
 {
     class TypeTemplateNode :
         public virtual ITemplateNode,
-        public virtual ICloneableNode<TypeTemplateNode>
+        public virtual ICloneableInScopeNode<TypeTemplateNode>
     {
     public:
         TypeTemplateNode(

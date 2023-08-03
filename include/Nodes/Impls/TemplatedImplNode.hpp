@@ -19,7 +19,7 @@ namespace Ace
     class TemplatedImplNode :
         public virtual INode,
         public virtual IImplNode,
-        public virtual ICloneableNode<TemplatedImplNode>,
+        public virtual ICloneableInScopeNode<TemplatedImplNode>,
         public virtual IBindableNode<ImplBoundNode>
     {
     public:

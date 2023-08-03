@@ -23,7 +23,7 @@ namespace Ace
 {
     class FunctionNode :
         public virtual ITypedNode,
-        public virtual ICloneableNode<FunctionNode>,
+        public virtual ICloneableInScopeNode<FunctionNode>,
         public virtual IBindableNode<FunctionBoundNode>
     {
     public:

@@ -14,7 +14,7 @@ namespace Ace
 {
     class ImplTemplateParamNode :
         public virtual INode,
-        public virtual ICloneableNode<ImplTemplateParamNode>,
+        public virtual ICloneableInScopeNode<ImplTemplateParamNode>,
         public virtual ISymbolCreatableNode
     {
     public:

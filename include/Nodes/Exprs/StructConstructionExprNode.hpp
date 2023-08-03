@@ -21,7 +21,7 @@ namespace Ace
 
     class StructConstructionExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<StructConstructionExprNode>,
+        public virtual ICloneableInScopeNode<StructConstructionExprNode>,
         public virtual IBindableNode<StructConstructionExprBoundNode>
     {
     public:

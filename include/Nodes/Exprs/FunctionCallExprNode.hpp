@@ -12,7 +12,7 @@ namespace Ace
 {
     class FunctionCallExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<FunctionCallExprNode>,
+        public virtual ICloneableInScopeNode<FunctionCallExprNode>,
         public virtual IBindableNode<IExprBoundNode>
     {
     public:

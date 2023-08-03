@@ -13,7 +13,7 @@ namespace Ace
 {
     class AssertStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<AssertStmtNode>,
+        public virtual ICloneableInScopeNode<AssertStmtNode>,
         public virtual IBindableNode<AssertStmtBoundNode>
     {
     public:

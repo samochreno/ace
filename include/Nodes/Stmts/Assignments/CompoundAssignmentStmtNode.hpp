@@ -14,7 +14,7 @@ namespace Ace
 {
     class CompoundAssignmentStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<CompoundAssignmentStmtNode>,
+        public virtual ICloneableInScopeNode<CompoundAssignmentStmtNode>,
         public virtual IBindableNode<CompoundAssignmentStmtBoundNode>
     {
     public:

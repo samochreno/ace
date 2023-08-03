@@ -18,7 +18,7 @@ namespace Ace
     class NormalImplNode :
         public virtual INode,
         public virtual IImplNode,
-        public virtual ICloneableNode<NormalImplNode>,
+        public virtual ICloneableInScopeNode<NormalImplNode>,
         public virtual IBindableNode<ImplBoundNode>
     {
     public:

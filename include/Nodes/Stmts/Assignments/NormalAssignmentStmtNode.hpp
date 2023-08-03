@@ -13,7 +13,7 @@ namespace Ace
 {
     class NormalAssignmentStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<NormalAssignmentStmtNode>,
+        public virtual ICloneableInScopeNode<NormalAssignmentStmtNode>,
         public virtual IBindableNode<NormalAssignmentStmtBoundNode>
     {
     public:

@@ -20,7 +20,7 @@ namespace Ace
     class VarStmtNode :
         public virtual IStmtNode,
         public virtual ITypedNode,
-        public virtual ICloneableNode<VarStmtNode>,
+        public virtual ICloneableInScopeNode<VarStmtNode>,
         public virtual IBindableNode<VarStmtBoundNode>
     {
     public:

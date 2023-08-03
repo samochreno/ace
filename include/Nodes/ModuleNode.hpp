@@ -24,7 +24,7 @@ namespace Ace
 {
     class ModuleNode :
         public virtual INode,
-        public virtual ICloneableNode<ModuleNode>,
+        public virtual ICloneableInScopeNode<ModuleNode>,
         public virtual IBindableNode<ModuleBoundNode>,
         public virtual IPartiallySymbolCreatableNode
     {

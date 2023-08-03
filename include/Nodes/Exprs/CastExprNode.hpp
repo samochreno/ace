@@ -13,7 +13,7 @@ namespace Ace
 {
     class CastExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<CastExprNode>,
+        public virtual ICloneableInScopeNode<CastExprNode>,
         public virtual IBindableNode<IExprBoundNode>
     {
     public:

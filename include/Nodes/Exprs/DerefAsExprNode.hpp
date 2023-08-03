@@ -13,7 +13,7 @@ namespace Ace
 {
     class DerefAsExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<DerefAsExprNode>,
+        public virtual ICloneableInScopeNode<DerefAsExprNode>,
         public virtual IBindableNode<DerefAsExprBoundNode>
     {
     public:

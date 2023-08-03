@@ -15,7 +15,7 @@ namespace Ace
 {
     class NormalTemplateParamNode :
         public virtual INode,
-        public virtual ICloneableNode<NormalTemplateParamNode>,
+        public virtual ICloneableInScopeNode<NormalTemplateParamNode>,
         public virtual ISymbolCreatableNode
     {
     public:

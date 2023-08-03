@@ -19,7 +19,7 @@ namespace Ace
     class NormalParamVarNode :
         public virtual INode,
         public virtual ITypedNode,
-        public virtual ICloneableNode<NormalParamVarNode>,
+        public virtual ICloneableInScopeNode<NormalParamVarNode>,
         public virtual IBindableNode<NormalParamVarBoundNode>
     {
     public:

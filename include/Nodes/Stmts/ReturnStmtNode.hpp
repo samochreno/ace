@@ -14,7 +14,7 @@ namespace Ace
 {
     class ReturnStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableNode<ReturnStmtNode>,
+        public virtual ICloneableInScopeNode<ReturnStmtNode>,
         public virtual IBindableNode<ReturnStmtBoundNode>
     {
     public:

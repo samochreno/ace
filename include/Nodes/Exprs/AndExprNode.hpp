@@ -12,7 +12,7 @@ namespace Ace
 {
     class AndExprNode :
         public virtual IExprNode,
-        public virtual ICloneableNode<AndExprNode>,
+        public virtual ICloneableInScopeNode<AndExprNode>,
         public virtual IBindableNode<AndExprBoundNode>
     {
     public:
