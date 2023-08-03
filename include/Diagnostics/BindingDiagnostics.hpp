@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
 
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
