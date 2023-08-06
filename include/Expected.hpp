@@ -179,6 +179,19 @@ namespace Ace
             return *this;
         }
 
+        template<typename TNew>
+        operator Expected<TNew>() const
+        {
+            if (m_OptValue.has_value())
+            {
+                return Expected<TNew>{ m_OptValue.value(), m_Diagnostics };
+            }
+            else
+            {
+                return Expected<TNew>{ m_Diagnostics };
+            }
+        }
+
         operator bool() const
         {
             return m_OptValue.has_value();
@@ -207,19 +220,6 @@ namespace Ace
         auto GetDiagnosticBag() const -> const DiagnosticBag& final
         {
             return m_Diagnostics;
-        }
-
-        template<typename TNew>
-        operator Expected<TNew>() const
-        {
-            if (m_Diagnostics.IsEmpty())
-            {
-                return Expected<TNew>(m_OptValue.value());
-            }
-            else
-            {
-                return Expected<TNew>(m_Diagnostics);
-            }
         }
 
     private:
