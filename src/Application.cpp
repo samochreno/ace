@@ -377,16 +377,16 @@ namespace Ace::Application
             return diagnostics.Unwrap();
         }
 
-        GlueGeneration::GenerateAndBindGlue(compilation);
-
-        const auto timeBindingAndVerificationEnd = now();
-
         diagnostics.Add(DiagnoseLayoutCycles(compilation));
         diagnostics.Add(DiagnoseUnsizedVarTypes(compilation));
+
+        const auto timeBindingAndVerificationEnd = now();
 
         const auto timeFrontendEnd = now();
 
         const auto timeBackendBegin = now();
+
+        GlueGeneration::GenerateAndBindGlue(compilation);
 
         Emitter emitter{ compilation };
         emitter.SetASTs(finalASTs);

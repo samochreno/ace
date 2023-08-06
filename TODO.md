@@ -16,10 +16,8 @@
 
 ## 🔔 Medium Priority
 
-- Add `CFANodeCreatable`:
-  - Implement it on `BoundNode`s
-  - Add `CFAGraph` &rarr; alias for `std::vector<CFANode>`
-  - `IEmittable` could hold this graph, so it could verify control flow
+- CFA:
+  - `IEmittable` could hold this `CFAGraph`, so it could verify control flow
   - Possibly implement `CFANode`s for `LLVM IR` instructions
 - ❓ Give template symbols shared ownership of the nodes
 - `*self`
