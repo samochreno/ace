@@ -36,13 +36,13 @@ namespace Ace
         {
             return m_OptionDefinitions;
         }
-        auto IsEnd() const -> bool
+        auto IsEnd(const size_t distance = 0) const -> bool
         {
-            return m_Iterator == m_EndIterator;
+            return (m_Iterator + distance) == m_EndIterator;
         }
-        auto Peek(const size_t distance = 1) const -> std::string_view
+        auto Peek(const size_t distance = 0) const -> std::string_view
         {
-            return *((m_Iterator - 1) + distance);
+            return *(m_Iterator + distance);
         }
 
         auto Eat() -> void
@@ -109,7 +109,7 @@ namespace Ace
                 end  (parser.Peek()),
             };
 
-            return diagnostics.Add(CreateMissingCLIOptionValueError(
+            diagnostics.Add(CreateMissingCLIOptionValueError(
                 srcLocation
             ));
         }
@@ -126,12 +126,12 @@ namespace Ace
                 end  (optValue.value()),
             };
 
-            return diagnostics.Add(CreateUnexpectedCLIOptionValueError(
+            diagnostics.Add(CreateUnexpectedCLIOptionValueError(
                 srcLocation
             ));
         }
 
-        return diagnostics;
+        return Diagnosed<void>{ diagnostics };
     }
 
     static auto ParseLongOption(
@@ -198,6 +198,11 @@ namespace Ace
                 }
 
                 return value;
+            }
+
+            if (parser.IsEnd(1))
+            {
+                return std::nullopt;
             }
 
             if (definition->Kind == CLIOptionKind::WithoutValue)
@@ -286,6 +291,11 @@ namespace Ace
                     end(name),
                     end(parser.Peek()),
                 };
+            }
+
+            if (parser.IsEnd(1))
+            {
+                return std::nullopt;
             }
 
             if (definition->Kind == CLIOptionKind::WithoutValue)
@@ -383,6 +393,11 @@ namespace Ace
             diagnostics.Add(dgnOption);
 
             optionMap[dgnOption.Unwrap().Definition] = dgnOption.Unwrap();
+        }
+
+        if (diagnostics.HasErrors())
+        {
+            return diagnostics;
         }
 
         return Expected
