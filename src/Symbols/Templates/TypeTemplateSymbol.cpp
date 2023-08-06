@@ -137,7 +137,7 @@ namespace Ace
         const auto castedAST = std::dynamic_pointer_cast<const ITypeNode>(ast);
 
         const auto dgnBoundAST = castedAST->CreateBoundType();
-        ACE_ASSERT(dgnBoundAST.GetDiagnosticBag().IsEmpty());
+        ACE_ASSERT(dgnBoundAST.GetDiagnostics().IsEmpty());
 
         const auto finalAST = Application::CreateTransformedAndVerifiedAST(
             dgnBoundAST.Unwrap(),

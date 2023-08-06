@@ -101,7 +101,7 @@ namespace Ace
             ACE_UNREACHABLE();
         }
 
-        auto GetDiagnosticBag() const -> const DiagnosticBag&
+        auto GetDiagnostics() const -> const DiagnosticBag&
         {
             return m_Diagnostics;
         }
@@ -216,7 +216,7 @@ namespace Ace
             }
         }
 
-        auto GetDiagnosticBag() const -> const DiagnosticBag& final
+        auto GetDiagnostics() const -> const DiagnosticBag& final
         {
             return m_Diagnostics;
         }

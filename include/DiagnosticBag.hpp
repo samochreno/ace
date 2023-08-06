@@ -21,7 +21,7 @@ namespace Ace
         template<typename TDiagnosed, typename = std::enable_if_t<std::is_base_of_v<IDiagnosed, TDiagnosed>>>
         auto Add(const TDiagnosed& diagnosed) -> DiagnosticBag&
         {
-            return Add(diagnosed.GetDiagnosticBag());
+            return Add(diagnosed.GetDiagnostics());
         }
         auto Add(const DiagnosticBag& diagnostics) -> DiagnosticBag&;
 

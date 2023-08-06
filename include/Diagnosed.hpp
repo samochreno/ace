@@ -24,7 +24,7 @@ namespace Ace
         {
         }
 
-        auto GetDiagnosticBag() const -> const DiagnosticBag& final
+        auto GetDiagnostics() const -> const DiagnosticBag& final
         {
             return m_Diagnostics;
         }
@@ -67,7 +67,7 @@ namespace Ace
             return m_Value;
         }
 
-        auto GetDiagnosticBag() const -> const DiagnosticBag& final
+        auto GetDiagnostics() const -> const DiagnosticBag& final
         {
             return m_Diagnostics;
         }

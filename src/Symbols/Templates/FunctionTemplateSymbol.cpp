@@ -140,7 +140,7 @@ namespace Ace
             std::dynamic_pointer_cast<const FunctionNode>(ast);
 
         const auto dgnBoundAST = castedAst->CreateBound();
-        ACE_ASSERT(dgnBoundAST.GetDiagnosticBag().IsEmpty());;
+        ACE_ASSERT(dgnBoundAST.GetDiagnostics().IsEmpty());;
 
         const auto finalAST = Application::CreateTransformedAndVerifiedAST(
             dgnBoundAST.Unwrap(),

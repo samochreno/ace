@@ -42,7 +42,7 @@ namespace Ace::Application
         DiagnosticBag diagnostics{};
 
         auto dgnTokens = LexTokens(fileBuffer);
-        diagnostics.Add(dgnTokens.GetDiagnosticBag());
+        diagnostics.Add(dgnTokens.GetDiagnostics());
 
         const auto expAST = ParseAST(
             fileBuffer,

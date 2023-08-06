@@ -172,7 +172,7 @@ namespace Ace
                 placeholderExpr,
                 targetTypeInfos.at(i)
             );
-            if (dgnConvertedExpr.GetDiagnosticBag().HasErrors())
+            if (dgnConvertedExpr.GetDiagnostics().HasErrors())
             {
                 return false;
             }

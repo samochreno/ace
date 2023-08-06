@@ -13,7 +13,7 @@
 auto ACE_MACRO_CONCAT(_exp_, resultVarName) = (expExpr); \
 if (!ACE_MACRO_CONCAT(_exp_, resultVarName)) \
 { \
-    return ACE_MACRO_CONCAT(_exp_, resultVarName).GetDiagnosticBag(); \
+    return ACE_MACRO_CONCAT(_exp_, resultVarName).GetDiagnostics(); \
 } \
 auto resultVarName = std::move(ACE_MACRO_CONCAT(_exp_, resultVarName).Unwrap())
 
@@ -31,7 +31,7 @@ return EmptyError{};
     const auto expExpr = (inExpExpr); \
     if (!expExpr) \
     { \
-        return expExpr.GetDiagnosticBag(); \
+        return expExpr.GetDiagnostics(); \
     } \
 }
 
@@ -62,6 +62,6 @@ namespace Ace
     class IDiagnosed
     {
     public:
-        virtual auto GetDiagnosticBag() const -> const DiagnosticBag& = 0;
+        virtual auto GetDiagnostics() const -> const DiagnosticBag& = 0;
     };
 }

@@ -6,7 +6,6 @@
 - String interning, maybe put `Token`s on the stack
 - Special fast lookup for native types
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
-- Rename `Expected<T>::GetDiagnosticBag` and `Diagnosed<T>::GetDiagnosticBag` to `GetDiagnostics`
 
 ## 💥 High Priority
 
