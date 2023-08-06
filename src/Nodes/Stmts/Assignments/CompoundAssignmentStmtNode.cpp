@@ -118,15 +118,20 @@ namespace Ace
         return Diagnosed{ expSymbol.Unwrap(), diagnostics };
     }
 
-    auto CompoundAssignmentStmtNode::CreateBound() const -> std::shared_ptr<const CompoundAssignmentStmtBoundNode>
+    auto CompoundAssignmentStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
-        const auto boundLHSExpr = m_LHSExpr->CreateBoundExpr();
-        const auto boundRHSExpr = m_RHSExpr->CreateBoundExpr();
+        const auto dgnBoundLHSExpr = m_LHSExpr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundLHSExpr);
 
-        auto* const lhsTypeSymbol = boundLHSExpr->GetTypeInfo().Symbol;
-        auto* const rhsTypeSymbol = boundRHSExpr->GetTypeInfo().Symbol;
+        const auto dgnBoundRHSExpr = m_RHSExpr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundRHSExpr);
+
+        auto* const lhsTypeSymbol =
+            dgnBoundLHSExpr.Unwrap()->GetTypeInfo().Symbol;
+        auto* const rhsTypeSymbol =
+            dgnBoundRHSExpr.Unwrap()->GetTypeInfo().Symbol;
 
         const auto dgnOpSymbol = ResolveOpSymbol(
             GetScope(),
@@ -136,16 +141,19 @@ namespace Ace
         );
         diagnostics.Add(dgnOpSymbol);
 
-        return std::make_shared<const CompoundAssignmentStmtBoundNode>(
+        return Diagnosed
+        {
+            std::make_shared<const CompoundAssignmentStmtBoundNode>(
+                GetSrcLocation(),
+                dgnBoundLHSExpr.Unwrap(),
+                dgnBoundRHSExpr.Unwrap(),
+                dgnOpSymbol.Unwrap()
+            ),
             diagnostics,
-            GetSrcLocation(),
-            boundLHSExpr,
-            boundRHSExpr,
-            dgnOpSymbol.Unwrap()
-        );
+        };
     }
 
-    auto CompoundAssignmentStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
+    auto CompoundAssignmentStmtNode::CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

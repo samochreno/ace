@@ -213,16 +213,6 @@ namespace Ace
         return m_LLVMContext;
     }
 
-    auto Compilation::GetDiagnostics() const -> const GlobalDiagnosticBag&
-    {
-        return m_Diagnostics;
-    }
-
-    auto Compilation::GetDiagnostics() -> GlobalDiagnosticBag&
-    {
-        return m_Diagnostics;
-    }
-
     auto Compilation::GetErrorSymbols() const -> const Ace::ErrorSymbols&
     {
         return m_ErrorSymbols;

@@ -3,23 +3,29 @@
 #include <memory>
 #include <vector>
 
-#include "Symbols/Types/TypeSymbol.hpp"
+#include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 
 namespace Ace
 {
+    class IExprBoundNode;
+
+    typedef std::optional<FunctionSymbol*>(*ConversionOpGetterFunction)(
+        const std::shared_ptr<Scope>&,
+        ITypeSymbol*,
+        ITypeSymbol*
+    );
     auto GetImplicitConversionOp(
-        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
         ITypeSymbol* targetType
-    ) -> Expected<FunctionSymbol*>;
+    ) -> std::optional<FunctionSymbol*>;
     auto GetExplicitConversionOp(
-        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
         ITypeSymbol* targetType
-    ) -> Expected<FunctionSymbol*>;
+    ) -> std::optional<FunctionSymbol*>;
 
     auto AreTypesSame(
         const std::vector<ITypeSymbol*>& typesA,
@@ -30,4 +36,23 @@ namespace Ace
         const std::vector<TypeInfo>& fromTypeInfos,
         const std::vector<TypeInfo>& targetTypeInfos
     ) -> bool;
+
+    auto CreateConverted(
+        std::shared_ptr<const IExprBoundNode> expr,
+        const TypeInfo& targetTypeInfo,
+        const ConversionOpGetterFunction func
+    ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>;
+    auto CreateImplicitlyConverted(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const TypeInfo& targetTypeInfo
+    ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>;
+    auto CreateExplicitlyConverted(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const TypeInfo& targetTypeInfo
+    ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>;
+
+    auto CreateImplicitlyConvertedAndTypeChecked(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const TypeInfo& targetTypeInfo
+    ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>;
 }

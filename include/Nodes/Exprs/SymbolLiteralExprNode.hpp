@@ -8,6 +8,7 @@
 #include "Name.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
@@ -33,8 +34,8 @@ namespace Ace
         auto CloneInScopeExpr(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> final;
-        auto CreateBound() const -> std::shared_ptr<const StaticVarRefExprBoundNode> final;
-        auto CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode> final;
+        auto CreateBound() const -> Diagnosed<std::shared_ptr<const StaticVarRefExprBoundNode>> final;
+        auto CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>> final;
 
         auto GetName() const -> const SymbolName&;
 

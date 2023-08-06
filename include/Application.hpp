@@ -59,26 +59,29 @@ namespace Ace::Application
 
 #undef TASTSmartPtr
 #undef TNodeIBase
-#define TTypeChecked        std::remove_reference_t<decltype(getOrCreateTypeCheckedFunc(TBound{}).Unwrap().Value)>
-#define TLowered            std::remove_reference_t<decltype(getOrCreateLoweredFunc(TTypeChecked{}).Value)>
+#define TTypeChecked        std::remove_reference_t<decltype(createTypeCheckedFunc(TBound{}).Unwrap())>
+#define TLowered            std::remove_reference_t<decltype(createLoweredFunc(TTypeChecked{}))>
 
     template<
         typename TBound, 
-        typename TGetOrCreateTypeCheckedFunc, 
-        typename TGetOrCreateLoweredFunc
+        typename TCreateTypeCheckedFunc, 
+        typename TCreateLoweredFunc
     >
     auto CreateTransformedAndVerifiedAST(
         const TBound& boundAST,
-        TGetOrCreateTypeCheckedFunc&& getOrCreateTypeCheckedFunc,
-        TGetOrCreateLoweredFunc&& getOrCreateLoweredFunc
+        TCreateTypeCheckedFunc&& createTypeCheckedFunc,
+        TCreateLoweredFunc&& createLoweredFunc
     ) -> Expected<TLowered>
     {
-        ACE_TRY(cchTypeCheckedAST, getOrCreateTypeCheckedFunc(boundAST));
-        const auto cchLoweredAST = getOrCreateLoweredFunc(
-            cchTypeCheckedAST.Value
-        );
+        DiagnosticBag diagnostics{};
 
-        auto& finalAST = cchLoweredAST.Value;
+        const auto dgnTypeCheckedAST = createTypeCheckedFunc(boundAST);
+        diagnostics.Add(dgnTypeCheckedAST);
+
+        const auto loweredAST = createLoweredFunc(dgnTypeCheckedAST.Unwrap());
+
+        auto& finalAST = loweredAST;
+
         const auto nodes = GetAllNodes(finalAST);
 
         auto* const compilation = finalAST->GetCompilation();
@@ -86,7 +89,7 @@ namespace Ace::Application
         ACE_TRY_VOID(ValidateControlFlow(compilation, nodes));
         BindFunctionSymbolsBodies(compilation, nodes);
 
-        return finalAST;
+        return Expected{ finalAST, diagnostics };
     }
 
 #undef TTypeChecked

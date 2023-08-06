@@ -3,12 +3,11 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
@@ -16,20 +15,13 @@
 namespace Ace
 {
     ConditionalJumpStmtBoundNode::ConditionalJumpStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& condition,
         LabelSymbol* const labelSymbol
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Condition{ condition },
         m_LabelSymbol{ labelSymbol }
     {
-    }
-
-    auto ConditionalJumpStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto ConditionalJumpStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -51,90 +43,69 @@ namespace Ace
         return children;
     }
 
-    auto ConditionalJumpStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const ConditionalJumpStmtBoundNode>
-    {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<const ConditionalJumpStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            m_Condition,
-            GetLabelSymbol()
-        );
-    }
-
-    auto ConditionalJumpStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const IStmtBoundNode>
-    {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto ConditionalJumpStmtBoundNode::GetOrCreateTypeChecked(
+    auto ConditionalJumpStmtBoundNode::CreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const ConditionalJumpStmtBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const ConditionalJumpStmtBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         const TypeInfo typeInfo
         {
             GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
-
-        ACE_TRY(cchConvertedAndCheckedCondition, CreateImplicitlyConvertedAndTypeChecked(
+        const auto dgnCheckedCondition = CreateImplicitlyConvertedAndTypeChecked(
             m_Condition,
             typeInfo
-        ));
+        );
+        diagnostics.Add(dgnCheckedCondition);
 
-        if (!cchConvertedAndCheckedCondition.IsChanged)
+        if (dgnCheckedCondition.Unwrap() == m_Condition)
         {
-            return CreateUnchanged(shared_from_this());
+            return Diagnosed{ shared_from_this(), diagnostics };
         }
 
-        return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchConvertedAndCheckedCondition.Value,
-            m_LabelSymbol
-        ));
+        return Diagnosed
+        {
+            std::make_shared<const ConditionalJumpStmtBoundNode>(
+                GetSrcLocation(),
+                dgnCheckedCondition.Unwrap(),
+                m_LabelSymbol
+            ),
+            diagnostics,
+        };
     }
 
-    auto ConditionalJumpStmtBoundNode::GetOrCreateTypeCheckedStmt(
+    auto ConditionalJumpStmtBoundNode::CreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateTypeChecked(context);
+        return CreateTypeChecked(context);
     }
 
-    auto ConditionalJumpStmtBoundNode::GetOrCreateLowered(
+    auto ConditionalJumpStmtBoundNode::CreateLowered(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const ConditionalJumpStmtBoundNode>>
+    ) const -> std::shared_ptr<const ConditionalJumpStmtBoundNode>
     {
-        const auto cchLoweredCondition =
-            m_Condition->GetOrCreateLoweredExpr({});
+        const auto loweredCondition = m_Condition->CreateLoweredExpr({});
 
-        if (!cchLoweredCondition.IsChanged)
+        if (loweredCondition == m_Condition)
         {
-            return CreateUnchanged(shared_from_this());
+            return shared_from_this();
         }
 
-        return CreateChanged(std::make_shared<const ConditionalJumpStmtBoundNode>(
-            DiagnosticBag{},
+        return std::make_shared<const ConditionalJumpStmtBoundNode>(
             GetSrcLocation(),
-            cchLoweredCondition.Value,
+            loweredCondition,
             m_LabelSymbol
-        )->GetOrCreateLowered(context).Value);
+        )->CreateLowered({});
     }
 
-    auto ConditionalJumpStmtBoundNode::GetOrCreateLoweredStmt(
+    auto ConditionalJumpStmtBoundNode::CreateLoweredStmt(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto ConditionalJumpStmtBoundNode::Emit(Emitter& emitter) const -> void

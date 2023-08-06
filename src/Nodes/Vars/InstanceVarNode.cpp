@@ -78,8 +78,10 @@ namespace Ace
         );
     }
 
-    auto InstanceVarNode::CreateBound() const -> std::shared_ptr<const InstanceVarBoundNode>
+    auto InstanceVarNode::CreateBound() const -> Diagnosed<std::shared_ptr<const InstanceVarBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         std::vector<std::shared_ptr<const AttributeBoundNode>> boundAttributes{};
         std::transform(
             begin(m_Attributes),
@@ -87,7 +89,9 @@ namespace Ace
             back_inserter(boundAttributes),
             [&](const std::shared_ptr<const AttributeNode>& attribute)
             {
-                return attribute->CreateBound();
+                const auto dgnBoundAttribute = attribute->CreateBound();
+                diagnostics.Add(dgnBoundAttribute);
+                return dgnBoundAttribute.Unwrap();
             }
         );
 
@@ -95,12 +99,15 @@ namespace Ace
             m_Name
         ).Unwrap();
 
-        return std::make_shared<const InstanceVarBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            selfSymbol,
-            boundAttributes
-        );
+        return Diagnosed
+        {
+            std::make_shared<const InstanceVarBoundNode>(
+                GetSrcLocation(),
+                selfSymbol,
+                boundAttributes
+            ),
+            diagnostics,
+        };
     }
 
     auto InstanceVarNode::GetName() const -> const Ident&

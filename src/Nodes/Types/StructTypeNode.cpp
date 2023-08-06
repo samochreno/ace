@@ -101,8 +101,10 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto StructTypeNode::CreateBound() const -> std::shared_ptr<const StructTypeBoundNode>
+    auto StructTypeNode::CreateBound() const -> Diagnosed<std::shared_ptr<const StructTypeBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         std::vector<std::shared_ptr<const AttributeBoundNode>> boundAttributes{};
         std::transform(
             begin(m_Attributes),
@@ -110,7 +112,9 @@ namespace Ace
             back_inserter(boundAttributes),
             [&](const std::shared_ptr<const AttributeNode>& attribute)
             {
-                return attribute->CreateBound();
+                const auto dgnBoundAttribute = attribute->CreateBound();
+                diagnostics.Add(dgnBoundAttribute);
+                return dgnBoundAttribute.Unwrap();
             }
         );
 
@@ -118,7 +122,9 @@ namespace Ace
         std::transform(begin(m_Vars), end(m_Vars), back_inserter(boundVars),
         [&](const std::shared_ptr<const InstanceVarNode>& var)
         {
-            return var->CreateBound();
+            const auto dgnBoundVar = var->CreateBound();
+            diagnostics.Add(dgnBoundVar);
+            return dgnBoundVar.Unwrap();
         });
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<StructTypeSymbol>(
@@ -127,16 +133,19 @@ namespace Ace
             m_SelfScope->CollectTemplateArgs()
         ).Unwrap();
 
-        return std::make_shared<const StructTypeBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            selfSymbol,
-            boundAttributes,
-            boundVars
-        );
+        return Diagnosed
+        {
+            std::make_shared<const StructTypeBoundNode>(
+                GetSrcLocation(),
+                selfSymbol,
+                boundAttributes,
+                boundVars
+            ),
+            diagnostics,
+        };
     }
 
-    auto StructTypeNode::CreateBoundType() const -> std::shared_ptr<const ITypeBoundNode>
+    auto StructTypeNode::CreateBoundType() const -> Diagnosed<std::shared_ptr<const ITypeBoundNode>>
     {
         return CreateBound();
     }

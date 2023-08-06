@@ -6,11 +6,10 @@
 #include "BoundNodes/BoundNode.hpp"
 #include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
@@ -23,28 +22,25 @@ namespace Ace
     {
     public:
         InstanceVarBoundNode(
-            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             InstanceVarSymbol* const symbol,
             const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes
         );
         virtual ~InstanceVarBoundNode() = default;
 
-        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
-        auto GetOrCreateTypeChecked(
+        auto CreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const InstanceVarBoundNode>>> final;
-        auto GetOrCreateLowered(
+        ) const -> Diagnosed<std::shared_ptr<const InstanceVarBoundNode>> final;
+        auto CreateLowered(
             const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const InstanceVarBoundNode>> final;
+        ) const -> std::shared_ptr<const InstanceVarBoundNode> final;
 
         auto GetSymbol() const -> InstanceVarSymbol* final;
 
     private:
-        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         InstanceVarSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const AttributeBoundNode>> m_Attributes{};

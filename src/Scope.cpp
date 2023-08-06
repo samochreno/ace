@@ -1082,12 +1082,17 @@ namespace Ace
             data.TemplateArgs = expTemplateArgs.Unwrap();
         }
 
-        const auto dgnMatchingSymbols = CollectMatchingSymbolsInScopes(data);
-        diagnostics.Add(dgnMatchingSymbols);
+        const auto expMatchingSymbols = CollectMatchingSymbolsInScopes(data);
+        diagnostics.Add(expMatchingSymbols);
+        if (!expMatchingSymbols)
+        {
+            return diagnostics;
+        }
 
         const auto expSymbol = data.IsLastNameSection ?
-            ResolveLastNameSectionSymbol(data, dgnMatchingSymbols.Unwrap()) :
-            ResolveNameSectionSymbol    (data, dgnMatchingSymbols.Unwrap());
+            ResolveLastNameSectionSymbol(data, expMatchingSymbols.Unwrap()) :
+            ResolveNameSectionSymbol    (data, expMatchingSymbols.Unwrap());
+
         diagnostics.Add(expSymbol);
         if (!expSymbol)
         {
@@ -1123,7 +1128,7 @@ namespace Ace
 
     auto Scope::CollectMatchingSymbolsInScopes(
         const SymbolResolutionData& data
-    ) -> Diagnosed<std::vector<ISymbol*>>
+    ) -> Expected<std::vector<ISymbol*>>
     {
         DiagnosticBag diagnostics{};
 
@@ -1145,7 +1150,12 @@ namespace Ace
             );
         });
 
-        return Diagnosed{ matchingSymbols, diagnostics };
+        if (matchingSymbols.empty() && diagnostics.HasErrors())
+        {
+            return diagnostics;
+        }
+
+        return Expected{ matchingSymbols, diagnostics };
     }
 
     auto Scope::CollectMatchingSymbols(

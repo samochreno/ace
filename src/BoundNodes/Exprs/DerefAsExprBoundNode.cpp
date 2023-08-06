@@ -3,32 +3,25 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
-#include "TypeInfo.hpp"
-#include "ValueKind.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
+#include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "ExprDropData.hpp"
+#include "TypeInfo.hpp"
+#include "ValueKind.hpp"
 
 namespace Ace
 {
     DerefAsExprBoundNode::DerefAsExprBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr,
         ITypeSymbol* const typeSymbol
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_TypeSymbol{ typeSymbol },
         m_Expr{ expr }
     {
-    }
-
-    auto DerefAsExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto DerefAsExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -50,87 +43,72 @@ namespace Ace
         return children;
     }
 
-    auto DerefAsExprBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto DerefAsExprBoundNode::CreateTypeChecked(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const DerefAsExprBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol->GetUnaliased();
+
+        const bool isRef = typeSymbol->IsRef();
+        const bool isPtr =
+            typeSymbol == GetCompilation()->GetNatives()->Ptr.GetSymbol();
+
+        if (!isRef && !isPtr)
+        {
+            diagnostics.Add(CreateExpectedDerefableExprError(GetSrcLocation()));
+        }
+
+        const auto dgnCheckedExpr = m_Expr->CreateTypeCheckedExpr({});
+        diagnostics.Add(dgnCheckedExpr);
+
+        if (dgnCheckedExpr.Unwrap() == m_Expr)
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const DerefAsExprBoundNode>(
+                GetSrcLocation(),
+                m_Expr,
+                m_TypeSymbol
+            ),
+            diagnostics,
+        };
+    }
+
+    auto DerefAsExprBoundNode::CreateTypeCheckedExpr(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto DerefAsExprBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const DerefAsExprBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        const auto loweredExpr = m_Expr->CreateLoweredExpr({});
+
+        if (loweredExpr == m_Expr)
         {
             return shared_from_this();
         }
 
         return std::make_shared<const DerefAsExprBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
             m_Expr,
             m_TypeSymbol
-        );
+        )->CreateLowered({});
     }
 
-    auto DerefAsExprBoundNode::CloneWithDiagnosticsExpr(
-        DiagnosticBag diagnostics
+    auto DerefAsExprBoundNode::CreateLoweredExpr(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IExprBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto DerefAsExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const DerefAsExprBoundNode>>>
-    {
-        auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol->GetUnaliased();
-
-        ACE_TRY_ASSERT(
-            (typeSymbol == GetCompilation()->GetNatives()->Ptr.GetSymbol()) ||
-            (typeSymbol->IsRef())
-        );
-
-        ACE_TRY(cchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
-
-        if (!cchCheckedExpr.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const DerefAsExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_Expr,
-            m_TypeSymbol
-        ));
-    }
-
-    auto DerefAsExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto DerefAsExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const DerefAsExprBoundNode>>
-    {
-        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
-
-        if (!cchLoweredExpr.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const DerefAsExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_Expr,
-            m_TypeSymbol
-        )->GetOrCreateLowered({}).Value);
-    }
-
-    auto DerefAsExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto DerefAsExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult

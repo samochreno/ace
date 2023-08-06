@@ -3,33 +3,25 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "TypeInfo.hpp"
-#include "ValueKind.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "ExprDropData.hpp"
+#include "TypeInfo.hpp"
+#include "ValueKind.hpp"
 
 namespace Ace
 {
     SizeOfExprBoundNode::SizeOfExprBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* const typeSymbol
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_TypeSymbol{ typeSymbol }
     {
-    }
-
-    auto SizeOfExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto SizeOfExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -47,56 +39,32 @@ namespace Ace
         return {};
     }
 
-    auto SizeOfExprBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto SizeOfExprBoundNode::CreateTypeChecked(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const SizeOfExprBoundNode>>
+    {
+        return Diagnosed{ shared_from_this(), DiagnosticBag{} };
+    }
+
+    auto SizeOfExprBoundNode::CreateTypeCheckedExpr(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto SizeOfExprBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const SizeOfExprBoundNode>
     {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<SizeOfExprBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            GetScope(),
-            m_TypeSymbol
-        );
+        return shared_from_this();
     }
 
-    auto SizeOfExprBoundNode::CloneWithDiagnosticsExpr(
-        DiagnosticBag diagnostics
+    auto SizeOfExprBoundNode::CreateLoweredExpr(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IExprBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto SizeOfExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const SizeOfExprBoundNode>>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto SizeOfExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto SizeOfExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const SizeOfExprBoundNode>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto SizeOfExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto SizeOfExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult

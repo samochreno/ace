@@ -42,8 +42,6 @@ namespace Ace
         auto GetTemplateInstantiator()       ->       TemplateInstantiator&;
         auto GetLLVMContext() const -> const llvm::LLVMContext&;
         auto GetLLVMContext()       ->       llvm::LLVMContext&;
-        auto GetDiagnostics() const -> const GlobalDiagnosticBag&;
-        auto GetDiagnostics()       ->       GlobalDiagnosticBag&;
         auto GetErrorSymbols() const -> const ErrorSymbols&;
 
     private:
@@ -55,7 +53,6 @@ namespace Ace
         GlobalScope m_GlobalScope{};
         TemplateInstantiator m_TemplateInstantiator{};
         llvm::LLVMContext m_LLVMContext{};
-        GlobalDiagnosticBag m_Diagnostics{};
         ErrorSymbols m_ErrorSymbols{};
     };
 }

@@ -53,17 +53,20 @@ namespace Ace
         );
     }
 
-    auto SelfParamVarNode::CreateBound() const -> std::shared_ptr<const SelfParamVarBoundNode>
+    auto SelfParamVarNode::CreateBound() const -> Diagnosed<std::shared_ptr<const SelfParamVarBoundNode>>
     {
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<SelfParamVarSymbol>(
             m_Name
         ).Unwrap();
 
-        return std::make_shared<const SelfParamVarBoundNode>(
+        return Diagnosed
+        {
+            std::make_shared<const SelfParamVarBoundNode>(
+                GetSrcLocation(),
+                selfSymbol
+            ),
             DiagnosticBag{},
-            GetSrcLocation(),
-            selfSymbol
-        );
+        };
     }
 
     auto SelfParamVarNode::GetName() const -> const Ident&

@@ -79,25 +79,35 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto VarStmtNode::CreateBound() const -> std::shared_ptr<const VarStmtBoundNode>
+    auto VarStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const VarStmtBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         auto* selfSymbol = m_Scope->ExclusiveResolveSymbol<LocalVarSymbol>(
             m_Name
         ).Unwrap();
 
-        const auto boundOptAssignedExpr = m_OptAssignedExpr.has_value() ?
-            std::optional{ m_OptAssignedExpr.value()->CreateBoundExpr() } :
-            std::nullopt;
+        std::optional<std::shared_ptr<const IExprBoundNode>> boundOptAssignedExpr{};
+        if (m_OptAssignedExpr.has_value())
+        {
+            const auto dgnBoundAssignedExpr =
+                m_OptAssignedExpr.value()->CreateBoundExpr();
+            diagnostics.Add(dgnBoundAssignedExpr);
+            boundOptAssignedExpr = dgnBoundAssignedExpr.Unwrap();
+        }
 
-        return std::make_shared<const VarStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            selfSymbol,
-            boundOptAssignedExpr
-        );
+        return Diagnosed
+        {
+            std::make_shared<const VarStmtBoundNode>(
+                GetSrcLocation(),
+                selfSymbol,
+                boundOptAssignedExpr
+            ),
+            diagnostics,
+        };
     }
 
-    auto VarStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
+    auto VarStmtNode::CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

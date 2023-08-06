@@ -87,8 +87,10 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto IfStmtNode::CreateBound() const -> std::shared_ptr<const IfStmtBoundNode>
+    auto IfStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const IfStmtBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         std::vector<std::shared_ptr<const IExprBoundNode>> boundConditions{};
         std::transform(
             begin(m_Conditions),
@@ -96,7 +98,9 @@ namespace Ace
             back_inserter(boundConditions),
             [&](const std::shared_ptr<const IExprNode>& condition)
             {
-                return condition->CreateBoundExpr();
+                const auto dgnCondition = condition->CreateBoundExpr();
+                diagnostics.Add(dgnCondition);
+                return dgnCondition.Unwrap();
             }
         );
 
@@ -107,20 +111,25 @@ namespace Ace
             back_inserter(boundBodies),
             [&](const std::shared_ptr<const BlockStmtNode>& body)
             {
-                return body->CreateBound();
+                const auto dgnBody = body->CreateBound();
+                diagnostics.Add(dgnBody);
+                return dgnBody.Unwrap();
             }
         );
 
-        return std::make_shared<const IfStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            boundConditions,
-            boundBodies
-        );
+        return Diagnosed
+        {
+            std::make_shared<const IfStmtBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                boundConditions,
+                boundBodies
+            ),
+            diagnostics,
+        };
     }
 
-    auto IfStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
+    auto IfStmtNode::CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

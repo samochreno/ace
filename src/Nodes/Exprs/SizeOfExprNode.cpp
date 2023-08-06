@@ -53,7 +53,7 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto SizeOfExprNode::CreateBound() const -> std::shared_ptr<const SizeOfExprBoundNode>
+    auto SizeOfExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const SizeOfExprBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
@@ -66,15 +66,18 @@ namespace Ace
             GetCompilation()->GetErrorSymbols().GetType()
         );
 
-        return std::make_shared<const SizeOfExprBoundNode>(
+        return Diagnosed
+        {
+            std::make_shared<const SizeOfExprBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                typeSymbol
+            ),
             diagnostics,
-            GetSrcLocation(),
-            GetScope(),
-            typeSymbol
-        );
+        };
     }
 
-    auto SizeOfExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
+    auto SizeOfExprNode::CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

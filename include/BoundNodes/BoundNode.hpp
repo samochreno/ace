@@ -10,7 +10,6 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
-#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -28,23 +27,9 @@ namespace Ace
         virtual ~IBoundNode() = default;
 
         virtual auto GetCompilation() const -> Compilation* final;
-        [[deprecated]]
-        virtual auto GetDiagnostics() const -> const DiagnosticBag& = 0;
-        virtual auto CollectDiagnostics() const -> DiagnosticBag final;
         virtual auto GetSrcLocation() const -> const SrcLocation& = 0;
         virtual auto GetScope() const -> std::shared_ptr<Scope> = 0;
         virtual auto CollectChildren() const -> std::vector<const IBoundNode*> = 0;
-    };
-
-    template<typename T>
-    class ICloneableWithDiagnosticsBoundNode : public virtual IBoundNode
-    {
-    public:
-        virtual ~ICloneableWithDiagnosticsBoundNode() = default;
-
-        virtual auto CloneWithDiagnostics(
-            DiagnosticBag diagnostics
-        ) const -> std::shared_ptr<const T> = 0;
     };
 
     template<typename TNode, typename TContext = TypeCheckingContext>
@@ -53,9 +38,9 @@ namespace Ace
     public:
         virtual ~ITypeCheckableBoundNode() = default;
 
-        virtual auto GetOrCreateTypeChecked(
+        virtual auto CreateTypeChecked(
             const TContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const TNode>>> = 0;
+        ) const -> Diagnosed<std::shared_ptr<const TNode>> = 0;
     };
 
     template<typename TNode, typename TContext = LoweringContext>
@@ -64,9 +49,9 @@ namespace Ace
     public:
         virtual ~ILowerableBoundNode() = default;
 
-        virtual auto GetOrCreateLowered(
+        virtual auto CreateLowered(
             const TContext& context
-        ) const -> Cacheable<std::shared_ptr<const TNode>> = 0;
+        ) const -> std::shared_ptr<const TNode> = 0;
     };
 
     template<typename T>

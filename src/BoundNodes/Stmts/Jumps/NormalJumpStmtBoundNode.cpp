@@ -3,29 +3,22 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Symbols/LabelSymbol.hpp"
+#include "Diagnostic.hpp"
 #include "Emitter.hpp"
 
 namespace Ace
 {
     NormalJumpStmtBoundNode::NormalJumpStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         LabelSymbol* const labelSymbol
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_LabelSymbol{ labelSymbol }
     {
-    }
-
-    auto NormalJumpStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto NormalJumpStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -43,56 +36,32 @@ namespace Ace
         return {};
     }
 
-    auto NormalJumpStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto NormalJumpStmtBoundNode::CreateTypeChecked(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const NormalJumpStmtBoundNode>>
+    {
+        return Diagnosed{ shared_from_this(), DiagnosticBag{} };
+    }
+
+    auto NormalJumpStmtBoundNode::CreateTypeCheckedStmt(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto NormalJumpStmtBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const NormalJumpStmtBoundNode>
     {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<const NormalJumpStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            GetScope(),
-            GetLabelSymbol()
-        );
+        return shared_from_this();
     }
 
-    auto NormalJumpStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
+    auto NormalJumpStmtBoundNode::CreateLoweredStmt(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto NormalJumpStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const NormalJumpStmtBoundNode>>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto NormalJumpStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto NormalJumpStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const NormalJumpStmtBoundNode>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto NormalJumpStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto NormalJumpStmtBoundNode::Emit(Emitter& emitter) const -> void

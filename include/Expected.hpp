@@ -9,7 +9,6 @@
 #include "DiagnosticBase.hpp"
 #include "DiagnosticBag.hpp"
 #include "Assert.hpp"
-#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -403,90 +402,6 @@ namespace Ace
 
         ACE_TRY(out, func(optIn.value()));
         return std::optional{ out };
-    }
-
-#undef TOut
-#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap().Value)>
-
-    template<typename TIn, typename F>
-    auto TransformExpectedCacheableVector(
-        const std::vector<TIn>& inVec,
-        F&& func
-    ) -> Expected<Cacheable<std::vector<TOut>>>
-    {
-        DiagnosticBag diagnostics{};
-
-        bool isChanged = false;
-        std::vector<TOut> outVec{};
-        outVec.reserve(inVec.size());
-
-        const auto unexpectedIt = std::find_if_not(
-            begin(inVec),
-            end  (inVec),
-            [&](const TIn& element)
-            {
-                auto expCchElement = func(element);
-                diagnostics.Add(expCchElement);
-                if (!expCchElement)
-                {
-                    return false;
-                }
-
-                if (expCchElement.Unwrap().IsChanged)
-                {
-                    isChanged = true;
-                }
-
-                if constexpr (std::is_move_constructible_v<TOut>)
-                {
-                    outVec.push_back(std::move(expCchElement.Unwrap().Value));
-                }
-                else
-                {
-                    outVec.push_back(expCchElement.Unwrap().Value);
-                }
-
-                return true;
-            }
-        );
-
-        if (unexpectedIt != end(inVec))
-        {
-            return diagnostics;
-        }
-
-        if (!isChanged)
-        {
-            return CreateUnchanged(inVec);
-        }
-
-        return CreateChanged(outVec);
-    }
-
-#undef TOut
-#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap().Value)>
-
-    template<typename TIn, typename F>
-    auto TransformExpectedCacheableOptional(
-        const std::optional<TIn>& optIn,
-        F&& func
-    ) -> Expected<Cacheable<std::optional<TOut>>>
-    {
-        bool isChanged = false;
-
-        if (!optIn.has_value())
-        {
-            return CreateUnchanged(optIn);
-        }
-
-        ACE_TRY(cchOut, func(optIn.value()));
-
-        if (!cchOut.IsChanged)
-        {
-            return CreateUnchanged(optIn);
-        }
-
-        return CreateChanged(std::optional{ cchOut.Value });
     }
 
 #undef TOut

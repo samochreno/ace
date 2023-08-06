@@ -95,7 +95,7 @@ namespace Ace
     static auto CreateBoundArgValue(
         const std::shared_ptr<Scope>& scope,
         const StructConstructionExprArg& arg
-    ) -> std::shared_ptr<const IExprBoundNode>
+    ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         if (arg.OptValue.has_value())
         {
@@ -112,7 +112,7 @@ namespace Ace
             arg.Name.SrcLocation,
             scope,
             symbolName
-        )->CreateBoundExpr();
+        )->CreateBound();
     }
 
     static auto CreateVarSymbolToUseSrcLocationsMap(
@@ -266,23 +266,25 @@ namespace Ace
         [&](const StructConstructionExprArg& arg) -> StructConstructionExprBoundArg
         {
             const auto matchingVarSymbolIt = std::find_if(
-                begin(varSymbolToUseSrcLocationsMap),
-                end  (varSymbolToUseSrcLocationsMap),
-                [&](const std::pair<InstanceVarSymbol* const, const std::vector<SrcLocation>&>& varSymbolAndUseSrcLocationsPair)
+                begin(varSymbols),
+                end  (varSymbols),
+                [&](InstanceVarSymbol* const varSymbol)
                 {
-                    auto* const varSymbol =
-                        varSymbolAndUseSrcLocationsPair.first;
-
                     return varSymbol->GetName().String == arg.Name.String;
                 }
             );
 
             const bool hasMatchingVarSymbol =
-                matchingVarSymbolIt != end(varSymbolToUseSrcLocationsMap);
+                matchingVarSymbolIt != end(varSymbols);
+
+            auto* compilation = scope->GetCompilation();
+
+            auto* const varSymbol = hasMatchingVarSymbol ?
+                *matchingVarSymbolIt :
+                compilation->GetErrorSymbols().GetInstanceVar();
 
             if (hasMatchingVarSymbol)
             {
-                auto* const varSymbol = matchingVarSymbolIt->first;
                 varSymbolToUseSrcLocationsMap.at(varSymbol).push_back(
                     arg.Name.SrcLocation
                 );
@@ -295,18 +297,13 @@ namespace Ace
                 ));
             }
 
-            auto* compilation = scope->GetCompilation();
-
-            auto* const varSymbol = hasMatchingVarSymbol ?
-                matchingVarSymbolIt->first :
-                compilation->GetErrorSymbols().GetInstanceVar();
-
-            const auto boundValue = CreateBoundArgValue(scope, arg);
+            const auto dgnBoundValue = CreateBoundArgValue(scope, arg);
+            diagnostics.Add(dgnBoundValue);
 
             return StructConstructionExprBoundArg
             {
                 varSymbol,
-                boundValue,
+                dgnBoundValue.Unwrap(),
             };
         });
 
@@ -330,7 +327,7 @@ namespace Ace
         return Diagnosed{ boundArgs, diagnostics };
     }
 
-    auto StructConstructionExprNode::CreateBound() const -> std::shared_ptr<const StructConstructionExprBoundNode>
+    auto StructConstructionExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const StructConstructionExprBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
@@ -353,7 +350,6 @@ namespace Ace
                 m_Args
             );
             diagnostics.Add(dgnBoundArgs);
-
             return dgnBoundArgs.Unwrap();
         }();
 
@@ -361,16 +357,19 @@ namespace Ace
             GetCompilation()->GetErrorSymbols().GetStructType()
         );
 
-        return std::make_shared<const StructConstructionExprBoundNode>(
+        return Diagnosed
+        {
+            std::make_shared<const StructConstructionExprBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                structSymbol,
+                boundArgs
+            ),
             diagnostics,
-            GetSrcLocation(),
-            GetScope(),
-            structSymbol,
-            boundArgs
-        );
+        };
     }
 
-    auto StructConstructionExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
+    auto StructConstructionExprNode::CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

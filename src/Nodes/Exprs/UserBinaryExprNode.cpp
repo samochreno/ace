@@ -214,21 +214,24 @@ namespace Ace
         return Diagnosed{ dgnOpSymbol.Unwrap(), diagnostics };
     }
 
-    auto UserBinaryExprNode::CreateBound() const -> std::shared_ptr<const UserBinaryExprBoundNode>
+    auto UserBinaryExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const UserBinaryExprBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
-        const auto boundLHSExpr = m_LHSExpr->CreateBoundExpr();
-        const auto boundRHSExpr = m_RHSExpr->CreateBoundExpr();
+        const auto dgnBoundLHSExpr = m_LHSExpr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundLHSExpr);
 
-        auto* const lhsTypeSymbol = boundLHSExpr->GetTypeInfo().Symbol;
-        auto* const rhsTypeSymbol = boundRHSExpr->GetTypeInfo().Symbol;
+        const auto dgnBoundRHSExpr = m_RHSExpr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundRHSExpr);
 
         const std::vector<TypeInfo> argTypeInfos
         {
-            boundLHSExpr->GetTypeInfo(),
-            boundRHSExpr->GetTypeInfo(),
+            dgnBoundLHSExpr.Unwrap()->GetTypeInfo(),
+            dgnBoundRHSExpr.Unwrap()->GetTypeInfo(),
         };
+
+        auto* const lhsTypeSymbol = argTypeInfos.at(0).Symbol;
+        auto* const rhsTypeSymbol = argTypeInfos.at(1).Symbol;
 
         const auto dgnOpSymbol = ResolveAndPickOpSymbol(
             GetScope(),
@@ -239,16 +242,19 @@ namespace Ace
         );
         diagnostics.Add(dgnOpSymbol);
 
-        return std::make_shared<const UserBinaryExprBoundNode>(
+        return Diagnosed
+        {
+            std::make_shared<const UserBinaryExprBoundNode>(
+                GetSrcLocation(),
+                dgnBoundLHSExpr.Unwrap(),
+                dgnBoundRHSExpr.Unwrap(),
+                dgnOpSymbol.Unwrap()
+            ),
             diagnostics,
-            GetSrcLocation(),
-            boundLHSExpr,
-            boundRHSExpr,
-            dgnOpSymbol.Unwrap()
-        );
+        };
     }
 
-    auto UserBinaryExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
+    auto UserBinaryExprNode::CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

@@ -5,9 +5,9 @@
 #include <functional>
 #include <unordered_map>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Stmts/LabelStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/Jumps/NormalJumpStmtBoundNode.hpp"
@@ -19,26 +19,18 @@
 #include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
-#include "Cacheable.hpp"
 #include "Emitter.hpp"
 
 namespace Ace
 {
     BlockStmtBoundNode::BlockStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& selfScope,
         const std::vector<std::shared_ptr<const IStmtBoundNode>>& stmts
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_SelfScope{ selfScope },
         m_Stmts{ stmts }
     {
-    }
-
-    auto BlockStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto BlockStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -60,90 +52,82 @@ namespace Ace
         return children;
     }
 
-    auto BlockStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto BlockStmtBoundNode::CreateTypeChecked(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const BlockStmtBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::vector<std::shared_ptr<const IStmtBoundNode>> checkedStmts{};
+        std::transform(
+            begin(m_Stmts),
+            end  (m_Stmts),
+            back_inserter(checkedStmts),
+            [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
+            {
+                const auto dgnCheckedStmt = stmt->CreateTypeCheckedStmt({
+                    context.ParentFunctionTypeSymbol
+                });
+                diagnostics.Add(dgnCheckedStmt);
+                return dgnCheckedStmt.Unwrap();
+            }
+        );
+
+        if (checkedStmts == m_Stmts)
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const BlockStmtBoundNode>(
+                GetSrcLocation(),
+                m_SelfScope,
+                checkedStmts
+            ),
+            diagnostics,
+        };
+    }
+
+    auto BlockStmtBoundNode::CreateTypeCheckedStmt(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto BlockStmtBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const BlockStmtBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        std::vector<std::shared_ptr<const IStmtBoundNode>> loweredStmts{};
+        std::transform(
+            begin(m_Stmts),
+            end  (m_Stmts),
+            back_inserter(loweredStmts),
+            [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
+            {
+                return stmt->CreateLoweredStmt({});
+            }
+        );
+
+        if (loweredStmts == m_Stmts)
         {
             return shared_from_this();
         }
 
         return std::make_shared<const BlockStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
             m_SelfScope,
-            m_Stmts
-        );
+            loweredStmts
+        )->CreateLowered({});
     }
 
-    auto BlockStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
+    auto BlockStmtBoundNode::CreateLoweredStmt(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto BlockStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const BlockStmtBoundNode>>>
-    {
-        ACE_TRY(cchCheckedContent, TransformExpectedCacheableVector(m_Stmts,
-        [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
-        {
-            return stmt->GetOrCreateTypeCheckedStmt({
-                context.ParentFunctionTypeSymbol
-            });
-        }));
-
-        if (!cchCheckedContent.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const BlockStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_SelfScope,
-            cchCheckedContent.Value
-        ));
-    }
-
-    auto BlockStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto BlockStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const BlockStmtBoundNode>>
-    {
-        const auto cchLoweredStmts = TransformCacheableVector(m_Stmts,
-        [](const std::shared_ptr<const IStmtBoundNode>& stmt)
-        {
-            return stmt->GetOrCreateLoweredStmt({});
-        });
-
-        if (!cchLoweredStmts.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const BlockStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_SelfScope,
-            cchLoweredStmts.Value
-        )->GetOrCreateLowered(context).Value);
-    }
-
-    auto BlockStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto BlockStmtBoundNode::Emit(Emitter& emitter) const -> void
@@ -157,7 +141,6 @@ namespace Ace
         auto stmts = m_Stmts;
 
         const auto blockEnd = std::make_shared<const BlockEndStmtBoundNode>(
-            DiagnosticBag{},
             GetSrcLocation().CreateLast(),
             m_SelfScope
         );

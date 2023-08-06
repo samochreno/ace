@@ -5,7 +5,6 @@
 
 #include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/Vars/StaticVarSymbol.hpp"
@@ -13,8 +12,8 @@
 #include "Symbols/Vars/Params/ParamVarSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Vars/VarSymbol.hpp"
+#include "Diagnostic.hpp"
 #include "Assert.hpp"
-#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
@@ -23,20 +22,13 @@
 namespace Ace
 {
     StaticVarRefExprBoundNode::StaticVarRefExprBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         IVarSymbol* const varSymbol
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_VarSymbol{ varSymbol }
     {
-    }
-
-    auto StaticVarRefExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto StaticVarRefExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -54,56 +46,32 @@ namespace Ace
         return {};
     }
 
-    auto StaticVarRefExprBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto StaticVarRefExprBoundNode::CreateTypeChecked(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const StaticVarRefExprBoundNode>>
+    {
+        return Diagnosed{ shared_from_this(), DiagnosticBag{} };
+    }
+
+    auto StaticVarRefExprBoundNode::CreateTypeCheckedExpr(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto StaticVarRefExprBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const StaticVarRefExprBoundNode>
     {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<StaticVarRefExprBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            GetScope(),
-            GetVarSymbol()
-        );
+        return shared_from_this();
     }
 
-    auto StaticVarRefExprBoundNode::CloneWithDiagnosticsExpr(
-        DiagnosticBag diagnostics
+    auto StaticVarRefExprBoundNode::CreateLoweredExpr(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IExprBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto StaticVarRefExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const StaticVarRefExprBoundNode>>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto StaticVarRefExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto StaticVarRefExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const StaticVarRefExprBoundNode>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto StaticVarRefExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto StaticVarRefExprBoundNode::Emit(

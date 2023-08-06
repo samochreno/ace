@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/ModuleSymbol.hpp"
 #include "BoundNodes/Types/TypeBoundNode.hpp"
@@ -11,12 +10,11 @@
 #include "BoundNodes/FunctionBoundNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
     ModuleBoundNode::ModuleBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         ModuleSymbol* const symbol,
         const std::vector<std::shared_ptr<const ModuleBoundNode>>& modules,
@@ -24,8 +22,7 @@ namespace Ace
         const std::vector<std::shared_ptr<const ImplBoundNode>>& impls,
         const std::vector<std::shared_ptr<const FunctionBoundNode>>& functions,
         const std::vector<std::shared_ptr<const StaticVarBoundNode>>& vars
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_Modules{ modules },
         m_Types{ types },
@@ -33,11 +30,6 @@ namespace Ace
         m_Functions{ functions },
         m_Vars{ vars }
     {
-    }
-
-    auto ModuleBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto ModuleBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -63,138 +55,173 @@ namespace Ace
         return children;
     }
 
-    auto ModuleBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto ModuleBoundNode::CreateTypeChecked(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const ModuleBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::vector<std::shared_ptr<const ModuleBoundNode>> checkedModules{};
+        std::transform(
+            begin(m_Modules),
+            end  (m_Modules),
+            back_inserter(checkedModules),
+            [&](const std::shared_ptr<const ModuleBoundNode>& module)
+            {
+                const auto dgnCheckedModule = module->CreateTypeChecked({});
+                diagnostics.Add(dgnCheckedModule);
+                return dgnCheckedModule.Unwrap();
+            }
+        );
+
+        std::vector<std::shared_ptr<const ITypeBoundNode>> checkedTypes{};
+        std::transform(
+            begin(m_Types),
+            end  (m_Types),
+            back_inserter(checkedTypes),
+            [&](const std::shared_ptr<const ITypeBoundNode>& type)
+            {
+                const auto dgnCheckedType = type->CreateTypeCheckedType({});
+                diagnostics.Add(dgnCheckedType);
+                return dgnCheckedType.Unwrap();
+            }
+        );
+
+        std::vector<std::shared_ptr<const ImplBoundNode>> checkedImpls{};
+        std::transform(
+            begin(m_Impls),
+            end  (m_Impls),
+            back_inserter(checkedImpls),
+            [&](const std::shared_ptr<const ImplBoundNode>& impl)
+            {
+                const auto dgnCheckedImpl = impl->CreateTypeChecked({});
+                diagnostics.Add(dgnCheckedImpl);
+                return dgnCheckedImpl.Unwrap();
+            }
+        );
+
+        std::vector<std::shared_ptr<const FunctionBoundNode>> checkedFunctions{};
+        std::transform(
+            begin(m_Functions),
+            end  (m_Functions),
+            back_inserter(checkedFunctions),
+            [&](const std::shared_ptr<const FunctionBoundNode>& function)
+            {
+                const auto dgnCheckedFunction = function->CreateTypeChecked({});
+                diagnostics.Add(dgnCheckedFunction);
+                return dgnCheckedFunction.Unwrap();
+            }
+        );
+
+        std::vector<std::shared_ptr<const StaticVarBoundNode>> checkedVars{};
+        std::transform(begin(m_Vars), end(m_Vars), back_inserter(checkedVars),
+        [&](const std::shared_ptr<const StaticVarBoundNode>& var)
+        {
+            const auto dgnCheckedVar = var->CreateTypeChecked({});
+            diagnostics.Add(dgnCheckedVar);
+            return dgnCheckedVar.Unwrap();
+        });
+
+        if (
+            (checkedModules == m_Modules) &&
+            (checkedTypes == m_Types) &&
+            (checkedImpls == m_Impls) &&
+            (checkedFunctions == m_Functions) &&
+            (checkedVars == m_Vars)
+            )
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const ModuleBoundNode>(
+                GetSrcLocation(),
+                m_Symbol,
+                checkedModules,
+                checkedTypes,
+                checkedImpls,
+                checkedFunctions,
+                checkedVars
+            ),
+            diagnostics,
+        };
+    }
+
+    auto ModuleBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const ModuleBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        std::vector<std::shared_ptr<const ModuleBoundNode>> loweredModules{};
+        std::transform(
+            begin(m_Modules),
+            end  (m_Modules),
+            back_inserter(loweredModules),
+            [](const std::shared_ptr<const ModuleBoundNode>& module)
+            {
+                return module->CreateLowered({});
+            }
+        );
+
+        std::vector<std::shared_ptr<const ITypeBoundNode>> loweredTypes{};
+        std::transform(
+            begin(m_Types),
+            end  (m_Types),
+            back_inserter(loweredTypes),
+            [](const std::shared_ptr<const ITypeBoundNode>& type)
+            {
+                return type->CreateLoweredType({});
+            }
+        );
+
+        std::vector<std::shared_ptr<const ImplBoundNode>> loweredImpls{};
+        std::transform(
+            begin(m_Impls),
+            end  (m_Impls),
+            back_inserter(loweredImpls),
+            [](const std::shared_ptr<const ImplBoundNode>& impl)
+            {
+                return impl->CreateLowered({});
+            }
+        );
+
+        std::vector<std::shared_ptr<const FunctionBoundNode>> loweredFunctions{};
+        std::transform(
+            begin(m_Functions),
+            end  (m_Functions),
+            back_inserter(loweredFunctions),
+            [](const std::shared_ptr<const FunctionBoundNode>& function)
+            {
+                return function->CreateLowered({});
+            }
+        );
+
+        std::vector<std::shared_ptr<const StaticVarBoundNode>> loweredVars{};
+        std::transform(begin(m_Vars), end(m_Vars), back_inserter(loweredVars),
+        [](const std::shared_ptr<const StaticVarBoundNode>& var)
+        {
+            return var->CreateLowered({});
+        });
+
+        if (
+            (loweredModules == m_Modules) &&
+            (loweredTypes == m_Types) &&
+            (loweredImpls == m_Impls) &&
+            (loweredFunctions == m_Functions) &&
+            (loweredVars == m_Vars)
+            )
         {
             return shared_from_this();
         }
 
         return std::make_shared<const ModuleBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
             m_Symbol,
-            m_Modules,
-            m_Types,
-            m_Impls,
-            m_Functions,
-            m_Vars
-        );
-    }
-
-    auto ModuleBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const ModuleBoundNode>>>
-    {
-        ACE_TRY(cchCheckedModules, TransformExpectedCacheableVector(m_Modules,
-        [](const std::shared_ptr<const ModuleBoundNode>& module)
-        {
-            return module->GetOrCreateTypeChecked({});
-        }));
-
-        ACE_TRY(cchCheckedTypes, TransformExpectedCacheableVector(m_Types,
-        [](const std::shared_ptr<const ITypeBoundNode>& type)
-        {
-            return type->GetOrCreateTypeCheckedType({});
-        }));
-
-        ACE_TRY(cchCheckedImpls, TransformExpectedCacheableVector(m_Impls,
-        [](const std::shared_ptr<const ImplBoundNode>& impl)
-        {
-            return impl->GetOrCreateTypeChecked({});
-        }));
-
-        ACE_TRY(cchCheckedFunctions, TransformExpectedCacheableVector(m_Functions,
-        [](const std::shared_ptr<const FunctionBoundNode>& function)
-        {
-            return function->GetOrCreateTypeChecked({});
-        }));
-
-        ACE_TRY(cchCheckedVars, TransformExpectedCacheableVector(m_Vars,
-        [](const std::shared_ptr<const StaticVarBoundNode>& var)
-        {
-            return var->GetOrCreateTypeChecked({});
-        }));
-
-        if (
-            !cchCheckedModules.IsChanged &&
-            !cchCheckedTypes.IsChanged &&
-            !cchCheckedImpls.IsChanged &&
-            !cchCheckedFunctions.IsChanged && 
-            !cchCheckedVars.IsChanged
-            )
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const ModuleBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_Symbol,
-            cchCheckedModules.Value,
-            cchCheckedTypes.Value,
-            cchCheckedImpls.Value,
-            cchCheckedFunctions.Value,
-            cchCheckedVars.Value
-        ));
-    }
-
-    auto ModuleBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const ModuleBoundNode>>
-    {
-        const auto cchLoweredModules = TransformCacheableVector(m_Modules,
-        [](const std::shared_ptr<const ModuleBoundNode>& module)
-        {
-            return module->GetOrCreateLowered({});
-        });
-
-        const auto cchLoweredTypes = TransformCacheableVector(m_Types,
-        [](const std::shared_ptr<const ITypeBoundNode>& type)
-        {
-            return type->GetOrCreateLoweredType({});
-        });
-
-        const auto cchLoweredImpls = TransformCacheableVector(m_Impls,
-        [](const std::shared_ptr<const ImplBoundNode>& impl)
-        {
-            return impl->GetOrCreateLowered({});
-        });
-
-        const auto cchLoweredFunctions = TransformCacheableVector(m_Functions,
-        [](const std::shared_ptr<const FunctionBoundNode>& function)
-        {
-            return function->GetOrCreateLowered({});
-        });
-
-        const auto cchLoweredVars = TransformCacheableVector(m_Vars,
-        [](const std::shared_ptr<const StaticVarBoundNode>& var)
-        {
-            return var->GetOrCreateLowered({});
-        });
-
-        if (
-            !cchLoweredModules.IsChanged &&
-            !cchLoweredTypes.IsChanged &&
-            !cchLoweredImpls.IsChanged && 
-            !cchLoweredFunctions.IsChanged && 
-            !cchLoweredVars.IsChanged
-            )
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const ModuleBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_Symbol,
-            cchLoweredModules.Value,
-            cchLoweredTypes.Value,
-            cchLoweredImpls.Value,
-            cchLoweredFunctions.Value,
-            cchLoweredVars.Value
-        )->GetOrCreateLowered({}).Value);
+            loweredModules,
+            loweredTypes,
+            loweredImpls,
+            loweredFunctions,
+            loweredVars
+        )->CreateLowered({});
     }
 }

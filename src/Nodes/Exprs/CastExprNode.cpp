@@ -59,11 +59,12 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto CastExprNode::CreateBound() const -> std::shared_ptr<const IExprBoundNode>
+    auto CastExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
-        const auto boundExpr = m_Expr->CreateBoundExpr();
+        const auto dgnBoundExpr = m_Expr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundExpr);
 
         const auto expTypeSymbol = GetScope()->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
@@ -74,18 +75,20 @@ namespace Ace
             GetCompilation()->GetErrorSymbols().GetType()
         );
 
-        const auto expCchConvertedBoundExpr = CreateExplicitlyConverted(
-            boundExpr, 
+        const auto dgnConvertedExpr = CreateExplicitlyConverted(
+            dgnBoundExpr.Unwrap(),
             TypeInfo{ typeSymbol, ValueKind::R }
         );
-        diagnostics.Add(expCchConvertedBoundExpr);
+        diagnostics.Add(dgnConvertedExpr);
 
-        return expCchConvertedBoundExpr.Unwrap().Value->CloneWithDiagnosticsExpr(
-            diagnostics
-        );
+        return Diagnosed
+        {
+            dgnConvertedExpr.Unwrap(),
+            diagnostics,
+        };
     }
 
-    auto CastExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
+    auto CastExprNode::CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

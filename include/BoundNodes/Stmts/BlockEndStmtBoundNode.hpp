@@ -4,55 +4,44 @@
 #include <vector>
 
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
     class BlockEndStmtBoundNode : 
         public std::enable_shared_from_this<BlockEndStmtBoundNode>,
         public virtual IStmtBoundNode,
-        public virtual ICloneableWithDiagnosticsBoundNode<BlockEndStmtBoundNode>,
         public virtual ITypeCheckableBoundNode<BlockEndStmtBoundNode, StmtTypeCheckingContext>,
         public virtual ILowerableBoundNode<BlockEndStmtBoundNode>
     {
     public:
         BlockEndStmtBoundNode(
-            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& selfScope
         );
         virtual ~BlockEndStmtBoundNode() = default;
 
-        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope>;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
-        auto CloneWithDiagnostics(
-            DiagnosticBag diagnostics
+        auto CreateTypeChecked(
+            const StmtTypeCheckingContext& context
+        ) const -> Diagnosed<std::shared_ptr<const BlockEndStmtBoundNode>> final;
+        auto CreateTypeCheckedStmt(
+            const StmtTypeCheckingContext& context
+        ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>> final;
+        auto CreateLowered(
+            const LoweringContext& context
         ) const -> std::shared_ptr<const BlockEndStmtBoundNode> final;
-        auto CloneWithDiagnosticsStmt(
-            DiagnosticBag diagnostics
+        auto CreateLoweredStmt(
+            const LoweringContext& context
         ) const -> std::shared_ptr<const IStmtBoundNode> final;
-        auto GetOrCreateTypeChecked(
-            const StmtTypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const BlockEndStmtBoundNode>>> final;
-        auto GetOrCreateTypeCheckedStmt(
-            const StmtTypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>> final;
-        auto GetOrCreateLowered(
-            const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const BlockEndStmtBoundNode>> final;
-        auto GetOrCreateLoweredStmt(
-            const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>> final;
         auto Emit(Emitter& emitter) const -> void final;
 
     private:
-        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_SelfScope{};
     };

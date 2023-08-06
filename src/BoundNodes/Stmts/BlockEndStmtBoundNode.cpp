@@ -3,29 +3,19 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
-#include "Emitter.hpp"
-#include "Symbols/Vars/LocalVarSymbol.hpp"
+#include "Diagnostic.hpp"
 #include "ExprDropData.hpp"
 
 namespace Ace
 {
     BlockEndStmtBoundNode::BlockEndStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& selfScope
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_SelfScope{ selfScope }
     {
-    }
-
-    auto BlockEndStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto BlockEndStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -48,55 +38,32 @@ namespace Ace
         return {};
     }
 
-    auto BlockEndStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto BlockEndStmtBoundNode::CreateTypeChecked(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const BlockEndStmtBoundNode>>
+    {
+        return Diagnosed{ shared_from_this(), DiagnosticBag{} };
+    }
+
+    auto BlockEndStmtBoundNode::CreateTypeCheckedStmt(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto BlockEndStmtBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const BlockEndStmtBoundNode>
     {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<BlockEndStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            GetSelfScope()
-        );
+        return shared_from_this();
     }
 
-    auto BlockEndStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
+    auto BlockEndStmtBoundNode::CreateLoweredStmt(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto BlockEndStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const BlockEndStmtBoundNode>>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto BlockEndStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto BlockEndStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const BlockEndStmtBoundNode>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto BlockEndStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto BlockEndStmtBoundNode::Emit(Emitter& emitter) const -> void

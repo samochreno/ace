@@ -24,6 +24,11 @@ namespace Ace
             return *this;
         }
 
+        auto Unwrap() const -> const DiagnosticBag&
+        {
+            return m_DiagnosticBag;
+        }
+
     private:
         DiagnosticBag m_DiagnosticBag{};
         size_t m_LastLogSize{};

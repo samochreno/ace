@@ -74,7 +74,7 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto FunctionCallExprNode::CreateBound() const -> std::shared_ptr<const IExprBoundNode>
+    auto FunctionCallExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
@@ -83,9 +83,11 @@ namespace Ace
             begin(m_Args),
             end  (m_Args),
             back_inserter(boundArgs),
-            [](const std::shared_ptr<const IExprNode>& arg)
+            [&](const std::shared_ptr<const IExprNode>& arg)
             {
-                return arg->CreateBoundExpr();
+                const auto dgnBoundArg = arg->CreateBoundExpr();
+                diagnostics.Add(dgnBoundArg);
+                return dgnBoundArg.Unwrap();
             }
         );
 
@@ -112,22 +114,29 @@ namespace Ace
                 GetCompilation()->GetErrorSymbols().GetFunction()
             );
 
-            return std::make_shared<const StaticFunctionCallExprBoundNode>(
+            return Diagnosed
+            {
+                std::make_shared<const StaticFunctionCallExprBoundNode>(
+                    GetSrcLocation(),
+                    GetScope(),
+                    functionSymbol,
+                    boundArgs
+                ),
                 diagnostics,
-                GetSrcLocation(),
-                GetScope(),
-                functionSymbol,
-                boundArgs
-            );
+            };
         }
         
         if (const auto* const memberAccessExpr = dynamic_cast<const MemberAccessExprNode*>(m_Expr.get()))
         {
-            const auto boundExpr =
+            const auto dgnBoundExpr =
                 memberAccessExpr->GetExpr()->CreateBoundExpr();
+            diagnostics.Add(dgnBoundExpr);
+
+            auto* const selfTypeSymbol =
+                dgnBoundExpr.Unwrap()->GetTypeInfo().Symbol;
 
             const auto expFunctionSymbol = GetScope()->ResolveInstanceSymbol<FunctionSymbol>(
-                boundExpr->GetTypeInfo().Symbol->GetWithoutRef(),
+                selfTypeSymbol,
                 memberAccessExpr->GetName(),
                 Scope::CreateArgTypes(argTypeSymbols)
             );
@@ -137,29 +146,34 @@ namespace Ace
                 GetCompilation()->GetErrorSymbols().GetFunction()
             );
 
-            return std::shared_ptr<const IExprBoundNode>
+            return Diagnosed
             {
                 std::make_shared<const InstanceFunctionCallExprBoundNode>(
-                    diagnostics,
                     GetSrcLocation(),
-                    boundExpr,
+                    dgnBoundExpr.Unwrap(),
                     functionSymbol,
                     boundArgs
-                )
+                ),
+                diagnostics,
             };
         }
 
-        const auto boundExpr = m_Expr->CreateBoundExpr();
+        const auto dgnBoundExpr = m_Expr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundExpr);
 
         diagnostics.Add(CreateExpectedFunctionError(
-            boundExpr->GetSrcLocation(),
-            boundExpr->GetTypeInfo().Symbol
+            dgnBoundExpr.Unwrap()->GetSrcLocation(),
+            dgnBoundExpr.Unwrap()->GetTypeInfo().Symbol
         ));
 
-        return boundExpr->CloneWithDiagnosticsExpr(diagnostics);
+        return Diagnosed
+        {
+            dgnBoundExpr.Unwrap(),
+            diagnostics,
+        };
     }
 
-    auto FunctionCallExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
+    auto FunctionCallExprNode::CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

@@ -60,7 +60,7 @@ namespace Ace
 
     auto ImplTemplateParamTypeSymbol::GetSizeKind() const -> Expected<TypeSizeKind>
     {
-        return TypeSizeKind::Unsized;
+        return TypeSizeKind::Sized;
     }
 
     auto ImplTemplateParamTypeSymbol::SetAsUnsized() -> void

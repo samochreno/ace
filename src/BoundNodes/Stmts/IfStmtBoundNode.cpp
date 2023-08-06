@@ -5,9 +5,9 @@
 #include <algorithm>
 #include <iterator>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/GroupStmtBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
@@ -17,29 +17,20 @@
 #include "BoundNodes/Stmts/Jumps/NormalJumpStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "SpecialIdent.hpp"
-#include "Assert.hpp"
-#include "Cacheable.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 
 namespace Ace
 {
     IfStmtBoundNode::IfStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::vector<std::shared_ptr<const IExprBoundNode>>& conditions,
         const std::vector<std::shared_ptr<const BlockStmtBoundNode>>& bodies
-    ) : m_Diagnostics{ diagnostics },
-        m_Scope{ scope },
+    ) : m_Scope{ scope },
         m_Conditions{ conditions },
         m_Bodies{ bodies }
     {
-    }
-
-    auto IfStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto IfStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -62,81 +53,79 @@ namespace Ace
         return children;
     }
 
-    auto IfStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const IfStmtBoundNode>
-    {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<const IfStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            GetScope(),
-            m_Conditions,
-            m_Bodies
-        );
-    }
-
-    auto IfStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const IStmtBoundNode>
-    {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto IfStmtBoundNode::GetOrCreateTypeChecked(
+    auto IfStmtBoundNode::CreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IfStmtBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const IfStmtBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         const TypeInfo typeInfo
         {
             GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
 
-        ACE_TRY(cchConvertedAndCheckedConditions, CreateImplicitlyConvertedAndTypeCheckedVector(
-            m_Conditions,
-            typeInfo
-        ));
+        std::vector<std::shared_ptr<const IExprBoundNode>> checkedConditions{};
+        std::transform(
+            begin(m_Conditions),
+            end  (m_Conditions),
+            back_inserter(checkedConditions),
+            [&](const std::shared_ptr<const IExprBoundNode>& condition)
+            {
+                const auto dgnCheckedCondition = CreateImplicitlyConvertedAndTypeChecked(
+                    condition,
+                    typeInfo
+                );
+                diagnostics.Add(dgnCheckedCondition);
+                return dgnCheckedCondition.Unwrap();
+            }
+        );
 
-        ACE_TRY(cchCheckedBodies, TransformExpectedCacheableVector(m_Bodies,
-        [&](const std::shared_ptr<const BlockStmtBoundNode>& body)
-        {
-            return body->GetOrCreateTypeChecked({
-                context.ParentFunctionTypeSymbol
-            });
-        }));
+        std::vector<std::shared_ptr<const BlockStmtBoundNode>> checkedBodies{};
+        std::transform(
+            begin(m_Bodies),
+            end  (m_Bodies),
+            back_inserter(checkedBodies),
+            [&](const std::shared_ptr<const BlockStmtBoundNode>& body)
+            {
+                const auto dgnCheckedBody = body->CreateTypeChecked({
+                    context.ParentFunctionTypeSymbol
+                });
+                diagnostics.Add(dgnCheckedBody);
+                return dgnCheckedBody.Unwrap();
+            }
+        );
 
         if (
-            !cchConvertedAndCheckedConditions.IsChanged &&
-            !cchCheckedBodies.IsChanged
+            (checkedConditions == m_Conditions) &&
+            (checkedBodies == m_Bodies)
             )
         {
-            return CreateUnchanged(shared_from_this());
+            return Diagnosed{ shared_from_this(), diagnostics };
         }
 
-        return CreateChanged(std::make_shared<const IfStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            cchConvertedAndCheckedConditions.Value,
-            cchCheckedBodies.Value
-        ));
+        return Diagnosed
+        {
+            std::make_shared<const IfStmtBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                checkedConditions,
+                checkedBodies
+            ),
+            diagnostics,
+        };
     }
 
-    auto IfStmtBoundNode::GetOrCreateTypeCheckedStmt(
+    auto IfStmtBoundNode::CreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateTypeChecked(context);
+        return CreateTypeChecked(context);
     }
 
-    auto IfStmtBoundNode::GetOrCreateLowered(
+    auto IfStmtBoundNode::CreateLowered(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const GroupStmtBoundNode>>
+    ) const -> std::shared_ptr<const GroupStmtBoundNode>
     {
         // From:
         // if condition_0 {
@@ -218,20 +207,17 @@ namespace Ace
             {
                 auto* const labelSymbol = labelSymbols.at(i - 1);
                 stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-                    DiagnosticBag{},
                     labelSymbol->GetName().SrcLocation,
                     labelSymbol
                 ));
             }
 
             const auto condition = std::make_shared<const LogicalNegationExprBoundNode>(
-                DiagnosticBag{},
                 m_Conditions.at(i)->GetSrcLocation(),
                 m_Conditions.at(i)
             );
 
             stmts.push_back(std::make_shared<const ConditionalJumpStmtBoundNode>(
-                DiagnosticBag{},
                 condition->GetSrcLocation(),
                 condition,
                 labelSymbols.at(i)
@@ -243,7 +229,6 @@ namespace Ace
             if (!isLastBody)
             {
                 stmts.push_back(std::make_shared<const NormalJumpStmtBoundNode>(
-                    DiagnosticBag{},
                     body->GetSrcLocation().CreateLast(),
                     GetScope(),
                     lastLabelSymbol
@@ -256,7 +241,6 @@ namespace Ace
             auto* const elseLabelSymbol = labelSymbols.rbegin()[1];
 
             stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-                DiagnosticBag{},
                 elseLabelSymbol->GetName().SrcLocation,
                 elseLabelSymbol
             ));
@@ -265,24 +249,22 @@ namespace Ace
         }
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-            DiagnosticBag{},
             lastLabelSymbol->GetName().SrcLocation,
             lastLabelSymbol
         ));
 
-        return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
-            DiagnosticBag{},
+        return std::make_shared<const GroupStmtBoundNode>(
             GetSrcLocation(),
             m_Scope,
             stmts
-        )->GetOrCreateLowered(context).Value);
+        )->CreateLowered({});
     }
 
-    auto IfStmtBoundNode::GetOrCreateLoweredStmt(
+    auto IfStmtBoundNode::CreateLoweredStmt(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto IfStmtBoundNode::Emit(Emitter& emitter) const -> void

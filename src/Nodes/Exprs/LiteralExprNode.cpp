@@ -56,18 +56,21 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto LiteralExprNode::CreateBound() const -> std::shared_ptr<const LiteralExprBoundNode>
+    auto LiteralExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const LiteralExprBoundNode>>
     {
-        return std::make_shared<const LiteralExprBoundNode>(
+        return Diagnosed
+        {
+            std::make_shared<const LiteralExprBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                m_Kind,
+                m_String
+            ),
             DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            m_Kind,
-            m_String
-        );
+        };
     }
 
-    auto LiteralExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
+    auto LiteralExprNode::CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

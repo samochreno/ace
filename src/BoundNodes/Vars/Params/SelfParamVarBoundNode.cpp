@@ -3,27 +3,19 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
-#include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
+#include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 
 namespace Ace
 {
     SelfParamVarBoundNode::SelfParamVarBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         SelfParamVarSymbol* const symbol
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol }
     {
-    }
-
-    auto SelfParamVarBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto SelfParamVarBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -41,21 +33,18 @@ namespace Ace
         return {};
     }
 
-    auto SelfParamVarBoundNode::GetOrCreateTypeChecked(
+    auto SelfParamVarBoundNode::CreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const SelfParamVarBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const SelfParamVarBoundNode>>
     {
-        ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
-        ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
-
-        return CreateUnchanged(shared_from_this());
+        return Diagnosed{ shared_from_this(), DiagnosticBag{} };
     }
 
-    auto SelfParamVarBoundNode::GetOrCreateLowered(
+    auto SelfParamVarBoundNode::CreateLowered(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const SelfParamVarBoundNode>>
+    ) const -> std::shared_ptr<const SelfParamVarBoundNode>
     {
-        return CreateUnchanged(shared_from_this());
+        return shared_from_this();
     }
 
     auto SelfParamVarBoundNode::GetSymbol() const -> SelfParamVarSymbol*

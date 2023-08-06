@@ -10,7 +10,7 @@
 
 #include "Log.hpp"
 #include "Diagnostic.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostics/BindingDiagnostics.hpp"
 #include "FileBuffer.hpp"
 #include "Compilation.hpp"
 #include "Lexer.hpp"
@@ -200,47 +200,82 @@ namespace Ace::Application
         });
     }
 
-    static auto ValidateTypeSizes(
+    static auto DiagnoseLayoutCycles(
         Compilation* const compilation
-    ) -> Expected<void>
+    ) -> Diagnosed<void>
     {
+        DiagnosticBag diagnostics{};
+
         const auto typeSymbols =
             compilation->GetGlobalScope()->CollectSymbolsRecursive<ITypeSymbol>();
 
-        const bool didValidateTypeSizes = std::find_if_not(
-            begin(typeSymbols), 
-            end  (typeSymbols),
-            [](const ITypeSymbol* const typeSymbol) -> bool
+        std::for_each(begin(typeSymbols), end(typeSymbols),
+        [&](const ITypeSymbol* const typeSymbol)
+        {
+            if (typeSymbol->IsError())
             {
-                if (typeSymbol->IsError())
-                {
-                    return true;
-                }
-
-                auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(
-                    typeSymbol
-                );
-                if (
-                    templatableSymbol &&
-                    templatableSymbol->IsTemplatePlaceholder()
-                    )
-                {
-                    return true;
-                }
-
-                return typeSymbol->GetSizeKind();
+                return;
             }
-        ) == end(typeSymbols);
-        ACE_TRY_ASSERT(didValidateTypeSizes);
 
-        return Void{};
+            auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(
+                typeSymbol
+            );
+            if (
+                templatableSymbol &&
+                templatableSymbol->IsTemplatePlaceholder()
+                )
+            {
+                return;
+            }
+
+            const auto expSizeKind = typeSymbol->GetSizeKind();
+            diagnostics.Add(expSizeKind);
+        });
+
+        return Diagnosed<void>{ diagnostics };
+    }
+
+    static auto DiagnoseUnsizedVarTypes(
+        Compilation* const compilation
+    ) -> Diagnosed<void>
+    {
+        DiagnosticBag diagnostics{};
+
+        const auto varSymbols =
+            compilation->GetGlobalScope()->CollectSymbolsRecursive<IVarSymbol>();
+
+        std::for_each(begin(varSymbols), end(varSymbols),
+        [&](IVarSymbol* const varSymbol)
+        {
+            auto* const typeSymbol = varSymbol->GetType();
+
+            if (typeSymbol->IsError())
+            {
+                return;
+            }
+
+            const auto expSizeKind = typeSymbol->GetSizeKind();
+            if (!expSizeKind)
+            {
+                return;
+            }
+
+            if (expSizeKind.Unwrap() == TypeSizeKind::Sized)
+            {
+                return;
+            }
+
+            diagnostics.Add(CreateUnsizedSymbolTypeError(varSymbol));
+        });
+
+        return Diagnosed<void>{ diagnostics };
     }
 
     static auto CompileCompilation(
         Compilation* const compilation
     ) -> Expected<void>
     {
-        DiagnosticBag diagnostics{};
+        GlobalDiagnosticBag diagnostics{};
 
         const auto& packageName = compilation->GetPackage().Name;
         const auto globalScope = compilation->GetGlobalScope();
@@ -261,7 +296,6 @@ namespace Ace::Application
                     compilation,
                     srcFileBuffer
                 );
-                compilation->GetDiagnostics().Add(expAST);
                 diagnostics.Add(expAST);
                 if (!expAST)
                 {
@@ -282,14 +316,12 @@ namespace Ace::Application
             compilation,
             nodes
         );
-        compilation->GetDiagnostics().Add(dgnCreateAndDefineSymbols);
         diagnostics.Add(dgnCreateAndDefineSymbols);
 
         const auto dgnDefineAssociations = DefineAssociations(
             compilation,
             nodes
         );
-        compilation->GetDiagnostics().Add(dgnDefineAssociations);
         diagnostics.Add(dgnDefineAssociations);
 
         const auto timeSymbolCreationEnd = now();
@@ -308,13 +340,9 @@ namespace Ace::Application
         std::transform(begin(asts), end(asts), back_inserter(boundASTs),
         [&](const std::shared_ptr<const ModuleNode>& ast)
         {
-            const auto boundAST = ast->CreateBound();
-
-            const auto astDiagnostics = boundAST->CollectDiagnostics();
-            compilation->GetDiagnostics().Add(astDiagnostics);
-            diagnostics.Add(astDiagnostics);
-
-            return boundAST;
+            const auto dgnBoundAST = ast->CreateBound();
+            diagnostics.Add(dgnBoundAST);
+            return dgnBoundAST.Unwrap();
         });
 
         std::vector<std::shared_ptr<const ModuleBoundNode>> finalASTs{};
@@ -325,15 +353,14 @@ namespace Ace::Application
                 boundAST,
                 [](const std::shared_ptr<const ModuleBoundNode>& ast)
                 { 
-                    return ast->GetOrCreateTypeChecked({});
+                    return ast->CreateTypeChecked({});
                 },
                 [](const std::shared_ptr<const ModuleBoundNode>& ast)
                 {
-                    return ast->GetOrCreateLowered({});
+                    return ast->CreateLowered({});
                 }
             );
             diagnostics.Add(expFinalAST);
-            compilation->GetDiagnostics().Add(expFinalAST);
             if (!expFinalAST)
             {
                 return;
@@ -344,16 +371,17 @@ namespace Ace::Application
 
         compilation->GetTemplateInstantiator().InstantiateSemanticsForSymbols();
 
-        if (diagnostics.HasErrors())
+        if (diagnostics.Unwrap().HasErrors())
         {
-            return diagnostics;
+            return diagnostics.Unwrap();
         }
 
         GlueGeneration::GenerateAndBindGlue(compilation);
 
         const auto timeBindingAndVerificationEnd = now();
 
-        ACE_TRY_VOID(ValidateTypeSizes(compilation));
+        diagnostics.Add(DiagnoseLayoutCycles(compilation));
+        diagnostics.Add(DiagnoseUnsizedVarTypes(compilation));
 
         const auto timeFrontendEnd = now();
 
@@ -374,11 +402,11 @@ namespace Ace::Application
             const auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration -= seconds);
 
             std::string value{};
-            value += minutes.count();
+            value += std::to_string(minutes.count());
             value += "m ";
-            value += seconds.count();
+            value += std::to_string(seconds.count());
             value += "s ";
-            value += miliseconds.count();
+            value += std::to_string(miliseconds.count());
             value += "ms";
 
             return value;
@@ -395,7 +423,7 @@ namespace Ace::Application
         LogDebug << createDurationString(emitterResult.Durations.LLC) + " - backend | llc\n";
         LogDebug << createDurationString(emitterResult.Durations.Clang) + " - backend | clang\n";
 
-        return Void{ diagnostics };
+        return Void{ diagnostics.Unwrap() };
     }
 
     static auto Compile(

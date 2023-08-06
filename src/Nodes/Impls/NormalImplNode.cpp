@@ -86,8 +86,10 @@ namespace Ace
         );
     }
 
-    auto NormalImplNode::CreateBound() const -> std::shared_ptr<const ImplBoundNode>
+    auto NormalImplNode::CreateBound() const -> Diagnosed<std::shared_ptr<const ImplBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         std::vector<std::shared_ptr<const FunctionBoundNode>> boundFunctions{};
         std::transform(
             begin(m_Functions),
@@ -95,16 +97,21 @@ namespace Ace
             back_inserter(boundFunctions),
             [&](const std::shared_ptr<const FunctionNode>& function)
             {
-                return function->CreateBound();
+                const auto dgnBoundFunction = function->CreateBound();
+                diagnostics.Add(dgnBoundFunction);
+                return dgnBoundFunction.Unwrap();
             }
         );
 
-        return std::make_shared<const ImplBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            boundFunctions
-        );
+        return Diagnosed
+        {
+            std::make_shared<const ImplBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                boundFunctions
+            ),
+            diagnostics,
+        };
     }
 
     auto NormalImplNode::DefineAssociations() const -> Expected<void>

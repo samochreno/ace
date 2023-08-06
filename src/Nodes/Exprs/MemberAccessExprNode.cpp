@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "SrcLocation.hpp"
-#include "Ident.hpp"
 #include "Scope.hpp"
 #include "Name.hpp"
 #include "BoundNodes/Exprs/VarRefs/InstanceVarRefExprBoundNode.hpp"
@@ -61,14 +60,18 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto MemberAccessExprNode::CreateBound() const -> std::shared_ptr<const InstanceVarRefExprBoundNode>
+    auto MemberAccessExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const InstanceVarRefExprBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
-        const auto boundExpr = m_Expr->CreateBoundExpr();
+        const auto dgnBoundExpr = m_Expr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundExpr);
+
+        auto* const selfTypeSymbol =
+            dgnBoundExpr.Unwrap()->GetTypeInfo().Symbol->GetWithoutRef();
 
         const auto expMemberSymbol = GetScope()->ResolveInstanceSymbol<InstanceVarSymbol>(
-            boundExpr->GetTypeInfo().Symbol->GetWithoutRef(),
+            selfTypeSymbol,
             m_Name
         );
         diagnostics.Add(expMemberSymbol);
@@ -77,15 +80,18 @@ namespace Ace
             GetCompilation()->GetErrorSymbols().GetInstanceVar()
         );
 
-        return std::make_shared<const InstanceVarRefExprBoundNode>(
+        return Diagnosed
+        {
+            std::make_shared<const InstanceVarRefExprBoundNode>(
+                GetSrcLocation(),
+                dgnBoundExpr.Unwrap(),
+                memberSymbol
+            ),
             diagnostics,
-            GetSrcLocation(),
-            boundExpr,
-            memberSymbol
-        );
+        };
     }
 
-    auto MemberAccessExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
+    auto MemberAccessExprNode::CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

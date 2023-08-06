@@ -54,18 +54,24 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto LogicalNegationExprNode::CreateBound() const -> std::shared_ptr<const LogicalNegationExprBoundNode>
+    auto LogicalNegationExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const LogicalNegationExprBoundNode>>
     {
-        const auto boundExpr = m_Expr->CreateBoundExpr();
+        DiagnosticBag diagnostics{};
 
-        return std::make_shared<const LogicalNegationExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            boundExpr
-        );
+        const auto dgnBoundExpr = m_Expr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundExpr);
+
+        return Diagnosed
+        {
+            std::make_shared<const LogicalNegationExprBoundNode>(
+                GetSrcLocation(),
+                dgnBoundExpr.Unwrap()
+            ),
+            diagnostics,
+        };
     }
 
-    auto LogicalNegationExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
+    auto LogicalNegationExprNode::CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

@@ -3,30 +3,22 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "TypeInfo.hpp"
-#include "ValueKind.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
+#include "TypeInfo.hpp"
+#include "ValueKind.hpp"
 
 namespace Ace
 {
     LogicalNegationExprBoundNode::LogicalNegationExprBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
-    }
-
-    auto LogicalNegationExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto LogicalNegationExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -48,86 +40,66 @@ namespace Ace
         return children;
     }
 
-    auto LogicalNegationExprBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const LogicalNegationExprBoundNode>
-    {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<const LogicalNegationExprBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            m_Expr
-        );
-    }
-
-    auto LogicalNegationExprBoundNode::CloneWithDiagnosticsExpr(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const IExprBoundNode>
-    {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto LogicalNegationExprBoundNode::GetOrCreateTypeChecked(
+    auto LogicalNegationExprBoundNode::CreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const LogicalNegationExprBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const LogicalNegationExprBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         const TypeInfo typeInfo
         {
             GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
-
-        ACE_TRY(cchConvertedAndCheckedExpr, CreateImplicitlyConvertedAndTypeChecked(
+        const auto dgnCheckedExpr = CreateImplicitlyConvertedAndTypeChecked(
             m_Expr,
             typeInfo
-        ));
+        );
 
-        if (!cchConvertedAndCheckedExpr.IsChanged)
+        if (dgnCheckedExpr.Unwrap() == m_Expr)
         {
-            return CreateUnchanged(shared_from_this());
+            return Diagnosed{ shared_from_this(), diagnostics };
         }
 
-        return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchConvertedAndCheckedExpr.Value
-        ));
+        return Diagnosed
+        {
+            std::make_shared<const LogicalNegationExprBoundNode>(
+                GetSrcLocation(),
+                dgnCheckedExpr.Unwrap()
+            ),
+            diagnostics,
+        };
     }
 
-    auto LogicalNegationExprBoundNode::GetOrCreateTypeCheckedExpr(
+    auto LogicalNegationExprBoundNode::CreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateTypeChecked(context);
+        return CreateTypeChecked(context);
     }
 
-    auto LogicalNegationExprBoundNode::GetOrCreateLowered(
+    auto LogicalNegationExprBoundNode::CreateLowered(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const LogicalNegationExprBoundNode>>
+    ) const -> std::shared_ptr<const LogicalNegationExprBoundNode>
     {
-        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
+        const auto loweredExpr = m_Expr->CreateLoweredExpr({});
 
-        if (!cchLoweredExpr.IsChanged)
+        if (loweredExpr == m_Expr)
         {
-            return CreateUnchanged(shared_from_this());
+            return shared_from_this();
         }
 
-        return CreateChanged(std::make_shared<const LogicalNegationExprBoundNode>(
-            DiagnosticBag{},
+        return std::make_shared<const LogicalNegationExprBoundNode>(
             GetSrcLocation(),
-            cchLoweredExpr.Value
-        )->GetOrCreateLowered({}).Value);
+            loweredExpr
+        )->CreateLowered({});
     }
 
-    auto LogicalNegationExprBoundNode::GetOrCreateLoweredExpr(
+    auto LogicalNegationExprBoundNode::CreateLoweredExpr(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
+    ) const -> std::shared_ptr<const IExprBoundNode>
     {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto LogicalNegationExprBoundNode::Emit(

@@ -3,35 +3,27 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "Diagnostic.hpp"
+#include "Assert.hpp"
+#include "Emitter.hpp"
+#include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Cacheable.hpp"
-#include "Emitter.hpp"
-#include "Assert.hpp"
-#include "ExprEmitResult.hpp"
 
 namespace Ace
 {
     StructConstructionExprBoundNode::StructConstructionExprBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         StructTypeSymbol* const structSymbol,
         const std::vector<StructConstructionExprBoundArg>& args
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_StructSymbol{ structSymbol },
         m_Args{ args }
     {
-    }
-
-    auto StructConstructionExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto StructConstructionExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -57,112 +49,90 @@ namespace Ace
         return children;
     }
 
-    auto StructConstructionExprBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto StructConstructionExprBoundNode::CreateTypeChecked(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const StructConstructionExprBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::vector<StructConstructionExprBoundArg> checkedArgs{};
+        std::transform(
+            begin(m_Args),
+            end  (m_Args),
+            back_inserter(checkedArgs),
+            [&](const StructConstructionExprBoundArg& arg)
+            {
+                const auto dgnCheckedValue =
+                    arg.Value->CreateTypeCheckedExpr({});
+                diagnostics.Add(dgnCheckedValue);
+
+                return StructConstructionExprBoundArg
+                {
+                    arg.Symbol,
+                    dgnCheckedValue.Unwrap(),
+                };
+            }
+        );
+
+        if (checkedArgs == m_Args)
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const StructConstructionExprBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                m_StructSymbol,
+                checkedArgs
+            ),
+            diagnostics,
+        };
+    }
+
+    auto StructConstructionExprBoundNode::CreateTypeCheckedExpr(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto StructConstructionExprBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const StructConstructionExprBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        std::vector<StructConstructionExprBoundArg> loweredArgs{};
+        std::transform(begin(m_Args), end(m_Args), back_inserter(loweredArgs),
+        [&](const StructConstructionExprBoundArg& arg)
+        {
+            const auto loweredValue = arg.Value->CreateLoweredExpr(context);
+
+            return StructConstructionExprBoundArg
+            {
+                arg.Symbol,
+                loweredValue,
+            };
+        });
+
+        if (loweredArgs == m_Args)
         {
             return shared_from_this();
         }
 
         return std::make_shared<const StructConstructionExprBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
             GetScope(),
             m_StructSymbol,
-            m_Args
-        );
+            loweredArgs
+        )->CreateLowered({});
     }
 
-    auto StructConstructionExprBoundNode::CloneWithDiagnosticsExpr(
-        DiagnosticBag diagnostics
+    auto StructConstructionExprBoundNode::CreateLoweredExpr(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IExprBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto StructConstructionExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const StructConstructionExprBoundNode>>>
-    {
-        ACE_TRY(cchCheckedArgs, TransformExpectedCacheableVector(m_Args,
-        [](const StructConstructionExprBoundArg& arg) -> Expected<Cacheable<StructConstructionExprBoundArg>>
-        {
-            ACE_TRY(cchCheckedValue, arg.Value->GetOrCreateTypeCheckedExpr({}));
-
-            if (!cchCheckedValue.IsChanged)
-            {
-                return CreateUnchanged(arg);
-            }
-
-            return CreateChanged(StructConstructionExprBoundArg{
-                arg.Symbol,
-                cchCheckedValue.Value,
-            });
-        }));
-
-        if (!cchCheckedArgs.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const StructConstructionExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            m_StructSymbol,
-            cchCheckedArgs.Value
-        ));
-    }
-
-    auto StructConstructionExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto StructConstructionExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const StructConstructionExprBoundNode>>
-    {
-        const auto cchLoweredArgs = TransformCacheableVector(m_Args,
-        [&](const StructConstructionExprBoundArg& arg) -> Cacheable<StructConstructionExprBoundArg>
-        {
-            const auto cchLoweredValue =
-                arg.Value->GetOrCreateLoweredExpr({});
-
-            if (!cchLoweredValue.IsChanged)
-            {
-                return CreateUnchanged(arg);
-            }
-
-            return CreateChanged(StructConstructionExprBoundArg{
-                arg.Symbol,
-                cchLoweredValue.Value,
-            });
-        });
-
-        if (!cchLoweredArgs.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const StructConstructionExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            m_StructSymbol,
-            cchLoweredArgs.Value
-        )->GetOrCreateLowered({}).Value);
-    }
-
-    auto StructConstructionExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto StructConstructionExprBoundNode::Emit(

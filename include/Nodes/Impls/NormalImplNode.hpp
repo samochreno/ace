@@ -37,7 +37,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const NormalImplNode> final;
-        auto CreateBound() const -> std::shared_ptr<const ImplBoundNode> final;
+        auto CreateBound() const -> Diagnosed<std::shared_ptr<const ImplBoundNode>> final;
 
         auto DefineAssociations() const -> Expected<void> final;
 

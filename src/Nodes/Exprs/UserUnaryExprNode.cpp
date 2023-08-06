@@ -18,7 +18,7 @@ namespace Ace
     UserUnaryExprNode::UserUnaryExprNode(
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprNode>& expr,
-        const Op op
+        const Op& op
     ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr },
         m_Op{ op }
@@ -111,13 +111,14 @@ namespace Ace
         return Diagnosed{ expSymbol.Unwrap(), diagnostics };
     }
 
-    auto UserUnaryExprNode::CreateBound() const -> std::shared_ptr<const UserUnaryExprBoundNode>
+    auto UserUnaryExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const UserUnaryExprBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
-        const auto boundExpresssion = m_Expr->CreateBoundExpr();
+        const auto dgnBoundExpr = m_Expr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundExpr);
 
-        auto* const typeSymbol = boundExpresssion->GetTypeInfo().Symbol;
+        auto* const typeSymbol = dgnBoundExpr.Unwrap()->GetTypeInfo().Symbol;
 
         const auto dgnOpSymbol = ResolveOpSymbol(
             GetScope(),
@@ -126,15 +127,18 @@ namespace Ace
         );
         diagnostics.Add(dgnOpSymbol);
 
-        return std::make_shared<const UserUnaryExprBoundNode>(
+        return Diagnosed
+        {
+            std::make_shared<const UserUnaryExprBoundNode>(
+                GetSrcLocation(),
+                dgnBoundExpr.Unwrap(),
+                dgnOpSymbol.Unwrap()
+            ),
             diagnostics,
-            GetSrcLocation(),
-            boundExpresssion,
-            dgnOpSymbol.Unwrap()
-        );
+        };
     }
 
-    auto UserUnaryExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
+    auto UserUnaryExprNode::CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

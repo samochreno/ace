@@ -7,6 +7,7 @@
 #include "Scope.hpp"
 #include "Ident.hpp"
 #include "AccessModifier.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
@@ -23,7 +24,7 @@ namespace Ace
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const ITypeNode> = 0;
 
-        virtual auto CreateBoundType() const -> std::shared_ptr<const ITypeBoundNode> = 0;
+        virtual auto CreateBoundType() const -> Diagnosed<std::shared_ptr<const ITypeBoundNode>> = 0;
 
         virtual auto GetName() const -> const Ident& = 0;
         virtual auto GetAccessModifier() const -> AccessModifier = 0;

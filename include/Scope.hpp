@@ -603,7 +603,7 @@ namespace Ace
 
         static auto CollectMatchingSymbolsInScopes(
             const SymbolResolutionData& data
-        ) -> Diagnosed<std::vector<ISymbol*>>;
+        ) -> Expected<std::vector<ISymbol*>>;
 
         auto CollectMatchingSymbols(
             const SymbolResolutionData& data

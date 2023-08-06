@@ -3,13 +3,12 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
+#include "Diagnostic.hpp"
 #include "Assert.hpp"
-#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
@@ -18,20 +17,13 @@
 namespace Ace
 {
     InstanceVarRefExprBoundNode::InstanceVarRefExprBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr,
         InstanceVarSymbol* const varSymbol
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr },
         m_VarSymbol{ varSymbol }
     {
-    }
-
-    auto InstanceVarRefExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto InstanceVarRefExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -53,83 +45,64 @@ namespace Ace
         return children;
     }
 
-    auto InstanceVarRefExprBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto InstanceVarRefExprBoundNode::CreateTypeChecked(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const InstanceVarRefExprBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        const auto dgnCheckedExpr = m_Expr->CreateTypeCheckedExpr({});
+        diagnostics.Add(dgnCheckedExpr);
+
+        if (dgnCheckedExpr.Unwrap() == m_Expr)
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const InstanceVarRefExprBoundNode>(
+                GetSrcLocation(),
+                dgnCheckedExpr.Unwrap(),
+                m_VarSymbol
+            ),
+            diagnostics,
+        };
+    }
+
+    auto InstanceVarRefExprBoundNode::CreateTypeCheckedExpr(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto InstanceVarRefExprBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const InstanceVarRefExprBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        const auto loweredExpr = m_Expr->CreateLoweredExpr({});
+
+        if (loweredExpr == m_Expr)
         {
             return shared_from_this();
         }
 
         return std::make_shared<const InstanceVarRefExprBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
-            GetExpr(),
-            GetVarSymbol()
-        );
+            loweredExpr,
+            m_VarSymbol
+        )->CreateLowered({});
     }
 
-    auto InstanceVarRefExprBoundNode::CloneWithDiagnosticsExpr(
-        DiagnosticBag diagnostics
+    auto InstanceVarRefExprBoundNode::CreateLoweredExpr(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IExprBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
+        return CreateLowered(context);
     }
 
-    auto InstanceVarRefExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const InstanceVarRefExprBoundNode>>>
-    {
-        ACE_TRY(cchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
-
-        if (!cchCheckedExpr.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const InstanceVarRefExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchCheckedExpr.Value,
-            m_VarSymbol
-        ));
-    }
-
-    auto InstanceVarRefExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto InstanceVarRefExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const InstanceVarRefExprBoundNode>>
-    {
-        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
-
-        if (!cchLoweredExpr.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const InstanceVarRefExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchLoweredExpr.Value,
-            m_VarSymbol
-        )->GetOrCreateLowered({}).Value);
-    }
-
-    auto InstanceVarRefExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
-    {
-        return GetOrCreateLowered(context);
-    }
-
-    static auto GetOrCreateDerefd(
+    static auto CreateDerefed(
         const std::shared_ptr<const IExprBoundNode>& expr
     ) -> std::shared_ptr<const IExprBoundNode>
     {
@@ -140,8 +113,7 @@ namespace Ace
 
         if (isRef)
         {
-            return GetOrCreateDerefd(std::make_shared<const DerefAsExprBoundNode>(
-                DiagnosticBag{},
+            return CreateDerefed(std::make_shared<const DerefAsExprBoundNode>(
                 expr->GetSrcLocation(),
                 expr,
                 typeSymbol->GetWithoutRef()
@@ -150,8 +122,7 @@ namespace Ace
 
         if (isStrongPtr)
         {
-            return GetOrCreateDerefd(std::make_shared<const DerefAsExprBoundNode>(
-                DiagnosticBag{},
+            return CreateDerefed(std::make_shared<const DerefAsExprBoundNode>(
                 expr->GetSrcLocation(),
                 expr,
                 typeSymbol->GetWithoutStrongPtr()
@@ -170,7 +141,7 @@ namespace Ace
         auto* const varSymbol = dynamic_cast<InstanceVarSymbol*>(m_VarSymbol);
         ACE_ASSERT(varSymbol);
 
-        const auto expr = GetOrCreateDerefd(m_Expr);
+        const auto expr = CreateDerefed(m_Expr);
         const auto exprEmitResult = expr->Emit(emitter);
         tmps.insert(
             end  (tmps), 

@@ -5,7 +5,6 @@
 
 #include "BoundNodes/BoundNode.hpp"
 #include "Diagnostic.hpp"
-#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -14,15 +13,12 @@ namespace Ace
     public:
         virtual ~ITypeBoundNode() = default;
 
-        virtual auto CloneWithDiagnosticsType(
-            DiagnosticBag diagnostics
-        ) const -> std::shared_ptr<const ITypeBoundNode> = 0;
-        virtual auto GetOrCreateTypeCheckedType(
+        virtual auto CreateTypeCheckedType(
             const TypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const ITypeBoundNode>>> = 0;
-        virtual auto GetOrCreateLoweredType(
+        ) const -> Diagnosed<std::shared_ptr<const ITypeBoundNode>> = 0;
+        virtual auto CreateLoweredType(
             const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const ITypeBoundNode>> = 0;
+        ) const -> std::shared_ptr<const ITypeBoundNode> = 0;
 
         virtual auto GetSymbol() const -> ITypeSymbol* = 0;
     };

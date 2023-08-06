@@ -3,25 +3,17 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 #include "Emitter.hpp"
 
 namespace Ace
 {
     ExprStmtBoundNode::ExprStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) : m_Diagnostics{ diagnostics },
-        m_Expr{ expr }
+    ) : m_Expr{ expr }
     {
-    }
-
-    auto ExprStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto ExprStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -43,77 +35,59 @@ namespace Ace
         return children;
     }
 
-    auto ExprStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto ExprStmtBoundNode::CreateTypeChecked(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const ExprStmtBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        const auto dgnCheckedExpr = m_Expr->CreateTypeCheckedExpr({});
+        diagnostics.Add(dgnCheckedExpr);
+
+        if (dgnCheckedExpr.Unwrap() == m_Expr)
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const ExprStmtBoundNode>(
+                GetSrcLocation(),
+                dgnCheckedExpr.Unwrap()
+            ),
+            diagnostics,
+        };
+    }
+
+    auto ExprStmtBoundNode::CreateTypeCheckedStmt(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto ExprStmtBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const ExprStmtBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        const auto loweredExpr = m_Expr->CreateLoweredExpr({});
+
+        if (loweredExpr == m_Expr)
         {
             return shared_from_this();
         }
 
         return std::make_shared<const ExprStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
-            m_Expr
-        );
+            loweredExpr
+        )->CreateLowered({});
     }
 
-    auto ExprStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
+    auto ExprStmtBoundNode::CreateLoweredStmt(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto ExprStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const ExprStmtBoundNode>>>
-    {
-        ACE_TRY(cchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
-        
-        if (!cchCheckedExpr.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const ExprStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchCheckedExpr.Value
-        ));
-    }
-
-    auto ExprStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto ExprStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const ExprStmtBoundNode>>
-    {
-        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
-
-        if (!cchLoweredExpr.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const ExprStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchLoweredExpr.Value
-        )->GetOrCreateLowered(context).Value);
-    }
-
-    auto ExprStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto ExprStmtBoundNode::Emit(Emitter& emitter) const -> void

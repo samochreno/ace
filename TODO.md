@@ -5,18 +5,25 @@
 - ❓ Eliminate local lambdas
 - String interning, maybe put `Token`s on the stack
 - Special fast lookup for native types
-- Rename `MemberAccess` to `FieldAccess` or `InstanceVarAccess`
 - Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
+- Rename `Expected<T>::GetDiagnosticBag` and `Diagnosed<T>::GetDiagnosticBag` to `GetDiagnostics`
 
 ## 💥 High Priority
 
-- Add conversion diagnostics
+- ❓ Move `Application` &rarr; `main` or `main` &rarr; `Application`
+- Remove builtin application arguments
+- Simplify `undefined reference` error messages
 - ❓ Move scoping from parsing to a separate pass
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
 - Finish diagnostics
 
 ## 🔔 Medium Priority
 
+- Add `CFANodeCreatable`:
+  - Implement it on `BoundNode`s
+  - Add `CFAGraph` &rarr; alias for `std::vector<CFANode>`
+  - `IEmittable` could hold this graph, so it could verify control flow
+  - Possibly implement `CFANode`s for `LLVM IR` instructions
 - ❓ Give template symbols shared ownership of the nodes
 - `*self`
 - Traits:

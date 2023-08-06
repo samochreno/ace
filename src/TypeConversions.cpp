@@ -2,18 +2,21 @@
 
 #include <memory>
 #include <vector>
-#include <string>
+#include <optional>
 #include <unordered_map>
 
-#include "SpecialIdent.hpp"
+#include "Diagnostic.hpp"
+#include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "Scope.hpp"
-#include "Ident.hpp"
-#include "Symbols/Types/TypeSymbol.hpp"
-#include "Symbols/FunctionSymbol.hpp"
-#include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "TypeInfo.hpp"
+#include "Symbols/FunctionSymbol.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/ConversionPlaceholderExprBoundNode.hpp"
+#include "BoundNodes/Exprs/RefExprBoundNode.hpp"
+#include "BoundNodes/Exprs/DerefExprBoundNode.hpp"
+#include "BoundNodes/Exprs/FunctionCalls/StaticFunctionCallExprBoundNode.hpp"
 
 namespace Ace
 {
@@ -42,35 +45,38 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
         ITypeSymbol* toType
-    ) -> Expected<FunctionSymbol*>
+    ) -> std::optional<FunctionSymbol*>
     {
         fromType = fromType->GetWithoutRef();
           toType =   toType->GetWithoutRef();
 
-        ACE_TRY_ASSERT(fromType->IsStrongPtr() && toType->IsWeakPtr());
+        if (!fromType->IsStrongPtr() || !toType->IsWeakPtr())
+        {
+            return std::nullopt;
+        }
 
-        ACE_TRY_ASSERT(
-            fromType->GetWithoutStrongPtr() ==
-            toType->GetWithoutWeakPtr()
-        );
+        if (fromType->GetWithoutStrongPtr() != toType->GetWithoutWeakPtr())
+        {
+            return std::nullopt;
+        }
 
-        auto* compilation = scope->GetCompilation();
+        auto* const compilation = scope->GetCompilation();
 
-        return dynamic_cast<FunctionSymbol*>(Scope::ResolveOrInstantiateTemplateInstance(
+        auto* const function = Scope::ResolveOrInstantiateTemplateInstance(
             SrcLocation{},
             compilation->GetNatives()->WeakPtr__from.GetSymbol(),
             std::nullopt,
             { fromType->GetWithoutStrongPtr()->GetWithoutRef() },
             {}
-        ).Unwrap());
+        ).Unwrap();
+        return dynamic_cast<FunctionSymbol*>(function);
     }
 
     auto GetImplicitConversionOp(
-        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
         ITypeSymbol* toType
-    ) -> Expected<FunctionSymbol*>
+    ) -> std::optional<FunctionSymbol*>
     {
         const auto optNativeOp = GetNativeConversionOp(
             fromType,
@@ -90,11 +96,10 @@ namespace Ace
     }
 
     auto GetExplicitConversionOp(
-        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
         ITypeSymbol* toType
-    ) -> Expected<FunctionSymbol*>
+    ) -> std::optional<FunctionSymbol*>
     {
         const auto optNativeImplicitOp = GetNativeConversionOp(
             fromType,
@@ -135,10 +140,7 @@ namespace Ace
 
         for (size_t i = 0; i < typesA.size(); i++)
         {
-            if (
-                typesA.at(i)->GetUnaliased() !=
-                typesB.at(i)->GetUnaliased()
-                )
+            if (typesA.at(i)->GetUnaliased() != typesB.at(i)->GetUnaliased())
             {
                 return false;
             }
@@ -160,25 +162,156 @@ namespace Ace
 
         for (size_t i = 0; i < fromTypeInfos.size(); i++)
         {
-            const auto dummyExpr = std::make_shared<const ConversionPlaceholderExprBoundNode>(
-                DiagnosticBag{},
+            const auto placeholderExpr = std::make_shared<const ConversionPlaceholderExprBoundNode>(
                 SrcLocation{},
                 scope,
                 fromTypeInfos.at(i)
             );
 
-            const auto expConvertedExpr = CreateImplicitlyConverted(
-                dummyExpr,
+            const auto dgnConvertedExpr = CreateImplicitlyConverted(
+                placeholderExpr,
                 targetTypeInfos.at(i)
             );
-            if (expConvertedExpr)
+            if (dgnConvertedExpr.GetDiagnosticBag().HasErrors())
             {
-                continue;
+                return false;
             }
-
-            return false;
         }
 
         return true;
+    }
+
+    auto CreateConverted(
+        std::shared_ptr<const IExprBoundNode> expr,
+        const TypeInfo& targetTypeInfo,
+        const ConversionOpGetterFunction func
+    ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        if (
+            targetTypeInfo.Symbol->IsError() ||
+            expr->GetTypeInfo().Symbol->IsError()
+            )
+        {
+            return Diagnosed{ expr, diagnostics };
+        }
+
+        if (
+            (targetTypeInfo.ValueKind == ValueKind::L) &&
+            (expr->GetTypeInfo().ValueKind == ValueKind::R)
+            )
+        {
+            diagnostics.Add(CreateExpectedLValueExprError(expr));
+        }
+
+        if (
+            expr->GetTypeInfo().Symbol->GetUnaliased() ==
+            targetTypeInfo.Symbol->GetUnaliased()
+            )
+        {
+            return Diagnosed{ expr, diagnostics };
+        }
+
+        const bool isRef = expr->GetTypeInfo().Symbol->IsRef();
+        const bool isTargetRef = targetTypeInfo.Symbol->IsRef();
+
+        if (isRef)
+        {
+            if (!isTargetRef)
+            {
+                expr = std::make_shared<const DerefExprBoundNode>(
+                    expr->GetSrcLocation(),
+                    expr
+                );
+            }
+        }
+        else
+        {
+            if (isTargetRef)
+            {
+                expr = std::make_shared<const RefExprBoundNode>(
+                    expr->GetSrcLocation(),
+                    expr
+                );
+            }
+        }
+
+        if (
+            expr->GetTypeInfo().Symbol->GetUnaliased() ==
+            targetTypeInfo.Symbol->GetUnaliased()
+            )
+        {
+            return Diagnosed{ expr, diagnostics };
+        }
+
+        const auto optOpSymbol = func(
+            expr->GetScope(),
+            expr->GetTypeInfo().Symbol,
+            targetTypeInfo.Symbol
+        );
+        if (!optOpSymbol.has_value())
+        {
+            diagnostics.Add(CreateUnableToConvertExprError(
+                expr,
+                targetTypeInfo
+            ));
+            return Diagnosed{ expr, diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const StaticFunctionCallExprBoundNode>(
+                expr->GetSrcLocation(),
+                expr->GetScope(),
+                optOpSymbol.value(),
+                std::vector{ expr }
+            ),
+            diagnostics,
+        };
+    }
+
+    auto CreateImplicitlyConverted(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const TypeInfo& targetTypeInfo
+    ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        return CreateConverted(
+            expr,
+            targetTypeInfo,
+            &GetImplicitConversionOp
+        );
+    }
+
+    auto CreateExplicitlyConverted(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const TypeInfo& targetTypeInfo
+    ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        return CreateConverted(
+            expr,
+            targetTypeInfo,
+            &GetExplicitConversionOp
+        );
+    }
+
+    auto CreateImplicitlyConvertedAndTypeChecked(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        const TypeInfo& targetTypeInfo
+    ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        const auto dgnConvertedExpr = CreateImplicitlyConverted(
+            expr,
+            targetTypeInfo
+        );
+        diagnostics.Add(dgnConvertedExpr);
+
+        const auto dgnCheckedExpr =
+            dgnConvertedExpr.Unwrap()->CreateTypeCheckedExpr({});
+        diagnostics.Add(dgnCheckedExpr);
+
+        return Diagnosed{ dgnCheckedExpr.Unwrap(), diagnostics };
     }
 }

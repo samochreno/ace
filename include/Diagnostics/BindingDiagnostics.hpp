@@ -20,6 +20,14 @@ namespace Ace
         const ISymbol* const redefinedSymbol
     ) -> std::shared_ptr<const DiagnosticGroup>;
 
+    auto CreateUnsizedSymbolTypeError(
+        ISymbol* const symbol
+    ) -> std::shared_ptr<const DiagnosticGroup>;
+
+    auto CreateStructVarCausesCycleError(
+        InstanceVarSymbol* const varSymbol
+    ) -> std::shared_ptr<const DiagnosticGroup>;
+
     auto CreateUnableToDeduceTemplateArgsError(
         const SrcLocation& srcLocation
     ) -> std::shared_ptr<const DiagnosticGroup>;

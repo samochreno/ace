@@ -6,7 +6,6 @@
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Emittable.hpp"
 #include "Diagnostic.hpp"
-#include "Cacheable.hpp"
 
 namespace Ace
 {
@@ -22,14 +21,11 @@ namespace Ace
     public:
         virtual ~IStmtBoundNode() = default;
 
-        virtual auto CloneWithDiagnosticsStmt(
-            DiagnosticBag diagnostics
-        ) const -> std::shared_ptr<const IStmtBoundNode> = 0;
-        virtual auto GetOrCreateTypeCheckedStmt(
+        virtual auto CreateTypeCheckedStmt(
             const StmtTypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>> = 0;
-        virtual auto GetOrCreateLoweredStmt(
+        ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>> = 0;
+        virtual auto CreateLoweredStmt(
             const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>> = 0;
+        ) const -> std::shared_ptr<const IStmtBoundNode> = 0;
     };
 }

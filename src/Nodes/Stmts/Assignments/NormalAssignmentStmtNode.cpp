@@ -61,20 +61,28 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto NormalAssignmentStmtNode::CreateBound() const -> std::shared_ptr<const NormalAssignmentStmtBoundNode>
+    auto NormalAssignmentStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const NormalAssignmentStmtBoundNode>>
     {
-        const auto boundLHSExpr = m_LHSExpr->CreateBoundExpr();
-        const auto boundRHSExpr = m_RHSExpr->CreateBoundExpr();
+        DiagnosticBag diagnostics{};
 
-        return std::make_shared<const NormalAssignmentStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            boundLHSExpr,
-            boundRHSExpr
-        );
+        const auto dgnBoundLHSExpr = m_LHSExpr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundLHSExpr);
+
+        const auto dgnBoundRHSExpr = m_RHSExpr->CreateBoundExpr();
+        diagnostics.Add(dgnBoundRHSExpr);
+
+        return Diagnosed
+        {
+            std::make_shared<const NormalAssignmentStmtBoundNode>(
+                GetSrcLocation(),
+                dgnBoundLHSExpr.Unwrap(),
+                dgnBoundRHSExpr.Unwrap()
+            ),
+            diagnostics,
+        };
     }
 
-    auto NormalAssignmentStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
+    auto NormalAssignmentStmtNode::CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

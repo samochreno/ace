@@ -10,25 +10,22 @@
 #include "BoundNodes/Vars/Params/SelfParamVarBoundNode.hpp"
 #include "BoundNodes/Vars/Params/NormalParamVarBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
     class FunctionBoundNode : 
         public std::enable_shared_from_this<FunctionBoundNode>,
         public virtual IBoundNode,
-        public virtual ICloneableWithDiagnosticsBoundNode<FunctionBoundNode>,
         public virtual ITypedBoundNode<FunctionSymbol>,
         public virtual ITypeCheckableBoundNode<FunctionBoundNode>,
         public virtual ILowerableBoundNode<FunctionBoundNode>
     {
     public:
         FunctionBoundNode(
-            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             FunctionSymbol* const symbol,
             const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
@@ -38,26 +35,21 @@ namespace Ace
         );
         virtual ~FunctionBoundNode() = default;
 
-        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
-        auto CloneWithDiagnostics(
-            DiagnosticBag diagnostics
-        ) const -> std::shared_ptr<const FunctionBoundNode> final;
-        auto GetOrCreateTypeChecked(
+        auto CreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const FunctionBoundNode>>> final;
-        auto GetOrCreateLowered(
+        ) const -> Diagnosed<std::shared_ptr<const FunctionBoundNode>> final;
+        auto CreateLowered(
             const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const FunctionBoundNode>> final;
+        ) const -> std::shared_ptr<const FunctionBoundNode> final;
 
         auto GetSymbol() const -> FunctionSymbol* final;
 
         auto GetBody() const -> std::optional<std::shared_ptr<const BlockStmtBoundNode>>;
 
     private:
-        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         FunctionSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const AttributeBoundNode>> m_Attributes{};

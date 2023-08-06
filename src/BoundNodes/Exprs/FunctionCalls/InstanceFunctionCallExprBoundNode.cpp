@@ -5,11 +5,11 @@
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/RefExprBoundNode.hpp"
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
+#include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
@@ -18,22 +18,15 @@
 namespace Ace
 {
     InstanceFunctionCallExprBoundNode::InstanceFunctionCallExprBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& expr,
         FunctionSymbol* const functionSymbol,
         const std::vector<std::shared_ptr<const IExprBoundNode>>& args
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr },
         m_FunctionSymbol{ functionSymbol },
         m_Args{ args }
     {
-    }
-
-    auto InstanceFunctionCallExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto InstanceFunctionCallExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -56,104 +49,123 @@ namespace Ace
         return children;
     }
 
-    auto InstanceFunctionCallExprBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto InstanceFunctionCallExprBoundNode::CreateTypeChecked(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const InstanceFunctionCallExprBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        const auto dgnCheckedExpr = m_Expr->CreateTypeCheckedExpr({});
+        diagnostics.Add(dgnCheckedExpr);
+
+        std::vector<std::shared_ptr<const IExprBoundNode>> convertedArgs = m_Args;
+        if (!m_FunctionSymbol->IsError())
+        {
+            const auto argTypeInfos = m_FunctionSymbol->CollectArgTypeInfos();
+
+            if (m_Args.size() != argTypeInfos.size())
+            {
+                diagnostics.Add(CreateUnexpectedArgCountError(
+                    GetSrcLocation(),
+                    m_FunctionSymbol,
+                    m_Args.size(),
+                    argTypeInfos.size()
+                ));
+            }
+
+            for (size_t i = 0; i < m_Args.size(); i++)
+            {
+                const auto dgnConvertedArg = CreateImplicitlyConverted(
+                    m_Args.at(i),
+                    argTypeInfos.at(i)
+                );
+                diagnostics.Add(dgnConvertedArg);
+                convertedArgs.at(i) = dgnConvertedArg.Unwrap();
+            }
+        }
+
+        std::vector<std::shared_ptr<const IExprBoundNode>> checkedArgs{};
+        std::transform(
+            begin(convertedArgs),
+            end  (convertedArgs),
+            back_inserter(checkedArgs),
+            [&](const std::shared_ptr<const IExprBoundNode>& arg)
+            {
+                const auto dgnCheckedArg = arg->CreateTypeCheckedExpr({});
+                diagnostics.Add(dgnCheckedArg);
+                return dgnCheckedArg.Unwrap();
+            }
+        );
+
+        if (
+            (dgnCheckedExpr.Unwrap() == m_Expr) &&
+            (checkedArgs == m_Args)
+            )
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const InstanceFunctionCallExprBoundNode>(
+                GetSrcLocation(),
+                dgnCheckedExpr.Unwrap(),
+                m_FunctionSymbol,
+                checkedArgs
+            ),
+            diagnostics,
+        };
+    }
+
+    auto InstanceFunctionCallExprBoundNode::CreateTypeCheckedExpr(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto InstanceFunctionCallExprBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const InstanceFunctionCallExprBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        const auto loweredExpr = m_Expr->CreateLoweredExpr({});
+
+        std::vector<std::shared_ptr<const IExprBoundNode>> loweredArgs{};
+        if (!m_FunctionSymbol->IsError())
+        {
+            std::transform(
+                begin(m_Args),
+                end  (m_Args),
+                back_inserter(loweredArgs),
+                [&](const std::shared_ptr<const IExprBoundNode>& arg)
+                {
+                    return arg->CreateLoweredExpr({});
+                }
+            );
+        }
+
+        if (
+            (loweredExpr == m_Expr) &&
+            (loweredArgs == m_Args)
+            )
         {
             return shared_from_this();
         }
 
         return std::make_shared<const InstanceFunctionCallExprBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
-            m_Expr,
+            loweredExpr,
             m_FunctionSymbol,
-            m_Args
-        );
+            loweredArgs
+        )->CreateLowered({});
     }
 
-    auto InstanceFunctionCallExprBoundNode::CloneWithDiagnosticsExpr(
-        DiagnosticBag diagnostics
+
+    auto InstanceFunctionCallExprBoundNode::CreateLoweredExpr(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IExprBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto InstanceFunctionCallExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const InstanceFunctionCallExprBoundNode>>>
-    {
-        ACE_TRY(cchCheckedExpr, m_Expr->GetOrCreateTypeCheckedExpr({}));
-
-        const auto argTypeInfos = m_FunctionSymbol->CollectArgTypeInfos();
-        ACE_TRY_ASSERT(m_Args.size() == argTypeInfos.size());
-
-        ACE_TRY(cchConvertedAndCheckedArgs, CreateImplicitlyConvertedAndTypeCheckedVector(
-            m_Args,
-            m_FunctionSymbol->CollectArgTypeInfos()
-        ));
-
-        if (
-            !cchCheckedExpr.IsChanged &&
-            !cchConvertedAndCheckedArgs.IsChanged
-            )
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchCheckedExpr.Value,
-            m_FunctionSymbol,
-            cchConvertedAndCheckedArgs.Value
-        ));
-    }
-
-    auto InstanceFunctionCallExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto InstanceFunctionCallExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const InstanceFunctionCallExprBoundNode>>
-    {
-        const auto cchLoweredExpr = m_Expr->GetOrCreateLoweredExpr({});
-
-        const auto cchLoweredArgs = TransformCacheableVector(m_Args,
-        [&](const std::shared_ptr<const IExprBoundNode>& arg)
-        {
-            return arg->GetOrCreateLoweredExpr({});
-        });
-
-        if (
-            !cchLoweredExpr.IsChanged && 
-            !cchLoweredArgs.IsChanged
-            )
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const InstanceFunctionCallExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchLoweredExpr.Value,
-            m_FunctionSymbol,
-            cchLoweredArgs.Value
-        )->GetOrCreateLowered({}).Value);
-    }
-
-
-    auto InstanceFunctionCallExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto InstanceFunctionCallExprBoundNode::Emit(
@@ -172,7 +184,6 @@ namespace Ace
             }
 
             return std::make_shared<const RefExprBoundNode>(
-                DiagnosticBag{},
                 m_Expr->GetSrcLocation(),
                 m_Expr
             );

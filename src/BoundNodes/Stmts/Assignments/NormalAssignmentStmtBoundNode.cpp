@@ -3,10 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
@@ -15,20 +14,13 @@
 namespace Ace
 {
     NormalAssignmentStmtBoundNode::NormalAssignmentStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& rhsExpr
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr }
     {
-    }
-
-    auto NormalAssignmentStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto NormalAssignmentStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -51,98 +43,80 @@ namespace Ace
         return children;
     }
 
-    auto NormalAssignmentStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto NormalAssignmentStmtBoundNode::CreateTypeChecked(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const NormalAssignmentStmtBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        auto* const lhsExprTypeSymbol =
+            m_LHSExpr->GetTypeInfo().Symbol->GetWithoutRef();
+
+        const auto dgnCheckedLHSExpr = CreateImplicitlyConvertedAndTypeChecked(
+            m_LHSExpr,
+            TypeInfo{ lhsExprTypeSymbol, ValueKind::L }
+        );
+        diagnostics.Add(dgnCheckedLHSExpr);
+
+        const auto dgnCheckedRHSExpr = CreateImplicitlyConvertedAndTypeChecked(
+            m_RHSExpr,
+            TypeInfo{ lhsExprTypeSymbol, ValueKind::R }
+        );
+        diagnostics.Add(dgnCheckedRHSExpr);
+
+        if (
+            (dgnCheckedLHSExpr.Unwrap() == m_LHSExpr) &&
+            (dgnCheckedRHSExpr.Unwrap() == m_RHSExpr)
+            )
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const NormalAssignmentStmtBoundNode>(
+                GetSrcLocation(),
+                dgnCheckedLHSExpr.Unwrap(),
+                dgnCheckedRHSExpr.Unwrap()
+            ),
+            diagnostics,
+        };
+    }
+
+    auto NormalAssignmentStmtBoundNode::CreateTypeCheckedStmt(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto NormalAssignmentStmtBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const NormalAssignmentStmtBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        const auto loweredLHSExpr = m_LHSExpr->CreateLoweredExpr({});
+        const auto loweredRHSExpr = m_RHSExpr->CreateLoweredExpr({});
+
+        if (
+            (loweredLHSExpr == m_LHSExpr) &&
+            (loweredRHSExpr == m_RHSExpr)
+            )
         {
             return shared_from_this();
         }
 
         return std::make_shared<const NormalAssignmentStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
-            m_LHSExpr,
-            m_RHSExpr
-        );
+            loweredLHSExpr,
+            loweredRHSExpr
+        )->CreateLowered({});
     }
 
-    auto NormalAssignmentStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
+    auto NormalAssignmentStmtBoundNode::CreateLoweredStmt(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto NormalAssignmentStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const NormalAssignmentStmtBoundNode>>>
-    {
-        auto* const lhsExprTypeSymbol =
-            m_LHSExpr->GetTypeInfo().Symbol->GetWithoutRef();
-
-        ACE_TRY(cchConvertedAndCheckedLHSExpr, CreateImplicitlyConvertedAndTypeChecked(
-            m_LHSExpr,
-            TypeInfo{ lhsExprTypeSymbol, ValueKind::L }
-        ));
-
-        ACE_TRY(cchConvertedAndCheckedRHSExpr, CreateImplicitlyConvertedAndTypeChecked(
-            m_RHSExpr,
-            TypeInfo{ lhsExprTypeSymbol, ValueKind::R }
-        ));
-
-        if (
-            !cchConvertedAndCheckedLHSExpr.IsChanged &&
-            !cchConvertedAndCheckedRHSExpr.IsChanged
-            )
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const NormalAssignmentStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchConvertedAndCheckedLHSExpr.Value,
-            cchConvertedAndCheckedRHSExpr.Value
-        ));
-    }
-
-    auto NormalAssignmentStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto NormalAssignmentStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const NormalAssignmentStmtBoundNode>>
-    {
-        const auto cchLoweredRHSExpr = m_RHSExpr->GetOrCreateLoweredExpr({});
-        const auto cchLoweredLHSExpr = m_LHSExpr->GetOrCreateLoweredExpr({});
-
-        if (
-            !cchLoweredLHSExpr.IsChanged &&
-            !cchLoweredRHSExpr.IsChanged
-            )
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const NormalAssignmentStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchLoweredLHSExpr.Value,
-            cchLoweredRHSExpr.Value
-        )->GetOrCreateLowered({}).Value);
-    }
-
-    auto NormalAssignmentStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto NormalAssignmentStmtBoundNode::Emit(Emitter& emitter) const -> void

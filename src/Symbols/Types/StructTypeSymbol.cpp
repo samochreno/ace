@@ -8,6 +8,7 @@
 #include "AccessModifier.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Diagnostic.hpp"
+#include "Diagnostics/BindingDiagnostics.hpp"
 #include "Emittable.hpp"
 #include "GlueGeneration.hpp"
 
@@ -62,32 +63,56 @@ namespace Ace
 
         const auto expSizeKind = [&]() -> Expected<TypeSizeKind>
         {
-            // If size resolution is already in progress,
-            // we have detected a circular dependency
-            ACE_TRY_ASSERT(!m_IsResolvingSize);
-            m_IsResolvingSize = true;
+            DiagnosticBag diagnostics{};
+
+            if (m_ResolvingVar.has_value())
+            {
+                return diagnostics.Add(CreateStructVarCausesCycleError(
+                    m_ResolvingVar.value()
+                ));
+            }
 
             if (m_IsPrimitivelyEmittable)
             {
-                return TypeSizeKind::Sized;
+                return Expected{ TypeSizeKind::Sized, diagnostics };
             }
 
             if (m_IsUnsized)
             {
-                return TypeSizeKind::Unsized;
+                return Expected{ TypeSizeKind::Unsized, diagnostics };
             }
 
-            const auto canResolveSize = TransformExpectedVector(CollectVars(),
-            [](const InstanceVarSymbol* const var) -> Expected<void>
-            {
-                ACE_TRY(sizeKind, var->GetType()->GetSizeKind());
-                ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
-                return Void{};
-            });
-            
-            m_IsResolvingSize = false;
+            const auto vars = CollectVars();
+            const auto unsizedVarIt = std::find_if_not(
+                begin(vars),
+                end  (vars),
+                [&](InstanceVarSymbol* const var)
+                {
+                    m_ResolvingVar = var;
 
-            ACE_TRY_ASSERT(canResolveSize);
+                    const auto expSizeKind = var->GetType()->GetSizeKind();
+                    diagnostics.Add(expSizeKind);
+                    if (!expSizeKind)
+                    {
+                        return false;
+                    }
+
+                    if (expSizeKind.Unwrap() == TypeSizeKind::Unsized)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+            );
+
+            m_ResolvingVar = std::nullopt;
+
+            if (unsizedVarIt != end(vars))
+            {
+                return diagnostics;
+            }
+
             return TypeSizeKind::Sized;
         }();
 

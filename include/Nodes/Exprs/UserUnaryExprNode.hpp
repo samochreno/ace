@@ -8,6 +8,7 @@
 #include "SrcLocation.hpp"
 #include "Op.hpp"
 #include "Scope.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
@@ -20,7 +21,7 @@ namespace Ace
         UserUnaryExprNode(
             const SrcLocation& srcLocation,
             const std::shared_ptr<const IExprNode>& expr,
-            const Op op
+            const Op& op
         );
         virtual ~UserUnaryExprNode() = default;
 
@@ -33,8 +34,8 @@ namespace Ace
         auto CloneInScopeExpr(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IExprNode> final;
-        auto CreateBound() const -> std::shared_ptr<const UserUnaryExprBoundNode> final;
-        auto CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode> final;
+        auto CreateBound() const -> Diagnosed<std::shared_ptr<const UserUnaryExprBoundNode>> final;
+        auto CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>> final;
             
     private:
         SrcLocation m_SrcLocation{};

@@ -17,7 +17,6 @@
 #include "AccessModifier.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
-#include "SpecialIdent.hpp"
 
 namespace Ace
 {
@@ -46,7 +45,7 @@ namespace Ace
         auto CloneInScope(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const FunctionNode> final;
-        auto CreateBound() const -> std::shared_ptr<const FunctionBoundNode> final;
+        auto CreateBound() const -> Diagnosed<std::shared_ptr<const FunctionBoundNode>> final;
 
         auto GetName() const -> const Ident& final;
 

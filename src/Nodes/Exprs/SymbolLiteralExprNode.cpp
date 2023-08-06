@@ -55,7 +55,7 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto SymbolLiteralExprNode::CreateBound() const -> std::shared_ptr<const StaticVarRefExprBoundNode>
+    auto SymbolLiteralExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const StaticVarRefExprBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
@@ -68,15 +68,18 @@ namespace Ace
             GetCompilation()->GetErrorSymbols().GetVar()
         );
 
-        return std::make_shared<const StaticVarRefExprBoundNode>(
+        return Diagnosed
+        {
+            std::make_shared<const StaticVarRefExprBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                varSymbol
+            ),
             diagnostics,
-            GetSrcLocation(),
-            GetScope(),
-            varSymbol
-        );
+        };
     }
 
-    auto SymbolLiteralExprNode::CreateBoundExpr() const -> std::shared_ptr<const IExprBoundNode>
+    auto SymbolLiteralExprNode::CreateBoundExpr() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
         return CreateBound();
     }

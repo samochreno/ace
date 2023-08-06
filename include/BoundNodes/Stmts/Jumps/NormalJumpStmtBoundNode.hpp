@@ -4,58 +4,47 @@
 #include <vector>
 
 #include "BoundNodes/Stmts/Jumps/JumpStmtBoundNode.hpp"
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
-#include "Scope.hpp"
 #include "Symbols/LabelSymbol.hpp"
-#include "Cacheable.hpp"
+#include "Scope.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
     class NormalJumpStmtBoundNode :
         public std::enable_shared_from_this<NormalJumpStmtBoundNode>,
         public virtual IJumpStmtBoundNode,
-        public virtual ICloneableWithDiagnosticsBoundNode<NormalJumpStmtBoundNode>,
         public virtual ITypeCheckableBoundNode<NormalJumpStmtBoundNode, StmtTypeCheckingContext>,
         public virtual ILowerableBoundNode<NormalJumpStmtBoundNode>
     {
     public:
         NormalJumpStmtBoundNode(
-            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             LabelSymbol* const labelSymbol
         );
         virtual ~NormalJumpStmtBoundNode() = default;
 
-        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
-        auto CloneWithDiagnostics(
-            DiagnosticBag diagnostics
+        auto CreateTypeChecked(
+            const StmtTypeCheckingContext& context
+        ) const -> Diagnosed<std::shared_ptr<const NormalJumpStmtBoundNode>> final;
+        auto CreateTypeCheckedStmt(
+            const StmtTypeCheckingContext& context
+        ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>> final;
+        auto CreateLowered(
+            const LoweringContext& context
         ) const -> std::shared_ptr<const NormalJumpStmtBoundNode> final;
-        auto CloneWithDiagnosticsStmt(
-            DiagnosticBag diagnostics
+        auto CreateLoweredStmt(
+            const LoweringContext& context
         ) const -> std::shared_ptr<const IStmtBoundNode> final;
-        auto GetOrCreateTypeChecked(
-            const StmtTypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const NormalJumpStmtBoundNode>>> final;
-        auto GetOrCreateTypeCheckedStmt(
-            const StmtTypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>> final;
-        auto GetOrCreateLowered(
-            const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const NormalJumpStmtBoundNode>> final;
-        auto GetOrCreateLoweredStmt(
-            const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>> final;
         auto Emit(Emitter& emitter) const -> void final;
 
         auto GetLabelSymbol() const -> LabelSymbol* final;
 
     private:
-        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
         LabelSymbol* m_LabelSymbol{};

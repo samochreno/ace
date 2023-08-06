@@ -8,24 +8,21 @@
 #include "BoundNodes/ImplBoundNode.hpp"
 #include "BoundNodes/FunctionBoundNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/ModuleSymbol.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
     class ModuleBoundNode : 
         public std::enable_shared_from_this<ModuleBoundNode>,
         public virtual IBoundNode,
-        public virtual ICloneableWithDiagnosticsBoundNode<ModuleBoundNode>,
         public virtual ITypeCheckableBoundNode<ModuleBoundNode>,
         public virtual ILowerableBoundNode<ModuleBoundNode>
     {
     public:
         ModuleBoundNode(
-            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             ModuleSymbol* const symbol,
             const std::vector<std::shared_ptr<const ModuleBoundNode>>& modules,
@@ -36,22 +33,17 @@ namespace Ace
         );
         virtual ~ModuleBoundNode() = default;
 
-        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
-        auto CloneWithDiagnostics(
-            DiagnosticBag diagnostics
-        ) const -> std::shared_ptr<const ModuleBoundNode> final;
-        auto GetOrCreateTypeChecked(
+        auto CreateTypeChecked(
             const TypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const ModuleBoundNode>>> final;
-        auto GetOrCreateLowered(
+        ) const -> Diagnosed<std::shared_ptr<const ModuleBoundNode>> final;
+        auto CreateLowered(
             const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const ModuleBoundNode>> final;
+        ) const -> std::shared_ptr<const ModuleBoundNode> final;
 
     private:
-        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         ModuleSymbol* m_Symbol{};
         std::vector<std::shared_ptr<const ModuleBoundNode>> m_Modules{};

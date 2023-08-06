@@ -72,21 +72,30 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto ReturnStmtNode::CreateBound() const -> std::shared_ptr<const ReturnStmtBoundNode>
+    auto ReturnStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const ReturnStmtBoundNode>>
     {
-        const auto boundOptExpr = m_OptExpr.has_value() ?
-            std::optional{ m_OptExpr.value()->CreateBoundExpr() } :
-            std::nullopt;
+        DiagnosticBag diagnostics{};
 
-        return std::make_shared<const ReturnStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            boundOptExpr
-        );
+        std::optional<std::shared_ptr<const IExprBoundNode>> boundOptExpr{};
+        if (m_OptExpr.has_value())
+        {
+            const auto dgnBoundExpr = m_OptExpr.value()->CreateBoundExpr();
+            diagnostics.Add(dgnBoundExpr);
+            boundOptExpr = dgnBoundExpr.Unwrap();
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const ReturnStmtBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                boundOptExpr
+            ),
+            diagnostics,
+        };
     }
 
-    auto ReturnStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
+    auto ReturnStmtNode::CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

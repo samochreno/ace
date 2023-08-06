@@ -64,7 +64,7 @@ namespace Ace
         Ident m_Name{};
         AccessModifier m_AccessModifier{};
 
-        mutable bool m_IsResolvingSize{};
+        mutable std::optional<InstanceVarSymbol*> m_ResolvingVar{};
         mutable std::optional<Expected<TypeSizeKind>> m_OptSizeKindCache{};
         bool m_IsUnsized{};
         bool m_IsPrimitivelyEmittable{};

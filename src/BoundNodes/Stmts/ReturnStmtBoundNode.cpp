@@ -3,10 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
+#include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
@@ -14,20 +14,13 @@
 namespace Ace
 {
     ReturnStmtBoundNode::ReturnStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::optional<std::shared_ptr<const IExprBoundNode>>& optExpr
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_OptExpr{ optExpr }
     {
-    }
-
-    auto ReturnStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto ReturnStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -52,109 +45,136 @@ namespace Ace
         return children;
     }
 
-    auto ReturnStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    static auto DiagnoseMissingOrUnexpectedExpr(
+        const SrcLocation& srcLocation,
+        ITypeSymbol* const functionTypeSymbol,
+        const std::optional<std::shared_ptr<const IExprBoundNode>>& optExpr
+    ) -> Diagnosed<void>
+    {
+        DiagnosticBag diagnostics{};
+
+        auto* const compilation = functionTypeSymbol->GetCompilation();
+
+        const bool isFunctionTypeVoid =
+            functionTypeSymbol == compilation->GetNatives()->Void.GetSymbol();
+
+        if (!isFunctionTypeVoid && !optExpr.has_value())
+        {
+            diagnostics.Add(CreateMissingReturnExprError(srcLocation));
+        }
+
+        if (isFunctionTypeVoid && optExpr.has_value())
+        {
+            diagnostics.Add(CreateReturningExprFromVoidFunctionError(
+                optExpr.value()->GetSrcLocation()
+            ));
+        }
+
+        return Diagnosed<void>{ diagnostics };
+    }
+
+    static auto DiagnoseUnsizedExpr(
+        const std::optional<std::shared_ptr<const IExprBoundNode>>& optExpr
+    ) -> Diagnosed<void>
+    {
+        DiagnosticBag diagnostics{};
+
+        if (!optExpr.has_value())
+        {
+            return Diagnosed<void>{ diagnostics };
+        }
+
+        const auto& expr = optExpr.value();
+
+        auto* const exprTypeSymbol = expr->GetTypeInfo().Symbol->GetUnaliased();
+
+        const auto expExprTypeSizeKind = exprTypeSymbol->GetSizeKind();
+        const bool isExprTypeUnsized = 
+            (expExprTypeSizeKind) &&
+            (expExprTypeSizeKind.Unwrap() == TypeSizeKind::Unsized);
+
+        if (isExprTypeUnsized)
+        {
+            diagnostics.Add(CreateReturningUnsizedExprError(
+                expr->GetSrcLocation()
+            ));
+        }
+
+        return Diagnosed<void>{ diagnostics };
+    }
+
+    auto ReturnStmtBoundNode::CreateTypeChecked(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const ReturnStmtBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        diagnostics.Add(DiagnoseMissingOrUnexpectedExpr(
+            GetSrcLocation(),
+            context.ParentFunctionTypeSymbol,
+            m_OptExpr
+        ));
+        diagnostics.Add(DiagnoseUnsizedExpr(m_OptExpr));
+
+        std::optional<std::shared_ptr<const IExprBoundNode>> checkedOptExpr{};
+        if (m_OptExpr.has_value())
+        {
+            const auto dgnExpr = CreateImplicitlyConvertedAndTypeChecked(
+                m_OptExpr.value(),
+                TypeInfo{ context.ParentFunctionTypeSymbol, ValueKind::R }
+            );
+            diagnostics.Add(dgnExpr);
+            checkedOptExpr = dgnExpr.Unwrap();
+        }
+
+        if (checkedOptExpr == m_OptExpr)
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const ReturnStmtBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                checkedOptExpr
+            ),
+            diagnostics,
+        };
+    }
+
+    auto ReturnStmtBoundNode::CreateTypeCheckedStmt(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto ReturnStmtBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const ReturnStmtBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        const auto loweredOptExpr = m_OptExpr.has_value() ?
+            std::optional{ m_OptExpr.value()->CreateLoweredExpr({}) } :
+            std::nullopt;
+
+        if (loweredOptExpr == m_OptExpr)
         {
             return shared_from_this();
         }
 
         return std::make_shared<const ReturnStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
             GetScope(),
-            m_OptExpr
-        );
+            loweredOptExpr
+        )->CreateLowered({});
     }
 
-    auto ReturnStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
+    auto ReturnStmtBoundNode::CreateLoweredStmt(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto ReturnStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const ReturnStmtBoundNode>>>
-    {
-        const bool isFunctionTypeVoid = 
-            context.ParentFunctionTypeSymbol == 
-            GetCompilation()->GetNatives()->Void.GetSymbol();
-
-        ACE_TRY_ASSERT(m_OptExpr.has_value() != isFunctionTypeVoid);
-
-        if (m_OptExpr.has_value())
-        {
-            auto* const exprTypeSymbol = 
-                m_OptExpr.value()->GetTypeInfo().Symbol->GetUnaliased();
-
-            const bool isExprTypeVoid = 
-                exprTypeSymbol ==
-                GetCompilation()->GetNatives()->Void.GetSymbol();
-
-            ACE_TRY_ASSERT(!isExprTypeVoid);
-        }
-
-        ACE_TRY(cchCheckedOptExpr, TransformExpectedCacheableOptional(m_OptExpr,
-        [&](const std::shared_ptr<const IExprBoundNode>& expr)
-        {
-            return CreateImplicitlyConvertedAndTypeChecked(
-                expr,
-                { context.ParentFunctionTypeSymbol, ValueKind::R }
-            );
-        }));
-
-        if (!cchCheckedOptExpr.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const ReturnStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            cchCheckedOptExpr.Value
-        ));
-    }
-
-    auto ReturnStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto ReturnStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const ReturnStmtBoundNode>>
-    {
-        const auto cchLoweredOptExpr = TransformCacheableOptional(m_OptExpr,
-        [&](const std::shared_ptr<const IExprBoundNode>& expr)
-        {
-            return expr->GetOrCreateLoweredExpr({});
-        });
-
-        if (!cchLoweredOptExpr.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const ReturnStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            cchLoweredOptExpr.Value
-        )->GetOrCreateLowered(context).Value);
-    }
-
-    auto ReturnStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto ReturnStmtBoundNode::Emit(Emitter& emitter) const -> void

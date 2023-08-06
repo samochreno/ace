@@ -134,8 +134,10 @@ namespace Ace
         );
     }
 
-    auto FunctionNode::CreateBound() const -> std::shared_ptr<const FunctionBoundNode>
+    auto FunctionNode::CreateBound() const -> Diagnosed<std::shared_ptr<const FunctionBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         std::vector<std::shared_ptr<const AttributeBoundNode>> boundAttributes{};
         std::transform(
             begin(m_Attributes),
@@ -143,13 +145,19 @@ namespace Ace
             back_inserter(boundAttributes),
             [&](const std::shared_ptr<const AttributeNode>& attribute)
             {
-                return attribute->CreateBound();
+                const auto dgnBoundAttribute = attribute->CreateBound();
+                diagnostics.Add(dgnBoundAttribute);
+                return dgnBoundAttribute.Unwrap();
             }
         );
 
-        const auto boundOptSelf = m_OptSelf.has_value() ?
-            std::optional{ m_OptSelf.value()->CreateBound() } :
-            std::nullopt;
+        std::optional<std::shared_ptr<const SelfParamVarBoundNode>> boundOptSelf{};
+        if (m_OptSelf.has_value())
+        {
+            const auto dgnBoundSelf = m_OptSelf.value()->CreateBound();
+            diagnostics.Add(dgnBoundSelf);
+            boundOptSelf = dgnBoundSelf.Unwrap();
+        }
 
         std::vector<std::shared_ptr<const NormalParamVarBoundNode>> boundParams{};
         std::transform(
@@ -158,13 +166,19 @@ namespace Ace
             back_inserter(boundParams),
             [&](const std::shared_ptr<const NormalParamVarNode>& param)
             {
-                return param->CreateBound();
+                const auto dgnBoundParam = param->CreateBound();
+                diagnostics.Add(dgnBoundParam);
+                return dgnBoundParam.Unwrap();
             }
         );
 
-        const auto boundOptBody = m_OptBody.has_value() ?
-            std::optional{ m_OptBody.value()->CreateBound() } :
-            std::nullopt;
+        std::optional<std::shared_ptr<const BlockStmtBoundNode>> boundOptBody{};
+        if (m_OptBody.has_value())
+        {
+            const auto dgnBoundBody = m_OptBody.value()->CreateBound();
+            diagnostics.Add(dgnBoundBody);
+            boundOptBody = dgnBoundBody.Unwrap();
+        }
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<FunctionSymbol>(
             m_Name,
@@ -172,15 +186,18 @@ namespace Ace
             m_SelfScope->CollectTemplateArgs()
         ).Unwrap();
 
-        return std::make_shared<const FunctionBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            selfSymbol,
-            boundAttributes,
-            boundOptSelf,
-            boundParams,
-            boundOptBody
-        );
+        return Diagnosed
+        {
+            std::make_shared<const FunctionBoundNode>(
+                GetSrcLocation(),
+                selfSymbol,
+                boundAttributes,
+                boundOptSelf,
+                boundParams,
+                boundOptBody
+            ),
+            diagnostics,
+        };
     }
 
     auto FunctionNode::GetName() const -> const Ident&

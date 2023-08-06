@@ -4,7 +4,6 @@
 #include <vector>
 #include <optional>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
@@ -12,31 +11,24 @@
 #include "BoundNodes/Vars/Params/NormalParamVarBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
     FunctionBoundNode::FunctionBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         FunctionSymbol* const symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
         const std::optional<const std::shared_ptr<const SelfParamVarBoundNode>>& optSelf,
         const std::vector<std::shared_ptr<const NormalParamVarBoundNode>>& params,
         const std::optional<std::shared_ptr<const BlockStmtBoundNode>>& optBody
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_Attributes{ attributes },
         m_OptSelf{ optSelf },
         m_Params{ params },
         m_OptBody{ optBody }
     {
-    }
-
-    auto FunctionBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto FunctionBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -70,122 +62,134 @@ namespace Ace
         return children;
     }
 
-    auto FunctionBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto FunctionBoundNode::CreateTypeChecked(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const FunctionBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::vector<std::shared_ptr<const AttributeBoundNode>> checkedAttributes{};
+        std::transform(
+            begin(m_Attributes),
+            end  (m_Attributes),
+            std::back_inserter(checkedAttributes),
+            [&](const std::shared_ptr<const AttributeBoundNode>& attribute)
+            {
+                const auto dgnCheckedAttribute =
+                    attribute->CreateTypeChecked({});
+                diagnostics.Add(dgnCheckedAttribute);
+                return dgnCheckedAttribute.Unwrap();
+            }
+        );
+
+        std::optional<std::shared_ptr<const SelfParamVarBoundNode>> checkedOptSelf{};
+        if (m_OptSelf.has_value())
+        {
+            const auto dgnCheckedOptSelf =
+                m_OptSelf.value()->CreateTypeChecked({});
+            diagnostics.Add(dgnCheckedOptSelf);
+            checkedOptSelf = dgnCheckedOptSelf.Unwrap();
+        }
+
+        std::vector<std::shared_ptr<const NormalParamVarBoundNode>> checkedParams{};
+        std::transform(
+            begin(m_Params),
+            end  (m_Params),
+            std::back_inserter(checkedParams),
+            [&](const std::shared_ptr<const NormalParamVarBoundNode>& param)
+            {
+                const auto dgnCheckedParam = param->CreateTypeChecked({});
+                diagnostics.Add(dgnCheckedParam);
+                return dgnCheckedParam.Unwrap();
+            }
+        );
+
+        std::optional<std::shared_ptr<const BlockStmtBoundNode>> checkedOptBody{};
+        if (m_OptBody.has_value())
+        {
+            const auto dgnCheckedOptBody = m_OptBody.value()->CreateTypeChecked({
+                m_Symbol->GetType()
+            });
+            diagnostics.Add(dgnCheckedOptBody);
+            checkedOptBody = dgnCheckedOptBody.Unwrap();
+        }
+
+        if (
+            (checkedAttributes == m_Attributes) &&
+            (checkedOptSelf == m_OptSelf) &&
+            (checkedParams == m_Params) &&
+            (checkedOptBody == m_OptBody)
+            )
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const FunctionBoundNode>(
+                GetSrcLocation(),
+                m_Symbol,
+                checkedAttributes,
+                checkedOptSelf,
+                checkedParams,
+                checkedOptBody
+            ),
+            diagnostics,
+        };
+    }
+
+    auto FunctionBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const FunctionBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        std::vector<std::shared_ptr<const AttributeBoundNode>> loweredAttributes{};
+        std::transform(
+            begin(m_Attributes),
+            end  (m_Attributes),
+            std::back_inserter(loweredAttributes),
+            [&](const std::shared_ptr<const AttributeBoundNode>& attribute)
+            {
+                return attribute->CreateLowered({});
+            }
+        );
+        
+        const auto loweredOptSelf = m_OptSelf.has_value() ?
+            std::optional{ m_OptSelf.value()->CreateLowered({}) } :
+            std::nullopt;
+
+        std::vector<std::shared_ptr<const NormalParamVarBoundNode>> loweredParams{};
+        std::transform(
+            begin(m_Params),
+            end  (m_Params),
+            std::back_inserter(loweredParams),
+            [&](const std::shared_ptr<const NormalParamVarBoundNode>& param)
+            {
+                return param->CreateLowered({});
+            }
+        );
+
+        const auto loweredOptBody = m_OptBody.has_value() ?
+            std::optional{ m_OptBody.value()->CreateLowered({}) } :
+            std::nullopt;
+
+        if (
+            (loweredAttributes == m_Attributes) && 
+            (loweredOptSelf == m_OptSelf) &&
+            (loweredParams == m_Params) && 
+            (loweredOptBody == m_OptBody)
+            )
         {
             return shared_from_this();
         }
 
         return std::make_shared<const FunctionBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            GetSymbol(),
-            m_Attributes,
-            m_OptSelf,
-            m_Params,
-            GetBody()
-        );
-    }
-
-    auto FunctionBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const FunctionBoundNode>>>
-    {
-        ACE_TRY(cchCheckedAttributes, TransformExpectedCacheableVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeBoundNode>& attribute)
-        {
-            return attribute->GetOrCreateTypeChecked({});
-        }));
-
-        ACE_TRY(cchCheckedOptSelf, TransformExpectedCacheableOptional(m_OptSelf,
-        [](const std::shared_ptr<const SelfParamVarBoundNode>& self)
-        {
-            return self->GetOrCreateTypeChecked({});
-        }));
-
-        ACE_TRY(cchCheckedParams, TransformExpectedCacheableVector(m_Params,
-        [](const std::shared_ptr<const NormalParamVarBoundNode>& param)
-        {
-            return param->GetOrCreateTypeChecked({});
-        }));
-
-        ACE_TRY(cchCheckedOptBody, TransformExpectedCacheableOptional(m_OptBody,
-        [&](const std::shared_ptr<const BlockStmtBoundNode>& body)
-        {
-            return body->GetOrCreateTypeChecked({ m_Symbol->GetType() });
-        }));
-
-        if (
-            !cchCheckedAttributes.IsChanged &&
-            !cchCheckedOptSelf.IsChanged && 
-            !cchCheckedParams.IsChanged && 
-            !cchCheckedOptBody.IsChanged
-            )
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const FunctionBoundNode>(
-            DiagnosticBag{},
             GetSrcLocation(),
             m_Symbol,
-            cchCheckedAttributes.Value,
-            cchCheckedOptSelf.Value,
-            cchCheckedParams.Value,
-            cchCheckedOptBody.Value
-        ));
-    }
-
-    auto FunctionBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const FunctionBoundNode>>
-    {
-        const auto cchLoweredAttributes = TransformCacheableVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeBoundNode>& attribute)
-        {
-            return attribute->GetOrCreateLowered({});
-        });
-        
-        const auto cchLoweredOptSelf = TransformCacheableOptional(m_OptSelf,
-        [](const std::shared_ptr<const SelfParamVarBoundNode>& self)
-        {
-            return self->GetOrCreateLowered({});
-        });
-
-        const auto cchLoweredParams = TransformCacheableVector(m_Params,
-        [](const std::shared_ptr<const NormalParamVarBoundNode>& param)
-        {
-            return param->GetOrCreateLowered({});
-        });
-
-        const auto cchLoweredOptBody = TransformCacheableOptional(m_OptBody,
-        [](const std::shared_ptr<const BlockStmtBoundNode>& body)
-        {
-            return body->GetOrCreateLowered({});
-        });
-
-        if (
-            !cchLoweredAttributes.IsChanged && 
-            !cchLoweredOptSelf.IsChanged &&
-            !cchLoweredParams.IsChanged && 
-            !cchLoweredOptBody.IsChanged
-            )
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const FunctionBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_Symbol,
-            cchLoweredAttributes.Value,
-            cchLoweredOptSelf.Value,
-            cchLoweredParams.Value,
-            cchLoweredOptBody.Value
-        )->GetOrCreateLowered({}).Value);
+            loweredAttributes,
+            loweredOptSelf,
+            loweredParams,
+            loweredOptBody
+        )->CreateLowered({});
     }
 
     auto FunctionBoundNode::GetSymbol() const -> FunctionSymbol*

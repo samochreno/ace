@@ -3,27 +3,19 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 #include "Emitter.hpp"
 
 namespace Ace
 {
     ExitStmtBoundNode::ExitStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope }
     {
-    }
-
-    auto ExitStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto ExitStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -41,55 +33,32 @@ namespace Ace
         return {};
     }
 
-    auto ExitStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto ExitStmtBoundNode::CreateTypeChecked(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const ExitStmtBoundNode>>
+    {
+        return Diagnosed{ shared_from_this(), DiagnosticBag{} };
+    }
+
+    auto ExitStmtBoundNode::CreateTypeCheckedStmt(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto ExitStmtBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const ExitStmtBoundNode>
     {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<const ExitStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            GetScope()
-        );
-    }
-
-    auto ExitStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const IStmtBoundNode>
-    {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto ExitStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const ExitStmtBoundNode>>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto ExitStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto ExitStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const ExitStmtBoundNode>>
-    {
-        return CreateUnchanged(shared_from_this());
+        return shared_from_this();
     }
     
-    auto ExitStmtBoundNode::GetOrCreateLoweredStmt(
+    auto ExitStmtBoundNode::CreateLoweredStmt(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto ExitStmtBoundNode::Emit(Emitter& emitter) const -> void

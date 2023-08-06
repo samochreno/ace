@@ -11,7 +11,6 @@
 #include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
-#include "Cacheable.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
@@ -19,20 +18,13 @@
 namespace Ace
 {
     VarStmtBoundNode::VarStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         LocalVarSymbol* const symbol,
         const std::optional<std::shared_ptr<const IExprBoundNode>>& optAssignedExpr
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_OptAssignedExpr{ optAssignedExpr }
     {
-    }
-
-    auto VarStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto VarStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -57,90 +49,71 @@ namespace Ace
         return children;
     }
 
-    auto VarStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto VarStmtBoundNode::CreateTypeChecked(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const VarStmtBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::optional<std::shared_ptr<const IExprBoundNode>> checkedOptAssignedExpr{};
+        if (m_OptAssignedExpr.has_value())
+        {
+            const auto dgnCheckedAssignedExpr = CreateImplicitlyConvertedAndTypeChecked(
+                m_OptAssignedExpr.value(),
+                TypeInfo{ m_Symbol->GetType(), ValueKind::R }
+            );
+            diagnostics.Add(dgnCheckedAssignedExpr);
+            checkedOptAssignedExpr = dgnCheckedAssignedExpr.Unwrap();
+        }
+
+        if (checkedOptAssignedExpr == m_OptAssignedExpr)
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const VarStmtBoundNode>(
+                GetSrcLocation(),
+                m_Symbol,
+                checkedOptAssignedExpr
+            ),
+            diagnostics,
+        };
+    }
+
+    auto VarStmtBoundNode::CreateTypeCheckedStmt(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto VarStmtBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const VarStmtBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        const auto loweredOptAssignedExpr = m_OptAssignedExpr.has_value() ?
+            std::optional{ m_OptAssignedExpr.value()->CreateLoweredExpr({}) } :
+            std::nullopt;
+
+        if (loweredOptAssignedExpr == m_OptAssignedExpr)
         {
             return shared_from_this();
         }
 
         return std::make_shared<const VarStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
-            GetSymbol(),
-            m_OptAssignedExpr
-        );
+            m_Symbol,
+            loweredOptAssignedExpr
+        )->CreateLowered({});
     }
 
-    auto VarStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
+    auto VarStmtBoundNode::CreateLoweredStmt(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto VarStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const VarStmtBoundNode>>>
-    {
-        ACE_TRY(sizeKind, m_Symbol->GetType()->GetSizeKind());
-        ACE_TRY_ASSERT(sizeKind == TypeSizeKind::Sized);
-
-        ACE_TRY(cchConvertedAndCheckedOptAssignedExpr, CreateImplicitlyConvertedAndTypeCheckedOptional(
-            m_OptAssignedExpr,
-            TypeInfo{ m_Symbol->GetType(), ValueKind::R }
-        ));
-
-        if (!cchConvertedAndCheckedOptAssignedExpr.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const VarStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_Symbol,
-            cchConvertedAndCheckedOptAssignedExpr.Value
-        ));
-    }
-
-    auto VarStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto VarStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const VarStmtBoundNode>>
-    {
-        const auto cchLoweredOptAssignedExpr = TransformCacheableOptional(m_OptAssignedExpr,
-        [](const std::shared_ptr<const IExprBoundNode>& expr)
-        {
-            return expr->GetOrCreateLoweredExpr({});
-        });
-
-        if (!cchLoweredOptAssignedExpr.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const VarStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_Symbol,
-            cchLoweredOptAssignedExpr.Value
-        )->GetOrCreateLowered(context).Value);
-    }
-
-    auto VarStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto VarStmtBoundNode::Emit(Emitter& emitter) const -> void
@@ -151,7 +124,6 @@ namespace Ace
         }
 
         const auto varRefExpr = std::make_shared<const StaticVarRefExprBoundNode>(
-            DiagnosticBag{},
             m_Symbol->GetName().SrcLocation,
             GetScope(),
             m_Symbol
@@ -160,7 +132,6 @@ namespace Ace
         // Without type checking and implicit conversions,
         // refs can be initialized too
         const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
-            DiagnosticBag{},
             GetSrcLocation(),
             varRefExpr,
             m_OptAssignedExpr.value()

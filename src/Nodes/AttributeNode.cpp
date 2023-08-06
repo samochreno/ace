@@ -47,15 +47,21 @@ namespace Ace
         );
     }
 
-    auto AttributeNode::CreateBound() const -> std::shared_ptr<const AttributeBoundNode>
+    auto AttributeNode::CreateBound() const -> Diagnosed<std::shared_ptr<const AttributeBoundNode>>
     {
-        const auto boundStructConstructionExpr =
-            m_StructConstructionExpr->CreateBound();
+        DiagnosticBag diagnostics{};
 
-        return std::make_shared<const AttributeBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            boundStructConstructionExpr
-        );
+        const auto dgnBoundStructConstructionExpr =
+            m_StructConstructionExpr->CreateBound();
+        diagnostics.Add(dgnBoundStructConstructionExpr);
+
+        return Diagnosed
+        {
+            std::make_shared<const AttributeBoundNode>(
+                GetSrcLocation(),
+                dgnBoundStructConstructionExpr.Unwrap()
+            ),
+            diagnostics,
+        };
     }
 }

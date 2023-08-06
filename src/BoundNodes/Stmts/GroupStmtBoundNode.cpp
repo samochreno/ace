@@ -3,28 +3,20 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
     GroupStmtBoundNode::GroupStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::vector<std::shared_ptr<const IStmtBoundNode>>& stmts
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Stmts{ stmts }
     {
-    }
-
-    auto GroupStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto GroupStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -46,90 +38,82 @@ namespace Ace
         return children;
     }
 
-    auto GroupStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto GroupStmtBoundNode::CreateTypeChecked(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const GroupStmtBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::vector<std::shared_ptr<const IStmtBoundNode>> checkedStmts{};
+        std::transform(
+            begin(m_Stmts),
+            end  (m_Stmts),
+            back_inserter(checkedStmts),
+            [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
+            {
+                const auto dgnCheckedStmt = stmt->CreateTypeCheckedStmt({
+                    context.ParentFunctionTypeSymbol
+                });
+                diagnostics.Add(dgnCheckedStmt);
+                return dgnCheckedStmt.Unwrap();
+            }
+        );
+
+        if (checkedStmts == m_Stmts)
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const GroupStmtBoundNode>(
+                GetSrcLocation(),
+                GetScope(),
+                checkedStmts
+            ),
+            diagnostics,
+        };
+    }
+
+    auto GroupStmtBoundNode::CreateTypeCheckedStmt(
+        const StmtTypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto GroupStmtBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const GroupStmtBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        std::vector<std::shared_ptr<const IStmtBoundNode>> loweredStmts{};
+        std::transform(
+            begin(m_Stmts),
+            end  (m_Stmts),
+            back_inserter(loweredStmts),
+            [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
+            {
+                return stmt->CreateLoweredStmt({});
+            }
+        );
+
+        if (loweredStmts == m_Stmts)
         {
             return shared_from_this();
         }
 
         return std::make_shared<const GroupStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
             GetScope(),
-            m_Stmts
-        );
+            loweredStmts
+        )->CreateLowered({});
     }
 
-    auto GroupStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
+    auto GroupStmtBoundNode::CreateLoweredStmt(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto GroupStmtBoundNode::GetOrCreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const GroupStmtBoundNode>>>
-    {
-        ACE_TRY(cchCheckedContent, TransformExpectedCacheableVector(m_Stmts,
-        [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
-        {
-            return stmt->GetOrCreateTypeCheckedStmt({
-                context.ParentFunctionTypeSymbol
-            });
-        }));
-
-        if (!cchCheckedContent.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            cchCheckedContent.Value
-        ));
-    }
-
-    auto GroupStmtBoundNode::GetOrCreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto GroupStmtBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const GroupStmtBoundNode>>
-    {
-        const auto cchLoweredStmts = TransformCacheableVector(m_Stmts,
-        [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
-        {
-            return stmt->GetOrCreateLoweredStmt({});
-        });
-
-        if (!cchLoweredStmts.IsChanged)
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            GetScope(),
-            cchLoweredStmts.Value
-        )->GetOrCreateLowered(context).Value);
-    }
-
-    auto GroupStmtBoundNode::GetOrCreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto GroupStmtBoundNode::Emit(Emitter& emitter) const -> void

@@ -1,4 +1,4 @@
-#include "Diagnostics/BindingDiagnostics.hpp"
+#include"Diagnostics/BindingDiagnostics.hpp"
 
 #include <memory>
 #include <string>
@@ -52,6 +52,36 @@ namespace Ace
             DiagnosticSeverity::Note,
             originalSymbol->GetName().SrcLocation,
             "previous definition"
+        );
+
+        return group;
+    }
+
+    auto CreateUnsizedSymbolTypeError(
+        ISymbol* const symbol
+    ) -> std::shared_ptr<const DiagnosticGroup>
+    {
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            symbol->GetName().SrcLocation,
+            "unsized " + CreateSymbolKindString(symbol->GetKind()) + " type"
+        );
+
+        return group;
+    }
+
+    auto CreateStructVarCausesCycleError(
+        InstanceVarSymbol* const varSymbol
+    ) -> std::shared_ptr<const DiagnosticGroup>
+    {
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            varSymbol->GetName().SrcLocation,
+            "field causes a cycle in struct layout"
         );
 
         return group;

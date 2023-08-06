@@ -3,33 +3,25 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
-#include "Symbols/Types/StructTypeSymbol.hpp"
+#include "Scope.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
-#include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Symbols/Types/StructTypeSymbol.hpp"
 
 namespace Ace
 {
     StructTypeBoundNode::StructTypeBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         StructTypeSymbol* const symbol,
         const std::vector<std::shared_ptr<const AttributeBoundNode>>& attributes,
         const std::vector<std::shared_ptr<const InstanceVarBoundNode>>& vars
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol },
         m_Attributes{ attributes },
         m_Vars{ vars }
     {
-    }
-
-    auto StructTypeBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto StructTypeBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -52,109 +44,105 @@ namespace Ace
         return children;
     }
 
-    auto StructTypeBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto StructTypeBoundNode::CreateTypeChecked(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const StructTypeBoundNode>>
+    {
+        DiagnosticBag diagnostics{};
+
+        std::vector<std::shared_ptr<const AttributeBoundNode>> checkedAttributes{};
+        std::transform(
+            begin(m_Attributes),
+            end  (m_Attributes),
+            back_inserter(checkedAttributes),
+            [&](const std::shared_ptr<const AttributeBoundNode>& attribute)
+            {
+                const auto dgnCheckedAttribute =
+                    attribute->CreateTypeChecked({});
+                diagnostics.Add(dgnCheckedAttribute);
+                return dgnCheckedAttribute.Unwrap();
+            }
+        );
+
+        std::vector<std::shared_ptr<const InstanceVarBoundNode>> checkedVars{};
+        std::transform(begin(m_Vars), end(m_Vars), back_inserter(checkedVars),
+        [&](const std::shared_ptr<const InstanceVarBoundNode>& var)
+        {
+            const auto dgnCheckedVar = var->CreateTypeChecked({});
+            diagnostics.Add(dgnCheckedVar);
+            return dgnCheckedVar.Unwrap();
+        });
+
+        if (
+            (checkedAttributes == m_Attributes) &&
+            (checkedVars == m_Vars) 
+            )
+        {
+            return Diagnosed{ shared_from_this(), diagnostics };
+        }
+
+        return Diagnosed
+        {
+            std::make_shared<const StructTypeBoundNode>(
+                GetSrcLocation(),
+                m_Symbol,
+                checkedAttributes,
+                checkedVars
+            ),
+            diagnostics,
+        };
+    }
+
+    auto StructTypeBoundNode::CreateTypeCheckedType(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const ITypeBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto StructTypeBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const StructTypeBoundNode>
     {
-        if (diagnostics.IsEmpty())
+        std::vector<std::shared_ptr<const AttributeBoundNode>> loweredAttributes{};
+        std::transform(
+            begin(m_Attributes),
+            end  (m_Attributes),
+            back_inserter(loweredAttributes),
+            [](const std::shared_ptr<const AttributeBoundNode>& attribute)
+            {
+                return attribute->CreateLowered({});
+            }
+        );
+
+        std::vector<std::shared_ptr<const InstanceVarBoundNode>> loweredVars{};
+        std::transform(begin(m_Vars), end(m_Vars), back_inserter(loweredVars),
+        [](const std::shared_ptr<const InstanceVarBoundNode>& var)
+        {
+            return var->CreateLowered({});
+        });
+
+        if (
+            (loweredAttributes == m_Attributes) &&
+            (loweredVars == m_Vars)
+            )
         {
             return shared_from_this();
         }
 
         return std::make_shared<const StructTypeBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
             GetSrcLocation(),
-            GetSymbol(),
-            m_Attributes,
-            m_Vars
-        );
+            m_Symbol,
+            loweredAttributes,
+            loweredVars
+        )->CreateLowered({});
     }
 
-    auto StructTypeBoundNode::CloneWithDiagnosticsType(
-        DiagnosticBag diagnostics
+    auto StructTypeBoundNode::CreateLoweredType(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const ITypeBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto StructTypeBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const StructTypeBoundNode>>>
-    {
-        ACE_TRY(cchCheckedAttributes, TransformExpectedCacheableVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeBoundNode>& attribute)
-        {
-            return attribute->GetOrCreateTypeChecked({});
-        }));
-
-        ACE_TRY(cchCheckedVars, TransformExpectedCacheableVector(m_Vars,
-        [](const std::shared_ptr<const InstanceVarBoundNode>& var)
-        {
-            return var->GetOrCreateTypeChecked({});
-        }));
-
-        if (
-            !cchCheckedAttributes.IsChanged &&
-            !cchCheckedVars.IsChanged
-            )
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const StructTypeBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_Symbol,
-            cchCheckedAttributes.Value,
-            cchCheckedVars.Value
-        ));
-    }
-
-    auto StructTypeBoundNode::GetOrCreateTypeCheckedType(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const ITypeBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto StructTypeBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const StructTypeBoundNode>>
-    {
-        const auto cchLoweredAttributes = TransformCacheableVector(m_Attributes,
-        [](const std::shared_ptr<const AttributeBoundNode>& attribute)
-        {
-            return attribute->GetOrCreateLowered({});
-        });
-
-        const auto cchLoweredVars = TransformCacheableVector(m_Vars,
-        [](const std::shared_ptr<const InstanceVarBoundNode>& var)
-        {
-            return var->GetOrCreateLowered({});
-        });
-
-        if (
-            !cchLoweredAttributes.IsChanged &&
-            !cchLoweredVars.IsChanged
-            )
-        {
-            return CreateUnchanged(shared_from_this());
-        }
-
-        return CreateChanged(std::make_shared<const StructTypeBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_Symbol,
-            cchLoweredAttributes.Value,
-            cchLoweredVars.Value
-        )->GetOrCreateLowered({}).Value);
-    }
-
-    auto StructTypeBoundNode::GetOrCreateLoweredType(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const ITypeBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto StructTypeBoundNode::GetSymbol() const -> StructTypeSymbol*

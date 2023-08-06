@@ -2989,9 +2989,14 @@ namespace Ace
             }
 
             parser.DiscardUntil(
-                DiscardKind::Inclusive,
-                TokenKind::Semicolon
+                DiscardKind::Exclusive,
+                { TokenKind::Semicolon, TokenKind::CloseBrace }
             );
+
+            if (parser.Peek() == TokenKind::Semicolon)
+            {
+                parser.Eat();
+            }
         }
 
         if (parser.Peek() == TokenKind::CloseBrace)

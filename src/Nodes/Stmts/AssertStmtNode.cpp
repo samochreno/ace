@@ -57,18 +57,24 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto AssertStmtNode::CreateBound() const -> std::shared_ptr<const AssertStmtBoundNode>
+    auto AssertStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const AssertStmtBoundNode>>
     {
-        const auto boundCondition = m_Condition->CreateBoundExpr();
+        DiagnosticBag diagnostics{};
+        
+        const auto dgnBoundCondition = m_Condition->CreateBoundExpr();
+        diagnostics.Add(dgnBoundCondition);
 
-        return std::make_shared<const AssertStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            boundCondition
-        );
+        return Diagnosed
+        {
+            std::make_shared<const AssertStmtBoundNode>(
+                GetSrcLocation(),
+                dgnBoundCondition.Unwrap()
+            ),
+            diagnostics,
+        };
     }
 
-    auto AssertStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
+    auto AssertStmtNode::CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

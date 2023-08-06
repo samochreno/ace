@@ -4,58 +4,47 @@
 #include <vector>
 
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "TypeInfo.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 #include "ExprEmitResult.hpp"
+#include "TypeInfo.hpp"
 
 namespace Ace
 {
     class ExprExprBoundNode :
         public std::enable_shared_from_this<ExprExprBoundNode>,
         public virtual IExprBoundNode,
-        public virtual ICloneableWithDiagnosticsBoundNode<ExprExprBoundNode>,
         public virtual ITypeCheckableBoundNode<ExprExprBoundNode>,
         public virtual ILowerableBoundNode<ExprExprBoundNode>
     {
     public:
         ExprExprBoundNode(
-            const DiagnosticBag& diagnostics,
             const SrcLocation& srcLocation,
             const std::shared_ptr<const IExprBoundNode>& expr
         );
         virtual ~ExprExprBoundNode() = default;
 
-        auto GetDiagnostics() const -> const DiagnosticBag& final;
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
-        auto CloneWithDiagnostics(
-            DiagnosticBag diagnostics
+        auto CreateTypeChecked(
+            const TypeCheckingContext& context
+        ) const -> Diagnosed<std::shared_ptr<const ExprExprBoundNode>> final;
+        auto CreateTypeCheckedExpr(
+            const TypeCheckingContext& context
+        ) const -> Diagnosed<std::shared_ptr<const IExprBoundNode>> final;
+        auto CreateLowered(
+            const LoweringContext& context
         ) const -> std::shared_ptr<const ExprExprBoundNode> final;
-        auto CloneWithDiagnosticsExpr(
-            DiagnosticBag diagnostics
+        auto CreateLoweredExpr(
+            const LoweringContext& context
         ) const -> std::shared_ptr<const IExprBoundNode> final;
-        auto GetOrCreateTypeChecked(
-            const TypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const ExprExprBoundNode>>> final;
-        auto GetOrCreateTypeCheckedExpr(
-            const TypeCheckingContext& context
-        ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>> final;
-        auto GetOrCreateLowered(
-            const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const ExprExprBoundNode>> final;
-        auto GetOrCreateLoweredExpr(
-            const LoweringContext& context
-        ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>> final;
         auto Emit(Emitter& emitter) const -> ExprEmitResult final;
 
         auto GetTypeInfo() const -> TypeInfo final;
 
     private:
-        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprBoundNode> m_Expr{};
     };

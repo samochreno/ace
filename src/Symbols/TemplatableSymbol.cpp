@@ -5,16 +5,16 @@
 
 namespace Ace
 {
-    static auto IsParam(ITypeSymbol* arg) -> bool
+    static auto IsParam(const ITypeSymbol* arg) -> bool
     {
         arg = arg->GetUnaliased();
 
-        if (dynamic_cast<ImplTemplateParamTypeSymbol*>(arg))
+        if (dynamic_cast<const ImplTemplateParamTypeSymbol*>(arg))
         {
             return true;
         }
 
-        if (dynamic_cast<NormalTemplateParamTypeSymbol*>(arg))
+        if (dynamic_cast<const NormalTemplateParamTypeSymbol*>(arg))
         {
             return true;
         }
@@ -24,6 +24,12 @@ namespace Ace
 
     auto ITemplatableSymbol::IsTemplatePlaceholder() const -> bool
     {
+        const auto* const typeSymbol = dynamic_cast<const ITypeSymbol*>(this);
+        if (typeSymbol && IsParam(typeSymbol))
+        {
+            return true;
+        }
+
         const auto implTemplateArgs = CollectImplTemplateArgs();
         const auto     templateArgs = CollectTemplateArgs();
 

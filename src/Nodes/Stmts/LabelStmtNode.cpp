@@ -56,20 +56,25 @@ namespace Ace
         return CloneInScope(scope);
     }
 
-    auto LabelStmtNode::CreateBound() const -> std::shared_ptr<const LabelStmtBoundNode>
+    auto LabelStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const LabelStmtBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<LabelSymbol>(
             m_Name
         ).Unwrap();
 
-        return std::make_shared<const LabelStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            selfSymbol
-        );
+        return Diagnosed
+        {
+            std::make_shared<const LabelStmtBoundNode>(
+                GetSrcLocation(),
+                selfSymbol
+            ),
+            diagnostics,
+        };
     }
 
-    auto LabelStmtNode::CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode>
+    auto LabelStmtNode::CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

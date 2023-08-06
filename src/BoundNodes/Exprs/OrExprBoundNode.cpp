@@ -3,32 +3,24 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "TypeInfo.hpp"
-#include "ValueKind.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
+#include "TypeInfo.hpp"
+#include "ValueKind.hpp"
 
 namespace Ace
 {
     OrExprBoundNode::OrExprBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& rhsExpr
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr }
     {
-    }
-
-    auto OrExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto OrExprBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -51,99 +43,83 @@ namespace Ace
         return children;
     }
 
-    auto OrExprBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const OrExprBoundNode>
-    {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<const OrExprBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            m_LHSExpr,
-            m_RHSExpr
-        );
-    }
-
-    auto OrExprBoundNode::CloneWithDiagnosticsExpr(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const IExprBoundNode>
-    {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto OrExprBoundNode::GetOrCreateTypeChecked(
+    auto OrExprBoundNode::CreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const OrExprBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const OrExprBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         const TypeInfo typeInfo
         {
             GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
 
-        ACE_TRY(cchConvertedAndCheckedLHSExpr, CreateImplicitlyConvertedAndTypeChecked(
+        const auto dgnCheckedLHSExpr = CreateImplicitlyConvertedAndTypeChecked(
             m_LHSExpr,
             typeInfo
-        ));
+        );
+        diagnostics.Add(dgnCheckedLHSExpr);
 
-        ACE_TRY(cchConvertedAndCheckedRHSExpr, CreateImplicitlyConvertedAndTypeChecked(
+        const auto dgnCheckedRHSExpr = CreateImplicitlyConvertedAndTypeChecked(
             m_RHSExpr,
             typeInfo
-        ));
+        );
+        diagnostics.Add(dgnCheckedRHSExpr);
 
         if (
-            !cchConvertedAndCheckedLHSExpr.IsChanged &&
-            !cchConvertedAndCheckedRHSExpr.IsChanged
+            (dgnCheckedLHSExpr.Unwrap() == m_LHSExpr) &&
+            (dgnCheckedRHSExpr.Unwrap() == m_RHSExpr)
             )
         {
-            return CreateUnchanged(shared_from_this());
+            return Diagnosed{ shared_from_this(), diagnostics };
         }
 
-        return CreateChanged(std::make_shared<const OrExprBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchConvertedAndCheckedLHSExpr.Value,
-            cchConvertedAndCheckedRHSExpr.Value
-        ));
+        return Diagnosed
+        {
+            std::make_shared<const OrExprBoundNode>(
+                GetSrcLocation(),
+                dgnCheckedLHSExpr.Unwrap(),
+                dgnCheckedRHSExpr.Unwrap()
+            ),
+            diagnostics,
+        };
     }
 
-    auto OrExprBoundNode::GetOrCreateTypeCheckedExpr(
+    auto OrExprBoundNode::CreateTypeCheckedExpr(
         const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
-        return GetOrCreateTypeChecked(context);
+        return CreateTypeChecked(context);
     }
 
-    auto OrExprBoundNode::GetOrCreateLowered(
+    auto OrExprBoundNode::CreateLowered(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const OrExprBoundNode>>
+    ) const -> std::shared_ptr<const OrExprBoundNode>
     {
-        const auto cchLoweredLHSExpr = m_LHSExpr->GetOrCreateLoweredExpr({});
-        const auto cchLoweredRHSExpr = m_RHSExpr->GetOrCreateLoweredExpr({});
+        const auto loweredLHSExpr = m_LHSExpr->CreateLoweredExpr({});
+        const auto loweredRHSExpr = m_RHSExpr->CreateLoweredExpr({});
 
         if (
-            !cchLoweredLHSExpr.IsChanged &&
-            !cchLoweredRHSExpr.IsChanged
+            (loweredLHSExpr == m_LHSExpr) &&
+            (loweredRHSExpr == m_RHSExpr)
             )
-            return CreateUnchanged(shared_from_this());
+        {
+            return shared_from_this();
+        }
 
-        return CreateChanged(std::make_shared<const OrExprBoundNode>(
-            DiagnosticBag{},
+        return std::make_shared<const OrExprBoundNode>(
             GetSrcLocation(),
-            cchLoweredLHSExpr.Value,
-            cchLoweredRHSExpr.Value
-        )->GetOrCreateLowered({}).Value);
+            loweredLHSExpr,
+            loweredRHSExpr
+        )->CreateLowered({});
     }
 
-    auto OrExprBoundNode::GetOrCreateLoweredExpr(
+    auto OrExprBoundNode::CreateLoweredExpr(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
+    ) const -> std::shared_ptr<const IExprBoundNode>
     {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto OrExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult

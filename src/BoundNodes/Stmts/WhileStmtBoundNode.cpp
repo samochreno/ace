@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "Diagnostic.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/GroupStmtBoundNode.hpp"
@@ -14,29 +14,21 @@
 #include "BoundNodes/Stmts/Jumps/ConditionalJumpStmtBoundNode.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "SpecialIdent.hpp"
-#include "Cacheable.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 
 namespace Ace
 {
     WhileStmtBoundNode::WhileStmtBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprBoundNode>& condition,
         const std::shared_ptr<const BlockStmtBoundNode>& body
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Condition{ condition },
         m_Body{ body }
     {
-    }
-
-    auto WhileStmtBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto WhileStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -59,77 +51,58 @@ namespace Ace
         return children;
     }
 
-    auto WhileStmtBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const WhileStmtBoundNode>
-    {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<const WhileStmtBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            GetScope(),
-            m_Condition,
-            m_Body
-        );
-    }
-
-    auto WhileStmtBoundNode::CloneWithDiagnosticsStmt(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const IStmtBoundNode>
-    {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto WhileStmtBoundNode::GetOrCreateTypeChecked(
+    auto WhileStmtBoundNode::CreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const WhileStmtBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const WhileStmtBoundNode>>
     {
+        DiagnosticBag diagnostics{};
+
         const TypeInfo typeInfo
         {
             GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
-
-        ACE_TRY(cchConvertedAndCheckedCondition, CreateImplicitlyConvertedAndTypeChecked(
+        const auto dgnCheckedCondition = CreateImplicitlyConvertedAndTypeChecked(
             m_Condition,
             typeInfo
-        ));
+        );
+        diagnostics.Add(dgnCheckedCondition);
 
-        ACE_TRY(cchCheckedBody, m_Body->GetOrCreateTypeChecked({
+        const auto dgnCheckedBody = m_Body->CreateTypeChecked({
             context.ParentFunctionTypeSymbol
-        }));
+        });
+        diagnostics.Add(dgnCheckedBody);
 
         if (
-            !cchConvertedAndCheckedCondition.IsChanged &&
-            !cchCheckedBody.IsChanged
+            (dgnCheckedCondition.Unwrap() == m_Condition) &&
+            (dgnCheckedBody.Unwrap() == m_Body)
             )
         {
-            return CreateUnchanged(shared_from_this());
+            return Diagnosed{ shared_from_this(), diagnostics };
         }
 
-        return CreateChanged(std::make_shared<const WhileStmtBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            m_Scope,
-            cchConvertedAndCheckedCondition.Value,
-            cchCheckedBody.Value
-        ));
+        return Diagnosed
+        {
+            std::make_shared<const WhileStmtBoundNode>(
+                GetSrcLocation(),
+                m_Scope,
+                dgnCheckedCondition.Unwrap(),
+                dgnCheckedBody.Unwrap()
+            ),
+            diagnostics,
+        };
     }
 
-    auto WhileStmtBoundNode::GetOrCreateTypeCheckedStmt(
+    auto WhileStmtBoundNode::CreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IStmtBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
-        return GetOrCreateTypeChecked(context);
+        return CreateTypeChecked(context);
     }
 
-    auto WhileStmtBoundNode::GetOrCreateLowered(
+    auto WhileStmtBoundNode::CreateLowered(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const GroupStmtBoundNode>>
+    ) const -> std::shared_ptr<const GroupStmtBoundNode>
     {
         // From:
         // while condition {
@@ -174,14 +147,12 @@ namespace Ace
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
 
         stmts.push_back(std::make_shared<const NormalJumpStmtBoundNode>(
-            DiagnosticBag{},
             GetSrcLocation().CreateFirst(),
             m_Scope,
             continueLabelSymbol
         ));
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-            DiagnosticBag{},
             beginLabelSymbol->GetName().SrcLocation,
             beginLabelSymbol
         ));
@@ -189,31 +160,28 @@ namespace Ace
         stmts.push_back(m_Body);
 
         stmts.push_back(std::make_shared<const LabelStmtBoundNode>(
-            DiagnosticBag{},
             continueLabelSymbol->GetName().SrcLocation,
             continueLabelSymbol
         ));
 
         stmts.push_back(std::make_shared<const ConditionalJumpStmtBoundNode>(
-            DiagnosticBag{},
             m_Condition->GetSrcLocation(),
             m_Condition,
             beginLabelSymbol
         ));
 
-        return CreateChanged(std::make_shared<const GroupStmtBoundNode>(
-            DiagnosticBag{},
+        return std::make_shared<const GroupStmtBoundNode>(
             GetSrcLocation(),
             m_Scope,
             stmts
-        )->GetOrCreateLowered(context).Value);
+        )->CreateLowered({});
     }
 
-    auto WhileStmtBoundNode::GetOrCreateLoweredStmt(
+    auto WhileStmtBoundNode::CreateLoweredStmt(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IStmtBoundNode>>
+    ) const -> std::shared_ptr<const IStmtBoundNode>
     {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto WhileStmtBoundNode::Emit(Emitter& emitter) const -> void

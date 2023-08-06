@@ -8,6 +8,7 @@
 #include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
@@ -34,8 +35,8 @@ namespace Ace
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> std::shared_ptr<const NormalAssignmentStmtBoundNode> final;
-        auto CreateBoundStmt() const -> std::shared_ptr<const IStmtBoundNode> final;
+        auto CreateBound() const -> Diagnosed<std::shared_ptr<const NormalAssignmentStmtBoundNode>> final;
+        auto CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>> final;
         
     private:
         SrcLocation m_SrcLocation{};

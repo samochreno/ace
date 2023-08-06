@@ -3,39 +3,31 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "TypeInfo.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
-#include "ValueKind.hpp"
+#include "Diagnostic.hpp"
 #include "Assert.hpp"
-#include "Cacheable.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "String.hpp"
+#include "TypeInfo.hpp"
+#include "ValueKind.hpp"
 
 namespace Ace
 {
     LiteralExprBoundNode::LiteralExprBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const LiteralKind kind,
         const std::string& string
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Kind{ kind },
         m_String{ string }
     {
     }
     
-    auto LiteralExprBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
-    }
-
     auto LiteralExprBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
         return m_SrcLocation;
@@ -51,57 +43,32 @@ namespace Ace
         return {};
     }
 
-    auto LiteralExprBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
+    auto LiteralExprBoundNode::CreateTypeChecked(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const LiteralExprBoundNode>>
+    {
+        return Diagnosed{ shared_from_this(), DiagnosticBag{} };
+    }
+
+    auto LiteralExprBoundNode::CreateTypeCheckedExpr(
+        const TypeCheckingContext& context
+    ) const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
+    {
+        return CreateTypeChecked(context);
+    }
+
+    auto LiteralExprBoundNode::CreateLowered(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const LiteralExprBoundNode>
     {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<LiteralExprBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            GetScope(),
-            m_Kind,
-            m_String
-        );
+        return shared_from_this();
     }
 
-    auto LiteralExprBoundNode::CloneWithDiagnosticsExpr(
-        DiagnosticBag diagnostics
+    auto LiteralExprBoundNode::CreateLoweredExpr(
+        const LoweringContext& context
     ) const -> std::shared_ptr<const IExprBoundNode>
     {
-        return CloneWithDiagnostics(std::move(diagnostics));
-    }
-
-    auto LiteralExprBoundNode::GetOrCreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const LiteralExprBoundNode>>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto LiteralExprBoundNode::GetOrCreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const IExprBoundNode>>>
-    {
-        return GetOrCreateTypeChecked(context);
-    }
-
-    auto LiteralExprBoundNode::GetOrCreateLowered(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const LiteralExprBoundNode>>
-    {
-        return CreateUnchanged(shared_from_this());
-    }
-
-    auto LiteralExprBoundNode::GetOrCreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const IExprBoundNode>>
-    {
-        return GetOrCreateLowered(context);
+        return CreateLowered(context);
     }
 
     auto LiteralExprBoundNode::Emit(Emitter& emitter) const -> ExprEmitResult

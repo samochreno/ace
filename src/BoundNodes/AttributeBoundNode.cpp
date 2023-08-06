@@ -3,27 +3,19 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "BoundNodes/Exprs/StructConstructionExprBoundNode.hpp"
 #include "Scope.hpp"
-#include "Cacheable.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
     AttributeBoundNode::AttributeBoundNode(
-        const DiagnosticBag& diagnostics,
         const SrcLocation& srcLocation,
         const std::shared_ptr<const StructConstructionExprBoundNode>& structConstructionExpr
-    ) : m_Diagnostics{ diagnostics },
-        m_SrcLocation{ srcLocation },
+    ) : m_SrcLocation{ srcLocation },
         m_StructConstructionExpr{ structConstructionExpr }
     {
-    }
-
-    auto AttributeBoundNode::GetDiagnostics() const -> const DiagnosticBag&
-    {
-        return m_Diagnostics;
     }
 
     auto AttributeBoundNode::GetSrcLocation() const -> const SrcLocation&
@@ -36,22 +28,6 @@ namespace Ace
         return m_StructConstructionExpr->GetScope();
     }
 
-    auto AttributeBoundNode::CloneWithDiagnostics(
-        DiagnosticBag diagnostics
-    ) const -> std::shared_ptr<const AttributeBoundNode>
-    {
-        if (diagnostics.IsEmpty())
-        {
-            return shared_from_this();
-        }
-
-        return std::make_shared<const AttributeBoundNode>(
-            diagnostics.Add(GetDiagnostics()),
-            GetSrcLocation(),
-            m_StructConstructionExpr
-        );
-    }
-
     auto AttributeBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
@@ -61,40 +37,46 @@ namespace Ace
         return children;
     }
 
-    auto AttributeBoundNode::GetOrCreateTypeChecked(
+    auto AttributeBoundNode::CreateTypeChecked(
         const TypeCheckingContext& context
-    ) const -> Expected<Cacheable<std::shared_ptr<const AttributeBoundNode>>>
+    ) const -> Diagnosed<std::shared_ptr<const AttributeBoundNode>>
     {
-        ACE_TRY(cchCheckedStructureConstructionExpr, m_StructConstructionExpr->GetOrCreateTypeChecked({}));
+        DiagnosticBag diagnostics{};
 
-        if (!cchCheckedStructureConstructionExpr.IsChanged)
+        const auto dgnCheckedStructConstructionExpr =
+            m_StructConstructionExpr->CreateTypeChecked({});
+        diagnostics.Add(dgnCheckedStructConstructionExpr);
+
+        if (dgnCheckedStructConstructionExpr.Unwrap() == m_StructConstructionExpr)
         {
-            return CreateUnchanged(shared_from_this());
+            return Diagnosed{ shared_from_this(), diagnostics };
         }
 
-        return CreateChanged(std::make_shared<const AttributeBoundNode>(
-            DiagnosticBag{},
-            GetSrcLocation(),
-            cchCheckedStructureConstructionExpr.Value
-        ));
+        return Diagnosed
+        {
+            std::make_shared<const AttributeBoundNode>(
+                GetSrcLocation(),
+                dgnCheckedStructConstructionExpr.Unwrap()
+            ),
+            diagnostics,
+        };
     }
 
-    auto AttributeBoundNode::GetOrCreateLowered(
+    auto AttributeBoundNode::CreateLowered(
         const LoweringContext& context
-    ) const -> Cacheable<std::shared_ptr<const AttributeBoundNode>>
+    ) const -> std::shared_ptr<const AttributeBoundNode>
     {
-        const auto cchLowewredStructConstructionExpr =
-            m_StructConstructionExpr->GetOrCreateLowered({});
+        const auto loweredStructConstructionExpr =
+            m_StructConstructionExpr->CreateLowered({});
 
-        if (!cchLowewredStructConstructionExpr.IsChanged)
+        if (loweredStructConstructionExpr == m_StructConstructionExpr)
         {
-            return CreateUnchanged(shared_from_this());
+            return shared_from_this();
         }
 
-        return CreateChanged(std::make_shared<const AttributeBoundNode>(
-            DiagnosticBag{},
+        return std::make_shared<const AttributeBoundNode>(
             GetSrcLocation(),
-            cchLowewredStructConstructionExpr.Value
-        )->GetOrCreateLowered({}).Value);
+            loweredStructConstructionExpr
+        )->CreateLowered({});
     }
 }
