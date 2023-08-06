@@ -52,6 +52,12 @@ namespace Ace
         {
         }
 
+        template<typename TNew>
+        operator Diagnosed<TNew>() const
+        {
+            return Diagnosed<TNew>{ m_Value, m_Diagnostics };
+        }
+
         auto Unwrap() -> TValue&
         {
             return m_Value;
