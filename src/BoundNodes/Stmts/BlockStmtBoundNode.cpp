@@ -20,6 +20,7 @@
 #include "Symbols/LabelSymbol.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "Emitter.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -134,6 +135,22 @@ namespace Ace
     {
         const auto stmts = CreateExpanded();
         emitter.EmitFunctionBodyStmts(stmts);
+    }
+
+    auto BlockStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
+    {
+        std::vector<CFANode> nodes{};
+        std::for_each(
+            begin(m_Stmts),
+            end  (m_Stmts),
+            [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
+            {
+                const auto stmtNodes = stmt->CreateCFANodes();
+                nodes.insert(end(nodes), begin(stmtNodes), end(stmtNodes));
+            }
+        );
+
+        return nodes;
     }
 
     auto BlockStmtBoundNode::CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const IStmtBoundNode>>

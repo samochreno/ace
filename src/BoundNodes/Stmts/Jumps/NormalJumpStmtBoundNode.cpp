@@ -8,6 +8,7 @@
 #include "Symbols/LabelSymbol.hpp"
 #include "Diagnostic.hpp"
 #include "Emitter.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -71,8 +72,8 @@ namespace Ace
         );
     }
 
-    auto NormalJumpStmtBoundNode::GetLabelSymbol() const -> LabelSymbol*
+    auto NormalJumpStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
     {
-        return m_LabelSymbol;
+        return std::vector{ CFANode{ CFANodeKind::Jump, m_LabelSymbol } };
     }
 }

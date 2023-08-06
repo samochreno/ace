@@ -2,8 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include <algorithm>
-#include <iterator>
+#include <optional>
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
@@ -19,6 +18,7 @@
 #include "SpecialIdent.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -268,6 +268,11 @@ namespace Ace
     }
 
     auto IfStmtBoundNode::Emit(Emitter& emitter) const -> void
+    {
+        ACE_UNREACHABLE();
+    }
+
+    auto IfStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
     {
         ACE_UNREACHABLE();
     }

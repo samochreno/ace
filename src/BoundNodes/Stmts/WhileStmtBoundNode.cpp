@@ -16,6 +16,7 @@
 #include "SpecialIdent.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -185,6 +186,11 @@ namespace Ace
     }
 
     auto WhileStmtBoundNode::Emit(Emitter& emitter) const -> void
+    {
+        ACE_UNREACHABLE();
+    }
+
+    auto WhileStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
     {
         ACE_UNREACHABLE();
     }

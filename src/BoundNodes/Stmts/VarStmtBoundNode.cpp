@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
@@ -14,6 +15,7 @@
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -138,6 +140,11 @@ namespace Ace
         );
 
         assignmentStmt->Emit(emitter);
+    }
+
+    auto VarStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
+    {
+        return {};
     }
 
     auto VarStmtBoundNode::GetSymbol() const -> LocalVarSymbol*

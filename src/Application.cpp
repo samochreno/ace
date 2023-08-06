@@ -21,7 +21,7 @@
 #include "Scope.hpp"
 #include "Symbols/All.hpp"
 #include "BoundNodes/All.hpp"
-#include "ControlFlowAnalysis.hpp"
+#include "CFA.hpp"
 #include "Emitter.hpp"
 #include "GlueGeneration.hpp"
 
@@ -139,43 +139,44 @@ namespace Ace::Application
         return Diagnosed<void>{ diagnostics };
     }
 
-    auto ValidateControlFlow(
+    auto DiagnoseNotAllControlPathsReturn(
         Compilation* const compilation,
         const std::vector<const IBoundNode*>& nodes
-    ) -> Expected<void>
+    ) -> Diagnosed<void>
     {
+        DiagnosticBag diagnostics{};
+
         const auto functionNodes =
             DynamicCastFilter<const FunctionBoundNode*>(nodes);
 
-        const bool didControlFlowAnalysisSucceed = std::find_if(
-            begin(functionNodes), 
-            end  (functionNodes),
-            [&](const FunctionBoundNode* const functionNode)
+        std::for_each(begin(functionNodes), end(functionNodes),
+        [&](const FunctionBoundNode* const functionNode)
+        {
+            if (
+                functionNode->GetSymbol()->GetType()->GetUnaliased() == 
+                compilation->GetNatives()->Void.GetSymbol()
+                )
             {
-                if (
-                    functionNode->GetSymbol()->GetType()->GetUnaliased() == 
-                    compilation->GetNatives()->Void.GetSymbol()
-                    )
-                {
-                    return false;
-                }
-
-                if (!functionNode->GetBody().has_value())
-                {
-                    return false;
-                }
-
-                ControlFlowAnalysis controlFlowAnalysis
-                {
-                    functionNode->GetBody().value()
-                };
-
-                return controlFlowAnalysis.IsEndReachableWithoutReturn();
+                return;
             }
-        ) == end(functionNodes);
-        ACE_TRY_ASSERT(didControlFlowAnalysisSucceed);
 
-        return Void{};
+            if (!functionNode->GetBody().has_value())
+            {
+                return;
+            }
+
+            const CFAGraph cfaGraph
+            {
+                functionNode->GetBody().value()->CreateCFANodes()
+            };
+
+            diagnostics.Add(CFA(
+                functionNode->GetSymbol()->GetName().SrcLocation,
+                cfaGraph
+            ));
+        });
+
+        return Diagnosed<void>{ diagnostics };
     }
 
     auto BindFunctionSymbolsBodies(

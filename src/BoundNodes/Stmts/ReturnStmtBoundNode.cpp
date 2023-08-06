@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
@@ -10,6 +11,7 @@
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -211,5 +213,10 @@ namespace Ace
 
             emitter.GetBlockBuilder().Builder.CreateRetVoid();
         }
+    }
+
+    auto ReturnStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
+    {
+        return std::vector{ CFANode{ CFANodeKind::Return } };
     }
 }

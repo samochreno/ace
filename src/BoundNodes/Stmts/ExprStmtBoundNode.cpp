@@ -6,6 +6,7 @@
 #include "SrcLocation.hpp"
 #include "Diagnostic.hpp"
 #include "Emitter.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -95,5 +96,10 @@ namespace Ace
         const auto exprEmitResult = m_Expr->Emit(emitter);
         
         emitter.EmitDropTmps(exprEmitResult.Tmps);
+    }
+
+    auto ExprStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
+    {
+        return {};
     }
 }

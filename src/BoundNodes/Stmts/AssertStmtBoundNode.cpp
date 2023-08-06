@@ -15,6 +15,7 @@
 #include "BoundNodes/Stmts/ExitStmtBoundNode.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -124,6 +125,11 @@ namespace Ace
     }
 
     auto AssertStmtBoundNode::Emit(Emitter& emitter) const -> void
+    {
+        ACE_UNREACHABLE();
+    }
+
+    auto AssertStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
     {
         ACE_UNREACHABLE();
     }

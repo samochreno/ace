@@ -18,10 +18,10 @@ namespace Ace::Application
         Compilation* const compilation,
         const std::vector<const INode*>& nodes
     ) -> Diagnosed<void>;
-    auto ValidateControlFlow(
+    auto DiagnoseNotAllControlPathsReturn(
         Compilation* const compilation,
         const std::vector<const IBoundNode*>& nodes
-    ) -> Expected<void>;
+    ) -> Diagnosed<void>;
     auto BindFunctionSymbolsBodies(
         Compilation* const compilation,
         const std::vector<const IBoundNode*>& nodes
@@ -85,8 +85,9 @@ namespace Ace::Application
         const auto nodes = GetAllNodes(finalAST);
 
         auto* const compilation = finalAST->GetCompilation();
+
+        diagnostics.Add(DiagnoseNotAllControlPathsReturn(compilation, nodes));
         
-        ACE_TRY_VOID(ValidateControlFlow(compilation, nodes));
         BindFunctionSymbolsBodies(compilation, nodes);
 
         return Expected{ finalAST, diagnostics };

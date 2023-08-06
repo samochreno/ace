@@ -11,6 +11,7 @@
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -45,6 +46,8 @@ namespace Ace
             const LoweringContext& context
         ) const -> std::shared_ptr<const IStmtBoundNode> final;
         auto Emit(Emitter& emitter) const -> void final;
+
+        auto CreateCFANodes() const -> std::vector<CFANode> final;
 
         auto GetSymbol() const -> LocalVarSymbol* final;
         

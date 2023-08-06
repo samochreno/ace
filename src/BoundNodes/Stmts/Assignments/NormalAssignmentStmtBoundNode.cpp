@@ -10,6 +10,7 @@
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
 #include "ExprDropData.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -144,5 +145,10 @@ namespace Ace
         );
 
         emitter.EmitDropTmps(tmps);
+    }
+
+    auto NormalAssignmentStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
+    {
+        return {};
     }
 }

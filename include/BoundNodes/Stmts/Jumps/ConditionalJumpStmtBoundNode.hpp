@@ -3,18 +3,19 @@
 #include <memory>
 #include <vector>
 
-#include "BoundNodes/Stmts/Jumps/JumpStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
     class ConditionalJumpStmtBoundNode :
         public std::enable_shared_from_this<ConditionalJumpStmtBoundNode>,
-        public virtual IJumpStmtBoundNode,
+        public virtual IStmtBoundNode,
         public virtual ITypeCheckableBoundNode<ConditionalJumpStmtBoundNode, StmtTypeCheckingContext>,
         public virtual ILowerableBoundNode<ConditionalJumpStmtBoundNode>
     {
@@ -43,7 +44,7 @@ namespace Ace
         ) const -> std::shared_ptr<const IStmtBoundNode> final;
         auto Emit(Emitter& emitter) const -> void final;
 
-        auto GetLabelSymbol() const -> LabelSymbol* final;
+        auto CreateCFANodes() const -> std::vector<CFANode> final;
 
     private:
         SrcLocation m_SrcLocation{};

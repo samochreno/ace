@@ -10,9 +10,7 @@
 ## 💥 High Priority
 
 - ❓ Move `Application` &rarr; `main` or `main` &rarr; `Application`
-- Remove builtin application arguments
 - Simplify `undefined reference` error messages
-- ❓ Move scoping from parsing to a separate pass
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
 - Finish diagnostics
 

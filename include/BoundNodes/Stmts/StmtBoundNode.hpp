@@ -1,11 +1,13 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "BoundNodes/BoundNode.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Emittable.hpp"
 #include "Diagnostic.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -27,5 +29,7 @@ namespace Ace
         virtual auto CreateLoweredStmt(
             const LoweringContext& context
         ) const -> std::shared_ptr<const IStmtBoundNode> = 0;
+
+        virtual auto CreateCFANodes() const -> std::vector<CFANode> = 0;
     };
 }

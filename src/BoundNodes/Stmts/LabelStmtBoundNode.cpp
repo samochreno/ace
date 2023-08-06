@@ -2,11 +2,13 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "SrcLocation.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -63,6 +65,11 @@ namespace Ace
 
     auto LabelStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
+    }
+
+    auto LabelStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
+    {
+        return std::vector{ CFANode{ CFANodeKind::Label, m_Symbol } };
     }
 
     auto LabelStmtBoundNode::GetSymbol() const -> LabelSymbol*

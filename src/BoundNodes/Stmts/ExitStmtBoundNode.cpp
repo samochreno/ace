@@ -7,6 +7,7 @@
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Emitter.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -75,5 +76,10 @@ namespace Ace
         );
 
         emitter.GetBlockBuilder().Builder.CreateUnreachable();
+    }
+
+    auto ExitStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
+    {
+        return std::vector{ CFANode{ CFANodeKind::Exit } };
     }
 }

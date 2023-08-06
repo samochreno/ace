@@ -6,7 +6,7 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
-#include "ExprDropData.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -68,5 +68,10 @@ namespace Ace
 
     auto BlockEndStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
+    }
+
+    auto BlockEndStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
+    {
+        return {};
     }
 }

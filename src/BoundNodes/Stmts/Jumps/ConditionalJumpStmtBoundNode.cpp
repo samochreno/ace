@@ -11,6 +11,7 @@
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -133,8 +134,11 @@ namespace Ace
         emitter.SetBlockBuilder(std::move(blockBuilder));
     }
 
-    auto ConditionalJumpStmtBoundNode::GetLabelSymbol() const -> LabelSymbol*
+    auto ConditionalJumpStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
     {
-        return m_LabelSymbol;
+        return std::vector
+        {
+            CFANode{ CFANodeKind::ConditionalJump, m_LabelSymbol }
+        };
     }
 }

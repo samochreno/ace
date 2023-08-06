@@ -20,6 +20,7 @@
 #include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "SpecialIdent.hpp"
+#include "CFA.hpp"
 
 namespace Ace
 {
@@ -416,6 +417,11 @@ namespace Ace
     auto CompoundAssignmentStmtBoundNode::Emit(
         Emitter& emitter
     ) const -> void
+    {
+        ACE_UNREACHABLE();
+    }
+
+    auto CompoundAssignmentStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
     {
         ACE_UNREACHABLE();
     }
