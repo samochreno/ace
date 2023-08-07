@@ -124,16 +124,23 @@ namespace Ace
         
         if (const auto* const memberAccessExpr = dynamic_cast<const MemberAccessExprNode*>(m_Expr.get()))
         {
-            const auto boundExpr =
-                diagnostics.Collect(memberAccessExpr->GetExpr()->CreateBoundExpr());
+            const auto boundExpr = diagnostics.Collect(
+                memberAccessExpr->GetExpr()->CreateBoundExpr()
+            );
 
-            auto* const selfTypeSymbol = boundExpr->GetTypeInfo().Symbol->GetUnaliased();
+            auto* const selfTypeSymbol =
+                boundExpr->GetTypeInfo().Symbol->GetWithoutRef();
 
-            const auto optFunctionSymbol = diagnostics.Collect(GetScope()->ResolveInstanceSymbol<FunctionSymbol>(
-                selfTypeSymbol,
-                memberAccessExpr->GetName(),
-                Scope::CreateArgTypes(argTypeSymbols)
-            ));
+            std::optional<FunctionSymbol*> optFunctionSymbol{};
+            if (!selfTypeSymbol->IsError())
+            {
+                optFunctionSymbol = diagnostics.Collect(GetScope()->ResolveInstanceSymbol<FunctionSymbol>(
+                    selfTypeSymbol,
+                    memberAccessExpr->GetName(),
+                    Scope::CreateArgTypes(argTypeSymbols)
+                ));
+            }
+
             auto* const functionSymbol = optFunctionSymbol.value_or(
                 GetCompilation()->GetErrorSymbols().GetFunction()
             );

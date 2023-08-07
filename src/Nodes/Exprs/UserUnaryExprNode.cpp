@@ -88,27 +88,32 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        auto expSymbol = scope->ResolveStaticSymbol<FunctionSymbol>(
-            CreateFullyQualifiedOpName(op, typeSymbol),
-            Scope::CreateArgTypes(typeSymbol)
-        );
-        if (!expSymbol)
+        std::optional<FunctionSymbol*> optSymbol{};
+        if (!typeSymbol->GetWithoutRef()->IsError())
         {
-            diagnostics.Add(CreateUndefinedUnaryOpRefError(
-                op,
-                typeSymbol
+            DiagnosticBag opDiagnostics{};
+            optSymbol = opDiagnostics.Collect(scope->ResolveStaticSymbol<FunctionSymbol>(
+                CreateFullyQualifiedOpName(op, typeSymbol),
+                Scope::CreateArgTypes(typeSymbol)
             ));
-
-            auto* compilation = scope->GetCompilation();
-            return Diagnosed
+            if (optSymbol.has_value())
             {
-                compilation->GetErrorSymbols().GetFunction(),
-                diagnostics,
-            };
+                diagnostics.Add(opDiagnostics);
+            }
+            else
+            {
+                diagnostics.Add(CreateUndefinedUnaryOpRefError(
+                    op,
+                    typeSymbol
+                ));
+            }
         }
 
-        const auto optSymbol = diagnostics.Collect(std::move(expSymbol));
-        return Diagnosed{ optSymbol.value(), diagnostics };
+        auto* const symbol = optSymbol.value_or(
+            scope->GetCompilation()->GetErrorSymbols().GetFunction()
+        );
+
+        return Diagnosed{ symbol, diagnostics };
     }
 
     auto UserUnaryExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const UserUnaryExprBoundNode>>

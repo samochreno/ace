@@ -69,10 +69,15 @@ namespace Ace
         auto* const selfTypeSymbol =
             boundExpr->GetTypeInfo().Symbol->GetWithoutRef();
 
-        const auto optMemberSymbol = diagnostics.Collect(GetScope()->ResolveInstanceSymbol<InstanceVarSymbol>(
-            selfTypeSymbol,
-            m_Name
-        ));
+        std::optional<InstanceVarSymbol*> optMemberSymbol{};
+        if (!selfTypeSymbol->IsError())
+        {
+            optMemberSymbol = diagnostics.Collect(GetScope()->ResolveInstanceSymbol<InstanceVarSymbol>(
+                selfTypeSymbol,
+                m_Name
+            ));
+        }
+
         auto* const memberSymbol = optMemberSymbol.value_or(
             GetCompilation()->GetErrorSymbols().GetInstanceVar()
         );

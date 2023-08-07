@@ -185,24 +185,63 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        auto expLHSOpSymbol = ResolveOpSymbol(
-            scope,
-            CreateFullyQualifiedOpName(op, lhsTypeSymbol),
-            argTypeInfos
-        );
-        auto expRHSOpSymbol = ResolveOpSymbol(
-            scope,
-            CreateFullyQualifiedOpName(op, rhsTypeSymbol),
-            argTypeInfos
-        );
+        std::optional<FunctionSymbol*> optOpSymbol{};
+        if (
+            !lhsTypeSymbol->GetWithoutRef()->IsError() &&
+            !rhsTypeSymbol->GetWithoutRef()->IsError()
+            )
+        {
+            DiagnosticBag lhsOpDiagnostics{};
+            const auto optLHSOpSymbol = lhsOpDiagnostics.Collect(ResolveOpSymbol(
+                scope,
+                CreateFullyQualifiedOpName(op, lhsTypeSymbol),
+                argTypeInfos
+            ));
 
-        const auto opSymbol = diagnostics.Collect(PickOpSymbol(
-            op,
-            lhsTypeSymbol,
-            rhsTypeSymbol,
-            std::move(expLHSOpSymbol),
-            std::move(expRHSOpSymbol)
-        ));
+            DiagnosticBag rhsOpDiagnostics{};
+            const auto optRHSOpSymbol = rhsOpDiagnostics.Collect(ResolveOpSymbol(
+                scope,
+                CreateFullyQualifiedOpName(op, rhsTypeSymbol),
+                argTypeInfos
+            ));
+
+            if (!optLHSOpSymbol.has_value() && !optRHSOpSymbol.has_value())
+            {
+                diagnostics.Add(CreateUndefinedBinaryOpRefError(
+                    op,
+                    lhsTypeSymbol,
+                    rhsTypeSymbol
+                ));
+            }
+
+            if (
+                (optLHSOpSymbol.has_value() && optRHSOpSymbol.has_value()) &&
+                (optLHSOpSymbol != optRHSOpSymbol)
+                )
+            {
+                diagnostics.Add(CreateAmbiguousBinaryOpRefError(
+                    op,
+                    lhsTypeSymbol,
+                    rhsTypeSymbol
+                ));
+            }
+
+            if (optLHSOpSymbol.has_value())
+            {
+                optOpSymbol = optLHSOpSymbol.value();
+                diagnostics.Add(lhsOpDiagnostics);
+            }
+
+            if (optRHSOpSymbol.has_value())
+            {
+                optOpSymbol = optRHSOpSymbol.value();
+                diagnostics.Add(rhsOpDiagnostics);
+            }
+        }
+
+        auto* const opSymbol = optOpSymbol.value_or(
+            scope->GetCompilation()->GetErrorSymbols().GetFunction()
+        );
 
         return Diagnosed{ opSymbol, diagnostics };
     }

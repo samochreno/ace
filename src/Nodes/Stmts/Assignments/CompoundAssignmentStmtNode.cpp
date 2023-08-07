@@ -94,28 +94,34 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expSymbol = scope->ResolveStaticSymbol<FunctionSymbol>(
-            CreateFullyQualifiedOpName(op, lhsTypeSymbol),
-            Scope::CreateArgTypes({ lhsTypeSymbol, rhsTypeSymbol })
-        );
-        if (!expSymbol)
+        std::optional<FunctionSymbol*> optSymbol{};
+        if (
+            !lhsTypeSymbol->GetWithoutRef()->IsError() &&
+            !rhsTypeSymbol->GetWithoutRef()->IsError()
+            )
         {
-            diagnostics.Add(CreateUndefinedBinaryOpRefError(
-                op,
-                lhsTypeSymbol,
-                rhsTypeSymbol
+            DiagnosticBag symbolDiagnostics{};
+            optSymbol = symbolDiagnostics.Collect(scope->ResolveStaticSymbol<FunctionSymbol>(
+                CreateFullyQualifiedOpName(op, lhsTypeSymbol),
+                Scope::CreateArgTypes({ lhsTypeSymbol, rhsTypeSymbol })
             ));
-
-            auto* compilation = scope->GetCompilation();
-            return Diagnosed
+            if (!optSymbol)
             {
-                compilation->GetErrorSymbols().GetFunction(),
-                diagnostics,
-            };
+                diagnostics.Add(CreateUndefinedBinaryOpRefError(
+                    op,
+                    lhsTypeSymbol,
+                    rhsTypeSymbol
+                ));
+            }
+
+            diagnostics.Add(symbolDiagnostics);
         }
 
-        const auto optSymbol = diagnostics.Collect(std::move(expSymbol));
-        return Diagnosed{ optSymbol.value(), diagnostics };
+        auto* const symbol = optSymbol.value_or(
+            scope->GetCompilation()->GetErrorSymbols().GetFunction()
+        );
+
+        return Diagnosed{ symbol, diagnostics };
     }
 
     auto CompoundAssignmentStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>
