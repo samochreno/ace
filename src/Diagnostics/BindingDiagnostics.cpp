@@ -170,7 +170,7 @@ namespace Ace
         group->Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "undefined reference to symbol"
+            "undefined symbol reference "
         );
 
         return group;
@@ -382,7 +382,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateUndefinedUnaryOpRefError(
+    auto CreateUndefinedUnaryOpError(
         const Op& op,
         ITypeSymbol* const type
     ) -> std::shared_ptr<const DiagnosticGroup>
@@ -395,7 +395,7 @@ namespace Ace
         );
 
         const std::string message =
-            "undefined reference to operator " + CreateOpString(opToken) +
+            "undefined to operator " + CreateOpString(opToken) +
             " for type `" + type->CreateSignature() + "`";
 
         group->Diagnostics.emplace_back(
@@ -407,7 +407,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateUndefinedBinaryOpRefError(
+    auto CreateUndefinedBinaryOpError(
         const Op& op,
         ITypeSymbol* const lhsType,
         ITypeSymbol* const rhsType
@@ -421,7 +421,7 @@ namespace Ace
         );
 
         const std::string message =
-            "undefined reference to operator " + CreateOpString(opToken) +
+            "undefined operator " + CreateOpString(opToken) +
             " for types `" + lhsType->CreateSignature() + "` and `" +
             rhsType->CreateSignature() + "`";
 

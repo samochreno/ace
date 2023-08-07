@@ -107,7 +107,7 @@ namespace Ace
             ));
             if (!optSymbol)
             {
-                diagnostics.Add(CreateUndefinedBinaryOpRefError(
+                diagnostics.Add(CreateUndefinedBinaryOpError(
                     op,
                     lhsTypeSymbol,
                     rhsTypeSymbol

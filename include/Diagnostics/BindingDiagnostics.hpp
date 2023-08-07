@@ -89,12 +89,12 @@ namespace Ace
         const SrcLocation& previousSrcLocation
     ) -> std::shared_ptr<const DiagnosticGroup>;
 
-    auto CreateUndefinedUnaryOpRefError(
+    auto CreateUndefinedUnaryOpError(
         const Op& op,
         ITypeSymbol* const type
     ) -> std::shared_ptr<const DiagnosticGroup>;
 
-    auto CreateUndefinedBinaryOpRefError(
+    auto CreateUndefinedBinaryOpError(
         const Op& op,
         ITypeSymbol* const lhsType,
         ITypeSymbol* const rhsType

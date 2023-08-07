@@ -142,7 +142,7 @@ namespace Ace
 
         if (!expLHSOpSymbol && !expRHSOpSymbol)
         {
-            diagnostics.Add(CreateUndefinedBinaryOpRefError(
+            diagnostics.Add(CreateUndefinedBinaryOpError(
                 op,
                 lhsTypeSymbol,
                 rhsTypeSymbol
@@ -207,7 +207,7 @@ namespace Ace
 
             if (!optLHSOpSymbol.has_value() && !optRHSOpSymbol.has_value())
             {
-                diagnostics.Add(CreateUndefinedBinaryOpRefError(
+                diagnostics.Add(CreateUndefinedBinaryOpError(
                     op,
                     lhsTypeSymbol,
                     rhsTypeSymbol

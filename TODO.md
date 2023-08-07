@@ -9,7 +9,6 @@
 ## 💥 High Priority
 
 - ❓ Move `Application` &rarr; `main` or `main` &rarr; `Application`
-- Simplify `undefined reference` error messages
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
 - Finish diagnostics
 

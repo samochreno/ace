@@ -102,7 +102,7 @@ namespace Ace
             }
             else
             {
-                diagnostics.Add(CreateUndefinedUnaryOpRefError(
+                diagnostics.Add(CreateUndefinedUnaryOpError(
                     op,
                     typeSymbol
                 ));
