@@ -8,16 +8,11 @@
 
 ## 💥 High Priority
 
-- ❓ Move `Application` &rarr; `main` or `main` &rarr; `Application`
+- Reduce state in `Compilation`:
+  - Make `Natives` symbol getters lazy, so they can be const, if accessed before resolution is possible panic, get them all at point of initialization to test that nothing went wrong
+  - ❓ Move uninstatiated templates (`TemplateInstantiator`) into `Scope` to keep all state there
+  - Move `LLVMContext` to `Emitter` if possible
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
-- Finish diagnostics
-
-## 🔔 Medium Priority
-
-- CFA:
-  - `IEmittable` could hold this `CFAGraph`, so it could verify control flow
-  - Possibly implement `CFANode`s for `LLVM IR` instructions
-- ❓ Give template symbols shared ownership of the nodes
 - `*self`
 - Traits:
   - Parsing
@@ -25,8 +20,16 @@
   - Binding
   - Replace operators with traits
   - ❓ Rust's orphan rule
+
+## 🔔 Medium Priority
+
+- CFA:
+  - `IEmittable` could hold this `CFAGraph`, so it could verify control flow
+  - Possibly implement `CFANode`s for `LLVM IR` instructions
 - Templates:
+  - ❓ Give template symbols shared ownership of the ast
   - Constraints
+  - Diagnostics
   - When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first
   - After compilation, do semantic analysis on templates that have never been instantiated
   - ❓ Create unique signatures for template instances
