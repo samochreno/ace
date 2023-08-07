@@ -35,8 +35,7 @@ namespace Ace
         auto GetPackageFileBuffer() const -> const FileBuffer*;
         auto GetPackage() const -> const Package&;
         auto GetOutputPath() const -> const std::filesystem::path&;
-        auto GetNatives() const -> const Natives*;
-        auto GetNatives()       ->       Natives*;
+        auto GetNatives() const -> const Natives&;
         auto GetGlobalScope() const -> const std::shared_ptr<Scope>&;
         auto GetTemplateInstantiator() const -> const TemplateInstantiator&;
         auto GetTemplateInstantiator()       ->       TemplateInstantiator&;
@@ -49,7 +48,7 @@ namespace Ace
         const FileBuffer* m_PackageFileBuffer{};
         Package m_Package{};
         std::filesystem::path m_OutputPath{};
-        std::unique_ptr<Natives> m_Natives{};
+        std::unique_ptr<const Natives> m_Natives{};
         GlobalScope m_GlobalScope{};
         TemplateInstantiator m_TemplateInstantiator{};
         llvm::LLVMContext m_LLVMContext{};

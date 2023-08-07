@@ -139,7 +139,7 @@ namespace Ace
             std::filesystem::create_directories(self->m_OutputPath);
         }
 
-        self->m_Natives = std::make_unique<Ace::Natives>(self.get());
+        self->m_Natives = std::make_unique<const Ace::Natives>(self.get());
         self->m_GlobalScope = { self.get() };
         self->m_ErrorSymbols = Ace::ErrorSymbols{ self.get() };
 
@@ -175,14 +175,9 @@ namespace Ace
         return m_OutputPath;
     }
 
-    auto Compilation::GetNatives() const -> const Ace::Natives*
+    auto Compilation::GetNatives() const -> const Ace::Natives&
     {
-        return m_Natives.get();
-    }
-
-    auto Compilation::GetNatives() -> Ace::Natives*
-    {
-        return m_Natives.get();
+        return *m_Natives.get();
     }
 
     auto Compilation::GetGlobalScope() const -> const std::shared_ptr<Scope>&

@@ -60,7 +60,7 @@ namespace Ace
 
         const TypeInfo typeInfo
         {
-            GetCompilation()->GetNatives()->Bool.GetSymbol(),
+            GetCompilation()->GetNatives().Bool.GetSymbol(),
             ValueKind::R,
         };
         const auto checkedCondition = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(

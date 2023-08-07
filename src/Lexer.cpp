@@ -156,7 +156,8 @@ namespace Ace
         const SrcLocation& srcLocation
     ) -> std::optional<std::vector<std::shared_ptr<const Token>>>
     {
-        const auto& natives = lexer.GetFileBuffer()->GetCompilation()->GetNatives();
+        const auto& natives =
+            lexer.GetFileBuffer()->GetCompilation()->GetNatives();
 
         Token token
         {
@@ -253,91 +254,91 @@ namespace Ace
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->Int8
+                natives.Int8
             );
         }
         else if (string == Keyword::Int16)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->Int16
+                natives.Int16
             );
         }
         else if (string == Keyword::Int32)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->Int32
+                natives.Int32
             );
         }
         else if (string == Keyword::Int64)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->Int64
+                natives.Int64
             );
         }
         else if (string == Keyword::UInt8)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->UInt8
+                natives.UInt8
             );
         }
         else if (string == Keyword::UInt16)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->UInt16
+                natives.UInt16
             );
         }
         else if (string == Keyword::UInt32)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->UInt32
+                natives.UInt32
             );
         }
         else if (string == Keyword::UInt64)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->UInt64
+                natives.UInt64
             );
         }
         else if (string == Keyword::Int)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->Int
+                natives.Int
             );
         }
         else if (string == Keyword::Float32)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->Float32
+                natives.Float32
             );
         }
         else if (string == Keyword::Float64)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->Float64
+                natives.Float64
             );
         }
         else if (string == Keyword::Bool)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->Bool
+                natives.Bool
             );
         }
         else if (string == Keyword::Void)
         {
             return CreateNativeTypeName(
                 srcLocation,
-                natives->Void
+                natives.Void
             );
         }
         else

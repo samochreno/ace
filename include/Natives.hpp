@@ -4,11 +4,12 @@
 #include <optional>
 #include <functional>
 #include <unordered_map>
-#include <unordered_set>
+#include <set>
 
 #include "LLVM.hpp"
 #include "Diagnostic.hpp"
 #include "Scope.hpp"
+#include "Lazy.hpp"
 #include "Diagnostic.hpp"
 #include "TypeSizeKind.hpp"
 
@@ -34,7 +35,7 @@ namespace Ace
             const SrcLocation& srcLocation
         ) const -> SymbolName = 0;
 
-        virtual auto Initialize() -> void = 0;
+        virtual auto GetGenericSymbol() const -> ISymbol* = 0;
     };
 
     enum class NativeCopyabilityKind
@@ -61,9 +62,8 @@ namespace Ace
             const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
-        auto Initialize() -> void final;
-
         auto GetSymbol() const -> ITypeSymbol*;
+        auto GetGenericSymbol() const -> ISymbol* final;
 
         auto HasIRType() const -> bool;
         auto GetIRType() const -> llvm::Type*;
@@ -74,8 +74,8 @@ namespace Ace
         std::optional<std::function<llvm::Type*()>> m_IRTypeGetter{};
         bool m_IsSized{};
         bool m_IsTriviallyCopyable{};
-
-        ITypeSymbol* m_Symbol{};
+        
+        Lazy<ITypeSymbol*> m_Symbol;
     };
 
     class NativeTypeTemplate : public virtual INative
@@ -93,15 +93,14 @@ namespace Ace
             const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
-        auto Initialize() -> void final;
-
         auto GetSymbol() const -> TypeTemplateSymbol*;
+        auto GetGenericSymbol() const -> ISymbol* final;
 
     private:
         Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
 
-        TypeTemplateSymbol* m_Symbol{};
+        Lazy<TypeTemplateSymbol*> m_Symbol;
     };
     
     class NativeFunction : public virtual INative
@@ -120,16 +119,15 @@ namespace Ace
             const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
-        auto Initialize() -> void final;
-
         auto GetSymbol() const -> FunctionSymbol*;
+        auto GetGenericSymbol() const -> ISymbol* final;
         
     private:
         Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
         FunctionBodyEmitter m_BodyEmitter{};
 
-        FunctionSymbol* m_Symbol{};
+        Lazy<FunctionSymbol*> m_Symbol;
     };
 
     class NativeFunctionTemplate : public virtual INative
@@ -147,15 +145,14 @@ namespace Ace
             const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
-        auto Initialize() -> void final;
-
         auto GetSymbol() const -> FunctionTemplateSymbol*;
+        auto GetGenericSymbol() const -> ISymbol* final;
 
     private:
         Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
 
-        FunctionTemplateSymbol* m_Symbol{};
+        Lazy<FunctionTemplateSymbol*> m_Symbol;
     };
 
     class NativeAssociatedFunction : public virtual INative
@@ -174,16 +171,15 @@ namespace Ace
             const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
-        auto Initialize() -> void final;
-
         auto GetSymbol() const -> FunctionSymbol*;
+        auto GetGenericSymbol() const -> ISymbol* final;
 
     private:
         const INative& m_Type;
         const char* m_Name{};
         FunctionBodyEmitter m_BodyEmitter{};
 
-        FunctionSymbol* m_Symbol{};
+        Lazy<FunctionSymbol*> m_Symbol;
     };
 
     class NativeAssociatedFunctionTemplate : public virtual INative
@@ -201,15 +197,14 @@ namespace Ace
             const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
-        auto Initialize() -> void final;
-
         auto GetSymbol() const -> FunctionTemplateSymbol*;
+        auto GetGenericSymbol() const -> ISymbol* final;
 
     private:
         const INative& m_Type;
         const char* m_Name{};
 
-        FunctionTemplateSymbol* m_Symbol{};
+        Lazy<FunctionTemplateSymbol*> m_Symbol;
     };
 
     class Natives
@@ -218,7 +213,7 @@ namespace Ace
         Natives(Compilation* const compilation);
         ~Natives() = default;
 
-        auto Initialize() -> void;
+        auto Verify() const -> void;
 
         auto GetIRTypeSymbolMap() const -> const std::unordered_map<ITypeSymbol*, llvm::Type*>&;
         auto GetImplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
@@ -582,28 +577,19 @@ namespace Ace
         NativeAssociatedFunctionTemplate WeakPtr__from;
 
     private:
-        auto InitializeCollectionsOfNatives() -> void;
+        Lazy<std::vector<INative*>> m_Natives;
+        Lazy<std::vector<NativeType*>> m_Types;
+        Lazy<std::vector<NativeTypeTemplate*>> m_TypeTemplates;
+        Lazy<std::vector<NativeFunction*>> m_Functions;
+        Lazy<std::vector<NativeFunctionTemplate*>> m_FunctionTemplates;
+        Lazy<std::vector<NativeAssociatedFunction*>> m_AssociatedFunctions;
+        Lazy<std::vector<NativeAssociatedFunctionTemplate*>> m_AssociatedFunctionTemplates;
 
-        auto InitializeIRTypeSymbolMap() -> void;
+        Lazy<std::unordered_map<ITypeSymbol*, llvm::Type*>> m_IRTypeSymbolMap;
 
-        auto InitializeImplicitFromOpMap() -> void;
-        auto InitializeExplicitFromOpMap() -> void;
+        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>> m_ImplicitFromOpMap;
+        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>> m_ExplicitFromOpMap;
 
-        auto InitializeSignedIntTypesSet() -> void;
-
-        std::vector<INative*> m_Natives{};
-        std::vector<NativeType*> m_Types{};
-        std::vector<NativeTypeTemplate*> m_TypeTemplates{};
-        std::vector<NativeFunction*> m_Functions{};
-        std::vector<NativeFunctionTemplate*> m_FunctionTemplates{};
-        std::vector<NativeAssociatedFunction*> m_AssociatedFunctions{};
-        std::vector<NativeAssociatedFunctionTemplate*> m_AssociatedFunctionTemplates{};
-
-        std::unordered_map<ITypeSymbol*, llvm::Type*> m_IRTypeSymbolMap{};
-
-        std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_ImplicitFromOpMap{};
-        std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_ExplicitFromOpMap{};
-
-        std::unordered_set<const NativeType*> m_SignedIntTypesSet{};
+        Lazy<std::set<const NativeType*>> m_SignedIntTypesSet;
     };
 }

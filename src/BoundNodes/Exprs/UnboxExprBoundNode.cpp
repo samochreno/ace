@@ -58,7 +58,7 @@ namespace Ace
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             SrcLocation{},
-            GetCompilation()->GetNatives()->StrongPtr__value.GetSymbol(),
+            GetCompilation()->GetNatives().StrongPtr__value.GetSymbol(),
             std::nullopt,
             { m_Expr->GetTypeInfo().Symbol->GetWithoutRef()->GetWithoutStrongPtr() },
             {}
@@ -106,7 +106,7 @@ namespace Ace
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             SrcLocation{},
-            GetCompilation()->GetNatives()->StrongPtr__value.GetSymbol(),
+            GetCompilation()->GetNatives().StrongPtr__value.GetSymbol(),
             std::nullopt,
             { loweredExpr->GetTypeInfo().Symbol->GetWithoutRef()->GetWithoutStrongPtr() },
             {}

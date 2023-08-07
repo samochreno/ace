@@ -40,7 +40,7 @@ namespace Ace::GlueGeneration
             name,
             SymbolCategory::Static,
             AccessModifier::Public,
-            compilation->GetNatives()->Void.GetSymbol()
+            compilation->GetNatives().Void.GetSymbol()
         );
 
         auto* const glueSymbol = Scope::DefineSymbol(
@@ -102,7 +102,7 @@ namespace Ace::GlueGeneration
             name,
             SymbolCategory::Static,
             AccessModifier::Public,
-            compilation->GetNatives()->Void.GetSymbol()
+            compilation->GetNatives().Void.GetSymbol()
         );
 
         auto* const glueSymbol = Scope::DefineSymbol(
@@ -432,7 +432,7 @@ namespace Ace::GlueGeneration
             [&](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
             { 
                 return bodyNode->CreateTypeChecked({
-                    compilation->GetNatives()->Void.GetSymbol()
+                    compilation->GetNatives().Void.GetSymbol()
                 }); 
             },
             [](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
@@ -541,7 +541,7 @@ namespace Ace::GlueGeneration
             [&](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
             { 
                 return bodyNode->CreateTypeChecked({
-                    compilation->GetNatives()->Void.GetSymbol()
+                    compilation->GetNatives().Void.GetSymbol()
                 }); 
             },
             [](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)

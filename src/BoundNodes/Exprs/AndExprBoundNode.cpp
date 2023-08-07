@@ -51,7 +51,7 @@ namespace Ace
 
         const TypeInfo typeInfo
         {
-            GetCompilation()->GetNatives()->Bool.GetSymbol(),
+            GetCompilation()->GetNatives().Bool.GetSymbol(),
             ValueKind::R,
         };
         const auto checkedLHSExpr = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
@@ -122,7 +122,7 @@ namespace Ace
     {
         std::vector<ExprDropData> tmps{};
 
-        auto* const boolType = GetCompilation()->GetNatives()->Bool.GetIRType();
+        auto* const boolType = GetCompilation()->GetNatives().Bool.GetIRType();
 
         auto* const allocaInst =
             emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
@@ -190,7 +190,7 @@ namespace Ace
     {
         return
         {
-            GetCompilation()->GetNatives()->Bool.GetSymbol(),
+            GetCompilation()->GetNatives().Bool.GetSymbol(),
             ValueKind::R
         };
     }

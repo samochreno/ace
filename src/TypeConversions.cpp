@@ -64,7 +64,7 @@ namespace Ace
 
         auto* const function = Scope::ResolveOrInstantiateTemplateInstance(
             SrcLocation{},
-            compilation->GetNatives()->WeakPtr__from.GetSymbol(),
+            compilation->GetNatives().WeakPtr__from.GetSymbol(),
             std::nullopt,
             { fromType->GetWithoutStrongPtr()->GetWithoutRef() },
             {}
@@ -81,7 +81,7 @@ namespace Ace
         const auto optNativeOp = GetNativeConversionOp(
             fromType,
             toType,
-            scope->GetCompilation()->GetNatives()->GetImplicitFromOpMap()
+            scope->GetCompilation()->GetNatives().GetImplicitFromOpMap()
         );
         if (optNativeOp.has_value())
         {
@@ -104,7 +104,7 @@ namespace Ace
         const auto optNativeImplicitOp = GetNativeConversionOp(
             fromType,
             toType,
-            scope->GetCompilation()->GetNatives()->GetImplicitFromOpMap()
+            scope->GetCompilation()->GetNatives().GetImplicitFromOpMap()
         );
         if (optNativeImplicitOp.has_value())
         {
@@ -114,7 +114,7 @@ namespace Ace
         const auto optNativeExplicitOp = GetNativeConversionOp(
             fromType,
             toType,
-            scope->GetCompilation()->GetNatives()->GetExplicitFromOpMap()
+            scope->GetCompilation()->GetNatives().GetExplicitFromOpMap()
         );
         if (optNativeExplicitOp)
         {

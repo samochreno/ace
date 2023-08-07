@@ -52,7 +52,7 @@ namespace Ace
 
         const TypeInfo typeInfo
         {
-            GetCompilation()->GetNatives()->Bool.GetSymbol(),
+            GetCompilation()->GetNatives().Bool.GetSymbol(),
             ValueKind::R,
         };
         const auto checkedCondition = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
@@ -118,7 +118,7 @@ namespace Ace
         const auto conditionEmitResult = m_Condition->Emit(emitter);
 
         auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
-            GetCompilation()->GetNatives()->Bool.GetIRType(),
+            GetCompilation()->GetNatives().Bool.GetIRType(),
             conditionEmitResult.Value
         );
 

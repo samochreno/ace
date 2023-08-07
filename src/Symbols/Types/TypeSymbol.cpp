@@ -17,7 +17,7 @@ namespace Ace
     {
         auto* const self = GetUnaliased();
 
-        const auto& ref = GetCompilation()->GetNatives()->Ref;
+        const auto& ref = GetCompilation()->GetNatives().Ref;
 
         if (self->GetScope() != ref.GetSymbol()->GetScope())
         {
@@ -63,7 +63,7 @@ namespace Ace
 
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             SrcLocation{},
-            GetCompilation()->GetNatives()->Ref.GetSymbol(),
+            GetCompilation()->GetNatives().Ref.GetSymbol(),
             std::nullopt,
             {},
             { this->GetUnaliased() }
@@ -79,7 +79,7 @@ namespace Ace
     {
         auto* const self = GetUnaliased();
 
-        const auto& strongPtr = GetCompilation()->GetNatives()->StrongPtr;
+        const auto& strongPtr = GetCompilation()->GetNatives().StrongPtr;
 
         if (self->GetScope() != strongPtr.GetSymbol()->GetScope())
         {
@@ -112,7 +112,7 @@ namespace Ace
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             SrcLocation{},
-            GetCompilation()->GetNatives()->StrongPtr.GetSymbol(),
+            GetCompilation()->GetNatives().StrongPtr.GetSymbol(),
             std::nullopt,
             {},
             { this->GetUnaliased() }
@@ -128,7 +128,7 @@ namespace Ace
     {
         auto* const self = GetUnaliased();
 
-        const auto& weakPtr = GetCompilation()->GetNatives()->WeakPtr;
+        const auto& weakPtr = GetCompilation()->GetNatives().WeakPtr;
 
         if (self->GetScope() != weakPtr.GetSymbol()->GetScope())
         {
@@ -161,7 +161,7 @@ namespace Ace
     {
         auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
             SrcLocation{},
-            GetCompilation()->GetNatives()->WeakPtr.GetSymbol(),
+            GetCompilation()->GetNatives().WeakPtr.GetSymbol(),
             std::nullopt,
             {},
             { this->GetUnaliased() }

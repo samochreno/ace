@@ -58,7 +58,7 @@ namespace Ace
         auto* const compilation = functionTypeSymbol->GetCompilation();
 
         const bool isFunctionTypeVoid =
-            functionTypeSymbol == compilation->GetNatives()->Void.GetSymbol();
+            functionTypeSymbol == compilation->GetNatives().Void.GetSymbol();
 
         if (!isFunctionTypeVoid && !optExpr.has_value())
         {

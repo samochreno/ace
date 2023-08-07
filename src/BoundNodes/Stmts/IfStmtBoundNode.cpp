@@ -61,7 +61,7 @@ namespace Ace
 
         const TypeInfo typeInfo
         {
-            GetCompilation()->GetNatives()->Bool.GetSymbol(),
+            GetCompilation()->GetNatives().Bool.GetSymbol(),
             ValueKind::R,
         };
 

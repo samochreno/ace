@@ -119,7 +119,7 @@ namespace Ace
             emitter.GetBlockBuilder().Builder.CreateAlloca(type);
         tmps.emplace_back(
             allocaInst, 
-            GetCompilation()->GetNatives()->Ptr.GetSymbol()
+            GetCompilation()->GetNatives().Ptr.GetSymbol()
         );
 
         emitter.GetBlockBuilder().Builder.CreateStore(
@@ -134,7 +134,7 @@ namespace Ace
     {
         return 
         { 
-            GetCompilation()->GetNatives()->Ptr.GetSymbol(), 
+            GetCompilation()->GetNatives().Ptr.GetSymbol(), 
             ValueKind::R
         };
     }

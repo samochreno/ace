@@ -53,7 +53,7 @@ namespace Ace
 
         const bool isRef = typeSymbol->IsRef();
         const bool isPtr =
-            typeSymbol == GetCompilation()->GetNatives()->Ptr.GetSymbol();
+            typeSymbol == GetCompilation()->GetNatives().Ptr.GetSymbol();
 
         if (!isRef && !isPtr)
         {
@@ -122,7 +122,7 @@ namespace Ace
             end  (exprEmitResult.Tmps)
         );
 
-        auto* const ptrType = GetCompilation()->GetNatives()->Ptr.GetIRType();
+        auto* const ptrType = GetCompilation()->GetNatives().Ptr.GetIRType();
 
         auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             ptrType,

@@ -152,7 +152,7 @@ namespace Ace::Application
         {
             if (
                 functionNode->GetSymbol()->GetType()->GetUnaliased() == 
-                compilation->GetNatives()->Void.GetSymbol()
+                compilation->GetNatives().Void.GetSymbol()
                 )
             {
                 return;
@@ -331,7 +331,7 @@ namespace Ace::Application
 
         const auto timeBindingAndVerificationBegin = now();
 
-        compilation->GetNatives()->Initialize();
+        compilation->GetNatives().Verify();
 
         std::vector<std::shared_ptr<const ModuleBoundNode>> boundASTs{};
         std::transform(begin(asts), end(asts), back_inserter(boundASTs),

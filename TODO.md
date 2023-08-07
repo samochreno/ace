@@ -9,7 +9,6 @@
 ## 💥 High Priority
 
 - Reduce state in `Compilation`:
-  - Make `Natives` symbol getters lazy, so they can be const, if accessed before resolution is possible panic, get them all at point of initialization to test that nothing went wrong
   - ❓ Move uninstatiated templates (`TemplateInstantiator`) into `Scope` to keep all state there
   - Move `LLVMContext` to `Emitter` if possible
 - Make it so defining two associated functions with a same name causes a symbol redefinition error

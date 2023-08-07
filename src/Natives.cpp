@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <optional>
+#include <set>
 #include <algorithm>
 
 #include "Diagnostic.hpp"
@@ -79,7 +80,34 @@ namespace Ace
         m_NameSectionStrings{ std::move(nameSectionStrings) },
         m_IRTypeGetter{ std::move(irTypeGetter) },
         m_IsSized{ sizeKind == TypeSizeKind::Sized },
-        m_IsTriviallyCopyable{ copyabilityKind == NativeCopyabilityKind::Trivial }
+        m_IsTriviallyCopyable{ copyabilityKind == NativeCopyabilityKind::Trivial },
+        m_Symbol
+        {
+            [this]()
+            {
+                const auto globalScope = GetCompilation()->GetGlobalScope();
+                auto* const symbol = globalScope->ResolveStaticSymbol<ITypeSymbol>(
+                    CreateFullyQualifiedName(SrcLocation{})
+                ).Unwrap();
+
+                if (m_IRTypeGetter.has_value())
+                {
+                    symbol->SetAsPrimitivelyEmittable();
+                }
+
+                if (!m_IsSized)
+                {
+                    symbol->SetAsUnsized();
+                }
+
+                if (m_IsTriviallyCopyable)
+                {
+                    symbol->SetAsTriviallyCopyable();
+                }        
+
+                return symbol;
+            }
+        }
     {
         ACE_ASSERT(
             (sizeKind == TypeSizeKind::Sized) ||
@@ -107,37 +135,14 @@ namespace Ace
         );
     }
 
-    auto NativeType::Initialize() -> void
-    {
-        const auto globalScope = GetCompilation()->GetGlobalScope();
-        auto* const symbol = globalScope->ResolveStaticSymbol<ITypeSymbol>(
-            CreateFullyQualifiedName(SrcLocation{})
-        ).Unwrap();
-
-        if (m_IRTypeGetter.has_value())
-        {
-            symbol->SetAsPrimitivelyEmittable();
-        }
-
-        if (!m_IsSized)
-        {
-            symbol->SetAsUnsized();
-        }
-
-        if (m_IsTriviallyCopyable)
-        {
-            symbol->SetAsTriviallyCopyable();
-        }
-
-        m_Symbol = symbol;
-    }
-
-
-
     auto NativeType::GetSymbol() const -> ITypeSymbol*
     {
-        ACE_ASSERT(m_Symbol);
-        return m_Symbol;
+        return m_Symbol.Get();
+    }
+
+    auto NativeType::GetGenericSymbol() const -> ISymbol*
+    {
+        return GetSymbol();
     }
 
     auto NativeType::HasIRType() const -> bool
@@ -155,7 +160,22 @@ namespace Ace
         Compilation* const compilation,
         std::vector<const char*>&& nameSectionStrings
     ) : m_Compilation{ compilation },
-        m_NameSectionStrings{ std::move(nameSectionStrings) }
+        m_NameSectionStrings{ std::move(nameSectionStrings) },
+        m_Symbol
+        {
+            [this]()
+            {
+                auto name = CreateFullyQualifiedName(SrcLocation{});
+                name.Sections.back().Name.String = SpecialIdent::CreateTemplate(
+                    name.Sections.back().Name.String
+                );
+
+                const auto globalScope = GetCompilation()->GetGlobalScope();
+                return globalScope->ResolveStaticSymbol<TypeTemplateSymbol>(
+                    name
+                ).Unwrap();
+            }
+        }
     {
     }
 
@@ -174,24 +194,14 @@ namespace Ace
         );
     }
 
-    auto NativeTypeTemplate::Initialize() -> void
-    {
-        auto name = CreateFullyQualifiedName(SrcLocation{});
-        name.Sections.back().Name.String = SpecialIdent::CreateTemplate(
-            name.Sections.back().Name.String
-        );
-
-        const auto globalScope = GetCompilation()->GetGlobalScope();
-        auto* const symbol =
-            globalScope->ResolveStaticSymbol<TypeTemplateSymbol>(name).Unwrap();
-
-        m_Symbol = symbol;
-    }
-
     auto NativeTypeTemplate::GetSymbol() const -> TypeTemplateSymbol*
     {
-        ACE_ASSERT(m_Symbol);
-        return m_Symbol;
+        return m_Symbol.Get();
+    }
+
+    auto NativeTypeTemplate::GetGenericSymbol() const -> ISymbol*
+    {
+        return GetSymbol();
     }
 
     NativeFunction::NativeFunction(
@@ -200,7 +210,23 @@ namespace Ace
         FunctionBodyEmitter&& bodyEmitter
     ) : m_Compilation{ compilation },
         m_NameSectionStrings{ std::move(nameSectionStrings) },
-        m_BodyEmitter{ std::move(bodyEmitter) }
+        m_BodyEmitter{ std::move(bodyEmitter) },
+        m_Symbol
+        {
+            [this]()
+            {
+                const auto globalScope = GetCompilation()->GetGlobalScope();
+                auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
+                    CreateFullyQualifiedName(SrcLocation{})
+                ).Unwrap();
+
+                symbol->BindBody(std::make_shared<FunctionEmittableBody>(
+                    m_BodyEmitter
+                ));
+
+                return symbol;
+            }
+        }
     {
     }
 
@@ -219,31 +245,31 @@ namespace Ace
         );
     }
 
-    auto NativeFunction::Initialize() -> void
-    {
-        const auto globalScope = GetCompilation()->GetGlobalScope();
-        auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
-            CreateFullyQualifiedName(SrcLocation{})
-        ).Unwrap();
-
-        symbol->BindBody(std::make_shared<FunctionEmittableBody>(
-            m_BodyEmitter
-        ));
-
-        m_Symbol = symbol;
-    }
-
     auto NativeFunction::GetSymbol() const -> FunctionSymbol*
     {
-        ACE_ASSERT(m_Symbol);
-        return m_Symbol;
+        return m_Symbol.Get();
+    }
+
+    auto NativeFunction::GetGenericSymbol() const -> ISymbol*
+    {
+        return GetSymbol();
     }
 
     NativeFunctionTemplate::NativeFunctionTemplate(
         Compilation* const compilation,
         std::vector<const char*>&& nameSectionStrings
     ) : m_Compilation{ compilation },
-        m_NameSectionStrings{ std::move(nameSectionStrings) }
+        m_NameSectionStrings{ std::move(nameSectionStrings) },
+        m_Symbol
+        {
+            [this]()
+            {
+                const auto globalScope = GetCompilation()->GetGlobalScope();
+                return globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
+                    CreateFullyQualifiedName(SrcLocation{})
+                ).Unwrap();
+            }
+        }
     {
     }
 
@@ -262,20 +288,14 @@ namespace Ace
         );
     }
 
-    auto NativeFunctionTemplate::Initialize() -> void
-    {
-        const auto globalScope = GetCompilation()->GetGlobalScope();
-        auto* const symbol = globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
-            CreateFullyQualifiedName(SrcLocation{})
-        ).Unwrap();
-
-        m_Symbol = symbol;
-    }
-
     auto NativeFunctionTemplate::GetSymbol() const -> FunctionTemplateSymbol*
     {
-        ACE_ASSERT(m_Symbol);
-        return m_Symbol;
+        return m_Symbol.Get();
+    }
+
+    auto NativeFunctionTemplate::GetGenericSymbol() const -> ISymbol*
+    {
+        return GetSymbol();
     }
 
     NativeAssociatedFunction::NativeAssociatedFunction(
@@ -284,7 +304,23 @@ namespace Ace
         FunctionBodyEmitter&& bodyEmitter
     ) : m_Type{ type },
         m_Name{ name },
-        m_BodyEmitter{ std::move(bodyEmitter) }
+        m_BodyEmitter{ std::move(bodyEmitter) },
+        m_Symbol
+        {
+            [this]()
+            {
+                const auto globalScope = GetCompilation()->GetGlobalScope();
+                auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
+                    CreateFullyQualifiedName(SrcLocation{})
+                ).Unwrap();
+
+                symbol->BindBody(std::make_shared<FunctionEmittableBody>(
+                    m_BodyEmitter
+                ));
+
+                return symbol;
+            }
+        }
     {
     }
 
@@ -304,31 +340,31 @@ namespace Ace
         );
     }
 
-    auto NativeAssociatedFunction::Initialize() -> void
-    {
-        const auto globalScope = GetCompilation()->GetGlobalScope();
-        auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
-            CreateFullyQualifiedName(SrcLocation{})
-        ).Unwrap();
-
-        symbol->BindBody(std::make_shared<FunctionEmittableBody>(
-            m_BodyEmitter
-        ));
-
-        m_Symbol = symbol;
-    }
-
     auto NativeAssociatedFunction::GetSymbol() const -> FunctionSymbol*
     {
-        ACE_ASSERT(m_Symbol);
-        return m_Symbol;
+        return m_Symbol.Get();
+    }
+
+    auto NativeAssociatedFunction::GetGenericSymbol() const -> ISymbol*
+    {
+        return GetSymbol();
     }
 
     NativeAssociatedFunctionTemplate::NativeAssociatedFunctionTemplate(
         const INative& type,
         const char* const name
     ) : m_Type{ type },
-        m_Name{ name }
+        m_Name{ name },
+        m_Symbol
+        {
+            [this]()
+            {
+                const auto globalScope = GetCompilation()->GetGlobalScope();
+                return globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
+                    CreateFullyQualifiedName(SrcLocation{})
+                ).Unwrap();
+            }
+        }
     {
     }
 
@@ -348,20 +384,14 @@ namespace Ace
         );
     }
 
-    auto NativeAssociatedFunctionTemplate::Initialize() -> void
-    {
-        const auto globalScope = GetCompilation()->GetGlobalScope();
-        auto* const symbol = globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
-            CreateFullyQualifiedName(SrcLocation{})
-        ).Unwrap();
-
-        m_Symbol = symbol;
-    }
-
     auto NativeAssociatedFunctionTemplate::GetSymbol() const -> FunctionTemplateSymbol*
     {
-        ACE_ASSERT(m_Symbol);
-        return m_Symbol;
+        return m_Symbol.Get();
+    }
+
+    auto NativeAssociatedFunctionTemplate::GetGenericSymbol() const -> ISymbol*
+    {
+        return GetSymbol();
     }
 
     namespace I
@@ -380,7 +410,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (fromType.GetCompilation()->GetNatives()->IsIntTypeSigned(fromType))
+                        if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(fromType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSExtOrTrunc(
                                 emitter.EmitLoadArg(0, fromType.GetIRType()),
@@ -523,7 +553,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (fromType.GetCompilation()->GetNatives()->IsIntTypeSigned(toType))
+                        if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(toType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateFPToSI(
                                 emitter.EmitLoadArg(0, fromType.GetIRType()),
@@ -580,7 +610,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (selfType.GetCompilation()->GetNatives()->IsIntTypeSigned(selfType))
+                        if (selfType.GetCompilation()->GetNatives().IsIntTypeSigned(selfType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSDiv(
                                 emitter.EmitLoadArg(0, selfType.GetIRType()),
@@ -613,7 +643,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (selfType.GetCompilation()->GetNatives()->IsIntTypeSigned(selfType))
+                        if (selfType.GetCompilation()->GetNatives().IsIntTypeSigned(selfType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSRem(
                                 emitter.EmitLoadArg(0, selfType.GetIRType()),
@@ -995,7 +1025,7 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
-                        if (fromType.GetCompilation()->GetNatives()->IsIntTypeSigned(fromType))
+                        if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(fromType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSIToFP(
                                 emitter.EmitLoadArg(0, fromType.GetIRType()),
@@ -2148,668 +2178,718 @@ namespace Ace
         {
             WeakPtr,
             "from"
+        },
+
+        m_Natives
+        {
+            [this]()
+            {
+                std::vector<INative*> natives{};
+
+                const auto types = m_Types.Get();
+                natives.insert(end(natives), begin(types), end(types));
+
+                const auto typeTemplates = m_TypeTemplates.Get();
+                natives.insert(
+                    end(natives),
+                    begin(typeTemplates),
+                    end  (typeTemplates)
+                );
+
+                const auto functions = m_Functions.Get();
+                natives.insert(end(natives), begin(functions), end(functions));
+
+                const auto functionTemplates = m_FunctionTemplates.Get();
+                natives.insert(
+                    end(natives),
+                    begin(functionTemplates),
+                    end  (functionTemplates)
+                );
+
+                const auto associatedFunctions = m_AssociatedFunctions.Get();
+                natives.insert(
+                    end(natives),
+                    begin(associatedFunctions),
+                    end  (associatedFunctions)
+                );
+
+                const auto associatedFunctionTemplates = m_AssociatedFunctionTemplates.Get();
+                natives.insert(
+                    end(natives),
+                    begin(associatedFunctionTemplates),
+                    end  (associatedFunctionTemplates)
+                );
+
+                return natives;
+            }
+        },
+        m_Types
+        {
+            [this]()
+            {
+                return std::vector
+                {
+                    &Int8,
+                    &Int16,
+                    &Int32,
+                    &Int64,
+                
+                    &UInt8,
+                    &UInt16,
+                    &UInt32,
+                    &UInt64,
+
+                    &Int,
+                
+                    &Float32,
+                    &Float64,
+
+                    &Bool,
+                    &Void,
+                    &String,
+
+                    &Ptr,
+                };
+            }
+        },
+        m_TypeTemplates
+        {
+            [this]()
+            {
+                return std::vector
+                {
+                    &Ref,
+                    &StrongPtr,
+                    &WeakPtr,
+                };
+            }
+        },
+        m_Functions
+        {
+            [this]()
+            {
+                return std::vector
+                {
+                    &print_int,
+                    &print_ptr,
+
+                    &alloc,
+                    &dealloc,
+                    &copy,
+                };
+            }
+        },
+        m_FunctionTemplates
+        {
+            [this]()
+            {
+                return std::vector<NativeFunctionTemplate*>
+                {
+                };
+            }
+        },
+        m_AssociatedFunctions
+        {
+            [this]()
+            {
+                return std::vector
+                {
+                    &i8__from_i16,
+                    &i8__from_i32,
+                    &i8__from_i64,
+                    &i8__from_u8,
+                    &i8__from_u16,
+                    &i8__from_u32,
+                    &i8__from_u64,
+                    &i8__from_int,
+                    &i8__from_f32,
+                    &i8__from_f64,
+                    &i8__unary_plus,
+                    &i8__unary_negation,
+                    &i8__one_complement,
+                    &i8__multiplication,
+                    &i8__division,
+                    &i8__remainder,
+                    &i8__addition,
+                    &i8__subtraction,
+                    &i8__right_shift,
+                    &i8__left_shift,
+                    &i8__less_than,
+                    &i8__greater_than,
+                    &i8__less_than_equals,
+                    &i8__greater_than_equals,
+                    &i8__equals,
+                    &i8__not_equals,
+                    &i8__AND,
+                    &i8__XOR,
+                    &i8__OR,
+
+                    &i16__from_i8,
+                    &i16__from_i32,
+                    &i16__from_i64,
+                    &i16__from_u8,
+                    &i16__from_u16,
+                    &i16__from_u32,
+                    &i16__from_u64,
+                    &i16__from_int,
+                    &i16__from_f32,
+                    &i16__from_f64,
+                    &i16__unary_plus,
+                    &i16__unary_negation,
+                    &i16__one_complement,
+                    &i16__multiplication,
+                    &i16__division,
+                    &i16__remainder,
+                    &i16__addition,
+                    &i16__subtraction,
+                    &i16__right_shift,
+                    &i16__left_shift,
+                    &i16__less_than,
+                    &i16__greater_than,
+                    &i16__less_than_equals,
+                    &i16__greater_than_equals,
+                    &i16__equals,
+                    &i16__not_equals,
+                    &i16__AND,
+                    &i16__XOR,
+                    &i16__OR,
+
+                    &i32__from_i8,
+                    &i32__from_i16,
+                    &i32__from_i64,
+                    &i32__from_u8,
+                    &i32__from_u16,
+                    &i32__from_u32,
+                    &i32__from_u64,
+                    &i32__from_int,
+                    &i32__from_f32,
+                    &i32__from_f64,
+                    &i32__unary_plus,
+                    &i32__unary_negation,
+                    &i32__one_complement,
+                    &i32__multiplication,
+                    &i32__division,
+                    &i32__remainder,
+                    &i32__addition,
+                    &i32__subtraction,
+                    &i32__right_shift,
+                    &i32__left_shift,
+                    &i32__less_than,
+                    &i32__greater_than,
+                    &i32__less_than_equals,
+                    &i32__greater_than_equals,
+                    &i32__equals,
+                    &i32__not_equals,
+                    &i32__AND,
+                    &i32__XOR,
+                    &i32__OR,
+
+                    &i64__from_i8,
+                    &i64__from_i16,
+                    &i64__from_i32,
+                    &i64__from_u8,
+                    &i64__from_u16,
+                    &i64__from_u32,
+                    &i64__from_u64,
+                    &i64__from_int,
+                    &i64__from_f32,
+                    &i64__from_f64,
+                    &i64__unary_plus,
+                    &i64__unary_negation,
+                    &i64__one_complement,
+                    &i64__multiplication,
+                    &i64__division,
+                    &i64__remainder,
+                    &i64__addition,
+                    &i64__subtraction,
+                    &i64__right_shift,
+                    &i64__left_shift,
+                    &i64__less_than,
+                    &i64__greater_than,
+                    &i64__less_than_equals,
+                    &i64__greater_than_equals,
+                    &i64__equals,
+                    &i64__not_equals,
+                    &i64__AND,
+                    &i64__XOR,
+                    &i64__OR,
+
+                    &u8__from_i8,
+                    &u8__from_i16,
+                    &u8__from_i32,
+                    &u8__from_i64,
+                    &u8__from_u16,
+                    &u8__from_u32,
+                    &u8__from_u64,
+                    &u8__from_int,
+                    &u8__from_f32,
+                    &u8__from_f64,
+                    &u8__unary_plus,
+                    &u8__unary_negation,
+                    &u8__one_complement,
+                    &u8__multiplication,
+                    &u8__division,
+                    &u8__remainder,
+                    &u8__addition,
+                    &u8__subtraction,
+                    &u8__right_shift,
+                    &u8__left_shift,
+                    &u8__less_than,
+                    &u8__greater_than,
+                    &u8__less_than_equals,
+                    &u8__greater_than_equals,
+                    &u8__equals,
+                    &u8__not_equals,
+                    &u8__AND,
+                    &u8__XOR,
+                    &u8__OR,
+
+                    &u16__from_i8,
+                    &u16__from_i16,
+                    &u16__from_i32,
+                    &u16__from_i64,
+                    &u16__from_u8,
+                    &u16__from_u32,
+                    &u16__from_u64,
+                    &u16__from_int,
+                    &u16__from_f32,
+                    &u16__from_f64,
+                    &u16__unary_plus,
+                    &u16__unary_negation,
+                    &u16__one_complement,
+                    &u16__multiplication,
+                    &u16__division,
+                    &u16__remainder,
+                    &u16__addition,
+                    &u16__subtraction,
+                    &u16__right_shift,
+                    &u16__left_shift,
+                    &u16__less_than,
+                    &u16__greater_than,
+                    &u16__less_than_equals,
+                    &u16__greater_than_equals,
+                    &u16__equals,
+                    &u16__not_equals,
+                    &u16__AND,
+                    &u16__XOR,
+                    &u16__OR,
+
+                    &u32__from_i8,
+                    &u32__from_i16,
+                    &u32__from_i32,
+                    &u32__from_i64,
+                    &u32__from_u8,
+                    &u32__from_u16,
+                    &u32__from_u64,
+                    &u32__from_int,
+                    &u32__from_f32,
+                    &u32__from_f64,
+                    &u32__unary_plus,
+                    &u32__unary_negation,
+                    &u32__one_complement,
+                    &u32__multiplication,
+                    &u32__division,
+                    &u32__remainder,
+                    &u32__addition,
+                    &u32__subtraction,
+                    &u32__right_shift,
+                    &u32__left_shift,
+                    &u32__less_than,
+                    &u32__greater_than,
+                    &u32__less_than_equals,
+                    &u32__greater_than_equals,
+                    &u32__equals,
+                    &u32__not_equals,
+                    &u32__AND,
+                    &u32__XOR,
+                    &u32__OR,
+
+                    &u64__from_i8,
+                    &u64__from_i16,
+                    &u64__from_i32,
+                    &u64__from_i64,
+                    &u64__from_u8,
+                    &u64__from_u16,
+                    &u64__from_u32,
+                    &u64__from_int,
+                    &u64__from_f32,
+                    &u64__from_f64,
+                    &u64__unary_plus,
+                    &u64__unary_negation,
+                    &u64__one_complement,
+                    &u64__multiplication,
+                    &u64__division,
+                    &u64__remainder,
+                    &u64__addition,
+                    &u64__subtraction,
+                    &u64__right_shift,
+                    &u64__left_shift,
+                    &u64__less_than,
+                    &u64__greater_than,
+                    &u64__less_than_equals,
+                    &u64__greater_than_equals,
+                    &u64__equals,
+                    &u64__not_equals,
+                    &u64__AND,
+                    &u64__XOR,
+                    &u64__OR,
+
+                    &int_from_i8,
+                    &int_from_i16,
+                    &int_from_i32,
+                    &int_from_i64,
+                    &int_from_u8,
+                    &int_from_u16,
+                    &int_from_u32,
+                    &int_from_u64,
+                    &int_from_f32,
+                    &int_from_f64,
+                    &int_unary_plus,
+                    &int_unary_negation,
+                    &int_one_complement,
+                    &int_multiplication,
+                    &int_division,
+                    &int_remainder,
+                    &int_addition,
+                    &int_subtraction,
+                    &int_right_shift,
+                    &int_left_shift,
+                    &int_less_than,
+                    &int_greater_than,
+                    &int_less_than_equals,
+                    &int_greater_than_equals,
+                    &int_equals,
+                    &int_not_equals,
+                    &int_AND,
+                    &int_XOR,
+                    &int_OR,
+
+                    &f32__from_i8,
+                    &f32__from_i16,
+                    &f32__from_i32,
+                    &f32__from_i64,
+                    &f32__from_u8,
+                    &f32__from_u16,
+                    &f32__from_u32,
+                    &f32__from_u64,
+                    &f32__from_int,
+                    &f32__from_f64,
+                    &f32__unary_plus,
+                    &f32__unary_negation,
+                    &f32__multiplication,
+                    &f32__division,
+                    &f32__remainder,
+                    &f32__addition,
+                    &f32__subtraction,
+                    &f32__less_than,
+                    &f32__greater_than,
+                    &f32__less_than_equals,
+                    &f32__greater_than_equals,
+                    &f32__equals,
+                    &f32__not_equals,
+
+                    &f64__from_i8,
+                    &f64__from_i16,
+                    &f64__from_i32,
+                    &f64__from_i64,
+                    &f64__from_u8,
+                    &f64__from_u16,
+                    &f64__from_u32,
+                    &f64__from_u64,
+                    &f64__from_int,
+                    &f64__from_f32,
+                    &f64__unary_plus,
+                    &f64__unary_negation,
+                    &f64__multiplication,
+                    &f64__division,
+                    &f64__remainder,
+                    &f64__addition,
+                    &f64__subtraction,
+                    &f64__less_than,
+                    &f64__greater_than,
+                    &f64__less_than_equals,
+                    &f64__greater_than_equals,
+                    &f64__equals,
+                    &f64__not_equals,
+                };
+            }
+        },
+        m_AssociatedFunctionTemplates
+        {
+            [this]()
+            {
+                return std::vector
+                {
+                    &StrongPtr__new,
+                    &StrongPtr__value,
+
+                    &WeakPtr__from,
+                };
+            }
+        },
+
+        m_IRTypeSymbolMap
+        {
+            [this]()
+            {
+                std::unordered_map<ITypeSymbol*, llvm::Type*> map{};
+
+                std::for_each(begin(m_Types.Get()), end(m_Types.Get()),
+                [&](const NativeType* const type)
+                {
+                    if (!type->HasIRType())
+                    {
+                        return;
+                    }
+
+                    map[type->GetSymbol()] = type->GetIRType();
+                });
+
+                return map;
+            }
+        },
+
+        m_ImplicitFromOpMap
+        {
+            [this]()
+            {
+                std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>> map{};
+
+                map[Int8.GetSymbol()] =
+                {
+                };
+                map[Int16.GetSymbol()] =
+                {
+                    { Int8.GetSymbol(), i16__from_i8.GetSymbol() },
+                    { UInt8.GetSymbol(), i16__from_u8.GetSymbol() },
+                };
+                map[Int32.GetSymbol()] = 
+                {
+                    { Int8.GetSymbol(), i32__from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), i32__from_i16.GetSymbol() },
+                    { UInt8.GetSymbol(), i32__from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), i32__from_u16.GetSymbol() },
+                };
+                map[Int64.GetSymbol()] =
+                {
+                    { Int8.GetSymbol(), i64__from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), i64__from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), i64__from_i32.GetSymbol() },
+                    { UInt8.GetSymbol(), i64__from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), i64__from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), i64__from_u32.GetSymbol() },
+                };
+
+                map[UInt8.GetSymbol()] =
+                {
+                };
+                map[UInt16.GetSymbol()] =
+                {
+                    { UInt8.GetSymbol(), u16__from_u8.GetSymbol() },
+                };
+                map[UInt32.GetSymbol()] = 
+                {
+                    { UInt8.GetSymbol(), u32__from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), u32__from_u16.GetSymbol() },
+                };
+                map[UInt64.GetSymbol()] =
+                {
+                    { UInt8.GetSymbol(), u64__from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), u64__from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), u64__from_u32.GetSymbol() },
+                };
+                map[Float32.GetSymbol()] =
+                {
+                    { Int8.GetSymbol(), f32__from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), f32__from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), f32__from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), f32__from_i64.GetSymbol() },
+                    { UInt8.GetSymbol(), f32__from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), f32__from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), f32__from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), f32__from_u64.GetSymbol() },
+                    { Int.GetSymbol(), f32__from_int.GetSymbol() },
+                };
+                map[Float64.GetSymbol()] =
+                {
+                    { Int8.GetSymbol(), f64__from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), f64__from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), f64__from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), f64__from_i64.GetSymbol() },
+                    { UInt8.GetSymbol(), f64__from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), f64__from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), f64__from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), f64__from_u64.GetSymbol() },
+                    { Int.GetSymbol(), f64__from_int.GetSymbol() },
+                    { Float32.GetSymbol(), f64__from_f32.GetSymbol() },
+                };
+
+                return map;
+            }
+        },
+        m_ExplicitFromOpMap
+        {
+            [this]()
+            {
+                std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>> map{};
+
+                map[Int8.GetSymbol()] =
+                {
+                    { Int16.GetSymbol(), i8__from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), i8__from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), i8__from_i64.GetSymbol() },
+                    { UInt8.GetSymbol(), i8__from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), i8__from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), i8__from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), i8__from_u64.GetSymbol() },
+                    { Int.GetSymbol(), i8__from_int.GetSymbol() },
+                    { Float32.GetSymbol(), i8__from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), i8__from_f64.GetSymbol() },
+                };
+                map[Int16.GetSymbol()] =
+                {
+                    { Int32.GetSymbol(), i16__from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), i16__from_i64.GetSymbol() },
+                    { UInt16.GetSymbol(), i16__from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), i16__from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), i16__from_u64.GetSymbol() },
+                    { Int.GetSymbol(), i16__from_int.GetSymbol() },
+                    { Float32.GetSymbol(), i16__from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), i16__from_f64.GetSymbol() },
+                };
+                map[Int32.GetSymbol()] =
+                {
+                    { Int64.GetSymbol(), i32__from_i64.GetSymbol() },
+                    { UInt32.GetSymbol(), i32__from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), i32__from_u64.GetSymbol() },
+                    { Int.GetSymbol(), i32__from_int.GetSymbol() },
+                    { Float32.GetSymbol(), i32__from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), i32__from_f64.GetSymbol() },
+                };
+                map[Int64.GetSymbol()] =
+                {
+                    { UInt64.GetSymbol(), i64__from_u64.GetSymbol() },
+                    { Int.GetSymbol(), i64__from_int.GetSymbol() },
+                    { Float32.GetSymbol(), i64__from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), i64__from_f64.GetSymbol() },
+                };
+
+                map[UInt8.GetSymbol()] =
+                {
+                    { Int8.GetSymbol(), u8__from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), u8__from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), u8__from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), u8__from_i64.GetSymbol() },
+                    { UInt16.GetSymbol(), u8__from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), u8__from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), u8__from_u64.GetSymbol() },
+                    { Int.GetSymbol(), u8__from_int.GetSymbol() },
+                    { Float32.GetSymbol(), u8__from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), u8__from_f64.GetSymbol() },
+                };
+                map[UInt16.GetSymbol()] =
+                {
+                    { Int8.GetSymbol(), u16__from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), u16__from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), u16__from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), u16__from_i64.GetSymbol() },
+                    { UInt32.GetSymbol(), u16__from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), u16__from_u64.GetSymbol() },
+                    { Int.GetSymbol(), u16__from_int.GetSymbol() },
+                    { Float32.GetSymbol(), u16__from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), u16__from_f64.GetSymbol() },
+                };
+                map[UInt32.GetSymbol()] =
+                {
+                    { Int8.GetSymbol(), u32__from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), u32__from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), u32__from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), u32__from_i64.GetSymbol() },
+                    { UInt64.GetSymbol(), u32__from_u64.GetSymbol() },
+                    { Int.GetSymbol(), u32__from_int.GetSymbol() },
+                    { Float32.GetSymbol(), u32__from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), u32__from_f64.GetSymbol() },
+                };
+                map[UInt64.GetSymbol()] =
+                {
+                    { Int8.GetSymbol(), u64__from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), u64__from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), u64__from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), u64__from_i64.GetSymbol() },
+                    { Int.GetSymbol(), u64__from_int.GetSymbol() },
+                    { Float32.GetSymbol(), u64__from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), u64__from_f64.GetSymbol() },
+                };
+
+                map[Int.GetSymbol()] =
+                {
+                    { Int8.GetSymbol(), int_from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), int_from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), int_from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), int_from_i64.GetSymbol() },
+                    { UInt8.GetSymbol(), int_from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), int_from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), int_from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), int_from_u64.GetSymbol() },
+                    { Float32.GetSymbol(), int_from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), int_from_f64.GetSymbol() },
+                };
+
+                map[Float32.GetSymbol()] =
+                {
+                    { Float64.GetSymbol(), f32__from_f64.GetSymbol() },
+                };
+                map[Float64.GetSymbol()] =
+                {
+                };
+
+                return map;
+            }
+        },
+        
+        m_SignedIntTypesSet
+        {
+            [this]()
+            {
+                return std::set<const NativeType*>
+                {
+                    &Int8,
+                    &Int16,
+                    &Int32,
+                    &Int64,
+                    &Int,
+                };
+            }
         }
     {
     }
 
-    auto Natives::Initialize() -> void
+    auto Natives::Verify() const -> void
     {
-        InitializeCollectionsOfNatives();
-
-        std::for_each(begin(m_Natives), end(m_Natives),
+        std::for_each(begin(m_Natives.Get()), end(m_Natives.Get()),
         [](INative* const native)
         {
-            native->Initialize();
+            (void)native->GetGenericSymbol();
         });
-
-        InitializeIRTypeSymbolMap();
-
-        InitializeImplicitFromOpMap();
-        InitializeExplicitFromOpMap();
-
-        InitializeSignedIntTypesSet();
     }
 
     auto Natives::GetIRTypeSymbolMap() const -> const std::unordered_map<ITypeSymbol*, llvm::Type*>&
     {
-        return m_IRTypeSymbolMap;
+        return m_IRTypeSymbolMap.Get();
     }
 
     auto Natives::GetImplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
     {
-        return m_ImplicitFromOpMap;
+        return m_ImplicitFromOpMap.Get();
     }
 
     auto Natives::GetExplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
     {
-        return m_ExplicitFromOpMap;
+        return m_ExplicitFromOpMap.Get();
     }
 
     auto Natives::IsIntTypeSigned(const NativeType& intType) const -> bool
     {
-        return m_SignedIntTypesSet.contains(&intType);
-    }
-
-    auto Natives::InitializeCollectionsOfNatives() -> void
-    {
-        m_Types = 
-        {
-            &Int8,
-            &Int16,
-            &Int32,
-            &Int64,
-        
-            &UInt8,
-            &UInt16,
-            &UInt32,
-            &UInt64,
-
-            &Int,
-        
-            &Float32,
-            &Float64,
-
-            &Bool,
-            &Void,
-            &String,
-
-            &Ptr,
-        };
-
-        m_TypeTemplates = 
-        {
-            &Ref,
-            &StrongPtr,
-            &WeakPtr,
-        };
-
-        m_Functions =
-        {
-            &print_int,
-            &print_ptr,
-
-            &alloc,
-            &dealloc,
-            &copy,
-        };
-
-        m_FunctionTemplates =
-        {
-        };
-
-        m_AssociatedFunctions =
-        {
-            &i8__from_i16,
-            &i8__from_i32,
-            &i8__from_i64,
-            &i8__from_u8,
-            &i8__from_u16,
-            &i8__from_u32,
-            &i8__from_u64,
-            &i8__from_int,
-            &i8__from_f32,
-            &i8__from_f64,
-            &i8__unary_plus,
-            &i8__unary_negation,
-            &i8__one_complement,
-            &i8__multiplication,
-            &i8__division,
-            &i8__remainder,
-            &i8__addition,
-            &i8__subtraction,
-            &i8__right_shift,
-            &i8__left_shift,
-            &i8__less_than,
-            &i8__greater_than,
-            &i8__less_than_equals,
-            &i8__greater_than_equals,
-            &i8__equals,
-            &i8__not_equals,
-            &i8__AND,
-            &i8__XOR,
-            &i8__OR,
-
-            &i16__from_i8,
-            &i16__from_i32,
-            &i16__from_i64,
-            &i16__from_u8,
-            &i16__from_u16,
-            &i16__from_u32,
-            &i16__from_u64,
-            &i16__from_int,
-            &i16__from_f32,
-            &i16__from_f64,
-            &i16__unary_plus,
-            &i16__unary_negation,
-            &i16__one_complement,
-            &i16__multiplication,
-            &i16__division,
-            &i16__remainder,
-            &i16__addition,
-            &i16__subtraction,
-            &i16__right_shift,
-            &i16__left_shift,
-            &i16__less_than,
-            &i16__greater_than,
-            &i16__less_than_equals,
-            &i16__greater_than_equals,
-            &i16__equals,
-            &i16__not_equals,
-            &i16__AND,
-            &i16__XOR,
-            &i16__OR,
-
-            &i32__from_i8,
-            &i32__from_i16,
-            &i32__from_i64,
-            &i32__from_u8,
-            &i32__from_u16,
-            &i32__from_u32,
-            &i32__from_u64,
-            &i32__from_int,
-            &i32__from_f32,
-            &i32__from_f64,
-            &i32__unary_plus,
-            &i32__unary_negation,
-            &i32__one_complement,
-            &i32__multiplication,
-            &i32__division,
-            &i32__remainder,
-            &i32__addition,
-            &i32__subtraction,
-            &i32__right_shift,
-            &i32__left_shift,
-            &i32__less_than,
-            &i32__greater_than,
-            &i32__less_than_equals,
-            &i32__greater_than_equals,
-            &i32__equals,
-            &i32__not_equals,
-            &i32__AND,
-            &i32__XOR,
-            &i32__OR,
-
-            &i64__from_i8,
-            &i64__from_i16,
-            &i64__from_i32,
-            &i64__from_u8,
-            &i64__from_u16,
-            &i64__from_u32,
-            &i64__from_u64,
-            &i64__from_int,
-            &i64__from_f32,
-            &i64__from_f64,
-            &i64__unary_plus,
-            &i64__unary_negation,
-            &i64__one_complement,
-            &i64__multiplication,
-            &i64__division,
-            &i64__remainder,
-            &i64__addition,
-            &i64__subtraction,
-            &i64__right_shift,
-            &i64__left_shift,
-            &i64__less_than,
-            &i64__greater_than,
-            &i64__less_than_equals,
-            &i64__greater_than_equals,
-            &i64__equals,
-            &i64__not_equals,
-            &i64__AND,
-            &i64__XOR,
-            &i64__OR,
-
-            &u8__from_i8,
-            &u8__from_i16,
-            &u8__from_i32,
-            &u8__from_i64,
-            &u8__from_u16,
-            &u8__from_u32,
-            &u8__from_u64,
-            &u8__from_int,
-            &u8__from_f32,
-            &u8__from_f64,
-            &u8__unary_plus,
-            &u8__unary_negation,
-            &u8__one_complement,
-            &u8__multiplication,
-            &u8__division,
-            &u8__remainder,
-            &u8__addition,
-            &u8__subtraction,
-            &u8__right_shift,
-            &u8__left_shift,
-            &u8__less_than,
-            &u8__greater_than,
-            &u8__less_than_equals,
-            &u8__greater_than_equals,
-            &u8__equals,
-            &u8__not_equals,
-            &u8__AND,
-            &u8__XOR,
-            &u8__OR,
-
-            &u16__from_i8,
-            &u16__from_i16,
-            &u16__from_i32,
-            &u16__from_i64,
-            &u16__from_u8,
-            &u16__from_u32,
-            &u16__from_u64,
-            &u16__from_int,
-            &u16__from_f32,
-            &u16__from_f64,
-            &u16__unary_plus,
-            &u16__unary_negation,
-            &u16__one_complement,
-            &u16__multiplication,
-            &u16__division,
-            &u16__remainder,
-            &u16__addition,
-            &u16__subtraction,
-            &u16__right_shift,
-            &u16__left_shift,
-            &u16__less_than,
-            &u16__greater_than,
-            &u16__less_than_equals,
-            &u16__greater_than_equals,
-            &u16__equals,
-            &u16__not_equals,
-            &u16__AND,
-            &u16__XOR,
-            &u16__OR,
-
-            &u32__from_i8,
-            &u32__from_i16,
-            &u32__from_i32,
-            &u32__from_i64,
-            &u32__from_u8,
-            &u32__from_u16,
-            &u32__from_u64,
-            &u32__from_int,
-            &u32__from_f32,
-            &u32__from_f64,
-            &u32__unary_plus,
-            &u32__unary_negation,
-            &u32__one_complement,
-            &u32__multiplication,
-            &u32__division,
-            &u32__remainder,
-            &u32__addition,
-            &u32__subtraction,
-            &u32__right_shift,
-            &u32__left_shift,
-            &u32__less_than,
-            &u32__greater_than,
-            &u32__less_than_equals,
-            &u32__greater_than_equals,
-            &u32__equals,
-            &u32__not_equals,
-            &u32__AND,
-            &u32__XOR,
-            &u32__OR,
-
-            &u64__from_i8,
-            &u64__from_i16,
-            &u64__from_i32,
-            &u64__from_i64,
-            &u64__from_u8,
-            &u64__from_u16,
-            &u64__from_u32,
-            &u64__from_int,
-            &u64__from_f32,
-            &u64__from_f64,
-            &u64__unary_plus,
-            &u64__unary_negation,
-            &u64__one_complement,
-            &u64__multiplication,
-            &u64__division,
-            &u64__remainder,
-            &u64__addition,
-            &u64__subtraction,
-            &u64__right_shift,
-            &u64__left_shift,
-            &u64__less_than,
-            &u64__greater_than,
-            &u64__less_than_equals,
-            &u64__greater_than_equals,
-            &u64__equals,
-            &u64__not_equals,
-            &u64__AND,
-            &u64__XOR,
-            &u64__OR,
-
-            &int_from_i8,
-            &int_from_i16,
-            &int_from_i32,
-            &int_from_i64,
-            &int_from_u8,
-            &int_from_u16,
-            &int_from_u32,
-            &int_from_u64,
-            &int_from_f32,
-            &int_from_f64,
-            &int_unary_plus,
-            &int_unary_negation,
-            &int_one_complement,
-            &int_multiplication,
-            &int_division,
-            &int_remainder,
-            &int_addition,
-            &int_subtraction,
-            &int_right_shift,
-            &int_left_shift,
-            &int_less_than,
-            &int_greater_than,
-            &int_less_than_equals,
-            &int_greater_than_equals,
-            &int_equals,
-            &int_not_equals,
-            &int_AND,
-            &int_XOR,
-            &int_OR,
-
-            &f32__from_i8,
-            &f32__from_i16,
-            &f32__from_i32,
-            &f32__from_i64,
-            &f32__from_u8,
-            &f32__from_u16,
-            &f32__from_u32,
-            &f32__from_u64,
-            &f32__from_int,
-            &f32__from_f64,
-            &f32__unary_plus,
-            &f32__unary_negation,
-            &f32__multiplication,
-            &f32__division,
-            &f32__remainder,
-            &f32__addition,
-            &f32__subtraction,
-            &f32__less_than,
-            &f32__greater_than,
-            &f32__less_than_equals,
-            &f32__greater_than_equals,
-            &f32__equals,
-            &f32__not_equals,
-
-            &f64__from_i8,
-            &f64__from_i16,
-            &f64__from_i32,
-            &f64__from_i64,
-            &f64__from_u8,
-            &f64__from_u16,
-            &f64__from_u32,
-            &f64__from_u64,
-            &f64__from_int,
-            &f64__from_f32,
-            &f64__unary_plus,
-            &f64__unary_negation,
-            &f64__multiplication,
-            &f64__division,
-            &f64__remainder,
-            &f64__addition,
-            &f64__subtraction,
-            &f64__less_than,
-            &f64__greater_than,
-            &f64__less_than_equals,
-            &f64__greater_than_equals,
-            &f64__equals,
-            &f64__not_equals,
-        };
-
-        m_AssociatedFunctionTemplates =
-        {
-            &StrongPtr__new,
-            &StrongPtr__value,
-
-            &WeakPtr__from,
-        };
-
-        m_Natives.insert(
-            end(m_Natives),
-            begin(m_Types),
-            end  (m_Types)
-        );
-        m_Natives.insert(
-            end(m_Natives),
-            begin(m_TypeTemplates),
-            end  (m_TypeTemplates)
-        );
-        m_Natives.insert(
-            end(m_Natives),
-            begin(m_Functions),
-            end  (m_Functions)
-        );
-        m_Natives.insert(
-            end(m_Natives),
-            begin(m_FunctionTemplates),
-            end  (m_FunctionTemplates)
-        );
-        m_Natives.insert(
-            end(m_Natives),
-            begin(m_AssociatedFunctions),
-            end  (m_AssociatedFunctions)
-        );
-        m_Natives.insert(
-            end(m_Natives),
-            begin(m_AssociatedFunctionTemplates),
-            end  (m_AssociatedFunctionTemplates)
-        );
-    }
-
-    auto Natives::InitializeIRTypeSymbolMap() -> void
-    {
-        auto& map = m_IRTypeSymbolMap;
-
-        std::for_each(begin(m_Types), end(m_Types),
-        [&](const NativeType* const type)
-        {
-            if (!type->HasIRType())
-                return;
-
-            map[type->GetSymbol()] = type->GetIRType();
-        });
-    }
-
-    auto Natives::InitializeImplicitFromOpMap() -> void
-    {
-        auto& map = m_ImplicitFromOpMap;
-
-        map[Int8.GetSymbol()] =
-        {
-        };
-        map[Int16.GetSymbol()] =
-        {
-            { Int8.GetSymbol(), i16__from_i8.GetSymbol() },
-            { UInt8.GetSymbol(), i16__from_u8.GetSymbol() },
-        };
-        map[Int32.GetSymbol()] = 
-        {
-            { Int8.GetSymbol(), i32__from_i8.GetSymbol() },
-            { Int16.GetSymbol(), i32__from_i16.GetSymbol() },
-            { UInt8.GetSymbol(), i32__from_u8.GetSymbol() },
-            { UInt16.GetSymbol(), i32__from_u16.GetSymbol() },
-        };
-        map[Int64.GetSymbol()] =
-        {
-            { Int8.GetSymbol(), i64__from_i8.GetSymbol() },
-            { Int16.GetSymbol(), i64__from_i16.GetSymbol() },
-            { Int32.GetSymbol(), i64__from_i32.GetSymbol() },
-            { UInt8.GetSymbol(), i64__from_u8.GetSymbol() },
-            { UInt16.GetSymbol(), i64__from_u16.GetSymbol() },
-            { UInt32.GetSymbol(), i64__from_u32.GetSymbol() },
-        };
-
-        map[UInt8.GetSymbol()] =
-        {
-        };
-        map[UInt16.GetSymbol()] =
-        {
-            { UInt8.GetSymbol(), u16__from_u8.GetSymbol() },
-        };
-        map[UInt32.GetSymbol()] = 
-        {
-            { UInt8.GetSymbol(), u32__from_u8.GetSymbol() },
-            { UInt16.GetSymbol(), u32__from_u16.GetSymbol() },
-        };
-        map[UInt64.GetSymbol()] =
-        {
-            { UInt8.GetSymbol(), u64__from_u8.GetSymbol() },
-            { UInt16.GetSymbol(), u64__from_u16.GetSymbol() },
-            { UInt32.GetSymbol(), u64__from_u32.GetSymbol() },
-        };
-        map[Float32.GetSymbol()] =
-        {
-            { Int8.GetSymbol(), f32__from_i8.GetSymbol() },
-            { Int16.GetSymbol(), f32__from_i16.GetSymbol() },
-            { Int32.GetSymbol(), f32__from_i32.GetSymbol() },
-            { Int64.GetSymbol(), f32__from_i64.GetSymbol() },
-            { UInt8.GetSymbol(), f32__from_u8.GetSymbol() },
-            { UInt16.GetSymbol(), f32__from_u16.GetSymbol() },
-            { UInt32.GetSymbol(), f32__from_u32.GetSymbol() },
-            { UInt64.GetSymbol(), f32__from_u64.GetSymbol() },
-            { Int.GetSymbol(), f32__from_int.GetSymbol() },
-        };
-        map[Float64.GetSymbol()] =
-        {
-            { Int8.GetSymbol(), f64__from_i8.GetSymbol() },
-            { Int16.GetSymbol(), f64__from_i16.GetSymbol() },
-            { Int32.GetSymbol(), f64__from_i32.GetSymbol() },
-            { Int64.GetSymbol(), f64__from_i64.GetSymbol() },
-            { UInt8.GetSymbol(), f64__from_u8.GetSymbol() },
-            { UInt16.GetSymbol(), f64__from_u16.GetSymbol() },
-            { UInt32.GetSymbol(), f64__from_u32.GetSymbol() },
-            { UInt64.GetSymbol(), f64__from_u64.GetSymbol() },
-            { Int.GetSymbol(), f64__from_int.GetSymbol() },
-            { Float32.GetSymbol(), f64__from_f32.GetSymbol() },
-        };
-    }
-
-    auto Natives::InitializeExplicitFromOpMap() -> void
-    {
-        auto& map = m_ExplicitFromOpMap;
-
-        map[Int8.GetSymbol()] =
-        {
-            { Int16.GetSymbol(), i8__from_i16.GetSymbol() },
-            { Int32.GetSymbol(), i8__from_i32.GetSymbol() },
-            { Int64.GetSymbol(), i8__from_i64.GetSymbol() },
-            { UInt8.GetSymbol(), i8__from_u8.GetSymbol() },
-            { UInt16.GetSymbol(), i8__from_u16.GetSymbol() },
-            { UInt32.GetSymbol(), i8__from_u32.GetSymbol() },
-            { UInt64.GetSymbol(), i8__from_u64.GetSymbol() },
-            { Int.GetSymbol(), i8__from_int.GetSymbol() },
-            { Float32.GetSymbol(), i8__from_f32.GetSymbol() },
-            { Float64.GetSymbol(), i8__from_f64.GetSymbol() },
-        };
-        map[Int16.GetSymbol()] =
-        {
-            { Int32.GetSymbol(), i16__from_i32.GetSymbol() },
-            { Int64.GetSymbol(), i16__from_i64.GetSymbol() },
-            { UInt16.GetSymbol(), i16__from_u16.GetSymbol() },
-            { UInt32.GetSymbol(), i16__from_u32.GetSymbol() },
-            { UInt64.GetSymbol(), i16__from_u64.GetSymbol() },
-            { Int.GetSymbol(), i16__from_int.GetSymbol() },
-            { Float32.GetSymbol(), i16__from_f32.GetSymbol() },
-            { Float64.GetSymbol(), i16__from_f64.GetSymbol() },
-        };
-        map[Int32.GetSymbol()] =
-        {
-            { Int64.GetSymbol(), i32__from_i64.GetSymbol() },
-            { UInt32.GetSymbol(), i32__from_u32.GetSymbol() },
-            { UInt64.GetSymbol(), i32__from_u64.GetSymbol() },
-            { Int.GetSymbol(), i32__from_int.GetSymbol() },
-            { Float32.GetSymbol(), i32__from_f32.GetSymbol() },
-            { Float64.GetSymbol(), i32__from_f64.GetSymbol() },
-        };
-        map[Int64.GetSymbol()] =
-        {
-            { UInt64.GetSymbol(), i64__from_u64.GetSymbol() },
-            { Int.GetSymbol(), i64__from_int.GetSymbol() },
-            { Float32.GetSymbol(), i64__from_f32.GetSymbol() },
-            { Float64.GetSymbol(), i64__from_f64.GetSymbol() },
-        };
-
-        map[UInt8.GetSymbol()] =
-        {
-            { Int8.GetSymbol(), u8__from_i8.GetSymbol() },
-            { Int16.GetSymbol(), u8__from_i16.GetSymbol() },
-            { Int32.GetSymbol(), u8__from_i32.GetSymbol() },
-            { Int64.GetSymbol(), u8__from_i64.GetSymbol() },
-            { UInt16.GetSymbol(), u8__from_u16.GetSymbol() },
-            { UInt32.GetSymbol(), u8__from_u32.GetSymbol() },
-            { UInt64.GetSymbol(), u8__from_u64.GetSymbol() },
-            { Int.GetSymbol(), u8__from_int.GetSymbol() },
-            { Float32.GetSymbol(), u8__from_f32.GetSymbol() },
-            { Float64.GetSymbol(), u8__from_f64.GetSymbol() },
-        };
-        map[UInt16.GetSymbol()] =
-        {
-            { Int8.GetSymbol(), u16__from_i8.GetSymbol() },
-            { Int16.GetSymbol(), u16__from_i16.GetSymbol() },
-            { Int32.GetSymbol(), u16__from_i32.GetSymbol() },
-            { Int64.GetSymbol(), u16__from_i64.GetSymbol() },
-            { UInt32.GetSymbol(), u16__from_u32.GetSymbol() },
-            { UInt64.GetSymbol(), u16__from_u64.GetSymbol() },
-            { Int.GetSymbol(), u16__from_int.GetSymbol() },
-            { Float32.GetSymbol(), u16__from_f32.GetSymbol() },
-            { Float64.GetSymbol(), u16__from_f64.GetSymbol() },
-        };
-        map[UInt32.GetSymbol()] =
-        {
-            { Int8.GetSymbol(), u32__from_i8.GetSymbol() },
-            { Int16.GetSymbol(), u32__from_i16.GetSymbol() },
-            { Int32.GetSymbol(), u32__from_i32.GetSymbol() },
-            { Int64.GetSymbol(), u32__from_i64.GetSymbol() },
-            { UInt64.GetSymbol(), u32__from_u64.GetSymbol() },
-            { Int.GetSymbol(), u32__from_int.GetSymbol() },
-            { Float32.GetSymbol(), u32__from_f32.GetSymbol() },
-            { Float64.GetSymbol(), u32__from_f64.GetSymbol() },
-        };
-        map[UInt64.GetSymbol()] =
-        {
-            { Int8.GetSymbol(), u64__from_i8.GetSymbol() },
-            { Int16.GetSymbol(), u64__from_i16.GetSymbol() },
-            { Int32.GetSymbol(), u64__from_i32.GetSymbol() },
-            { Int64.GetSymbol(), u64__from_i64.GetSymbol() },
-            { Int.GetSymbol(), u64__from_int.GetSymbol() },
-            { Float32.GetSymbol(), u64__from_f32.GetSymbol() },
-            { Float64.GetSymbol(), u64__from_f64.GetSymbol() },
-        };
-
-        map[Int.GetSymbol()] =
-        {
-            { Int8.GetSymbol(), int_from_i8.GetSymbol() },
-            { Int16.GetSymbol(), int_from_i16.GetSymbol() },
-            { Int32.GetSymbol(), int_from_i32.GetSymbol() },
-            { Int64.GetSymbol(), int_from_i64.GetSymbol() },
-            { UInt8.GetSymbol(), int_from_u8.GetSymbol() },
-            { UInt16.GetSymbol(), int_from_u16.GetSymbol() },
-            { UInt32.GetSymbol(), int_from_u32.GetSymbol() },
-            { UInt64.GetSymbol(), int_from_u64.GetSymbol() },
-            { Float32.GetSymbol(), int_from_f32.GetSymbol() },
-            { Float64.GetSymbol(), int_from_f64.GetSymbol() },
-        };
-
-        map[Float32.GetSymbol()] =
-        {
-            { Float64.GetSymbol(), f32__from_f64.GetSymbol() },
-        };
-        map[Float64.GetSymbol()] =
-        {
-        };
-    }
-
-    auto Natives::InitializeSignedIntTypesSet() -> void
-    {
-        m_SignedIntTypesSet = 
-        {
-            &Int8,
-            &Int16,
-            &Int32,
-            &Int64,
-            &Int,
-        };
+        return m_SignedIntTypesSet.Get().contains(&intType);
     }
 }

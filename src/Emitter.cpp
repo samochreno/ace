@@ -190,7 +190,7 @@ namespace Ace
         auto* const mainFunctionSymbol = mainFunctionSymbols.front();
         ACE_ASSERT(
             mainFunctionSymbol->GetType()->GetUnaliased() == 
-            natives->Int.GetSymbol()
+            natives.Int.GetSymbol()
         );
         ACE_ASSERT(mainFunctionSymbol->GetCategory() == SymbolCategory::Static);
         ACE_ASSERT(mainFunctionSymbol->CollectAllParams().empty());
@@ -696,7 +696,7 @@ namespace Ace
 
     auto Emitter::EmitNativeTypes() -> void
     {
-        for (auto& typeSymbolPair : m_Compilation->GetNatives()->GetIRTypeSymbolMap())
+        for (auto& typeSymbolPair : m_Compilation->GetNatives().GetIRTypeSymbolMap())
         {
             m_TypeMap[typeSymbolPair.first] = typeSymbolPair.second;
         }
