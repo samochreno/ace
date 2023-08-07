@@ -356,11 +356,13 @@ namespace Ace::GlueGeneration
             structSymbol->GetName().SrcLocation,
             SpecialIdent::Op::Copy,
         });
-        const auto expOpSymbol = 
-            compilation->GetGlobalScope()->ResolveStaticSymbol<FunctionSymbol>(opName);
+
+        const auto optOpSymbol = DiagnosticBag{}.Collect(
+            compilation->GetGlobalScope()->ResolveStaticSymbol<FunctionSymbol>(opName)
+        );
 
         std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
-        if (expOpSymbol)
+        if (optOpSymbol.has_value())
         {
             std::vector<std::shared_ptr<const IExprBoundNode>> args{};
             args.push_back(selfParamRefExprNode);
@@ -369,7 +371,7 @@ namespace Ace::GlueGeneration
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                 SrcLocation{},
                 bodyScope,
-                expOpSymbol.Unwrap(),
+                optOpSymbol.value(),
                 args
             );
 
@@ -475,10 +477,12 @@ namespace Ace::GlueGeneration
             structSymbol->GetName().SrcLocation,
             SpecialIdent::Op::Drop,
         });
-        const auto expOpSymbol = 
-            compilation->GetGlobalScope()->ResolveStaticSymbol<FunctionSymbol>(opName);
 
-        if (expOpSymbol)
+        const auto optOpSymbol = DiagnosticBag{}.Collect(
+            compilation->GetGlobalScope()->ResolveStaticSymbol<FunctionSymbol>(opName)
+        );
+
+        if (optOpSymbol.has_value())
         {
             std::vector<std::shared_ptr<const IExprBoundNode>> args{};
             args.push_back(selfParamRefExprNode);
@@ -486,7 +490,7 @@ namespace Ace::GlueGeneration
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                 SrcLocation{},
                 bodyScope,
-                expOpSymbol.Unwrap(),
+                optOpSymbol.value(),
                 args
             );
 

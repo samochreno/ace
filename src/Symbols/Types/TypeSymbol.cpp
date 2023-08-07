@@ -205,11 +205,8 @@ namespace Ace
             SpecialIdent::CreateTemplate(self->GetName().String),
         };
 
-        auto expTemplate =
-            GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(name);
-        
-        return expTemplate ?
-            std::optional{ expTemplate.Unwrap() } :
-            std::nullopt;
+        return DiagnosticBag{}.Collect(
+            GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(name)
+        );
     }
 }

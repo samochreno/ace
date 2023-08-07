@@ -61,7 +61,7 @@ namespace Ace
             return m_OptSizeKindCache.value();
         }
 
-        const auto expSizeKind = [&]() -> Expected<TypeSizeKind>
+        const auto sizeKind = [&]() -> Expected<TypeSizeKind>
         {
             DiagnosticBag diagnostics{};
 
@@ -117,8 +117,8 @@ namespace Ace
             return TypeSizeKind::Sized;
         }();
 
-        m_OptSizeKindCache = expSizeKind;
-        return expSizeKind;
+        m_OptSizeKindCache = sizeKind;
+        return sizeKind;
     }
 
     auto StructTypeSymbol::SetAsUnsized() -> void

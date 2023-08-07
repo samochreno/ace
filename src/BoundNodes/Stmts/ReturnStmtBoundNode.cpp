@@ -90,12 +90,11 @@ namespace Ace
 
         auto* const exprTypeSymbol = expr->GetTypeInfo().Symbol->GetUnaliased();
 
-        const auto expExprTypeSizeKind = exprTypeSymbol->GetSizeKind();
-        const bool isExprTypeUnsized = 
-            (expExprTypeSizeKind) &&
-            (expExprTypeSizeKind.Unwrap() == TypeSizeKind::Unsized);
+        const auto optExprTypeSizeKind = DiagnosticBag{}.Collect(
+            exprTypeSymbol->GetSizeKind()
+        );
 
-        if (isExprTypeUnsized)
+        if (optExprTypeSizeKind == TypeSizeKind::Unsized)
         {
             diagnostics.Add(CreateReturningUnsizedExprError(
                 expr->GetSrcLocation()

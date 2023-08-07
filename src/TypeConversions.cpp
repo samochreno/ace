@@ -168,11 +168,11 @@ namespace Ace
                 fromTypeInfos.at(i)
             );
 
-            const auto dgnConvertedExpr = CreateImplicitlyConverted(
+            const auto convertedExpr = CreateImplicitlyConverted(
                 placeholderExpr,
                 targetTypeInfos.at(i)
             );
-            if (dgnConvertedExpr.GetDiagnostics().HasErrors())
+            if (convertedExpr.GetDiagnostics().HasErrors())
             {
                 return false;
             }

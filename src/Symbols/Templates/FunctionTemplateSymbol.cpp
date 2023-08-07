@@ -138,11 +138,11 @@ namespace Ace
         const auto castedAst =
             std::dynamic_pointer_cast<const FunctionNode>(ast);
 
-        const auto dgnBoundAST = castedAst->CreateBound();
-        ACE_ASSERT(dgnBoundAST.GetDiagnostics().IsEmpty());;
+        const auto boundAST = castedAst->CreateBound();
+        ACE_ASSERT(boundAST.GetDiagnostics().IsEmpty());;
 
         const auto finalAST = Application::CreateTransformedAndVerifiedAST(
-            dgnBoundAST.Unwrap(),
+            boundAST.Unwrap(),
             [](const std::shared_ptr<const FunctionBoundNode>& ast)
             {
                 return ast->CreateTypeChecked({});

@@ -192,12 +192,11 @@ namespace Ace
             SpecialIdent::CreateTemplate(m_Name.String)
         };
 
-        auto expTemplate =
-            GetScope()->ResolveStaticSymbol<FunctionTemplateSymbol>(name);
 
-        return expTemplate ?
-            std::optional{ expTemplate.Unwrap() } :
-            std::nullopt;
+
+        return DiagnosticBag{}.Collect(
+            GetScope()->ResolveStaticSymbol<FunctionTemplateSymbol>(name)
+        );
     }
     
     auto FunctionSymbol::CollectTemplateArgs() const -> std::vector<ITypeSymbol*>
