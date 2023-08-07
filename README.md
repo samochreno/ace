@@ -22,15 +22,4 @@ Only abbreviate the following words:
 | expression | expr |
 | statement | stmt |
 | variable | var |
-
-### Error Naming
-
-Try to name errors using these adjectives:
-- Empty
-- Forbidden
-- Missing
-- Multiple
-- Unknown
-- Unexpected
-- Unterminated
-- Undefined
+| control flow analysis | cfa |
