@@ -8,9 +8,7 @@
 
 ## 💥 High Priority
 
-- Reduce state in `Compilation`:
-  - ❓ Move uninstatiated templates (`TemplateInstantiator`) into `Scope` to keep all state there
-  - Move `LLVMContext` to `Emitter` if possible
+- Make `Compilation` immutable: move uninstatiated templates (`TemplateInstantiator`) into `Scope` to keep all state there
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
 - `*self`
 - Traits:

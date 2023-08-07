@@ -122,7 +122,9 @@ namespace Ace
     {
         std::vector<ExprDropData> tmps{};
 
-        auto* const boolType = GetCompilation()->GetNatives().Bool.GetIRType();
+        auto* const boolType = GetCompilation()->GetNatives().Bool.GetIRType(
+            emitter.GetContext()
+        );
 
         auto* const allocaInst =
             emitter.GetBlockBuilder().Builder.CreateAlloca(boolType);
@@ -145,12 +147,12 @@ namespace Ace
         );
 
         auto falseBlockBuilder = std::make_unique<BlockBuilder>(
-            GetCompilation()->GetLLVMContext(),
+            emitter.GetContext(),
             emitter.GetFunction()
         );
 
         auto endBlockBuilder = std::make_unique<BlockBuilder>(
-            GetCompilation()->GetLLVMContext(),
+            emitter.GetContext(),
             emitter.GetFunction()
         );
 

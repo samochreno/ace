@@ -16,11 +16,6 @@
 #include "GlobalDiagnosticBag.hpp"
 #include "ErrorSymbols.hpp"
 
-namespace llvm
-{
-    class LLVMContext;
-}
-
 namespace Ace
 {
     class Compilation
@@ -39,8 +34,6 @@ namespace Ace
         auto GetGlobalScope() const -> const std::shared_ptr<Scope>&;
         auto GetTemplateInstantiator() const -> const TemplateInstantiator&;
         auto GetTemplateInstantiator()       ->       TemplateInstantiator&;
-        auto GetLLVMContext() const -> const llvm::LLVMContext&;
-        auto GetLLVMContext()       ->       llvm::LLVMContext&;
         auto GetErrorSymbols() const -> const ErrorSymbols&;
 
     private:
@@ -51,7 +44,6 @@ namespace Ace
         std::unique_ptr<const Natives> m_Natives{};
         GlobalScope m_GlobalScope{};
         TemplateInstantiator m_TemplateInstantiator{};
-        llvm::LLVMContext m_LLVMContext{};
         ErrorSymbols m_ErrorSymbols{};
     };
 }

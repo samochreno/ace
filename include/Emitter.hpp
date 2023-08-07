@@ -102,7 +102,10 @@ namespace Ace
         auto EmitDropArgs() -> void;
 
         auto GetCompilation() const -> Compilation*;
-        auto GetModule() const -> llvm::Module&;
+        auto GetContext() const -> const llvm::LLVMContext&;
+        auto GetContext()       ->       llvm::LLVMContext&;
+        auto GetModule() const -> const llvm::Module&;
+        auto GetModule()       ->       llvm::Module&;
         auto GetC() const -> const C&;
 
         auto GetIRType(
@@ -140,6 +143,7 @@ namespace Ace
 
         std::vector<std::shared_ptr<const ModuleBoundNode>> m_ASTs{};
 
+        llvm::LLVMContext m_Context{};
         std::unique_ptr<llvm::Module> m_Module{};
 
         std::unordered_map<const ITypeSymbol*, llvm::Type*> m_TypeMap{};

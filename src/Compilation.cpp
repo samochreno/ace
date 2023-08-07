@@ -7,8 +7,6 @@
 #include <unordered_map>
 #include <filesystem>
 
-#include <llvm/IR/LLVMContext.h>
-
 #include "Diagnostic.hpp"
 #include "Diagnostics/CompilationDiagnostics.hpp"
 #include "SrcBuffer.hpp"
@@ -193,16 +191,6 @@ namespace Ace
     auto Compilation::GetTemplateInstantiator() -> Ace::TemplateInstantiator&
     {
         return m_TemplateInstantiator;
-    }
-
-    auto Compilation::GetLLVMContext() const -> const llvm::LLVMContext&
-    {
-        return m_LLVMContext;
-    }
-
-    auto Compilation::GetLLVMContext() -> llvm::LLVMContext&
-    {
-        return m_LLVMContext;
     }
 
     auto Compilation::GetErrorSymbols() const -> const Ace::ErrorSymbols&

@@ -13,6 +13,11 @@
 #include "Diagnostic.hpp"
 #include "TypeSizeKind.hpp"
 
+namespace llvm
+{
+    class LLVMContext;
+}
+
 namespace Ace
 {
     class FunctionSymbol;
@@ -50,7 +55,7 @@ namespace Ace
         NativeType(
             Compilation* const compilation,
             std::vector<const char*>&& nameSectionStrings,
-            std::optional<std::function<llvm::Type*()>>&& irTypeGetter,
+            std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>>&& irTypeGetter,
             const TypeSizeKind sizeKind,
             const NativeCopyabilityKind copyabilityKind
         );
@@ -66,12 +71,12 @@ namespace Ace
         auto GetGenericSymbol() const -> ISymbol* final;
 
         auto HasIRType() const -> bool;
-        auto GetIRType() const -> llvm::Type*;
+        auto GetIRType(llvm::LLVMContext& context) const -> llvm::Type*;
         
     private:
         Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
-        std::optional<std::function<llvm::Type*()>> m_IRTypeGetter{};
+        std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>> m_IRTypeGetter{};
         bool m_IsSized{};
         bool m_IsTriviallyCopyable{};
         
@@ -215,7 +220,10 @@ namespace Ace
 
         auto Verify() const -> void;
 
-        auto GetIRTypeSymbolMap() const -> const std::unordered_map<ITypeSymbol*, llvm::Type*>&;
+        auto CollectIRTypeSymbolMap(
+            llvm::LLVMContext& context
+        ) const -> std::unordered_map<ITypeSymbol*, llvm::Type*>;
+
         auto GetImplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
         auto GetExplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
 
@@ -584,8 +592,6 @@ namespace Ace
         Lazy<std::vector<NativeFunctionTemplate*>> m_FunctionTemplates;
         Lazy<std::vector<NativeAssociatedFunction*>> m_AssociatedFunctions;
         Lazy<std::vector<NativeAssociatedFunctionTemplate*>> m_AssociatedFunctionTemplates;
-
-        Lazy<std::unordered_map<ITypeSymbol*, llvm::Type*>> m_IRTypeSymbolMap;
 
         Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>> m_ImplicitFromOpMap;
         Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>> m_ExplicitFromOpMap;

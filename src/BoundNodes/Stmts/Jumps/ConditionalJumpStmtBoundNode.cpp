@@ -111,14 +111,18 @@ namespace Ace
     auto ConditionalJumpStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
         auto blockBuilder = std::make_unique<BlockBuilder>(
-            GetCompilation()->GetLLVMContext(),
+            emitter.GetContext(),
             emitter.GetFunction()
         );
 
         const auto conditionEmitResult = m_Condition->Emit(emitter);
 
+        auto* const boolType = GetCompilation()->GetNatives().Bool.GetIRType(
+            emitter.GetContext()
+        );
+
         auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
-            GetCompilation()->GetNatives().Bool.GetIRType(),
+            boolType,
             conditionEmitResult.Value
         );
 

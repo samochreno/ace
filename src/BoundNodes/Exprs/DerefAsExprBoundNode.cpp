@@ -122,7 +122,9 @@ namespace Ace
             end  (exprEmitResult.Tmps)
         );
 
-        auto* const ptrType = GetCompilation()->GetNatives().Ptr.GetIRType();
+        auto* const ptrType = GetCompilation()->GetNatives().Ptr.GetIRType(
+            emitter.GetContext()
+        );
 
         auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             ptrType,

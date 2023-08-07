@@ -52,7 +52,7 @@ namespace Ace
         }
 
         auto block = llvm::BasicBlock::Create(
-            m_Emitter.GetCompilation()->GetLLVMContext(),
+            m_Emitter.GetContext(),
             "",
             m_Emitter.GetFunction()
         );
@@ -73,7 +73,7 @@ namespace Ace
         {
             std::make_unique<llvm::Module>(
                 "module",
-                compilation->GetLLVMContext()
+                m_Context
             )
         },
         m_LabelBlockMap{ *this }
@@ -96,7 +96,7 @@ namespace Ace
 
     static auto SaveModuleToFile(
         Compilation* const compilation,
-        const llvm::Module* const module,
+        const llvm::Module& module,
         const char* const extension
     ) -> void
     {
@@ -107,7 +107,7 @@ namespace Ace
         std::string moduleString{};
 
         llvm::raw_string_ostream moduleOStream{ moduleString };
-        moduleOStream << *module;
+        moduleOStream << module;
         moduleOStream.flush();
 
         std::ofstream irFileStream{ filePath };
@@ -119,11 +119,11 @@ namespace Ace
 
     auto Emitter::Emit() -> Result
     {
-        const auto globalScope = m_Compilation->GetGlobalScope();
-        const auto& packageName = m_Compilation->GetPackage().Name;
-        const auto& natives     = m_Compilation->GetNatives();
+        const auto  globalScope = GetCompilation()->GetGlobalScope();
+        const auto& packageName = GetCompilation()->GetPackage().Name;
+        const auto& natives     = GetCompilation()->GetNatives();
 
-        m_C.Initialize(m_Compilation->GetLLVMContext(), *m_Module);
+        m_C.Initialize(GetContext(), GetModule());
 
         const auto& now = std::chrono::steady_clock::now;
 
@@ -196,7 +196,7 @@ namespace Ace
         ACE_ASSERT(mainFunctionSymbol->CollectAllParams().empty());
 
         auto* const mainType = llvm::FunctionType::get(
-            llvm::Type::getInt32Ty(m_Compilation->GetLLVMContext()),
+            llvm::Type::getInt32Ty(GetContext()),
             false
         );
 
@@ -204,11 +204,11 @@ namespace Ace
             mainType,
             llvm::Function::ExternalLinkage,
             "main",
-            *m_Module
+            GetModule()
         );
 
         auto* const mainBlock = llvm::BasicBlock::Create(
-            m_Compilation->GetLLVMContext(),
+            GetContext(),
             "",
             mainFunction
         );
@@ -221,14 +221,14 @@ namespace Ace
 
         std::string originalModuleString{};
         llvm::raw_string_ostream originalModuleOStream{ originalModuleString };
-        originalModuleOStream << *m_Module;
+        originalModuleOStream << GetModule();
         originalModuleOStream.flush();
         originalModuleString.clear();
 
         // TODO: Make this optional with a CLI option
         SaveModuleToFile(
-            m_Compilation,
-            m_Module.get(),
+            GetCompilation(),
+            GetModule(),
             "ll"
         );
 
@@ -252,35 +252,34 @@ namespace Ace
         auto mpm = pb.buildPerModuleDefaultPipeline(
             llvm::OptimizationLevel::O3
         );
-        mpm.run(*m_Module, mam);
+        mpm.run(GetModule(), mam);
 
         const auto timeAnalysesEnd = now();
 
         // TODO: Make this optional with a CLI option
         SaveModuleToFile(
-            m_Compilation,
-            m_Module.get(),
+            GetCompilation(),
+            GetModule(),
             "opt.ll"
         );
 
         std::error_code errorCode{};
         llvm::raw_fd_ostream bitcodeFileOStream
         { 
-            (m_Compilation->GetOutputPath() / (packageName + ".bc")).string(),
+            (GetCompilation()->GetOutputPath() / (packageName + ".bc")).string(),
             errorCode, 
             llvm::sys::fs::OF_None 
         };
         ACE_ASSERT(!errorCode);
-        llvm::WriteBitcodeToFile(*m_Module, bitcodeFileOStream);
+        llvm::WriteBitcodeToFile(GetModule(), bitcodeFileOStream);
         bitcodeFileOStream.close();
         
         const auto timeLLCBegin = now();
 
         const std::string llc = 
             "llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj -o " +
-            (m_Compilation->GetOutputPath() / (packageName + ".obj")).string() +
-            " " +
-            (m_Compilation->GetOutputPath() / (packageName + ".bc")).string();
+            (GetCompilation()->GetOutputPath() / (packageName + ".obj")).string() +
+            " " + (GetCompilation()->GetOutputPath() / (packageName + ".bc")).string();
         system(llc.c_str());
 
         const auto timeLLCEnd = now();
@@ -289,8 +288,8 @@ namespace Ace
 
         const std::string clang = 
             "clang -lc -lm "
-            "-o " + (m_Compilation->GetOutputPath() / packageName).string() + " " +
-            (m_Compilation->GetOutputPath() / (packageName + ".obj")).string();
+            "-o " + (GetCompilation()->GetOutputPath() / packageName).string() +
+            " " + (GetCompilation()->GetOutputPath() / (packageName + ".obj")).string();
         system(clang.c_str());
 
         const auto timeClangEnd = now();
@@ -632,7 +631,22 @@ namespace Ace
         return m_Compilation;
     }
 
-    auto Emitter::GetModule() const -> llvm::Module&
+    auto Emitter::GetContext() const -> const llvm::LLVMContext&
+    {
+        return m_Context;
+    }
+
+    auto Emitter::GetContext() -> llvm::LLVMContext&
+    {
+        return m_Context;
+    }
+
+    auto Emitter::GetModule() const -> const llvm::Module&
+    {
+        return *m_Module.get();
+    }
+
+    auto Emitter::GetModule() -> llvm::Module&
     {
         return *m_Module.get();
     }
@@ -696,7 +710,10 @@ namespace Ace
 
     auto Emitter::EmitNativeTypes() -> void
     {
-        for (auto& typeSymbolPair : m_Compilation->GetNatives().GetIRTypeSymbolMap())
+        const auto nativeTypeMap =
+            GetCompilation()->GetNatives().CollectIRTypeSymbolMap(GetContext());
+
+        for (auto& typeSymbolPair : nativeTypeMap)
         {
             m_TypeMap[typeSymbolPair.first] = typeSymbolPair.second;
         }
@@ -710,10 +727,12 @@ namespace Ace
         [&](const StructTypeSymbol* const structSymbol)
         {
             if (structSymbol->IsPrimitivelyEmittable())
+            {
                 return;
+            }
 
             m_TypeMap[structSymbol] = llvm::StructType::create(
-                m_Compilation->GetLLVMContext(),
+                GetContext(),
                 structSymbol->CreateSignature()
             );
         });
@@ -722,7 +741,9 @@ namespace Ace
         [&](const StructTypeSymbol* const structSymbol)
         {
             if (structSymbol->IsPrimitivelyEmittable())
+            {
                 return;
+            }
 
             std::vector<llvm::Type*> elements{};
 
@@ -810,13 +831,13 @@ namespace Ace
                     type,
                     llvm::Function::ExternalLinkage,
                     functionSymbol->CreateSignature(),
-                    *m_Module
+                    GetModule()
                 );
 
                 m_FunctionMap[functionSymbol] = function;
 
                 auto* const block = llvm::BasicBlock::Create(
-                    m_Compilation->GetLLVMContext(),
+                    GetContext(),
                     "",
                     function
                 );

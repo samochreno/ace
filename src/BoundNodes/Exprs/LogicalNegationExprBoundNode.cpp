@@ -115,7 +115,9 @@ namespace Ace
             end  (exprEmitResult.Tmps)
         );
 
-        auto* const boolType = GetCompilation()->GetNatives().Bool.GetIRType();
+        auto* const boolType = GetCompilation()->GetNatives().Bool.GetIRType(
+            emitter.GetContext()
+        );
 
         auto* const loadInst = emitter.GetBlockBuilder().Builder.CreateLoad(
             boolType,

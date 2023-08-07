@@ -73,7 +73,7 @@ namespace Ace
     NativeType::NativeType(
         Compilation* const compilation,
         std::vector<const char*>&& nameSectionStrings,
-        std::optional<std::function<llvm::Type*()>>&& irTypeGetter,
+        std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>>&& irTypeGetter,
         const TypeSizeKind sizeKind,
         const NativeCopyabilityKind copyabilityKind
     ) : m_Compilation{ compilation },
@@ -150,10 +150,10 @@ namespace Ace
         return m_IRTypeGetter.has_value();
     }
 
-    auto NativeType::GetIRType() const -> llvm::Type*
+    auto NativeType::GetIRType(llvm::LLVMContext& context) const -> llvm::Type*
     {
         ACE_ASSERT(HasIRType());
-        return m_IRTypeGetter.value()();
+        return m_IRTypeGetter.value()(context);
     }
 
     NativeTypeTemplate::NativeTypeTemplate(
@@ -410,18 +410,25 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
+                        auto* const fromIRType = fromType.GetIRType(
+                            emitter.GetContext()
+                        );
+                        auto* const toIRType = toType.GetIRType(
+                            emitter.GetContext()
+                        );
+
                         if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(fromType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSExtOrTrunc(
-                                emitter.EmitLoadArg(0, fromType.GetIRType()),
-                                toType.GetIRType()
+                                emitter.EmitLoadArg(0, fromIRType),
+                                toIRType
                             );
                         }
                         else
                         {
                             return emitter.GetBlockBuilder().Builder.CreateZExtOrTrunc(
-                                emitter.EmitLoadArg(0, fromType.GetIRType()),
-                                toType.GetIRType()
+                                emitter.EmitLoadArg(0, fromIRType),
+                                toIRType
                             );
                         }
                     }();
@@ -553,18 +560,25 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
+                        auto* const fromIRType = fromType.GetIRType(
+                            emitter.GetContext()
+                        );
+                        auto* const toIRType = toType.GetIRType(
+                            emitter.GetContext()
+                        );
+
                         if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(toType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateFPToSI(
-                                emitter.EmitLoadArg(0, fromType.GetIRType()),
-                                toType.GetIRType()
+                                emitter.EmitLoadArg(0, fromIRType),
+                                toIRType
                             );
                         }
                         else
                         {
                             return emitter.GetBlockBuilder().Builder.CreateFPToUI(
-                                emitter.EmitLoadArg(0, fromType.GetIRType()),
-                                toType.GetIRType()
+                                emitter.EmitLoadArg(0, fromIRType),
+                                toIRType
                             );
                         }
                     }();
@@ -610,18 +624,22 @@ namespace Ace
                 {
                     auto* const value = [&]() -> llvm::Value*
                     {
+                        auto* const selfIRType = selfType.GetIRType(
+                            emitter.GetContext()
+                        );
+
                         if (selfType.GetCompilation()->GetNatives().IsIntTypeSigned(selfType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSDiv(
-                                emitter.EmitLoadArg(0, selfType.GetIRType()),
-                                emitter.EmitLoadArg(1, selfType.GetIRType())
+                                emitter.EmitLoadArg(0, selfIRType),
+                                emitter.EmitLoadArg(1, selfIRType)
                             );
                         }
                         else
                         {
                             return emitter.GetBlockBuilder().Builder.CreateUDiv(
-                                emitter.EmitLoadArg(0, selfType.GetIRType()),
-                                emitter.EmitLoadArg(1, selfType.GetIRType())
+                                emitter.EmitLoadArg(0, selfIRType),
+                                emitter.EmitLoadArg(1, selfIRType)
                             );
                         }
                     }();
@@ -641,20 +659,24 @@ namespace Ace
                 SpecialIdent::Op::Remainder,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = [&]() -> llvm::Value*
                     {
                         if (selfType.GetCompilation()->GetNatives().IsIntTypeSigned(selfType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSRem(
-                                emitter.EmitLoadArg(0, selfType.GetIRType()),
-                                emitter.EmitLoadArg(1, selfType.GetIRType())
+                                emitter.EmitLoadArg(0, selfIRType),
+                                emitter.EmitLoadArg(1, selfIRType)
                             );
                         }
                         else
                         {
                             return emitter.GetBlockBuilder().Builder.CreateURem(
-                                emitter.EmitLoadArg(0, selfType.GetIRType()),
-                                emitter.EmitLoadArg(1, selfType.GetIRType())
+                                emitter.EmitLoadArg(0, selfIRType),
+                                emitter.EmitLoadArg(1, selfIRType)
                             );
                         }
                     }();
@@ -674,8 +696,12 @@ namespace Ace
                 SpecialIdent::Op::UnaryPlus,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     emitter.GetBlockBuilder().Builder.CreateRet(
-                        emitter.EmitLoadArg(0, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType)
                     );
                 }
             };
@@ -691,9 +717,13 @@ namespace Ace
                 SpecialIdent::Op::UnaryNegation,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateMul(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        llvm::ConstantInt::get(selfType.GetIRType(), -1)
+                        emitter.EmitLoadArg(0, selfIRType),
+                        llvm::ConstantInt::get(selfIRType, -1)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -712,9 +742,13 @@ namespace Ace
                 SpecialIdent::Op::OneComplement,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateXor(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        llvm::ConstantInt::get(selfType.GetIRType(), -1)
+                        emitter.EmitLoadArg(0, selfIRType),
+                        llvm::ConstantInt::get(selfIRType, -1)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -732,9 +766,13 @@ namespace Ace
                 SpecialIdent::Op::Multiplication,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateMul(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -752,9 +790,13 @@ namespace Ace
                 SpecialIdent::Op::Addition,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateAdd(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -772,9 +814,13 @@ namespace Ace
                 SpecialIdent::Op::Subtraction,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateSub(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -792,9 +838,13 @@ namespace Ace
                 SpecialIdent::Op::RightShift,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateAShr(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -812,9 +862,13 @@ namespace Ace
                 SpecialIdent::Op::LeftShift,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateShl(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -832,10 +886,14 @@ namespace Ace
                 SpecialIdent::Op::LessThan,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
                         llvm::CmpInst::Predicate::ICMP_SLT,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -853,10 +911,14 @@ namespace Ace
                 SpecialIdent::Op::GreaterThan,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
                         llvm::CmpInst::Predicate::ICMP_SGT,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -874,10 +936,14 @@ namespace Ace
                 SpecialIdent::Op::LessThanEquals,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
                         llvm::CmpInst::Predicate::ICMP_SLE,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -895,10 +961,14 @@ namespace Ace
                 SpecialIdent::Op::GreaterThanEquals,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
                         llvm::CmpInst::Predicate::ICMP_SGE,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -916,10 +986,14 @@ namespace Ace
                 SpecialIdent::Op::Equals,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
                         llvm::CmpInst::Predicate::ICMP_EQ,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -937,10 +1011,14 @@ namespace Ace
                 SpecialIdent::Op::NotEquals,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
                         llvm::CmpInst::Predicate::ICMP_NE,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -958,9 +1036,13 @@ namespace Ace
                 SpecialIdent::Op::AND,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateAnd(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -978,9 +1060,13 @@ namespace Ace
                 SpecialIdent::Op::XOR,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateXor(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -998,9 +1084,13 @@ namespace Ace
                 SpecialIdent::Op::OR,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateOr(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1023,20 +1113,27 @@ namespace Ace
                 name,
                 [&](Emitter& emitter)
                 {
+                    auto* const fromIRType = fromType.GetIRType(
+                        emitter.GetContext()
+                    );
+                    auto* const toIRType = toType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = [&]() -> llvm::Value*
                     {
                         if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(fromType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateSIToFP(
-                                emitter.EmitLoadArg(0, fromType.GetIRType()),
-                                toType.GetIRType()
+                                emitter.EmitLoadArg(0, fromIRType),
+                                toIRType
                             );
                         }
                         else
                         {
                             return emitter.GetBlockBuilder().Builder.CreateUIToFP(
-                                emitter.EmitLoadArg(0, fromType.GetIRType()),
-                                toType.GetIRType()
+                                emitter.EmitLoadArg(0, fromIRType),
+                                toIRType
                             );
                         }
                     }();
@@ -1164,8 +1261,12 @@ namespace Ace
                 SpecialIdent::Op::UnaryPlus,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     emitter.GetBlockBuilder().Builder.CreateRet(
-                        emitter.EmitLoadArg(0, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType)
                     );
                 }
             };
@@ -1181,9 +1282,13 @@ namespace Ace
                 SpecialIdent::Op::UnaryNegation,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFMul(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        llvm::ConstantFP::get(selfType.GetIRType(), -1)
+                        emitter.EmitLoadArg(0, selfIRType),
+                        llvm::ConstantFP::get(selfIRType, -1)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1201,9 +1306,13 @@ namespace Ace
                 SpecialIdent::Op::Multiplication,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFMul(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1221,9 +1330,13 @@ namespace Ace
                 SpecialIdent::Op::Division,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFDiv(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
             
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1241,9 +1354,13 @@ namespace Ace
                 SpecialIdent::Op::Remainder,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFRem(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1261,9 +1378,13 @@ namespace Ace
                 SpecialIdent::Op::Addition,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFAdd(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1281,9 +1402,13 @@ namespace Ace
                 SpecialIdent::Op::Subtraction,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFSub(
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1301,10 +1426,14 @@ namespace Ace
                 SpecialIdent::Op::LessThan,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
                         llvm::CmpInst::Predicate::FCMP_OLT,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1322,10 +1451,14 @@ namespace Ace
                 SpecialIdent::Op::GreaterThan,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
                         llvm::CmpInst::Predicate::FCMP_OGT,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1343,10 +1476,14 @@ namespace Ace
                 SpecialIdent::Op::LessThanEquals,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
                         llvm::CmpInst::Predicate::FCMP_OLE,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1364,10 +1501,14 @@ namespace Ace
                 SpecialIdent::Op::GreaterThanEquals,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
                         llvm::CmpInst::Predicate::FCMP_OGE,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1385,10 +1526,14 @@ namespace Ace
                 SpecialIdent::Op::Equals,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
                         llvm::CmpInst::Predicate::FCMP_OEQ,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1406,10 +1551,14 @@ namespace Ace
                 SpecialIdent::Op::NotEquals,
                 [&](Emitter& emitter)
                 {
+                    auto* const selfIRType = selfType.GetIRType(
+                        emitter.GetContext()
+                    );
+
                     auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
                         llvm::CmpInst::Predicate::FCMP_ONE,
-                        emitter.EmitLoadArg(0, selfType.GetIRType()),
-                        emitter.EmitLoadArg(1, selfType.GetIRType())
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
                     );
 
                     emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -1424,9 +1573,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Int8" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt8Ty(compilation->GetLLVMContext());
+                return llvm::Type::getInt8Ty(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1435,9 +1584,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Int16" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt16Ty(compilation->GetLLVMContext());
+                return llvm::Type::getInt16Ty(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1446,9 +1595,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Int32" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt32Ty(compilation->GetLLVMContext());
+                return llvm::Type::getInt32Ty(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1457,9 +1606,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Int64" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt64Ty(compilation->GetLLVMContext());
+                return llvm::Type::getInt64Ty(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1469,9 +1618,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "UInt8" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt8Ty(compilation->GetLLVMContext());
+                return llvm::Type::getInt8Ty(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1480,9 +1629,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "UInt16" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt16Ty(compilation->GetLLVMContext());
+                return llvm::Type::getInt16Ty(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1491,9 +1640,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "UInt32" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt32Ty(compilation->GetLLVMContext());
+                return llvm::Type::getInt32Ty(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1502,9 +1651,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "UInt64" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt64Ty(compilation->GetLLVMContext());
+                return llvm::Type::getInt64Ty(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1514,9 +1663,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Int" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt32Ty(compilation->GetLLVMContext());
+                return llvm::Type::getInt32Ty(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1526,9 +1675,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Float32" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getFloatTy(compilation->GetLLVMContext());
+                return llvm::Type::getFloatTy(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1537,9 +1686,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Float64" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getDoubleTy(compilation->GetLLVMContext());
+                return llvm::Type::getDoubleTy(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1549,9 +1698,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Bool" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt1Ty(compilation->GetLLVMContext());
+                return llvm::Type::getInt1Ty(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1560,9 +1709,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Void" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getVoidTy(compilation->GetLLVMContext());
+                return llvm::Type::getVoidTy(context);
             },
             TypeSizeKind::Unsized,
             NativeCopyabilityKind::NonTrivial,
@@ -1580,9 +1729,9 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Ptr" },
-            [compilation]() -> llvm::Type*
+            [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
-                return llvm::Type::getInt8PtrTy(compilation->GetLLVMContext());
+                return llvm::Type::getInt8PtrTy(context);
             },
             TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
@@ -1613,7 +1762,7 @@ namespace Ace
                 std::string string{ "%" PRId32 "\n" };
 
                 auto* const charType = llvm::Type::getInt8Ty(
-                    compilation->GetLLVMContext()
+                    emitter.GetContext()
                 );
 
                 std::vector<llvm::Constant*> chars(string.size());
@@ -1656,7 +1805,7 @@ namespace Ace
                 ));
                 args.push_back(emitter.EmitLoadArg(
                     0, 
-                    Int.GetIRType()
+                    Int.GetIRType(emitter.GetContext())
                 ));
 
                 emitter.GetBlockBuilder().Builder.CreateCall(
@@ -1676,7 +1825,7 @@ namespace Ace
                 std::string string{ "0x%" PRIXPTR "\n" };
 
                 auto* const charType = llvm::Type::getInt8Ty(
-                    compilation->GetLLVMContext()
+                    emitter.GetContext()
                 );
 
                 std::vector<llvm::Constant*> chars(string.size());
@@ -1719,7 +1868,7 @@ namespace Ace
                 ));
                 args.push_back(emitter.EmitLoadArg(
                     0,
-                    llvm::Type::getInt8PtrTy(compilation->GetLLVMContext())
+                    llvm::Type::getInt8PtrTy(emitter.GetContext())
                 ));
 
                 emitter.GetBlockBuilder().Builder.CreateCall(
@@ -1769,7 +1918,7 @@ namespace Ace
                 auto* const freeFunction =
                     emitter.GetC().GetFunctions().GetFree();
 
-                auto* const ptrType = Ptr.GetIRType();
+                auto* const ptrType = Ptr.GetIRType(emitter.GetContext());
 
                 auto* const blockValue = emitter.EmitLoadArg(
                     0,
@@ -1793,7 +1942,7 @@ namespace Ace
                 auto* const memcpyFunction =
                     emitter.GetC().GetFunctions().GetMemcpy();
 
-                auto* const ptrType = Ptr.GetIRType();
+                auto* const ptrType = Ptr.GetIRType(emitter.GetContext());
 
                 auto* const intTypeSymbol = Int.GetSymbol();
                 auto* const intType = emitter.GetIRType(intTypeSymbol);
@@ -2104,9 +2253,12 @@ namespace Ace
             "from_f64",
             [this, compilation](Emitter& emitter)
             {
+                auto* const float64IRType =
+                    Float64.GetIRType(emitter.GetContext());
+
                 auto* const value = emitter.GetBlockBuilder().Builder.CreateFPTrunc(
-                    emitter.EmitLoadArg(0, Float64.GetIRType()),
-                    llvm::Type::getFloatTy(compilation->GetLLVMContext())
+                    emitter.EmitLoadArg(0, float64IRType),
+                    llvm::Type::getFloatTy(emitter.GetContext())
                 );
 
                 emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -2141,9 +2293,12 @@ namespace Ace
             "from_f32",
             [this, compilation](Emitter& emitter)
             {
+                auto* const float32IRType =
+                    Float32.GetIRType(emitter.GetContext());
+
                 auto* const value = emitter.GetBlockBuilder().Builder.CreateFPExt(
-                    emitter.EmitLoadArg(0, Float32.GetIRType()),
-                    llvm::Type::getDoubleTy(compilation->GetLLVMContext())
+                    emitter.EmitLoadArg(0, float32IRType),
+                    llvm::Type::getDoubleTy(emitter.GetContext())
                 );
 
                 emitter.GetBlockBuilder().Builder.CreateRet(value);
@@ -2628,27 +2783,6 @@ namespace Ace
             }
         },
 
-        m_IRTypeSymbolMap
-        {
-            [this]()
-            {
-                std::unordered_map<ITypeSymbol*, llvm::Type*> map{};
-
-                std::for_each(begin(m_Types.Get()), end(m_Types.Get()),
-                [&](const NativeType* const type)
-                {
-                    if (!type->HasIRType())
-                    {
-                        return;
-                    }
-
-                    map[type->GetSymbol()] = type->GetIRType();
-                });
-
-                return map;
-            }
-        },
-
         m_ImplicitFromOpMap
         {
             [this]()
@@ -2873,9 +3007,24 @@ namespace Ace
         });
     }
 
-    auto Natives::GetIRTypeSymbolMap() const -> const std::unordered_map<ITypeSymbol*, llvm::Type*>&
+    auto Natives::CollectIRTypeSymbolMap(
+        llvm::LLVMContext& context
+    ) const -> std::unordered_map<ITypeSymbol*, llvm::Type*>
     {
-        return m_IRTypeSymbolMap.Get();
+        std::unordered_map<ITypeSymbol*, llvm::Type*> map{};
+
+        std::for_each(begin(m_Types.Get()), end(m_Types.Get()),
+        [&](const NativeType* const type)
+        {
+            if (!type->HasIRType())
+            {
+                return;
+            }
+
+            map[type->GetSymbol()] = type->GetIRType(context);
+        });
+
+        return map;
     }
 
     auto Natives::GetImplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
