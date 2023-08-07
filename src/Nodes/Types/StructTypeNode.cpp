@@ -112,9 +112,7 @@ namespace Ace
             back_inserter(boundAttributes),
             [&](const std::shared_ptr<const AttributeNode>& attribute)
             {
-                const auto dgnBoundAttribute = attribute->CreateBound();
-                diagnostics.Add(dgnBoundAttribute);
-                return dgnBoundAttribute.Unwrap();
+                return diagnostics.Collect(attribute->CreateBound());
             }
         );
 
@@ -122,9 +120,7 @@ namespace Ace
         std::transform(begin(m_Vars), end(m_Vars), back_inserter(boundVars),
         [&](const std::shared_ptr<const InstanceVarNode>& var)
         {
-            const auto dgnBoundVar = var->CreateBound();
-            diagnostics.Add(dgnBoundVar);
-            return dgnBoundVar.Unwrap();
+            return diagnostics.Collect(var->CreateBound());
         });
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<StructTypeSymbol>(

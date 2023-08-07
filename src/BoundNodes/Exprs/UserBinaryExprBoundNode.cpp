@@ -56,32 +56,26 @@ namespace Ace
         {
             const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
 
-            const auto dgnConvertedLHSExpr = CreateImplicitlyConverted(
-                convertedLHSExpr,
+            convertedLHSExpr = diagnostics.Collect(CreateImplicitlyConverted(
+                m_LHSExpr,
                 argTypeInfos.at(0)
-            );
-            diagnostics.Add(dgnConvertedLHSExpr);
-            convertedLHSExpr = dgnConvertedLHSExpr.Unwrap();
+            ));
 
-            const auto dgnConvertedRHSExpr = CreateImplicitlyConverted(
+            convertedRHSExpr = diagnostics.Collect(CreateImplicitlyConverted(
                 convertedRHSExpr,
                 argTypeInfos.at(1)
-            );
-            diagnostics.Add(dgnConvertedRHSExpr);
-            convertedRHSExpr = dgnConvertedRHSExpr.Unwrap();
+            ));
         }
 
-        const auto dgnCheckedLHSExpr =
-            convertedLHSExpr->CreateTypeCheckedExpr({});
-        diagnostics.Add(dgnCheckedLHSExpr);
+        const auto checkedLHSExpr =
+            diagnostics.Collect(convertedLHSExpr->CreateTypeCheckedExpr({}));
 
-        const auto dgnCheckedRHSExpr =
-            convertedRHSExpr->CreateTypeCheckedExpr({});
-        diagnostics.Add(dgnCheckedRHSExpr);
+        const auto checkedRHSExpr =
+            diagnostics.Collect(convertedRHSExpr->CreateTypeCheckedExpr({}));
 
         if (
-            (dgnCheckedLHSExpr.Unwrap() == m_LHSExpr) &&
-            (dgnCheckedRHSExpr.Unwrap() == m_RHSExpr)
+            (checkedLHSExpr == m_LHSExpr) &&
+            (checkedRHSExpr == m_RHSExpr)
             )
         {
             return Diagnosed{ shared_from_this(), diagnostics };
@@ -91,8 +85,8 @@ namespace Ace
         {
             std::make_shared<const UserBinaryExprBoundNode>(
                 GetSrcLocation(),
-                dgnCheckedLHSExpr.Unwrap(),
-                dgnCheckedRHSExpr.Unwrap(),
+                checkedLHSExpr,
+                checkedRHSExpr,
                 m_OpSymbol
             ),
             diagnostics,

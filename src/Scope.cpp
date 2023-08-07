@@ -319,7 +319,7 @@ namespace Ace
 
             if (optDefinedSymbol.has_value())
             {
-                diagnostics.Add(partiallyCreatable->ContinueCreatingSymbol(
+                diagnostics.Collect(partiallyCreatable->ContinueCreatingSymbol(
                     optDefinedSymbol.value()
                 ));
 
@@ -327,13 +327,11 @@ namespace Ace
             }
         }
 
-        auto dgnOwnedSymbol = creatable->CreateSymbol();
-        diagnostics.Add(dgnOwnedSymbol);
+        auto* const symbol = diagnostics.Collect(DefineSymbol(
+            diagnostics.Collect(creatable->CreateSymbol())
+        ));
 
-        const auto dgnSymbol = DefineSymbol(std::move(dgnOwnedSymbol.Unwrap()));
-        diagnostics.Add(dgnSymbol);
-
-        return Diagnosed{ dgnSymbol.Unwrap(), diagnostics };
+        return Diagnosed{ symbol, diagnostics };
     }
 
     auto Scope::RemoveSymbol(ISymbol* const symbol) -> void
@@ -617,13 +615,12 @@ namespace Ace
         std::for_each(begin(deductionResults), end(deductionResults),
         [&](const TemplateArgDeductionResult& deductionResult)
         {
-            const auto expDidVerifyDeductionResult = VerifyTemplateArgDeductionResult(
+            const auto didVerifyDeductionResult = diagnostics.Collect(VerifyTemplateArgDeductionResult(
                 srcLocation,
                 deductionResult,
                 templateParamToArgMap
-            );
-            diagnostics.Add(expDidVerifyDeductionResult);
-            if (!expDidVerifyDeductionResult)
+            ));
+            if (!didVerifyDeductionResult)
             {
                 return;
             }
@@ -631,18 +628,17 @@ namespace Ace
             templateParamToArgMap[deductionResult.Param] = deductionResult.Arg;
         });
 
-        const auto expTemplateArgs = CollectTemplateArgsFromMap(
+        const auto optTemplateArgs = diagnostics.Collect(CollectTemplateArgsFromMap(
             srcLocation,
             templateParamToArgMap,
             templateParams
-        );
-        diagnostics.Add(expTemplateArgs);
-        if (!expTemplateArgs)
+        ));
+        if (!optTemplateArgs.has_value())
         {
             return diagnostics;
         }
 
-        return Expected{ expTemplateArgs.Unwrap(), diagnostics };
+        return Expected{ optTemplateArgs.value(), diagnostics };
     }
 
     static auto DeduceTemplateArgs(
@@ -685,22 +681,21 @@ namespace Ace
             ));
         }
 
-        const auto expTemplateArg = TemplateArgDeductionAlgorithm(
+        const auto optTemplateArg = diagnostics.Collect(TemplateArgDeductionAlgorithm(
             srcLocation,
             knownTemplateArgs,
             templateParams,
             optArgTypes.value(),
             paramTypes
-        );
-        diagnostics.Add(expTemplateArg);
-        if (!expTemplateArg)
+        ));
+        if (!optTemplateArg.has_value())
         {
             return diagnostics;
         }
 
         return Expected
         {
-            expTemplateArg.Unwrap(),
+            optTemplateArg.value(),
             diagnostics,
         };
     }
@@ -715,14 +710,13 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expDeducedTemplateArgs = DeduceTemplateArgs(
+        const auto optDeducedTemplateArgs = diagnostics.Collect(DeduceTemplateArgs(
             srcLocation,
             t3mplate,
             templateArgs,
             optArgTypes
-        );
-        diagnostics.Add(expDeducedTemplateArgs);
-        if (!expDeducedTemplateArgs)
+        ));
+        if (!optDeducedTemplateArgs.has_value())
         {
             return diagnostics;
         }
@@ -731,7 +725,7 @@ namespace Ace
             srcLocation,
             t3mplate,
             implTemplateArgs,
-            expDeducedTemplateArgs.Unwrap()
+            optDeducedTemplateArgs.value()
         );
         if (optResolvedInstance)
         {
@@ -740,14 +734,13 @@ namespace Ace
 
         auto* const compilation = t3mplate->GetCompilation();
 
-        const auto dgnSymbol = compilation->GetTemplateInstantiator().InstantiateSymbols(
+        auto* const symbol = diagnostics.Collect(compilation->GetTemplateInstantiator().InstantiateSymbols(
             t3mplate,
             implTemplateArgs,
-            expDeducedTemplateArgs.Unwrap()
-        );
-        diagnostics.Add(dgnSymbol);
+            optDeducedTemplateArgs.value()
+        ));
 
-        return Expected{ dgnSymbol.Unwrap(), diagnostics };
+        return Expected{ symbol, diagnostics };
     }
 
     auto Scope::CollectTemplateArgs() const -> std::vector<ITypeSymbol*>
@@ -822,7 +815,7 @@ namespace Ace
                 i
             );
 
-            diagnostics.Add(DefineSymbol(std::move(aliasSymbol)));
+            (void)diagnostics.Collect(DefineSymbol(std::move(aliasSymbol)));
         }
 
         for (size_t i = 0; i < templateParamNames.size(); i++)
@@ -834,7 +827,7 @@ namespace Ace
                 i
             );
 
-            diagnostics.Add(DefineSymbol(std::move(aliasSymbol)));
+            (void)diagnostics.Collect(DefineSymbol(std::move(aliasSymbol)));
         }
 
         return Diagnosed<void>{ diagnostics };
@@ -978,11 +971,11 @@ namespace Ace
             back_inserter(symbols), 
             [&](ISymbol* const matchingSymbol)
             {
-                const auto expIsCorrectSymbolType = data.IsCorrectSymbolType(
+                const bool isCorrectSymbolType = data.IsCorrectSymbolType(
                     data.SrcLocation,
                     matchingSymbol
                 );
-                if (!expIsCorrectSymbolType)
+                if (!isCorrectSymbolType)
                 {
                     return false;
                 }
@@ -993,10 +986,14 @@ namespace Ace
 
         if (symbols.empty())
         {
-            return diagnostics.Add(data.IsCorrectSymbolType(
+            const bool isCorrectSymbolType = diagnostics.Collect(data.IsCorrectSymbolType(
                 data.SrcLocation,
                 matchingSymbols.front()
             ));
+            if (!isCorrectSymbolType)
+            {
+                return diagnostics;
+            }
         }
 
         if (symbols.size() > 1)
@@ -1008,7 +1005,7 @@ namespace Ace
         }
 
         auto* const symbol = symbols.front();
-        diagnostics.Add(DiagnoseInaccessibleSymbol(
+        diagnostics.Collect(DiagnoseInaccessibleSymbol(
             data.SrcLocation,
             symbol,
             data.BeginScope
@@ -1039,11 +1036,10 @@ namespace Ace
         std::transform(begin(argNames), end(argNames), back_inserter(args),
         [&](const SymbolName& argName)
         {
-            const auto expArg = scope->ResolveStaticSymbol<ITypeSymbol>(
+            const auto optArg = diagnostics.Collect(scope->ResolveStaticSymbol<ITypeSymbol>(
                 argName
-            );
-            diagnostics.Add(expArg);
-            return expArg.UnwrapOr(
+            ));
+            return optArg.value_or(
                 scope->GetCompilation()->GetErrorSymbols().GetType()
             );
         });
@@ -1072,29 +1068,30 @@ namespace Ace
 
         if (!HasResolvedTemplateArgs(data))
         {
-            const auto expTemplateArgs = ResolveTemplateArgs(data);
-            diagnostics.Add(expTemplateArgs);
-            if (!expTemplateArgs)
+            const auto optTemplateArgs = diagnostics.Collect(
+                ResolveTemplateArgs(data)
+            );
+            if (!optTemplateArgs.has_value())
             {
                 return diagnostics;
             }
 
-            data.TemplateArgs = expTemplateArgs.Unwrap();
+            data.TemplateArgs = optTemplateArgs.value();
         }
 
-        const auto expMatchingSymbols = CollectMatchingSymbolsInScopes(data);
-        diagnostics.Add(expMatchingSymbols);
-        if (!expMatchingSymbols)
+        const auto optMatchingSymbols = diagnostics.Collect(
+            CollectMatchingSymbolsInScopes(data)
+        );
+        if (!optMatchingSymbols.has_value())
         {
             return diagnostics;
         }
 
-        const auto expSymbol = data.IsLastNameSection ?
-            ResolveLastNameSectionSymbol(data, expMatchingSymbols.Unwrap()) :
-            ResolveNameSectionSymbol    (data, expMatchingSymbols.Unwrap());
-
-        diagnostics.Add(expSymbol);
-        if (!expSymbol)
+        const auto optSymbol = diagnostics.Collect(data.IsLastNameSection ? 
+            ResolveLastNameSectionSymbol(data, optMatchingSymbols.value()) :
+            ResolveNameSectionSymbol    (data, optMatchingSymbols.value())
+        );
+        if (!optSymbol.has_value())
         {
             return diagnostics;
         }
@@ -1104,7 +1101,7 @@ namespace Ace
             return diagnostics;
         }
 
-        return Expected{ expSymbol.Unwrap(), diagnostics };
+        return Expected{ optSymbol.value(), diagnostics };
     }
 
     static auto IsInstanceVar(
@@ -1136,17 +1133,18 @@ namespace Ace
         std::for_each(begin(data.Scopes), end(data.Scopes),
         [&](const std::shared_ptr<const Scope>& scope)
         {
-            const auto expMatchingSymbols = scope->CollectMatchingSymbols(data);
-            diagnostics.Add(expMatchingSymbols);
-            if (!expMatchingSymbols)
+            const auto optMatchingSymbols = diagnostics.Collect(
+                scope->CollectMatchingSymbols(data)
+            );
+            if (!optMatchingSymbols.has_value())
             {
                 return;
             }
 
             matchingSymbols.insert(
                 end(matchingSymbols),
-                begin(expMatchingSymbols.Unwrap()),
-                end  (expMatchingSymbols.Unwrap())
+                begin(optMatchingSymbols.value()),
+                end  (optMatchingSymbols.value())
             );
         });
 
@@ -1255,22 +1253,21 @@ namespace Ace
             };
         }
 
-        const auto expTemplateInstance = ResolveOrInstantiateTemplateInstance(
+        const auto optTemplateInstance = diagnostics.Collect(ResolveOrInstantiateTemplateInstance(
             data.SrcLocation,
             t3mplate,
             data.OptArgTypes,
             data.ImplTemplateArgs,
             data.TemplateArgs
-        );
-        diagnostics.Add(expTemplateInstance);
-        if (!expTemplateInstance)
+        ));
+        if (!optTemplateInstance.has_value())
         {
             return diagnostics;
         }
 
         return Expected
         {
-            std::vector<ISymbol*>{ expTemplateInstance.Unwrap() },
+            std::vector<ISymbol*>{ optTemplateInstance.value() },
             diagnostics,
         };
     }
@@ -1498,7 +1495,7 @@ namespace Ace
             ));
         }
 
-        const auto expSymbol = ResolveSymbolInScopes(SymbolResolutionData{
+        const auto optSymbol = diagnostics.Collect(ResolveSymbolInScopes(SymbolResolutionData{
             (data.NameSectionsBegin + 1)->CreateSrcLocation(),
             data.BeginScope,
             data.NameSectionsBegin + 1,
@@ -1508,14 +1505,13 @@ namespace Ace
             selfScopedSymbol->GetSelfScope()->CollectSelfAndAssociations(),
             data.TemplateArgs,
             data.IsTemplate,
-        });   
-        diagnostics.Add(expSymbol);
-        if (!expSymbol)
+        }));   
+        if (!optSymbol.has_value())
         {
             return diagnostics;
         }
 
-        return Expected{ expSymbol.Unwrap(), diagnostics };
+        return Expected{ optSymbol.value(), diagnostics };
     }
 
     auto Scope::CollectSelfAndAssociations() const -> std::vector<std::shared_ptr<const Scope>>

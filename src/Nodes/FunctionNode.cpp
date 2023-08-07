@@ -145,18 +145,15 @@ namespace Ace
             back_inserter(boundAttributes),
             [&](const std::shared_ptr<const AttributeNode>& attribute)
             {
-                const auto dgnBoundAttribute = attribute->CreateBound();
-                diagnostics.Add(dgnBoundAttribute);
-                return dgnBoundAttribute.Unwrap();
+                return diagnostics.Collect(attribute->CreateBound());
             }
         );
 
         std::optional<std::shared_ptr<const SelfParamVarBoundNode>> boundOptSelf{};
         if (m_OptSelf.has_value())
         {
-            const auto dgnBoundSelf = m_OptSelf.value()->CreateBound();
-            diagnostics.Add(dgnBoundSelf);
-            boundOptSelf = dgnBoundSelf.Unwrap();
+            boundOptSelf =
+                diagnostics.Collect(m_OptSelf.value()->CreateBound());
         }
 
         std::vector<std::shared_ptr<const NormalParamVarBoundNode>> boundParams{};
@@ -166,18 +163,15 @@ namespace Ace
             back_inserter(boundParams),
             [&](const std::shared_ptr<const NormalParamVarNode>& param)
             {
-                const auto dgnBoundParam = param->CreateBound();
-                diagnostics.Add(dgnBoundParam);
-                return dgnBoundParam.Unwrap();
+                return diagnostics.Collect(param->CreateBound());
             }
         );
 
         std::optional<std::shared_ptr<const BlockStmtBoundNode>> boundOptBody{};
         if (m_OptBody.has_value())
         {
-            const auto dgnBoundBody = m_OptBody.value()->CreateBound();
-            diagnostics.Add(dgnBoundBody);
-            boundOptBody = dgnBoundBody.Unwrap();
+            boundOptBody =
+                diagnostics.Collect(m_OptBody.value()->CreateBound());
         }
 
         auto* const selfSymbol = GetScope()->ExclusiveResolveSymbol<FunctionSymbol>(
@@ -228,12 +222,10 @@ namespace Ace
             SymbolCategory::Instance :
             SymbolCategory::Static;
 
-        const auto expTypeSymbol = m_SelfScope->ResolveStaticSymbol<ITypeSymbol>(
+        const auto optTypeSymbol = diagnostics.Collect(m_SelfScope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
-        );
-        diagnostics.Add(expTypeSymbol);
-
-        auto* const typeSymbol = expTypeSymbol.UnwrapOr(
+        ));
+        auto* const typeSymbol = optTypeSymbol.value_or(
             GetCompilation()->GetErrorSymbols().GetType()
         );
 

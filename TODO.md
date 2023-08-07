@@ -5,7 +5,6 @@
 - ❓ Eliminate local lambdas
 - String interning, maybe put `Token`s on the stack
 - Special fast lookup for native types
-- Change `TransformExpectedVector(vec, f)` to `TransformExpected(begin, end, f)`
 
 ## 💥 High Priority
 

@@ -59,12 +59,14 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expVarSymbol = m_Scope->ResolveStaticSymbol<IVarSymbol>(
-            m_Name
-        );
-        diagnostics.Add(expVarSymbol);
+        if (m_Name.Sections.front().Name.String == "sllf")
+        {
+            [](){}();
+        }
 
-        auto* const varSymbol = expVarSymbol.UnwrapOr(
+        const auto optVarSymbol =
+            diagnostics.Collect(m_Scope->ResolveStaticSymbol<IVarSymbol>(m_Name));
+        auto* const varSymbol = optVarSymbol.value_or(
             GetCompilation()->GetErrorSymbols().GetVar()
         );
 

@@ -149,10 +149,7 @@ namespace Ace
             std::find(begin(parser.Peek()), end(parser.Peek()), '='),
         };
 
-        diagnostics.Add(DiagnoseMissingOptionName(
-            parser,
-            name
-        ));
+        diagnostics.Collect(DiagnoseMissingOptionName(parser, name));
 
         const auto matchedDefinitionIt = std::find_if(
             begin(parser.GetOptionDefinitions()),
@@ -213,7 +210,7 @@ namespace Ace
             return parser.Peek(1);
         }();
 
-        diagnostics.Add(DiagnoseMissingOrUnexpectedOptionValue(
+        diagnostics.Collect(DiagnoseMissingOrUnexpectedOptionValue(
             parser,
             definition,
             optValue
@@ -249,10 +246,7 @@ namespace Ace
             begin(parser.Peek()) + 2,
         };
 
-        diagnostics.Add(DiagnoseMissingOptionName(
-            parser,
-            name
-        ));
+        diagnostics.Collect(DiagnoseMissingOptionName(parser, name));
 
         const auto matchedDefinitionIt = std::find_if(
             begin(parser.GetOptionDefinitions()),
@@ -306,7 +300,7 @@ namespace Ace
             return parser.Peek(1);
         }();
 
-        diagnostics.Add(DiagnoseMissingOrUnexpectedOptionValue(
+        diagnostics.Collect(DiagnoseMissingOrUnexpectedOptionValue(
             parser,
             definition,
             optValue
@@ -389,10 +383,8 @@ namespace Ace
                 continue;
             }
 
-            const auto dgnOption = ParseOption(parser);
-            diagnostics.Add(dgnOption);
-
-            optionMap[dgnOption.Unwrap().Definition] = dgnOption.Unwrap();
+            const auto option = diagnostics.Collect(ParseOption(parser));
+            optionMap[option.Definition] = option;
         }
 
         if (diagnostics.HasErrors())

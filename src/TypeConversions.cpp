@@ -302,16 +302,14 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnConvertedExpr = CreateImplicitlyConverted(
+        const auto convertedExpr = diagnostics.Collect(CreateImplicitlyConverted(
             expr,
             targetTypeInfo
-        );
-        diagnostics.Add(dgnConvertedExpr);
+        ));
 
-        const auto dgnCheckedExpr =
-            dgnConvertedExpr.Unwrap()->CreateTypeCheckedExpr({});
-        diagnostics.Add(dgnCheckedExpr);
+        const auto checkedExpr =
+            diagnostics.Collect(convertedExpr->CreateTypeCheckedExpr({}));
 
-        return Diagnosed{ dgnCheckedExpr.Unwrap(), diagnostics };
+        return Diagnosed{ checkedExpr, diagnostics };
     }
 }

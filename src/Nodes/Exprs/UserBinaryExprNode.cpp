@@ -90,12 +90,11 @@ namespace Ace
 
         const auto argTypeSymbols = CollectTypeSymbols(argTypeInfos);
 
-        const auto expSymbol = scope->ResolveStaticSymbol<FunctionSymbol>(
+        const auto optSymbol = diagnostics.Collect(scope->ResolveStaticSymbol<FunctionSymbol>(
             name,
             Scope::CreateArgTypes(argTypeSymbols)
-        );
-        diagnostics.Add(expSymbol);
-        if (!expSymbol)
+        ));
+        if (!optSymbol.has_value())
         {
             return diagnostics;
         }
@@ -103,14 +102,14 @@ namespace Ace
         const bool areArgsConvertible = AreTypesConvertible(
             scope,
             argTypeInfos,
-            expSymbol.Unwrap()->CollectArgTypeInfos()
+            optSymbol.value()->CollectArgTypeInfos()
         );
         if (!areArgsConvertible)
         {
             return diagnostics;
         }
 
-        return Expected{ expSymbol.Unwrap(), diagnostics };
+        return Expected{ optSymbol.value(), diagnostics };
     }
 
     static auto CreateFullyQualifiedOpName(
@@ -135,8 +134,8 @@ namespace Ace
         const Op& op,
         ITypeSymbol* const lhsTypeSymbol,
         ITypeSymbol* const rhsTypeSymbol,
-        const Expected<FunctionSymbol*>& expLHSOpSymbol,
-        const Expected<FunctionSymbol*>& expRHSOpSymbol
+        Expected<FunctionSymbol*> expLHSOpSymbol,
+        Expected<FunctionSymbol*> expRHSOpSymbol
     ) -> Diagnosed<FunctionSymbol*>
     {
         DiagnosticBag diagnostics{};
@@ -169,16 +168,11 @@ namespace Ace
             ));
         }
 
-        if (expLHSOpSymbol)
-        {
-            diagnostics.Add(expLHSOpSymbol);
-            return Diagnosed{ expLHSOpSymbol.Unwrap(), diagnostics };
-        }
-        else
-        {
-            diagnostics.Add(expRHSOpSymbol);
-            return Diagnosed{ expRHSOpSymbol.Unwrap(), diagnostics };
-        }
+        const auto optOpSymbol = diagnostics.Collect(expLHSOpSymbol ?
+            std::move(expLHSOpSymbol) :
+            std::move(expRHSOpSymbol)
+        );
+        return Diagnosed{ optOpSymbol.value(), diagnostics };
     }
 
     static auto ResolveAndPickOpSymbol(
@@ -191,64 +185,61 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expLHSOpSymbol = ResolveOpSymbol(
+        auto expLHSOpSymbol = ResolveOpSymbol(
             scope,
             CreateFullyQualifiedOpName(op, lhsTypeSymbol),
             argTypeInfos
         );
-        const auto expRHSOpSymbol = ResolveOpSymbol(
+        auto expRHSOpSymbol = ResolveOpSymbol(
             scope,
             CreateFullyQualifiedOpName(op, rhsTypeSymbol),
             argTypeInfos
         );
 
-        const auto dgnOpSymbol = PickOpSymbol(
+        const auto opSymbol = diagnostics.Collect(PickOpSymbol(
             op,
             lhsTypeSymbol,
             rhsTypeSymbol,
-            expLHSOpSymbol,
-            expRHSOpSymbol
-        );
-        diagnostics.Add(dgnOpSymbol);
+            std::move(expLHSOpSymbol),
+            std::move(expRHSOpSymbol)
+        ));
 
-        return Diagnosed{ dgnOpSymbol.Unwrap(), diagnostics };
+        return Diagnosed{ opSymbol, diagnostics };
     }
 
     auto UserBinaryExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const UserBinaryExprBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnBoundLHSExpr = m_LHSExpr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundLHSExpr);
-
-        const auto dgnBoundRHSExpr = m_RHSExpr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundRHSExpr);
+        const auto boundLHSExpr =
+            diagnostics.Collect(m_LHSExpr->CreateBoundExpr());
+        const auto boundRHSExpr =
+            diagnostics.Collect(m_RHSExpr->CreateBoundExpr());
 
         const std::vector<TypeInfo> argTypeInfos
         {
-            dgnBoundLHSExpr.Unwrap()->GetTypeInfo(),
-            dgnBoundRHSExpr.Unwrap()->GetTypeInfo(),
+            boundLHSExpr->GetTypeInfo(),
+            boundRHSExpr->GetTypeInfo(),
         };
 
         auto* const lhsTypeSymbol = argTypeInfos.at(0).Symbol;
         auto* const rhsTypeSymbol = argTypeInfos.at(1).Symbol;
 
-        const auto dgnOpSymbol = ResolveAndPickOpSymbol(
+        const auto opSymbol = diagnostics.Collect(ResolveAndPickOpSymbol(
             GetScope(),
             m_Op,
             argTypeInfos,
             lhsTypeSymbol,
             rhsTypeSymbol
-        );
-        diagnostics.Add(dgnOpSymbol);
+        ));
 
         return Diagnosed
         {
             std::make_shared<const UserBinaryExprBoundNode>(
                 GetSrcLocation(),
-                dgnBoundLHSExpr.Unwrap(),
-                dgnBoundRHSExpr.Unwrap(),
-                dgnOpSymbol.Unwrap()
+                boundLHSExpr,
+                boundRHSExpr,
+                opSymbol
             ),
             diagnostics,
         };

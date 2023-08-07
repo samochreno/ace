@@ -46,13 +46,12 @@ namespace Ace
                 end  (params),
             };
 
-            const auto dgnPlaceholderSymbol = InstantiateSymbols(
+            const auto placeholderSymbol = diagnostics.Collect(InstantiateSymbols(
                 symbol,
                 upcastedImplParams,
                 upcastedParams
-            );
-            diagnostics.Add(dgnPlaceholderSymbol);
-            symbol->SetPlaceholderSymbol(dgnPlaceholderSymbol.Unwrap());
+            ));
+            symbol->SetPlaceholderSymbol(placeholderSymbol);
         });
 
         return Diagnosed<void>{ diagnostics };
@@ -129,11 +128,8 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnSymbolsInstantiationResult = t3mplate->InstantiateSymbols(
-            implArgs,
-            args
-        );
-        diagnostics.Add(dgnSymbolsInstantiationResult);
+        const auto symbolsInstantiationResult =
+            diagnostics.Collect(t3mplate->InstantiateSymbols(implArgs, args));
 
         const bool areArgsPlaceholders = AreArgsPlaceholders(
             implArgs,
@@ -142,13 +138,13 @@ namespace Ace
         if (!areArgsPlaceholders)
         {
             m_SymbolOnlyInstantiatedASTsMap[t3mplate].push_back(
-                dgnSymbolsInstantiationResult.Unwrap().AST
+                symbolsInstantiationResult.AST
             );
         }
         
         return Diagnosed
         {
-            dgnSymbolsInstantiationResult.Unwrap().Symbol,
+            symbolsInstantiationResult.Symbol,
             diagnostics,
         };
     }

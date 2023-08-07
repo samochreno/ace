@@ -79,9 +79,8 @@ namespace Ace
         std::optional<std::shared_ptr<const IExprBoundNode>> boundOptExpr{};
         if (m_OptExpr.has_value())
         {
-            const auto dgnBoundExpr = m_OptExpr.value()->CreateBoundExpr();
-            diagnostics.Add(dgnBoundExpr);
-            boundOptExpr = dgnBoundExpr.Unwrap();
+            boundOptExpr =
+                diagnostics.Collect(m_OptExpr.value()->CreateBoundExpr());
         }
 
         return Diagnosed

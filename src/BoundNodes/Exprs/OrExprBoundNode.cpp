@@ -54,22 +54,18 @@ namespace Ace
             GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
-
-        const auto dgnCheckedLHSExpr = CreateImplicitlyConvertedAndTypeChecked(
+        const auto checkedLHSExpr = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
             m_LHSExpr,
             typeInfo
-        );
-        diagnostics.Add(dgnCheckedLHSExpr);
-
-        const auto dgnCheckedRHSExpr = CreateImplicitlyConvertedAndTypeChecked(
+        ));
+        const auto checkedRHSExpr = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
             m_RHSExpr,
             typeInfo
-        );
-        diagnostics.Add(dgnCheckedRHSExpr);
+        ));
 
         if (
-            (dgnCheckedLHSExpr.Unwrap() == m_LHSExpr) &&
-            (dgnCheckedRHSExpr.Unwrap() == m_RHSExpr)
+            (checkedLHSExpr == m_LHSExpr) &&
+            (checkedRHSExpr == m_RHSExpr)
             )
         {
             return Diagnosed{ shared_from_this(), diagnostics };
@@ -79,8 +75,8 @@ namespace Ace
         {
             std::make_shared<const OrExprBoundNode>(
                 GetSrcLocation(),
-                dgnCheckedLHSExpr.Unwrap(),
-                dgnCheckedRHSExpr.Unwrap()
+                checkedLHSExpr,
+                checkedRHSExpr
             ),
             diagnostics,
         };

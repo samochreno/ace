@@ -89,7 +89,11 @@ namespace Ace
 
         if (!std::filesystem::exists(directory.Path))
         {
-            return { {}, diagnostics };
+            return Diagnosed
+            {
+                std::vector<std::filesystem::path>{},
+                diagnostics
+            };
         }
 
         std::vector<std::filesystem::path> filePaths{};
@@ -139,7 +143,7 @@ namespace Ace
             diagnostics.Add(CreateFileSystemError(directory.Path, e));
         }
 
-        return { filePaths, diagnostics };
+        return Diagnosed{ filePaths, diagnostics };
     }
 
     struct ExpandedLastFilePathPartData
@@ -183,7 +187,7 @@ namespace Ace
         const bool isFileDirectoryPath = beforeExtension[0] == '*';
         if (!isFileDirectoryPath)
         {
-            return
+            return Diagnosed
             {
                 ExpandedLastFilePathPartData
                 {
@@ -221,7 +225,7 @@ namespace Ace
             return recursiveness;
         }();
 
-        return
+        return Diagnosed
         {
             ExpandedLastFilePathPartData
             {
@@ -283,7 +287,7 @@ namespace Ace
         const bool isMacro = part.starts_with('$');
         if (!isMacro)
         {
-            return { part, diagnostics };
+            return Diagnosed{ part, diagnostics };
         }
 
         const std::string pathMacro = part.substr(1);
@@ -295,11 +299,10 @@ namespace Ace
                 fileBuffer,
                 pathMacro
             ));
-
-            return { {}, diagnostics };
+            return Diagnosed{ std::string{}, diagnostics };
         }
         
-        return { macroValueIt->second, diagnostics };
+        return Diagnosed{ macroValueIt->second, diagnostics };
     }
 
     static auto ExpandFilePathParts(
@@ -310,42 +313,44 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnFirstFilePathPart = ExpandFirstFilePathPart(
+        const auto firstFilePathPart = diagnostics.Collect(ExpandFirstFilePathPart(
             fileBuffer,
             filePathParts.front(),
             pathMacroMap
-        );
-        diagnostics.Add(dgnFirstFilePathPart);
+        ));
 
-        const auto dgnLastFilePathPartData = ExpandLastFilePathPart(
+        const auto lastFilePathPartData = diagnostics.Collect(ExpandLastFilePathPart(
             fileBuffer,
             filePathParts.back()
-        );
-        diagnostics.Add(dgnLastFilePathPartData);
+        ));
 
-        std::string path = dgnFirstFilePathPart.Unwrap() + '/';
+        std::string path = firstFilePathPart + '/';
         std::for_each(
             begin(filePathParts) + 1,
             end  (filePathParts) - 1,
             [&](const std::string& part) { path += part + '/'; }
         );
 
-        const bool isFilePath = dgnLastFilePathPartData.Unwrap().OptPath.has_value();
+        const bool isFilePath = lastFilePathPartData.OptPath.has_value();
         if (isFilePath)
         {
-            path += dgnLastFilePathPartData.Unwrap().OptPath.value();
-            return { FilePathOrFilteredDirectory{ path }, diagnostics };
+            path += lastFilePathPartData.OptPath.value();
+            return Diagnosed
+            {
+                FilePathOrFilteredDirectory{ path },
+                diagnostics
+            };
         }
 
-        return
+        return Diagnosed
         {
             FilePathOrFilteredDirectory
             {
                 FilteredDirectory
                 {
                     path,
-                    dgnLastFilePathPartData.Unwrap().OptExtension,
-                    dgnLastFilePathPartData.Unwrap().Recursiveness,
+                    lastFilePathPartData.OptExtension,
+                    lastFilePathPartData.Recursiveness,
                 }
             },
             diagnostics,
@@ -400,7 +405,7 @@ namespace Ace
             ));
         }
 
-        return { parts, diagnostics };
+        return Expected{ parts, diagnostics };
     }
 
     static auto TransformFilePaths(
@@ -416,14 +421,15 @@ namespace Ace
         std::for_each(begin(filePaths), end(filePaths),
         [&](const std::string& filePath)
         {
-            const auto expFilePathParts = SplitFilePath(filePath);
-            diagnostics.Add(expFilePathParts);
-            if (!expFilePathParts)
+            const auto optFilePathParts = diagnostics.Collect(SplitFilePath(
+                filePath
+            ));
+            if (!optFilePathParts.has_value())
             {
                 return;
             }
 
-            filePathsParts.push_back(expFilePathParts.Unwrap());
+            filePathsParts.push_back(optFilePathParts.value());
         });
 
         const auto packageDirectoryPath = packageFilePath.parent_path();
@@ -432,17 +438,16 @@ namespace Ace
         std::for_each(begin(filePathsParts), end(filePathsParts),
         [&](const std::vector<std::string>& filePathParts)
         {
-            const auto dgnFilePathOrFilteredDirectory = ExpandFilePathParts(
+            const auto filePathOrFilteredDirectory = diagnostics.Collect(ExpandFilePathParts(
                 fileBuffer,
                 filePathParts,
                 pathMacroMap
-            );
-            diagnostics.Add(dgnFilePathOrFilteredDirectory);
+            ));
 
-            if (dgnFilePathOrFilteredDirectory.Unwrap().IsFilePath())
+            if (filePathOrFilteredDirectory.IsFilePath())
             {
                 const auto expandedFilePath =
-                    dgnFilePathOrFilteredDirectory.Unwrap().GetFilePath();
+                    filePathOrFilteredDirectory.GetFilePath();
 
                 const auto filePath = [&]() -> std::filesystem::path
                 {
@@ -457,28 +462,27 @@ namespace Ace
                 finalFilePaths.push_back(filePath);
             }
 
-            if (dgnFilePathOrFilteredDirectory.Unwrap().IsDirectoryPath())
+            if (filePathOrFilteredDirectory.IsDirectoryPath())
             {
                 auto directory =
-                    dgnFilePathOrFilteredDirectory.Unwrap().GetFilteredDirectory();
+                    filePathOrFilteredDirectory.GetFilteredDirectory();
 
                 directory.Path = directory.Path.is_absolute() ? 
                     directory.Path : 
                     (packageDirectoryPath / directory.Path);
 
-                const auto dgnDirectoryFilePaths =
-                    CollectFilteredDirectoryFilePaths(directory);
-                diagnostics.Add(dgnDirectoryFilePaths);
+                const auto directoryFilePaths =
+                    diagnostics.Collect(CollectFilteredDirectoryFilePaths(directory));
 
                 finalFilePaths.insert(
                     end(finalFilePaths),
-                    begin(dgnDirectoryFilePaths.Unwrap()),
-                    end  (dgnDirectoryFilePaths.Unwrap())
+                    begin(directoryFilePaths),
+                    end  (directoryFilePaths)
                 );
             }
         });
 
-        return { finalFilePaths, diagnostics };
+        return Diagnosed{ finalFilePaths, diagnostics };
     }
 
     static auto ReadFilePath(
@@ -489,19 +493,18 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expFileBuffer = FileBuffer::Read(
+        const auto optFileBuffer = diagnostics.Collect(FileBuffer::Read(
             fileBuffer->GetCompilation(),
             filePath
-        );
-        diagnostics.Add(expFileBuffer);
-        if (!expFileBuffer)
+        ));
+        if (!optFileBuffer.has_value())
         {
             return diagnostics;
         }
 
-        srcBuffers->push_back(expFileBuffer.Unwrap());
+        srcBuffers->push_back(optFileBuffer.value());
 
-        return { expFileBuffer.Unwrap().get(), diagnostics };
+        return Expected{ optFileBuffer.value().get(), diagnostics };
     }
 
     static auto CreateDefaultValue(
@@ -543,7 +546,7 @@ namespace Ace
                 fileBuffer,
                 prefixedName
             ));
-            return { CreateDefaultValue(type), diagnostics };
+            return Diagnosed{ CreateDefaultValue(type), diagnostics };
         }
 
         if (json[name].type() != type)
@@ -554,10 +557,10 @@ namespace Ace
                 json[name].type(),
                 type
             ));
-            return { CreateDefaultValue(type), diagnostics };
+            return Diagnosed{ CreateDefaultValue(type), diagnostics };
         }
 
-        return { json[name], diagnostics };
+        return Diagnosed{ json[name], diagnostics };
     }
 
     static auto GetOrCreateElement(
@@ -580,10 +583,10 @@ namespace Ace
                 json.at(index).type(),
                 type
             ));
-            return { CreateDefaultValue(type), diagnostics };
+            return Diagnosed{ CreateDefaultValue(type), diagnostics };
         }
 
-        return { json.at(index), diagnostics };
+        return Diagnosed{ json.at(index), diagnostics };
     }
 
     static auto DiagnoseUnexpectedProperties(
@@ -621,7 +624,7 @@ namespace Ace
             }
         }
 
-        return diagnostics;
+        return Diagnosed<void>{ diagnostics };
     }
 
     static auto ParsePathMacroMap(
@@ -631,33 +634,31 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnPathMacros = GetOrCreateProperty(
+        const auto pathMacros = diagnostics.Collect(GetOrCreateProperty(
             fileBuffer,
             package,
             {},
             Property::PathMacros,
             nlohmann::json::value_t::array
-        );
-        diagnostics.Add(dgnPathMacros);
+        ));
 
         std::unordered_map<std::string, std::string> pathMacroMap{};
-        for (size_t i = 0; i < dgnPathMacros.Unwrap().size(); i++)
+        for (size_t i = 0; i < pathMacros.size(); i++)
         {
-            const auto dgnPathMacro = GetOrCreateElement(
+            const auto pathMacro = diagnostics.Collect(GetOrCreateElement(
                 fileBuffer,
-                dgnPathMacros.Unwrap(),
+                pathMacros,
                 Property::PathMacros,
                 i,
                 nlohmann::json::value_t::object
-            );
-            diagnostics.Add(dgnPathMacro);
+            ));
 
             const auto pathMacroPropertyNamePrefix =
                 Property::PathMacros + "[" + std::to_string(i) + "]";
 
-            diagnostics.Add(DiagnoseUnexpectedProperties(
+            diagnostics.Collect(DiagnoseUnexpectedProperties(
                 fileBuffer,
-                dgnPathMacro.Unwrap(),
+                pathMacro,
                 pathMacroPropertyNamePrefix,
                 {
                     Property::Name,
@@ -665,33 +666,28 @@ namespace Ace
                 }
             ));
 
-            const auto dgnPathMacroName = GetOrCreateProperty(
+            std::string pathMacroName = diagnostics.Collect(GetOrCreateProperty(
                 fileBuffer,
-                dgnPathMacro.Unwrap(),
+                pathMacro,
                 pathMacroPropertyNamePrefix,
                 Property::Name,
                 nlohmann::json::value_t::string
-            );
-            diagnostics.Add(dgnPathMacroName);
+            ));
+            Trim(pathMacroName);
 
-            const auto dgnPathMacroValue = GetOrCreateProperty(
+            std::string pathMacroValue = diagnostics.Collect(GetOrCreateProperty(
                 fileBuffer,
-                dgnPathMacro.Unwrap(),
+                pathMacro,
                 pathMacroPropertyNamePrefix,
                 Property::Value,
                 nlohmann::json::value_t::string
-            );
-            diagnostics.Add(dgnPathMacroValue);
-
-            std::string pathMacroName = dgnPathMacroName.Unwrap();
-            Trim(pathMacroName);
-            std::string pathMacroValue = dgnPathMacroValue.Unwrap();
+            ));
             Trim(pathMacroValue);
-            
+
             pathMacroMap[pathMacroName] = std::move(pathMacroValue);
         }
 
-        return { pathMacroMap, diagnostics };
+        return Diagnosed{ pathMacroMap, diagnostics };
     }
 
     static auto ParseFiles(
@@ -702,31 +698,29 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnFilesArray = GetOrCreateProperty(
+        const auto filesArray = diagnostics.Collect(GetOrCreateProperty(
             fileBuffer,
             package,
             {},
             filesPropertyName,
             nlohmann::json::value_t::array
-        );
-        diagnostics.Add(dgnFilesArray);
+        ));
 
         std::vector<std::string> files{};
-        for (size_t i = 0; i < dgnFilesArray.Unwrap().size(); i++)
+        for (size_t i = 0; i < filesArray.size(); i++)
         {
-            const auto dgnFile = GetOrCreateElement(
+            const auto file = diagnostics.Collect(GetOrCreateElement(
                 fileBuffer,
-                dgnFilesArray.Unwrap(),
+                filesArray,
                 filesPropertyName,
                 i,
                 nlohmann::json::value_t::string
-            );
-            diagnostics.Add(dgnFile);
+            ));
 
-            files.push_back(dgnFile.Unwrap());
+            files.push_back(file);
         }
 
-        return { files, diagnostics };
+        return Diagnosed{ files, diagnostics };
     }
 
     static auto ReadFilePaths(
@@ -741,21 +735,20 @@ namespace Ace
         std::for_each(begin(filePaths), end(filePaths),
         [&](const std::filesystem::path& filePath)
         {
-            const auto expFileBuffer = ReadFilePath(
+            const auto optFileBuffer = diagnostics.Collect(ReadFilePath(
                 srcBuffers,
                 fileBuffer,
                 filePath
-            );
-            diagnostics.Add(expFileBuffer);
-            if (!expFileBuffer)
+            ));
+            if (!optFileBuffer.has_value())
             {
                 return;
             }
 
-            fileBuffers.push_back(expFileBuffer.Unwrap());
+            fileBuffers.push_back(optFileBuffer.value());
         });
 
-        return { fileBuffers, diagnostics };
+        return Diagnosed{ fileBuffers, diagnostics };
     }
 
     static auto ParsePackage(
@@ -767,7 +760,7 @@ namespace Ace
 
         const auto package = nlohmann::json::parse(fileBuffer->GetBuffer());
 
-        diagnostics.Add(DiagnoseUnexpectedProperties(
+        diagnostics.Collect(DiagnoseUnexpectedProperties(
             fileBuffer,
             package,
             {},
@@ -779,65 +772,58 @@ namespace Ace
             }
         ));
 
-        auto dgnName = GetOrCreateProperty(
+        auto name = diagnostics.Collect(GetOrCreateProperty(
             fileBuffer,
             package,
             {},
             Property::Name,
             nlohmann::json::value_t::string
-        );
-        diagnostics.Add(dgnName);
+        ));
 
-        const auto dgnPathMacroMap = ParsePathMacroMap(
+        const auto pathMacroMap = diagnostics.Collect(ParsePathMacroMap(
             fileBuffer,
             package
-        );
-        diagnostics.Add(dgnPathMacroMap);
+        ));
 
-        const auto dgnSrcFiles = ParseFiles(
+        const auto srcFiles = diagnostics.Collect(ParseFiles(
             fileBuffer,
             package,
             Property::SrcFiles
-        );
-        diagnostics.Add(dgnSrcFiles);
+        ));
 
-        const auto dgnDepFiles = ParseFiles(
+        const auto depFiles = diagnostics.Collect(ParseFiles(
             fileBuffer,
             package,
             Property::DepFiles
-        );
-        diagnostics.Add(dgnDepFiles);
+        ));
 
-        const auto dgnSrcFilePaths = TransformFilePaths(
+        const auto srcFilePaths = diagnostics.Collect(TransformFilePaths(
             fileBuffer,
             fileBuffer->GetPath(),
-            dgnSrcFiles.Unwrap(),
-            dgnPathMacroMap.Unwrap()
-        );
-        diagnostics.Add(dgnSrcFilePaths);
+            srcFiles,
+            pathMacroMap
+        ));
 
-        const auto dgnDepFilePaths = TransformFilePaths(
+        const auto depFilePaths = diagnostics.Collect(TransformFilePaths(
             fileBuffer,
             fileBuffer->GetPath(),
-            dgnDepFiles.Unwrap(),
-            dgnPathMacroMap.Unwrap()
-        );
-        diagnostics.Add(dgnDepFilePaths);
+            depFiles,
+            pathMacroMap
+        ));
 
-        const auto dgnSrcFileBuffers = ReadFilePaths(
+        const auto srcFileBuffers = diagnostics.Collect(ReadFilePaths(
             srcBuffers,
             fileBuffer,
-            dgnSrcFilePaths.Unwrap()
-        );
-        diagnostics.Add(dgnSrcFileBuffers);
+            srcFilePaths
+        ));
 
-        return
+        return Diagnosed
         {
             Package
             {
-                std::move(dgnName.Unwrap()),
-                std::move(dgnSrcFileBuffers.Unwrap()),
-                std::move(dgnDepFilePaths.Unwrap()),
+                std::move(name),
+                std::move(srcFileBuffers),
+                std::move(depFilePaths),
             },
             diagnostics,
         };
@@ -852,13 +838,12 @@ namespace Ace
 
         try
         {
-            const auto dgnPackage = ParsePackage(
+            const auto package = diagnostics.Collect(ParsePackage(
                 srcBuffers,
                 fileBuffer
-            );
-            diagnostics.Add(dgnPackage);
+            ));
 
-            return { dgnPackage.Unwrap(), diagnostics };
+            return Expected{ package, diagnostics };
         }
         catch (const nlohmann::json::exception& exception)
         {

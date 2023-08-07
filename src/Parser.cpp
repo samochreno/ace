@@ -751,9 +751,11 @@ namespace Ace
             };
         }
 
-        const auto expName = GetOpFunctionName(nameToken.Value, paramCount);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(GetOpFunctionName(
+            nameToken.Value,
+            paramCount
+        ));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
@@ -775,7 +777,7 @@ namespace Ace
         return Ident
         {
             nameToken.Value->SrcLocation,
-            expName.Unwrap(),
+            optName.value(),
         };
     }
 
@@ -1446,27 +1448,25 @@ namespace Ace
 
         std::vector<Ident> nestedName{};
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
 
-        nestedName.push_back(std::move(expName.Unwrap()));
+        nestedName.push_back(std::move(optName.value()));
 
         while (parser.Peek() == TokenKind::ColonColon)
         {
             parser.Eat();
 
-            const auto expName = ParseName(parser, scope);
-            diagnostics.Add(expName);
-            if (!expName)
+            const auto optName = diagnostics.Collect(ParseName(parser, scope));
+            if (!optName.has_value())
             {
                 return diagnostics;
             }
 
-            nestedName.push_back(std::move(expName.Unwrap()));
+            nestedName.push_back(std::move(optName.value()));
         }
 
         return Expected{ std::move(nestedName), diagnostics };
@@ -1479,19 +1479,17 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
 
-        const auto expTemplateArgs = ParseOptionalTemplateArgs(
+        const auto optTemplateArgs = diagnostics.Collect(ParseOptionalTemplateArgs(
             parser,
             scope
-        );
-        diagnostics.Add(expTemplateArgs);
-        if (!expTemplateArgs)
+        ));
+        if (!optTemplateArgs.has_value())
         {
             return diagnostics;
         }
@@ -1500,8 +1498,8 @@ namespace Ace
         {
             SymbolNameSection
             {
-                expName.Unwrap(),
-                expTemplateArgs.Unwrap(),
+                optName.value(),
+                optTemplateArgs.value(),
             },
             diagnostics,
         };
@@ -1523,27 +1521,31 @@ namespace Ace
         
         std::vector<SymbolNameSection> sections{};
 
-        const auto expSection = ParseSymbolNameSection(parser, scope);
-        diagnostics.Add(expSection);
-        if (!expSection)
+        const auto optSection = diagnostics.Collect(ParseSymbolNameSection(
+            parser,
+            scope
+        ));
+        if (!optSection.has_value())
         {
             return diagnostics;
         }
 
-        sections.push_back(std::move(expSection.Unwrap()));
+        sections.push_back(std::move(optSection.value()));
 
         while (parser.Peek() == TokenKind::ColonColon)
         {
             parser.Eat();
 
-            const auto expSection = ParseSymbolNameSection(parser, scope);
-            diagnostics.Add(expSection);
-            if (!expSection)
+            const auto optSection = diagnostics.Collect(ParseSymbolNameSection(
+                parser,
+                scope
+            ));
+            if (!optSection.has_value())
             {
                 return diagnostics;
             }
 
-            sections.push_back(std::move(expSection.Unwrap()));
+            sections.push_back(std::move(optSection.value()));
         }
 
         return Expected
@@ -1595,9 +1597,11 @@ namespace Ace
             break;
         }
 
-        const auto expSymbolName = ParseSymbolName(parser, scope);
-        diagnostics.Add(expSymbolName);
-        if (!expSymbolName)
+        const auto optSymbolName = diagnostics.Collect(ParseSymbolName(
+            parser,
+            scope
+        ));
+        if (!optSymbolName.has_value())
         {
             return diagnostics;
         }
@@ -1606,7 +1610,7 @@ namespace Ace
         {
             TypeName
             {
-                expSymbolName.Unwrap(),
+                optSymbolName.value(),
                 modifiers,
             },
             diagnostics,
@@ -1653,11 +1657,10 @@ namespace Ace
                 }
             }
 
-            const auto expName = ParseName(parser, scope);
-            diagnostics.Add(expName);
-            if (expName)
+            const auto optName = diagnostics.Collect(ParseName(parser, scope));
+            if (optName.has_value())
             {
-                names.push_back(std::move(expName.Unwrap()));
+                names.push_back(std::move(optName.value()));
                 continue;
             }
 
@@ -1696,17 +1699,19 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expNames = ParseTemplateParamNames(parser, scope);
-        diagnostics.Add(expNames);
-        if (!expNames)
+        const auto optNames = diagnostics.Collect(ParseTemplateParamNames(
+            parser,
+            scope
+        ));
+        if (!optNames.has_value())
         {
             return diagnostics;
         }
         
         std::vector<std::shared_ptr<const ImplTemplateParamNode>> params{};
         std::transform(
-            begin(expNames.Unwrap()),
-            end  (expNames.Unwrap()),
+            begin(optNames.value()),
+            end  (optNames.value()),
             back_inserter(params),
             [&](const Ident& name)
             {
@@ -1728,17 +1733,19 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expNames = ParseTemplateParamNames(parser, scope);
-        diagnostics.Add(expNames);
-        if (!expNames)
+        const auto optNames = diagnostics.Collect(ParseTemplateParamNames(
+            parser,
+            scope
+        ));
+        if (!optNames.has_value())
         {
             return diagnostics;
         }
         
         std::vector<std::shared_ptr<const NormalTemplateParamNode>> params{};
         std::transform(
-            begin(expNames.Unwrap()),
-            end  (expNames.Unwrap()),
+            begin(optNames.value()),
+            end  (optNames.value()),
             back_inserter(params),
             [&](const Ident& name)
             {
@@ -1810,11 +1817,13 @@ namespace Ace
                 }
             }
 
-            const auto expArg = ParseSymbolName(parser, scope);
-            diagnostics.Add(expArg);
-            if (expArg)
+            const auto optArg = diagnostics.Collect(ParseSymbolName(
+                parser,
+                scope
+            ));
+            if (optArg.has_value())
             {
-                args.push_back(std::move(expArg.Unwrap()));
+                args.push_back(std::move(optArg.value()));
                 continue;
             }
 
@@ -1858,14 +1867,16 @@ namespace Ace
             return Expected{ std::vector<SymbolName>{}, diagnostics };
         }
 
-        const auto expArgs = ParseTemplateArgs(parser, scope);
-        diagnostics.Add(expArgs);
-        if (!expArgs)
+        const auto optArgs = diagnostics.Collect(ParseTemplateArgs(
+            parser,
+            scope
+        ));
+        if (!optArgs.has_value())
         {
             return diagnostics;
         }
 
-        return Expected{ std::move(expArgs.Unwrap()), diagnostics };
+        return Expected{ std::move(optArgs.value()), diagnostics };
     }
 
     static auto ParseAttribute(
@@ -1887,12 +1898,11 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expStructConstructionExpr = ParseStructConstructionExpr(
+        const auto optStructConstructionExpr = diagnostics.Collect(ParseStructConstructionExpr(
             parser,
             scope
-        );
-        diagnostics.Add(expStructConstructionExpr);
-        if (!expStructConstructionExpr)
+        ));
+        if (!optStructConstructionExpr.has_value())
         {
             return diagnostics;
         }
@@ -1911,7 +1921,7 @@ namespace Ace
         {
             std::make_shared<const AttributeNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
-                expStructConstructionExpr.Unwrap()
+                optStructConstructionExpr.value()
             ),
             diagnostics,
         };
@@ -1927,11 +1937,13 @@ namespace Ace
         std::vector<std::shared_ptr<const AttributeNode>> attributes{};
         while (parser.Peek() == TokenKind::OpenBracket)
         {
-            const auto expAttribute = ParseAttribute(parser, scope);
-            diagnostics.Add(expAttribute);
-            if (expAttribute)
+            const auto optAttribute = diagnostics.Collect(ParseAttribute(
+                parser,
+                scope
+            ));
+            if (optAttribute.has_value())
             {
-                attributes.push_back(expAttribute.Unwrap());
+                attributes.push_back(optAttribute.value());
                 continue;
             }
 
@@ -1954,16 +1966,17 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expAttributes = ParseAttributes(parser, scope);
-        diagnostics.Add(expAttributes);
-        if (!expAttributes)
+        const auto optAttributes = diagnostics.Collect(ParseAttributes(
+            parser,
+            scope
+        ));
+        if (!optAttributes.has_value())
         {
             return diagnostics;
         }
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
@@ -1978,13 +1991,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Allow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -1994,9 +2006,9 @@ namespace Ace
             std::make_shared<const NormalParamVarNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expName.Unwrap(),
-                expTypeName.Unwrap(),
-                expAttributes.Unwrap(),
+                optName.value(),
+                optTypeName.value(),
+                optAttributes.value(),
                 index
             ),
             diagnostics,
@@ -2041,15 +2053,14 @@ namespace Ace
                 }
             }
 
-            const auto expParam = ParseParam(
+            const auto optParam = diagnostics.Collect(ParseParam(
                 parser,
                 scope,
                 params.size()
-            );
-            diagnostics.Add(expParam);
-            if (expParam)
+            ));
+            if (optParam.has_value())
             {
-                params.push_back(expParam.Unwrap());
+                params.push_back(optParam.value());
                 continue;
             }
 
@@ -2112,11 +2123,10 @@ namespace Ace
                 }
             }
 
-            const auto expArg = ParseExpr(parser, scope);
-            diagnostics.Add(expArg);
-            if (expArg)
+            const auto optArg = diagnostics.Collect(ParseExpr(parser, scope));
+            if (optArg.has_value())
             {
-                args.push_back(expArg.Unwrap());
+                args.push_back(optArg.value());
                 continue;
             }
 
@@ -2150,9 +2160,8 @@ namespace Ace
 
         const auto& literalToken = parser.Eat();
 
-        const auto expLiteralKind = GetLiteralKind(literalToken);
-        diagnostics.Add(expLiteralKind);
-        if (!expLiteralKind)
+        const auto optLiteralKind = diagnostics.Collect(GetLiteralKind(literalToken));
+        if (!optLiteralKind.has_value())
         {
             return diagnostics;
         }
@@ -2162,7 +2171,7 @@ namespace Ace
             std::make_shared<const LiteralExprNode>(
                 literalToken->SrcLocation,
                 scope,
-                expLiteralKind.Unwrap(),
+                optLiteralKind.value(),
                 literalToken->String
             ),
             diagnostics,
@@ -2178,9 +2187,11 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expName = ParseSymbolName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseSymbolName(
+            parser,
+            scope
+        ));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
@@ -2190,7 +2201,7 @@ namespace Ace
             std::make_shared<const SymbolLiteralExprNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expName.Unwrap()
+                optName.value()
             ),
             diagnostics,
         };
@@ -2241,9 +2252,8 @@ namespace Ace
                 }
             }
 
-            const auto expName = ParseName(parser, scope);
-            diagnostics.Add(expName);
-            if (!expName)
+            const auto optName = diagnostics.Collect(ParseName(parser, scope));
+            if (!optName.has_value())
             {
                 return diagnostics;
             }
@@ -2253,18 +2263,18 @@ namespace Ace
             {
                 parser.Eat();
 
-                const auto expValue = ParseExpr(parser, scope);
-                diagnostics.Add(expValue);
-                if (!expValue)
+                optValue = diagnostics.Collect(ParseExpr(
+                    parser,
+                    scope
+                ));
+                if (!optValue.has_value())
                 {
                     return diagnostics;
                 }
-
-                optValue = expValue.Unwrap();
             }
             
             args.emplace_back(
-                expName.Unwrap(),
+                optName.value(),
                 optValue
             );
         }
@@ -2302,19 +2312,20 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseSymbolName(parser, scope);
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        const auto optTypeName = diagnostics.Collect(ParseSymbolName(
+            parser,
+            scope
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
 
-        auto expArgs = ParseStructConstructionExprArgs(
+        auto optArgs = diagnostics.Collect(ParseStructConstructionExprArgs(
             parser,
             scope
-        );
-        diagnostics.Add(expArgs);
-        if (!expArgs)
+        ));
+        if (!optArgs.has_value())
         {
             return diagnostics;
         }
@@ -2324,8 +2335,8 @@ namespace Ace
             std::make_shared<const StructConstructionExprNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expTypeName.Unwrap(),
-                std::move(expArgs.Unwrap())
+                optTypeName.value(),
+                std::move(optArgs.value())
             ),
             diagnostics,
         };
@@ -2360,13 +2371,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Allow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -2391,9 +2401,8 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expExpr);
-        if (!expExpr)
+        const auto optExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optExpr.has_value())
         {
             return diagnostics;
         }
@@ -2412,8 +2421,8 @@ namespace Ace
         {
             std::make_shared<const CastExprNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
-                expTypeName.Unwrap(),
-                expExpr.Unwrap()
+                optTypeName.value(),
+                optExpr.value()
             ),
             diagnostics,
         };
@@ -2448,9 +2457,8 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expExpr);
-        if (!expExpr)
+        const auto optExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optExpr.has_value())
         {
             return diagnostics;
         }
@@ -2469,7 +2477,7 @@ namespace Ace
         {
             std::make_shared<const AddressOfExprNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
-                expExpr.Unwrap()
+                optExpr.value()
             ),
             diagnostics,
         };
@@ -2504,13 +2512,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Allow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -2530,7 +2537,7 @@ namespace Ace
             std::make_shared<const SizeOfExprNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expTypeName.Unwrap()
+                optTypeName.value()
             ),
             diagnostics,
         };
@@ -2565,13 +2572,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Allow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -2596,9 +2602,8 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expExpr);
-        if (!expExpr)
+        const auto optExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optExpr.has_value())
         {
             return diagnostics;
         }
@@ -2617,8 +2622,8 @@ namespace Ace
         {
             std::make_shared<const DerefAsExprNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
-                expTypeName.Unwrap(),
-                expExpr.Unwrap()
+                optTypeName.value(),
+                optExpr.value()
             ),
             diagnostics,
         };
@@ -2643,9 +2648,8 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expExpr);
-        if (!expExpr)
+        const auto optExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optExpr.has_value())
         {
             return diagnostics;
         }
@@ -2664,7 +2668,7 @@ namespace Ace
         {
             std::make_shared<const ExprExprNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
-                expExpr.Unwrap()
+                optExpr.value()
             ),
             diagnostics,
         };
@@ -2750,14 +2754,13 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expPrimaryExpr = ParsePrimaryExpr(parser, scope);
-        diagnostics.Add(expPrimaryExpr);
-        if (!expPrimaryExpr)
+        const auto optPrimaryExpr = diagnostics.Collect(ParsePrimaryExpr(parser, scope));
+        if (!optPrimaryExpr.has_value())
         {
             return diagnostics;
         }
 
-        auto expr = expPrimaryExpr.Unwrap();
+        auto expr = optPrimaryExpr.value();
 
         while (
             (parser.Peek() == TokenKind::Dot) ||
@@ -2768,9 +2771,11 @@ namespace Ace
             {
                 parser.Eat();
 
-                const auto expName = ParseSymbolNameSection(parser, scope);
-                diagnostics.Add(expName);
-                if (!expName)
+                const auto optName = diagnostics.Collect(ParseSymbolNameSection(
+                    parser,
+                    scope
+                ));
+                if (!optName.has_value())
                 {
                     return diagnostics;
                 }
@@ -2778,15 +2783,17 @@ namespace Ace
                 expr = std::make_shared<const MemberAccessExprNode>(
                     SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                     expr,
-                    expName.Unwrap()
+                    optName.value()
                 );
             }
 
             if (parser.Peek() == TokenKind::OpenParen)
             {
-                const auto expArgs = ParseArgs(parser, scope);
-                diagnostics.Add(expArgs);
-                if (!expArgs)
+                const auto optArgs = diagnostics.Collect(ParseArgs(
+                    parser,
+                    scope
+                ));
+                if (!optArgs.has_value())
                 {
                     return diagnostics;
                 }
@@ -2794,7 +2801,7 @@ namespace Ace
                 expr = std::make_shared<const FunctionCallExprNode>(
                     SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                     expr,
-                    expArgs.Unwrap()
+                    optArgs.value()
                 );
             }
         }
@@ -2823,14 +2830,16 @@ namespace Ace
             );
         }
 
-        const auto expSecondaryExpr = ParseSecondaryExpr(parser, scope);
-        diagnostics.Add(expSecondaryExpr);
-        if (!expSecondaryExpr)
+        const auto optSecondaryExpr = diagnostics.Collect(ParseSecondaryExpr(
+            parser,
+            scope
+        ));
+        if (!optSecondaryExpr.has_value())
         {
             return diagnostics;
         }
 
-        auto expr = expSecondaryExpr.Unwrap();
+        auto expr = optSecondaryExpr.value();
         while (!ops.empty())
         {
             const auto& op = ops.back();
@@ -2863,9 +2872,11 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expUnaryExpr = ParseUnaryExpr(parser, scope);
-        diagnostics.Add(expUnaryExpr);
-        if (!expUnaryExpr)
+        const auto optUnaryExpr = diagnostics.Collect(ParseUnaryExpr(
+            parser,
+            scope
+        ));
+        if (!optUnaryExpr.has_value())
         {
             return diagnostics;
         }
@@ -2873,7 +2884,7 @@ namespace Ace
         std::vector<std::shared_ptr<const IExprNode>> exprs{};
         std::vector<Op> ops{};
 
-        exprs.push_back(expUnaryExpr.Unwrap());
+        exprs.push_back(optUnaryExpr.value());
         
         while (IsBinaryOp(parser.Peek()->Kind))
         {
@@ -2883,14 +2894,16 @@ namespace Ace
                 opToken->Kind
             );
 
-            const auto expUnaryExpr = ParseUnaryExpr(parser, scope);
-            diagnostics.Add(expUnaryExpr);
-            if (!expUnaryExpr)
+            const auto optUnaryExpr = diagnostics.Collect(ParseUnaryExpr(
+                parser,
+                scope
+            ));
+            if (!optUnaryExpr.has_value())
             {
                 return diagnostics;
             }
 
-            exprs.push_back(expUnaryExpr.Unwrap());
+            exprs.push_back(optUnaryExpr.value());
         }
 
         if (ops.empty())
@@ -2980,11 +2993,13 @@ namespace Ace
             (parser.Peek() != TokenKind::CloseBrace)
             )
         {
-            const auto expStmt = ParseStmt(parser, selfScope);
-            diagnostics.Add(expStmt);
-            if (expStmt)
+            const auto optStmt = diagnostics.Collect(ParseStmt(
+                parser,
+                selfScope
+            ));
+            if (optStmt.has_value())
             {
-                stmts.push_back(expStmt.Unwrap());
+                stmts.push_back(optStmt.value());
                 continue;
             }
 
@@ -3031,9 +3046,8 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expExpr);
-        if (!expExpr)
+        const auto optExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optExpr.has_value())
         {
             return diagnostics;
         }
@@ -3052,7 +3066,7 @@ namespace Ace
         {
             std::make_shared<const ExprStmtNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
-                expExpr.Unwrap()
+                optExpr.value()
             ),
             diagnostics,
         };
@@ -3067,9 +3081,8 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expLhsExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expLhsExpr);
-        if (!expLhsExpr)
+        const auto optLHSExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optLHSExpr.has_value())
         {
             return diagnostics;
         }
@@ -3084,9 +3097,8 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expRhsExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expRhsExpr);
-        if (!expRhsExpr)
+        const auto optRHSExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optRHSExpr.has_value())
         {
             return diagnostics;
         }
@@ -3106,8 +3118,8 @@ namespace Ace
             std::make_shared<const NormalAssignmentStmtNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expLhsExpr.Unwrap(),
-                expRhsExpr.Unwrap()
+                optLHSExpr.value(),
+                optRHSExpr.value()
             ),
             diagnostics,
         };
@@ -3122,9 +3134,8 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expLhsExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expLhsExpr);
-        if (!expLhsExpr)
+        const auto optLhsExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optLhsExpr.has_value())
         {
             return diagnostics;
         }
@@ -3143,9 +3154,8 @@ namespace Ace
             opToken->Kind,
         };
 
-        const auto expRhsExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expRhsExpr);
-        if (!expRhsExpr)
+        const auto optRhsExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optRhsExpr.has_value())
         {
             return diagnostics;
         }
@@ -3165,8 +3175,8 @@ namespace Ace
             std::make_shared<const CompoundAssignmentStmtNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expLhsExpr.Unwrap(),
-                expRhsExpr.Unwrap(),
+                optLhsExpr.value(),
+                optRhsExpr.value(),
                 op
             ),
             diagnostics,
@@ -3182,9 +3192,8 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
@@ -3199,30 +3208,26 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Allow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
 
-        std::optional<std::shared_ptr<const IExprNode>> optAssignment{};
+        std::optional<std::shared_ptr<const IExprNode>> optAssignedExpr{};
         if (parser.Peek() == TokenKind::Equals)
         {
             parser.Eat();
 
-            const auto expExpr = ParseExpr(parser, scope);
-            diagnostics.Add(expExpr);
-            if (!expExpr)
+            optAssignedExpr = diagnostics.Collect(ParseExpr(parser, scope));
+            if (!optAssignedExpr.has_value())
             {
                 return diagnostics;
             }
-
-            optAssignment = expExpr.Unwrap();
         }
 
         if (parser.Peek() != TokenKind::Semicolon)
@@ -3240,9 +3245,9 @@ namespace Ace
             std::make_shared<const VarStmtNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expName.Unwrap(),
-                expTypeName.Unwrap(),
-                optAssignment
+                optName.value(),
+                optTypeName.value(),
+                optAssignedExpr
             ),
             diagnostics,
         };
@@ -3265,16 +3270,14 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expCondition = ParseExpr(parser, scope);
-        diagnostics.Add(expCondition);
-        if (!expCondition)
+        const auto optCondition = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optCondition.has_value())
         {
             return diagnostics;
         }
 
-        const auto expBody = ParseBlockStmt(parser, scope);
-        diagnostics.Add(expBody);
-        if (!expBody)
+        const auto optBody = diagnostics.Collect(ParseBlockStmt(parser, scope));
+        if (!optBody.has_value())
         {
             return diagnostics;
         }
@@ -3283,8 +3286,8 @@ namespace Ace
         {
             std::pair
             {
-                expCondition.Unwrap(),
-                expBody.Unwrap()
+                optCondition.value(),
+                optBody.value()
             },
             diagnostics,
         };
@@ -3307,16 +3310,14 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expCondition = ParseExpr(parser, scope);
-        diagnostics.Add(expCondition);
-        if (!expCondition)
+        const auto optCondition = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optCondition.has_value())
         {
             return diagnostics;
         }
 
-        const auto expBody = ParseBlockStmt(parser, scope);
-        diagnostics.Add(expBody);
-        if (!expBody)
+        const auto optBody = diagnostics.Collect(ParseBlockStmt(parser, scope));
+        if (!optBody.has_value())
         {
             return diagnostics;
         }
@@ -3325,8 +3326,8 @@ namespace Ace
         {
             std::pair
             {
-                expCondition.Unwrap(),
-                expBody.Unwrap()
+                optCondition.value(),
+                optBody.value()
             },
             diagnostics,
         };
@@ -3349,14 +3350,13 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expBody = ParseBlockStmt(parser, scope);
-        diagnostics.Add(expBody);
-        if (!expBody)
+        const auto optBody = diagnostics.Collect(ParseBlockStmt(parser, scope));
+        if (!optBody.has_value())
         {
             return diagnostics;
         }
 
-        return Expected{ expBody.Unwrap(), diagnostics };
+        return Expected{ optBody.value(), diagnostics };
     }
 
     static auto ParseIfStmt(
@@ -3371,39 +3371,45 @@ namespace Ace
         std::vector<std::shared_ptr<const IExprNode>> conditions{};
         std::vector<std::shared_ptr<const BlockStmtNode>> bodies{};
 
-        const auto expIfBlock = ParseIfBlock(parser, scope);
-        diagnostics.Add(expIfBlock);
-        if (!expIfBlock)
+        const auto optIfBlock = diagnostics.Collect(ParseIfBlock(
+            parser,
+            scope
+        ));
+        if (!optIfBlock.has_value())
         {
             return diagnostics;
         }
 
-        conditions.push_back(expIfBlock.Unwrap().first);
-        bodies.push_back(expIfBlock.Unwrap().second);
+        conditions.push_back(optIfBlock.value().first);
+        bodies.push_back(optIfBlock.value().second);
 
         while (parser.Peek() == TokenKind::ElifKeyword)
         {
-            const auto expElifBlock = ParseElifBlock(parser, scope);
-            diagnostics.Add(expElifBlock);
-            if (!expElifBlock)
+            const auto optElifBlock = diagnostics.Collect(ParseElifBlock(
+                parser,
+                scope
+            ));
+            if (!optElifBlock.has_value())
             {
                 return diagnostics;
             }
 
-            conditions.push_back(expElifBlock.Unwrap().first);
-            bodies.push_back(expElifBlock.Unwrap().second);
+            conditions.push_back(optElifBlock.value().first);
+            bodies.push_back(optElifBlock.value().second);
         }
 
         if (parser.Peek() == TokenKind::ElseKeyword)
         {
-            const auto expElseBlock = ParseElseBlock(parser, scope);
-            diagnostics.Add(expElseBlock);
-            if (!expElseBlock)
+            const auto optElseBlock = diagnostics.Collect(ParseElseBlock(
+                parser,
+                scope
+            ));
+            if (!optElseBlock.has_value())
             {
                 return diagnostics;
             }
 
-            bodies.push_back(expElseBlock.Unwrap());
+            bodies.push_back(optElseBlock.value());
         }
 
         return Expected
@@ -3437,16 +3443,14 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expCondition = ParseExpr(parser, scope);
-        diagnostics.Add(expCondition);
-        if (!expCondition)
+        const auto optCondition = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optCondition.has_value())
         {
             return diagnostics;
         }
 
-        const auto expBody = ParseBlockStmt(parser, scope);
-        diagnostics.Add(expBody);
-        if (!expBody)
+        const auto optBody = diagnostics.Collect(ParseBlockStmt(parser, scope));
+        if (!optBody.has_value())
         {
             return diagnostics;
         }
@@ -3456,8 +3460,8 @@ namespace Ace
             std::make_shared<const WhileStmtNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expCondition.Unwrap(),
-                expBody.Unwrap()
+                optCondition.value(),
+                optBody.value()
             ),
             diagnostics,
         };
@@ -3485,14 +3489,11 @@ namespace Ace
         std::optional<std::shared_ptr<const IExprNode>> optExpr{};
         if (parser.Peek() != TokenKind::Semicolon)
         {
-            const auto expExpr = ParseExpr(parser, scope);
-            diagnostics.Add(expExpr);
-            if (!expExpr)
+            optExpr = diagnostics.Collect(ParseExpr(parser, scope));
+            if (!optExpr.has_value())
             {
                 return diagnostics;
             }
-
-            optExpr = expExpr.Unwrap();
         }
 
         if (parser.Peek() != TokenKind::Semicolon)
@@ -3574,9 +3575,8 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expCondition = ParseExpr(parser, scope);
-        diagnostics.Add(expCondition);
-        if (!expCondition)
+        const auto optCondition = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optCondition.has_value())
         {
             return diagnostics;
         }
@@ -3596,7 +3596,7 @@ namespace Ace
             std::make_shared<const AssertStmtNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expCondition.Unwrap()
+                optCondition.value()
             ),
             diagnostics,
         };
@@ -3666,9 +3666,8 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expExpr);
-        if (!expExpr)
+        const auto optExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optExpr.has_value())
         {
             return diagnostics;
         }
@@ -3700,7 +3699,7 @@ namespace Ace
             {
                 std::make_shared<const ExprStmtNode>(
                     SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
-                    expExpr.Unwrap()
+                    optExpr.value()
                 ),
                 diagnostics,
             };
@@ -3713,9 +3712,8 @@ namespace Ace
             opToken->Kind,
         };
     
-        const auto expRhsExpr = ParseExpr(parser, scope);
-        diagnostics.Add(expRhsExpr);
-        if (!expRhsExpr)
+        const auto optRhsExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optRhsExpr.has_value())
         {
             return diagnostics;
         }
@@ -3739,8 +3737,8 @@ namespace Ace
                 std::make_shared<const NormalAssignmentStmtNode>(
                     SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                     scope,
-                    expExpr.Unwrap(),
-                    expRhsExpr.Unwrap()
+                    optExpr.value(),
+                    optRhsExpr.value()
                 ),
                 diagnostics,
             };
@@ -3753,8 +3751,8 @@ namespace Ace
                 std::make_shared<const CompoundAssignmentStmtNode>(
                     SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                     scope,
-                    expExpr.Unwrap(),
-                    expRhsExpr.Unwrap(),
+                    optExpr.value(),
+                    optRhsExpr.value(),
                     op
                 ),
                 diagnostics,
@@ -3832,9 +3830,10 @@ namespace Ace
         {
             const auto modifierToken = parser.Eat();
 
-            const auto expModifier = GetModifier(modifierToken);
-            diagnostics.Add(expModifier);
-            if (!expModifier)
+            const auto optModifier = diagnostics.Collect(GetModifier(
+                modifierToken
+            ));
+            if (!optModifier.has_value())
             {
                 continue;
             }
@@ -3842,7 +3841,7 @@ namespace Ace
             const auto allowedModifierIt = std::find(
                 begin(allowedModifiers),
                 end  (allowedModifiers),
-                expModifier.Unwrap()
+                optModifier.value()
             );
             if (allowedModifierIt == end(allowedModifiers))
             {
@@ -3857,7 +3856,7 @@ namespace Ace
                 allowedModifierIt
             );
 
-            modifierToTokenMap[expModifier.Unwrap()] = modifierToken;
+            modifierToTokenMap[optModifier.value()] = modifierToken;
         }
 
         if (parser.Peek().get() == minusGreaterThanToken.get())
@@ -3885,26 +3884,29 @@ namespace Ace
         const auto beginSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(parser, scope);
-        diagnostics.Add(expAttributes);
-        if (!expAttributes)
-        {
-            return diagnostics;
-        }
-
-        const auto expNameToken = ParseFunctionOrOpNameToken(
+        const auto optAttributes = diagnostics.Collect(ParseAttributes(
             parser,
             scope
-        );
-        diagnostics.Add(expNameToken);
-        if (!expNameToken)
+        ));
+        if (!optAttributes.has_value())
         {
             return diagnostics;
         }
 
-        const auto expParams = ParseParams(parser, selfScope);
-        diagnostics.Add(expParams);
-        if (!expParams)
+        const auto optNameToken = diagnostics.Collect(ParseFunctionOrOpNameToken(
+            parser,
+            scope
+        ));
+        if (!optNameToken.has_value())
+        {
+            return diagnostics;
+        }
+
+        const auto optParams = diagnostics.Collect(ParseParams(
+            parser,
+            selfScope
+        ));
+        if (!optParams.has_value())
         {
             return diagnostics;
         }
@@ -3919,13 +3921,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Disallow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -3935,7 +3936,7 @@ namespace Ace
         bool isExtern = false;
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
-            const auto dgnModifierToTokenMap = ParseModifiersUntil(
+            const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
                 { Modifier::Public, Modifier::Self, Modifier::Extern },
@@ -3945,10 +3946,7 @@ namespace Ace
                         (parser.Peek() == TokenKind::OpenBrace) ||
                         (parser.Peek() == TokenKind::Semicolon);
                 }
-            );
-            diagnostics.Add(dgnModifierToTokenMap);
-
-            const auto& modifierToTokenMap = dgnModifierToTokenMap.Unwrap();
+            ));
 
             if (modifierToTokenMap.contains(Modifier::Public))
             {
@@ -3973,14 +3971,13 @@ namespace Ace
             }
         }
 
-        const auto expName = CreateFunctionOrOpName(
-            expNameToken.Unwrap(),
-            expParams.Unwrap().size(),
+        const auto optName = diagnostics.Collect(CreateFunctionOrOpName(
+            optNameToken.value(),
+            optParams.value().size(),
             accessModifier,
             optSelfToken.has_value()
-        );
-        diagnostics.Add(expName);
-        if (!expName)
+        ));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
@@ -4000,14 +3997,14 @@ namespace Ace
         }
         else
         {
-            const auto expBody = ParseBlockStmt(parser, selfScope);
-            diagnostics.Add(expBody);
-            if (!expBody)
+            optBody = diagnostics.Collect(ParseBlockStmt(
+                parser,
+                selfScope
+            ));
+            if (!optBody.has_value())
             {
                 return diagnostics;
             }
-
-            optBody = expBody.Unwrap();
         }
 
         const auto optSelfParam = CreateSelfParam(
@@ -4021,12 +4018,12 @@ namespace Ace
             std::make_shared<const FunctionNode>(
                 SrcLocation{ beginSrcLocation, parser.GetSrcLocation() },
                 selfScope,
-                expName.Unwrap(),
-                expTypeName.Unwrap(),
-                expAttributes.Unwrap(),
+                optName.value(),
+                optTypeName.value(),
+                optAttributes.value(),
                 accessModifier,
                 optSelfParam,
-                expParams.Unwrap(),
+                optParams.value(),
                 optBody
             ),
             diagnostics,
@@ -4044,33 +4041,32 @@ namespace Ace
         const auto beginSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(parser, scope);
-        diagnostics.Add(expAttributes);
-        if (!expAttributes)
+        const auto optAttributes = diagnostics.Collect(ParseAttributes(
+            parser,
+            scope
+        ));
+        if (!optAttributes.has_value())
         {
             return diagnostics;
         }
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
 
-        const auto expTemplateParams = ParseTemplateParams(
+        const auto optTemplateParams = diagnostics.Collect(ParseTemplateParams(
             parser,
             selfScope
-        );
-        diagnostics.Add(expTemplateParams);
-        if (!expTemplateParams)
+        ));
+        if (!optTemplateParams.has_value())
         {
             return diagnostics;
         }
 
-        const auto expParams = ParseParams(parser, selfScope);
-        diagnostics.Add(expParams);
-        if (!expParams)
+        const auto optParams = diagnostics.Collect(ParseParams(parser, selfScope));
+        if (!optParams.has_value())
         {
             return diagnostics;
         }
@@ -4085,13 +4081,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Disallow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -4100,7 +4095,7 @@ namespace Ace
         std::optional<std::shared_ptr<const Token>> optSelfToken{};
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
-            const auto dgnModifierToTokenMap = ParseModifiersUntil(
+            const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
                 { Modifier::Public, Modifier::Self },
@@ -4110,11 +4105,8 @@ namespace Ace
                         (parser.Peek() == TokenKind::OpenBrace) ||
                         (parser.Peek() == TokenKind::Semicolon);
                 }
-            );
-            diagnostics.Add(dgnModifierToTokenMap);
+            ));
 
-            const auto& modifierToTokenMap = dgnModifierToTokenMap.Unwrap();
-             
             if (modifierToTokenMap.contains(Modifier::Public))
             {
                 accessModifier = AccessModifier::Public;
@@ -4126,9 +4118,11 @@ namespace Ace
             }
         }
 
-        const auto expBody = ParseBlockStmt(parser, selfScope);
-        diagnostics.Add(expBody);
-        if (!expBody)
+        const auto optBody = diagnostics.Collect(ParseBlockStmt(
+            parser,
+            selfScope
+        ));
+        if (!optBody.has_value())
         {
             return diagnostics;
         }
@@ -4142,13 +4136,13 @@ namespace Ace
         const auto function = std::make_shared<const FunctionNode>(
             SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
             selfScope,
-            expName.Unwrap(),
-            expTypeName.Unwrap(),
-            expAttributes.Unwrap(),
+            optName.value(),
+            optTypeName.value(),
+            optAttributes.value(),
             accessModifier,
             selfParam,
-            expParams.Unwrap(),
-            expBody.Unwrap()
+            optParams.value(),
+            optBody.value()
         );
 
         return Expected
@@ -4156,7 +4150,7 @@ namespace Ace
             std::make_shared<const FunctionTemplateNode>(
                 function->GetSrcLocation(),
                 std::vector<std::shared_ptr<const ImplTemplateParamNode>>{},
-                expTemplateParams.Unwrap(),
+                optTemplateParams.value(),
                 function
             ),
             diagnostics,
@@ -4183,16 +4177,18 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseSymbolName(parser, scope);
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        const auto optTypeName = diagnostics.Collect(ParseSymbolName(
+            parser,
+            scope
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
 
         // TODO: Remove this block after impl template specialization
         {
-            const auto& sections = expTypeName.Unwrap().Sections;
+            const auto& sections = optTypeName.value().Sections;
 
             const auto sectionWithTemplateArgsIt = std::find_if_not(
                 begin(sections),
@@ -4205,9 +4201,9 @@ namespace Ace
             if (sectionWithTemplateArgsIt != end(sections))
             {
                 const auto firstSectionSoruceLocation =
-                    expTypeName.Unwrap().Sections.front().Name.SrcLocation;
+                    optTypeName.value().Sections.front().Name.SrcLocation;
                 const auto lastSectionSoruceLocation =
-                    expTypeName.Unwrap().Sections.back().Name.SrcLocation;
+                    optTypeName.value().Sections.back().Name.SrcLocation;
 
                 const SrcLocation srcLocation
                 {
@@ -4241,29 +4237,27 @@ namespace Ace
         {
             if (IsFunctionBegin(parser))
             {
-                const auto expFunction = ParseImplFunction(
+                const auto optFunction = diagnostics.Collect(ParseImplFunction(
                     parser,
                     selfScope,
-                    expTypeName.Unwrap()
-                );
-                diagnostics.Add(expFunction);
-                if (expFunction)
+                    optTypeName.value()
+                ));
+                if (optFunction.has_value())
                 {
-                    functions.push_back(expFunction.Unwrap());
+                    functions.push_back(optFunction.value());
                     continue;
                 }
             }
             else if (IsFunctionTemplateBegin(parser))
             {
-                const auto expFunctionTemplate = ParseImplFunctionTemplate(
+                const auto optFunctionTemplate = diagnostics.Collect(ParseImplFunctionTemplate(
                     parser,
                     selfScope,
-                    expTypeName.Unwrap()
-                );
-                diagnostics.Add(expFunctionTemplate);
-                if (expFunctionTemplate)
+                    optTypeName.value()
+                ));
+                if (optFunctionTemplate.has_value())
                 {
-                    functionTemplates.push_back(expFunctionTemplate.Unwrap());
+                    functionTemplates.push_back(optFunctionTemplate.value());
                     continue;
                 }
             }
@@ -4297,7 +4291,7 @@ namespace Ace
             std::make_shared<const NormalImplNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 selfScope,
-                expTypeName.Unwrap(),
+                optTypeName.value(),
                 functions,
                 functionTemplates
             ),
@@ -4317,36 +4311,38 @@ namespace Ace
         const auto beginSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(parser, scope);
-        diagnostics.Add(expAttributes);
-        if (!expAttributes)
-        {
-            return diagnostics;
-        }
-
-        const auto expNameToken = ParseFunctionOrOpNameToken(
+        const auto optAttributes = diagnostics.Collect(ParseAttributes(
             parser,
             scope
-        );
-        diagnostics.Add(expNameToken);
-        if (!expNameToken)
+        ));
+        if (!optAttributes.has_value())
         {
             return diagnostics;
         }
 
-        const auto expTemplateParams = ParseOptionalTemplateParams(
+        const auto optNameToken = diagnostics.Collect(ParseFunctionOrOpNameToken(
+            parser,
+            scope
+        ));
+        if (!optNameToken.has_value())
+        {
+            return diagnostics;
+        }
+
+        const auto optTemplateParams = diagnostics.Collect(ParseOptionalTemplateParams(
             parser,
             selfScope
-        );
-        diagnostics.Add(expTemplateParams);
-        if (!expTemplateParams)
+        ));
+        if (!optTemplateParams.has_value())
         {
             return diagnostics;
         }
 
-        const auto expParams = ParseParams(parser, selfScope);
-        diagnostics.Add(expParams);
-        if (!expParams)
+        const auto optParams = diagnostics.Collect(ParseParams(
+            parser,
+            selfScope
+        ));
+        if (!optParams.has_value())
         {
             return diagnostics;
         }
@@ -4361,13 +4357,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Disallow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -4376,7 +4371,7 @@ namespace Ace
         std::optional<std::shared_ptr<const Token>> optSelfToken{};
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
-            const auto dgnModifierToTokenMap = ParseModifiersUntil(
+            const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
                 { Modifier::Public, Modifier::Self },
@@ -4386,11 +4381,8 @@ namespace Ace
                         (parser.Peek() == TokenKind::OpenBrace) ||
                         (parser.Peek() == TokenKind::Semicolon);
                 }
-            );
-            diagnostics.Add(dgnModifierToTokenMap);
+            ));
 
-            const auto& modifierToTokenMap = dgnModifierToTokenMap.Unwrap();
-             
             if (modifierToTokenMap.contains(Modifier::Public))
             {
                 accessModifier = AccessModifier::Public;
@@ -4402,21 +4394,19 @@ namespace Ace
             }
         }
 
-        const auto expName = CreateFunctionOrOpName(
-            expNameToken.Unwrap(),
-            expParams.Unwrap().size(),
+        const auto optName = diagnostics.Collect(CreateFunctionOrOpName(
+            optNameToken.value(),
+            optParams.value().size(),
             accessModifier,
             optSelfToken.has_value()
-        );
-        diagnostics.Add(expName);
-        if (!expName)
+        ));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
 
-        const auto expBody = ParseBlockStmt(parser, scope);
-        diagnostics.Add(expBody);
-        if (!expBody)
+        const auto optBody = diagnostics.Collect(ParseBlockStmt(parser, scope));
+        if (!optBody.has_value())
         {
             return diagnostics;
         }
@@ -4430,13 +4420,13 @@ namespace Ace
         const auto function = std::make_shared<const FunctionNode>(
             SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
             selfScope,
-            expName.Unwrap(),
-            expTypeName.Unwrap(),
-            expAttributes.Unwrap(),
+            optName.value(),
+            optTypeName.value(),
+            optAttributes.value(),
             accessModifier,
             optSelfParam,
-            expParams.Unwrap(),
-            expBody.Unwrap()
+            optParams.value(),
+            optBody.value()
         );
 
         std::vector<std::shared_ptr<const ImplTemplateParamNode>> clonedImplTemplateParams{};
@@ -4455,7 +4445,7 @@ namespace Ace
             std::make_shared<const FunctionTemplateNode>(
                 function->GetSrcLocation(),
                 clonedImplTemplateParams,
-                expTemplateParams.Unwrap(),
+                optTemplateParams.value(),
                 function
             ),
             diagnostics,
@@ -4482,81 +4472,109 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTemplateParams = ParseImplTemplateParams(
+        const auto optTemplateParams = diagnostics.Collect(ParseImplTemplateParams(
             parser,
             selfScope
-        );
-        diagnostics.Add(expTemplateParams);
-        if (!expTemplateParams)
+        ));
+        if (!optTemplateParams.has_value())
         {
             return diagnostics;
         }
 
-        const auto expTypeName = ParseSymbolName(parser, scope);
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        const auto optTypeName = diagnostics.Collect(ParseSymbolName(
+            parser,
+            scope
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
 
         // TODO: Remove this block after impl template specialization
         {
-            const auto expIsNotSpecialized = [&]() -> Expected<void>
+            const auto isNotSpecialized = diagnostics.Collect([&]() -> Expected<void>
             {
-                const auto& templateParams = expTemplateParams.Unwrap();
-                const auto& typeNameSections = expTypeName.Unwrap().Sections;
+                const auto& templateParams = optTemplateParams.value();
+                const auto& typeNameSections = optTypeName.value().Sections;
 
-                const bool foundTemplatedSection = std::find_if(
+                const auto templatedSectionIt = std::find_if_not(
                     begin(typeNameSections),
                     end  (typeNameSections) - 1,
                     [](const SymbolNameSection& section)
                     {
                         return section.TemplateArgs.empty();
                     }
-                ) == end(typeNameSections);
-
-                ACE_TRY_ASSERT(!foundTemplatedSection);
+                );
+                if (templatedSectionIt != (end(typeNameSections) - 1))
+                {
+                    return diagnostics;
+                }
 
                 const auto& templateArgs = typeNameSections.back().TemplateArgs;
-                ACE_TRY_ASSERT(templateParams.size() == templateArgs.size());
+                if (templateParams.size() != templateArgs.size())
+                {
+                    return diagnostics;
+                }
 
                 std::unordered_set<std::string> templateParamSet{};
-                ACE_TRY_VOID(TransformExpectedVector(templateParams,
-                [&](const std::shared_ptr<const ImplTemplateParamNode>& templateParam) -> Expected<void>
+                const auto redefinedParamIt = std::find_if(
+                    begin(templateParams),
+                    end  (templateParams),
+                    [&](const std::shared_ptr<const ImplTemplateParamNode>& templateParam)
+                    {
+                        const std::string& templateParamName =
+                            templateParam->GetName().String;
+
+                        if (templateParamSet.contains(templateParamName))
+                        {
+                            return true;
+                        }
+
+                        templateParamSet.insert(templateParamName);
+                        return false;
+                    }
+                );
+                if (redefinedParamIt != end(templateParams))
                 {
-                    const std::string& templateParamName =
-                        templateParam->GetName().String;
+                    return diagnostics;
+                }
 
-                    ACE_TRY_ASSERT(!templateParamSet.contains(
-                        templateParamName
-                    ));
-                    templateParamSet.insert(templateParamName);
+                const auto invalidArgIt = std::find_if(
+                    begin(templateArgs),
+                    end  (templateArgs),
+                    [&](const SymbolName& arg)
+                    {
+                        if (arg.Sections.size() != 1)
+                        {
+                            return true;
+                        }
 
-                    return Void{};
-                }));
-                
-                ACE_TRY_VOID(TransformExpectedVector(templateArgs,
-                [&](const SymbolName& arg) -> Expected<void>
-                {
-                    ACE_TRY_ASSERT(arg.Sections.size() == 1);
-                    ACE_TRY_ASSERT(arg.Sections.back().TemplateArgs.empty());
+                        if (!arg.Sections.back().TemplateArgs.empty())
+                        {
+                            return true;
+                        }
+                            
+                        const std::string& templateArgName =
+                            arg.Sections.front().Name.String;
 
-                    const std::string& templateArgName =
-                        arg.Sections.front().Name.String;
-                    ACE_TRY_ASSERT(templateParamSet.contains(templateArgName));
-                    templateParamSet.erase(templateArgName);
+                        if (!templateParamSet.contains(templateArgName))
+                        {
+                            return true;
+                        }
 
-                    return Void{};
-                }));
-
+                        templateParamSet.erase(templateArgName);
+                        return false;
+                    }
+                );
+            
                 return Void{};
-            }();
-            if (!expIsNotSpecialized)
+            }());
+            if (!isNotSpecialized)
             {
                 const auto firstSectionSoruceLocation =
-                    expTypeName.Unwrap().Sections.front().Name.SrcLocation;
+                    optTypeName.value().Sections.front().Name.SrcLocation;
                 const auto lastSectionSoruceLocation =
-                    expTypeName.Unwrap().Sections.back().Name.SrcLocation;
+                    optTypeName.value().Sections.back().Name.SrcLocation;
 
                 const SrcLocation srcLocation
                 {
@@ -4589,16 +4607,15 @@ namespace Ace
         {
             if (IsFunctionBegin(parser) || IsFunctionTemplateBegin(parser))
             {
-                const auto expFunctionTemplate = ParseTemplatedImplFunction(
+                const auto optFunctionTemplate = diagnostics.Collect(ParseTemplatedImplFunction(
                     parser,
                     selfScope,
-                    expTypeName.Unwrap(),
-                    expTemplateParams.Unwrap()
-                );
-                diagnostics.Add(expFunctionTemplate);
-                if (expFunctionTemplate)
+                    optTypeName.value(),
+                    optTemplateParams.value()
+                ));
+                if (optFunctionTemplate.has_value())
                 {
-                    functionTemplates.push_back(expFunctionTemplate.Unwrap());
+                    functionTemplates.push_back(optFunctionTemplate.value());
                     continue;
                 }
             }
@@ -4627,7 +4644,7 @@ namespace Ace
             ));
         }
 
-        auto typeTemplateName = expTypeName.Unwrap();
+        auto typeTemplateName = optTypeName.value();
         auto& typeTemplateNameLastSection = typeTemplateName.Sections.back();
         typeTemplateNameLastSection.TemplateArgs.clear();
         typeTemplateNameLastSection.Name.String = SpecialIdent::CreateTemplate(
@@ -4657,23 +4674,26 @@ namespace Ace
         const auto beginSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(parser, scope);
-        diagnostics.Add(expAttributes);
-        if (!expAttributes)
+        const auto optAttributes = diagnostics.Collect(ParseAttributes(
+            parser,
+            scope
+        ));
+        if (!optAttributes.has_value())
         {
             return diagnostics;
         }
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
 
-        const auto expParams = ParseParams(parser, selfScope);
-        diagnostics.Add(expParams);
-        if (!expParams)
+        const auto optParams = diagnostics.Collect(ParseParams(
+            parser,
+            selfScope
+        ));
+        if (!optParams.has_value())
         {
             return diagnostics;
         }
@@ -4688,13 +4708,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             selfScope,
             RefParsingKind::Disallow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -4703,7 +4722,7 @@ namespace Ace
         bool isExtern = false;
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
-            const auto dgnModifierToTokenMap = ParseModifiersUntil(
+            const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
                 { Modifier::Public, Modifier::Extern },
@@ -4713,11 +4732,8 @@ namespace Ace
                         (parser.Peek() == TokenKind::OpenBrace) ||
                         (parser.Peek() == TokenKind::Semicolon);
                 }
-            );
-            diagnostics.Add(dgnModifierToTokenMap);
+            ));
 
-            const auto& modifierToTokenMap = dgnModifierToTokenMap.Unwrap();
-             
             if (modifierToTokenMap.contains(Modifier::Public))
             {
                 accessModifier = AccessModifier::Public;
@@ -4744,14 +4760,14 @@ namespace Ace
         }
         else
         {
-            const auto expBody = ParseBlockStmt(parser, selfScope);
-            diagnostics.Add(expBody);
-            if (!expBody)
+            optBody = diagnostics.Collect(ParseBlockStmt(
+                parser,
+                selfScope
+            ));
+            if (!optBody.has_value())
             {
                 return diagnostics;
             }
-
-            optBody = expBody.Unwrap();
         }
 
         return Expected
@@ -4759,12 +4775,12 @@ namespace Ace
             std::make_shared<const FunctionNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 selfScope,
-                expName.Unwrap(),
-                expTypeName.Unwrap(),
-                expAttributes.Unwrap(),
+                optName.value(),
+                optTypeName.value(),
+                optAttributes.value(),
                 accessModifier,
                 std::nullopt,
-                expParams.Unwrap(),
+                optParams.value(),
                 optBody
             ),
             diagnostics,
@@ -4781,36 +4797,35 @@ namespace Ace
         const auto beginSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(parser, scope);
-        diagnostics.Add(expAttributes);
-        if (!expAttributes)
+        const auto optAttributes = diagnostics.Collect(ParseAttributes(
+            parser,
+            scope
+        ));
+        if (!optAttributes.has_value())
         {
             return diagnostics;
         }
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
 
-        const auto expTemplateParams = ParseTemplateParams(
+        const auto optTemplateParams = diagnostics.Collect(ParseTemplateParams(
             parser,
             selfScope
-        );
-        diagnostics.Add(expTemplateParams);
-        if (!expTemplateParams)
+        ));
+        if (!optTemplateParams.has_value())
         {
             return diagnostics;
         }
 
-        const auto expParams = ParseParams(
+        const auto optParams = diagnostics.Collect(ParseParams(
             parser,
             selfScope
-        );
-        diagnostics.Add(expParams);
-        if (!expParams)
+        ));
+        if (!optParams.has_value())
         {
             return diagnostics;
         }
@@ -4825,13 +4840,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Disallow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -4839,7 +4853,7 @@ namespace Ace
         auto accessModifier = AccessModifier::Private;
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
-            const auto dgnModifierToTokenMap = ParseModifiersUntil(
+            const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
                 { Modifier::Public },
@@ -4849,10 +4863,7 @@ namespace Ace
                         (parser.Peek() == TokenKind::OpenBrace) ||
                         (parser.Peek() == TokenKind::Semicolon);
                 }
-            );
-            diagnostics.Add(dgnModifierToTokenMap);
-
-            const auto& modifierToTokenMap = dgnModifierToTokenMap.Unwrap();
+            ));
              
             if (modifierToTokenMap.contains(Modifier::Public))
             {
@@ -4860,9 +4871,11 @@ namespace Ace
             }
         }
 
-        const auto expBody = ParseBlockStmt(parser, selfScope);
-        diagnostics.Add(expBody);
-        if (!expBody)
+        const auto optBody = diagnostics.Collect(ParseBlockStmt(
+            parser,
+            selfScope
+        ));
+        if (!optBody.has_value())
         {
             return diagnostics;
         }
@@ -4870,13 +4883,13 @@ namespace Ace
         const auto function = std::make_shared<const FunctionNode>(
             SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
             selfScope,
-            expName.Unwrap(),
-            expTypeName.Unwrap(),
-            expAttributes.Unwrap(),
+            optName.value(),
+            optTypeName.value(),
+            optAttributes.value(),
             accessModifier,
             std::nullopt,
-            expParams.Unwrap(),
-            expBody.Unwrap()
+            optParams.value(),
+            optBody.value()
         );
 
         return Expected
@@ -4884,7 +4897,7 @@ namespace Ace
             std::make_shared<const FunctionTemplateNode>(
                 function->GetSrcLocation(),
                 std::vector<std::shared_ptr<const ImplTemplateParamNode>>{},
-                expTemplateParams.Unwrap(),
+                optTemplateParams.value(),
                 function
             ),
             diagnostics,
@@ -4900,16 +4913,17 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expAttributes = ParseAttributes(parser, scope);
-        diagnostics.Add(expAttributes);
-        if (!expAttributes)
+        const auto optAttributes = diagnostics.Collect(ParseAttributes(
+            parser,
+            scope
+        ));
+        if (!optAttributes.has_value())
         {
             return diagnostics;
         }
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
@@ -4924,13 +4938,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Disallow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -4938,16 +4951,13 @@ namespace Ace
         auto accessModifier = AccessModifier::Private;
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
-            const auto dgnModifierToTokenMap = ParseModifiersUntil(
+            const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
                 { Modifier::Public },
                 [&]() { return parser.Peek() == TokenKind::Semicolon; }
-            );
-            diagnostics.Add(dgnModifierToTokenMap);
+            ));
 
-            const auto& modifierToTokenMap = dgnModifierToTokenMap.Unwrap();
-             
             if (modifierToTokenMap.contains(Modifier::Public))
             {
                 accessModifier = AccessModifier::Public;
@@ -4969,9 +4979,9 @@ namespace Ace
             std::make_shared<const StaticVarNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expName.Unwrap(),
-                expTypeName.Unwrap(),
-                expAttributes.Unwrap(),
+                optName.value(),
+                optTypeName.value(),
+                optAttributes.value(),
                 accessModifier
             ),
             diagnostics,
@@ -4988,16 +4998,17 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expAttributes = ParseAttributes(parser, scope);
-        diagnostics.Add(expAttributes);
-        if (!expAttributes)
+        const auto optAttributes = diagnostics.Collect(ParseAttributes(
+            parser,
+            scope
+        ));
+        if (!optAttributes.has_value())
         {
             return diagnostics;
         }
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
@@ -5012,13 +5023,12 @@ namespace Ace
 
         parser.Eat();
 
-        const auto expTypeName = ParseTypeName(
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
             parser,
             scope,
             RefParsingKind::Disallow
-        );
-        diagnostics.Add(expTypeName);
-        if (!expTypeName)
+        ));
+        if (!optTypeName.has_value())
         {
             return diagnostics;
         }
@@ -5026,16 +5036,13 @@ namespace Ace
         auto accessModifier = AccessModifier::Private;
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
-            const auto dgnModifierToTokenMap = ParseModifiersUntil(
+            const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
                 { Modifier::Public },
                 [&]() { return parser.Peek() == TokenKind::Comma; }
-            );
-            diagnostics.Add(dgnModifierToTokenMap);
+            ));
 
-            const auto& modifierToTokenMap = dgnModifierToTokenMap.Unwrap();
-             
             if (modifierToTokenMap.contains(Modifier::Public))
             {
                 accessModifier = AccessModifier::Public;
@@ -5047,9 +5054,9 @@ namespace Ace
             std::make_shared<const InstanceVarNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
-                expName.Unwrap(),
-                expTypeName.Unwrap(),
-                expAttributes.Unwrap(),
+                optName.value(),
+                optTypeName.value(),
+                optAttributes.value(),
                 accessModifier,
                 index
             ),
@@ -5100,15 +5107,14 @@ namespace Ace
                 }
             }
             
-            const auto expVar = ParseMemberVar(
+            const auto optVar = diagnostics.Collect(ParseMemberVar(
                 parser,
                 scope,
                 vars.size()
-            );
-            diagnostics.Add(expVar);
-            if (expVar)
+            ));
+            if (optVar.has_value())
             {
-                vars.push_back(expVar.Unwrap());
+                vars.push_back(optVar.value());
                 continue;
             }
 
@@ -5143,16 +5149,17 @@ namespace Ace
         const auto beginSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(parser, scope);
-        diagnostics.Add(expAttributes);
-        if (!expAttributes)
+        const auto optAttributes = diagnostics.Collect(ParseAttributes(
+            parser,
+            scope
+        ));
+        if (!optAttributes.has_value())
         {
             return diagnostics;
         }
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
@@ -5180,15 +5187,12 @@ namespace Ace
         auto accessModifier = AccessModifier::Private;
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
-            const auto dgnModifierToTokenMap = ParseModifiersUntil(
+            const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
                 { Modifier::Public },
                 [&]() { return parser.Peek() == TokenKind::OpenBrace; }
-            );
-            diagnostics.Add(dgnModifierToTokenMap);
-
-            const auto& modifierToTokenMap = dgnModifierToTokenMap.Unwrap();
+            ));
 
             if (modifierToTokenMap.contains(Modifier::Public))
             {
@@ -5196,9 +5200,11 @@ namespace Ace
             }
         }
         
-        const auto expBody = ParseStructBody(parser, selfScope);
-        diagnostics.Add(expBody);
-        if (!expBody)
+        const auto optBody = diagnostics.Collect(ParseStructBody(
+            parser,
+            selfScope
+        ));
+        if (!optBody.has_value())
         {
             return diagnostics;
         }
@@ -5208,10 +5214,10 @@ namespace Ace
             std::make_shared<const StructTypeNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 selfScope,
-                expName.Unwrap(),
-                expAttributes.Unwrap(),
+                optName.value(),
+                optAttributes.value(),
                 accessModifier,
-                expBody.Unwrap()
+                optBody.value()
             ),
             diagnostics,
         };
@@ -5227,26 +5233,26 @@ namespace Ace
         const auto beginSrcLocation = parser.GetSrcLocation();
         const auto selfScope = scope->GetOrCreateChild({});
 
-        const auto expAttributes = ParseAttributes(parser, scope);
-        diagnostics.Add(expAttributes);
-        if (!expAttributes)
+        const auto optAttributes = diagnostics.Collect(ParseAttributes(
+            parser,
+            scope
+        ));
+        if (!optAttributes.has_value())
         {
             return diagnostics;
         }
 
-        const auto expName = ParseName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseName(parser, scope));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
 
-        const auto expTemplateParams = ParseTemplateParams(
+        const auto optTemplateParams = diagnostics.Collect(ParseTemplateParams(
             parser,
             selfScope
-        );
-        diagnostics.Add(expTemplateParams);
-        if (!expTemplateParams)
+        ));
+        if (!optTemplateParams.has_value())
         {
             return diagnostics;
         }
@@ -5274,15 +5280,12 @@ namespace Ace
         auto accessModifier = AccessModifier::Private;
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
-            const auto dgnModifierToTokenMap = ParseModifiersUntil(
+            const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
                 { Modifier::Public },
                 [&]() { return parser.Peek() == TokenKind::OpenBrace; }
-            );
-            diagnostics.Add(dgnModifierToTokenMap);
-
-            const auto& modifierToTokenMap = dgnModifierToTokenMap.Unwrap();
+            ));
 
             if (modifierToTokenMap.contains(Modifier::Public))
             {
@@ -5290,9 +5293,11 @@ namespace Ace
             }
         }
 
-        const auto expBody = ParseStructBody(parser, selfScope);
-        diagnostics.Add(expBody);
-        if (!expBody)
+        const auto optBody = diagnostics.Collect(ParseStructBody(
+            parser,
+            selfScope
+        ));
+        if (!optBody.has_value())
         {
             return diagnostics;
         }
@@ -5300,17 +5305,17 @@ namespace Ace
         const auto type = std::make_shared<const StructTypeNode>(
             SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
             selfScope,
-            expName.Unwrap(),
-            expAttributes.Unwrap(),
+            optName.value(),
+            optAttributes.value(),
             accessModifier,
-            expBody.Unwrap()
+            optBody.value()
         );
 
         return Expected
         {
             std::make_shared<const TypeTemplateNode>(
                 type->GetSrcLocation(),
-                expTemplateParams.Unwrap(),
+                optTemplateParams.value(),
                 type
             ),
             diagnostics,
@@ -5326,19 +5331,18 @@ namespace Ace
 
         if (IsStructTemplateBegin(parser))
         {
-            const auto expStructTemplate = ParseStructTemplate(
+            const auto optStructTemplate = diagnostics.Collect(ParseStructTemplate(
                 parser,
                 scope
-            );
-            diagnostics.Add(expStructTemplate);
-            if (!expStructTemplate)
+            ));
+            if (!optStructTemplate.has_value())
             {
                 return diagnostics;
             }
 
             return Expected
             {
-                expStructTemplate.Unwrap(),
+                optStructTemplate.value(),
                 diagnostics,
             };
         }
@@ -5355,14 +5359,16 @@ namespace Ace
 
         if (IsStructBegin(parser))
         {
-            const auto expStruct = ParseStruct(parser, scope);
-            diagnostics.Add(expStruct);
-            if (!expStruct)
+            const auto optStruct = diagnostics.Collect(ParseStruct(
+                parser,
+                scope
+            ));
+            if (!optStruct.has_value())
             {
-                return expStruct;
+                return diagnostics;
             }
 
-            return Expected{ expStruct.Unwrap(), diagnostics };
+            return Expected{ optStruct.value(), diagnostics };
         }
 
         return diagnostics.Add(CreateUnexpectedTokenError(parser.Peek()));
@@ -5377,9 +5383,11 @@ namespace Ace
 
         const auto beginSrcLocation = parser.GetSrcLocation();
 
-        const auto expName = ParseNestedName(parser, scope);
-        diagnostics.Add(expName);
-        if (!expName)
+        const auto optName = diagnostics.Collect(ParseNestedName(
+            parser,
+            scope
+        ));
+        if (!optName.has_value())
         {
             return diagnostics;
         }
@@ -5407,15 +5415,12 @@ namespace Ace
         auto accessModifier = AccessModifier::Private;
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
-            const auto dgnModifierToTokenMap = ParseModifiersUntil(
+            const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
                 { Modifier::Public },
                 [&]() { return parser.Peek() == TokenKind::OpenBrace; }
-            );
-            diagnostics.Add(dgnModifierToTokenMap);
-
-            const auto& modifierToTokenMap = dgnModifierToTokenMap.Unwrap();
+            ));
 
             if (modifierToTokenMap.contains(Modifier::Public))
             {
@@ -5426,8 +5431,8 @@ namespace Ace
         std::vector<std::shared_ptr<Scope>> scopes{};
         scopes.push_back(scope);
         std::transform(
-            begin(expName.Unwrap()),
-            end  (expName.Unwrap()),
+            begin(optName.value()),
+            end  (optName.value()),
             back_inserter(scopes),
             [&](const Ident& name)
             {
@@ -5462,93 +5467,94 @@ namespace Ace
 
             if (IsModuleBegin(parser))
             {
-                const auto expModule = ParseModule(parser, selfScope);
-                diagnostics.Add(expModule);
-                if (expModule)
+                const auto optModule = diagnostics.Collect(ParseModule(
+                    parser,
+                    selfScope
+                ));
+                if (optModule.has_value())
                 {
-                    modules.push_back(expModule.Unwrap());
+                    modules.push_back(optModule.value());
                     continue;
                 }
             }
             else if (IsTypeBegin(parser))
             {
-                const auto expType = ParseType(parser, selfScope);
-                diagnostics.Add(expType);
-                if (expType)
+                const auto optType = diagnostics.Collect(ParseType(
+                    parser,
+                    selfScope
+                ));
+                if (optType.has_value())
                 {
-                    types.push_back(expType.Unwrap());
+                    types.push_back(optType.value());
                     continue;
                 }
             }
             else if (IsTypeTemplateBegin(parser))
             {
-                const auto expTypeTemplate = ParseTypeTemplate(
+                const auto optTypeTemplate = diagnostics.Collect(ParseTypeTemplate(
                     parser,
                     selfScope
-                );
-                diagnostics.Add(expTypeTemplate);
-                if (expTypeTemplate)
+                ));
+                if (optTypeTemplate.has_value())
                 {
-                    typeTemplates.push_back(expTypeTemplate.Unwrap());
+                    typeTemplates.push_back(optTypeTemplate.value());
                     continue;
                 }
             }
             else if (IsImplBegin(parser))
             {
-                const auto expImpl = ParseImpl(
+                const auto optImpl = diagnostics.Collect(ParseImpl(
                     parser,
                     selfScope
-                );
-                diagnostics.Add(expImpl);
-                if (expImpl)
+                ));
+                if (optImpl.has_value())
                 {
-                    normalImpls.push_back(expImpl.Unwrap());
+                    normalImpls.push_back(optImpl.value());
                     continue;
                 }
             }
             else if (IsTemplatedImplBegin(parser))
             {
-                const auto expTemplatedImpl = ParseTemplatedImpl(
+                const auto optTemplatedImpl = diagnostics.Collect(ParseTemplatedImpl(
                     parser,
                     selfScope
-                );
-                diagnostics.Add(expTemplatedImpl);
-                if (expTemplatedImpl)
+                ));
+                if (optTemplatedImpl.has_value())
                 {
-                    templatedImpls.push_back(expTemplatedImpl.Unwrap());
+                    templatedImpls.push_back(optTemplatedImpl.value());
                     continue;
                 }
             }
             else if (IsFunctionBegin(parser))
             {
-                const auto expFunction = ParseFunction(parser, selfScope);
-                diagnostics.Add(expFunction);
-                if (expFunction)
+                const auto optFunction = diagnostics.Collect(ParseFunction(
+                    parser,
+                    selfScope
+                ));
+                if (optFunction.has_value())
                 {
-                    functions.push_back(expFunction.Unwrap());
+                    functions.push_back(optFunction.value());
                     continue;
                 }
             }
             else if (IsFunctionTemplateBegin(parser))
             {
-                const auto expFunctionTemplate = ParseFunctionTemplate(
+                const auto optFunctionTemplate = diagnostics.Collect(ParseFunctionTemplate(
                     parser,
                     selfScope
-                );
-                diagnostics.Add(expFunctionTemplate);
-                if (expFunctionTemplate)
+                ));
+                if (optFunctionTemplate.has_value())
                 {
-                    functionTemplates.push_back(expFunctionTemplate.Unwrap());
+                    functionTemplates.push_back(optFunctionTemplate.value());
                     continue;
                 }
             }
             else if (IsVarBegin(parser))
             {
-                const auto expVar = ParseVar(parser, selfScope);
-                diagnostics.Add(expVar);
-                if (expVar)
+                const auto optVar = diagnostics.Collect(ParseVar(parser, selfScope));
+                if (optVar.has_value())
                 {
-                    vars.push_back(expVar.Unwrap());
+                    vars.push_back(optVar.value());
                     continue;
                 }
             }
@@ -5583,7 +5589,7 @@ namespace Ace
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scopes.front(),
                 scopes.back(),
-                expName.Unwrap(),
+                optName.value(),
                 accessModifier,
                 modules,
                 types,
@@ -5605,9 +5611,8 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expModule = ParseModule(parser, scope);
-        diagnostics.Add(expModule);
-        if (!expModule)
+        const auto optModule = diagnostics.Collect(ParseModule(parser, scope));
+        if (!optModule.has_value())
         {
             return diagnostics;
         }
@@ -5616,7 +5621,7 @@ namespace Ace
 
         return
         {
-            expModule.Unwrap(),
+            optModule.value(),
             diagnostics,
         };
     }

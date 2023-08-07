@@ -63,20 +63,18 @@ namespace Ace
             GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
-        const auto dgnCheckedCondition = CreateImplicitlyConvertedAndTypeChecked(
+        const auto checkedCondition = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
             m_Condition,
             typeInfo
-        );
-        diagnostics.Add(dgnCheckedCondition);
+        ));
 
-        const auto dgnCheckedBody = m_Body->CreateTypeChecked({
+        const auto checkedBody = diagnostics.Collect(m_Body->CreateTypeChecked({
             context.ParentFunctionTypeSymbol
-        });
-        diagnostics.Add(dgnCheckedBody);
+        }));
 
         if (
-            (dgnCheckedCondition.Unwrap() == m_Condition) &&
-            (dgnCheckedBody.Unwrap() == m_Body)
+            (checkedCondition == m_Condition) &&
+            (checkedBody == m_Body)
             )
         {
             return Diagnosed{ shared_from_this(), diagnostics };
@@ -87,8 +85,8 @@ namespace Ace
             std::make_shared<const WhileStmtBoundNode>(
                 GetSrcLocation(),
                 m_Scope,
-                dgnCheckedCondition.Unwrap(),
-                dgnCheckedBody.Unwrap()
+                checkedCondition,
+                checkedBody
             ),
             diagnostics,
         };

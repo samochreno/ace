@@ -111,22 +111,20 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        diagnostics.Add(DiagnoseMissingOrUnexpectedExpr(
+        diagnostics.Collect(DiagnoseMissingOrUnexpectedExpr(
             GetSrcLocation(),
             context.ParentFunctionTypeSymbol,
             m_OptExpr
         ));
-        diagnostics.Add(DiagnoseUnsizedExpr(m_OptExpr));
+        diagnostics.Collect(DiagnoseUnsizedExpr(m_OptExpr));
 
         std::optional<std::shared_ptr<const IExprBoundNode>> checkedOptExpr{};
         if (m_OptExpr.has_value())
         {
-            const auto dgnExpr = CreateImplicitlyConvertedAndTypeChecked(
+            checkedOptExpr = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
                 m_OptExpr.value(),
                 TypeInfo{ context.ParentFunctionTypeSymbol, ValueKind::R }
-            );
-            diagnostics.Add(dgnExpr);
-            checkedOptExpr = dgnExpr.Unwrap();
+            ));
         }
 
         if (checkedOptExpr == m_OptExpr)

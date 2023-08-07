@@ -75,20 +75,15 @@ namespace Ace
             std::back_inserter(checkedAttributes),
             [&](const std::shared_ptr<const AttributeBoundNode>& attribute)
             {
-                const auto dgnCheckedAttribute =
-                    attribute->CreateTypeChecked({});
-                diagnostics.Add(dgnCheckedAttribute);
-                return dgnCheckedAttribute.Unwrap();
+                return diagnostics.Collect(attribute->CreateTypeChecked({}));
             }
         );
 
         std::optional<std::shared_ptr<const SelfParamVarBoundNode>> checkedOptSelf{};
         if (m_OptSelf.has_value())
         {
-            const auto dgnCheckedOptSelf =
-                m_OptSelf.value()->CreateTypeChecked({});
-            diagnostics.Add(dgnCheckedOptSelf);
-            checkedOptSelf = dgnCheckedOptSelf.Unwrap();
+            checkedOptSelf =
+                diagnostics.Collect(m_OptSelf.value()->CreateTypeChecked({}));
         }
 
         std::vector<std::shared_ptr<const NormalParamVarBoundNode>> checkedParams{};
@@ -98,20 +93,16 @@ namespace Ace
             std::back_inserter(checkedParams),
             [&](const std::shared_ptr<const NormalParamVarBoundNode>& param)
             {
-                const auto dgnCheckedParam = param->CreateTypeChecked({});
-                diagnostics.Add(dgnCheckedParam);
-                return dgnCheckedParam.Unwrap();
+                return diagnostics.Collect(param->CreateTypeChecked({}));
             }
         );
 
         std::optional<std::shared_ptr<const BlockStmtBoundNode>> checkedOptBody{};
         if (m_OptBody.has_value())
         {
-            const auto dgnCheckedOptBody = m_OptBody.value()->CreateTypeChecked({
+            checkedOptBody = diagnostics.Collect(m_OptBody.value()->CreateTypeChecked({
                 m_Symbol->GetType()
-            });
-            diagnostics.Add(dgnCheckedOptBody);
-            checkedOptBody = dgnCheckedOptBody.Unwrap();
+            }));
         }
 
         if (

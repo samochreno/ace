@@ -64,19 +64,16 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnBoundExpr = m_Expr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundExpr);
+        const auto boundExpr = diagnostics.Collect(m_Expr->CreateBoundExpr());
 
         auto* const selfTypeSymbol =
-            dgnBoundExpr.Unwrap()->GetTypeInfo().Symbol->GetWithoutRef();
+            boundExpr->GetTypeInfo().Symbol->GetWithoutRef();
 
-        const auto expMemberSymbol = GetScope()->ResolveInstanceSymbol<InstanceVarSymbol>(
+        const auto optMemberSymbol = diagnostics.Collect(GetScope()->ResolveInstanceSymbol<InstanceVarSymbol>(
             selfTypeSymbol,
             m_Name
-        );
-        diagnostics.Add(expMemberSymbol);
-
-        auto* const memberSymbol = expMemberSymbol.UnwrapOr(
+        ));
+        auto* const memberSymbol = optMemberSymbol.value_or(
             GetCompilation()->GetErrorSymbols().GetInstanceVar()
         );
 
@@ -84,7 +81,7 @@ namespace Ace
         {
             std::make_shared<const InstanceVarRefExprBoundNode>(
                 GetSrcLocation(),
-                dgnBoundExpr.Unwrap(),
+                boundExpr,
                 memberSymbol
             ),
             diagnostics,

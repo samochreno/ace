@@ -114,40 +114,36 @@ namespace Ace
             };
         }
 
-        diagnostics.Add(expSymbol);
-        return Diagnosed{ expSymbol.Unwrap(), diagnostics };
+        const auto optSymbol = diagnostics.Collect(std::move(expSymbol));
+        return Diagnosed{ optSymbol.value(), diagnostics };
     }
 
     auto CompoundAssignmentStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnBoundLHSExpr = m_LHSExpr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundLHSExpr);
+        const auto boundLHSExpr =
+            diagnostics.Collect(m_LHSExpr->CreateBoundExpr());
+        const auto boundRHSExpr =
+            diagnostics.Collect(m_RHSExpr->CreateBoundExpr());
 
-        const auto dgnBoundRHSExpr = m_RHSExpr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundRHSExpr);
+        auto* const lhsTypeSymbol = boundLHSExpr->GetTypeInfo().Symbol;
+        auto* const rhsTypeSymbol = boundRHSExpr->GetTypeInfo().Symbol;
 
-        auto* const lhsTypeSymbol =
-            dgnBoundLHSExpr.Unwrap()->GetTypeInfo().Symbol;
-        auto* const rhsTypeSymbol =
-            dgnBoundRHSExpr.Unwrap()->GetTypeInfo().Symbol;
-
-        const auto dgnOpSymbol = ResolveOpSymbol(
+        const auto opSymbol = diagnostics.Collect(ResolveOpSymbol(
             GetScope(),
             m_Op,
             lhsTypeSymbol,
             rhsTypeSymbol
-        );
-        diagnostics.Add(dgnOpSymbol);
+        ));
 
         return Diagnosed
         {
             std::make_shared<const CompoundAssignmentStmtBoundNode>(
                 GetSrcLocation(),
-                dgnBoundLHSExpr.Unwrap(),
-                dgnBoundRHSExpr.Unwrap(),
-                dgnOpSymbol.Unwrap()
+                boundLHSExpr,
+                boundRHSExpr,
+                opSymbol
             ),
             diagnostics,
         };

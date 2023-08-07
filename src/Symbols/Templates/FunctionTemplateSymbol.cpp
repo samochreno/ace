@@ -98,7 +98,7 @@ namespace Ace
             m_TemplateNode->GetScope()
         );
 
-        diagnostics.Add(ast->GetSelfScope()->DefineTemplateArgAliases(
+        diagnostics.Collect(ast->GetSelfScope()->DefineTemplateArgAliases(
             implParamNames,
             implArgs,
             paramNames,
@@ -107,12 +107,11 @@ namespace Ace
 
         const auto nodes = Application::GetAllNodes(ast);
 
-        diagnostics.Add(Application::CreateAndDefineSymbols(
+        diagnostics.Collect(Application::CreateAndDefineSymbols(
             GetCompilation(),
             nodes
         ));
-
-        diagnostics.Add(Application::DefineAssociations(
+        diagnostics.Collect(Application::DefineAssociations(
             GetCompilation(),
             nodes
         ));

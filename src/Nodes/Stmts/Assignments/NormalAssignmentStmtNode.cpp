@@ -65,18 +65,17 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnBoundLHSExpr = m_LHSExpr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundLHSExpr);
-
-        const auto dgnBoundRHSExpr = m_RHSExpr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundRHSExpr);
+        const auto boundLHSExpr =
+            diagnostics.Collect(m_LHSExpr->CreateBoundExpr());
+        const auto boundRHSExpr =
+            diagnostics.Collect(m_RHSExpr->CreateBoundExpr());
 
         return Diagnosed
         {
             std::make_shared<const NormalAssignmentStmtBoundNode>(
                 GetSrcLocation(),
-                dgnBoundLHSExpr.Unwrap(),
-                dgnBoundRHSExpr.Unwrap()
+                boundLHSExpr,
+                boundRHSExpr
             ),
             diagnostics,
         };

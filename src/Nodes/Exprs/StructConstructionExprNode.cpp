@@ -141,7 +141,7 @@ namespace Ace
         std::for_each(begin(varUseSrcLocations), end(varUseSrcLocations),
         [&](const SrcLocation& varUseSrcLocation)
         {
-            diagnostics.Add(DiagnoseInaccessibleSymbol(
+            diagnostics.Collect(DiagnoseInaccessibleSymbol(
                 varUseSrcLocation,
                 varSymbol,
                 scope
@@ -162,7 +162,7 @@ namespace Ace
         std::for_each(begin(varSymbols), end(varSymbols),
         [&](InstanceVarSymbol* const varSymbol)
         {
-            diagnostics.Add(DiagnoseInaccessibleVar(
+            diagnostics.Collect(DiagnoseInaccessibleVar(
                 scope,
                 varSymbol,
                 varSymbolToUseSrcLocationsMap.at(varSymbol)
@@ -237,7 +237,7 @@ namespace Ace
         std::for_each(begin(varSymbols), end(varSymbols),
         [&](InstanceVarSymbol* const varSymbol)
         {
-            diagnostics.Add(DiagnoseStructConstructionVarSpecifiedMoreThanOnce(
+            diagnostics.Collect(DiagnoseStructConstructionVarSpecifiedMoreThanOnce(
                 structSymbol,
                 varSymbol,
                 varSymbolToUseSrcLocationsMap.at(varSymbol)
@@ -297,28 +297,28 @@ namespace Ace
                 ));
             }
 
-            const auto dgnBoundValue = CreateBoundArgValue(scope, arg);
-            diagnostics.Add(dgnBoundValue);
+            const auto boundValue =
+                diagnostics.Collect(CreateBoundArgValue(scope, arg));
 
             return StructConstructionExprBoundArg
             {
                 varSymbol,
-                dgnBoundValue.Unwrap(),
+                boundValue,
             };
         });
 
-        diagnostics.Add(DiagnoseInaccessibleVars(
+        diagnostics.Collect(DiagnoseInaccessibleVars(
             scope,
             varSymbols,
             varSymbolToUseSrcLocationsMap
         ));
-        diagnostics.Add(DiagnoseMissingVars(
+        diagnostics.Collect(DiagnoseMissingVars(
             srcLocation,
             structSymbol,
             varSymbols,
             varSymbolToUseSrcLocationsMap
         ));
-        diagnostics.Add(DiagnoseVarsSpecifiedMoreThanOnce(
+        diagnostics.Collect(DiagnoseVarsSpecifiedMoreThanOnce(
             structSymbol,
             varSymbols,
             varSymbolToUseSrcLocationsMap
@@ -331,29 +331,25 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expStructSymbol = m_Scope->ResolveStaticSymbol<StructTypeSymbol>(
-            m_TypeName
-        );
-        diagnostics.Add(expStructSymbol);
+        const auto optStructSymbol =
+            diagnostics.Collect(m_Scope->ResolveStaticSymbol<StructTypeSymbol>(m_TypeName));
 
         const auto boundArgs = [&]() -> std::vector<StructConstructionExprBoundArg>
         {
-            if (!expStructSymbol)
+            if (!optStructSymbol.has_value())
             {
                 return {};
             }
 
-            const auto dgnBoundArgs = CreateBoundArgs(
+            return diagnostics.Collect(CreateBoundArgs(
                 m_TypeName.CreateSrcLocation(),
                 GetScope(),
-                expStructSymbol.Unwrap(),
+                optStructSymbol.value(),
                 m_Args
-            );
-            diagnostics.Add(dgnBoundArgs);
-            return dgnBoundArgs.Unwrap();
+            ));
         }();
 
-        auto* const structSymbol = expStructSymbol.UnwrapOr(
+        auto* const structSymbol = optStructSymbol.value_or(
             GetCompilation()->GetErrorSymbols().GetStructType()
         );
 

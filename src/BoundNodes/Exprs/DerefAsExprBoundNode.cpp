@@ -60,10 +60,10 @@ namespace Ace
             diagnostics.Add(CreateExpectedDerefableExprError(GetSrcLocation()));
         }
 
-        const auto dgnCheckedExpr = m_Expr->CreateTypeCheckedExpr({});
-        diagnostics.Add(dgnCheckedExpr);
+        const auto checkedExpr =
+            diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
 
-        if (dgnCheckedExpr.Unwrap() == m_Expr)
+        if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), diagnostics };
         }
@@ -72,7 +72,7 @@ namespace Ace
         {
             std::make_shared<const DerefAsExprBoundNode>(
                 GetSrcLocation(),
-                m_Expr,
+                checkedExpr,
                 m_TypeSymbol
             ),
             diagnostics,

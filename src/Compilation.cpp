@@ -66,19 +66,18 @@ namespace Ace
         self->m_CLIArgBuffer = cliArgBuffer.get();
         srcBuffers->push_back(std::move(cliArgBuffer));
 
-        const auto expCLIArgsParseResult = ParseCommandLineArgs(
+        const auto optCLIArgsParseResult = diagnostics.Collect(ParseCommandLineArgs(
             self->m_CLIArgBuffer,
             GetOptionDefinitions()
-        );
-        diagnostics.Add(expCLIArgsParseResult);
-        if (!expCLIArgsParseResult)
+        ));
+        if (!optCLIArgsParseResult.has_value())
         {
             return diagnostics;
         }
 
         const auto& positionalArgs =
-            expCLIArgsParseResult.Unwrap().PositionalArgs;
-        const auto& optionMap = expCLIArgsParseResult.Unwrap().OptionMap;
+            optCLIArgsParseResult.value().PositionalArgs;
+        const auto& optionMap = optCLIArgsParseResult.value().OptionMap;
 
         if (positionalArgs.empty())
         {
@@ -105,30 +104,28 @@ namespace Ace
 
         const auto packagePath = positionalArgs.front();
 
-        auto expPackageFileBuffer = FileBuffer::Read(
+        auto optPackageFileBuffer = diagnostics.Collect(FileBuffer::Read(
             self.get(),
             packagePath
-        );
-        diagnostics.Add(expPackageFileBuffer);
-        if (!expPackageFileBuffer)
+        ));
+        if (!optPackageFileBuffer.has_value())
         {
             return diagnostics;
         }
 
-        self->m_PackageFileBuffer = expPackageFileBuffer.Unwrap().get();
-        srcBuffers->push_back(std::move(expPackageFileBuffer.Unwrap()));
+        self->m_PackageFileBuffer = optPackageFileBuffer.value().get();
+        srcBuffers->push_back(std::move(optPackageFileBuffer.value()));
 
-        auto expPackage = Package::Parse(
+        auto optPackage = diagnostics.Collect(Package::Parse(
             srcBuffers,
             self->m_PackageFileBuffer
-        );
-        diagnostics.Add(expPackage);
-        if (!expPackage)
+        ));
+        if (!optPackage.has_value())
         {
             return diagnostics;
         }
 
-        self->m_Package = std::move(expPackage.Unwrap());
+        self->m_Package = std::move(optPackage.value());
 
         self->m_OutputPath = optionMap.at(
             &OutputPathOptionDefinition

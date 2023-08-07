@@ -69,32 +69,24 @@ namespace Ace
             const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
             ACE_ASSERT(argTypeInfos.size() == 2);
 
-            const auto dgnConvertedLHSExpr = CreateImplicitlyConverted(
+            convertedLHSExpr = diagnostics.Collect(CreateImplicitlyConverted(
                 convertedLHSExpr,
                 TypeInfo{ argTypeInfos.at(0).Symbol, ValueKind::L }
-            );
-            diagnostics.Add(dgnConvertedLHSExpr);
-            convertedLHSExpr = dgnConvertedLHSExpr.Unwrap();
-
-            const auto dgnConvertedRHSExpr = CreateImplicitlyConverted(
+            ));
+            convertedRHSExpr = diagnostics.Collect(CreateImplicitlyConverted(
                 convertedRHSExpr,
                 TypeInfo{ argTypeInfos.at(1).Symbol, ValueKind::R }
-            );
-            diagnostics.Add(dgnConvertedRHSExpr);
-            convertedRHSExpr = dgnConvertedRHSExpr.Unwrap();
+            ));
         }
 
-        const auto dgnCheckedLHSExpr =
-            convertedLHSExpr->CreateTypeCheckedExpr({});
-        diagnostics.Add(dgnCheckedLHSExpr);
-
-        const auto dgnCheckedRHSExpr =
-            convertedRHSExpr->CreateTypeCheckedExpr({});
-        diagnostics.Add(dgnCheckedRHSExpr);
+        const auto checkedLHSExpr =
+            diagnostics.Collect(convertedLHSExpr->CreateTypeCheckedExpr({}));
+        const auto checkedRHSExpr =
+            diagnostics.Collect(convertedRHSExpr->CreateTypeCheckedExpr({}));
         
         if (
-            (dgnCheckedLHSExpr.Unwrap() == m_LHSExpr) &&
-            (dgnCheckedRHSExpr.Unwrap() == m_RHSExpr)
+            (checkedLHSExpr == m_LHSExpr) &&
+            (checkedRHSExpr == m_RHSExpr)
             )
         {
             return Diagnosed{ shared_from_this(), diagnostics };
@@ -104,8 +96,8 @@ namespace Ace
         {
             std::make_shared<const CompoundAssignmentStmtBoundNode>(
                 GetSrcLocation(),
-                dgnCheckedLHSExpr.Unwrap(),
-                dgnCheckedRHSExpr.Unwrap(),
+                checkedLHSExpr,
+                checkedRHSExpr,
                 m_OpSymbol
             ),
             diagnostics,

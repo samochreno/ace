@@ -54,18 +54,16 @@ namespace Ace
             const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
             ACE_ASSERT(argTypeInfos.size() == 1);
 
-            const auto dgnConvertedExpr = CreateImplicitlyConverted(
+            convertedExpr = diagnostics.Collect(CreateImplicitlyConverted(
                 convertedExpr,
                 argTypeInfos.front()
-            );
-            diagnostics.Add(dgnConvertedExpr);
-            convertedExpr = dgnConvertedExpr.Unwrap();
+            ));
         }
 
-        const auto dgnCheckedExpr = convertedExpr->CreateTypeCheckedExpr({});
-        diagnostics.Add(dgnCheckedExpr);
+        const auto checkedExpr =
+            diagnostics.Collect(convertedExpr->CreateTypeCheckedExpr({}));
 
-        if (dgnCheckedExpr.Unwrap() == m_Expr)
+        if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), diagnostics };
         }
@@ -74,7 +72,7 @@ namespace Ace
         {
             std::make_shared<const UserUnaryExprBoundNode>(
                 GetSrcLocation(),
-                dgnCheckedExpr.Unwrap(),
+                checkedExpr,
                 m_OpSymbol
             ),
             diagnostics,

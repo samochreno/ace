@@ -51,15 +51,14 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnBoundStructConstructionExpr =
-            m_StructConstructionExpr->CreateBound();
-        diagnostics.Add(dgnBoundStructConstructionExpr);
+        const auto boundStructConstructionExpr =
+            diagnostics.Collect(m_StructConstructionExpr->CreateBound());
 
         return Diagnosed
         {
             std::make_shared<const AttributeBoundNode>(
                 GetSrcLocation(),
-                dgnBoundStructConstructionExpr.Unwrap()
+                boundStructConstructionExpr
             ),
             diagnostics,
         };

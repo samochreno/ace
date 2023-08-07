@@ -63,27 +63,23 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnBoundExpr = m_Expr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundExpr);
+        const auto boundExpr = diagnostics.Collect(m_Expr->CreateBoundExpr());
 
-        const auto expTypeSymbol = GetScope()->ResolveStaticSymbol<ITypeSymbol>(
+        const auto optTypeSymbol = diagnostics.Collect(GetScope()->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
-        );
-        diagnostics.Add(expTypeSymbol);
-
-        auto* const typeSymbol = expTypeSymbol.UnwrapOr(
+        ));
+        auto* const typeSymbol = optTypeSymbol.value_or(
             GetCompilation()->GetErrorSymbols().GetType()
         );
 
-        const auto dgnConvertedExpr = CreateExplicitlyConverted(
-            dgnBoundExpr.Unwrap(),
+        const auto convertedExpr = diagnostics.Collect(CreateExplicitlyConverted(
+            boundExpr,
             TypeInfo{ typeSymbol, ValueKind::R }
-        );
-        diagnostics.Add(dgnConvertedExpr);
+        ));
 
         return Diagnosed
         {
-            dgnConvertedExpr.Unwrap(),
+            convertedExpr,
             diagnostics,
         };
     }

@@ -57,13 +57,12 @@ namespace Ace
             GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
-        const auto dgnCheckedCondition = CreateImplicitlyConvertedAndTypeChecked(
+        const auto checkedCondition = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
             m_Condition,
             typeInfo
-        );
-        diagnostics.Add(dgnCheckedCondition);
+        ));
 
-        if (dgnCheckedCondition.Unwrap() == m_Condition)
+        if (checkedCondition == m_Condition)
         {
             return Diagnosed{ shared_from_this(), diagnostics };
         }
@@ -72,7 +71,7 @@ namespace Ace
         {
             std::make_shared<const AssertStmtBoundNode>(
                 GetSrcLocation(),
-                dgnCheckedCondition.Unwrap()
+                checkedCondition
             ),
             diagnostics,
         };

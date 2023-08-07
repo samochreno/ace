@@ -55,8 +55,8 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnCheckedExpr = m_Expr->CreateTypeCheckedExpr({});
-        diagnostics.Add(dgnCheckedExpr);
+        const auto checkedExpr =
+            diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
 
         std::vector<std::shared_ptr<const IExprBoundNode>> convertedArgs = m_Args;
         if (!m_FunctionSymbol->IsError())
@@ -75,12 +75,10 @@ namespace Ace
 
             for (size_t i = 0; i < m_Args.size(); i++)
             {
-                const auto dgnConvertedArg = CreateImplicitlyConverted(
+                convertedArgs.at(i) = diagnostics.Collect(CreateImplicitlyConverted(
                     m_Args.at(i),
                     argTypeInfos.at(i)
-                );
-                diagnostics.Add(dgnConvertedArg);
-                convertedArgs.at(i) = dgnConvertedArg.Unwrap();
+                ));
             }
         }
 
@@ -91,14 +89,12 @@ namespace Ace
             back_inserter(checkedArgs),
             [&](const std::shared_ptr<const IExprBoundNode>& arg)
             {
-                const auto dgnCheckedArg = arg->CreateTypeCheckedExpr({});
-                diagnostics.Add(dgnCheckedArg);
-                return dgnCheckedArg.Unwrap();
+                return diagnostics.Collect(arg->CreateTypeCheckedExpr({}));
             }
         );
 
         if (
-            (dgnCheckedExpr.Unwrap() == m_Expr) &&
+            (checkedExpr == m_Expr) &&
             (checkedArgs == m_Args)
             )
         {
@@ -109,7 +105,7 @@ namespace Ace
         {
             std::make_shared<const InstanceFunctionCallExprBoundNode>(
                 GetSrcLocation(),
-                dgnCheckedExpr.Unwrap(),
+                checkedExpr,
                 m_FunctionSymbol,
                 checkedArgs
             ),

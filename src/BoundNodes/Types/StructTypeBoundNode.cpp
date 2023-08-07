@@ -57,10 +57,7 @@ namespace Ace
             back_inserter(checkedAttributes),
             [&](const std::shared_ptr<const AttributeBoundNode>& attribute)
             {
-                const auto dgnCheckedAttribute =
-                    attribute->CreateTypeChecked({});
-                diagnostics.Add(dgnCheckedAttribute);
-                return dgnCheckedAttribute.Unwrap();
+                return diagnostics.Collect(attribute->CreateTypeChecked({}));
             }
         );
 
@@ -68,9 +65,7 @@ namespace Ace
         std::transform(begin(m_Vars), end(m_Vars), back_inserter(checkedVars),
         [&](const std::shared_ptr<const InstanceVarBoundNode>& var)
         {
-            const auto dgnCheckedVar = var->CreateTypeChecked({});
-            diagnostics.Add(dgnCheckedVar);
-            return dgnCheckedVar.Unwrap();
+            return diagnostics.Collect(var->CreateTypeChecked({}));
         });
 
         if (

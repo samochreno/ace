@@ -62,14 +62,13 @@ namespace Ace
             back_inserter(checkedArgs),
             [&](const StructConstructionExprBoundArg& arg)
             {
-                const auto dgnCheckedValue =
-                    arg.Value->CreateTypeCheckedExpr({});
-                diagnostics.Add(dgnCheckedValue);
+                const auto checkedValue =
+                    diagnostics.Collect(arg.Value->CreateTypeCheckedExpr({}));
 
                 return StructConstructionExprBoundArg
                 {
                     arg.Symbol,
-                    dgnCheckedValue.Unwrap(),
+                    checkedValue,
                 };
             }
         );

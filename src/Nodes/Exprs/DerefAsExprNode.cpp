@@ -62,15 +62,12 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnBoundExpr = m_Expr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundExpr);
+        const auto boundExpr = diagnostics.Collect(m_Expr->CreateBoundExpr());
 
-        const auto expTypeSymbol = GetScope()->ResolveStaticSymbol<ITypeSymbol>(
+        const auto optTypeSymbol = diagnostics.Collect(GetScope()->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
-        );
-        diagnostics.Add(expTypeSymbol);
-
-        auto* const typeSymbol = expTypeSymbol.UnwrapOr(
+        ));
+        auto* const typeSymbol = optTypeSymbol.value_or(
             GetCompilation()->GetErrorSymbols().GetType()
         );
 
@@ -78,7 +75,7 @@ namespace Ace
         {
             std::make_shared<const DerefAsExprBoundNode>(
                 GetSrcLocation(),
-                dgnBoundExpr.Unwrap(),
+                boundExpr,
                 typeSymbol
             ),
             diagnostics,

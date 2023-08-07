@@ -322,25 +322,23 @@ namespace Ace
 
             const auto srcLocation = name.Sections.front().CreateSrcLocation();
 
-            const auto expBeginScope = GetStaticSymbolResolutionBeginScope(
-                srcLocation,
-                name
+            const auto optBeginScope = diagnostics.Collect(
+                GetStaticSymbolResolutionBeginScope(srcLocation, name)
             );
-            diagnostics.Add(expBeginScope);
-            if (!expBeginScope)
+            if (!optBeginScope.has_value())
             {
                 return diagnostics;
             }
 
             std::vector<std::shared_ptr<const Scope>> beginScopes{};
-            beginScopes.push_back(expBeginScope.Unwrap());
+            beginScopes.push_back(optBeginScope.value());
             beginScopes.insert(
                 end(beginScopes), 
-                begin(expBeginScope.Unwrap()->m_Associations), 
-                end  (expBeginScope.Unwrap()->m_Associations)
+                begin(optBeginScope.value()->m_Associations), 
+                end  (optBeginScope.value()->m_Associations)
             );
 
-            const auto expSymbol = ResolveSymbolInScopes(SymbolResolutionData{
+            const auto optSymbol = diagnostics.Collect(ResolveSymbolInScopes(SymbolResolutionData{
                 srcLocation,
                 shared_from_this(),
                 name.Sections.begin(),
@@ -350,30 +348,26 @@ namespace Ace
                 beginScopes,
                 GetStaticSymbolResolutionImplTemplateArgs(shared_from_this()),
                 IsTemplate<TSymbol>()
-            });
-            diagnostics.Add(expSymbol);
-            if (!expSymbol)
+            }));
+            if (!optSymbol.has_value())
             {
                 return diagnostics;
             }
 
-            auto* const symbol = expSymbol.Unwrap();
+            auto* const symbol = dynamic_cast<TSymbol*>(optSymbol.value());
+            ACE_ASSERT(symbol);
 
-            const auto expIsCorrectSymbolCategory = IsCorrectSymbolCategory(
+            const auto isCorrectSymbolCategory = diagnostics.Collect(IsCorrectSymbolCategory(
                 srcLocation,
                 symbol,
                 SymbolCategory::Static
-            );
-            diagnostics.Add(expIsCorrectSymbolCategory);
-            if (!expIsCorrectSymbolCategory)
+            ));
+            if (!isCorrectSymbolCategory)
             {
                 return diagnostics;
             }
 
-            auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
-            ACE_ASSERT(castedSymbol);
-
-            return Expected{ castedSymbol, diagnostics };
+            return Expected{ symbol, diagnostics };
         }
 
         template<typename TSymbol>
@@ -401,7 +395,7 @@ namespace Ace
 
             const auto srcLocation = nameSections.front().CreateSrcLocation();
 
-            const auto expSymbol = ResolveSymbolInScopes(SymbolResolutionData{
+            const auto optSymbol = diagnostics.Collect(ResolveSymbolInScopes(SymbolResolutionData{
                 srcLocation,
                 shared_from_this(),
                 nameSections.begin(),
@@ -411,30 +405,26 @@ namespace Ace
                 GetInstanceSymbolResolutionScopes(selfType),
                 CollectInstanceSymbolResolutionImplTemplateArgs(selfType),
                 IsTemplate<TSymbol>()
-            });
-            diagnostics.Add(expSymbol);
-            if (!expSymbol)
+            }));
+            if (!optSymbol.has_value())
             {
                 return diagnostics;
             }
 
-            auto* const symbol = expSymbol.Unwrap();
+            auto* const symbol = dynamic_cast<TSymbol*>(optSymbol.value());
+            ACE_ASSERT(symbol);
 
-            const auto expIsCorrectSymbolCategory = IsCorrectSymbolCategory(
+            const auto isCorrectSymbolCategory = diagnostics.Collect(IsCorrectSymbolCategory(
                 srcLocation,
                 symbol,
                 SymbolCategory::Instance
-            );
-            diagnostics.Add(expIsCorrectSymbolCategory);
-            if (!expIsCorrectSymbolCategory)
+            ));
+            if (!isCorrectSymbolCategory)
             {
                 return diagnostics;
             }
 
-            auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
-            ACE_ASSERT(castedSymbol);
-
-            return Expected{ castedSymbol, diagnostics };
+            return Expected{ symbol, diagnostics };
         }
 
         template<typename TSymbol>
@@ -488,7 +478,7 @@ namespace Ace
 
             const auto srcLocation = nameSections.front().CreateSrcLocation();
 
-            const auto expSymbol = ResolveSymbolInScopes(SymbolResolutionData{
+            const auto optSymbol = diagnostics.Collect(ResolveSymbolInScopes(SymbolResolutionData{
                 srcLocation,
                 shared_from_this(),
                 nameSections.begin(),
@@ -499,19 +489,17 @@ namespace Ace
                 implTemplateArgs,
                 templateArgs,
                 IsTemplate<TSymbol>()
-            });
-            diagnostics.Add(expSymbol);
-            if (!expSymbol)
+            }));
+            if (!optSymbol.has_value())
             {
                 return diagnostics;
             }
 
-            auto* const symbol = expSymbol.Unwrap();
 
-            auto* const castedSymbol = dynamic_cast<TSymbol*>(symbol);
-            ACE_ASSERT(castedSymbol);
+            auto* const symbol = dynamic_cast<TSymbol*>(optSymbol.value());
+            ACE_ASSERT(symbol);
 
-            return Expected{ castedSymbol, diagnostics };
+            return Expected{ symbol, diagnostics };
         }
 
         template<typename TSymbol>

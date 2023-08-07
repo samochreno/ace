@@ -69,12 +69,10 @@ namespace Ace
 
             for (size_t i = 0; i < m_Args.size(); i++)
             {
-                const auto dgnConvertedArg = CreateImplicitlyConverted(
+                convertedArgs.at(i) = diagnostics.Collect(CreateImplicitlyConverted(
                     m_Args.at(i),
                     argTypeInfos.at(i)
-                );
-                diagnostics.Add(dgnConvertedArg);
-                convertedArgs.at(i) = dgnConvertedArg.Unwrap();
+                ));
             }
         }
 
@@ -85,9 +83,7 @@ namespace Ace
             back_inserter(checkedArgs),
             [&](const std::shared_ptr<const IExprBoundNode>& arg)
             {
-                const auto dgnCheckedArg = arg->CreateTypeCheckedExpr({});
-                diagnostics.Add(dgnCheckedArg);
-                return dgnCheckedArg.Unwrap();
+                return diagnostics.Collect(arg->CreateTypeCheckedExpr({}));
             }
         );
 

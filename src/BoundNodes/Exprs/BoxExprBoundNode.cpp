@@ -63,13 +63,12 @@ namespace Ace
             functionSymbol->CollectParams().front()->GetType(),
             ValueKind::R,
         };
-        const auto dgnCheckedExpr = CreateImplicitlyConvertedAndTypeChecked(
+        const auto checkedExpr = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
             m_Expr,
             typeInfo
-        );
-        diagnostics.Add(dgnCheckedExpr);
+        ));
 
-        if (dgnCheckedExpr.Unwrap() == m_Expr)
+        if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), diagnostics };
         }
@@ -78,7 +77,7 @@ namespace Ace
         {
             std::make_shared<const BoxExprBoundNode>(
                 GetSrcLocation(),
-                dgnCheckedExpr.Unwrap()
+                checkedExpr
             ),
             diagnostics,
         };

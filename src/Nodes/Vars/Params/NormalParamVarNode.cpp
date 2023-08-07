@@ -85,9 +85,7 @@ namespace Ace
             back_inserter(boundAttributes),
             [&](const std::shared_ptr<const AttributeNode>& attribute)
             {
-                const auto dgnBoundAttribute = attribute->CreateBound();
-                diagnostics.Add(dgnBoundAttribute);
-                return dgnBoundAttribute.Unwrap();
+                return diagnostics.Collect(attribute->CreateBound());
             }
         );
 
@@ -130,12 +128,10 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expTypeSymbol = m_Scope->ResolveStaticSymbol<ITypeSymbol>(
+        const auto optTypeSymbol = diagnostics.Collect(m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
-        );
-        diagnostics.Add(expTypeSymbol);
-
-        auto* const typeSymbol = expTypeSymbol.UnwrapOr(
+        ));
+        auto* const typeSymbol = optTypeSymbol.value_or(
             GetCompilation()->GetErrorSymbols().GetType()
         );
 

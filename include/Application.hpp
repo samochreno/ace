@@ -75,10 +75,10 @@ namespace Ace::Application
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnTypeCheckedAST = createTypeCheckedFunc(boundAST);
-        diagnostics.Add(dgnTypeCheckedAST);
+        const auto typeCheckedAST =
+            diagnostics.Collect(createTypeCheckedFunc(boundAST));
 
-        const auto loweredAST = createLoweredFunc(dgnTypeCheckedAST.Unwrap());
+        const auto loweredAST = createLoweredFunc(typeCheckedAST);
 
         auto& finalAST = loweredAST;
 
@@ -86,7 +86,10 @@ namespace Ace::Application
 
         auto* const compilation = finalAST->GetCompilation();
 
-        diagnostics.Add(DiagnoseNotAllControlPathsReturn(compilation, nodes));
+        diagnostics.Collect(DiagnoseNotAllControlPathsReturn(
+            compilation,
+            nodes
+        ));
         
         BindFunctionSymbolsBodies(compilation, nodes);
 

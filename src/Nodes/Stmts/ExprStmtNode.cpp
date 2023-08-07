@@ -58,14 +58,13 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnBoundExpr = m_Expr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundExpr);
+        const auto boundExpr = diagnostics.Collect(m_Expr->CreateBoundExpr());
 
         return Diagnosed
         {
             std::make_shared<const ExprStmtBoundNode>(
                 GetSrcLocation(),
-                dgnBoundExpr.Unwrap()
+                boundExpr
             ),
             diagnostics,
         };

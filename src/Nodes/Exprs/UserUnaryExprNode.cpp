@@ -88,7 +88,7 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expSymbol = scope->ResolveStaticSymbol<FunctionSymbol>(
+        auto expSymbol = scope->ResolveStaticSymbol<FunctionSymbol>(
             CreateFullyQualifiedOpName(op, typeSymbol),
             Scope::CreateArgTypes(typeSymbol)
         );
@@ -107,32 +107,30 @@ namespace Ace
             };
         }
 
-        diagnostics.Add(expSymbol);
-        return Diagnosed{ expSymbol.Unwrap(), diagnostics };
+        const auto optSymbol = diagnostics.Collect(std::move(expSymbol));
+        return Diagnosed{ optSymbol.value(), diagnostics };
     }
 
     auto UserUnaryExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const UserUnaryExprBoundNode>>
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnBoundExpr = m_Expr->CreateBoundExpr();
-        diagnostics.Add(dgnBoundExpr);
+        const auto boundExpr = diagnostics.Collect(m_Expr->CreateBoundExpr());
 
-        auto* const typeSymbol = dgnBoundExpr.Unwrap()->GetTypeInfo().Symbol;
+        auto* const typeSymbol = boundExpr->GetTypeInfo().Symbol;
 
-        const auto dgnOpSymbol = ResolveOpSymbol(
+        const auto opSymbol = diagnostics.Collect(ResolveOpSymbol(
             GetScope(),
             m_Op,
             typeSymbol
-        );
-        diagnostics.Add(dgnOpSymbol);
+        ));
 
         return Diagnosed
         {
             std::make_shared<const UserUnaryExprBoundNode>(
                 GetSrcLocation(),
-                dgnBoundExpr.Unwrap(),
-                dgnOpSymbol.Unwrap()
+                boundExpr,
+                opSymbol
             ),
             diagnostics,
         };

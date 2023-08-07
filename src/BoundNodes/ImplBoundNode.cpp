@@ -53,9 +53,7 @@ namespace Ace
             back_inserter(checkedFunctions),
             [&](const std::shared_ptr<const FunctionBoundNode>& function)
             {
-                const auto dgnCheckedFunction = function->CreateTypeChecked({});
-                diagnostics.Add(dgnCheckedFunction);
-                return dgnCheckedFunction.Unwrap();
+                return diagnostics.Collect(function->CreateTypeChecked({}));
             }
         );
 

@@ -13,10 +13,13 @@ namespace Ace
     class [[nodiscard]] Diagnosed;
 
     template<>
-    class [[nodiscard]] Diagnosed<void> : public IDiagnosed
+    class [[nodiscard]] Diagnosed<void>
 
     {
     public:
+        [[deprecated]]
+        auto _DiagnosedVoid() -> void {  }
+
         Diagnosed() = default;
         Diagnosed(
             const DiagnosticBag& diagnostics
@@ -24,7 +27,7 @@ namespace Ace
         {
         }
 
-        auto GetDiagnostics() const -> const DiagnosticBag& final
+        auto GetDiagnostics() const -> const DiagnosticBag&
         {
             return m_Diagnostics;
         }
@@ -34,9 +37,12 @@ namespace Ace
     };
 
     template<typename TValue>
-    class [[nodiscard]] Diagnosed : public IDiagnosed
+    class [[nodiscard]] Diagnosed
     {
     public:
+        [[deprecated]]
+        auto _DiagnosedNotVoid() -> void {  }
+
         Diagnosed(
             const TValue& value,
             const DiagnosticBag& diagnostics
@@ -67,7 +73,7 @@ namespace Ace
             return m_Value;
         }
 
-        auto GetDiagnostics() const -> const DiagnosticBag& final
+        auto GetDiagnostics() const -> const DiagnosticBag&
         {
             return m_Diagnostics;
         }

@@ -90,10 +90,8 @@ namespace Ace
         std::optional<std::shared_ptr<const IExprBoundNode>> boundOptAssignedExpr{};
         if (m_OptAssignedExpr.has_value())
         {
-            const auto dgnBoundAssignedExpr =
-                m_OptAssignedExpr.value()->CreateBoundExpr();
-            diagnostics.Add(dgnBoundAssignedExpr);
-            boundOptAssignedExpr = dgnBoundAssignedExpr.Unwrap();
+            boundOptAssignedExpr =
+                diagnostics.Collect(m_OptAssignedExpr.value()->CreateBoundExpr());
         }
 
         return Diagnosed
@@ -136,12 +134,10 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto expTypeSymbol = m_Scope->ResolveStaticSymbol<ITypeSymbol>(
+        const auto optTypeSymbol = diagnostics.Collect(m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
-        );
-        diagnostics.Add(expTypeSymbol);
-
-        auto* const typeSymbol = expTypeSymbol.UnwrapOr(
+        ));
+        auto* const typeSymbol = optTypeSymbol.value_or(
             GetCompilation()->GetErrorSymbols().GetType()
         );
 

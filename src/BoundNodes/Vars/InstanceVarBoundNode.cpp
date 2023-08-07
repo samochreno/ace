@@ -53,10 +53,7 @@ namespace Ace
             back_inserter(checkedAttributes),
             [&](const std::shared_ptr<const AttributeBoundNode>& attribute)
             {
-                const auto dgnCheckedAttribute =
-                    attribute->CreateTypeChecked({});
-                diagnostics.Add(dgnCheckedAttribute);
-                return dgnCheckedAttribute.Unwrap();
+                return diagnostics.Collect(attribute->CreateTypeChecked({}));
             }
         );
 

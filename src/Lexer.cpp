@@ -515,14 +515,13 @@ namespace Ace
                 suffixBeginSrcLocation,
                 lexer.GetLastSrcLocation(),
             };
-            const auto expTokenKind = CreateNumericLiteralTokenKind(
+            const auto optTokenKind = diagnostics.Collect(CreateNumericLiteralTokenKind(
                 suffixSrcLocation,
                 suffix
-            );
-            diagnostics.Add(expTokenKind);
-            if (expTokenKind)
+            ));
+            if (optTokenKind.has_value())
             {
-                tokenKind = expTokenKind.Unwrap();
+                tokenKind = optTokenKind.value();
             }
         }
 
@@ -884,16 +883,16 @@ namespace Ace
 
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
-        const auto expTokenKind = LexDefaultTokenKind(lexer);
-        diagnostics.Add(expTokenKind);
-        if (!expTokenKind)
+        const auto optTokenKind =
+            diagnostics.Collect(LexDefaultTokenKind(lexer));
+        if (!optTokenKind.has_value())
         {
             return diagnostics;
         }
 
         const auto token = std::make_shared<const Token>(
             SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
-            expTokenKind.Unwrap()
+            optTokenKind.value()
         );
 
         return
@@ -955,11 +954,10 @@ namespace Ace
 
         if (lexer.Peek() == '"')
         {
-            const auto dgnString = LexString(lexer);
-            diagnostics.Add(dgnString);
+            const auto string = diagnostics.Collect(LexString(lexer));
             return
             {
-                std::vector{ dgnString.Unwrap() },
+                std::vector{ string },
                 diagnostics,
             };
         }
@@ -971,25 +969,25 @@ namespace Ace
 
         if (IsNumericLiteralBegin(lexer))
         {
-            const auto dgnNumericLiteral = LexNumericLiteral(lexer);
-            diagnostics.Add(dgnNumericLiteral);
+            const auto numericLiteral =
+                diagnostics.Collect(LexNumericLiteral(lexer));
+
             return
             {
-                std::vector{ dgnNumericLiteral.Unwrap() },
+                std::vector{ numericLiteral },
                 diagnostics,
             };
         }
 
-        const auto expDefault = LexDefault(lexer);
-        diagnostics.Add(expDefault);
-        if (!expDefault)
+        const auto optDefault = diagnostics.Collect(LexDefault(lexer));
+        if (!optDefault.has_value())
         {
             return diagnostics;
         }
 
         return
         {
-            std::vector{ expDefault.Unwrap() },
+            std::vector{ optDefault.value() },
             diagnostics,
         };
     }
@@ -1088,18 +1086,17 @@ namespace Ace
 
             if (IsCommentBegin(lexer))
             {
-                diagnostics.Add(DiscardComment(lexer));
+                diagnostics.Collect(DiscardComment(lexer));
                 continue;
             }
 
-            const auto expTokens = Lex(lexer);
-            diagnostics.Add(expTokens);
-            if (expTokens)
+            const auto optTokens = diagnostics.Collect(Lex(lexer));
+            if (optTokens.has_value())
             {
                 tokens.insert(
                     end(tokens),
-                    begin(expTokens.Unwrap()),
-                    end  (expTokens.Unwrap())
+                    begin(optTokens.value()),
+                    end  (optTokens.value())
                 );
             }
             else

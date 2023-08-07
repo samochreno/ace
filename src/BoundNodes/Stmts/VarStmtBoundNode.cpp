@@ -60,12 +60,10 @@ namespace Ace
         std::optional<std::shared_ptr<const IExprBoundNode>> checkedOptAssignedExpr{};
         if (m_OptAssignedExpr.has_value())
         {
-            const auto dgnCheckedAssignedExpr = CreateImplicitlyConvertedAndTypeChecked(
+            checkedOptAssignedExpr = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
                 m_OptAssignedExpr.value(),
                 TypeInfo{ m_Symbol->GetType(), ValueKind::R }
-            );
-            diagnostics.Add(dgnCheckedAssignedExpr);
-            checkedOptAssignedExpr = dgnCheckedAssignedExpr.Unwrap();
+            ));
         }
 
         if (checkedOptAssignedExpr == m_OptAssignedExpr)

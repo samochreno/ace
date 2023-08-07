@@ -72,12 +72,10 @@ namespace Ace
             back_inserter(checkedConditions),
             [&](const std::shared_ptr<const IExprBoundNode>& condition)
             {
-                const auto dgnCheckedCondition = CreateImplicitlyConvertedAndTypeChecked(
+                return diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
                     condition,
                     typeInfo
-                );
-                diagnostics.Add(dgnCheckedCondition);
-                return dgnCheckedCondition.Unwrap();
+                ));
             }
         );
 
@@ -88,11 +86,9 @@ namespace Ace
             back_inserter(checkedBodies),
             [&](const std::shared_ptr<const BlockStmtBoundNode>& body)
             {
-                const auto dgnCheckedBody = body->CreateTypeChecked({
+                return diagnostics.Collect(body->CreateTypeChecked({
                     context.ParentFunctionTypeSymbol
-                });
-                diagnostics.Add(dgnCheckedBody);
-                return dgnCheckedBody.Unwrap();
+                }));
             }
         );
 

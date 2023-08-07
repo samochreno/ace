@@ -51,12 +51,12 @@ namespace Ace
             GetCompilation()->GetNatives()->Bool.GetSymbol(),
             ValueKind::R,
         };
-        const auto dgnCheckedExpr = CreateImplicitlyConvertedAndTypeChecked(
+        const auto checkedExpr = diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(
             m_Expr,
             typeInfo
-        );
+        ));
 
-        if (dgnCheckedExpr.Unwrap() == m_Expr)
+        if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), diagnostics };
         }
@@ -65,7 +65,7 @@ namespace Ace
         {
             std::make_shared<const LogicalNegationExprBoundNode>(
                 GetSrcLocation(),
-                dgnCheckedExpr.Unwrap()
+                checkedExpr
             ),
             diagnostics,
         };

@@ -68,9 +68,7 @@ namespace Ace
             back_inserter(checkedModules),
             [&](const std::shared_ptr<const ModuleBoundNode>& module)
             {
-                const auto dgnCheckedModule = module->CreateTypeChecked({});
-                diagnostics.Add(dgnCheckedModule);
-                return dgnCheckedModule.Unwrap();
+                return diagnostics.Collect(module->CreateTypeChecked({}));
             }
         );
 
@@ -81,9 +79,7 @@ namespace Ace
             back_inserter(checkedTypes),
             [&](const std::shared_ptr<const ITypeBoundNode>& type)
             {
-                const auto dgnCheckedType = type->CreateTypeCheckedType({});
-                diagnostics.Add(dgnCheckedType);
-                return dgnCheckedType.Unwrap();
+                return diagnostics.Collect(type->CreateTypeCheckedType({}));
             }
         );
 
@@ -94,9 +90,7 @@ namespace Ace
             back_inserter(checkedImpls),
             [&](const std::shared_ptr<const ImplBoundNode>& impl)
             {
-                const auto dgnCheckedImpl = impl->CreateTypeChecked({});
-                diagnostics.Add(dgnCheckedImpl);
-                return dgnCheckedImpl.Unwrap();
+                return diagnostics.Collect(impl->CreateTypeChecked({}));
             }
         );
 
@@ -107,9 +101,7 @@ namespace Ace
             back_inserter(checkedFunctions),
             [&](const std::shared_ptr<const FunctionBoundNode>& function)
             {
-                const auto dgnCheckedFunction = function->CreateTypeChecked({});
-                diagnostics.Add(dgnCheckedFunction);
-                return dgnCheckedFunction.Unwrap();
+                return diagnostics.Collect(function->CreateTypeChecked({}));
             }
         );
 
@@ -117,9 +109,7 @@ namespace Ace
         std::transform(begin(m_Vars), end(m_Vars), back_inserter(checkedVars),
         [&](const std::shared_ptr<const StaticVarBoundNode>& var)
         {
-            const auto dgnCheckedVar = var->CreateTypeChecked({});
-            diagnostics.Add(dgnCheckedVar);
-            return dgnCheckedVar.Unwrap();
+            return diagnostics.Collect(var->CreateTypeChecked({}));
         });
 
         if (

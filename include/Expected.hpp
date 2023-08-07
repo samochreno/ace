@@ -12,12 +12,6 @@
 
 namespace Ace
 {
-    struct EmptyError
-    {
-    };
-
-    auto CreateEmptyError() -> std::shared_ptr<const DiagnosticGroup>;
-
     struct Void
     {
         Void() = default;
@@ -34,9 +28,12 @@ namespace Ace
     class [[nodiscard]] Expected;
 
     template<>
-    class [[nodiscard]] Expected<void> : public IDiagnosed
+    class [[nodiscard]] Expected<void>
     {
     public:
+        [[deprecated]]
+        auto _ExpectedVoid() -> void {  }
+
         Expected() = default;
         Expected(
             const Expected& other
@@ -54,12 +51,6 @@ namespace Ace
             Void&& value
         ) : m_Diagnostics{ std::move(value.DiagnosticBag) }
         {
-        }
-        Expected(
-            const EmptyError& emptyError
-        ) : m_IsFatal{ true }
-        {
-            m_Diagnostics.Add(CreateEmptyError());
         }
         Expected(
             const DiagnosticBag& diagnostics
@@ -112,9 +103,12 @@ namespace Ace
     };
 
     template<typename T>
-    class [[nodiscard]] Expected : public IDiagnosed
+    class [[nodiscard]] Expected
     {
     public:
+        [[deprecated]]
+        auto _ExpectedNotVoid() -> void {  }
+
         Expected()
         {
         }
@@ -152,10 +146,6 @@ namespace Ace
           : m_OptValue{ std::move(value) },
             m_Diagnostics{ diagnostics }
         {
-        }
-        Expected(const EmptyError& error)
-        {
-            m_Diagnostics.Add(CreateEmptyError());
         }
         Expected(const DiagnosticBag& diagnostics)
         {
@@ -204,19 +194,8 @@ namespace Ace
         {
             return m_OptValue.value();
         }
-        auto UnwrapOr(T value) const -> T
-        {
-            if (m_OptValue.has_value())
-            {
-                return m_OptValue.value();
-            }
-            else
-            {
-                return value;
-            }
-        }
 
-        auto GetDiagnostics() const -> const DiagnosticBag& final
+        auto GetDiagnostics() const -> const DiagnosticBag&
         {
             return m_Diagnostics;
         }
@@ -225,184 +204,4 @@ namespace Ace
         std::optional<T> m_OptValue{};
         DiagnosticBag m_Diagnostics{};
     };
-
-#define TIn  typename std::decay_t<decltype(*TBegin{})>
-#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap())>
-
-    template<typename TBegin, typename TEnd, typename F>
-    auto TransformExpected(
-        const TBegin begin,
-        const TEnd end,
-        F&& func
-    ) -> std::enable_if_t<!std::is_same_v<TOut, void>, Expected<std::vector<TOut>>>
-    {
-        DiagnosticBag diagnostics{};
-
-        std::vector<TOut> outVec{};
-        const auto unexpectedIt = std::find_if_not(begin, end,
-        [&](const TIn& element)
-        {
-            auto expOut = func(element);
-            diagnostics.Add(expOut);
-            if (!expOut)
-            {
-                return false;
-            }
-
-            if constexpr (std::is_move_constructible_v<TOut>)
-            {
-                outVec.push_back(std::move(expOut.Unwrap()));
-            }
-            else
-            {
-                outVec.push_back(expOut.Unwrap());
-            }
-
-            return true;
-        });
-
-        if (unexpectedIt != end)
-        {
-            return diagnostics;
-        }
-
-        return { outVec, diagnostics };
-    }
-
-#undef TOut
-#define TIn  typename std::decay_t<decltype(*TBegin{})>
-#define TOut typename std::decay_t<decltype(func(*TIn{}).Unwrap())>
-
-    template<typename TBegin, typename TEnd, typename F>
-    auto TransformExpected(
-        const TBegin begin,
-        const TEnd end,
-        F&& func
-    ) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
-    {
-        DiagnosticBag diagnostics{};
-
-        const auto unexpectedIt = std::find_if_not(begin, end,
-        [&](const TIn& element)
-        {
-            const auto expOut = func(element);
-            diagnostics.Add(expOut);
-            if (!expOut)
-            {
-                return false;
-            }
-
-            return true;
-        });
-
-        if (unexpectedIt != end)
-        {
-            return diagnostics;
-        }
-
-        return Void{ diagnostics };
-    }
-
-#undef TIn
-#undef TOut
-#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap())>
-
-    template<typename TIn, typename F>
-    auto TransformExpectedVector(
-        const std::vector<TIn>& inVec,
-        F&& func
-    ) -> std::enable_if_t<!std::is_same_v<TOut, void>, Expected<std::vector<TOut>>>
-    {
-        DiagnosticBag diagnostics{};
-
-        std::vector<TOut> outVec{};
-        outVec.reserve(inVec.size());
-
-        const auto unexpectedIt = std::find_if_not(
-            begin(inVec),
-            end  (inVec),
-            [&](const TIn& element)
-            {
-                auto expOut = func(element);
-                diagnostics.Add(expOut);
-                if (!expOut)
-                {
-                    return false;
-                }
-
-                if constexpr (std::is_move_constructible_v<TOut>)
-                {
-                    outVec.push_back(std::move(expOut.Unwrap()));
-                }
-                else
-                {
-                    outVec.push_back(expOut.Unwrap());
-                }
-
-                return true;
-            }
-        );
-
-        if (unexpectedIt != end(inVec))
-        {
-            return diagnostics;
-        }
-
-        return { outVec, diagnostics };
-    }
-
-#undef TOut
-#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap())>
-
-    template<typename TIn, typename F>
-    auto TransformExpectedVector(
-        const std::vector<TIn>& inVec,
-        F&& func
-    ) -> std::enable_if_t<std::is_same_v<TOut, void>, Expected<void>>
-    {
-        DiagnosticBag diagnostics{};
-
-        const auto unexpectedIt = std::find_if_not(
-            begin(inVec),
-            end  (inVec),
-            [&](const TIn& element)
-            {
-                const auto expOut = func(element);
-                diagnostics.Add(expOut);
-                if (!expOut)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-        );
-
-        if (unexpectedIt != end(inVec))
-        {
-            return diagnostics;
-        }
-
-        return Void{ diagnostics };
-    }
-
-#undef TOut
-#define TOut typename std::decay_t<decltype(func(TIn{}).Unwrap())>
-
-    template<typename TIn, typename F>
-    auto TransformExpectedOptional(
-        const std::optional<TIn>& optIn,
-        F&& func
-    ) -> Expected<std::optional<TOut>>
-    {
-        if (!optIn.has_value())
-        {
-            return std::optional<TOut>{};
-        }
-
-        ACE_TRY(out, func(optIn.value()));
-        return std::optional{ out };
-    }
-
-#undef TOut
 }

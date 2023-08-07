@@ -98,9 +98,7 @@ namespace Ace
             back_inserter(boundConditions),
             [&](const std::shared_ptr<const IExprNode>& condition)
             {
-                const auto dgnCondition = condition->CreateBoundExpr();
-                diagnostics.Add(dgnCondition);
-                return dgnCondition.Unwrap();
+                return diagnostics.Collect(condition->CreateBoundExpr());
             }
         );
 
@@ -111,9 +109,7 @@ namespace Ace
             back_inserter(boundBodies),
             [&](const std::shared_ptr<const BlockStmtNode>& body)
             {
-                const auto dgnBody = body->CreateBound();
-                diagnostics.Add(dgnBody);
-                return dgnBody.Unwrap();
+                return diagnostics.Collect(body->CreateBound());
             }
         );
 

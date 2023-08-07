@@ -68,19 +68,18 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnBoundCondition = m_Condition->CreateBoundExpr();
-        diagnostics.Add(dgnBoundCondition);
+        const auto boundCondition =
+            diagnostics.Collect(m_Condition->CreateBoundExpr());
 
-        const auto dgnBoundBody = m_Body->CreateBound();
-        diagnostics.Add(dgnBoundBody);
+        const auto boundBody = diagnostics.Collect(m_Body->CreateBound());
 
         return Diagnosed
         {
             std::make_shared<const WhileStmtBoundNode>(
                 GetSrcLocation(),
                 GetScope(),
-                dgnBoundCondition.Unwrap(),
-                dgnBoundBody.Unwrap()
+                boundCondition,
+                boundBody
             ),
             diagnostics,
         };

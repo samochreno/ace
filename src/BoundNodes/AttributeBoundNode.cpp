@@ -43,11 +43,10 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnCheckedStructConstructionExpr =
-            m_StructConstructionExpr->CreateTypeChecked({});
-        diagnostics.Add(dgnCheckedStructConstructionExpr);
+        const auto checkedStructConstructionExpr =
+            diagnostics.Collect(m_StructConstructionExpr->CreateTypeChecked({}));
 
-        if (dgnCheckedStructConstructionExpr.Unwrap() == m_StructConstructionExpr)
+        if (checkedStructConstructionExpr == m_StructConstructionExpr)
         {
             return Diagnosed{ shared_from_this(), diagnostics };
         }
@@ -56,7 +55,7 @@ namespace Ace
         {
             std::make_shared<const AttributeBoundNode>(
                 GetSrcLocation(),
-                dgnCheckedStructConstructionExpr.Unwrap()
+                checkedStructConstructionExpr
             ),
             diagnostics,
         };

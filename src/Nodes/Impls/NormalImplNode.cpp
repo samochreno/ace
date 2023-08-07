@@ -97,9 +97,7 @@ namespace Ace
             back_inserter(boundFunctions),
             [&](const std::shared_ptr<const FunctionNode>& function)
             {
-                const auto dgnBoundFunction = function->CreateBound();
-                diagnostics.Add(dgnBoundFunction);
-                return dgnBoundFunction.Unwrap();
+                return diagnostics.Collect(function->CreateBound());
             }
         );
 
@@ -120,16 +118,15 @@ namespace Ace
 
         ACE_ASSERT(m_TypeName.Sections.back().TemplateArgs.empty());
 
-        const auto expTypeSymbol = GetScope()->ResolveStaticSymbol<ITypeSymbol>(
+        const auto optTypeSymbol = diagnostics.Collect(GetScope()->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName
-        );
-        diagnostics.Add(expTypeSymbol);
-        if (!expTypeSymbol)
+        ));
+        if (!optTypeSymbol.has_value())
         {
             return diagnostics;
         }
 
-        expTypeSymbol.Unwrap()->GetSelfScope()->DefineAssociation(m_SelfScope);
+        optTypeSymbol.value()->GetSelfScope()->DefineAssociation(m_SelfScope);
         return Void{ diagnostics };
     }
 }

@@ -79,9 +79,7 @@ namespace Ace
         std::transform(begin(m_Stmts), end(m_Stmts), back_inserter(boundStmts),
         [&](const std::shared_ptr<const IStmtNode>& stmt)
         {
-            const auto dgnBoundStmt = stmt->CreateBoundStmt();
-            diagnostics.Add(dgnBoundStmt);
-            return dgnBoundStmt.Unwrap();
+            return diagnostics.Collect(stmt->CreateBoundStmt());
         });
 
         return Diagnosed

@@ -51,10 +51,10 @@ namespace Ace
     {
         DiagnosticBag diagnostics{};
 
-        const auto dgnCheckedExpr = m_Expr->CreateTypeCheckedExpr({});
-        diagnostics.Add(dgnCheckedExpr);
+        const auto checkedExpr =
+            diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
 
-        if (dgnCheckedExpr.Unwrap() == m_Expr)
+        if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), diagnostics };
         }
@@ -63,7 +63,7 @@ namespace Ace
         {
             std::make_shared<const InstanceVarRefExprBoundNode>(
                 GetSrcLocation(),
-                dgnCheckedExpr.Unwrap(),
+                checkedExpr,
                 m_VarSymbol
             ),
             diagnostics,

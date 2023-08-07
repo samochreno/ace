@@ -201,9 +201,7 @@ namespace Ace
             back_inserter(boundModules),
             [&](const std::shared_ptr<const ModuleNode>& module)
             {
-                const auto dgnBoundModule = module->CreateBound();
-                diagnostics.Add(dgnBoundModule);
-                return dgnBoundModule.Unwrap();
+                return diagnostics.Collect(module->CreateBound());
             }
         );
 
@@ -211,9 +209,7 @@ namespace Ace
         std::transform(begin(m_Types), end(m_Types), back_inserter(boundTypes),
         [&](const std::shared_ptr<const ITypeNode>& type)
         {
-            const auto dgnBoundType = type->CreateBoundType();
-            diagnostics.Add(dgnBoundType);
-            return dgnBoundType.Unwrap();
+            return diagnostics.Collect(type->CreateBoundType());
         });
 
         std::vector<std::shared_ptr<const ImplBoundNode>> boundImpls{};
@@ -223,9 +219,7 @@ namespace Ace
             back_inserter(boundImpls),
             [&](const std::shared_ptr<const NormalImplNode>& normalImpl)
             {
-                const auto dgnBoundImpl = normalImpl->CreateBound();
-                diagnostics.Add(dgnBoundImpl);
-                return dgnBoundImpl.Unwrap();
+                return diagnostics.Collect(normalImpl->CreateBound());
             }
         );
 
@@ -236,9 +230,7 @@ namespace Ace
             back_inserter(boundTemplatedImpls),
             [&](const std::shared_ptr<const TemplatedImplNode>& templatedImpl)
             {
-                const auto dgnBoundImpl = templatedImpl->CreateBound();
-                diagnostics.Add(dgnBoundImpl);
-                return dgnBoundImpl.Unwrap();
+                return diagnostics.Collect(templatedImpl->CreateBound());
             }
         );
 
@@ -249,9 +241,7 @@ namespace Ace
             back_inserter(boundFunctions),
             [&](const std::shared_ptr<const FunctionNode>& function)
             {
-                const auto dgnBoundFunction = function->CreateBound();
-                diagnostics.Add(dgnBoundFunction);
-                return dgnBoundFunction.Unwrap();
+                return diagnostics.Collect(function->CreateBound());
             }
         );
 
@@ -262,9 +252,7 @@ namespace Ace
             back_inserter(boundVars),
             [&](const std::shared_ptr<const StaticVarNode>& var)
             {
-                const auto dgnBoundVar = var->CreateBound();
-                diagnostics.Add(dgnBoundVar);
-                return dgnBoundVar.Unwrap();
+                return diagnostics.Collect(var->CreateBound());
             }
         );
 

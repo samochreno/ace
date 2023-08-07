@@ -90,14 +90,15 @@ namespace Ace
                 {
                     m_ResolvingVar = var;
 
-                    const auto expSizeKind = var->GetType()->GetSizeKind();
-                    diagnostics.Add(expSizeKind);
-                    if (!expSizeKind)
+                    const auto optSizeKind = diagnostics.Collect(
+                        var->GetType()->GetSizeKind()
+                    );
+                    if (!optSizeKind.has_value())
                     {
                         return false;
                     }
 
-                    if (expSizeKind.Unwrap() == TypeSizeKind::Unsized)
+                    if (optSizeKind.value() == TypeSizeKind::Unsized)
                     {
                         return false;
                     }

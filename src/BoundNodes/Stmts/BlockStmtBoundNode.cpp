@@ -66,11 +66,9 @@ namespace Ace
             back_inserter(checkedStmts),
             [&](const std::shared_ptr<const IStmtBoundNode>& stmt)
             {
-                const auto dgnCheckedStmt = stmt->CreateTypeCheckedStmt({
+                return diagnostics.Collect(stmt->CreateTypeCheckedStmt({
                     context.ParentFunctionTypeSymbol
-                });
-                diagnostics.Add(dgnCheckedStmt);
-                return dgnCheckedStmt.Unwrap();
+                }));
             }
         );
 

@@ -41,22 +41,20 @@ namespace Ace::Application
     {
         DiagnosticBag diagnostics{};
 
-        auto dgnTokens = LexTokens(fileBuffer);
-        diagnostics.Add(dgnTokens.GetDiagnostics());
+        const auto tokens = diagnostics.Collect(LexTokens(fileBuffer));
 
-        const auto expAST = ParseAST(
+        const auto optAST = diagnostics.Collect(ParseAST(
             fileBuffer,
-            std::move(dgnTokens.Unwrap())
-        );
-        diagnostics.Add(expAST);
-        if (!expAST)
+            std::move(tokens)
+        ));
+        if (!optAST.has_value())
         {
             return diagnostics;
         }
 
         return Expected
         {
-            expAST.Unwrap(),
+            optAST.value(),
             diagnostics,
         };
     }
@@ -115,7 +113,7 @@ namespace Ace::Application
         std::for_each(begin(symbolCreatableNodes), end(symbolCreatableNodes),
         [&](const ISymbolCreatableNode* const symbolCreatableNode)
         {
-            diagnostics.Add(Scope::DefineSymbol(symbolCreatableNode));
+            (void)diagnostics.Collect(Scope::DefineSymbol(symbolCreatableNode));
         });
 
         return Diagnosed<void>{ diagnostics };
@@ -133,7 +131,7 @@ namespace Ace::Application
         std::for_each(begin(implNodes), end(implNodes),
         [&](const IImplNode* const implNode)
         {
-            diagnostics.Add(implNode->DefineAssociations());
+            diagnostics.Collect(implNode->DefineAssociations());
         });
 
         return Diagnosed<void>{ diagnostics };
@@ -170,7 +168,7 @@ namespace Ace::Application
                 functionNode->GetBody().value()->CreateCFANodes()
             };
 
-            diagnostics.Add(CFA(
+            diagnostics.Collect(CFA(
                 functionNode->GetSymbol()->GetName().SrcLocation,
                 cfaGraph
             ));
@@ -229,8 +227,8 @@ namespace Ace::Application
                 return;
             }
 
-            const auto expSizeKind = typeSymbol->GetSizeKind();
-            diagnostics.Add(expSizeKind);
+            const auto optSizeKind =
+                diagnostics.Collect(typeSymbol->GetSizeKind());
         });
 
         return Diagnosed<void>{ diagnostics };
@@ -255,13 +253,14 @@ namespace Ace::Application
                 return;
             }
 
-            const auto expSizeKind = typeSymbol->GetSizeKind();
-            if (!expSizeKind)
+            const auto optSizeKind =
+                diagnostics.Collect(typeSymbol->GetSizeKind());
+            if (!optSizeKind.has_value())
             {
                 return;
             }
 
-            if (expSizeKind.Unwrap() == TypeSizeKind::Sized)
+            if (optSizeKind.value() == TypeSizeKind::Sized)
             {
                 return;
             }
@@ -293,17 +292,16 @@ namespace Ace::Application
             end  (compilation->GetPackage().SrcFileBuffers),
             [&](const FileBuffer* const srcFileBuffer)
             {
-                const auto expAST = ParseAST(
+                const auto optAST = diagnostics.Collect(ParseAST(
                     compilation,
                     srcFileBuffer
-                );
-                diagnostics.Add(expAST);
-                if (!expAST)
+                ));
+                if (!optAST.has_value())
                 {
                     return;
                 }
 
-                asts.push_back(expAST.Unwrap());
+                asts.push_back(optAST.value());
             }
         );
 
@@ -313,23 +311,21 @@ namespace Ace::Application
 
         const auto timeSymbolCreationBegin = now();
 
-        const auto dgnCreateAndDefineSymbols = CreateAndDefineSymbols(
+        diagnostics.Collect(CreateAndDefineSymbols(
             compilation,
             nodes
-        );
-        diagnostics.Add(dgnCreateAndDefineSymbols);
+        ));
 
-        const auto dgnDefineAssociations = DefineAssociations(
+        diagnostics.Collect(DefineAssociations(
             compilation,
             nodes
-        );
-        diagnostics.Add(dgnDefineAssociations);
+        ));
 
         const auto timeSymbolCreationEnd = now();
 
         const auto templateSymbols = globalScope->CollectSymbolsRecursive<ITemplateSymbol>();
         compilation->GetTemplateInstantiator().SetSymbols(templateSymbols);
-        diagnostics.Add(
+        diagnostics.Collect(
             compilation->GetTemplateInstantiator().InstantiatePlaceholderSymbols()
         );
 
@@ -341,16 +337,14 @@ namespace Ace::Application
         std::transform(begin(asts), end(asts), back_inserter(boundASTs),
         [&](const std::shared_ptr<const ModuleNode>& ast)
         {
-            const auto dgnBoundAST = ast->CreateBound();
-            diagnostics.Add(dgnBoundAST);
-            return dgnBoundAST.Unwrap();
+            return diagnostics.Collect(ast->CreateBound());
         });
 
         std::vector<std::shared_ptr<const ModuleBoundNode>> finalASTs{};
         std::for_each(begin(boundASTs), end(boundASTs),
         [&](const std::shared_ptr<const ModuleBoundNode>& boundAST)
         {
-            const auto expFinalAST = CreateTransformedAndVerifiedAST(
+            const auto optFinalAST = diagnostics.Collect(CreateTransformedAndVerifiedAST(
                 boundAST,
                 [](const std::shared_ptr<const ModuleBoundNode>& ast)
                 { 
@@ -360,14 +354,13 @@ namespace Ace::Application
                 {
                     return ast->CreateLowered({});
                 }
-            );
-            diagnostics.Add(expFinalAST);
-            if (!expFinalAST)
+            ));
+            if (!optFinalAST.has_value())
             {
                 return;
             }
 
-            finalASTs.push_back(expFinalAST.Unwrap());
+            finalASTs.push_back(optFinalAST.value());
         });
 
         compilation->GetTemplateInstantiator().InstantiateSemanticsForSymbols();
@@ -377,8 +370,8 @@ namespace Ace::Application
             return diagnostics.Unwrap();
         }
 
-        diagnostics.Add(DiagnoseLayoutCycles(compilation));
-        diagnostics.Add(DiagnoseUnsizedVarTypes(compilation));
+        diagnostics.Collect(DiagnoseLayoutCycles(compilation));
+        diagnostics.Collect(DiagnoseUnsizedVarTypes(compilation));
 
         const auto timeBindingAndVerificationEnd = now();
 
@@ -434,27 +427,26 @@ namespace Ace::Application
     {
         DiagnosticBag diagnostics{};
 
-        const auto expCompilation = Compilation::Parse(
-            srcBuffers,
-            args
+        DiagnosticBag compilationDiagnostics{};
+        const auto optCompilation = compilationDiagnostics.Collect(
+            Compilation::Parse(srcBuffers, args)
         );
-        diagnostics.Add(expCompilation);
-        GlobalDiagnosticBag{}.Add(expCompilation);
-        if (!expCompilation)
+        GlobalDiagnosticBag{}.Add(compilationDiagnostics);
+                  diagnostics.Add(compilationDiagnostics);
+        if (!optCompilation.has_value())
         {
             return diagnostics;
         }
 
         Log << CreateIndent() << termcolor::bright_green << "Compiling ";
         Log << termcolor::reset;
-        Log << expCompilation.Unwrap()->GetPackage().Name << "\n";
+        Log << optCompilation.value()->GetPackage().Name << "\n";
         IndentLevel++;
 
-        const auto expDidCompile = CompileCompilation(
-            expCompilation.Unwrap().get()
-        );
-        diagnostics.Add(expDidCompile);
-        if (!expDidCompile || diagnostics.HasErrors())
+        const auto didCompile = diagnostics.Collect(CompileCompilation(
+            optCompilation.value().get()
+        ));
+        if (!didCompile || diagnostics.HasErrors())
         {
             Log << CreateIndent() << termcolor::bright_red << "Failed";
             Log << termcolor::reset << " to compile\n";
@@ -477,7 +469,7 @@ namespace Ace::Application
 
         std::vector<std::shared_ptr<const ISrcBuffer>> srcBuffers{};
 
-        const auto expDidCompile = Compile(
+        const auto didCompile = Compile(
             &srcBuffers,
             std::vector<std::string_view>
             {
@@ -485,7 +477,7 @@ namespace Ace::Application
                 { "ace/package.json" },
             }
         );
-        if (!expDidCompile)
+        if (!didCompile)
         {
             return;
         }
