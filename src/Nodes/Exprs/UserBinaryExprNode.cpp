@@ -186,10 +186,7 @@ namespace Ace
         DiagnosticBag diagnostics{};
 
         std::optional<FunctionSymbol*> optOpSymbol{};
-        if (
-            !lhsTypeSymbol->GetWithoutRef()->IsError() &&
-            !rhsTypeSymbol->GetWithoutRef()->IsError()
-            )
+        if (!lhsTypeSymbol->IsError() && !rhsTypeSymbol->IsError())
         {
             DiagnosticBag lhsOpDiagnostics{};
             const auto optLHSOpSymbol = lhsOpDiagnostics.Collect(ResolveOpSymbol(

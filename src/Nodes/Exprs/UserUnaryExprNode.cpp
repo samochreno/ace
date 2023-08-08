@@ -89,7 +89,7 @@ namespace Ace
         DiagnosticBag diagnostics{};
 
         std::optional<FunctionSymbol*> optSymbol{};
-        if (!typeSymbol->GetWithoutRef()->IsError())
+        if (!typeSymbol->IsError())
         {
             DiagnosticBag opDiagnostics{};
             optSymbol = opDiagnostics.Collect(scope->ResolveStaticSymbol<FunctionSymbol>(

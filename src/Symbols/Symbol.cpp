@@ -248,8 +248,58 @@ namespace Ace
         };
     }
 
+    static auto IsTypeError(const ITypeSymbol* const typeSymbol) -> bool
+    {
+        auto* const compilation = typeSymbol->GetCompilation();
+
+        if (compilation->GetErrorSymbols().Contains(typeSymbol))
+        {
+            return true;
+        }
+
+        const auto implTemplateArgs = typeSymbol->CollectImplTemplateArgs();
+        const auto errorImplTemplateArgIt = std::find_if(
+            begin(implTemplateArgs),
+            end  (implTemplateArgs),
+            [&](const ITypeSymbol* const implTemplateArg)
+            {
+                return IsTypeError(implTemplateArg);
+            }
+        );
+        if (errorImplTemplateArgIt != end(implTemplateArgs))
+        {
+            return true;
+        }
+
+        const auto templateArgs = typeSymbol->CollectTemplateArgs();
+        const auto errorTemplateArgIt = std::find_if(
+            begin(templateArgs),
+            end  (templateArgs),
+            [&](const ITypeSymbol* const templateArg)
+            {
+                return IsTypeError(templateArg);
+            }
+        );
+        if (errorTemplateArgIt != end(templateArgs))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     auto ISymbol::IsError() const -> bool
     {
-        return GetCompilation()->GetErrorSymbols().Contains(this);
+        if (GetCompilation()->GetErrorSymbols().Contains(this))
+        {
+            return true;
+        }
+
+        if (const auto* const type = dynamic_cast<const ITypeSymbol*>(this))
+        {
+            return IsTypeError(type);
+        }
+
+        return false;
     }
 }
