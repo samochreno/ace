@@ -37,8 +37,31 @@ namespace Ace
     {
         std::string signature{};
 
-        const auto templateArgs = symbol->CollectTemplateArgs();
+        const auto implTemplateArgs = symbol->CollectImplTemplateArgs();
+        if (!implTemplateArgs.empty())
+        {
+            signature += "<";
 
+            bool isFirstImplTemplateArg = true;
+            std::for_each(begin(implTemplateArgs), end(implTemplateArgs),
+            [&](const ITypeSymbol* const implTemplateArg)
+            {
+                if (isFirstImplTemplateArg)
+                {
+                    isFirstImplTemplateArg = false;
+                }
+                else
+                {
+                    signature += ", ";
+                }
+
+                signature += implTemplateArg->CreateSignature();
+            });
+
+            signature += ">";
+        }
+
+        const auto templateArgs = symbol->CollectTemplateArgs();
         if (!templateArgs.empty())
         {
             signature += "[";
