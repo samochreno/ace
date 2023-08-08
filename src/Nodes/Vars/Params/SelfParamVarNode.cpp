@@ -19,11 +19,11 @@ namespace Ace
     SelfParamVarNode::SelfParamVarNode(
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
-        const SymbolName& typeName
+        const TypeName& typeName
     ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope },
         m_Name{ srcLocation, SpecialIdent::Self },
-        m_TypeName{ typeName, std::vector{ TypeNameModifier::Ref } }
+        m_TypeName{ typeName }
     {
     }
 
@@ -49,7 +49,7 @@ namespace Ace
         return std::make_shared<const SelfParamVarNode>(
             m_SrcLocation,
             scope,
-            m_TypeName.SymbolName
+            m_TypeName
         );
     }
 

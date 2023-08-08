@@ -89,4 +89,8 @@ namespace Ace
     auto CreateInstanceOpError(
         const std::shared_ptr<const Token>& nameToken
     ) -> std::shared_ptr<const DiagnosticGroup>;
+
+    auto CreateMissingSelfModifierAfterStrongPtrError(
+        const std::shared_ptr<const Token>& strongPtrModifierToken
+    ) -> std::shared_ptr<const DiagnosticGroup>;
 }

@@ -352,4 +352,23 @@ namespace Ace
 
         return group;
     }
+
+    auto CreateMissingSelfModifierAfterStrongPtrError(
+        const std::shared_ptr<const Token>& strongPtrModifierToken
+    ) -> std::shared_ptr<const DiagnosticGroup>
+    {
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        const std::string message = std::string{} +
+            "missing `" + SpecialIdent::Self + "` modifier after " +
+            CreateTokenKindString(TokenKind::Asterisk);
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            strongPtrModifierToken->SrcLocation.CreateLast(),
+            message
+        );
+
+        return group;
+    }
 }

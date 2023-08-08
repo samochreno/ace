@@ -49,6 +49,30 @@ namespace Ace
         return children;
     }
 
+    static auto DiagnoseMismatchedSelfExprType(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        SelfParamVarSymbol* const paramSymbol
+    ) -> Diagnosed<void>
+    {
+        DiagnosticBag diagnostics{};
+
+        const bool isParamStrongPtr =
+            paramSymbol->GetType()->GetWithoutRef()->IsStrongPtr();
+
+        const bool isExprStrongPtr =
+            expr->GetTypeInfo().Symbol->GetWithoutRef()->IsStrongPtr();
+
+        if (isParamStrongPtr && !isExprStrongPtr)
+        {
+            diagnostics.Add(CreateMismatchedSelfExprTypeError(
+                expr->GetSrcLocation(),
+                paramSymbol
+            ));
+        }
+
+        return Diagnosed<void>{ diagnostics };
+    }
+
     auto InstanceFunctionCallExprBoundNode::CreateTypeChecked(
         const TypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const InstanceFunctionCallExprBoundNode>>
@@ -57,6 +81,11 @@ namespace Ace
 
         const auto checkedExpr =
             diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
+
+        diagnostics.Collect(DiagnoseMismatchedSelfExprType(
+            checkedExpr,
+            m_FunctionSymbol->CollectSelfParam().value()
+        ));
 
         std::vector<std::shared_ptr<const IExprBoundNode>> convertedArgs = m_Args;
         if (!m_FunctionSymbol->IsError())
@@ -156,12 +185,128 @@ namespace Ace
         )->CreateLowered({});
     }
 
-
     auto InstanceFunctionCallExprBoundNode::CreateLoweredExpr(
         const LoweringContext& context
     ) const -> std::shared_ptr<const IExprBoundNode>
     {
         return CreateLowered(context);
+    }
+
+    static auto CreateDerefed(
+        const std::shared_ptr<const IExprBoundNode>& expr
+    ) -> std::shared_ptr<const IExprBoundNode>
+    {
+        auto* const typeSymbol = expr->GetTypeInfo().Symbol;
+
+        const bool isRef = typeSymbol->IsRef();
+        const bool isStrongPtr = typeSymbol->IsStrongPtr();
+
+        if (isRef)
+        {
+            return CreateDerefed(std::make_shared<const DerefAsExprBoundNode>(
+                expr->GetSrcLocation(),
+                expr,
+                typeSymbol->GetWithoutRef()
+            ));
+        }
+
+        if (isStrongPtr)
+        {
+            return CreateDerefed(std::make_shared<const DerefAsExprBoundNode>(
+                expr->GetSrcLocation(),
+                expr,
+                typeSymbol->GetWithoutStrongPtr()
+            ));
+        }
+
+        return expr;
+    }
+
+    static auto CreateDerefedNormalSelfExpr(
+        const std::shared_ptr<const IExprBoundNode>& expr
+    ) -> std::shared_ptr<const IExprBoundNode>
+    {
+        auto* const typeSymbol = expr->GetTypeInfo().Symbol;
+
+        const bool isRef = typeSymbol->IsRef();
+        const bool isStrongPtr = typeSymbol->IsStrongPtr();
+
+        if (isRef)
+        {
+            return CreateDerefedNormalSelfExpr(std::make_shared<const DerefAsExprBoundNode>(
+                expr->GetSrcLocation(),
+                expr,
+                typeSymbol->GetWithoutRef()
+            ));
+        }
+
+        if (isStrongPtr)
+        {
+            return CreateDerefedNormalSelfExpr(std::make_shared<const DerefAsExprBoundNode>(
+                expr->GetSrcLocation(),
+                expr,
+                typeSymbol->GetWithoutStrongPtr()
+            ));
+        }
+
+        return std::make_shared<const RefExprBoundNode>(
+            expr->GetSrcLocation(),
+            expr
+        );
+    }
+
+    static auto CreateDerefedStrongPtrSelfExpr(
+        const std::shared_ptr<const IExprBoundNode>& expr
+    ) -> std::shared_ptr<const IExprBoundNode>
+    {
+        auto* const typeSymbol = expr->GetTypeInfo().Symbol;
+
+        const bool isRef = typeSymbol->IsRef();
+        const bool isStrongPtr = typeSymbol->IsStrongPtr();
+
+        if (isRef)
+        {
+            return CreateDerefedNormalSelfExpr(std::make_shared<const DerefAsExprBoundNode>(
+                expr->GetSrcLocation(),
+                expr,
+                typeSymbol->GetWithoutRef()
+            ));
+        }
+
+        if (isStrongPtr)
+        {
+            auto* const derefedTypeSymbol = typeSymbol->GetWithoutStrongPtr();
+
+            if (derefedTypeSymbol->IsStrongPtr())
+            {
+                return CreateDerefedStrongPtrSelfExpr(std::make_shared<const DerefAsExprBoundNode>(
+                    expr->GetSrcLocation(),
+                    expr,
+                    typeSymbol->GetWithoutStrongPtr()
+                ));
+            }
+        }
+
+        return std::make_shared<const RefExprBoundNode>(
+            expr->GetSrcLocation(),
+            expr
+        );
+    }
+
+    static auto CreateDerefedSelfExpr(
+        const std::shared_ptr<const IExprBoundNode>& expr,
+        SelfParamVarSymbol* const paramSymbol
+    ) -> std::shared_ptr<const IExprBoundNode>
+    {
+        auto* const exprTypeSymbol = expr->GetTypeInfo().Symbol;
+        auto* const paramTypeSymbol = paramSymbol->GetType();
+
+        if (paramTypeSymbol->GetWithoutRef()->IsStrongPtr())
+        {
+            return CreateDerefedStrongPtrSelfExpr(expr);
+        }
+
+        return CreateDerefedNormalSelfExpr(expr);
     }
 
     auto InstanceFunctionCallExprBoundNode::Emit(
@@ -172,22 +317,12 @@ namespace Ace
 
         std::vector<llvm::Value*> args{};
 
-        const auto expr = [&]() -> std::shared_ptr<const IExprBoundNode>
-        {
-            if (m_Expr->GetTypeInfo().Symbol->IsRef())
-            {
-                return m_Expr;
-            }
-
-            return std::make_shared<const RefExprBoundNode>(
-                m_Expr->GetSrcLocation(),
-                m_Expr
-            );
-        }();
-
-        auto* const selfType = emitter.GetIRType(expr->GetTypeInfo().Symbol);
-        
-        const auto selfEmitResult = expr->Emit(emitter);
+        const auto selfExpr = CreateDerefedSelfExpr(
+            m_Expr,
+            m_FunctionSymbol->CollectSelfParam().value()
+        );
+        auto* const selfType = emitter.GetIRType(selfExpr->GetTypeInfo().Symbol);
+        const auto selfEmitResult = selfExpr->Emit(emitter);
         tmps.insert(
             end(tmps),
             begin(selfEmitResult.Tmps),

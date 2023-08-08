@@ -8,9 +8,10 @@
 
 ## 💥 High Priority
 
+- Fix that glue doesnt bind on private types
+- Add `ErrorlessDiagnosticBag` to verify no diagnostics get discarded accidentally, make it assert no errors get in, its helpful to the pattern `DiagnosticBag{}.Collect(...)`
 - Make `Compilation` immutable: move uninstatiated templates (`TemplateInstantiator`) into `Scope` to keep all state there
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
-- `*self`
 - Traits:
   - Parsing
   - Symbols

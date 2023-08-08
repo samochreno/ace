@@ -38,12 +38,19 @@ namespace Ace
         Public,
         Extern,
         Self,
+        StrongPtr,
     };
 
     enum class FunctionOrOpNameKind
     {
         Function,
         Op,
+    };
+
+    enum class SelfKind
+    {
+        Normal,
+        StrongPtr,
     };
 
     struct FunctionOrOpNameToken
@@ -782,20 +789,46 @@ namespace Ace
     }
 
     static auto CreateSelfParam(
-        const std::optional<std::shared_ptr<const Token>>& optSelfToken,
+        const std::optional<SelfKind>& optSelfKind,
+        const std::vector<std::shared_ptr<const Token>>& selfTokens,
         const std::shared_ptr<Scope>& scope,
-        const SymbolName& selfTypeName
+        const SymbolName& selfTypeSymbolName
     ) -> std::optional<std::shared_ptr<const SelfParamVarNode>>
     {
-        if (!optSelfToken.has_value())
+        if (!optSelfKind.has_value())
         {
+            ACE_ASSERT(selfTokens.empty());
             return std::nullopt;
         }
 
+        ACE_ASSERT(!selfTokens.empty());
+
+        const SrcLocation srcLocation
+        {
+            selfTokens.front()->SrcLocation,
+            selfTokens.back() ->SrcLocation,
+        };
+
+        std::vector<TypeNameModifier> modifiers{ TypeNameModifier::Ref };
+
+        switch (optSelfKind.value())
+        {
+            case SelfKind::Normal:
+            {
+                break;
+            }
+
+            case SelfKind::StrongPtr:
+            {
+                modifiers.push_back(TypeNameModifier::StrongPtr);
+                break;
+            }
+        }
+
         return std::make_shared<const SelfParamVarNode>(
-            optSelfToken.value()->SrcLocation,
+            srcLocation,
             scope,
-            selfTypeName
+            TypeName{ selfTypeSymbolName, modifiers }
         );
     }
 
@@ -910,6 +943,11 @@ namespace Ace
                 {
                     return { Modifier::Self, diagnostics };
                 }
+            }
+
+            case TokenKind::Asterisk:
+            {
+                return { Modifier::StrongPtr, diagnostics };
             }
 
             default:
@@ -3932,14 +3970,20 @@ namespace Ace
         }
 
         auto accessModifier = AccessModifier::Private;
-        std::optional<std::shared_ptr<const Token>> optSelfToken{};
+        std::optional<SelfKind> optSelfKind{};
+        std::vector<std::shared_ptr<const Token>> selfTokens{};
         bool isExtern = false;
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
-                { Modifier::Public, Modifier::Self, Modifier::Extern },
+                {
+                    Modifier::Public,
+                    Modifier::StrongPtr,
+                    Modifier::Self,
+                    Modifier::Extern,
+                },
                 [&]()
                 {
                     return
@@ -3953,9 +3997,30 @@ namespace Ace
                 accessModifier = AccessModifier::Public;
             }
 
+            if (modifierToTokenMap.contains(Modifier::StrongPtr))
+            {
+                const auto& strongPtrToken = modifierToTokenMap.at(
+                    Modifier::StrongPtr
+                );
+
+                selfTokens.push_back(strongPtrToken);
+                optSelfKind = SelfKind::StrongPtr;
+
+                if (!modifierToTokenMap.contains(Modifier::Self))
+                {
+                    diagnostics.Add(CreateMissingSelfModifierAfterStrongPtrError(
+                        strongPtrToken
+                    ));
+                }
+            }
+
             if (modifierToTokenMap.contains(Modifier::Self))
             {
-                optSelfToken = modifierToTokenMap.at(Modifier::Self);
+                selfTokens.push_back(modifierToTokenMap.at(Modifier::Self));
+                if (!optSelfKind.has_value())
+                {
+                    optSelfKind = SelfKind::Normal;
+                }
             }
 
             if (modifierToTokenMap.contains(Modifier::Extern))
@@ -3975,7 +4040,7 @@ namespace Ace
             optNameToken.value(),
             optParams.value().size(),
             accessModifier,
-            optSelfToken.has_value()
+            optSelfKind.has_value()
         ));
         if (!optName.has_value())
         {
@@ -4008,7 +4073,8 @@ namespace Ace
         }
 
         const auto optSelfParam = CreateSelfParam(
-            optSelfToken,
+            optSelfKind,
+            selfTokens,
             selfScope,
             selfTypeName
         );
@@ -4092,13 +4158,14 @@ namespace Ace
         }
 
         auto accessModifier = AccessModifier::Private;
-        std::optional<std::shared_ptr<const Token>> optSelfToken{};
+        std::optional<SelfKind> optSelfKind{};
+        std::vector<std::shared_ptr<const Token>> selfTokens{};
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
-                { Modifier::Public, Modifier::Self },
+                { Modifier::Public, Modifier::StrongPtr, Modifier::Self },
                 [&]()
                 {
                     return
@@ -4112,9 +4179,30 @@ namespace Ace
                 accessModifier = AccessModifier::Public;
             }
 
+            if (modifierToTokenMap.contains(Modifier::StrongPtr))
+            {
+                const auto& strongPtrToken = modifierToTokenMap.at(
+                    Modifier::StrongPtr
+                );
+
+                selfTokens.push_back(strongPtrToken);
+                optSelfKind = SelfKind::StrongPtr;
+
+                if (!modifierToTokenMap.contains(Modifier::Self))
+                {
+                    diagnostics.Add(CreateMissingSelfModifierAfterStrongPtrError(
+                        strongPtrToken
+                    ));
+                }
+            }
+
             if (modifierToTokenMap.contains(Modifier::Self))
             {
-                optSelfToken = modifierToTokenMap.at(Modifier::Self);
+                selfTokens.push_back(modifierToTokenMap.at(Modifier::Self));
+                if (!optSelfKind.has_value())
+                {
+                    optSelfKind = SelfKind::Normal;
+                }
             }
         }
 
@@ -4128,7 +4216,8 @@ namespace Ace
         }
 
         const auto selfParam = CreateSelfParam(
-            optSelfToken,
+            optSelfKind,
+            selfTokens,
             selfScope,
             selfTypeName
         );
@@ -4368,13 +4457,14 @@ namespace Ace
         }
 
         auto accessModifier = AccessModifier::Private;
-        std::optional<std::shared_ptr<const Token>> optSelfToken{};
+        std::optional<SelfKind> optSelfKind{};
+        std::vector<std::shared_ptr<const Token>> selfTokens{};
         if (parser.Peek() == TokenKind::MinusGreaterThan)
         {
             const auto modifierToTokenMap = diagnostics.Collect(ParseModifiersUntil(
                 parser,
                 scope,
-                { Modifier::Public, Modifier::Self },
+                { Modifier::Public, Modifier::StrongPtr, Modifier::Self },
                 [&]()
                 {
                     return
@@ -4388,9 +4478,30 @@ namespace Ace
                 accessModifier = AccessModifier::Public;
             }
 
+            if (modifierToTokenMap.contains(Modifier::StrongPtr))
+            {
+                const auto& strongPtrToken = modifierToTokenMap.at(
+                    Modifier::StrongPtr
+                );
+
+                selfTokens.push_back(strongPtrToken);
+                optSelfKind = SelfKind::StrongPtr;
+
+                if (!modifierToTokenMap.contains(Modifier::Self))
+                {
+                    diagnostics.Add(CreateMissingSelfModifierAfterStrongPtrError(
+                        strongPtrToken
+                    ));
+                }
+            }
+
             if (modifierToTokenMap.contains(Modifier::Self))
             {
-                optSelfToken = modifierToTokenMap.at(Modifier::Self);
+                selfTokens.push_back(modifierToTokenMap.at(Modifier::Self));
+                if (!optSelfKind.has_value())
+                {
+                    optSelfKind = SelfKind::Normal;
+                }
             }
         }
 
@@ -4398,7 +4509,7 @@ namespace Ace
             optNameToken.value(),
             optParams.value().size(),
             accessModifier,
-            optSelfToken.has_value()
+            optSelfKind.has_value()
         ));
         if (!optName.has_value())
         {
@@ -4412,7 +4523,8 @@ namespace Ace
         }
 
         const auto optSelfParam = CreateSelfParam(
-            optSelfToken,
+            optSelfKind,
+            selfTokens,
             selfScope,
             selfTypeName
         );

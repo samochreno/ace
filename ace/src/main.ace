@@ -1,3 +1,82 @@
+print_int(value: int): void -> pub extern;
+print_ptr(ptr: std::Ptr): void -> pub extern;
+
+main(): int {
+    test();
+    ret 0;
+}
+
+test(): void {
+    i: int = 0;
+
+    i += compound_assignment();
+    print_int(i);
+    assert i == 11;
+
+
+    i += struct_compound_assignment();
+    print_int(i);
+    assert i == 37;
+
+    i += boxed_struct_compound_assignment();
+    print_int(i);
+    assert i == 41;
+
+    i += boxed_self();
+    print_int(i);
+    assert i == 53;
+
+    print_int(0);
+}
+
+Node: struct -> pub {
+    value: int
+}
+
+impl Node {
+    value(): int -> self {
+        ret self.value;
+    }
+
+    area(): int -> *self {
+        ret self.value * self.value;
+    }
+}
+
+boxed_self(): int {
+    i: int = 0;
+    boxed_node: *Node = box new Node { value: 3 };
+
+    i += boxed_node.value();
+    assert i == 3;
+
+    i += boxed_node.area();
+    assert i == 12;
+
+    ret i;
+}
+
+boxed_struct_compound_assignment(): int {
+    value: Vector2 = new Vector2 { x: 0, y: 2 };
+
+    boxed_value: *Vector2 = box value;
+    boxed_value.y *= 2;
+
+    ret boxed_value.y;
+}
+
+struct_compound_assignment(): int {
+    value: Vector2 = new Vector2 { x: 0, y: 27 };
+    value.y -= 1;
+    ret value.y;
+}
+
+compound_assignment(): int {
+    i: int = 10;
+    increment_int(i);
+    ret i;
+}
+
 Vector2: struct -> pub {
     x: int -> pub, 
     y: int -> pub,
@@ -253,7 +332,7 @@ RAII: struct {
 impl RAII {
     new(): RAII {
         print_int(11111);
-        ret new RAII { };
+        ret new RAII {};
     }
 
     op copy(self: &RAII, other: &RAII): void -> pub {
@@ -364,7 +443,7 @@ PL: struct {
 impl PL {
     new(): PL {
         print_int(11111);
-        ret new PL { };
+        ret new PL {};
     }
 
     op copy(self: &PL, other: &PL): void -> pub {
@@ -497,7 +576,7 @@ global(): int {
 NewTemplate[T]: struct { }
 
 deducable[T, U](lhs: T, rhs: U): T {
-    new NewTemplate[U] { };
+    new NewTemplate[U] {};
     ret lhs;
 }
 
@@ -522,51 +601,3 @@ implicit_conversion_with_binary_op(): int {
     i: i32 = 5i32 + 9i16;
     ret 0;
 }
-
-compound_assignment(): int {
-    i: int = 10;
-    increment_int(i);
-    ret i;
-}
-
-struct_compound_assignment(): int {
-    value: Vector2 = new Vector2 { x: 0, y: 27 };
-    value.y -= 1;
-    ret value.y;
-}
-
-boxed_struct_compound_assignment(): int {
-    value: Vector2 = new Vector2 { x: 0, y: 2 };
-
-    boxed_value: *Vector2 = box value;
-    boxed_value.y *= 2;
-
-    ret boxed_value.y;
-}
-
-test(): void {
-    i: int = 0;
-
-    i += compound_assignment();
-    print_int(i);
-    assert i == 11;
-
-    i += struct_compound_assignment();
-    print_int(i);
-    assert i == 37;
-
-    i += boxed_struct_compound_assignment();
-    print_int(i);
-    assert i == 41;
-
-    print_int(0);
-}
-
-main(): int {
-    test();
-    ret 0;
-}
-
-print_int(value: int): void -> pub extern;
-
-print_ptr(ptr: std::Ptr): void -> pub extern;

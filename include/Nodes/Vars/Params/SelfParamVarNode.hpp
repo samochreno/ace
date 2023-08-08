@@ -26,7 +26,7 @@ namespace Ace
         SelfParamVarNode(
             const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
-            const SymbolName& typeName
+            const TypeName& typeName
         );
         virtual ~SelfParamVarNode() = default;
 

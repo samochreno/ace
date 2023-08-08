@@ -153,4 +153,26 @@ namespace Ace
 
         return group;
     }
+
+    auto CreateMismatchedSelfExprTypeError(
+        const SrcLocation& srcLocation,
+        const SelfParamVarSymbol* const selfParamSymbol
+    ) -> std::shared_ptr<const DiagnosticGroup>
+    {
+        auto group = std::make_shared<DiagnosticGroup>();
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            "mismatched self argument type"
+        );
+
+        group->Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            selfParamSymbol->GetName().SrcLocation,
+            "parameter declaration"
+        );
+
+        return group;
+    }
 }

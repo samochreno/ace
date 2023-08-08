@@ -7,6 +7,7 @@
 #include "TypeInfo.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "Symbols/FunctionSymbol.hpp"
+#include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 
 namespace Ace
 {
@@ -44,5 +45,10 @@ namespace Ace
 
     auto CreateMissingReturnExprError(
         const SrcLocation& srcLocation
+    ) -> std::shared_ptr<const DiagnosticGroup>;
+
+    auto CreateMismatchedSelfExprTypeError(
+        const SrcLocation& srcLocation,
+        const SelfParamVarSymbol* const selfParamSymbol
     ) -> std::shared_ptr<const DiagnosticGroup>;
 }

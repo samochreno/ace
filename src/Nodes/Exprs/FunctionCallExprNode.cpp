@@ -128,8 +128,7 @@ namespace Ace
                 memberAccessExpr->GetExpr()->CreateBoundExpr()
             );
 
-            auto* const selfTypeSymbol =
-                boundExpr->GetTypeInfo().Symbol->GetWithoutRef();
+            auto* const selfTypeSymbol = boundExpr->GetTypeInfo().Symbol;
 
             std::optional<FunctionSymbol*> optFunctionSymbol{};
             if (!selfTypeSymbol->IsError())
