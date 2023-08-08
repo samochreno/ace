@@ -346,7 +346,7 @@ namespace Ace
                 optArgTypes,
                 IsCorrectSymbolType<TSymbol>,
                 beginScopes,
-                GetStaticSymbolResolutionImplTemplateArgs(shared_from_this()),
+                CollectStaticSymbolResolutionImplTemplateArgs(shared_from_this()),
                 IsTemplate<TSymbol>()
             }));
             if (!optSymbol.has_value())
@@ -623,7 +623,7 @@ namespace Ace
             const SrcLocation& srcLocation,
             const SymbolName& name
         ) const -> Expected<std::shared_ptr<const Scope>>;
-        static auto GetStaticSymbolResolutionImplTemplateArgs(
+        static auto CollectStaticSymbolResolutionImplTemplateArgs(
             const std::shared_ptr<const Scope>& beginScope
         ) -> std::vector<ITypeSymbol*>;
 

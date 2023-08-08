@@ -1440,7 +1440,7 @@ namespace Ace
         return diagnostics.Add(CreateUndefinedSymbolRefError(srcLocation));
     }
 
-    auto Scope::GetStaticSymbolResolutionImplTemplateArgs(
+    auto Scope::CollectStaticSymbolResolutionImplTemplateArgs(
         const std::shared_ptr<const Scope>& beginScope
     ) -> std::vector<ITypeSymbol*>
     {
