@@ -216,17 +216,12 @@ namespace Ace::GlueGeneration
         });
     }
 
-    auto GenerateAndBindGlue(
-        Compilation* const compilation
-    ) -> void
+    auto GenerateAndBindGlue(Compilation* const compilation) -> void
     {
         GenerateAndBindGlue(
             compilation,
             &GetOrDefineAndBindCopyGlueSymbols,
-            [](
-                ITypeSymbol* const typeSymbol, 
-                FunctionSymbol* const glueSymbol
-            ) 
+            [](ITypeSymbol* const typeSymbol, FunctionSymbol* const glueSymbol) 
             { 
                 return typeSymbol->CreateCopyGlueBody(glueSymbol);
             }
@@ -234,10 +229,7 @@ namespace Ace::GlueGeneration
         GenerateAndBindGlue(
             compilation,
             &GetOrDefineAndBindDropGlueSymbols,
-            [](
-                ITypeSymbol* const typeSymbol, 
-                FunctionSymbol* const glueSymbol
-            ) 
+            [](ITypeSymbol* const typeSymbol, FunctionSymbol* const glueSymbol) 
             { 
                 return typeSymbol->CreateDropGlueBody(glueSymbol);
             }

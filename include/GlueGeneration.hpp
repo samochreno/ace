@@ -9,9 +9,7 @@
 
 namespace Ace::GlueGeneration
 {
-    auto GenerateAndBindGlue(
-        Compilation* const compilation
-    ) -> void;
+    auto GenerateAndBindGlue(Compilation* const compilation) -> void;
 
     auto CreateCopyGlueBody(
         Compilation* const compilation,

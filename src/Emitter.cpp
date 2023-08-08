@@ -353,7 +353,7 @@ namespace Ace
 
         std::for_each(
             begin(m_LocalVarSymbolStmtIndexPairs), 
-            end(m_LocalVarSymbolStmtIndexPairs), 
+            end  (m_LocalVarSymbolStmtIndexPairs), 
             [&](const LocalVarSymbolStmtIndexPair& symbolIndexPair)
             {
                 auto* const varSymbol = symbolIndexPair.LocalVarSymbol;
@@ -433,7 +433,9 @@ namespace Ace
                     m_BlockBuilder->Block->back().isTerminator();
 
                 if (isTerminated)
+                {
                     return;
+                }
 
                 stmt->Emit(*this);
                 
@@ -446,31 +448,25 @@ namespace Ace
                     auto blockVarSymbols = 
                         blockScope->CollectSymbols<LocalVarSymbol>();
 
-                    std::sort(
-                        begin(blockVarSymbols),
-                        end  (blockVarSymbols),
-                        [&](
-                            const LocalVarSymbol* const lhs,
-                            const LocalVarSymbol* const rhs
-                            )
-                        {
-                            return
-                                m_LocalVarSymbolStmtIndexMap.at(lhs) >
-                                m_LocalVarSymbolStmtIndexMap.at(rhs);
-                        }
-                    );
+                    std::sort(begin(blockVarSymbols), end(blockVarSymbols),
+                    [&](
+                        const LocalVarSymbol* const lhs,
+                        const LocalVarSymbol* const rhs
+                        )
+                    {
+                        return
+                            m_LocalVarSymbolStmtIndexMap.at(lhs) >
+                            m_LocalVarSymbolStmtIndexMap.at(rhs);
+                    });
 
-                    std::for_each(
-                        begin(blockVarSymbols),
-                        end  (blockVarSymbols),
-                        [&](LocalVarSymbol* const varSymbol)
-                        {
-                            EmitDrop({ 
-                                m_LocalVarMap.at(varSymbol), 
-                                varSymbol->GetType() 
-                            });
-                        }
-                    );
+                    std::for_each(begin(blockVarSymbols), end(blockVarSymbols),
+                    [&](LocalVarSymbol* const varSymbol)
+                    {
+                        EmitDrop({ 
+                            m_LocalVarMap.at(varSymbol), 
+                            varSymbol->GetType() 
+                        });
+                    });
                 }
             });
         }
