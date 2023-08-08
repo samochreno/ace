@@ -402,7 +402,7 @@ namespace Ace
                 nameSections.end(),
                 optArgTypes,
                 IsCorrectSymbolType<TSymbol>,
-                GetInstanceSymbolResolutionScopes(selfType),
+                CollectInstanceSymbolResolutionScopes(selfType),
                 CollectInstanceSymbolResolutionImplTemplateArgs(selfType),
                 IsTemplate<TSymbol>()
             }));
@@ -612,7 +612,7 @@ namespace Ace
             const std::vector<ITypeSymbol*>& templateArgs
         ) -> std::optional<ISymbol*>;
 
-        static auto GetInstanceSymbolResolutionScopes(
+        static auto CollectInstanceSymbolResolutionScopes(
             ITypeSymbol* selfType
         ) -> std::vector<std::shared_ptr<const Scope>>;
         static auto CollectInstanceSymbolResolutionImplTemplateArgs(

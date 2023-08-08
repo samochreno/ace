@@ -1349,7 +1349,7 @@ namespace Ace
         return perfectMatchIt->get();
     }
 
-    auto Scope::GetInstanceSymbolResolutionScopes(
+    auto Scope::CollectInstanceSymbolResolutionScopes(
         ITypeSymbol* selfType
     ) -> std::vector<std::shared_ptr<const Scope>>
     {
@@ -1357,14 +1357,14 @@ namespace Ace
 
         if (selfType->IsRef())
         {
-            return GetInstanceSymbolResolutionScopes(
+            return CollectInstanceSymbolResolutionScopes(
                 selfType->GetWithoutRef()
             );
         }
 
         if (selfType->IsStrongPtr())
         {
-            return GetInstanceSymbolResolutionScopes(
+            return CollectInstanceSymbolResolutionScopes(
                 selfType->GetWithoutStrongPtr()
             );
         }
