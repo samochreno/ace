@@ -50,6 +50,7 @@ namespace Ace
 
         auto CollectParams()    const -> std::vector<IParamVarSymbol*> final;
         auto CollectAllParams() const -> std::vector<IParamVarSymbol*>;
+        auto CollectSelfParam() const -> std::optional<SelfParamVarSymbol*>;
 
         auto CollectArgTypeInfos() const -> std::vector<TypeInfo>;
 

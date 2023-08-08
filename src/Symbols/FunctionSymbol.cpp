@@ -151,6 +151,20 @@ namespace Ace
         return params;
     }
 
+    auto FunctionSymbol::CollectSelfParam() const -> std::optional<SelfParamVarSymbol*>
+    {
+        const auto selfParams =
+            m_SelfScope->CollectSymbols<SelfParamVarSymbol>();
+
+        if (selfParams.empty())
+        {
+            return {};
+        }
+        
+        ACE_ASSERT(selfParams.size() == 1);
+        return selfParams.front();
+    }
+
     auto FunctionSymbol::CollectArgTypeInfos() const -> std::vector<TypeInfo>
     {
         const auto params = CollectParams();
