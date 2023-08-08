@@ -1395,7 +1395,7 @@ namespace Ace
         return selfType->CollectTemplateArgs();
     }
 
-    auto Scope::GetStaticSymbolResolutionBeginScope(
+    auto Scope::FindStaticSymbolResolutionBeginScope(
         const SrcLocation& srcLocation,
         const SymbolName& name
     ) const -> Expected<std::shared_ptr<const Scope>>

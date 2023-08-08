@@ -323,7 +323,7 @@ namespace Ace
             const auto srcLocation = name.Sections.front().CreateSrcLocation();
 
             const auto optBeginScope = diagnostics.Collect(
-                GetStaticSymbolResolutionBeginScope(srcLocation, name)
+                FindStaticSymbolResolutionBeginScope(srcLocation, name)
             );
             if (!optBeginScope.has_value())
             {
@@ -619,7 +619,7 @@ namespace Ace
             ITypeSymbol* const selfType
         ) -> std::vector<ITypeSymbol*>;
 
-        auto GetStaticSymbolResolutionBeginScope(
+        auto FindStaticSymbolResolutionBeginScope(
             const SrcLocation& srcLocation,
             const SymbolName& name
         ) const -> Expected<std::shared_ptr<const Scope>>;
