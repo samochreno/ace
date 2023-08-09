@@ -9,17 +9,17 @@ namespace Ace
 {
     auto CreateMissingCLIOptionNameError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnknownCLIOptionNameError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateMissingCLIOptionValueError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedCLIOptionValueError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 }

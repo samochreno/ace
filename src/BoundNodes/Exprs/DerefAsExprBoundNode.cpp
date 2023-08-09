@@ -47,7 +47,7 @@ namespace Ace
         const TypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const DerefAsExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol->GetUnaliased();
 
@@ -65,7 +65,7 @@ namespace Ace
 
         if (checkedExpr == m_Expr)
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -75,7 +75,7 @@ namespace Ace
                 checkedExpr,
                 m_TypeSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

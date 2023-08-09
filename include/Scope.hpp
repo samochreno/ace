@@ -41,16 +41,17 @@ namespace Ace
         const ISymbol* const symbol
     ) -> Expected<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (dynamic_cast<const TSymbol*>(symbol) == nullptr)
         {
-            return diagnostics.Add(CreateIncorrectSymbolTypeError<TSymbol>(
+            diagnostics.Add(CreateIncorrectSymbolTypeError<TSymbol>(
                 srcLocation
             ));
+            return std::move(diagnostics);
         }
 
-        return Void{ diagnostics };
+        return Void{ std::move(diagnostics) };
     }
 
     auto IsCorrectSymbolCategory(
@@ -62,7 +63,7 @@ namespace Ace
     auto CreateSymbolRedefinitionError(
         const ISymbol* const originalSymbol,
         const ISymbol* const redefinedSymbol
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     template<typename TSymbol>
     constexpr auto IsTemplate() -> bool
@@ -190,7 +191,7 @@ namespace Ace
             std::unique_ptr<TSymbol> ownedSymbol
         ) -> Diagnosed<TSymbol*>
         {
-            DiagnosticBag diagnostics{};
+            auto diagnostics = DiagnosticBag::Create();
 
             // TODO: Dont allow private types to leak in public interface
             /*
@@ -253,7 +254,7 @@ namespace Ace
 
                 if (isSameKind && isSameType)
                 {
-                    return Diagnosed{ castedSameSymbol, diagnostics };
+                    return Diagnosed{ castedSameSymbol, std::move(diagnostics) };
                 }
             }
 
@@ -261,7 +262,7 @@ namespace Ace
                 std::move(ownedSymbol)
             );
 
-            return Diagnosed{ symbol, diagnostics };
+            return Diagnosed{ symbol, std::move(diagnostics) };
         }
         static auto DefineSymbol(
             const ISymbolCreatable* const creatable
@@ -318,7 +319,7 @@ namespace Ace
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
-            DiagnosticBag diagnostics{};
+            auto diagnostics = DiagnosticBag::Create();
 
             const auto srcLocation = name.Sections.front().CreateSrcLocation();
 
@@ -327,7 +328,7 @@ namespace Ace
             );
             if (!optBeginScope.has_value())
             {
-                return diagnostics;
+                return std::move(diagnostics);
             }
 
             std::vector<std::shared_ptr<const Scope>> beginScopes{};
@@ -351,7 +352,7 @@ namespace Ace
             }));
             if (!optSymbol.has_value())
             {
-                return diagnostics;
+                return std::move(diagnostics);
             }
 
             auto* const symbol = dynamic_cast<TSymbol*>(optSymbol.value());
@@ -364,10 +365,10 @@ namespace Ace
             ));
             if (!isCorrectSymbolCategory)
             {
-                return diagnostics;
+                return std::move(diagnostics);
             }
 
-            return Expected{ symbol, diagnostics };
+            return Expected{ symbol, std::move(diagnostics) };
         }
 
         template<typename TSymbol>
@@ -389,7 +390,7 @@ namespace Ace
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<TSymbol*>
         {
-            DiagnosticBag diagnostics{};
+            auto diagnostics = DiagnosticBag::Create();
 
             const std::vector nameSections{ name };
 
@@ -408,7 +409,7 @@ namespace Ace
             }));
             if (!optSymbol.has_value())
             {
-                return diagnostics;
+                return std::move(diagnostics);
             }
 
             auto* const symbol = dynamic_cast<TSymbol*>(optSymbol.value());
@@ -421,10 +422,10 @@ namespace Ace
             ));
             if (!isCorrectSymbolCategory)
             {
-                return diagnostics;
+                return std::move(diagnostics);
             }
 
-            return Expected{ symbol, diagnostics };
+            return Expected{ symbol, std::move(diagnostics) };
         }
 
         template<typename TSymbol>
@@ -469,7 +470,7 @@ namespace Ace
             const std::vector<ITypeSymbol*>& templateArgs
         ) const -> Expected<TSymbol*>
         {
-            DiagnosticBag diagnostics{};
+            auto diagnostics = DiagnosticBag::Create();
 
             const std::vector nameSections
             { 
@@ -492,14 +493,14 @@ namespace Ace
             }));
             if (!optSymbol.has_value())
             {
-                return diagnostics;
+                return std::move(diagnostics);
             }
 
 
             auto* const symbol = dynamic_cast<TSymbol*>(optSymbol.value());
             ACE_ASSERT(symbol);
 
-            return Expected{ symbol, diagnostics };
+            return Expected{ symbol, std::move(diagnostics) };
         }
 
         template<typename TSymbol>

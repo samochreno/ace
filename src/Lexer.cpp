@@ -354,23 +354,67 @@ namespace Ace
         const std::string& suffix
     ) -> Expected<TokenKind>
     {
-        if (suffix == "i8")  return TokenKind::Int8;
-        if (suffix == "i16") return TokenKind::Int16;
-        if (suffix == "i32") return TokenKind::Int32;
-        if (suffix == "i64") return TokenKind::Int64;
+        auto diagnostics = DiagnosticBag::Create();
+
+        if (suffix == "i8") 
+        {
+            return Expected{ TokenKind::Int8, std::move(diagnostics) };
+        }
+
+        if (suffix == "i16")
+        {
+            return Expected{ TokenKind::Int16, std::move(diagnostics) };
+        }
+
+        if (suffix == "i32")
+        {
+            return Expected{ TokenKind::Int32, std::move(diagnostics) };
+        }
+
+        if (suffix == "i64")
+        {
+            return Expected{ TokenKind::Int64, std::move(diagnostics) };
+        }
         
-        if (suffix == "u8")  return TokenKind::UInt8;
-        if (suffix == "u16") return TokenKind::UInt16;
-        if (suffix == "u32") return TokenKind::UInt32;
-        if (suffix == "u64") return TokenKind::UInt64;
-        if (suffix == "u64") return TokenKind::UInt64;
+        if (suffix == "u8")
+        {
+            return Expected{ TokenKind::UInt8, std::move(diagnostics) };
+        }
 
-        if (suffix == "f32") return TokenKind::Float32;
-        if (suffix == "f64") return TokenKind::Float64;
+        if (suffix == "u16")
+        {
+            return Expected{ TokenKind::UInt16, std::move(diagnostics) };
+        }
 
-        return DiagnosticBag{}.Add(CreateUnknownNumericLiteralTypeSuffixError(
+        if (suffix == "u32")
+        {
+            return Expected{ TokenKind::UInt32, std::move(diagnostics) };
+        }
+
+        if (suffix == "u64")
+        {
+            return Expected{ TokenKind::UInt64, std::move(diagnostics) };
+        }
+
+        if (suffix == "u64")
+        {
+            return Expected{ TokenKind::UInt64, std::move(diagnostics) };
+        }
+
+        if (suffix == "f32")
+        {
+            return Expected{ TokenKind::Float32, std::move(diagnostics) };
+        }
+    
+        if (suffix == "f64")
+        {
+            return Expected{ TokenKind::Float64, std::move(diagnostics) };
+        }
+
+        diagnostics.Add(CreateUnknownNumericLiteralTypeSuffixError(
             srcLocation
         ));
+        return std::move(diagnostics);
     }
 
     static auto IsIdentBegin(const Lexer& lexer) -> bool
@@ -480,7 +524,7 @@ namespace Ace
         Lexer& lexer
     ) -> Diagnosed<std::shared_ptr<const Token>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
@@ -559,7 +603,7 @@ namespace Ace
         return
         {
             token,
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -567,6 +611,8 @@ namespace Ace
         Lexer& lexer
     ) -> Expected<TokenKind>
     {
+        auto diagnostics = DiagnosticBag::Create();
+
         switch (lexer.Peek())
         {
             case '=':
@@ -576,11 +622,19 @@ namespace Ace
                 if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::EqualsEquals;
+                    return Expected
+                    {
+                        TokenKind::EqualsEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::Equals;
+                    return Expected
+                    {
+                        TokenKind::Equals,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -591,11 +645,18 @@ namespace Ace
                 if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::PlusEquals;
+                    return Expected
+                    {
+                        TokenKind::PlusEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::Plus;
+                    return Expected {
+                        TokenKind::Plus,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -606,16 +667,28 @@ namespace Ace
                 if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::MinusEquals;
+                    return Expected
+                    {
+                        TokenKind::MinusEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else if (lexer.Peek() == '>')
                 {
                     lexer.Eat();
-                    return TokenKind::MinusGreaterThan;
+                    return Expected
+                    {
+                        TokenKind::MinusGreaterThan,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::Minus;
+                    return Expected
+                    {
+                        TokenKind::Minus,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -626,11 +699,19 @@ namespace Ace
                 if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::AsteriskEquals;
+                    return Expected
+                    {
+                        TokenKind::AsteriskEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::Asterisk;
+                    return Expected
+                    {
+                        TokenKind::Asterisk,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -641,11 +722,19 @@ namespace Ace
                 if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::SlashEquals;
+                    return Expected
+                    {
+                        TokenKind::SlashEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::Slash;
+                    return Expected
+                    {
+                        TokenKind::Slash,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -656,11 +745,19 @@ namespace Ace
                 if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::PercentEquals;
+                    return Expected
+                    {
+                        TokenKind::PercentEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::Percent;
+                    return Expected
+                    {
+                        TokenKind::Percent,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -675,21 +772,37 @@ namespace Ace
                     if (lexer.Peek() == '=')
                     {
                         lexer.Eat();
-                        return TokenKind::LessThanLessThanEquals;
+                        return Expected
+                        {
+                            TokenKind::LessThanLessThanEquals,
+                            std::move(diagnostics),
+                        };
                     }
                     else
                     {
-                        return TokenKind::LessThanLessThan;
+                        return Expected
+                        {
+                            TokenKind::LessThanLessThan,
+                            std::move(diagnostics),
+                        };
                     }
                 }
                 else if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::LessThanEquals;
+                    return Expected
+                    {
+                        TokenKind::LessThanEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::LessThan;
+                    return Expected
+                    {
+                        TokenKind::LessThan,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -704,21 +817,37 @@ namespace Ace
                     if (lexer.Peek() == '=')
                     {
                         lexer.Eat();
-                        return TokenKind::GreaterThanGreaterThanEquals;
+                        return Expected
+                        {
+                            TokenKind::GreaterThanGreaterThanEquals,
+                            std::move(diagnostics),
+                        };
                     }
                     else
                     {
-                        return TokenKind::GreaterThanGreaterThan;
+                        return Expected
+                        {
+                            TokenKind::GreaterThanGreaterThan,
+                            std::move(diagnostics),
+                        };
                     }
                 }
                 else if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::GreaterThanEquals;
+                    return Expected
+                    {
+                        TokenKind::GreaterThanEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::GreaterThan;
+                    return Expected
+                    {
+                        TokenKind::GreaterThan,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -729,16 +858,28 @@ namespace Ace
                 if (lexer.Peek() == '&')
                 {
                     lexer.Eat();
-                    return TokenKind::AmpersandAmpersand;
+                    return Expected
+                    {
+                        TokenKind::AmpersandAmpersand,
+                        std::move(diagnostics),
+                    };
                 }
                 else if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::AmpersandEquals;
+                    return Expected
+                    {
+                        TokenKind::AmpersandEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::Ampersand;
+                    return Expected
+                    {
+                        TokenKind::Ampersand,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -749,11 +890,19 @@ namespace Ace
                 if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::CaretEquals;
+                    return Expected
+                    {
+                        TokenKind::CaretEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::Caret;
+                    return Expected
+                    {
+                        TokenKind::Caret,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -764,16 +913,28 @@ namespace Ace
                 if (lexer.Peek() == '|')
                 {
                     lexer.Eat();
-                    return TokenKind::VerticalBarVerticalBar;
+                    return Expected
+                    {
+                        TokenKind::VerticalBarVerticalBar,
+                        std::move(diagnostics),
+                    };
                 }
                 else if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::VerticalBarEquals;
+                    return Expected
+                    {
+                        TokenKind::VerticalBarEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::VerticalBar;
+                    return Expected
+                    {
+                        TokenKind::VerticalBar,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
@@ -784,30 +945,50 @@ namespace Ace
                 if (lexer.Peek() == ':')
                 {
                     lexer.Eat();
-                    return TokenKind::ColonColon;
+                    return Expected
+                    {
+                        TokenKind::ColonColon,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::Colon;
+                    return Expected
+                    {
+                        TokenKind::Colon,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
             case '.':
             {
                 lexer.Eat();
-                return TokenKind::Dot;
+                return Expected
+                {
+                    TokenKind::Dot,
+                    std::move(diagnostics),
+                };
             }
 
             case ',':
             {
                 lexer.Eat();
-                return TokenKind::Comma;
+                return Expected
+                {
+                    TokenKind::Comma,
+                    std::move(diagnostics),
+                };
             }
 
             case ';':
             {
                 lexer.Eat();
-                return TokenKind::Semicolon;
+                return Expected
+                {
+                    TokenKind::Semicolon,
+                    std::move(diagnostics),
+                };
             }
 
             case '!':
@@ -817,61 +998,98 @@ namespace Ace
                 if (lexer.Peek() == '=')
                 {
                     lexer.Eat();
-                    return TokenKind::ExclamationEquals;
+                    return Expected
+                    {
+                        TokenKind::ExclamationEquals,
+                        std::move(diagnostics),
+                    };
                 }
                 else
                 {
-                    return TokenKind::Exclamation;
+                    return Expected
+                    {
+                        TokenKind::Exclamation,
+                        std::move(diagnostics),
+                    };
                 }
             }
 
             case '~':
             {
                 lexer.Eat();
-                return TokenKind::Tilde;
+                return Expected
+                {
+                    TokenKind::Tilde,
+                    std::move(diagnostics),
+                };
             }
 
             case '(':
             {
                 lexer.Eat();
-                return TokenKind::OpenParen;
+                return Expected
+                {
+                    TokenKind::OpenParen,
+                    std::move(diagnostics),
+                };
             }
 
             case ')':
             {
                 lexer.Eat();
-                return TokenKind::CloseParen;
+                return Expected
+                {
+                    TokenKind::CloseParen,
+                    std::move(diagnostics),
+                };
             }
 
             case '{':
             {
                 lexer.Eat();
-                return TokenKind::OpenBrace;
+                return Expected
+                {
+                    TokenKind::OpenBrace,
+                    std::move(diagnostics),
+                };
             }
 
             case '}':
             {
                 lexer.Eat();
-                return TokenKind::CloseBrace;
+                return Expected
+                {
+                    TokenKind::CloseBrace,
+                    std::move(diagnostics),
+                };
             }
 
             case '[':
             {
                 lexer.Eat();
-                return TokenKind::OpenBracket;
+                return Expected
+                {
+                    TokenKind::OpenBracket,
+                    std::move(diagnostics),
+                };
             }
 
             case ']':
             {
                 lexer.Eat();
-                return TokenKind::CloseBracket;
+                return Expected
+                {
+                    TokenKind::CloseBracket,
+                    std::move(diagnostics),
+                };
             }
 
             default:
             {
-                return DiagnosticBag{}.Add(CreateUnexpectedCharacterError(
+                diagnostics.Add(CreateUnexpectedCharacterError(
                     lexer.GetSrcLocation()
                 ));
+                return std::move(diagnostics);
             }
         }
     }
@@ -880,7 +1098,7 @@ namespace Ace
         Lexer& lexer
     ) -> Expected<std::shared_ptr<const Token>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
@@ -888,7 +1106,7 @@ namespace Ace
             diagnostics.Collect(LexDefaultTokenKind(lexer));
         if (!optTokenKind.has_value())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         const auto token = std::make_shared<const Token>(
@@ -899,7 +1117,7 @@ namespace Ace
         return
         {
             token,
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -907,7 +1125,7 @@ namespace Ace
         Lexer& lexer
     ) -> Diagnosed<std::shared_ptr<const Token>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
@@ -943,7 +1161,7 @@ namespace Ace
         return
         {
             token,
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -951,21 +1169,17 @@ namespace Ace
         Lexer& lexer
     ) -> Expected<std::vector<std::shared_ptr<const Token>>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (lexer.Peek() == '"')
         {
             const auto string = diagnostics.Collect(LexString(lexer));
-            return
-            {
-                std::vector{ string },
-                diagnostics,
-            };
+            return Expected{ std::vector{ string }, std::move(diagnostics) };
         }
 
         if (IsIdentBegin(lexer))
         {
-            return LexIdent(lexer);
+            return Expected{ LexIdent(lexer), std::move(diagnostics) };
         }
 
         if (IsNumericLiteralBegin(lexer))
@@ -973,29 +1187,29 @@ namespace Ace
             const auto numericLiteral =
                 diagnostics.Collect(LexNumericLiteral(lexer));
 
-            return
+            return Expected
             {
                 std::vector{ numericLiteral },
-                diagnostics,
+                std::move(diagnostics),
             };
         }
 
         const auto optDefault = diagnostics.Collect(LexDefault(lexer));
         if (!optDefault.has_value())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
-        return
+        return Expected
         {
             std::vector{ optDefault.value() },
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
     static auto DiscardMultiLineComment(Lexer& lexer) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
@@ -1019,12 +1233,18 @@ namespace Ace
         }
         else
         {
+            const SrcLocation srcLocation
+            {
+                beginSrcLocation,
+                lexer.GetLastSrcLocation(),
+            };
+
             diagnostics.Add(CreateUnterminatedMultiLineCommentError(
-                SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() }
+                srcLocation
             ));
         }
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto DiscardSingleLineComment(Lexer& lexer) -> void
@@ -1053,7 +1273,7 @@ namespace Ace
             DiscardSingleLineComment(lexer);
         }
 
-        return { DiagnosticBag{} };
+        return { DiagnosticBag::Create() };
     }
 
     static auto DiscardWhitespace(
@@ -1070,7 +1290,7 @@ namespace Ace
         const FileBuffer* const fileBuffer
     ) -> Diagnosed<std::vector<std::shared_ptr<const Token>>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         Lexer lexer{ fileBuffer };
 
@@ -1114,7 +1334,7 @@ namespace Ace
         return Diagnosed
         {
             tokens,
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 }

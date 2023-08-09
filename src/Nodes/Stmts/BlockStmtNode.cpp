@@ -73,7 +73,7 @@ namespace Ace
 
     auto BlockStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const BlockStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const IStmtBoundNode>> boundStmts{};
         std::transform(begin(m_Stmts), end(m_Stmts), back_inserter(boundStmts),
@@ -89,7 +89,7 @@ namespace Ace
                 m_SelfScope,
                 boundStmts
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

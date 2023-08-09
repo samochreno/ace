@@ -9,11 +9,11 @@ namespace Ace
 {
     auto CreateNotAllControlPathsReturnError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "not all control paths return a value"

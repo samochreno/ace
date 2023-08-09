@@ -14,14 +14,14 @@ namespace Ace
     auto CreateFileSystemError(
         const std::filesystem::path& path,
         const std::filesystem::filesystem_error& error
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
         std::string what{ std::string_view{ error.what() }.substr(18) };
         MakeLowercase(what);
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             std::nullopt,
             "file system: " + what + ": " + path.string()
@@ -32,11 +32,11 @@ namespace Ace
 
     auto CreateFileNotFoundError(
         const std::filesystem::path& path
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             std::nullopt,
             "file not found: " + path.string()
@@ -47,11 +47,11 @@ namespace Ace
 
     auto CreateFileOpenError(
         const std::filesystem::path& path
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             std::nullopt,
             "unable to open file: " + path.string()
@@ -62,11 +62,11 @@ namespace Ace
 
     auto CreateFilePathEndsWithSeparatorError(
         const std::filesystem::path& path
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             std::nullopt,
             "file path ends with separator: " + path.string()

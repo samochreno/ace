@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
+#include <functional>
 #include <type_traits>
 
 #include "Assert.hpp"
@@ -24,73 +26,57 @@ namespace Ace
     class DiagnosticBag
     {
     public:
-        DiagnosticBag() = default;
+        DiagnosticBag([[deprecated]] const DiagnosticBag&) = default;
         ~DiagnosticBag() = default;
+        
+        static auto Create()       -> DiagnosticBag;
+        static auto CreateGlobal() -> DiagnosticBag;
 
-        auto Add(
-            const std::shared_ptr<const DiagnosticGroup>& diagnosticGroup
-        ) -> DiagnosticBag&;
-        auto Add(const DiagnosticBag& diagnostics) -> DiagnosticBag&;
-
-        template<typename TDiagnosed>
-        auto Collect(
-            TDiagnosed diagnosed
-        ) -> void requires IsDiagnosedVoid<TDiagnosed>
-        {
-            Add(diagnosed.GetDiagnostics());
-        }
-
-#define TValue typename std::decay_t<decltype(diagnosed.Unwrap())>
+        auto Add(DiagnosticBag diagnosticBag) -> DiagnosticBag&;
+        auto Add(DiagnosticGroup diagnosticGroup) -> DiagnosticBag&;
 
         template<typename TDiagnosed>
+        auto Collect(TDiagnosed value) -> void requires IsDiagnosedVoid<TDiagnosed>
+        {
+            Add(std::move(value.GetDiagnostics()));
+        }
+        template<typename TDiagnosed>
         [[nodiscard]]
-        auto Collect(
-            TDiagnosed diagnosed
-        ) -> TValue requires IsDiagnosedNotVoid<TDiagnosed>
+        auto Collect(TDiagnosed value) requires IsDiagnosedNotVoid<TDiagnosed>
         {
-            Add(diagnosed.GetDiagnostics());
-            return std::move(diagnosed.Unwrap());
+            Add(std::move(value.GetDiagnostics()));
+            return std::move(value.Unwrap());
         }
-
-#undef TValue
-
         template<typename TExpected>
-        auto Collect(
-            TExpected expected
-        ) -> bool requires IsExpectedVoid<TExpected>
+        auto Collect(TExpected value) -> bool requires IsExpectedVoid<TExpected>
         {
-            Add(expected.GetDiagnostics());
-            return expected;
+            Add(std::move(value.GetDiagnostics()));
+            return value;
         }
-
-#define TValue typename std::decay_t<decltype(expected.Unwrap())>
-
         template<typename TExpected>
         [[nodiscard]]
-        auto Collect(
-            TExpected expected
-        ) -> std::optional<TValue> requires IsExpectedNotVoid<TExpected>
+        auto Collect(TExpected value) requires IsExpectedNotVoid<TExpected>
         {
-            Add(expected.GetDiagnostics());
-            if (!expected)
+            Add(std::move(value.GetDiagnostics()));
+            if (!value)
             {
-                return std::nullopt;
+                return std::optional<std::decay_t<decltype(value.Unwrap())>>{};
             }
 
-            return std::optional{ std::move(expected.Unwrap()) };
+            return std::optional{ std::move(value.Unwrap()) };
         }
 
-#undef TValue
-
         auto IsEmpty() const -> bool;
-        auto GetDiagnosticGroups() const -> const std::vector<std::shared_ptr<const DiagnosticGroup>>&;
         auto GetSeverity() const -> DiagnosticSeverity;
         auto HasErrors() const -> bool;
 
     private:
-        auto AddSeverity(const DiagnosticSeverity& severity) -> void;
+        DiagnosticBag() = default;
 
-        std::vector<std::shared_ptr<const DiagnosticGroup>> m_DiagnosticGroups{};
+        auto AddSeverity(const DiagnosticSeverity severity) -> void;
+
+        std::optional<std::function<void(const DiagnosticGroup&)>> m_OptHandler{};
+        std::vector<DiagnosticGroup> m_DiagnosticGroups{};
         DiagnosticSeverity m_Severity = DiagnosticSeverity::Info;
     };
 }

@@ -66,7 +66,7 @@ namespace Ace
 
     auto WhileStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const WhileStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto boundCondition =
             diagnostics.Collect(m_Condition->CreateBoundExpr());
@@ -81,7 +81,7 @@ namespace Ace
                 boundCondition,
                 boundBody
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

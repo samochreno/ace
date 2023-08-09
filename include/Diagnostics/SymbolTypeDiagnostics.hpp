@@ -12,11 +12,11 @@ namespace Ace
     template<typename TSymbol>
     auto CreateIncorrectSymbolTypeError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "symbol is not " + CreateSymbolTypeStringWithArticle<TSymbol>()

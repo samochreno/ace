@@ -1,11 +1,12 @@
-#include "GlobalDiagnosticBag.hpp"
+#include "DiagnosticLog.hpp"
 
-#include <memory>
-#include <vector>
+#include <string>
+#include <string_view>
 
-#include "DiagnosticBag.hpp"
-#include "SrcBuffer.hpp"
+#include <termcolor/termcolor.hpp>
+
 #include "Log.hpp"
+#include "SrcBuffer.hpp"
 
 namespace Ace
 {
@@ -254,40 +255,25 @@ namespace Ace
         }
     }
 
-    static auto LogDiagnosticGroup(
-        const std::shared_ptr<const DiagnosticGroup>& diagnosticGroup
-    ) -> void
+    static bool HasLogged = false;
+
+    auto LogDiagnosticGroup(const DiagnosticGroup& diagnosticGroup) -> void
     {
+        if (!HasLogged)
+        {
+            HasLogged = true;
+        }
+        else
+        {
+            Log << "\n";
+        }
+
         std::for_each(
-            begin(diagnosticGroup->Diagnostics),
-            end  (diagnosticGroup->Diagnostics),
+            begin(diagnosticGroup.Diagnostics),
+            end  (diagnosticGroup.Diagnostics),
             [&](const Diagnostic& diagnostic)
             {
                 LogDiagnostic(diagnostic);
-            }
-        );
-    }
-
-    auto LogGlobalDiagnostics(
-        const DiagnosticBag& diagnostics,
-        const size_t lastLogSize
-    ) -> void
-    {
-        std::for_each(
-            begin(diagnostics.GetDiagnosticGroups()) + lastLogSize,
-            end  (diagnostics.GetDiagnosticGroups()),
-            [&](const std::shared_ptr<const DiagnosticGroup>& diagnosticGroup)
-            {
-                const bool isFirstDiagnostic =
-                    diagnosticGroup ==
-                    *begin(diagnostics.GetDiagnosticGroups());
-
-                if (!isFirstDiagnostic)
-                {
-                    Log << "\n";
-                }
-
-                LogDiagnosticGroup(diagnosticGroup);
             }
         );
     }

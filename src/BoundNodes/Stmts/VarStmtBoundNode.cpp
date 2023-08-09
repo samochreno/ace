@@ -55,7 +55,7 @@ namespace Ace
         const StmtTypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const VarStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::optional<std::shared_ptr<const IExprBoundNode>> checkedOptAssignedExpr{};
         if (m_OptAssignedExpr.has_value())
@@ -68,7 +68,7 @@ namespace Ace
 
         if (checkedOptAssignedExpr == m_OptAssignedExpr)
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -78,7 +78,7 @@ namespace Ace
                 m_Symbol,
                 checkedOptAssignedExpr
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

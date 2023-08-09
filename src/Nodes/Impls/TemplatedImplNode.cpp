@@ -89,7 +89,7 @@ namespace Ace
 
     auto TemplatedImplNode::CreateBound() const -> Diagnosed<std::shared_ptr<const ImplBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const FunctionBoundNode>> boundFunctions{};
         std::transform(
@@ -109,25 +109,25 @@ namespace Ace
                 GetScope(),
                 boundFunctions
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
     auto TemplatedImplNode::DefineAssociations() const -> Expected<void>
     { 
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto optTemplateSymbol = diagnostics.Collect(GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(
             m_TypeTemplateName
         ));
         if (!optTemplateSymbol.has_value())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         optTemplateSymbol.value()->GetSelfScope()->DefineAssociation(
             m_SelfScope
         );
-        return Void{ diagnostics };
+        return Void{ std::move(diagnostics) };
     }
 }

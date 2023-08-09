@@ -92,12 +92,12 @@ namespace Ace
         ITypeSymbol* const rhsTypeSymbol
     ) -> Diagnosed<FunctionSymbol*>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::optional<FunctionSymbol*> optSymbol{};
         if (!lhsTypeSymbol->IsError() && !rhsTypeSymbol->IsError())
         {
-            DiagnosticBag symbolDiagnostics{};
+            auto symbolDiagnostics = DiagnosticBag::Create();
             optSymbol = symbolDiagnostics.Collect(scope->ResolveStaticSymbol<FunctionSymbol>(
                 CreateFullyQualifiedOpName(op, lhsTypeSymbol),
                 Scope::CreateArgTypes({ lhsTypeSymbol, rhsTypeSymbol })
@@ -111,19 +111,19 @@ namespace Ace
                 ));
             }
 
-            diagnostics.Add(symbolDiagnostics);
+            diagnostics.Add(std::move(symbolDiagnostics));
         }
 
         auto* const symbol = optSymbol.value_or(
             scope->GetCompilation()->GetErrorSymbols().GetFunction()
         );
 
-        return Diagnosed{ symbol, diagnostics };
+        return Diagnosed{ symbol, std::move(diagnostics) };
     }
 
     auto CompoundAssignmentStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const CompoundAssignmentStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto boundLHSExpr =
             diagnostics.Collect(m_LHSExpr->CreateBoundExpr());
@@ -148,7 +148,7 @@ namespace Ace
                 boundRHSExpr,
                 opSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

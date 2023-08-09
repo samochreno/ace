@@ -13,7 +13,6 @@ test(): void {
     print_int(i);
     assert i == 11;
 
-
     i += struct_compound_assignment();
     print_int(i);
     assert i == 37;
@@ -45,11 +44,12 @@ impl Node {
 
 boxed_self(): int {
     i: int = 0;
-    boxed_node: *Node = box new Node { value: 3 };
 
-    i += boxed_node.value();
+    node: Node = new Node { value: 3 };
+    i += node.value();
     assert i == 3;
 
+    boxed_node: *Node = box node;
     i += boxed_node.area();
     assert i == 12;
 

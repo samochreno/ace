@@ -57,7 +57,7 @@ namespace Ace
 
     auto SymbolLiteralExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const StaticVarRefExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto optVarSymbol =
             diagnostics.Collect(m_Scope->ResolveStaticSymbol<IVarSymbol>(m_Name));
@@ -73,7 +73,7 @@ namespace Ace
                 GetScope(),
                 varSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

@@ -136,7 +136,7 @@ namespace Ace
 
     auto FunctionNode::CreateBound() const -> Diagnosed<std::shared_ptr<const FunctionBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const AttributeBoundNode>> boundAttributes{};
         std::transform(
@@ -190,7 +190,7 @@ namespace Ace
                 boundParams,
                 boundOptBody
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -216,7 +216,7 @@ namespace Ace
 
     auto FunctionNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto symbolCategory = m_OptSelf.has_value() ?
             SymbolCategory::Instance :
@@ -238,7 +238,7 @@ namespace Ace
                 m_AccessModifier,
                 typeSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
     

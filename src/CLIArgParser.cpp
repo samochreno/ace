@@ -70,11 +70,11 @@ namespace Ace
         const std::string_view name
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (!name.empty())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         const SrcLocation srcLocation
@@ -84,9 +84,10 @@ namespace Ace
             end  (parser.Peek()),
         };
 
-        return diagnostics.Add(CreateMissingCLIOptionNameError(
+        diagnostics.Add(CreateMissingCLIOptionNameError(
             srcLocation
         ));
+        return std::move(diagnostics);
     }
 
     static auto DiagnoseMissingOrUnexpectedOptionValue(
@@ -95,7 +96,7 @@ namespace Ace
         const std::optional<std::string_view>& optValue
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (
             (definition->Kind == CLIOptionKind::WithValue) &&
@@ -131,14 +132,14 @@ namespace Ace
             ));
         }
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto ParseLongOption(
         CLIArgParser& parser
     ) -> Diagnosed<CLIOption>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         ACE_ASSERT(parser.Peek().at(0) == '-');
         ACE_ASSERT(parser.Peek().at(1) == '-');
@@ -228,14 +229,14 @@ namespace Ace
             parser.Eat();
         }
 
-        return Diagnosed{ option, diagnostics };
+        return Diagnosed{ option, std::move(diagnostics) };
     }
 
     static auto ParseShortOption(
         CLIArgParser& parser
     ) -> Diagnosed<CLIOption>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         ACE_ASSERT(parser.Peek().at(0) == '-');
         ACE_ASSERT(parser.Peek().at(1) != '-');
@@ -318,7 +319,7 @@ namespace Ace
             parser.Eat();
         }
 
-        return Diagnosed{ option, diagnostics };
+        return Diagnosed{ option, std::move(diagnostics) };
     }
 
     static auto ParseOption(
@@ -364,7 +365,7 @@ namespace Ace
         std::vector<const CLIOptionDefinition*>&& optionDefinitions
     ) -> Expected<CLIArgsParseResult>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         CLIArgParser parser
         {
@@ -389,7 +390,7 @@ namespace Ace
 
         if (diagnostics.HasErrors())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         return Expected
@@ -399,7 +400,7 @@ namespace Ace
                 std::move(positionalArgs),
                 std::move(optionMap),
             },
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 }

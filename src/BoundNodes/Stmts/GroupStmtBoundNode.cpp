@@ -43,7 +43,7 @@ namespace Ace
         const StmtTypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const GroupStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const IStmtBoundNode>> checkedStmts{};
         std::transform(
@@ -60,7 +60,7 @@ namespace Ace
 
         if (checkedStmts == m_Stmts)
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -70,7 +70,7 @@ namespace Ace
                 GetScope(),
                 checkedStmts
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

@@ -53,7 +53,7 @@ namespace Ace
         const TypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const StructConstructionExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<StructConstructionExprBoundArg> checkedArgs{};
         std::transform(
@@ -75,7 +75,7 @@ namespace Ace
 
         if (checkedArgs == m_Args)
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -86,7 +86,7 @@ namespace Ace
                 m_StructSymbol,
                 checkedArgs
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

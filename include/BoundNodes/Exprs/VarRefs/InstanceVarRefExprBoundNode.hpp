@@ -50,7 +50,6 @@ namespace Ace
         auto GetVarSymbol() const -> InstanceVarSymbol*;
 
     private:
-        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprBoundNode> m_Expr{};
         InstanceVarSymbol* m_VarSymbol{};

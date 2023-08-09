@@ -3,39 +3,58 @@
 #include <memory>
 
 #include "DiagnosticBase.hpp"
+#include "DiagnosticLog.hpp"
 
 namespace Ace
 {
-    auto DiagnosticBag::Add(
-        const std::shared_ptr<const DiagnosticGroup>& diagnosticGroup
-    ) -> DiagnosticBag&
+    auto DiagnosticBag::Create() -> DiagnosticBag
     {
-        m_DiagnosticGroups.push_back(diagnosticGroup);
+        return {};
+    }
 
+    auto DiagnosticBag::CreateGlobal() -> DiagnosticBag
+    {
+        auto diagnosticBag = Create();
+
+        diagnosticBag.m_OptHandler = [](const DiagnosticGroup& diagnosticGroup)
+        {
+            LogDiagnosticGroup(diagnosticGroup);
+        };
+
+        return diagnosticBag;
+    }
+
+    auto DiagnosticBag::Add(DiagnosticBag diagnosticBag) -> DiagnosticBag&
+    {
         std::for_each(
-            begin(diagnosticGroup->Diagnostics),
-            end  (diagnosticGroup->Diagnostics),
-            [&](const Diagnostic& diagnostic)
+            begin(diagnosticBag.m_DiagnosticGroups),
+            end  (diagnosticBag.m_DiagnosticGroups),
+            [&](DiagnosticGroup& diagnosticGroup)
             {
-                AddSeverity(diagnostic.Severity);
+                Add(std::move(diagnosticGroup));
             }
         );
 
         return *this;
     }
 
-    auto DiagnosticBag::Add(
-        const DiagnosticBag& diagnostics
-    ) -> DiagnosticBag&
+    auto DiagnosticBag::Add(DiagnosticGroup diagnosticGroup) -> DiagnosticBag&
     {
         std::for_each(
-            begin(diagnostics.GetDiagnosticGroups()),
-            end  (diagnostics.GetDiagnosticGroups()),
-            [&](const std::shared_ptr<const DiagnosticGroup>& diagnosticGroup)
+            begin(diagnosticGroup.Diagnostics),
+            end  (diagnosticGroup.Diagnostics),
+            [&](const Diagnostic& diagnostic)
             {
-                Add(diagnosticGroup);
+                AddSeverity(diagnostic.Severity);
             }
         );
+
+        m_DiagnosticGroups.push_back(std::move(diagnosticGroup));
+
+        if (m_OptHandler.has_value())
+        {
+            m_OptHandler.value()(m_DiagnosticGroups.back());
+        }
 
         return *this;
     }
@@ -43,11 +62,6 @@ namespace Ace
     auto DiagnosticBag::IsEmpty() const -> bool
     {
         return m_DiagnosticGroups.empty();
-    }
-
-    auto DiagnosticBag::GetDiagnosticGroups() const -> const std::vector<std::shared_ptr<const DiagnosticGroup>>&
-    {
-        return m_DiagnosticGroups;
     }
 
     auto DiagnosticBag::GetSeverity() const -> DiagnosticSeverity
@@ -60,9 +74,7 @@ namespace Ace
         return m_Severity == DiagnosticSeverity::Error;
     }
 
-    auto DiagnosticBag::AddSeverity(
-        const DiagnosticSeverity& severity
-    ) -> void
+    auto DiagnosticBag::AddSeverity(const DiagnosticSeverity severity) -> void
     {
         switch (severity)
         {

@@ -9,5 +9,5 @@ namespace Ace
 {
     auto CreateNotAllControlPathsReturnError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 }

@@ -14,14 +14,13 @@ namespace Ace
 {
     struct Void
     {
-        Void() = default;
         Void(
-            const DiagnosticBag& diagnostics
-        ) : DiagnosticBag{ diagnostics }
+            DiagnosticBag diagnostics
+        ) : Diagnostics{ std::move(diagnostics) }
         {
         }
 
-        DiagnosticBag DiagnosticBag{};
+        DiagnosticBag Diagnostics = DiagnosticBag::Create();
     };
 
     template<typename T>
@@ -32,50 +31,22 @@ namespace Ace
     {
     public:
         [[deprecated]]
-        auto _ExpectedVoid() -> void {  }
+        auto _ExpectedVoid() -> void {}
 
         Expected() = default;
+        Expected([[deprecated]] const Expected&) = default;
         Expected(
-            const Expected& other
-        ) : m_IsFatal{ other.m_IsFatal },
-            m_Diagnostics{ other.m_Diagnostics }
-        {
-        }
-        Expected(Expected&& other) noexcept
-          : m_IsFatal{ other.m_IsFatal },
-            m_Diagnostics{ std::move(other.m_Diagnostics) }
-        {
-            other.m_IsFatal = false;
-        }
-        Expected(
-            Void&& value
-        ) : m_Diagnostics{ std::move(value.DiagnosticBag) }
+            Void value
+        ) : m_Diagnostics{ std::move(value.Diagnostics) }
         {
         }
         Expected(
-            const DiagnosticBag& diagnostics
+            DiagnosticBag diagnostics
         ) : m_IsFatal{ true }
         {
-            m_Diagnostics.Add(diagnostics);
+            m_Diagnostics.Add(std::move(diagnostics));
         }
         ~Expected() = default;
-
-        auto operator=(const Expected& other) -> Expected&
-        {
-            m_IsFatal = other.m_IsFatal;
-            m_Diagnostics = other.m_Diagnostics;
-
-            return *this;
-        }
-        auto operator=(Expected&& other) noexcept -> Expected&
-        {
-            m_IsFatal = other.m_IsFatal;
-            m_Diagnostics = std::move(other.m_Diagnostics);
-
-            other.m_IsFatal = false;
-
-            return *this;
-        }
 
         operator bool() const
         {
@@ -96,10 +67,14 @@ namespace Ace
         {
             return m_Diagnostics;
         }
+        auto GetDiagnostics() -> DiagnosticBag&
+        {
+            return m_Diagnostics;
+        }
 
     private:
         bool m_IsFatal{};
-        DiagnosticBag m_Diagnostics{};
+        DiagnosticBag m_Diagnostics = DiagnosticBag::Create();
     };
 
     template<typename T>
@@ -109,75 +84,43 @@ namespace Ace
         [[deprecated]]
         auto _ExpectedNotVoid() -> void {  }
 
-        Expected()
-        {
-        }
-        Expected(
-            const Expected& other
-        ) : m_OptValue{ other.m_OptValue },
-            m_Diagnostics{ other.m_Diagnostics }
-        {
-        }
-        Expected(Expected&& other) noexcept
-          : m_OptValue{ std::move(other.m_OptValue) },
-            m_Diagnostics{ std::move(other.m_Diagnostics) }
-        {
-        }
-        Expected(
-            const T& value
-        ) : m_OptValue{ value }
-        {
-        }
+        Expected() = default;
+        Expected([[deprecated]] const Expected&) = default;
         Expected(
             const T& value,
-            const DiagnosticBag& diagnostics
+            DiagnosticBag diagnostics
         ) : m_OptValue{ value },
-            m_Diagnostics{ diagnostics }
-        {
-        }
-        Expected(T&& value) noexcept
-            : m_OptValue{ std::move(value) }
+            m_Diagnostics{ std::move(diagnostics) }
         {
         }
         Expected(
             T&& value,
-            const DiagnosticBag& diagnostics
+            DiagnosticBag diagnostics
         ) noexcept
           : m_OptValue{ std::move(value) },
-            m_Diagnostics{ diagnostics }
+            m_Diagnostics{ std::move(diagnostics) }
         {
         }
-        Expected(const DiagnosticBag& diagnostics)
+        Expected(DiagnosticBag diagnostics)
         {
-            m_Diagnostics.Add(diagnostics);
+            m_Diagnostics.Add(std::move(diagnostics));
         }
         ~Expected() = default;
 
-        auto operator=(const Expected& other) -> Expected&
-        {
-            m_OptValue = other.m_OptValue;
-            m_Diagnostics = other.m_Diagnostics;
-
-            return *this;
-        }
-        auto operator=(Expected&& other) noexcept -> Expected&
-        {
-            m_OptValue = std::move(other.m_OptValue);
-            m_Diagnostics = std::move(other.m_Diagnostics);
-
-            return *this;
-        }
-
         template<typename TNew>
-        operator Expected<TNew>() const
+        operator Expected<TNew>() &&
         {
             if (m_OptValue.has_value())
             {
-                return Expected<TNew>{ m_OptValue.value(), m_Diagnostics };
+                return Expected<TNew>
+                {
+                    std::move(m_OptValue.value()),
+                    std::move(m_Diagnostics),
+                };
             }
             else
             {
-                return Expected<TNew>{ m_Diagnostics };
+                return Expected<TNew>{ std::move(m_Diagnostics) };
             }
         }
 
@@ -199,9 +142,13 @@ namespace Ace
         {
             return m_Diagnostics;
         }
+        auto GetDiagnostics() -> DiagnosticBag&
+        {
+            return m_Diagnostics;
+        }
 
     private:
         std::optional<T> m_OptValue{};
-        DiagnosticBag m_Diagnostics{};
+        DiagnosticBag m_Diagnostics = DiagnosticBag::Create();
     };
 }

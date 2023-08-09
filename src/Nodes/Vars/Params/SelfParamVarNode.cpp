@@ -65,7 +65,7 @@ namespace Ace
                 GetSrcLocation(),
                 selfSymbol
             ),
-            DiagnosticBag{},
+            DiagnosticBag::Create(),
         };
     }
 
@@ -91,7 +91,7 @@ namespace Ace
 
     auto SelfParamVarNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto optTypeSymbol = diagnostics.Collect(m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
@@ -107,7 +107,7 @@ namespace Ace
                 m_Scope,
                 typeSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 }

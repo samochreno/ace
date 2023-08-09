@@ -192,7 +192,7 @@ namespace Ace
 
     auto ModuleNode::CreateBound() const -> Diagnosed<std::shared_ptr<const ModuleBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const ModuleBoundNode>> boundModules{};
         std::transform(
@@ -283,7 +283,7 @@ namespace Ace
                 boundFunctions,
                 boundVars
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -311,7 +311,7 @@ namespace Ace
                 GetName(),
                 m_AccessModifier
             ),
-            DiagnosticBag{},
+            DiagnosticBag::Create(),
         };
     }
 
@@ -319,7 +319,7 @@ namespace Ace
         ISymbol* const symbol
     ) const -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         auto* const moduleSymbol = dynamic_cast<ModuleSymbol*>(symbol);
         ACE_ASSERT(moduleSymbol);
@@ -339,7 +339,7 @@ namespace Ace
             ));
         }
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     auto ModuleNode::GetName() const -> const Ident&

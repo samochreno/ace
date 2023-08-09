@@ -43,14 +43,14 @@ namespace Ace
         const TypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const ExprExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto checkedExpr =
             diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
 
         if (checkedExpr == m_Expr)
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -59,7 +59,7 @@ namespace Ace
                 GetSrcLocation(),
                 checkedExpr
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

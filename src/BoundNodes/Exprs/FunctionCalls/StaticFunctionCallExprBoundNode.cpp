@@ -50,7 +50,7 @@ namespace Ace
         const TypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const StaticFunctionCallExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const IExprBoundNode>> convertedArgs = m_Args;
         if (!m_FunctionSymbol->IsError())
@@ -89,7 +89,7 @@ namespace Ace
 
         if (checkedArgs == m_Args)
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -100,7 +100,7 @@ namespace Ace
                 m_FunctionSymbol,
                 checkedArgs
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

@@ -117,7 +117,7 @@ namespace Ace
         const CFAGraph& graph
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (IsEndReachableWithoutReturn(graph, begin(graph.Nodes), {}))
         {
@@ -126,6 +126,6 @@ namespace Ace
             ));
         }
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 }

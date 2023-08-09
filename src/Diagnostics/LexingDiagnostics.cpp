@@ -9,11 +9,11 @@ namespace Ace
 {
     auto CreateUnterminatedMultiLineCommentError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "unterminated multiline comment"
@@ -24,11 +24,11 @@ namespace Ace
 
     auto CreateUnterminatedStringLiteralError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "unterminated string literal"
@@ -39,11 +39,11 @@ namespace Ace
 
     auto CreateUnexpectedCharacterError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "unexpected character"
@@ -54,11 +54,11 @@ namespace Ace
 
     auto CreateUnknownNumericLiteralTypeSuffixError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "unknown numeric literal type suffix"
@@ -69,11 +69,11 @@ namespace Ace
 
     auto CreateDecimalPointInNonFloatNumericLiteralError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "decimal point in non-float numeric literal"

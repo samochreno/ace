@@ -80,7 +80,7 @@ namespace Ace
 
     auto InstanceVarNode::CreateBound() const -> Diagnosed<std::shared_ptr<const InstanceVarBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const AttributeBoundNode>> boundAttributes{};
         std::transform(
@@ -104,7 +104,7 @@ namespace Ace
                 selfSymbol,
                 boundAttributes
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -130,7 +130,7 @@ namespace Ace
 
     auto InstanceVarNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto optTypeSymbol = diagnostics.Collect(m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
@@ -148,7 +148,7 @@ namespace Ace
                 typeSymbol,
                 m_Index
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 }

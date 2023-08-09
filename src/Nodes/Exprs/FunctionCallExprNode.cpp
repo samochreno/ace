@@ -76,7 +76,7 @@ namespace Ace
 
     auto FunctionCallExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const IExprBoundNode>> boundArgs{};
         std::transform(
@@ -118,7 +118,7 @@ namespace Ace
                     functionSymbol,
                     boundArgs
                 ),
-                diagnostics,
+                std::move(diagnostics),
             };
         }
         
@@ -152,7 +152,7 @@ namespace Ace
                     functionSymbol,
                     boundArgs
                 ),
-                diagnostics,
+                std::move(diagnostics),
             };
         }
 
@@ -166,7 +166,7 @@ namespace Ace
         return Diagnosed
         {
             boundExpr,
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

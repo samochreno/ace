@@ -58,7 +58,7 @@ namespace Ace
                 GetSrcLocation(),
                 GetScope()
             ),
-            DiagnosticBag{},
+            DiagnosticBag::Create(),
         };
     }
 

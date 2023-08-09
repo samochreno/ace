@@ -73,7 +73,7 @@ namespace Ace::Application
         TCreateLoweredFunc&& createLoweredFunc
     ) -> Expected<TLowered>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto typeCheckedAST =
             diagnostics.Collect(createTypeCheckedFunc(boundAST));
@@ -93,7 +93,7 @@ namespace Ace::Application
         
         BindFunctionSymbolsBodies(compilation, nodes);
 
-        return Expected{ finalAST, diagnostics };
+        return Expected{ finalAST, std::move(diagnostics) };
     }
 
 #undef TTypeChecked

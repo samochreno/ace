@@ -100,7 +100,7 @@ namespace Ace
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<FunctionTemplateSymbol>(this),
-            DiagnosticBag{},
+            DiagnosticBag::Create(),
         };
     }
 

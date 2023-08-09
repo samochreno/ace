@@ -85,14 +85,14 @@ namespace Ace
         const FilteredDirectory& directory
     ) -> Diagnosed<std::vector<std::filesystem::path>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (!std::filesystem::exists(directory.Path))
         {
             return Diagnosed
             {
                 std::vector<std::filesystem::path>{},
-                diagnostics
+                std::move(diagnostics),
             };
         }
 
@@ -143,7 +143,7 @@ namespace Ace
             diagnostics.Add(CreateFileSystemError(directory.Path, e));
         }
 
-        return Diagnosed{ filePaths, diagnostics };
+        return Diagnosed{ filePaths, std::move(diagnostics) };
     }
 
     struct ExpandedLastFilePathPartData
@@ -158,7 +158,7 @@ namespace Ace
         std::string part
     ) -> Diagnosed<ExpandedLastFilePathPartData>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         TrimRight(part);
 
@@ -195,7 +195,7 @@ namespace Ace
                     optExtension,
                     Recursiveness::NonRecursive,
                 },
-                diagnostics,
+                std::move(diagnostics),
             };
         }
 
@@ -233,7 +233,7 @@ namespace Ace
                 optExtension,
                 recursiveness,
             },
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -282,12 +282,12 @@ namespace Ace
         const std::unordered_map<std::string, std::string>& pathMacroMap
     ) -> Diagnosed<std::string>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const bool isMacro = part.starts_with('$');
         if (!isMacro)
         {
-            return Diagnosed{ part, diagnostics };
+            return Diagnosed{ part, std::move(diagnostics) };
         }
 
         const std::string pathMacro = part.substr(1);
@@ -299,10 +299,10 @@ namespace Ace
                 fileBuffer,
                 pathMacro
             ));
-            return Diagnosed{ std::string{}, diagnostics };
+            return Diagnosed{ std::string{}, std::move(diagnostics) };
         }
         
-        return Diagnosed{ macroValueIt->second, diagnostics };
+        return Diagnosed{ macroValueIt->second, std::move(diagnostics) };
     }
 
     static auto ExpandFilePathParts(
@@ -311,7 +311,7 @@ namespace Ace
         const std::unordered_map<std::string, std::string>& pathMacroMap
     ) -> Diagnosed<FilePathOrFilteredDirectory>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto firstFilePathPart = diagnostics.Collect(ExpandFirstFilePathPart(
             fileBuffer,
@@ -338,7 +338,7 @@ namespace Ace
             return Diagnosed
             {
                 FilePathOrFilteredDirectory{ path },
-                diagnostics
+                std::move(diagnostics),
             };
         }
 
@@ -353,7 +353,7 @@ namespace Ace
                     lastFilePathPartData.Recursiveness,
                 }
             },
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -361,7 +361,7 @@ namespace Ace
         const std::string& filePath
     ) -> Expected<std::vector<std::string>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto isPathSeparator = [](const char& character) -> bool
         {
@@ -400,12 +400,13 @@ namespace Ace
         }
         else
         {
-            return diagnostics.Add(CreateFilePathEndsWithSeparatorError(
+            diagnostics.Add(CreateFilePathEndsWithSeparatorError(
                 filePath
             ));
+            return std::move(diagnostics);
         }
 
-        return Expected{ parts, diagnostics };
+        return Expected{ parts, std::move(diagnostics) };
     }
 
     static auto TransformFilePaths(
@@ -415,7 +416,7 @@ namespace Ace
         const std::unordered_map<std::string, std::string>& pathMacroMap
     ) -> Diagnosed<std::vector<std::filesystem::path>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::vector<std::string>> filePathsParts{};
         std::for_each(begin(filePaths), end(filePaths),
@@ -482,7 +483,7 @@ namespace Ace
             }
         });
 
-        return Diagnosed{ finalFilePaths, diagnostics };
+        return Diagnosed{ finalFilePaths, std::move(diagnostics) };
     }
 
     static auto ReadFilePath(
@@ -491,7 +492,7 @@ namespace Ace
         const std::filesystem::path& filePath
     ) -> Expected<const FileBuffer*>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto optFileBuffer = diagnostics.Collect(FileBuffer::Read(
             fileBuffer->GetCompilation(),
@@ -499,12 +500,12 @@ namespace Ace
         ));
         if (!optFileBuffer.has_value())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         srcBuffers->push_back(optFileBuffer.value());
 
-        return Expected{ optFileBuffer.value().get(), diagnostics };
+        return Expected{ optFileBuffer.value().get(), std::move(diagnostics) };
     }
 
     static auto CreateDefaultValue(
@@ -534,7 +535,7 @@ namespace Ace
         const nlohmann::json::value_t type
     ) -> Diagnosed<nlohmann::json>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto prefixedName = namePrefix.empty() ?
             name :
@@ -546,7 +547,7 @@ namespace Ace
                 fileBuffer,
                 prefixedName
             ));
-            return Diagnosed{ CreateDefaultValue(type), diagnostics };
+            return Diagnosed{ CreateDefaultValue(type), std::move(diagnostics) };
         }
 
         if (json[name].type() != type)
@@ -557,10 +558,10 @@ namespace Ace
                 json[name].type(),
                 type
             ));
-            return Diagnosed{ CreateDefaultValue(type), diagnostics };
+            return Diagnosed{ CreateDefaultValue(type), std::move(diagnostics) };
         }
 
-        return Diagnosed{ json[name], diagnostics };
+        return Diagnosed{ json[name], std::move(diagnostics) };
     }
 
     static auto GetOrCreateElement(
@@ -571,7 +572,7 @@ namespace Ace
         const nlohmann::json::value_t type
     ) -> Diagnosed<nlohmann::json>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         ACE_ASSERT(index < json.size());
 
@@ -583,10 +584,10 @@ namespace Ace
                 json.at(index).type(),
                 type
             ));
-            return Diagnosed{ CreateDefaultValue(type), diagnostics };
+            return Diagnosed{ CreateDefaultValue(type), std::move(diagnostics) };
         }
 
-        return Diagnosed{ json.at(index), diagnostics };
+        return Diagnosed{ json.at(index), std::move(diagnostics) };
     }
 
     static auto DiagnoseUnexpectedProperties(
@@ -596,7 +597,7 @@ namespace Ace
         std::vector<std::string> expectedNames
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         for (const auto& nameValuePair : json.items())
         {
@@ -624,7 +625,7 @@ namespace Ace
             }
         }
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto ParsePathMacroMap(
@@ -632,7 +633,7 @@ namespace Ace
         const nlohmann::json& package
     ) -> Diagnosed<std::unordered_map<std::string, std::string>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto pathMacros = diagnostics.Collect(GetOrCreateProperty(
             fileBuffer,
@@ -687,7 +688,7 @@ namespace Ace
             pathMacroMap[pathMacroName] = std::move(pathMacroValue);
         }
 
-        return Diagnosed{ pathMacroMap, diagnostics };
+        return Diagnosed{ pathMacroMap, std::move(diagnostics) };
     }
 
     static auto ParseFiles(
@@ -696,7 +697,7 @@ namespace Ace
         const std::string& filesPropertyName
     ) -> Diagnosed<std::vector<std::string>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto filesArray = diagnostics.Collect(GetOrCreateProperty(
             fileBuffer,
@@ -720,7 +721,7 @@ namespace Ace
             files.push_back(file);
         }
 
-        return Diagnosed{ files, diagnostics };
+        return Diagnosed{ files, std::move(diagnostics) };
     }
 
     static auto ReadFilePaths(
@@ -729,7 +730,7 @@ namespace Ace
         const std::vector<std::filesystem::path>& filePaths
     ) -> Diagnosed<std::vector<const FileBuffer*>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<const FileBuffer*> fileBuffers{};
         std::for_each(begin(filePaths), end(filePaths),
@@ -748,7 +749,7 @@ namespace Ace
             fileBuffers.push_back(optFileBuffer.value());
         });
 
-        return Diagnosed{ fileBuffers, diagnostics };
+        return Diagnosed{ fileBuffers, std::move(diagnostics) };
     }
 
     static auto ParsePackage(
@@ -756,7 +757,7 @@ namespace Ace
         const FileBuffer* const fileBuffer
     ) -> Diagnosed<Package>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto package = nlohmann::json::parse(fileBuffer->GetBuffer());
 
@@ -825,7 +826,7 @@ namespace Ace
                 std::move(srcFileBuffers),
                 std::move(depFilePaths),
             },
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -834,7 +835,7 @@ namespace Ace
         const FileBuffer* const fileBuffer
     ) -> Expected<Package>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         try
         {
@@ -843,14 +844,15 @@ namespace Ace
                 fileBuffer
             ));
 
-            return Expected{ package, diagnostics };
+            return Expected{ package, std::move(diagnostics) };
         }
         catch (const nlohmann::json::exception& exception)
         {
-            return diagnostics.Add(CreateJsonError(
+            diagnostics.Add(CreateJsonError(
                 fileBuffer,
                 exception
             ));
+            return std::move(diagnostics);
         }
     }
 }

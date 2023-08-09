@@ -74,7 +74,7 @@ namespace Ace
 
     auto ReturnStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const ReturnStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::optional<std::shared_ptr<const IExprBoundNode>> boundOptExpr{};
         if (m_OptExpr.has_value())
@@ -90,7 +90,7 @@ namespace Ace
                 GetScope(),
                 boundOptExpr
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

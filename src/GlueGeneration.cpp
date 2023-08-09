@@ -349,7 +349,7 @@ namespace Ace::GlueGeneration
             SpecialIdent::Op::Copy,
         });
 
-        const auto optOpSymbol = DiagnosticBag{}.Collect(
+        const auto optOpSymbol = DiagnosticBag::Create().Collect(
             compilation->GetGlobalScope()->ResolveStaticSymbol<FunctionSymbol>(opName)
         );
 
@@ -470,7 +470,7 @@ namespace Ace::GlueGeneration
             SpecialIdent::Op::Drop,
         });
 
-        const auto optOpSymbol = DiagnosticBag{}.Collect(
+        const auto optOpSymbol = DiagnosticBag::Create().Collect(
             compilation->GetGlobalScope()->ResolveStaticSymbol<FunctionSymbol>(opName)
         );
 

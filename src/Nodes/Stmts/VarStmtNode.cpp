@@ -81,7 +81,7 @@ namespace Ace
 
     auto VarStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const VarStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         auto* selfSymbol = m_Scope->ExclusiveResolveSymbol<LocalVarSymbol>(
             m_Name
@@ -101,7 +101,7 @@ namespace Ace
                 selfSymbol,
                 boundOptAssignedExpr
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -132,7 +132,7 @@ namespace Ace
 
     auto VarStmtNode::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto optTypeSymbol = diagnostics.Collect(m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
@@ -148,7 +148,7 @@ namespace Ace
                 m_Name,
                 typeSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 }

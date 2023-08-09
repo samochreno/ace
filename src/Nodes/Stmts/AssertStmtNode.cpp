@@ -59,7 +59,7 @@ namespace Ace
 
     auto AssertStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const AssertStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
         
         const auto boundCondition =
             diagnostics.Collect(m_Condition->CreateBoundExpr());
@@ -70,7 +70,7 @@ namespace Ace
                 GetSrcLocation(),
                 boundCondition
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

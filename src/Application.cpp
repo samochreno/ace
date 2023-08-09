@@ -39,7 +39,7 @@ namespace Ace::Application
         const FileBuffer* const fileBuffer
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto tokens = diagnostics.Collect(LexTokens(fileBuffer));
 
@@ -49,13 +49,13 @@ namespace Ace::Application
         ));
         if (!optAST.has_value())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         return Expected
         {
             optAST.value(),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -64,7 +64,7 @@ namespace Ace::Application
         const std::vector<const INode*>& nodes
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         auto symbolCreatableNodes =
             DynamicCastFilter<const ISymbolCreatableNode*>(nodes);
@@ -116,7 +116,7 @@ namespace Ace::Application
             (void)diagnostics.Collect(Scope::DefineSymbol(symbolCreatableNode));
         });
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     auto DefineAssociations(
@@ -124,7 +124,7 @@ namespace Ace::Application
         const std::vector<const INode*>& nodes
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto implNodes = DynamicCastFilter<const IImplNode*>(nodes);
 
@@ -134,7 +134,7 @@ namespace Ace::Application
             diagnostics.Collect(implNode->DefineAssociations());
         });
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     auto DiagnoseNotAllControlPathsReturn(
@@ -142,7 +142,7 @@ namespace Ace::Application
         const std::vector<const IBoundNode*>& nodes
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto functionNodes =
             DynamicCastFilter<const FunctionBoundNode*>(nodes);
@@ -174,7 +174,7 @@ namespace Ace::Application
             ));
         });
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     auto BindFunctionSymbolsBodies(
@@ -203,7 +203,7 @@ namespace Ace::Application
         Compilation* const compilation
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto typeSymbols =
             compilation->GetGlobalScope()->CollectSymbolsRecursive<ITypeSymbol>();
@@ -231,14 +231,14 @@ namespace Ace::Application
                 diagnostics.Collect(typeSymbol->GetSizeKind());
         });
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto DiagnoseUnsizedVarTypes(
         Compilation* const compilation
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto varSymbols =
             compilation->GetGlobalScope()->CollectSymbolsRecursive<IVarSymbol>();
@@ -268,14 +268,14 @@ namespace Ace::Application
             diagnostics.Add(CreateUnsizedSymbolTypeError(varSymbol));
         });
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto CompileCompilation(
         Compilation* const compilation
     ) -> Expected<void>
     {
-        GlobalDiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::CreateGlobal();
 
         const auto& packageName = compilation->GetPackage().Name;
         const auto globalScope = compilation->GetGlobalScope();
@@ -365,9 +365,9 @@ namespace Ace::Application
 
         compilation->GetTemplateInstantiator().InstantiateSemanticsForSymbols();
 
-        if (diagnostics.Unwrap().HasErrors())
+        if (diagnostics.HasErrors())
         {
-            return diagnostics.Unwrap();
+            return std::move(diagnostics);
         }
 
         diagnostics.Collect(DiagnoseLayoutCycles(compilation));
@@ -417,7 +417,7 @@ namespace Ace::Application
         LogDebug << createDurationString(emitterResult.Durations.LLC) + " - backend | llc\n";
         LogDebug << createDurationString(emitterResult.Durations.Clang) + " - backend | clang\n";
 
-        return Void{ diagnostics.Unwrap() };
+        return Void{ std::move(diagnostics) };
     }
 
     static auto Compile(
@@ -425,17 +425,16 @@ namespace Ace::Application
         const std::vector<std::string_view>& args
     ) -> Expected<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
-        DiagnosticBag compilationDiagnostics{};
+        auto compilationDiagnostics = DiagnosticBag::CreateGlobal();
         const auto optCompilation = compilationDiagnostics.Collect(
             Compilation::Parse(srcBuffers, args)
         );
-        GlobalDiagnosticBag{}.Add(compilationDiagnostics);
-                  diagnostics.Add(compilationDiagnostics);
+        diagnostics.Add(std::move(compilationDiagnostics));
         if (!optCompilation.has_value())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         Log << CreateIndent() << termcolor::bright_green << "Compiling ";
@@ -452,14 +451,14 @@ namespace Ace::Application
             Log << termcolor::reset << " to compile\n";
             IndentLevel++;
 
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         Log << CreateIndent() << termcolor::bright_green << "Finished";
         Log << termcolor::reset << " compilation\n";
         IndentLevel++;
 
-        return Void{ diagnostics };
+        return Void{ std::move(diagnostics) };
     }
 
     auto Main(const std::vector<std::string_view>& args) -> void

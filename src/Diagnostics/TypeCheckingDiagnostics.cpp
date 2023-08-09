@@ -10,11 +10,11 @@ namespace Ace
 {
     auto CreateExpectedLValueExprError(
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             expr->GetSrcLocation(),
             "expected an assignable expression"
@@ -26,15 +26,15 @@ namespace Ace
     auto CreateUnableToConvertExprError(
         const std::shared_ptr<const IExprBoundNode>& expr,
         const TypeInfo& targetTypeInfo
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
         const std::string message =
             "unable to convert `" + expr->GetTypeInfo().Symbol->CreateSignature() +
             "` to `" + targetTypeInfo.Symbol->CreateSignature() + "`";
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             expr->GetSrcLocation(),
             message
@@ -45,11 +45,11 @@ namespace Ace
 
     auto CreateExpectedDerefableExprError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "expected a dereferencable expression"
@@ -63,22 +63,22 @@ namespace Ace
         FunctionSymbol* const functionSymbol,
         const size_t expectedArgCount,
         const size_t unexpectedArgCount
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
         const std::string message =
             "expected " + std::to_string(expectedArgCount) +
             " argument" + (expectedArgCount == 1 ? "" : "s") +
             ", got " + std::to_string(unexpectedArgCount);
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             message
         );
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Note,
             functionSymbol->GetName().SrcLocation,
             "function declaration"
@@ -89,11 +89,11 @@ namespace Ace
 
     auto CreateExpectedStrongPtrExprError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "expected a strong pointer"
@@ -104,9 +104,9 @@ namespace Ace
 
     auto CreateReturningExprFromVoidFunctionError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
         auto* const compilation = srcLocation.Buffer->GetCompilation();
         auto* const voidType = compilation->GetNatives().Void.GetSymbol();
@@ -115,7 +115,7 @@ namespace Ace
             "returning an expression from a function of type `" +
             voidType->CreateSignature() + "`";
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             message
@@ -126,11 +126,11 @@ namespace Ace
 
     auto CreateReturningUnsizedExprError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "returning an unsized expression"
@@ -141,11 +141,11 @@ namespace Ace
 
     auto CreateMissingReturnExprError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "missing return expression"
@@ -157,17 +157,17 @@ namespace Ace
     auto CreateMismatchedSelfExprTypeError(
         const SrcLocation& srcLocation,
         const SelfParamVarSymbol* const selfParamSymbol
-    ) -> std::shared_ptr<const DiagnosticGroup>
+    ) -> DiagnosticGroup
     {
-        auto group = std::make_shared<DiagnosticGroup>();
+        DiagnosticGroup group{};
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
             "mismatched self argument type"
         );
 
-        group->Diagnostics.emplace_back(
+        group.Diagnostics.emplace_back(
             DiagnosticSeverity::Note,
             selfParamSymbol->GetName().SrcLocation,
             "parameter declaration"

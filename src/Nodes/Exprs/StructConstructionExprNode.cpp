@@ -136,7 +136,7 @@ namespace Ace
         const std::vector<SrcLocation>& varUseSrcLocations
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::for_each(begin(varUseSrcLocations), end(varUseSrcLocations),
         [&](const SrcLocation& varUseSrcLocation)
@@ -148,7 +148,7 @@ namespace Ace
             ));
         });
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto DiagnoseInaccessibleVars(
@@ -157,7 +157,7 @@ namespace Ace
         const std::map<InstanceVarSymbol*, std::vector<SrcLocation>>& varSymbolToUseSrcLocationsMap
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::for_each(begin(varSymbols), end(varSymbols),
         [&](InstanceVarSymbol* const varSymbol)
@@ -169,7 +169,7 @@ namespace Ace
             ));
         });
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto DiagnoseMissingVars(
@@ -179,7 +179,7 @@ namespace Ace
         const std::map<InstanceVarSymbol*, std::vector<SrcLocation>>& varSymbolToUseSrcLocationsMap
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<InstanceVarSymbol*> missingVarSymbols{};
         std::for_each(begin(varSymbols), end(varSymbols),
@@ -200,7 +200,7 @@ namespace Ace
             ));
         }
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto DiagnoseStructConstructionVarSpecifiedMoreThanOnce(
@@ -209,7 +209,7 @@ namespace Ace
         const std::vector<SrcLocation>& varUseSrcLocations
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (varUseSrcLocations.size() > 1)
         {
@@ -223,7 +223,7 @@ namespace Ace
             });
         }
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto DiagnoseVarsSpecifiedMoreThanOnce(
@@ -232,7 +232,7 @@ namespace Ace
         const std::map<InstanceVarSymbol*, std::vector<SrcLocation>>& varSymbolToUseSrcLocationsMap
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::for_each(begin(varSymbols), end(varSymbols),
         [&](InstanceVarSymbol* const varSymbol)
@@ -244,7 +244,7 @@ namespace Ace
             ));
         });
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto CreateBoundArgs(
@@ -254,7 +254,7 @@ namespace Ace
         const std::vector<StructConstructionExprArg>& args
     ) -> Diagnosed<std::vector<StructConstructionExprBoundArg>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto varSymbols = structSymbol->CollectVars();
 
@@ -324,12 +324,12 @@ namespace Ace
             varSymbolToUseSrcLocationsMap
         ));
 
-        return Diagnosed{ boundArgs, diagnostics };
+        return Diagnosed{ boundArgs, std::move(diagnostics) };
     }
 
     auto StructConstructionExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const StructConstructionExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto optStructSymbol =
             diagnostics.Collect(m_Scope->ResolveStaticSymbol<StructTypeSymbol>(m_TypeName));
@@ -361,7 +361,7 @@ namespace Ace
                 structSymbol,
                 boundArgs
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

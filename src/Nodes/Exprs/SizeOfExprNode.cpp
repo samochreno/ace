@@ -55,7 +55,7 @@ namespace Ace
 
     auto SizeOfExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const SizeOfExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto optTypeSymbol = diagnostics.Collect(m_Scope->ResolveStaticSymbol<ITypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
@@ -71,7 +71,7 @@ namespace Ace
                 GetScope(),
                 typeSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

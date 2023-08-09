@@ -60,7 +60,7 @@ namespace Ace
 
     auto DerefAsExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const DerefAsExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto boundExpr = diagnostics.Collect(m_Expr->CreateBoundExpr());
 
@@ -78,7 +78,7 @@ namespace Ace
                 boundExpr,
                 typeSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

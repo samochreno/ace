@@ -86,7 +86,7 @@ namespace Ace
         const std::vector<ITypeSymbol*>& args
     ) -> Diagnosed<TemplateSymbolsInstantationResult>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto paramNames = m_TemplateNode->CollectParamNames();
 
@@ -125,7 +125,7 @@ namespace Ace
         return Diagnosed
         {
             TemplateSymbolsInstantationResult{ symbol, ast },
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

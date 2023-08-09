@@ -10,87 +10,87 @@ namespace Ace
 {
     auto CreateUnexpectedTokenError(
         const std::shared_ptr<const Token>& unexpectedToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedTokenError(
         const std::shared_ptr<const Token>& unexpectedToken,
         const TokenKind expectedTokenKind
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedTokenExpectedLiteralError(
         const std::shared_ptr<const Token>& unexpectedToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedTokenExpectedNewError(
         const std::shared_ptr<const Token>& unexpectedToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedTokenExpectedCompoundAssignmentOpError(
         const std::shared_ptr<const Token>& unexpectedToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedTokenExpectedOverloadableOpError(
         const std::shared_ptr<const Token>& unexpectedToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateEmptyTemplateParamsError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateEmptyTemplateArgsError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateExternInstanceFunctionError(
         const std::shared_ptr<const Token>& externKeywordToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnknownModifierError(
         const std::shared_ptr<const Token>& modifierToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateForbiddenModifierError(
         const std::shared_ptr<const Token>& modifierToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateEmptyModifiersError(
         const std::shared_ptr<const Token>& minusGreaterThanToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateMissingTokenError(
         const SrcLocation& lastTokenSrcLocation,
         const TokenKind expectedTokenKind
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateTemplateSpecializationError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedUnaryOpParamCountError(
         const std::shared_ptr<const Token>& opToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedBinaryOpParamCountError(
         const std::shared_ptr<const Token>& opToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedUnaryOrBinaryOpParamCountError(
         const std::shared_ptr<const Token>& opToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnknownIdentOpError(
         const std::shared_ptr<const Token>& opToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateOpMustBePublicError(
         const std::shared_ptr<const Token>& nameToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateInstanceOpError(
         const std::shared_ptr<const Token>& nameToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateMissingSelfModifierAfterStrongPtrError(
         const std::shared_ptr<const Token>& strongPtrModifierToken
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 }

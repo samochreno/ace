@@ -47,7 +47,6 @@ namespace Ace
         auto GetTypeInfo() const -> TypeInfo final;
 
     private:
-        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};
         ITypeSymbol* m_TypeSymbol{};

@@ -187,14 +187,14 @@ namespace Ace
         const ConversionOpGetterFunction func
     ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (
             targetTypeInfo.Symbol->IsError() ||
             expr->GetTypeInfo().Symbol->IsError()
             )
         {
-            return Diagnosed{ expr, diagnostics };
+            return Diagnosed{ expr, std::move(diagnostics) };
         }
 
         if (
@@ -210,7 +210,7 @@ namespace Ace
             targetTypeInfo.Symbol->GetUnaliased()
             )
         {
-            return Diagnosed{ expr, diagnostics };
+            return Diagnosed{ expr, std::move(diagnostics) };
         }
 
         const bool isRef = expr->GetTypeInfo().Symbol->IsRef();
@@ -242,7 +242,7 @@ namespace Ace
             targetTypeInfo.Symbol->GetUnaliased()
             )
         {
-            return Diagnosed{ expr, diagnostics };
+            return Diagnosed{ expr, std::move(diagnostics) };
         }
 
         const auto optOpSymbol = func(
@@ -256,7 +256,7 @@ namespace Ace
                 expr,
                 targetTypeInfo
             ));
-            return Diagnosed{ expr, diagnostics };
+            return Diagnosed{ expr, std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -267,7 +267,7 @@ namespace Ace
                 optOpSymbol.value(),
                 std::vector{ expr }
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -300,16 +300,15 @@ namespace Ace
         const TypeInfo& targetTypeInfo
     ) -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
-        const auto convertedExpr = diagnostics.Collect(CreateImplicitlyConverted(
-            expr,
-            targetTypeInfo
-        ));
+        const auto convertedExpr = diagnostics.Collect(
+            CreateImplicitlyConverted(expr, targetTypeInfo)
+        );
 
         const auto checkedExpr =
             diagnostics.Collect(convertedExpr->CreateTypeCheckedExpr({}));
 
-        return Diagnosed{ checkedExpr, diagnostics };
+        return Diagnosed{ checkedExpr, std::move(diagnostics) };
     }
 }

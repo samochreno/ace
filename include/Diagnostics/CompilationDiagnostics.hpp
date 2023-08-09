@@ -10,36 +10,36 @@
 
 namespace Ace
 {
-    auto CreateMissingPackagePathArgError() -> std::shared_ptr<const DiagnosticGroup>;
+    auto CreateMissingPackagePathArgError() -> DiagnosticGroup;
 
     auto CreateMultiplePackagePathArgsError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedPackagePropertyWarning(
         const FileBuffer* const packageFileBuffer,
         const std::string& propertyName
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateMissingPackagePropertyError(
         const FileBuffer* const packageFileBuffer,
         const std::string& propertyName
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedPackagePropertyTypeError(
         const FileBuffer* const packageFileBuffer,
         const std::string& propertyName,
         const nlohmann::json::value_t type,
         const nlohmann::json::value_t expectedType
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUndefinedRefToPackagePathMacroError(
         const FileBuffer* const packageFileBuffer,
         const std::string& macro
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateTrailingPackagePathCharactersBeforeExtensionError(
         const FileBuffer* const packageFileBuffer,
         const std::string_view characters
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 }

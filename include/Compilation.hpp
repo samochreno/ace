@@ -13,7 +13,6 @@
 #include "Scope.hpp"
 #include "Natives.hpp"
 #include "TemplateInstantiator.hpp"
-#include "GlobalDiagnosticBag.hpp"
 #include "ErrorSymbols.hpp"
 
 namespace Ace

@@ -61,7 +61,7 @@ namespace Ace
 
     auto CastExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const IExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto boundExpr = diagnostics.Collect(m_Expr->CreateBoundExpr());
 
@@ -80,7 +80,7 @@ namespace Ace
         return Diagnosed
         {
             convertedExpr,
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

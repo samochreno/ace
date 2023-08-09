@@ -45,7 +45,6 @@ namespace Ace
         auto GetTypeInfo() const -> TypeInfo final;
 
     private:
-        DiagnosticBag m_Diagnostics{};
         SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprBoundNode> m_Expr{};
     };

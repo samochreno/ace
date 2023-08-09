@@ -59,7 +59,7 @@ namespace Ace
 
     auto NormalTemplateParamTypeSymbol::GetSizeKind() const -> Expected<TypeSizeKind>
     {
-        return TypeSizeKind::Sized;
+        return Expected{ TypeSizeKind::Sized, DiagnosticBag::Create() };
     }
 
     auto NormalTemplateParamTypeSymbol::SetAsUnsized() -> void

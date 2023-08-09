@@ -66,7 +66,7 @@ namespace Ace
                 m_Kind,
                 m_String
             ),
-            DiagnosticBag{},
+            DiagnosticBag::Create(),
         };
     }
 

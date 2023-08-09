@@ -48,7 +48,7 @@ namespace Ace
         const TypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const UserBinaryExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         auto convertedLHSExpr = m_LHSExpr;
         auto convertedRHSExpr = m_RHSExpr;
@@ -78,7 +78,7 @@ namespace Ace
             (checkedRHSExpr == m_RHSExpr)
             )
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -89,7 +89,7 @@ namespace Ace
                 checkedRHSExpr,
                 m_OpSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

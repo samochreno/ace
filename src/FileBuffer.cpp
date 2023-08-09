@@ -16,19 +16,19 @@ namespace Ace
         const std::filesystem::path& path
     ) -> Expected<std::shared_ptr<const FileBuffer>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (!std::filesystem::exists(path))
         {
-            return diagnostics.Add(CreateFileNotFoundError(
-                path
-            ));
+            diagnostics.Add(CreateFileNotFoundError(path));
+            return std::move(diagnostics);
         }
 
         std::ifstream fileStream{ path };
         if (!fileStream.is_open())
         {
-            return diagnostics.Add(CreateFileOpenError(path));
+            diagnostics.Add(CreateFileOpenError(path));
+            return std::move(diagnostics);
         }
 
         std::string buffer{};
@@ -80,7 +80,7 @@ namespace Ace
                 std::move(lines),
                 std::move(lineBeginIterators),
             }),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

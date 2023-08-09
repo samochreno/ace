@@ -44,7 +44,7 @@ namespace Ace
         const TypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const InstanceVarBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const AttributeBoundNode>> checkedAttributes{};
         std::transform(
@@ -59,7 +59,7 @@ namespace Ace
 
         if (checkedAttributes == m_Attributes)
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -69,7 +69,7 @@ namespace Ace
                 m_Symbol,
                 checkedAttributes
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

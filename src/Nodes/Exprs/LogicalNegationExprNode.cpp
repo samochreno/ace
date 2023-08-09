@@ -56,7 +56,7 @@ namespace Ace
 
     auto LogicalNegationExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const LogicalNegationExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto boundExpr = diagnostics.Collect(m_Expr->CreateBoundExpr());
 
@@ -66,7 +66,7 @@ namespace Ace
                 GetSrcLocation(),
                 boundExpr
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

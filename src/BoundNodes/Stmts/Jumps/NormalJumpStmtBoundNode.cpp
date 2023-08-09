@@ -41,7 +41,7 @@ namespace Ace
         const StmtTypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const NormalJumpStmtBoundNode>>
     {
-        return Diagnosed{ shared_from_this(), DiagnosticBag{} };
+        return Diagnosed{ shared_from_this(), DiagnosticBag::Create() };
     }
 
     auto NormalJumpStmtBoundNode::CreateTypeCheckedStmt(

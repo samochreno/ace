@@ -86,7 +86,7 @@ namespace Ace
         const std::vector<TypeInfo>& argTypeInfos
     ) -> Expected<FunctionSymbol*>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto argTypeSymbols = CollectTypeSymbols(argTypeInfos);
 
@@ -96,7 +96,7 @@ namespace Ace
         ));
         if (!optSymbol.has_value())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         const bool areArgsConvertible = AreTypesConvertible(
@@ -106,10 +106,10 @@ namespace Ace
         );
         if (!areArgsConvertible)
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
-        return Expected{ optSymbol.value(), diagnostics };
+        return Expected{ optSymbol.value(), std::move(diagnostics) };
     }
 
     static auto CreateFullyQualifiedOpName(
@@ -138,7 +138,7 @@ namespace Ace
         Expected<FunctionSymbol*> expRHSOpSymbol
     ) -> Diagnosed<FunctionSymbol*>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (!expLHSOpSymbol && !expRHSOpSymbol)
         {
@@ -152,7 +152,7 @@ namespace Ace
             return Diagnosed
             {
                 compilation->GetErrorSymbols().GetFunction(),
-                diagnostics,
+                std::move(diagnostics),
             };
         }
 
@@ -172,7 +172,7 @@ namespace Ace
             std::move(expLHSOpSymbol) :
             std::move(expRHSOpSymbol)
         );
-        return Diagnosed{ optOpSymbol.value(), diagnostics };
+        return Diagnosed{ optOpSymbol.value(), std::move(diagnostics) };
     }
 
     static auto ResolveAndPickOpSymbol(
@@ -183,19 +183,19 @@ namespace Ace
         ITypeSymbol* const rhsTypeSymbol
     ) -> Diagnosed<FunctionSymbol*>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::optional<FunctionSymbol*> optOpSymbol{};
         if (!lhsTypeSymbol->IsError() && !rhsTypeSymbol->IsError())
         {
-            DiagnosticBag lhsOpDiagnostics{};
+            auto lhsOpDiagnostics = DiagnosticBag::Create();
             const auto optLHSOpSymbol = lhsOpDiagnostics.Collect(ResolveOpSymbol(
                 scope,
                 CreateFullyQualifiedOpName(op, lhsTypeSymbol),
                 argTypeInfos
             ));
 
-            DiagnosticBag rhsOpDiagnostics{};
+            auto rhsOpDiagnostics = DiagnosticBag::Create();
             const auto optRHSOpSymbol = rhsOpDiagnostics.Collect(ResolveOpSymbol(
                 scope,
                 CreateFullyQualifiedOpName(op, rhsTypeSymbol),
@@ -226,13 +226,12 @@ namespace Ace
             if (optLHSOpSymbol.has_value())
             {
                 optOpSymbol = optLHSOpSymbol.value();
-                diagnostics.Add(lhsOpDiagnostics);
+                diagnostics.Add(std::move(lhsOpDiagnostics));
             }
-
-            if (optRHSOpSymbol.has_value())
+            else if (optRHSOpSymbol.has_value())
             {
                 optOpSymbol = optRHSOpSymbol.value();
-                diagnostics.Add(rhsOpDiagnostics);
+                diagnostics.Add(std::move(rhsOpDiagnostics));
             }
         }
 
@@ -240,12 +239,12 @@ namespace Ace
             scope->GetCompilation()->GetErrorSymbols().GetFunction()
         );
 
-        return Diagnosed{ opSymbol, diagnostics };
+        return Diagnosed{ opSymbol, std::move(diagnostics) };
     }
 
     auto UserBinaryExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const UserBinaryExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto boundLHSExpr =
             diagnostics.Collect(m_LHSExpr->CreateBoundExpr());
@@ -277,7 +276,7 @@ namespace Ace
                 boundRHSExpr,
                 opSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

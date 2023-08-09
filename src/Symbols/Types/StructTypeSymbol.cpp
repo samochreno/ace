@@ -63,23 +63,24 @@ namespace Ace
 
         const auto sizeKind = [&]() -> Expected<TypeSizeKind>
         {
-            DiagnosticBag diagnostics{};
+            auto diagnostics = DiagnosticBag::Create();
 
             if (m_ResolvingVar.has_value())
             {
-                return diagnostics.Add(CreateStructVarCausesCycleError(
+                diagnostics.Add(CreateStructVarCausesCycleError(
                     m_ResolvingVar.value()
                 ));
+                return std::move(diagnostics);
             }
 
             if (m_IsPrimitivelyEmittable)
             {
-                return Expected{ TypeSizeKind::Sized, diagnostics };
+                return Expected{ TypeSizeKind::Sized, std::move(diagnostics) };
             }
 
             if (m_IsUnsized)
             {
-                return Expected{ TypeSizeKind::Unsized, diagnostics };
+                return Expected{ TypeSizeKind::Unsized, std::move(diagnostics) };
             }
 
             const auto vars = CollectVars();
@@ -111,10 +112,10 @@ namespace Ace
 
             if (unsizedVarIt != end(vars))
             {
-                return diagnostics;
+                return std::move(diagnostics);
             }
 
-            return TypeSizeKind::Sized;
+            return Expected{ TypeSizeKind::Sized, std::move(diagnostics) };
         }();
 
         m_OptSizeKindCache = sizeKind;

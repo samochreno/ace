@@ -89,7 +89,7 @@ namespace Ace
 
     auto IfStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const IfStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const IExprBoundNode>> boundConditions{};
         std::transform(
@@ -121,7 +121,7 @@ namespace Ace
                 boundConditions,
                 boundBodies
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

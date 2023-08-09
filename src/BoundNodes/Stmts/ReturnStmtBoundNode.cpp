@@ -53,7 +53,7 @@ namespace Ace
         const std::optional<std::shared_ptr<const IExprBoundNode>>& optExpr
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         auto* const compilation = functionTypeSymbol->GetCompilation();
 
@@ -72,25 +72,25 @@ namespace Ace
             ));
         }
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto DiagnoseUnsizedExpr(
         const std::optional<std::shared_ptr<const IExprBoundNode>>& optExpr
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         if (!optExpr.has_value())
         {
-            return Diagnosed<void>{ diagnostics };
+            return Diagnosed<void>{ std::move(diagnostics) };
         }
 
         const auto& expr = optExpr.value();
 
         auto* const exprTypeSymbol = expr->GetTypeInfo().Symbol->GetUnaliased();
 
-        const auto optExprTypeSizeKind = DiagnosticBag{}.Collect(
+        const auto optExprTypeSizeKind = DiagnosticBag::Create().Collect(
             exprTypeSymbol->GetSizeKind()
         );
 
@@ -101,14 +101,14 @@ namespace Ace
             ));
         }
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     auto ReturnStmtBoundNode::CreateTypeChecked(
         const StmtTypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const ReturnStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         diagnostics.Collect(DiagnoseMissingOrUnexpectedExpr(
             GetSrcLocation(),
@@ -128,7 +128,7 @@ namespace Ace
 
         if (checkedOptExpr == m_OptExpr)
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -138,7 +138,7 @@ namespace Ace
                 GetScope(),
                 checkedOptExpr
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

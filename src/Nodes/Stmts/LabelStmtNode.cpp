@@ -58,7 +58,7 @@ namespace Ace
 
     auto LabelStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const LabelStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         auto* const selfSymbol = m_Scope->ExclusiveResolveSymbol<LabelSymbol>(
             m_Name
@@ -70,7 +70,7 @@ namespace Ace
                 GetSrcLocation(),
                 selfSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -102,7 +102,7 @@ namespace Ace
                 m_Scope, 
                 m_Name
             ),
-            DiagnosticBag{},
+            DiagnosticBag::Create(),
         };
     }
 

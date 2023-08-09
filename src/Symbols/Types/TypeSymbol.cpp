@@ -205,7 +205,7 @@ namespace Ace
             SpecialIdent::CreateTemplate(self->GetName().String),
         };
 
-        return DiagnosticBag{}.Collect(
+        return DiagnosticBag::Create().Collect(
             GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(name)
         );
     }

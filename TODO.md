@@ -5,11 +5,11 @@
 - ❓ Eliminate local lambdas
 - String interning, maybe put `Token`s on the stack
 - Special fast lookup for native types
+- Rename `targetType` to `toType` or the opposite
 
 ## 💥 High Priority
 
 - Fix that glue doesnt bind on private types
-- Add `ErrorlessDiagnosticBag` to verify no diagnostics get discarded accidentally, make it assert no errors get in, its helpful to the pattern `DiagnosticBag{}.Collect(...)`
 - Make `Compilation` immutable: move uninstatiated templates (`TemplateInstantiator`) into `Scope` to keep all state there
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
 - Traits:

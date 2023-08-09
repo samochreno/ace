@@ -60,7 +60,7 @@ namespace Ace
 
     auto OrExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const OrExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto boundLHSExpr =
             diagnostics.Collect(m_LHSExpr->CreateBoundExpr());
@@ -74,7 +74,7 @@ namespace Ace
                 boundLHSExpr,
                 boundRHSExpr
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

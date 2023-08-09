@@ -63,7 +63,7 @@ namespace Ace
 
     auto NormalAssignmentStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const NormalAssignmentStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto boundLHSExpr =
             diagnostics.Collect(m_LHSExpr->CreateBoundExpr());
@@ -77,7 +77,7 @@ namespace Ace
                 boundLHSExpr,
                 boundRHSExpr
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

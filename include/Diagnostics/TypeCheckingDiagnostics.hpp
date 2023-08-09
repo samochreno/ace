@@ -13,42 +13,42 @@ namespace Ace
 {
     auto CreateExpectedLValueExprError(
         const std::shared_ptr<const IExprBoundNode>& expr
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnableToConvertExprError(
         const std::shared_ptr<const IExprBoundNode>& expr,
         const TypeInfo& targetTypeInfo
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateExpectedDerefableExprError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnexpectedArgCountError(
         const SrcLocation& srcLocation,
         FunctionSymbol* const functionSymbol,
         const size_t expectedArgCount,
         const size_t unexpectedArgCount
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateExpectedStrongPtrExprError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateReturningExprFromVoidFunctionError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateReturningUnsizedExprError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateMissingReturnExprError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateMismatchedSelfExprTypeError(
         const SrcLocation& srcLocation,
         const SelfParamVarSymbol* const selfParamSymbol
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 }

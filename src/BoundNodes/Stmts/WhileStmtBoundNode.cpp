@@ -56,7 +56,7 @@ namespace Ace
         const StmtTypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const WhileStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const TypeInfo typeInfo
         {
@@ -77,7 +77,7 @@ namespace Ace
             (checkedBody == m_Body)
             )
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -88,7 +88,7 @@ namespace Ace
                 checkedCondition,
                 checkedBody
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

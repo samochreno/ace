@@ -18,7 +18,6 @@
 #include "Natives.hpp"
 #include "Scope.hpp"
 #include "TemplateInstantiator.hpp"
-#include "GlobalDiagnosticBag.hpp"
 #include "ErrorSymbols.hpp"
 
 namespace Ace
@@ -53,7 +52,7 @@ namespace Ace
         const std::vector<std::string_view>& args
     ) -> Expected<std::unique_ptr<Compilation>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         auto self = std::make_unique<Compilation>();
 
@@ -70,7 +69,7 @@ namespace Ace
         ));
         if (!optCLIArgsParseResult.has_value())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         const auto& positionalArgs =
@@ -79,7 +78,8 @@ namespace Ace
 
         if (positionalArgs.empty())
         {
-            return diagnostics.Add(CreateMissingPackagePathArgError());
+            diagnostics.Add(CreateMissingPackagePathArgError());
+            return std::move(diagnostics);
         }
 
         if (positionalArgs.size() > 1)
@@ -108,7 +108,7 @@ namespace Ace
         ));
         if (!optPackageFileBuffer.has_value())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         self->m_PackageFileBuffer = optPackageFileBuffer.value().get();
@@ -120,7 +120,7 @@ namespace Ace
         ));
         if (!optPackage.has_value())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         self->m_Package = std::move(optPackage.value());
@@ -143,13 +143,13 @@ namespace Ace
 
         if (diagnostics.HasErrors())
         {
-            return diagnostics;
+            return std::move(diagnostics);
         }
 
         return
         {
             std::unique_ptr<Compilation>{ std::move(self) },
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

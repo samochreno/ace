@@ -71,7 +71,7 @@ namespace Ace
                 m_Scope,
                 m_Name
             ),
-            DiagnosticBag{},
+            DiagnosticBag::Create(),
         };
     }
 

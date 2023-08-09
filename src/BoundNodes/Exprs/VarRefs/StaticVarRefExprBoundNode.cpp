@@ -50,7 +50,7 @@ namespace Ace
         const TypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const StaticVarRefExprBoundNode>>
     {
-        return Diagnosed{ shared_from_this(), DiagnosticBag{} };
+        return Diagnosed{ shared_from_this(), DiagnosticBag::Create() };
     }
 
     auto StaticVarRefExprBoundNode::CreateTypeCheckedExpr(

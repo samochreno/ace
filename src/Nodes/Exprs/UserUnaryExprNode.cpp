@@ -86,19 +86,19 @@ namespace Ace
         ITypeSymbol* const typeSymbol
     ) -> Diagnosed<FunctionSymbol*>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::optional<FunctionSymbol*> optSymbol{};
         if (!typeSymbol->IsError())
         {
-            DiagnosticBag opDiagnostics{};
+            auto opDiagnostics = DiagnosticBag::Create();
             optSymbol = opDiagnostics.Collect(scope->ResolveStaticSymbol<FunctionSymbol>(
                 CreateFullyQualifiedOpName(op, typeSymbol),
                 Scope::CreateArgTypes(typeSymbol)
             ));
             if (optSymbol.has_value())
             {
-                diagnostics.Add(opDiagnostics);
+                diagnostics.Add(std::move(opDiagnostics));
             }
             else
             {
@@ -113,12 +113,12 @@ namespace Ace
             scope->GetCompilation()->GetErrorSymbols().GetFunction()
         );
 
-        return Diagnosed{ symbol, diagnostics };
+        return Diagnosed{ symbol, std::move(diagnostics) };
     }
 
     auto UserUnaryExprNode::CreateBound() const -> Diagnosed<std::shared_ptr<const UserUnaryExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto boundExpr = diagnostics.Collect(m_Expr->CreateBoundExpr());
 
@@ -137,7 +137,7 @@ namespace Ace
                 boundExpr,
                 opSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

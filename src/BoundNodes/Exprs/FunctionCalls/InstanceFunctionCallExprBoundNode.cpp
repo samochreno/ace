@@ -54,7 +54,7 @@ namespace Ace
         SelfParamVarSymbol* const paramSymbol
     ) -> Diagnosed<void>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const bool isParamStrongPtr =
             paramSymbol->GetType()->GetWithoutRef()->IsStrongPtr();
@@ -70,22 +70,17 @@ namespace Ace
             ));
         }
 
-        return Diagnosed<void>{ diagnostics };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     auto InstanceFunctionCallExprBoundNode::CreateTypeChecked(
         const TypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const InstanceFunctionCallExprBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto checkedExpr =
             diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
-
-        diagnostics.Collect(DiagnoseMismatchedSelfExprType(
-            checkedExpr,
-            m_FunctionSymbol->CollectSelfParam().value()
-        ));
 
         std::vector<std::shared_ptr<const IExprBoundNode>> convertedArgs = m_Args;
         if (!m_FunctionSymbol->IsError())
@@ -109,6 +104,11 @@ namespace Ace
                     argTypeInfos.at(i)
                 ));
             }
+
+            diagnostics.Collect(DiagnoseMismatchedSelfExprType(
+                checkedExpr,
+                m_FunctionSymbol->CollectSelfParam().value()
+            ));
         }
 
         std::vector<std::shared_ptr<const IExprBoundNode>> checkedArgs{};
@@ -127,7 +127,7 @@ namespace Ace
             (checkedArgs == m_Args)
             )
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -138,7 +138,7 @@ namespace Ace
                 m_FunctionSymbol,
                 checkedArgs
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

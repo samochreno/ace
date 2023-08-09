@@ -13,101 +13,101 @@ namespace Ace
         const ISymbol* const originalSymbol,
         const SrcLocation& newSymbolNameLocation,
         const AccessModifier newSymbolAccessModifier
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateSymbolRedefinitionError(
         const ISymbol* const originalSymbol,
         const ISymbol* const redefinedSymbol
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnsizedSymbolTypeError(
         ISymbol* const symbol
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateStructVarCausesCycleError(
         InstanceVarSymbol* const varSymbol
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnableToDeduceTemplateArgsError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUnableToDeduceTemplateArgError(
         const SrcLocation& srcLocation,
         const NormalTemplateParamTypeSymbol* const templateParam
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateTooManyTemplateArgsError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateTemplateArgDeductionConflict(
         const SrcLocation& srcLocation,
         const NormalTemplateParamTypeSymbol* const templateParam,
         const ITypeSymbol* const deducedArg,
         const ITypeSymbol* const conflictingDeducedArg
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUndefinedSymbolRefError(
         const SrcLocation& srcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateAmbiguousSymbolRefError(
         const SrcLocation& srcLocation,
         const std::vector<ISymbol*>& candidateSymbols
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateScopeAccessOfNonSelfScopedSymbolError(
         const SrcLocation& srcLocation,
         const ISymbol* const symbol
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateInaccessibleSymbolError(
         const SrcLocation& srcLocation,
         ISymbol* const symbol
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateIncorrectSymbolCategoryError(
         const SrcLocation& srcLocation,
         const ISymbol* const symbol,
         const SymbolCategory expectedCategory
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateMissingStructVarsError(
         const SrcLocation& srcLocation,
         StructTypeSymbol* const structSymbol,
         const std::vector<InstanceVarSymbol*>& missingVarSymbols
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateStructHasNoVarNamedError(
         StructTypeSymbol* const structSymbol,
         const Ident& fieldName
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateStructVarInitializedMoreThanOnceError(
         const SrcLocation& srcLocation,
         const SrcLocation& previousSrcLocation
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUndefinedUnaryOpError(
         const Op& op,
         ITypeSymbol* const type
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateUndefinedBinaryOpError(
         const Op& op,
         ITypeSymbol* const lhsType,
         ITypeSymbol* const rhsType
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateAmbiguousBinaryOpRefError(
         const Op& op,
         ITypeSymbol* const lhsType,
         ITypeSymbol* const rhsType
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 
     auto CreateExpectedFunctionError(
         const SrcLocation& srcLocation,
         ITypeSymbol* const type
-    ) -> std::shared_ptr<const DiagnosticGroup>;
+    ) -> DiagnosticGroup;
 }

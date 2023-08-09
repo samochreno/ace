@@ -48,7 +48,7 @@ namespace Ace
         const StmtTypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const ConditionalJumpStmtBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const TypeInfo typeInfo
         {
@@ -62,7 +62,7 @@ namespace Ace
 
         if (checkedCondition == m_Condition)
         {
-            return Diagnosed{ shared_from_this(), diagnostics };
+            return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
         return Diagnosed
@@ -72,7 +72,7 @@ namespace Ace
                 checkedCondition,
                 m_LabelSymbol
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 

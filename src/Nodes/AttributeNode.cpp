@@ -49,7 +49,7 @@ namespace Ace
 
     auto AttributeNode::CreateBound() const -> Diagnosed<std::shared_ptr<const AttributeBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         const auto boundStructConstructionExpr =
             diagnostics.Collect(m_StructConstructionExpr->CreateBound());
@@ -60,7 +60,7 @@ namespace Ace
                 GetSrcLocation(),
                 boundStructConstructionExpr
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 }

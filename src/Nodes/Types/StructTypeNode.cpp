@@ -103,7 +103,7 @@ namespace Ace
 
     auto StructTypeNode::CreateBound() const -> Diagnosed<std::shared_ptr<const StructTypeBoundNode>>
     {
-        DiagnosticBag diagnostics{};
+        auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const AttributeBoundNode>> boundAttributes{};
         std::transform(
@@ -137,7 +137,7 @@ namespace Ace
                 boundAttributes,
                 boundVars
             ),
-            diagnostics,
+            std::move(diagnostics),
         };
     }
 
@@ -180,7 +180,7 @@ namespace Ace
                 m_Name,
                 m_AccessModifier
             ),
-            DiagnosticBag{},
+            DiagnosticBag::Create(),
         };
     }
 }
