@@ -22,11 +22,11 @@ namespace Ace
 {
     static auto GetNativeConversionOp(
         ITypeSymbol* fromType, 
-        ITypeSymbol* toType, 
+        ITypeSymbol* targetType, 
         const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>& fromOpMap
     ) -> std::optional<FunctionSymbol*>
     {
-        const auto fromOpMapIt = fromOpMap.find(toType);
+        const auto fromOpMapIt = fromOpMap.find(targetType);
         if (fromOpMapIt == end(fromOpMap))
         {
             return std::nullopt;
@@ -44,18 +44,18 @@ namespace Ace
     static auto GetImplicitPtrConversionOp(
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
-        ITypeSymbol* toType
+        ITypeSymbol* targetType
     ) -> std::optional<FunctionSymbol*>
     {
-        fromType = fromType->GetWithoutRef();
-          toType =   toType->GetWithoutRef();
+        fromType   =   fromType->GetWithoutRef();
+        targetType = targetType->GetWithoutRef();
 
-        if (!fromType->IsStrongPtr() || !toType->IsWeakPtr())
+        if (!fromType->IsStrongPtr() || !targetType->IsWeakPtr())
         {
             return std::nullopt;
         }
 
-        if (fromType->GetWithoutStrongPtr() != toType->GetWithoutWeakPtr())
+        if (fromType->GetWithoutStrongPtr() != targetType->GetWithoutWeakPtr())
         {
             return std::nullopt;
         }
@@ -75,12 +75,12 @@ namespace Ace
     auto GetImplicitConversionOp(
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
-        ITypeSymbol* toType
+        ITypeSymbol* targetType
     ) -> std::optional<FunctionSymbol*>
     {
         const auto optNativeOp = GetNativeConversionOp(
             fromType,
-            toType,
+            targetType,
             scope->GetCompilation()->GetNatives().GetImplicitFromOpMap()
         );
         if (optNativeOp.has_value())
@@ -91,19 +91,19 @@ namespace Ace
         return GetImplicitPtrConversionOp(
             scope,
             fromType,
-            toType
+            targetType
         );
     }
 
     auto GetExplicitConversionOp(
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* fromType,
-        ITypeSymbol* toType
+        ITypeSymbol* targetType
     ) -> std::optional<FunctionSymbol*>
     {
         const auto optNativeImplicitOp = GetNativeConversionOp(
             fromType,
-            toType,
+            targetType,
             scope->GetCompilation()->GetNatives().GetImplicitFromOpMap()
         );
         if (optNativeImplicitOp.has_value())
@@ -113,7 +113,7 @@ namespace Ace
 
         const auto optNativeExplicitOp = GetNativeConversionOp(
             fromType,
-            toType,
+            targetType,
             scope->GetCompilation()->GetNatives().GetExplicitFromOpMap()
         );
         if (optNativeExplicitOp)
@@ -124,7 +124,7 @@ namespace Ace
         return GetImplicitPtrConversionOp(
             scope,
             fromType,
-            toType
+            targetType
         );
     }
 

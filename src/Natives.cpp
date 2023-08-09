@@ -399,12 +399,12 @@ namespace Ace
         static auto FromIntImpl(
             const char* const name,
             const NativeType& fromType,
-            const NativeType& toType
+            const NativeType& targetType
         ) -> NativeAssociatedFunction
         {
             return
             {
-                toType,
+                targetType,
                 name,
                 [&](Emitter& emitter)
                 {
@@ -413,7 +413,7 @@ namespace Ace
                         auto* const fromIRType = fromType.GetIRType(
                             emitter.GetContext()
                         );
-                        auto* const toIRType = toType.GetIRType(
+                        auto* const toIRType = targetType.GetIRType(
                             emitter.GetContext()
                         );
 
@@ -439,122 +439,122 @@ namespace Ace
         }
 
         static auto FromInt8(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_i8",
                 natives->Int8,
-                toType
+                targetType
             );
         }
 
         static auto FromInt16(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_i16",
                 natives->Int16,
-                toType
+                targetType
             );
         }
 
         static auto FromInt32(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_i32",
                 natives->Int32,
-                toType
+                targetType
             );
         }
 
         static auto FromInt64(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_i64", 
                 natives->Int64,
-                toType
+                targetType
             );
         }
 
         static auto FromUInt8(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_u8",
                 natives->UInt8,
-                toType
+                targetType
             );
         }
 
         static auto FromUInt16(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_u16",
                 natives->UInt16,
-                toType
+                targetType
             );
         }
 
         static auto FromUInt32(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_u32",
                 natives->UInt32,
-                toType
+                targetType
             );
         }
 
         static auto FromUInt64(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_u64",
                 natives->UInt64,
-                toType
+                targetType
             );
         }
 
         static auto FromInt(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_int",
                 natives->Int,
-                toType
+                targetType
             );
         }
 
         static auto FromFloat(
             const char* const name,
             const NativeType& fromType,
-            const NativeType& toType
+            const NativeType& targetType
         ) -> NativeAssociatedFunction
         {
             return
             {
-                toType,
+                targetType,
                 name,
                 [&](Emitter& emitter)
                 {
@@ -563,11 +563,11 @@ namespace Ace
                         auto* const fromIRType = fromType.GetIRType(
                             emitter.GetContext()
                         );
-                        auto* const toIRType = toType.GetIRType(
+                        auto* const toIRType = targetType.GetIRType(
                             emitter.GetContext()
                         );
 
-                        if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(toType))
+                        if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(targetType))
                         {
                             return emitter.GetBlockBuilder().Builder.CreateFPToSI(
                                 emitter.EmitLoadArg(0, fromIRType),
@@ -589,26 +589,26 @@ namespace Ace
         }
 
         static auto FromFloat32(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromFloat(
                 "from_f32",
                 natives->Float32,
-                toType
+                targetType
             );
         }
 
         static auto FromFloat64(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromFloat(
                 "from_f64",
                 natives->Float64,
-                toType
+                targetType
             );
         }
 
@@ -1104,19 +1104,19 @@ namespace Ace
         static auto FromIntImpl(
             const char* const name,
             const NativeType& fromType,
-            const NativeType& toType
+            const NativeType& targetType
         ) -> NativeAssociatedFunction
         {
             return
             {
-                toType,
+                targetType,
                 name,
                 [&](Emitter& emitter)
                 {
                     auto* const fromIRType = fromType.GetIRType(
                         emitter.GetContext()
                     );
-                    auto* const toIRType = toType.GetIRType(
+                    auto* const toIRType = targetType.GetIRType(
                         emitter.GetContext()
                     );
 
@@ -1144,110 +1144,110 @@ namespace Ace
         }
 
         static auto FromInt8(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_i8",
                 natives->Int8,
-                toType
+                targetType
             );
         }
 
         static auto FromInt16(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_i16",
                 natives->Int16,
-                toType
+                targetType
             );
         }
 
         static auto FromInt32(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_i32",
                 natives->Int32,
-                toType
+                targetType
             );
         }
 
         static auto FromInt64(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_i64",
                 natives->Int64,
-                toType
+                targetType
             );
         }
 
         static auto FromUInt8(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_u8",
                 natives->UInt8,
-                toType
+                targetType
             );
         }
 
         static auto FromUInt16(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_u16",
                 natives->UInt16,
-                toType
+                targetType
             );
         }
 
         static auto FromUInt32(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_u32",
                 natives->UInt32,
-                toType
+                targetType
             );
         }
 
         static auto FromUInt64(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_u64",
                 natives->UInt64,
-                toType
+                targetType
             );
         }
 
         static auto FromInt(
-            const NativeType& toType,
+            const NativeType& targetType,
             const Natives* const natives
         ) -> NativeAssociatedFunction
         {
             return FromIntImpl(
                 "from_int",
                 natives->Int,
-                toType
+                targetType
             );
         }
 
