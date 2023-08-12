@@ -24,6 +24,7 @@
 #include "SpecialIdent.hpp"
 #include "Name.hpp"
 #include "Ident.hpp"
+#include "Keyword.hpp"
 
 namespace Ace
 {
@@ -995,65 +996,11 @@ namespace Ace
         Parser(
             const FileBuffer* const fileBuffer,
             const std::vector<std::shared_ptr<const Token>>& tokens
-        ) : m_FileBuffer{ fileBuffer }
+        ) : m_FileBuffer{ fileBuffer },
+            m_Tokens{ std::move(tokens) },
+            m_Iterator{ begin(m_Tokens) },
+            m_EndIterator{ end(m_Tokens) - 1 }
         {
-            const auto firstLineIt = begin(fileBuffer->GetLines());
-            const auto  lastLineIt =   end(fileBuffer->GetLines()) - 1;
-
-            const auto& firstLine = *firstLineIt;
-            const auto&  lastLine = * lastLineIt;
-
-            const SrcLocation leadingSrcLocation
-            {
-                fileBuffer,
-                begin(firstLine),
-                begin(firstLine) + 1,
-            };
-            const SrcLocation trailingSrcLocation
-            {
-                fileBuffer,
-                end(lastLine) - 1,
-                end(lastLine),
-            };
-
-            m_Tokens.push_back(std::make_shared<const Token>(
-                leadingSrcLocation,
-                TokenKind::Ident,
-                fileBuffer->GetCompilation()->GetPackage().Name
-            ));
-            m_Tokens.push_back(std::make_shared<const Token>(
-                leadingSrcLocation,
-                TokenKind::Colon
-            ));
-            m_Tokens.push_back(std::make_shared<const Token>(
-                leadingSrcLocation,
-                TokenKind::ModuleKeyword
-            ));
-            m_Tokens.push_back(std::make_shared<const Token>(
-                leadingSrcLocation,
-                TokenKind::OpenBrace
-            ));
-
-            std::transform(
-                begin(tokens),
-                end  (tokens),
-                back_inserter(m_Tokens),
-                [](const std::shared_ptr<const Token>& token)
-                {
-                    return token;
-                }
-            );
-
-            m_Tokens.insert(
-                end(m_Tokens) - 1,
-                std::make_shared<const Token>(
-                    trailingSrcLocation,
-                    TokenKind::CloseBrace
-                )
-            );
-
-               m_Iterator = begin(m_Tokens);
-            m_EndIterator = end  (m_Tokens) - 1;
         }
         ~Parser() = default;
 
@@ -1447,6 +1394,26 @@ namespace Ace
             (parser.Peek(2) != TokenKind::ModuleKeyword);
     }
 
+    static auto IsSpecialSymbolNameSectionBegin(
+        const Parser& parser
+    ) -> bool
+    {
+        return
+            (parser.Peek(0) == TokenKind::IntKeyword) ||
+            (parser.Peek(0) == TokenKind::Int8Keyword) ||
+            (parser.Peek(0) == TokenKind::Int16Keyword) ||
+            (parser.Peek(0) == TokenKind::Int32Keyword) ||
+            (parser.Peek(0) == TokenKind::Int64Keyword) ||
+            (parser.Peek(0) == TokenKind::UInt8Keyword) ||
+            (parser.Peek(0) == TokenKind::UInt16Keyword) ||
+            (parser.Peek(0) == TokenKind::UInt32Keyword) ||
+            (parser.Peek(0) == TokenKind::UInt64Keyword) ||
+            (parser.Peek(0) == TokenKind::Float32Keyword) ||
+            (parser.Peek(0) == TokenKind::Float64Keyword) ||
+            (parser.Peek(0) == TokenKind::BoolKeyword) ||
+            (parser.Peek(0) == TokenKind::VoidKeyword);
+    }
+
     static auto ParseExpr(
         Parser& parser,
         const std::shared_ptr<Scope>& scope
@@ -1529,12 +1496,53 @@ namespace Ace
         return Expected{ std::move(nestedName), std::move(diagnostics) };
     }
 
+    static auto ParseSpecialSymbolNameSection(
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
+    ) -> Expected<SymbolNameSection>
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        if (!IsSpecialSymbolNameSectionBegin(parser))
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::IntKeyword
+            ));
+            return std::move(diagnostics);
+        }
+
+        const auto& token = parser.Eat();
+
+        std::string name{ TokenKindToKeywordMap.at(token->Kind) };
+        
+        return Expected
+        {
+            SymbolNameSection{ Ident{ token->SrcLocation, std::move(name) } },
+            std::move(diagnostics),
+        };
+    }
+
     static auto ParseSymbolNameSection(
         Parser& parser,
         const std::shared_ptr<Scope>& scope
     ) -> Expected<SymbolNameSection>
     {
         auto diagnostics = DiagnosticBag::Create();
+
+        if (IsSpecialSymbolNameSectionBegin(parser))
+        {
+            const auto optSection = diagnostics.Collect(ParseSpecialSymbolNameSection(
+                parser,
+                scope
+            ));
+            if (!optSection.has_value())
+            {
+                return std::move(diagnostics);
+            }
+
+            return Expected{ optSection.value(), std::move(diagnostics) };
+        }
 
         const auto optName = diagnostics.Collect(ParseName(parser, scope));
         if (!optName.has_value())
@@ -1695,12 +1703,17 @@ namespace Ace
         parser.Eat();
 
         std::vector<Ident> names{};
+        bool isFirstName = true;
         while (
             !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBracket)
             )
         {
-            if (!names.empty())
+            if (isFirstName)
+            {
+                isFirstName = false;
+            }
+            else
             {
                 if (parser.Peek() == TokenKind::Comma)
                 {
@@ -1861,12 +1874,17 @@ namespace Ace
         parser.Eat();
 
         std::vector<SymbolName> args{};
+        bool isFirstArg = true;
         while (
             !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBracket)
             )
         {
-            if (!args.empty())
+            if (isFirstArg)
+            {
+                isFirstArg = false;
+            }
+            else
             {
                 if (parser.Peek() == TokenKind::Comma)
                 {
@@ -2106,12 +2124,17 @@ namespace Ace
         parser.Eat();
 
         std::vector<std::shared_ptr<const NormalParamVarNode>> params{};
+        bool isFirstParam = true;
         while (
             !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseParen)
             )
         {
-            if (!params.empty())
+            if (isFirstParam)
+            {
+                isFirstParam = false;
+            }
+            else
             {
                 if (parser.Peek() == TokenKind::Comma)
                 {
@@ -2177,12 +2200,17 @@ namespace Ace
         parser.Eat();
 
         std::vector<std::shared_ptr<const IExprNode>> args{};
+        bool isFirstArg = true;
         while (
             !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseParen)
             )
         {
-            if (!args.empty())
+            if (isFirstArg)
+            {
+                isFirstArg = false;
+            }
+            else
             {
                 if (parser.Peek() == TokenKind::Comma)
                 {
@@ -2302,12 +2330,17 @@ namespace Ace
         parser.Eat();
 
         std::vector<StructConstructionExprArg> args{};
+        bool isFirstArg = true;
         while (
             !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBrace)
             )
         {
-            if (!args.empty())
+            if (isFirstArg)
+            {
+                isFirstArg = false;
+            }
+            else
             {
                 if (parser.Peek() == TokenKind::Comma)
                 {
@@ -5284,12 +5317,17 @@ namespace Ace
         parser.Eat();
 
         std::vector<std::shared_ptr<const InstanceVarNode>> vars{};
+        bool isFirstVar = true;
         while (
             !parser.IsEnd() &&
             (parser.Peek() != TokenKind::CloseBrace)
             )
         {
-            if (!vars.empty())
+            if (isFirstVar)
+            {
+                isFirstVar = false;
+            }
+            else
             {
                 if (parser.Peek() == TokenKind::Comma)
                 {
@@ -5815,24 +5853,158 @@ namespace Ace
         };
     }
 
-    static auto ParseAST(
-        Parser& parser,
-        const std::shared_ptr<Scope>& scope
+    static auto ParseTopLevelModule(
+        Parser& parser
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optModule = diagnostics.Collect(ParseModule(parser, scope));
-        if (!optModule.has_value())
+        const auto beginSrcLocation = parser.GetSrcLocation();
+
+        auto* const compilation = parser.GetFileBuffer()->GetCompilation();
+
+        const auto packageName = compilation->GetPackage().Name;
+
+        const auto     scope = compilation->GetGlobalScope();
+        const auto selfScope = scope->GetOrCreateChild({ packageName });
+
+        std::vector<std::shared_ptr<const ModuleNode>> modules{};
+        std::vector<std::shared_ptr<const ITypeNode>> types{};
+        std::vector<std::shared_ptr<const TypeTemplateNode>> typeTemplates{};
+        std::vector<std::shared_ptr<const NormalImplNode>> normalImpls{};
+        std::vector<std::shared_ptr<const TemplatedImplNode>> templatedImpls{};
+        std::vector<std::shared_ptr<const FunctionNode>> functions{};
+        std::vector<std::shared_ptr<const FunctionTemplateNode>> functionTemplates{};
+        std::vector<std::shared_ptr<const StaticVarNode>> vars{};
+        while (!parser.IsEnd())
         {
-            return std::move(diagnostics);
+            if (IsModuleBegin(parser))
+            {
+                const auto optModule = diagnostics.Collect(ParseModule(
+                    parser,
+                    selfScope
+                ));
+                if (optModule.has_value())
+                {
+                    modules.push_back(optModule.value());
+                    continue;
+                }
+            }
+            else if (IsTypeBegin(parser))
+            {
+                const auto optType = diagnostics.Collect(ParseType(
+                    parser,
+                    selfScope
+                ));
+                if (optType.has_value())
+                {
+                    types.push_back(optType.value());
+                    continue;
+                }
+            }
+            else if (IsTypeTemplateBegin(parser))
+            {
+                const auto optTypeTemplate = diagnostics.Collect(ParseTypeTemplate(
+                    parser,
+                    selfScope
+                ));
+                if (optTypeTemplate.has_value())
+                {
+                    typeTemplates.push_back(optTypeTemplate.value());
+                    continue;
+                }
+            }
+            else if (IsImplBegin(parser))
+            {
+                const auto optImpl = diagnostics.Collect(ParseImpl(
+                    parser,
+                    selfScope
+                ));
+                if (optImpl.has_value())
+                {
+                    normalImpls.push_back(optImpl.value());
+                    continue;
+                }
+            }
+            else if (IsTemplatedImplBegin(parser))
+            {
+                const auto optTemplatedImpl = diagnostics.Collect(ParseTemplatedImpl(
+                    parser,
+                    selfScope
+                ));
+                if (optTemplatedImpl.has_value())
+                {
+                    templatedImpls.push_back(optTemplatedImpl.value());
+                    continue;
+                }
+            }
+            else if (IsFunctionBegin(parser))
+            {
+                const auto optFunction = diagnostics.Collect(ParseFunction(
+                    parser,
+                    selfScope
+                ));
+                if (optFunction.has_value())
+                {
+                    functions.push_back(optFunction.value());
+                    continue;
+                }
+            }
+            else if (IsFunctionTemplateBegin(parser))
+            {
+                const auto optFunctionTemplate = diagnostics.Collect(ParseFunctionTemplate(
+                    parser,
+                    selfScope
+                ));
+                if (optFunctionTemplate.has_value())
+                {
+                    functionTemplates.push_back(optFunctionTemplate.value());
+                    continue;
+                }
+            }
+            else if (IsVarBegin(parser))
+            {
+                const auto optVar = diagnostics.Collect(ParseVar(parser, selfScope));
+                if (optVar.has_value())
+                {
+                    vars.push_back(optVar.value());
+                    continue;
+                }
+            }
+            else
+            {
+                diagnostics.Add(CreateUnexpectedTokenError(
+                    parser.Peek()
+                ));
+            }
+            
+            parser.DiscardUntil(
+                DiscardKind::Inclusive,
+                { TokenKind::Semicolon, TokenKind::CloseBrace }
+            );
         }
 
         ACE_ASSERT(parser.IsEnd());
 
-        return
+        const std::vector name{ Ident { beginSrcLocation, packageName } };
+
+        return Expected
         {
-            optModule.value(),
+            std::make_shared<const ModuleNode>(
+                SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
+                scope,
+                selfScope,
+                name,
+                AccessModifier::Public,
+                modules,
+                types,
+                typeTemplates,
+                normalImpls,
+                templatedImpls,
+                functions,
+                functionTemplates,
+                vars
+            ),
             std::move(diagnostics),
         };
     }
@@ -5842,10 +6014,20 @@ namespace Ace
         const std::vector<std::shared_ptr<const Token>>& tokens
     ) -> Expected<std::shared_ptr<const ModuleNode>>
     {
+        auto diagnostics = DiagnosticBag::Create();
+
         Parser parser{ fileBuffer, tokens };
-        return ParseAST(
-            parser,
-            fileBuffer->GetCompilation()->GetGlobalScope()
-        );
+
+        const auto optModule = diagnostics.Collect(ParseTopLevelModule(parser));
+        if (!optModule.has_value())
+        {
+            return std::move(diagnostics);
+        }
+
+        return Expected
+        {
+            optModule.value(),
+            std::move(diagnostics),
+        };
     }
 }
