@@ -259,89 +259,13 @@ namespace Ace
                 return "`|=`";
             }
 
-            case TokenKind::IfKeyword:
+            default:
             {
-                return std::string{} + "`" + Keyword::If + "`";
-            }
-            case TokenKind::ElseKeyword:
-            {
-                return std::string{} + "`" + Keyword::Else + "`";
-            }
-            case TokenKind::ElifKeyword:
-            {
-                return std::string{} + "`" + Keyword::Elif + "`";
-            }
-            case TokenKind::WhileKeyword:
-            {
-                return std::string{} + "`" + Keyword::While + "`";
-            }
-            case TokenKind::ReturnKeyword:
-            {
-                return Keyword::Return;
-            }
-            case TokenKind::StructKeyword:
-            {
-                return std::string{} + "`" + Keyword::Struct + "`";
-            }
-            case TokenKind::OpKeyword:
-            {
-                return std::string{} + "`" + Keyword::Op + "`";
-            }
-            case TokenKind::PublicKeyword:
-            {
-                return std::string{} + "`" + Keyword::Public + "`";
-            }
-            case TokenKind::ExternKeyword:
-            {
-                return std::string{} + "`" + Keyword::Extern + "`";
-            }
-            case TokenKind::CastKeyword:
-            {
-                return std::string{} + "`" + Keyword::Cast + "`";
-            }
-            case TokenKind::ExitKeyword:
-            {
-                return std::string{} + "`" + Keyword::Exit + "`";
-            }
-            case TokenKind::AssertKeyword:
-            {
-                return std::string{} + "`" + Keyword::Assert + "`";
-            }
-            case TokenKind::ModuleKeyword:
-            {
-                return std::string{} + "`" + Keyword::Module + "`";
-            }
-            case TokenKind::ImplKeyword:
-            {
-                return std::string{} + "`" + Keyword::Impl + "`";
-            }
-            case TokenKind::AddressOfKeyword:
-            {
-                return std::string{} + "`" + Keyword::AddressOf + "`";
-            }
-            case TokenKind::SizeOfKeyword:
-            {
-                return std::string{} + "`" + Keyword::SizeOf + "`";
-            }
-            case TokenKind::DerefAsKeyword:
-            {
-                return std::string{} + "`" + Keyword::DerefAs + "`";
-            }
-            case TokenKind::BoxKeyword:
-            {
-                return std::string{} + "`" + Keyword::Box + "`";
-            }
-            case TokenKind::UnboxKeyword:
-            {
-                return std::string{} + "`" + Keyword::Unbox + "`";
-            }
-            case TokenKind::TrueKeyword:
-            {
-                return std::string{} + "`" + Keyword::True + "`";
-            }
-            case TokenKind::FalseKeyword:
-            {
-                return std::string{} + "`" + Keyword::False + "`";
+                const auto keywordTokenKindIt = TokenKindToKeywordMap.find(
+                    tokenKind
+                );
+                ACE_ASSERT(keywordTokenKindIt != end(TokenKindToKeywordMap));
+                return "`" + std::string{ keywordTokenKindIt->second } + "`";
             }
         }
     }

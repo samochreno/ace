@@ -94,5 +94,18 @@ namespace Ace
         UnboxKeyword,
         TrueKeyword,
         FalseKeyword,
+        IntKeyword,
+        Int8Keyword,
+        Int16Keyword,
+        Int32Keyword,
+        Int64Keyword,
+        UInt8Keyword,
+        UInt16Keyword,
+        UInt32Keyword,
+        UInt64Keyword,
+        Float32Keyword,
+        Float64Keyword,
+        BoolKeyword,
+        VoidKeyword,
     };
 }

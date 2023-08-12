@@ -2,24 +2,26 @@
 
 ## 🛠️ Refactor
 
+- Put `Token` on stack
 - ❓ Eliminate local lambdas
-- String interning, maybe put `Token`s on the stack
-- Special fast lookup for native types
+- ❓ String interning
+- ❓ Put braces on opening line
 
 ## 💥 High Priority
 
-- Fix that glue doesnt bind on private types
-- Make `Compilation` immutable: move uninstatiated templates (`TemplateInstantiator`) into `Scope` to keep all state there
+- Unit testing (Test that `CreateTokenKindString` handles all possible values, test `Keyword.cpp`)
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
 - Traits:
   - Parsing
   - Symbols
   - Binding
+  - Fix that glue doesnt bind on private types
   - Replace operators with traits
   - ❓ Rust's orphan rule
 
 ## 🔔 Medium Priority
 
+- Make `Compilation` immutable: move uninstatiated templates (`TemplateInstantiator`) into `Scope` to keep all state there
 - CFA:
   - `IEmittable` could hold this `CFAGraph`, so it could verify control flow
   - Possibly implement `CFANode`s for `LLVM IR` instructions

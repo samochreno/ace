@@ -21,6 +21,7 @@
 #include "BoundNodes/Exprs/ConversionPlaceholderExprBoundNode.hpp"
 #include "Compilation.hpp"
 #include "TypeConversions.hpp"
+#include "Keyword.hpp"
 
 namespace Ace
 {
@@ -948,12 +949,38 @@ namespace Ace
         return perfectMatchIt->get();
     }
 
+    static auto GetNativeTypeSymbol(
+        Compilation* const compilation,
+        const std::string& name
+    ) -> std::optional<ISymbol*>
+    {
+        const auto tokenKindIt = KeywordToTokenKindMap.find(name);
+        if (tokenKindIt == end(KeywordToTokenKindMap))
+        {
+            return std::nullopt;
+        }
+
+        return GetTokenKindNativeTypeSymbol(
+            compilation,
+            tokenKindIt->second
+        );
+    }
+
     static auto ResolveLastNameSectionSymbol(
         const SymbolResolutionData& data,
         const std::vector<ISymbol*>& matchingSymbols
     ) -> Expected<ISymbol*>
     {
         auto diagnostics = DiagnosticBag::Create();
+
+        const auto optNativeSymbol = GetNativeTypeSymbol(
+            data.BeginScope->GetCompilation(),
+            data.Name
+        );
+        if (optNativeSymbol.has_value())
+        {
+            return Expected{ optNativeSymbol.value(), std::move(diagnostics) };
+        }
 
         if (matchingSymbols.empty())
         {
@@ -1399,7 +1426,11 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        if (name.IsGlobal)
+        const bool isNativeType = KeywordToTokenKindMap.contains(
+            name.Sections.front().Name.String
+        );
+
+        if (name.IsGlobal || isNativeType)
         {
             return Expected
             {
@@ -1466,6 +1497,15 @@ namespace Ace
     ) -> Expected<ISymbol*>
     {
         auto diagnostics = DiagnosticBag::Create();
+
+        const auto optNativeSymbol = GetNativeTypeSymbol(
+            data.BeginScope->GetCompilation(),
+            data.Name
+        );
+        if (optNativeSymbol.has_value())
+        {
+            return Expected{ optNativeSymbol.value(), std::move(diagnostics) };
+        }
 
         if (matchingSymbols.empty())
         {

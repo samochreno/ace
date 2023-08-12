@@ -111,244 +111,6 @@ namespace Ace
         SrcLocation m_LastSrcLocation{};
     };
 
-    static auto CreateNativeTypeName(
-        const SrcLocation& srcLocation,
-        const NativeType& nativeType
-    ) -> std::vector<std::shared_ptr<const Token>>
-    {
-        const auto name = nativeType.CreateFullyQualifiedName(
-            srcLocation
-        );
-
-        std::vector<std::shared_ptr<const Token>> tokens{};
-
-        ACE_ASSERT(name.IsGlobal);
-        tokens.push_back(std::make_shared<const Token>(
-            srcLocation,
-            TokenKind::ColonColon
-        ));
-
-        for (size_t i = 0; i < name.Sections.size(); i++)
-        {
-            const auto& section = name.Sections.at(i);
-
-            if (i != 0)
-            {
-                tokens.emplace_back(std::make_shared<const Token>(
-                    section.Name.SrcLocation,
-                    TokenKind::ColonColon
-                ));
-            }
-
-            tokens.emplace_back(std::make_shared<const Token>(
-                section.Name.SrcLocation,
-                TokenKind::Ident,
-                section.Name.String
-            ));
-        }
-
-        return tokens;
-    }
-
-    static auto CreateKeyword(
-        const Lexer& lexer,
-        const std::string& string,
-        const SrcLocation& srcLocation
-    ) -> std::optional<std::vector<std::shared_ptr<const Token>>>
-    {
-        const auto& natives =
-            lexer.GetFileBuffer()->GetCompilation()->GetNatives();
-
-        Token token
-        {
-            srcLocation,
-            TokenKind::Ident,
-        };
-
-        if (string == Keyword::If)
-        {
-            token.Kind = TokenKind::IfKeyword;
-        }
-        else if (string == Keyword::Else)
-        {
-            token.Kind = TokenKind::ElseKeyword;
-        }
-        else if (string == Keyword::Elif)
-        {
-            token.Kind = TokenKind::ElifKeyword;
-        }
-        else if (string == Keyword::While)
-        {
-            token.Kind = TokenKind::WhileKeyword;
-        }
-        else if (string == Keyword::Return)
-        {
-            token.Kind = TokenKind::ReturnKeyword;
-        }
-        else if (string == Keyword::Struct)
-        {
-            token.Kind = TokenKind::StructKeyword;
-        }
-        else if (string == Keyword::Op)
-        {
-            token.Kind = TokenKind::OpKeyword;
-        }
-        else if (string == Keyword::Public)
-        {
-            token.Kind = TokenKind::PublicKeyword;
-        }
-        else if (string == Keyword::Extern)
-        {
-            token.Kind = TokenKind::ExternKeyword;
-        }
-        else if (string == Keyword::Cast)
-        {
-            token.Kind = TokenKind::CastKeyword;
-        }
-        else if (string == Keyword::Exit)
-        {
-            token.Kind = TokenKind::ExitKeyword;
-        }
-        else if (string == Keyword::Assert)
-        {
-            token.Kind = TokenKind::AssertKeyword;
-        }
-        else if (string == Keyword::Module)
-        {
-            token.Kind = TokenKind::ModuleKeyword;
-        }
-        else if (string == Keyword::Impl)
-        {
-            token.Kind = TokenKind::ImplKeyword;
-        }
-        else if (string == Keyword::AddressOf)
-        {
-            token.Kind = TokenKind::AddressOfKeyword;
-        }
-        else if (string == Keyword::SizeOf)
-        {
-            token.Kind = TokenKind::SizeOfKeyword;
-        }
-        else if (string == Keyword::DerefAs)
-        {
-            token.Kind = TokenKind::DerefAsKeyword;
-        }
-        else if (string == Keyword::Box)
-        {
-            token.Kind = TokenKind::BoxKeyword;
-        }
-        else if (string == Keyword::Unbox)
-        {
-            token.Kind = TokenKind::UnboxKeyword;
-        }
-        else if (string == Keyword::True)
-        {
-            token.Kind = TokenKind::TrueKeyword;
-        }
-        else if (string == Keyword::False)
-        {
-            token.Kind = TokenKind::FalseKeyword;
-        }
-
-        else if (string == Keyword::Int8)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.Int8
-            );
-        }
-        else if (string == Keyword::Int16)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.Int16
-            );
-        }
-        else if (string == Keyword::Int32)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.Int32
-            );
-        }
-        else if (string == Keyword::Int64)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.Int64
-            );
-        }
-        else if (string == Keyword::UInt8)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.UInt8
-            );
-        }
-        else if (string == Keyword::UInt16)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.UInt16
-            );
-        }
-        else if (string == Keyword::UInt32)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.UInt32
-            );
-        }
-        else if (string == Keyword::UInt64)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.UInt64
-            );
-        }
-        else if (string == Keyword::Int)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.Int
-            );
-        }
-        else if (string == Keyword::Float32)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.Float32
-            );
-        }
-        else if (string == Keyword::Float64)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.Float64
-            );
-        }
-        else if (string == Keyword::Bool)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.Bool
-            );
-        }
-        else if (string == Keyword::Void)
-        {
-            return CreateNativeTypeName(
-                srcLocation,
-                natives.Void
-            );
-        }
-        else
-        {
-            return std::nullopt;
-        }
-
-        return std::vector{ std::make_shared<const Token>(token) };
-    }
-
     static auto CreateNumericLiteralTokenKind(
         const SrcLocation& srcLocation,
         const std::string& suffix
@@ -356,57 +118,52 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        if (suffix == "i8") 
+        if (suffix == TokenKindToKeywordMap.at(TokenKind::Int8Keyword)) 
         {
             return Expected{ TokenKind::Int8, std::move(diagnostics) };
         }
 
-        if (suffix == "i16")
+        if (suffix == TokenKindToKeywordMap.at(TokenKind::Int16Keyword))
         {
             return Expected{ TokenKind::Int16, std::move(diagnostics) };
         }
 
-        if (suffix == "i32")
+        if (suffix == TokenKindToKeywordMap.at(TokenKind::Int32Keyword))
         {
             return Expected{ TokenKind::Int32, std::move(diagnostics) };
         }
 
-        if (suffix == "i64")
+        if (suffix == TokenKindToKeywordMap.at(TokenKind::Int64Keyword))
         {
             return Expected{ TokenKind::Int64, std::move(diagnostics) };
         }
         
-        if (suffix == "u8")
+        if (suffix == TokenKindToKeywordMap.at(TokenKind::UInt8Keyword))
         {
             return Expected{ TokenKind::UInt8, std::move(diagnostics) };
         }
 
-        if (suffix == "u16")
+        if (suffix == TokenKindToKeywordMap.at(TokenKind::UInt16Keyword))
         {
             return Expected{ TokenKind::UInt16, std::move(diagnostics) };
         }
 
-        if (suffix == "u32")
+        if (suffix == TokenKindToKeywordMap.at(TokenKind::UInt32Keyword))
         {
             return Expected{ TokenKind::UInt32, std::move(diagnostics) };
         }
 
-        if (suffix == "u64")
+        if (suffix == TokenKindToKeywordMap.at(TokenKind::UInt64Keyword))
         {
             return Expected{ TokenKind::UInt64, std::move(diagnostics) };
         }
 
-        if (suffix == "u64")
-        {
-            return Expected{ TokenKind::UInt64, std::move(diagnostics) };
-        }
-
-        if (suffix == "f32")
+        if (suffix == TokenKindToKeywordMap.at(TokenKind::Float32Keyword))
         {
             return Expected{ TokenKind::Float32, std::move(diagnostics) };
         }
     
-        if (suffix == "f64")
+        if (suffix == TokenKindToKeywordMap.at(TokenKind::Float64Keyword))
         {
             return Expected{ TokenKind::Float64, std::move(diagnostics) };
         }
@@ -490,7 +247,7 @@ namespace Ace
 
     static auto LexIdent(
         Lexer& lexer
-    ) -> std::vector<std::shared_ptr<const Token>>
+    ) -> std::shared_ptr<const Token>
     {
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
@@ -501,23 +258,26 @@ namespace Ace
             string += lexer.Eat();
         }
 
-        const auto identToken = std::make_shared<const Token>(
-            SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
+        const SrcLocation srcLocation
+        {
+            beginSrcLocation,
+            lexer.GetLastSrcLocation(),
+        };
+
+        const auto keywordTokenKindIt = KeywordToTokenKindMap.find(string);
+        if (keywordTokenKindIt != end(KeywordToTokenKindMap))
+        {
+            return std::make_shared<const Token>(
+                srcLocation,
+                keywordTokenKindIt->second
+            );
+        }
+
+        return std::make_shared<const Token>(
+            srcLocation,
             TokenKind::Ident,
             string
         );
-
-        const auto optKeywordTokens = CreateKeyword(
-            lexer,
-            string,
-            identToken->SrcLocation
-        );
-
-        const auto tokens = optKeywordTokens.has_value() ?
-            optKeywordTokens.value() :
-            std::vector{ identToken };
-
-        return tokens;
     }
 
     static auto LexNumericLiteral(
@@ -600,7 +360,7 @@ namespace Ace
             numberString
         );
 
-        return
+        return Diagnosed
         {
             token,
             std::move(diagnostics),
@@ -1114,7 +874,7 @@ namespace Ace
             optTokenKind.value()
         );
 
-        return
+        return Expected
         {
             token,
             std::move(diagnostics),
@@ -1165,16 +925,14 @@ namespace Ace
         };
     }
 
-    static auto Lex(
-        Lexer& lexer
-    ) -> Expected<std::vector<std::shared_ptr<const Token>>>
+    static auto Lex(Lexer& lexer) -> Expected<std::shared_ptr<const Token>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         if (lexer.Peek() == '"')
         {
             const auto string = diagnostics.Collect(LexString(lexer));
-            return Expected{ std::vector{ string }, std::move(diagnostics) };
+            return Expected{ string, std::move(diagnostics) };
         }
 
         if (IsIdentBegin(lexer))
@@ -1189,7 +947,7 @@ namespace Ace
 
             return Expected
             {
-                std::vector{ numericLiteral },
+                numericLiteral,
                 std::move(diagnostics),
             };
         }
@@ -1202,7 +960,7 @@ namespace Ace
 
         return Expected
         {
-            std::vector{ optDefault.value() },
+            optDefault.value(),
             std::move(diagnostics),
         };
     }
@@ -1311,14 +1069,10 @@ namespace Ace
                 continue;
             }
 
-            const auto optTokens = diagnostics.Collect(Lex(lexer));
-            if (optTokens.has_value())
+            auto optToken = diagnostics.Collect(Lex(lexer));
+            if (optToken.has_value())
             {
-                tokens.insert(
-                    end(tokens),
-                    begin(optTokens.value()),
-                    end  (optTokens.value())
-                );
+                tokens.push_back(std::move(optToken.value()));
             }
             else
             {
