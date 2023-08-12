@@ -7,6 +7,7 @@
 
 #include "Log.hpp"
 #include "SrcBuffer.hpp"
+#include "Assert.hpp"
 
 namespace Ace
 {
@@ -77,15 +78,48 @@ namespace Ace
             };
         }
 
-        const auto padding      = MaxSnippetWidth - highlight.size();
-        const auto paddingLeft  = padding / 2;
-        const auto paddingRight = padding - paddingLeft;
+        ACE_ASSERT(line.size() > MaxSnippetWidth);
+        ACE_ASSERT(highlight.size() < line.size());
 
-        return std::string_view
+        const size_t padding = MaxSnippetWidth - highlight.size();
+
+        size_t leftPadding  = padding / 2;
+        size_t rightPadding = padding - leftPadding;
+
+        const size_t maxLeftPadding = std::distance(
+            begin(line),
+            begin(highlight)
+        );
+        const size_t maxRightPadding = std::distance(
+            end(highlight),
+            end(line)
+        );
+
+        if (leftPadding > maxLeftPadding)
         {
-            begin(highlight) - paddingLeft,
-            end  (highlight) + paddingRight,
-        };
+            leftPadding  = maxLeftPadding;
+            rightPadding = padding - leftPadding;
+        }
+        else if (rightPadding > maxRightPadding)
+        {
+            rightPadding = maxRightPadding;
+            leftPadding  = padding - rightPadding;
+        }
+
+        auto beginIt = begin(highlight);
+        auto endIt   = end  (highlight);
+
+        for (size_t i = 0; i < leftPadding; i++)
+        {
+            beginIt--;
+        }
+
+        for (size_t i = 0; i < rightPadding; i++)
+        {
+            endIt++;
+        }
+
+        return std::string_view{ beginIt, endIt };
     }
 
     static auto CalculateSnippetStringLine(
@@ -102,7 +136,6 @@ namespace Ace
             std::make_reverse_iterator(bufferBeginIt),
             '\n'
         );
-
         const auto lineEndIt = std::find(
             srcLocation.CharacterBeginIterator,
             bufferEndIt,
@@ -144,10 +177,7 @@ namespace Ace
             CreateCappedIterator(line, srcLocation.CharacterEndIterator),
         };
 
-        const auto string = CalculateSnippetString(
-            line,
-            highlight
-        );
+        const auto string = CalculateSnippetString(line, highlight);
 
         highlight = std::string_view
         {
@@ -155,10 +185,7 @@ namespace Ace
             CreateCappedIterator(string, end  (highlight)),
         };
 
-        const auto highlightString = CreateHighlightString(
-            string,
-            highlight
-        );
+        const auto highlightString = CreateHighlightString(string, highlight);
 
         return DiagnosticSnippetDisplayInfo{ string, highlightString };
     }
