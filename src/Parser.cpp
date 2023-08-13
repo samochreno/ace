@@ -1089,6 +1089,11 @@ namespace Ace
                 return;
             }
 
+            if (*(m_Iterator - 1) == TokenKind::OpenBrace)
+            {
+                m_NestLevel++;
+            }
+
             if (Peek() == TokenKind::CloseBrace)
             {
                 ssize_t signedNestLevel = static_cast<ssize_t>(m_NestLevel);
@@ -1097,11 +1102,6 @@ namespace Ace
                 {
                     m_NestLevel--;
                 }
-            }
-
-            if (*(m_Iterator - 1) == TokenKind::OpenBrace)
-            {
-                m_NestLevel++;
             }
         }
 
