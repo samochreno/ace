@@ -9,7 +9,7 @@
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "BoundNodes/Exprs/VarRefs/StaticVarRefExprBoundNode.hpp"
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
-#include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/Assignments/SimpleAssignmentStmtBoundNode.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
@@ -131,7 +131,7 @@ namespace Ace
 
         // Without type checking and implicit conversions,
         // refs can be initialized too
-        const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
+        const auto assignmentStmt = std::make_shared<const SimpleAssignmentStmtBoundNode>(
             GetSrcLocation(),
             varRefExpr,
             m_OptAssignedExpr.value()

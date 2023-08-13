@@ -12,32 +12,32 @@
 
 namespace Ace
 {
-    class NormalAssignmentStmtBoundNode :
-        public std::enable_shared_from_this<NormalAssignmentStmtBoundNode>,
+    class SimpleAssignmentStmtBoundNode :
+        public std::enable_shared_from_this<SimpleAssignmentStmtBoundNode>,
         public virtual IStmtBoundNode,
-        public virtual ITypeCheckableBoundNode<NormalAssignmentStmtBoundNode, StmtTypeCheckingContext>,
-        public virtual ILowerableBoundNode<NormalAssignmentStmtBoundNode>
+        public virtual ITypeCheckableBoundNode<SimpleAssignmentStmtBoundNode, StmtTypeCheckingContext>,
+        public virtual ILowerableBoundNode<SimpleAssignmentStmtBoundNode>
     {
     public:
-        NormalAssignmentStmtBoundNode(
+        SimpleAssignmentStmtBoundNode(
             const SrcLocation& srcLocation,
             const std::shared_ptr<const IExprBoundNode>& lhsExpr,
             const std::shared_ptr<const IExprBoundNode>& rhsExpr
         );
-        virtual ~NormalAssignmentStmtBoundNode() = default;
+        virtual ~SimpleAssignmentStmtBoundNode() = default;
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const IBoundNode*> final;
         auto CreateTypeChecked(
             const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const NormalAssignmentStmtBoundNode>> final;
+        ) const -> Diagnosed<std::shared_ptr<const SimpleAssignmentStmtBoundNode>> final;
         auto CreateTypeCheckedStmt(
             const StmtTypeCheckingContext& context
         ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>> final;
         auto CreateLowered(
             const LoweringContext& context
-        ) const -> std::shared_ptr<const NormalAssignmentStmtBoundNode> final;
+        ) const -> std::shared_ptr<const SimpleAssignmentStmtBoundNode> final;
         auto CreateLoweredStmt(
             const LoweringContext& context
         ) const -> std::shared_ptr<const IStmtBoundNode> final;

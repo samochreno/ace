@@ -26,7 +26,7 @@
 #include "Nodes/ModuleNode.hpp"
 #include "Nodes/Stmts/AssertStmtNode.hpp"
 #include "Nodes/Stmts/Assignments/CompoundAssignmentStmtNode.hpp"
-#include "Nodes/Stmts/Assignments/NormalAssignmentStmtNode.hpp"
+#include "Nodes/Stmts/Assignments/SimpleAssignmentStmtNode.hpp"
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Nodes/Stmts/BlockStmtNode.hpp"
 #include "Nodes/Stmts/ExitStmtNode.hpp"

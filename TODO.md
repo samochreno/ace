@@ -2,7 +2,6 @@
 
 ## 🛠️ Refactor
 
-- Rename `NormalAssignment` to `SimpleAssignment`
 - ❓ Eliminate local lambdas
 - ❓ String interning
 - ❓ Put braces on opening line

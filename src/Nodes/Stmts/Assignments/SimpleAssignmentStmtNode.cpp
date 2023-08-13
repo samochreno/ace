@@ -1,4 +1,4 @@
-#include "Nodes/Stmts/Assignments/NormalAssignmentStmtNode.hpp"
+#include "Nodes/Stmts/Assignments/SimpleAssignmentStmtNode.hpp"
 
 #include <memory>
 #include <vector>
@@ -6,11 +6,11 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
-#include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/Assignments/SimpleAssignmentStmtBoundNode.hpp"
 
 namespace Ace
 {
-    NormalAssignmentStmtNode::NormalAssignmentStmtNode(
+    SimpleAssignmentStmtNode::SimpleAssignmentStmtNode(
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprNode>& lhsExpr,
@@ -22,17 +22,17 @@ namespace Ace
     {
     }
 
-    auto NormalAssignmentStmtNode::GetSrcLocation() const -> const SrcLocation&
+    auto SimpleAssignmentStmtNode::GetSrcLocation() const -> const SrcLocation&
     {
         return m_SrcLocation;
     }
 
-    auto NormalAssignmentStmtNode::GetScope() const -> std::shared_ptr<Scope>
+    auto SimpleAssignmentStmtNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;
     }
 
-    auto NormalAssignmentStmtNode::CollectChildren() const -> std::vector<const INode*>
+    auto SimpleAssignmentStmtNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
 
@@ -42,11 +42,11 @@ namespace Ace
         return children;
     }
 
-    auto NormalAssignmentStmtNode::CloneInScope(
+    auto SimpleAssignmentStmtNode::CloneInScope(
         const std::shared_ptr<Scope>& scope
-    ) const -> std::shared_ptr<const NormalAssignmentStmtNode>
+    ) const -> std::shared_ptr<const SimpleAssignmentStmtNode>
     {
-        return std::make_shared<const NormalAssignmentStmtNode>(
+        return std::make_shared<const SimpleAssignmentStmtNode>(
             m_SrcLocation,
             m_Scope,
             m_LHSExpr->CloneInScopeExpr(scope),
@@ -54,14 +54,14 @@ namespace Ace
         );
     }
 
-    auto NormalAssignmentStmtNode::CloneInScopeStmt(
+    auto SimpleAssignmentStmtNode::CloneInScopeStmt(
         const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const IStmtNode>
     {
         return CloneInScope(scope);
     }
 
-    auto NormalAssignmentStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const NormalAssignmentStmtBoundNode>>
+    auto SimpleAssignmentStmtNode::CreateBound() const -> Diagnosed<std::shared_ptr<const SimpleAssignmentStmtBoundNode>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -72,7 +72,7 @@ namespace Ace
 
         return Diagnosed
         {
-            std::make_shared<const NormalAssignmentStmtBoundNode>(
+            std::make_shared<const SimpleAssignmentStmtBoundNode>(
                 GetSrcLocation(),
                 boundLHSExpr,
                 boundRHSExpr
@@ -81,7 +81,7 @@ namespace Ace
         };
     }
 
-    auto NormalAssignmentStmtNode::CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
+    auto SimpleAssignmentStmtNode::CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateBound();
     }

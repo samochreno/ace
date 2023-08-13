@@ -5,37 +5,37 @@
 
 #include "Nodes/Stmts/StmtNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
-#include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/Assignments/SimpleAssignmentStmtBoundNode.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 
 namespace Ace
 {
-    class NormalAssignmentStmtNode :
+    class SimpleAssignmentStmtNode :
         public virtual IStmtNode,
-        public virtual ICloneableInScopeNode<NormalAssignmentStmtNode>,
-        public virtual IBindableNode<NormalAssignmentStmtBoundNode>
+        public virtual ICloneableInScopeNode<SimpleAssignmentStmtNode>,
+        public virtual IBindableNode<SimpleAssignmentStmtBoundNode>
     {
     public:
-        NormalAssignmentStmtNode(
+        SimpleAssignmentStmtNode(
             const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
             const std::shared_ptr<const IExprNode>& lhsExpr,
             const std::shared_ptr<const IExprNode>& rhsExpr
         );
-        virtual ~NormalAssignmentStmtNode() = default;
+        virtual ~SimpleAssignmentStmtNode() = default;
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
             const std::shared_ptr<Scope>& scope
-        ) const -> std::shared_ptr<const NormalAssignmentStmtNode> final;
+        ) const -> std::shared_ptr<const SimpleAssignmentStmtNode> final;
         auto CloneInScopeStmt(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const IStmtNode> final;
-        auto CreateBound() const -> Diagnosed<std::shared_ptr<const NormalAssignmentStmtBoundNode>> final;
+        auto CreateBound() const -> Diagnosed<std::shared_ptr<const SimpleAssignmentStmtBoundNode>> final;
         auto CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>> final;
         
     private:

@@ -1,4 +1,4 @@
-#include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/Assignments/SimpleAssignmentStmtBoundNode.hpp"
 
 #include <memory>
 #include <vector>
@@ -14,7 +14,7 @@
 
 namespace Ace
 {
-    NormalAssignmentStmtBoundNode::NormalAssignmentStmtBoundNode(
+    SimpleAssignmentStmtBoundNode::SimpleAssignmentStmtBoundNode(
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprBoundNode>& lhsExpr,
         const std::shared_ptr<const IExprBoundNode>& rhsExpr
@@ -24,17 +24,17 @@ namespace Ace
     {
     }
 
-    auto NormalAssignmentStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
+    auto SimpleAssignmentStmtBoundNode::GetSrcLocation() const -> const SrcLocation&
     {
         return m_SrcLocation;
     }
 
-    auto NormalAssignmentStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
+    auto SimpleAssignmentStmtBoundNode::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_LHSExpr->GetScope();
     }
 
-    auto NormalAssignmentStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
+    auto SimpleAssignmentStmtBoundNode::CollectChildren() const -> std::vector<const IBoundNode*>
     {
         std::vector<const IBoundNode*> children{};
 
@@ -44,9 +44,9 @@ namespace Ace
         return children;
     }
 
-    auto NormalAssignmentStmtBoundNode::CreateTypeChecked(
+    auto SimpleAssignmentStmtBoundNode::CreateTypeChecked(
         const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const NormalAssignmentStmtBoundNode>>
+    ) const -> Diagnosed<std::shared_ptr<const SimpleAssignmentStmtBoundNode>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -72,7 +72,7 @@ namespace Ace
 
         return Diagnosed
         {
-            std::make_shared<const NormalAssignmentStmtBoundNode>(
+            std::make_shared<const SimpleAssignmentStmtBoundNode>(
                 GetSrcLocation(),
                 checkedLHSExpr,
                 checkedRHSExpr
@@ -81,16 +81,16 @@ namespace Ace
         };
     }
 
-    auto NormalAssignmentStmtBoundNode::CreateTypeCheckedStmt(
+    auto SimpleAssignmentStmtBoundNode::CreateTypeCheckedStmt(
         const StmtTypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto NormalAssignmentStmtBoundNode::CreateLowered(
+    auto SimpleAssignmentStmtBoundNode::CreateLowered(
         const LoweringContext& context
-    ) const -> std::shared_ptr<const NormalAssignmentStmtBoundNode>
+    ) const -> std::shared_ptr<const SimpleAssignmentStmtBoundNode>
     {
         const auto loweredLHSExpr = m_LHSExpr->CreateLoweredExpr({});
         const auto loweredRHSExpr = m_RHSExpr->CreateLoweredExpr({});
@@ -103,21 +103,21 @@ namespace Ace
             return shared_from_this();
         }
 
-        return std::make_shared<const NormalAssignmentStmtBoundNode>(
+        return std::make_shared<const SimpleAssignmentStmtBoundNode>(
             GetSrcLocation(),
             loweredLHSExpr,
             loweredRHSExpr
         )->CreateLowered({});
     }
 
-    auto NormalAssignmentStmtBoundNode::CreateLoweredStmt(
+    auto SimpleAssignmentStmtBoundNode::CreateLoweredStmt(
         const LoweringContext& context
     ) const -> std::shared_ptr<const IStmtBoundNode>
     {
         return CreateLowered(context);
     }
 
-    auto NormalAssignmentStmtBoundNode::Emit(Emitter& emitter) const -> void
+    auto SimpleAssignmentStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
         std::vector<ExprDropData> tmps{};
 
@@ -144,7 +144,7 @@ namespace Ace
         emitter.EmitDropTmps(tmps);
     }
 
-    auto NormalAssignmentStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
+    auto SimpleAssignmentStmtBoundNode::CreateCFANodes() const -> std::vector<CFANode>
     {
         return {};
     }

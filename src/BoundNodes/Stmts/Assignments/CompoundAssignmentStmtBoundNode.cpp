@@ -16,7 +16,7 @@
 #include "BoundNodes/Stmts/GroupStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/ExprStmtBoundNode.hpp"
-#include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/Assignments/SimpleAssignmentStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "SpecialIdent.hpp"
@@ -133,7 +133,7 @@ namespace Ace
             opSymbol
         );
 
-        const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
+        const auto assignmentStmt = std::make_shared<const SimpleAssignmentStmtBoundNode>(
             srcLocation,
             lhsExpr,
             userBinaryExpr
@@ -331,7 +331,7 @@ namespace Ace
             opSymbol
         );
 
-        const auto assignmentStmt = std::make_shared<const NormalAssignmentStmtBoundNode>(
+        const auto assignmentStmt = std::make_shared<const SimpleAssignmentStmtBoundNode>(
             srcLocation,
             tempRefVarFieldRefExpr,
             userBinaryExpr

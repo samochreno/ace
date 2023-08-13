@@ -3163,7 +3163,7 @@ namespace Ace
     static auto ParseAssignmentStmt(
         Parser& parser,
         const std::shared_ptr<Scope>& scope
-    ) -> Expected<std::shared_ptr<const NormalAssignmentStmtNode>>
+    ) -> Expected<std::shared_ptr<const SimpleAssignmentStmtNode>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -3205,7 +3205,7 @@ namespace Ace
 
         return Expected
         {
-            std::make_shared<const NormalAssignmentStmtNode>(
+            std::make_shared<const SimpleAssignmentStmtNode>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 optLHSExpr.value(),
@@ -3839,7 +3839,7 @@ namespace Ace
         {
             return Expected
             {
-                std::make_shared<const NormalAssignmentStmtNode>(
+                std::make_shared<const SimpleAssignmentStmtNode>(
                     SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                     scope,
                     optExpr.value(),

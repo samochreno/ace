@@ -28,7 +28,7 @@
 #include "BoundNodes/ModuleBoundNode.hpp"
 #include "BoundNodes/Stmts/AssertStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/Assignments/CompoundAssignmentStmtBoundNode.hpp"
-#include "BoundNodes/Stmts/Assignments/NormalAssignmentStmtBoundNode.hpp"
+#include "BoundNodes/Stmts/Assignments/SimpleAssignmentStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockEndStmtBoundNode.hpp"
 #include "BoundNodes/Stmts/BlockStmtBoundNode.hpp"
