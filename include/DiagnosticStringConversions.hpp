@@ -38,7 +38,7 @@ namespace Ace
     ) -> std::string;
 
     auto CreateOpString(
-        const std::shared_ptr<const Token>& opToken
+        const Token& opToken
     ) -> std::string;
 
     template<typename TSymbol>

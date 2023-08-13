@@ -51,20 +51,4 @@ namespace Ace
     {
         return !(token == value);
     }
-    template<typename T>
-    auto operator==(
-        const std::shared_ptr<const Token>& token,
-        T&& value
-    ) -> bool
-    {
-        return (*token.get()) == value;
-    }
-    template<typename T>
-    auto operator!=(
-        const std::shared_ptr<const Token>& token,
-        T&& value
-    ) -> bool
-    {
-        return !(token == value);
-    }
 }

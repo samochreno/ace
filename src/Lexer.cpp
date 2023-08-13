@@ -245,9 +245,7 @@ namespace Ace
             (lexer.Peek(1) == '#');
     }
 
-    static auto LexIdent(
-        Lexer& lexer
-    ) -> std::shared_ptr<const Token>
+    static auto LexIdent(Lexer& lexer) -> Token
     {
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
@@ -267,22 +265,22 @@ namespace Ace
         const auto keywordTokenKindIt = KeywordToTokenKindMap.find(string);
         if (keywordTokenKindIt != end(KeywordToTokenKindMap))
         {
-            return std::make_shared<const Token>(
+            return Token
+            {
                 srcLocation,
-                keywordTokenKindIt->second
-            );
+                keywordTokenKindIt->second,
+            };
         }
 
-        return std::make_shared<const Token>(
+        return Token
+        {
             srcLocation,
             TokenKind::Ident,
-            string
-        );
+            string,
+        };
     }
 
-    static auto LexNumericLiteral(
-        Lexer& lexer
-    ) -> Diagnosed<std::shared_ptr<const Token>>
+    static auto LexNumericLiteral(Lexer& lexer) -> Diagnosed<Token>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -354,22 +352,19 @@ namespace Ace
             } 
         }
 
-        const auto token = std::make_shared<const Token>(
-            SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
-            tokenKind,
-            numberString
-        );
-
         return Diagnosed
         {
-            token,
+            Token
+            {
+                SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
+                tokenKind,
+                numberString
+            },
             std::move(diagnostics),
         };
     }
 
-    static auto LexDefaultTokenKind(
-        Lexer& lexer
-    ) -> Expected<TokenKind>
+    static auto LexDefaultTokenKind(Lexer& lexer) -> Expected<TokenKind>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -854,9 +849,7 @@ namespace Ace
         }
     }
 
-    static auto LexDefault(
-        Lexer& lexer
-    ) -> Expected<std::shared_ptr<const Token>>
+    static auto LexDefault(Lexer& lexer) -> Expected<Token>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -869,21 +862,18 @@ namespace Ace
             return std::move(diagnostics);
         }
 
-        const auto token = std::make_shared<const Token>(
-            SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
-            optTokenKind.value()
-        );
-
         return Expected
         {
-            token,
+            Token
+            {
+                SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
+                optTokenKind.value()
+            },
             std::move(diagnostics),
         };
     }
 
-    static auto LexString(
-        Lexer& lexer
-    ) -> Diagnosed<std::shared_ptr<const Token>>
+    static auto LexString(Lexer& lexer) -> Diagnosed<Token>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -912,20 +902,19 @@ namespace Ace
             ));
         }
 
-        const auto token = std::make_shared<const Token>(
-            SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
-            TokenKind::String,
-            value
-        );
-
-        return
+        return Diagnosed
         {
-            token,
+            Token
+            {
+                SrcLocation{ beginSrcLocation, lexer.GetLastSrcLocation() },
+                TokenKind::String,
+                value,
+            },
             std::move(diagnostics),
         };
     }
 
-    static auto Lex(Lexer& lexer) -> Expected<std::shared_ptr<const Token>>
+    static auto Lex(Lexer& lexer) -> Expected<Token>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -1034,9 +1023,7 @@ namespace Ace
         return { DiagnosticBag::Create() };
     }
 
-    static auto DiscardWhitespace(
-        Lexer& lexer
-    ) -> void
+    static auto DiscardWhitespace(Lexer& lexer) -> void
     {
         while (IsWhitespace(lexer))
         {
@@ -1046,13 +1033,13 @@ namespace Ace
 
     auto LexTokens(
         const FileBuffer* const fileBuffer
-    ) -> Diagnosed<std::vector<std::shared_ptr<const Token>>>
+    ) -> Diagnosed<std::vector<Token>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         Lexer lexer{ fileBuffer };
 
-        std::vector<std::shared_ptr<const Token>> tokens{};
+        std::vector<Token> tokens{};
         while (!lexer.IsEnd())
         {
             DiscardWhitespace(lexer);
@@ -1080,10 +1067,10 @@ namespace Ace
             }
         }
 
-        tokens.push_back(std::make_shared<const Token>(
+        tokens.emplace_back(
             lexer.GetLastSrcLocation(),
             TokenKind::EndOfFile
-        ));
+        );
 
         return Diagnosed
         {

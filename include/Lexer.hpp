@@ -11,5 +11,5 @@ namespace Ace
 {
     auto LexTokens(
         const FileBuffer* const fileBuffer
-    ) -> Diagnosed<std::vector<std::shared_ptr<const Token>>>;
+    ) -> Diagnosed<std::vector<Token>>;
 }

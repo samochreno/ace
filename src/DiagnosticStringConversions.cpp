@@ -526,15 +526,13 @@ namespace Ace
         }
     }
 
-    auto CreateOpString(
-        const std::shared_ptr<const Token>& opToken
-    ) -> std::string
+    auto CreateOpString(const Token& opToken) -> std::string
     {
-        if (opToken->Kind == TokenKind::Ident)
+        if (opToken.Kind == TokenKind::Ident)
         {
-            return "`" + opToken->String + "`";
+            return "`" + opToken.String + "`";
         }
 
-        return CreateTokenKindString(opToken->Kind);
+        return CreateTokenKindString(opToken.Kind);
     }
 }

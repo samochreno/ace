@@ -389,10 +389,11 @@ namespace Ace
     {
         DiagnosticGroup group{};
 
-        const auto opToken = std::make_shared<const Token>(
+        const Token opToken
+        {
             op.SrcLocation,
-            op.TokenKind
-        );
+            op.TokenKind,
+        };
 
         const std::string message =
             "undefined to operator " + CreateOpString(opToken) +
@@ -415,10 +416,11 @@ namespace Ace
     {
         DiagnosticGroup group{};
 
-        const auto opToken = std::make_shared<const Token>(
+        const Token opToken
+        {
             op.SrcLocation,
-            op.TokenKind
-        );
+            op.TokenKind,
+        };
 
         const std::string message =
             "undefined operator " + CreateOpString(opToken) +
@@ -442,10 +444,11 @@ namespace Ace
     {
         DiagnosticGroup group{};
 
-        const auto opToken = std::make_shared<const Token>(
+        const Token opToken
+        {
             op.SrcLocation,
-            op.TokenKind
-        );
+            op.TokenKind,
+        };
 
         const std::string message =
             "ambiguous reference to operator " + CreateOpString(opToken) +

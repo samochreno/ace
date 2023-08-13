@@ -2,7 +2,6 @@
 
 ## 🛠️ Refactor
 
-- Put `Token` on stack
 - ❓ Eliminate local lambdas
 - ❓ String interning
 - ❓ Put braces on opening line
