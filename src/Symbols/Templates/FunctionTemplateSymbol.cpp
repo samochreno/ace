@@ -19,13 +19,13 @@
 namespace Ace
 {
     FunctionTemplateSymbol::FunctionTemplateSymbol(
-        const FunctionTemplateNode* const templateNode
+        const std::shared_ptr<const FunctionTemplateNode>& templateNode
     ) : m_TemplateNode{ templateNode }
     {
         m_Name =
         {
-            GetASTName().SrcLocation,
-            SpecialIdent::CreateTemplate(GetASTName().String),
+            GetAST()->GetTemplateName().SrcLocation,
+            SpecialIdent::CreateTemplate(GetAST()->GetTemplateName().String),
         };
     }
 
@@ -49,24 +49,9 @@ namespace Ace
         return SymbolCategory::Static;
     }
 
-    auto FunctionTemplateSymbol::GetAccessModifier() const -> AccessModifier
+    auto FunctionTemplateSymbol::GetAST() const -> std::shared_ptr<const ITemplatableNode>
     {
-        return m_TemplateNode->GetAST()->GetAccessModifier();
-    }
-
-    auto FunctionTemplateSymbol::CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*>
-    {
-        return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<ImplTemplateParamTypeSymbol>();
-    }
-
-    auto FunctionTemplateSymbol::CollectParams() const -> std::vector<NormalTemplateParamTypeSymbol*>
-    {
-        return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<NormalTemplateParamTypeSymbol>();
-    }
-
-    auto FunctionTemplateSymbol::GetASTName() const -> const Ident&
-    {
-        return m_TemplateNode->GetAST()->GetName();
+        return m_TemplateNode->GetAST();
     }
 
     auto FunctionTemplateSymbol::SetPlaceholderSymbol(
@@ -94,11 +79,11 @@ namespace Ace
         ACE_ASSERT(implArgs.size() == implParamNames.size());
         ACE_ASSERT(args.size() == paramNames.size());
 
-        const auto ast = m_TemplateNode->GetAST()->CloneInScope(
+        const auto ast = m_TemplateNode->GetConcreteAST()->CloneInScope(
             m_TemplateNode->GetScope()
         );
 
-        diagnostics.Collect(ast->GetSelfScope()->DefineTemplateArgAliases(
+        diagnostics.Collect(ast->GetTemplateSelfScope()->DefineTemplateArgAliases(
             implParamNames,
             implArgs,
             paramNames,
@@ -132,13 +117,13 @@ namespace Ace
     }
 
     auto FunctionTemplateSymbol::InstantiateSemanticsForSymbols(
-        const std::shared_ptr<const INode>& ast
+        const std::shared_ptr<const ITemplatableNode>& ast
     ) -> void
     {
-        const auto castedAst =
+        const auto castedAST =
             std::dynamic_pointer_cast<const FunctionNode>(ast);
 
-        const auto boundAST = castedAst->CreateBound();
+        const auto boundAST = castedAST->CreateBound();
         ACE_ASSERT(boundAST.GetDiagnostics().IsEmpty());;
 
         const auto finalAST = Application::CreateTransformedAndVerifiedAST(

@@ -4,18 +4,19 @@
 #include <vector>
 
 #include "Symbols/Symbol.hpp"
+#include "AccessModifier.hpp"
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
 #include "Ident.hpp"
 
 namespace Ace
 {
-    class INode;
+    class ITemplatableNode;
 
     struct TemplateSymbolsInstantationResult
     {
         ISymbol* const Symbol{};
-        std::shared_ptr<const INode> AST{};
+        std::shared_ptr<const ITemplatableNode> AST{};
     };
 
     class ITemplateSymbol : public virtual ISymbol
@@ -23,14 +24,14 @@ namespace Ace
     public:
         virtual ~ITemplateSymbol() = default;
 
-        virtual auto CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*>   = 0;
-        virtual auto CollectParams()     const -> std::vector<NormalTemplateParamTypeSymbol*> = 0;
+        virtual auto GetAccessModifier() const -> AccessModifier final;
 
-        virtual auto GetASTName() const -> const Ident& = 0;
+        virtual auto GetAST() const -> std::shared_ptr<const ITemplatableNode> = 0;
 
-        virtual auto SetPlaceholderSymbol(
-            ISymbol* const symbol
-        ) -> void = 0;
+        virtual auto CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*> final;
+        virtual auto CollectParams()     const -> std::vector<NormalTemplateParamTypeSymbol*> final;
+
+        virtual auto SetPlaceholderSymbol(ISymbol* const symbol) -> void = 0;
         virtual auto GetPlaceholderSymbol() const -> ISymbol* = 0;
 
         virtual auto InstantiateSymbols(
@@ -38,7 +39,7 @@ namespace Ace
             const std::vector<ITypeSymbol*>& args
         ) -> Diagnosed<TemplateSymbolsInstantationResult> = 0;
         virtual auto InstantiateSemanticsForSymbols(
-            const std::shared_ptr<const INode>& ast
+            const std::shared_ptr<const ITemplatableNode>& ast
         ) -> void = 0;
     };
 }

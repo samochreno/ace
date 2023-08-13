@@ -9,8 +9,8 @@
 
 namespace Ace
 {
-    TemplateInstantiator::TemplateInstantiator()
-        : m_Symbols{}, m_SymbolOnlyInstantiatedASTsMap{}
+    TemplateInstantiator::TemplateInstantiator(
+    ) : m_Symbols{}, m_SymbolOnlyInstantiatedASTsMap{}
     {
     }
 
@@ -162,15 +162,14 @@ namespace Ace
             for (const auto& templateASTsPair : symbolOnlyInstantiatedASTsMap)
             {
                 didInstantiateSemantics = true;
+
+                const auto& asts = templateASTsPair.second;
                 
-                std::for_each(
-                    begin(templateASTsPair.second),
-                    end  (templateASTsPair.second),
-                    [&](const std::shared_ptr<const INode>& ast)
-                    {
-                        templateASTsPair.first->InstantiateSemanticsForSymbols(ast);
-                    }
-                );
+                std::for_each(begin(asts), end(asts),
+                [&](const std::shared_ptr<const ITemplatableNode>& ast)
+                {
+                    templateASTsPair.first->InstantiateSemanticsForSymbols(ast);
+                });
             }
         }
     }

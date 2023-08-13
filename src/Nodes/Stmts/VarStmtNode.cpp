@@ -110,11 +110,6 @@ namespace Ace
         return CreateBound();
     }
 
-    auto VarStmtNode::GetName() const -> const Ident&
-    {
-        return m_Name;
-    }
-
     auto VarStmtNode::GetSymbolScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;

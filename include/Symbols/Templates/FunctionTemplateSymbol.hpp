@@ -21,7 +21,7 @@ namespace Ace
     {
     public:
         FunctionTemplateSymbol(
-            const FunctionTemplateNode* const templateNode
+            const std::shared_ptr<const FunctionTemplateNode>& templateNode
         );
         virtual ~FunctionTemplateSymbol() = default;
 
@@ -29,12 +29,8 @@ namespace Ace
         auto GetName() const -> const Ident& final;
         auto GetKind() const -> SymbolKind final;
         auto GetCategory() const -> SymbolCategory final;
-        auto GetAccessModifier() const -> AccessModifier final;
 
-        auto CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*>   final;
-        auto CollectParams()     const -> std::vector<NormalTemplateParamTypeSymbol*> final;
-
-        auto GetASTName() const -> const Ident& final;
+        auto GetAST() const -> std::shared_ptr<const ITemplatableNode> final;
 
         auto SetPlaceholderSymbol(ISymbol* const symbol) -> void final;
         auto GetPlaceholderSymbol() const -> ISymbol* final;
@@ -44,13 +40,13 @@ namespace Ace
             const std::vector<ITypeSymbol*>& args
         ) -> Diagnosed<TemplateSymbolsInstantationResult> final;
         auto InstantiateSemanticsForSymbols(
-            const std::shared_ptr<const INode>& ast
+            const std::shared_ptr<const ITemplatableNode>& ast
         ) -> void final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};
         Ident m_Name{};
-        const FunctionTemplateNode* m_TemplateNode{};
+        std::shared_ptr<const FunctionTemplateNode> m_TemplateNode{};
         ISymbol* m_PlaceholderSymbol{};
         std::vector<std::shared_ptr<const FunctionNode>> m_InstantiatedOnlySymbolsASTs{};
     };

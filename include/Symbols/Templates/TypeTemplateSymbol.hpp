@@ -22,7 +22,9 @@ namespace Ace
         public virtual ISelfScopedSymbol
     {
     public:
-        TypeTemplateSymbol(const TypeTemplateNode* const templateNode);
+        TypeTemplateSymbol(
+            const std::shared_ptr<const TypeTemplateNode>& templateNode
+        );
         virtual ~TypeTemplateSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
@@ -30,12 +32,8 @@ namespace Ace
         auto GetName() const -> const Ident& final;
         auto GetKind() const -> SymbolKind final;
         auto GetCategory() const -> SymbolCategory final;
-        auto GetAccessModifier() const -> AccessModifier final;
 
-        auto CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*>   final;
-        auto CollectParams()     const -> std::vector<NormalTemplateParamTypeSymbol*> final;
-
-        auto GetASTName() const -> const Ident& final;
+        auto GetAST() const -> std::shared_ptr<const ITemplatableNode> final;
   
         auto SetPlaceholderSymbol(ISymbol* const symbol) -> void final;
         auto GetPlaceholderSymbol() const -> ISymbol* final;
@@ -45,13 +43,13 @@ namespace Ace
             const std::vector<ITypeSymbol*>& args
         ) -> Diagnosed<TemplateSymbolsInstantationResult> final;
         auto InstantiateSemanticsForSymbols(
-            const std::shared_ptr<const INode>& ast
+            const std::shared_ptr<const ITemplatableNode>& ast
         ) -> void final;
 
     private:
         Ident m_Name{};
         AccessModifier m_AccessModifier{};
-        const TypeTemplateNode* m_TemplateNode{};
+        std::shared_ptr<const TypeTemplateNode> m_TemplateNode{};
         ISymbol* m_PlaceholderSymbol{};
     };
 }

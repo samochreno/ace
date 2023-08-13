@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "Nodes/Node.hpp"
+#include "Nodes/TemplatableNode.hpp"
 #include "BoundNodes/Types/TypeBoundNode.hpp"
 #include "Scope.hpp"
 #include "Ident.hpp"
@@ -13,20 +14,16 @@ namespace Ace
 {
     class ITypeNode :
         public virtual INode,
-        public virtual ISymbolCreatableNode
+        public virtual ISymbolCreatableNode,
+        public virtual ITemplatableNode
     {
     public:
         virtual ~ITypeNode() = default;
-
-        virtual auto GetSelfScope() const -> std::shared_ptr<Scope> = 0;
 
         virtual auto CloneInScopeType(
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const ITypeNode> = 0;
 
         virtual auto CreateBoundType() const -> Diagnosed<std::shared_ptr<const ITypeBoundNode>> = 0;
-
-        virtual auto GetName() const -> const Ident& = 0;
-        virtual auto GetAccessModifier() const -> AccessModifier = 0;
     };
 }

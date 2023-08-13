@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "Nodes/Node.hpp"
-#include "Nodes/TypedNode.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "BoundNodes/Vars/Params/NormalParamVarBoundNode.hpp"
 #include "SrcLocation.hpp"
@@ -18,9 +17,9 @@ namespace Ace
 {
     class NormalParamVarNode :
         public virtual INode,
-        public virtual ITypedNode,
         public virtual ICloneableInScopeNode<NormalParamVarNode>,
-        public virtual IBindableNode<NormalParamVarBoundNode>
+        public virtual IBindableNode<NormalParamVarBoundNode>,
+        public virtual ISymbolCreatableNode
     {
     public:
         NormalParamVarNode(
@@ -40,8 +39,6 @@ namespace Ace
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const NormalParamVarNode> final;
         auto CreateBound() const -> Diagnosed<std::shared_ptr<const NormalParamVarBoundNode>> final;
-
-        auto GetName() const -> const Ident& final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;

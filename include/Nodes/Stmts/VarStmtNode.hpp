@@ -5,7 +5,6 @@
 #include <optional>
 
 #include "Nodes/Stmts/StmtNode.hpp"
-#include "Nodes/TypedNode.hpp"
 #include "Nodes/Exprs/ExprNode.hpp"
 #include "BoundNodes/Stmts/VarStmtBoundNode.hpp"
 #include "SrcLocation.hpp"
@@ -19,9 +18,9 @@ namespace Ace
 {
     class VarStmtNode :
         public virtual IStmtNode,
-        public virtual ITypedNode,
         public virtual ICloneableInScopeNode<VarStmtNode>,
-        public virtual IBindableNode<VarStmtBoundNode>
+        public virtual IBindableNode<VarStmtBoundNode>,
+        public virtual ISymbolCreatableNode
     {
     public:
         VarStmtNode(
@@ -44,8 +43,6 @@ namespace Ace
         ) const -> std::shared_ptr<const IStmtNode> final;
         auto CreateBound() const -> Diagnosed<std::shared_ptr<const VarStmtBoundNode>> final;
         auto CreateBoundStmt() const -> Diagnosed<std::shared_ptr<const IStmtBoundNode>> final;
-
-        auto GetName() const -> const Ident& final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;

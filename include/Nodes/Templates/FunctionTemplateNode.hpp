@@ -16,6 +16,7 @@
 namespace Ace
 {
     class FunctionTemplateNode :
+        public std::enable_shared_from_this<FunctionTemplateNode>,
         public virtual ITemplateNode,
         public virtual ICloneableInScopeNode<FunctionTemplateNode>
     {
@@ -40,10 +41,12 @@ namespace Ace
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>> final;
 
+        auto GetAST() const -> std::shared_ptr<const ITemplatableNode> final;
+
         auto CollectImplParamNames() const -> std::vector<Ident> final;
         auto CollectParamNames()     const -> std::vector<Ident> final;
 
-        auto GetAST() const -> const std::shared_ptr<const FunctionNode>&;
+        auto GetConcreteAST() const -> const std::shared_ptr<const FunctionNode>&;
 
     private:
         SrcLocation m_SrcLocation{};

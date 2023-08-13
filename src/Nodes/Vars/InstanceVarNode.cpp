@@ -108,11 +108,6 @@ namespace Ace
         };
     }
 
-    auto InstanceVarNode::GetName() const -> const Ident&
-    {
-        return m_Name;
-    }
-
     auto InstanceVarNode::GetSymbolScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;

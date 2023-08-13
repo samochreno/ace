@@ -194,11 +194,6 @@ namespace Ace
         };
     }
 
-    auto FunctionNode::GetName() const -> const Ident&
-    {
-        return m_Name;
-    }
-
     auto FunctionNode::GetSymbolScope() const -> std::shared_ptr<Scope>
     {
         return GetScope();
@@ -241,19 +236,19 @@ namespace Ace
             std::move(diagnostics),
         };
     }
-    
-    auto FunctionNode::GetSelfScope() const -> std::shared_ptr<Scope>
+
+    auto FunctionNode::GetTemplateSelfScope() const -> std::shared_ptr<Scope>
     {
         return m_SelfScope;
     }
 
-    auto FunctionNode::GetAccessModifier() const -> AccessModifier
+    auto FunctionNode::GetTemplateName() const -> const Ident&
     {
-        return m_AccessModifier;
+        return m_Name;
     }
 
-    auto FunctionNode::GetParams() const -> const std::vector<std::shared_ptr<const NormalParamVarNode>>&
+    auto FunctionNode::GetTemplateAccessModifier() const -> AccessModifier
     {
-        return m_Params;
+        return m_AccessModifier;
     }
 }

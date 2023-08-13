@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "Nodes/Node.hpp"
-#include "Nodes/TypedNode.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
 #include "SrcLocation.hpp"
@@ -19,9 +18,9 @@ namespace Ace
 {
     class StaticVarNode :
         public virtual INode,
-        public virtual ITypedNode,
         public virtual ICloneableInScopeNode<StaticVarNode>,
-        public virtual IBindableNode<StaticVarBoundNode>
+        public virtual IBindableNode<StaticVarBoundNode>,
+        public virtual ISymbolCreatableNode
     {
     public:
         StaticVarNode(
@@ -41,8 +40,6 @@ namespace Ace
             const std::shared_ptr<Scope>& scope
         ) const -> std::shared_ptr<const StaticVarNode> final;
         auto CreateBound() const -> Diagnosed<std::shared_ptr<const StaticVarBoundNode>> final;
-
-        auto GetName() const -> const Ident& final;
 
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;

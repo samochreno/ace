@@ -1344,7 +1344,7 @@ namespace Ace
         const auto& symbolMap = t3mplate->GetScope()->m_SymbolMap;
 
         const auto matchingNameSymbolsIt = symbolMap.find(
-            t3mplate->GetASTName().String
+            t3mplate->GetAST()->GetTemplateName().String
         );
         if (matchingNameSymbolsIt == end(symbolMap))
         {

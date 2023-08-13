@@ -69,11 +69,6 @@ namespace Ace
         };
     }
 
-    auto SelfParamVarNode::GetName() const -> const Ident&
-    {
-        return m_Name;
-    }
-
     auto SelfParamVarNode::GetSymbolScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;

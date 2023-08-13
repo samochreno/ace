@@ -41,11 +41,6 @@ namespace Ace
         return m_SelfScope->GetParent().value();
     }
 
-    auto StructTypeNode::GetSelfScope() const -> std::shared_ptr<Scope>
-    {
-        return m_SelfScope;
-    }
-
     auto StructTypeNode::CollectChildren() const -> std::vector<const INode*>
     {
         std::vector<const INode*> children{};
@@ -146,16 +141,6 @@ namespace Ace
         return CreateBound();
     }
 
-    auto StructTypeNode::GetName() const -> const Ident&
-    {
-        return m_Name;
-    }
-
-    auto StructTypeNode::GetAccessModifier() const -> AccessModifier
-    {
-        return m_AccessModifier;
-    }
-
     auto StructTypeNode::GetSymbolScope() const -> std::shared_ptr<Scope>
     {
         return GetScope();
@@ -182,5 +167,20 @@ namespace Ace
             ),
             DiagnosticBag::Create(),
         };
+    }
+
+    auto StructTypeNode::GetTemplateSelfScope() const -> std::shared_ptr<Scope>
+    {
+        return m_SelfScope;
+    }
+
+    auto StructTypeNode::GetTemplateName() const -> const Ident&
+    {
+        return m_Name;
+    }
+
+    auto StructTypeNode::GetTemplateAccessModifier() const -> AccessModifier
+    {
+        return m_AccessModifier;
     }
 }

@@ -14,13 +14,13 @@
 namespace Ace
 {
     TypeTemplateSymbol::TypeTemplateSymbol(
-        const TypeTemplateNode* const templateNode
+        const std::shared_ptr<const TypeTemplateNode>& templateNode
     ) : m_TemplateNode{ templateNode }
     {
         m_Name =
         {
-            GetASTName().SrcLocation,
-            SpecialIdent::CreateTemplate(GetASTName().String),
+            GetAST()->GetTemplateName().SrcLocation,
+            SpecialIdent::CreateTemplate(GetAST()->GetTemplateName().String),
         };
     }
 
@@ -31,7 +31,7 @@ namespace Ace
 
     auto TypeTemplateSymbol::GetSelfScope() const -> std::shared_ptr<Scope>
     {
-        return m_TemplateNode->GetSelfScope();
+        return m_TemplateNode->GetAST()->GetTemplateSelfScope();
     }
 
     auto TypeTemplateSymbol::GetName() const -> const Ident&
@@ -49,24 +49,9 @@ namespace Ace
         return SymbolCategory::Static;
     }
 
-    auto TypeTemplateSymbol::GetAccessModifier() const -> AccessModifier
+    auto TypeTemplateSymbol::GetAST() const -> std::shared_ptr<const ITemplatableNode>
     {
-        return m_TemplateNode->GetAST()->GetAccessModifier();
-    }
-
-    auto TypeTemplateSymbol::CollectImplParams() const -> std::vector<ImplTemplateParamTypeSymbol*>
-    {
-        return {};
-    }
-
-    auto TypeTemplateSymbol::CollectParams() const -> std::vector<NormalTemplateParamTypeSymbol*>
-    {
-        return m_TemplateNode->GetAST()->GetSelfScope()->CollectSymbols<NormalTemplateParamTypeSymbol>();
-    }
-
-    auto TypeTemplateSymbol::GetASTName() const -> const Ident&
-    {
-        return m_TemplateNode->GetAST()->GetName();
+        return m_TemplateNode->GetAST();
     }
 
     auto TypeTemplateSymbol::SetPlaceholderSymbol(
@@ -92,11 +77,11 @@ namespace Ace
 
         ACE_ASSERT(args.size() == paramNames.size());
 
-        const auto ast = m_TemplateNode->GetAST()->CloneInScopeType(
+        const auto ast = m_TemplateNode->GetConcreteAST()->CloneInScopeType(
             m_TemplateNode->GetScope()
         );
 
-        diagnostics.Collect(ast->GetSelfScope()->DefineTemplateArgAliases(
+        diagnostics.Collect(ast->GetTemplateSelfScope()->DefineTemplateArgAliases(
             {},
             {},
             paramNames,
@@ -130,7 +115,7 @@ namespace Ace
     }
 
     auto TypeTemplateSymbol::InstantiateSemanticsForSymbols(
-        const std::shared_ptr<const INode>& ast
+        const std::shared_ptr<const ITemplatableNode>& ast
     ) -> void
     {
         const auto castedAST = std::dynamic_pointer_cast<const ITypeNode>(ast);

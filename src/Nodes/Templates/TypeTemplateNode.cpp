@@ -46,6 +46,8 @@ namespace Ace
         const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const TypeTemplateNode>
     {
+        const auto clonedAST = m_AST->CloneInScopeType(scope);
+
         std::vector<std::shared_ptr<const NormalTemplateParamNode>> clonedParams{};
         std::transform(
             begin(m_Params),
@@ -53,14 +55,14 @@ namespace Ace
             back_inserter(clonedParams),
             [&](const std::shared_ptr<const NormalTemplateParamNode>& param)
             {
-                return param->CloneInScope(m_AST->GetSelfScope());
+                return param->CloneInScope(clonedAST->GetTemplateSelfScope());
             }
         );
 
         return std::make_shared<const TypeTemplateNode>(
             m_SrcLocation,
             clonedParams,
-            m_AST->CloneInScopeType(scope)
+            clonedAST
         );
     }
 
@@ -83,9 +85,14 @@ namespace Ace
     {
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
-            std::make_unique<TypeTemplateSymbol>(this),
+            std::make_unique<TypeTemplateSymbol>(shared_from_this()),
             DiagnosticBag::Create(),
         };
+    }
+
+    auto TypeTemplateNode::GetAST() const -> std::shared_ptr<const ITemplatableNode>
+    {
+        return m_AST;
     }
 
     auto TypeTemplateNode::CollectImplParamNames() const -> std::vector<Ident>
@@ -109,13 +116,8 @@ namespace Ace
         return names;
     }
 
-    auto TypeTemplateNode::GetAST() const -> const std::shared_ptr<const ITypeNode>&
+    auto TypeTemplateNode::GetConcreteAST() const -> const std::shared_ptr<const ITypeNode>&
     {
         return m_AST;
-    }
-
-    auto TypeTemplateNode::GetSelfScope() const -> std::shared_ptr<Scope>
-    {
-        return m_AST->GetSelfScope();
     }
 }

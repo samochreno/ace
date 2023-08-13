@@ -50,6 +50,8 @@ namespace Ace
         const std::shared_ptr<Scope>& scope
     ) const -> std::shared_ptr<const FunctionTemplateNode>
     {
+        const auto clonedAST = m_AST->CloneInScope(scope);
+
         std::vector<std::shared_ptr<const ImplTemplateParamNode>> clonedImplParams{};
         std::transform(
             begin(m_ImplParams),
@@ -57,7 +59,7 @@ namespace Ace
             back_inserter(clonedImplParams),
             [&](const std::shared_ptr<const ImplTemplateParamNode>& implParam)
             {
-                return implParam->CloneInScope(m_AST->GetSelfScope());
+                return implParam->CloneInScope(clonedAST->GetTemplateSelfScope());
             }
         );
 
@@ -68,7 +70,7 @@ namespace Ace
             back_inserter(clonedParams),
             [&](const std::shared_ptr<const NormalTemplateParamNode>& param)
             {
-                return param->CloneInScope(m_AST->GetSelfScope());
+                return param->CloneInScope(clonedAST->GetTemplateSelfScope());
             }
         );
 
@@ -76,7 +78,7 @@ namespace Ace
             m_SrcLocation,
             clonedImplParams,
             clonedParams,
-            m_AST->CloneInScope(scope)
+            clonedAST
         );
     }
 
@@ -99,9 +101,14 @@ namespace Ace
     {
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
-            std::make_unique<FunctionTemplateSymbol>(this),
+            std::make_unique<FunctionTemplateSymbol>(shared_from_this()),
             DiagnosticBag::Create(),
         };
+    }
+
+    auto FunctionTemplateNode::GetAST() const -> std::shared_ptr<const ITemplatableNode>
+    {
+        return m_AST;
     }
 
     auto FunctionTemplateNode::CollectImplParamNames() const -> std::vector<Ident>
@@ -136,7 +143,7 @@ namespace Ace
         return names;
     }
 
-    auto FunctionTemplateNode::GetAST() const -> const std::shared_ptr<const FunctionNode>&
+    auto FunctionTemplateNode::GetConcreteAST() const -> const std::shared_ptr<const FunctionNode>&
     {
         return m_AST;
     }

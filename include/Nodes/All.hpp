@@ -43,7 +43,6 @@
 #include "Nodes/TemplateParams/NormalTemplateParamNode.hpp"
 #include "Nodes/Types/TypeNode.hpp"
 #include "Nodes/Types/StructTypeNode.hpp"
-#include "Nodes/TypedNode.hpp"
 #include "Nodes/Vars/InstanceVarNode.hpp"
 #include "Nodes/Vars/StaticVarNode.hpp"
 #include "Nodes/Vars/Params/NormalParamVarNode.hpp"

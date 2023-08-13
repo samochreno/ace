@@ -34,7 +34,6 @@ namespace Ace
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto GetSelfScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const INode*> final;
         auto CloneInScope(
             const std::shared_ptr<Scope>& scope
@@ -45,13 +44,14 @@ namespace Ace
         auto CreateBound() const -> Diagnosed<std::shared_ptr<const StructTypeBoundNode>> final;
         auto CreateBoundType() const -> Diagnosed<std::shared_ptr<const ITypeBoundNode>> final;
 
-        auto GetName() const -> const Ident& final;
-        auto GetAccessModifier() const -> AccessModifier final;
-
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>> final;
+
+        auto GetTemplateSelfScope() const -> std::shared_ptr<Scope> final;
+        auto GetTemplateName() const -> const Ident& final;
+        auto GetTemplateAccessModifier() const -> AccessModifier final;
         
     private:
         SrcLocation m_SrcLocation{};

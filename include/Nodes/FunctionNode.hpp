@@ -4,7 +4,8 @@
 #include <vector>
 #include <optional>
 
-#include "Nodes/TypedNode.hpp"
+#include "Nodes/Node.hpp"
+#include "Nodes/TemplatableNode.hpp"
 #include "Nodes/AttributeNode.hpp"
 #include "Nodes/Vars/Params/SelfParamVarNode.hpp"
 #include "Nodes/Vars/Params/NormalParamVarNode.hpp"
@@ -21,9 +22,11 @@
 namespace Ace
 {
     class FunctionNode :
-        public virtual ITypedNode,
+        public virtual INode,
         public virtual ICloneableInScopeNode<FunctionNode>,
-        public virtual IBindableNode<FunctionBoundNode>
+        public virtual IBindableNode<FunctionBoundNode>,
+        public virtual ISymbolCreatableNode,
+        public virtual ITemplatableNode
     {
     public:
         FunctionNode(
@@ -47,17 +50,15 @@ namespace Ace
         ) const -> std::shared_ptr<const FunctionNode> final;
         auto CreateBound() const -> Diagnosed<std::shared_ptr<const FunctionBoundNode>> final;
 
-        auto GetName() const -> const Ident& final;
-
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetSymbolKind() const -> SymbolKind final;
         auto GetSymbolCreationSuborder() const -> size_t final;
         auto CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>> final;
-        
-        auto GetSelfScope() const -> std::shared_ptr<Scope>;
-        auto GetAccessModifier() const -> AccessModifier;
-        auto GetParams() const -> const std::vector<std::shared_ptr<const NormalParamVarNode>>&;
 
+        auto GetTemplateSelfScope() const -> std::shared_ptr<Scope> final;
+        auto GetTemplateName() const -> const Ident& final;
+        auto GetTemplateAccessModifier() const -> AccessModifier final;
+        
     protected:
         SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_SelfScope{};
