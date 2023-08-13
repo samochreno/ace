@@ -20,6 +20,7 @@ namespace Ace
             { std::string_view{        "while" }, TokenKind::WhileKeyword     },
             { std::string_view{       "module" }, TokenKind::ModuleKeyword    },
             { std::string_view{          "ret" }, TokenKind::ReturnKeyword    },
+            { std::string_view{        "trait" }, TokenKind::TraitKeyword     },
             { std::string_view{       "struct" }, TokenKind::StructKeyword    },
             { std::string_view{           "op" }, TokenKind::OpKeyword        },
             { std::string_view{          "pub" }, TokenKind::PublicKeyword    },

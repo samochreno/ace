@@ -82,6 +82,7 @@ namespace Ace
         WhileKeyword,
         ModuleKeyword,
         ReturnKeyword,
+        TraitKeyword,
         StructKeyword,
         OpKeyword,
         PublicKeyword,
