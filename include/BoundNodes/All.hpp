@@ -45,7 +45,6 @@
 #include "BoundNodes/Stmts/WhileStmtBoundNode.hpp"
 #include "BoundNodes/Types/TypeBoundNode.hpp"
 #include "BoundNodes/Types/StructTypeBoundNode.hpp"
-#include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/Vars/InstanceVarBoundNode.hpp"
 #include "BoundNodes/Vars/StaticVarBoundNode.hpp"
 #include "BoundNodes/Vars/Params/NormalParamVarBoundNode.hpp"

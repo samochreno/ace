@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "BoundNodes/BoundNode.hpp"
-#include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
@@ -16,7 +15,6 @@ namespace Ace
     class InstanceVarBoundNode : 
         public std::enable_shared_from_this<InstanceVarBoundNode>,
         public virtual IBoundNode,
-        public virtual ITypedBoundNode<InstanceVarSymbol>,
         public virtual ITypeCheckableBoundNode<InstanceVarBoundNode>,
         public virtual ILowerableBoundNode<InstanceVarBoundNode>
     {
@@ -38,7 +36,7 @@ namespace Ace
             const LoweringContext& context
         ) const -> std::shared_ptr<const InstanceVarBoundNode> final;
 
-        auto GetSymbol() const -> InstanceVarSymbol* final;
+        auto GetSymbol() const -> InstanceVarSymbol*;
 
     private:
         SrcLocation m_SrcLocation{};

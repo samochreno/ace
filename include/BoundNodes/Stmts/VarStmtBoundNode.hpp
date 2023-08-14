@@ -5,7 +5,6 @@
 #include <optional>
 
 #include "BoundNodes/Stmts/StmtBoundNode.hpp"
-#include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/Exprs/ExprBoundNode.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
@@ -18,7 +17,6 @@ namespace Ace
     class VarStmtBoundNode :
         public std::enable_shared_from_this<VarStmtBoundNode>,
         public virtual IStmtBoundNode,
-        public virtual ITypedBoundNode<LocalVarSymbol>,
         public virtual ITypeCheckableBoundNode<VarStmtBoundNode, StmtTypeCheckingContext>,
         public virtual ILowerableBoundNode<VarStmtBoundNode>
     {
@@ -49,7 +47,7 @@ namespace Ace
 
         auto CreateCFANodes() const -> std::vector<CFANode> final;
 
-        auto GetSymbol() const -> LocalVarSymbol* final;
+        auto GetSymbol() const -> LocalVarSymbol*;
         
     private:
         SrcLocation m_SrcLocation{};

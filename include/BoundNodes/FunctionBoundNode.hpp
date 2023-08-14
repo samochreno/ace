@@ -5,7 +5,6 @@
 #include <optional>
 
 #include "BoundNodes/BoundNode.hpp"
-#include "BoundNodes/TypedBoundNode.hpp"
 #include "BoundNodes/AttributeBoundNode.hpp"
 #include "BoundNodes/Vars/Params/SelfParamVarBoundNode.hpp"
 #include "BoundNodes/Vars/Params/NormalParamVarBoundNode.hpp"
@@ -20,7 +19,6 @@ namespace Ace
     class FunctionBoundNode : 
         public std::enable_shared_from_this<FunctionBoundNode>,
         public virtual IBoundNode,
-        public virtual ITypedBoundNode<FunctionSymbol>,
         public virtual ITypeCheckableBoundNode<FunctionBoundNode>,
         public virtual ILowerableBoundNode<FunctionBoundNode>
     {
@@ -45,7 +43,7 @@ namespace Ace
             const LoweringContext& context
         ) const -> std::shared_ptr<const FunctionBoundNode> final;
 
-        auto GetSymbol() const -> FunctionSymbol* final;
+        auto GetSymbol() const -> FunctionSymbol*;
 
         auto GetBody() const -> std::optional<std::shared_ptr<const BlockStmtBoundNode>>;
 

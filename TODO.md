@@ -8,7 +8,6 @@
 
 ## 💥 High Priority
 
-- Remove `ITypedBoundNode`
 - Unit testing (Test that `CreateTokenKindString` handles all possible values, test `Keyword.cpp`)
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
 - Traits:
