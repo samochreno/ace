@@ -337,6 +337,16 @@ namespace Ace
                 return "module";
             }
 
+            case SymbolKind::Void:
+            {
+                return "void";
+            }
+
+            case SymbolKind::Trait:
+            {
+                return "trait";
+            }
+
             case SymbolKind::Struct:
             {
                 return "struct";
@@ -402,6 +412,8 @@ namespace Ace
         switch (symbolKind)
         {
             case SymbolKind::Module:
+            case SymbolKind::Void:
+            case SymbolKind::Trait:
             case SymbolKind::Struct:
             case SymbolKind::Label:
             case SymbolKind::Function:

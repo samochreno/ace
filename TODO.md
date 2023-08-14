@@ -5,6 +5,7 @@
 - ❓ Eliminate local lambdas
 - ❓ String interning
 - ❓ Put braces on opening line
+- ❓ Align `GetScope` and `GetSelfScope`
 
 ## 💥 High Priority
 

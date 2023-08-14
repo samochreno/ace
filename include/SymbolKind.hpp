@@ -10,6 +10,7 @@ namespace Ace
     {
         Module,
         Void,
+        Trait,
         Struct,
         Label,
         Function,
