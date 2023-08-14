@@ -9,6 +9,7 @@ namespace Ace
     enum class SymbolKind
     {
         Module,
+        Void,
         Struct,
         Label,
         Function,

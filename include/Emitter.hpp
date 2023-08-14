@@ -90,7 +90,7 @@ namespace Ace
         auto EmitCopy(
             llvm::Value* const lhsValue, 
             llvm::Value* const rhsValue, 
-            ITypeSymbol* const typeSymbol
+            ISizedTypeSymbol* const typeSymbol
         ) -> void;
         auto EmitDrop(const ExprDropData& dropData) -> void;
         auto EmitDropTmps(

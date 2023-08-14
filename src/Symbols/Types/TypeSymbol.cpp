@@ -5,14 +5,20 @@
 
 #include "Symbols/Types/Aliases/AliasTypeSymbol.hpp"
 #include "Symbols/Types/Aliases/TemplateArgs/NormalTemplateArgAliasTypeSymbol.hpp"
-#include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Templates/TypeTemplateSymbol.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
 #include "Assert.hpp"
 #include "Diagnostic.hpp"
 
 namespace Ace
 {
+    auto ITypeSymbol::DiagnoseCycle() const -> Diagnosed<void>
+    {
+        return Diagnosed<void>{ DiagnosticBag::Create() };
+    }
+
+
     auto ITypeSymbol::IsRef() const -> bool
     {
         auto* const self = GetUnaliased();

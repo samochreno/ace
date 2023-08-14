@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "Symbols/Vars/Params/ParamVarSymbol.hpp"
-#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Ident.hpp"
@@ -17,7 +17,7 @@ namespace Ace
         SelfParamVarSymbol(
             const SrcLocation& srcLocation,
             const std::shared_ptr<Scope>& scope,
-            ITypeSymbol* const type
+            ISizedTypeSymbol* const type
         );
         virtual ~SelfParamVarSymbol() = default;
 
@@ -27,11 +27,11 @@ namespace Ace
         auto GetCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
 
-        auto GetType() const -> ITypeSymbol* final;
+        auto GetType() const -> ISizedTypeSymbol* final;
 
     private:
         Ident m_Name{};
         std::shared_ptr<Scope> m_Scope{};
-        ITypeSymbol* m_Type{};
+        ISizedTypeSymbol* m_Type{};
     };
 }

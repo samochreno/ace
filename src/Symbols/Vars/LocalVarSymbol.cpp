@@ -5,14 +5,14 @@
 #include "Scope.hpp"
 #include "Ident.hpp"
 #include "AccessModifier.hpp"
-#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 
 namespace Ace
 {
     LocalVarSymbol::LocalVarSymbol(
         const std::shared_ptr<Scope>& scope,
         const Ident& name,
-        ITypeSymbol* const type
+        ISizedTypeSymbol* const type
     ) : m_Scope{ scope },
         m_Name{ name },
         m_Type{ type }
@@ -44,7 +44,7 @@ namespace Ace
         return AccessModifier::Private;
     }
 
-    auto LocalVarSymbol::GetType() const -> ITypeSymbol*
+    auto LocalVarSymbol::GetType() const -> ISizedTypeSymbol*
     {
         return m_Type;
     }

@@ -5,7 +5,6 @@
 #include <optional>
 
 #include "Symbols/Symbol.hpp"
-#include "Symbols/TypedSymbol.hpp"
 #include "Symbols/SelfScopedSymbol.hpp"
 #include "Symbols/TemplatableSymbol.hpp"
 #include "Symbols/ParamizedSymbol.hpp"
@@ -24,7 +23,6 @@ namespace Ace
 
     class FunctionSymbol :
         public virtual ISymbol,
-        public virtual ITypedSymbol,
         public virtual ISelfScopedSymbol,
         public virtual ITemplatableSymbol,
         public virtual IParamizedSymbol
@@ -46,21 +44,18 @@ namespace Ace
         auto GetCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
 
-        auto GetType() const -> ITypeSymbol* final;
-
         auto CollectParams()    const -> std::vector<IParamVarSymbol*> final;
         auto CollectAllParams() const -> std::vector<IParamVarSymbol*>;
         auto CollectSelfParam() const -> std::optional<SelfParamVarSymbol*>;
 
         auto CollectArgTypeInfos() const -> std::vector<TypeInfo>;
 
+        auto GetType() const -> ITypeSymbol*;
+
         auto BindBody(const std::shared_ptr<const IEmittable<void>>& body) -> void;
         auto GetBody() -> std::optional<const IEmittable<void>*>;
 
         auto GetTemplate() const -> std::optional<FunctionTemplateSymbol*>;
-
-        auto CollectTemplateArgs()     const -> std::vector<ITypeSymbol*> final;
-        auto CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*> final;
 
     private:
         std::shared_ptr<Scope> m_SelfScope{};

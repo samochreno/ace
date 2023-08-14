@@ -11,7 +11,6 @@
 #include "Scope.hpp"
 #include "Lazy.hpp"
 #include "Diagnostic.hpp"
-#include "TypeSizeKind.hpp"
 
 namespace llvm
 {
@@ -56,7 +55,6 @@ namespace Ace
             Compilation* const compilation,
             std::vector<const char*>&& nameSectionStrings,
             std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>>&& irTypeGetter,
-            const TypeSizeKind sizeKind,
             const NativeCopyabilityKind copyabilityKind
         );
         ~NativeType() = default;
@@ -77,7 +75,6 @@ namespace Ace
         Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
         std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>> m_IRTypeGetter{};
-        bool m_IsSized{};
         bool m_IsTriviallyCopyable{};
         
         Lazy<ITypeSymbol*> m_Symbol;
@@ -245,7 +242,6 @@ namespace Ace
         NativeType Float64;
 
         NativeType Bool;
-        NativeType Void;
         NativeType String;
 
         NativeType Ptr;

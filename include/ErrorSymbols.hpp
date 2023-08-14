@@ -6,6 +6,7 @@ namespace Ace
 
     class ISymbol;
     class ITypeSymbol;
+    class ISizedTypeSymbol;
     class StructTypeSymbol;
     class IVarSymbol;
     class InstanceVarSymbol;
@@ -21,6 +22,7 @@ namespace Ace
         auto Contains(const ISymbol* const symbol) const -> bool;
 
         auto GetType() const -> ITypeSymbol*;
+        auto GetSizedType() const -> ISizedTypeSymbol*;
         auto GetStructType() const -> StructTypeSymbol*;
         auto GetVar() const -> IVarSymbol*;
         auto GetInstanceVar() const -> InstanceVarSymbol*;

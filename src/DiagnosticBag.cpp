@@ -12,6 +12,31 @@ namespace Ace
         return {};
     }
 
+    auto DiagnosticBag::CreateNoError() -> DiagnosticBag
+    {
+        auto diagnosticBag = Create();
+
+        diagnosticBag.m_OptHandler = [](const DiagnosticGroup& diagnosticGroup)
+        {
+            ACE_ASSERT(std::find_if(
+                begin(diagnosticGroup.Diagnostics),
+                end  (diagnosticGroup.Diagnostics),
+                [&](const Diagnostic& diagnostic)
+                {
+                    if (diagnostic.Severity == DiagnosticSeverity::Error)
+                    {
+                        LogDiagnosticGroup(diagnosticGroup);
+                        return true;
+                    }
+
+                    return false;
+                }
+            ) == end(diagnosticGroup.Diagnostics));
+        };
+
+        return diagnosticBag;
+    }
+
     auto DiagnosticBag::CreateGlobal() -> DiagnosticBag
     {
         auto diagnosticBag = Create();

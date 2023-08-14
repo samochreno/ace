@@ -187,7 +187,7 @@ namespace Ace
             emitter.EmitCopy(
                 elementPtr,
                 argEmitResult.Value, 
-                argTypeSymbol
+                dynamic_cast<ISizedTypeSymbol*>(argTypeSymbol)
             );
         });
         

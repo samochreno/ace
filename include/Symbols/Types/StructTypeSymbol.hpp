@@ -4,7 +4,7 @@
 #include <vector>
 #include <optional>
 
-#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
 #include "Scope.hpp"
@@ -15,7 +15,7 @@
 
 namespace Ace
 {
-    class StructTypeSymbol : public virtual ITypeSymbol
+    class StructTypeSymbol : public virtual ISizedTypeSymbol
     {
     public:
         StructTypeSymbol(
@@ -32,8 +32,8 @@ namespace Ace
         auto GetCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
 
-        auto GetSizeKind() const -> Expected<TypeSizeKind> final;
-        auto SetAsUnsized() -> void final;
+        auto DiagnoseCycle() const -> Diagnosed<void> final;
+
         auto SetAsPrimitivelyEmittable() -> void final;
         auto IsPrimitivelyEmittable() const -> bool final;
 
@@ -54,9 +54,6 @@ namespace Ace
         auto BindDropGlue(FunctionSymbol* const glue) -> void final;
         auto GetDropGlue() const -> std::optional<FunctionSymbol*> final;
 
-        auto CollectTemplateArgs() const -> std::vector<ITypeSymbol*> final;
-        auto CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*> final;
-
         auto CollectVars() const -> std::vector<InstanceVarSymbol*>;
 
     private:
@@ -65,8 +62,7 @@ namespace Ace
         AccessModifier m_AccessModifier{};
 
         mutable std::optional<InstanceVarSymbol*> m_ResolvingVar{};
-        mutable std::optional<Expected<TypeSizeKind>> m_OptSizeKindCache{};
-        bool m_IsUnsized{};
+        mutable std::optional<DiagnosticBag> m_OptCycleDiagnosticsCache{};
         bool m_IsPrimitivelyEmittable{};
         
         bool m_IsTriviallyCopyable{};

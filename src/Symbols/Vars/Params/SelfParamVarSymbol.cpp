@@ -5,7 +5,7 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Ident.hpp"
-#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "SpecialIdent.hpp"
 #include "AccessModifier.hpp"
 
@@ -14,7 +14,7 @@ namespace Ace
     SelfParamVarSymbol::SelfParamVarSymbol(
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
-        ITypeSymbol* const type
+        ISizedTypeSymbol* const type
     ) : m_Scope{ scope },
         m_Type{ type },
         m_Name
@@ -50,7 +50,7 @@ namespace Ace
         return AccessModifier::Public;
     }
 
-    auto SelfParamVarSymbol::GetType() const -> ITypeSymbol*
+    auto SelfParamVarSymbol::GetType() const -> ISizedTypeSymbol*
     {
         return m_Type;
     }

@@ -482,4 +482,24 @@ namespace Ace
 
         return group;
     }
+
+    auto CreateUnsizedTemplateArgsError(
+        const SrcLocation& srcLocation,
+        const std::vector<ITypeSymbol*>& unsizedTemplateArgs
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        const std::string message = std::string{} +
+            "unsized template argument" +
+            (unsizedTemplateArgs.size() > 1 ? "s" : "");
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            message
+        );
+
+        return group;
+    }
 }

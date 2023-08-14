@@ -3,20 +3,20 @@
 #include <memory>
 
 #include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
 #include "Ident.hpp"
 #include "AccessModifier.hpp"
+#include "Diagnostic.hpp"
+#include "Emittable.hpp"
 
 namespace Ace
 {
-    class NormalTemplateParamTypeSymbol : public virtual ITypeSymbol
+    class VoidTypeSymbol : public ITypeSymbol
     {
     public:
-        NormalTemplateParamTypeSymbol(
-            const std::shared_ptr<Scope>& scope,
-            const Ident& name
-        );
-        virtual ~NormalTemplateParamTypeSymbol() = default;
+        VoidTypeSymbol(const std::shared_ptr<Scope>& scope);
+        virtual ~VoidTypeSymbol() = default;
 
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetSelfScope() const -> std::shared_ptr<Scope> final;
@@ -30,4 +30,3 @@ namespace Ace
         Ident m_Name{};
     };
 }
-

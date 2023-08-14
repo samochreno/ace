@@ -74,12 +74,10 @@ namespace Ace
         Compilation* const compilation,
         std::vector<const char*>&& nameSectionStrings,
         std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>>&& irTypeGetter,
-        const TypeSizeKind sizeKind,
         const NativeCopyabilityKind copyabilityKind
     ) : m_Compilation{ compilation },
         m_NameSectionStrings{ std::move(nameSectionStrings) },
         m_IRTypeGetter{ std::move(irTypeGetter) },
-        m_IsSized{ sizeKind == TypeSizeKind::Sized },
         m_IsTriviallyCopyable{ copyabilityKind == NativeCopyabilityKind::Trivial },
         m_Symbol
         {
@@ -92,28 +90,22 @@ namespace Ace
 
                 if (m_IRTypeGetter.has_value())
                 {
-                    symbol->SetAsPrimitivelyEmittable();
-                }
-
-                if (!m_IsSized)
-                {
-                    symbol->SetAsUnsized();
+                    dynamic_cast<ISizedTypeSymbol*>(
+                        symbol
+                    )->SetAsPrimitivelyEmittable();
                 }
 
                 if (m_IsTriviallyCopyable)
                 {
-                    symbol->SetAsTriviallyCopyable();
+                    dynamic_cast<ISizedTypeSymbol*>(
+                        symbol
+                    )->SetAsTriviallyCopyable();
                 }        
 
                 return symbol;
             }
         }
     {
-        ACE_ASSERT(
-            (sizeKind == TypeSizeKind::Sized) ||
-            (sizeKind == TypeSizeKind::Unsized)
-        );
-
         ACE_ASSERT(
             (copyabilityKind == NativeCopyabilityKind::Trivial) ||
             (copyabilityKind == NativeCopyabilityKind::NonTrivial)
@@ -1577,7 +1569,6 @@ namespace Ace
             {
                 return llvm::Type::getInt8Ty(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
         Int16
@@ -1588,7 +1579,6 @@ namespace Ace
             {
                 return llvm::Type::getInt16Ty(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
         Int32
@@ -1599,7 +1589,6 @@ namespace Ace
             {
                 return llvm::Type::getInt32Ty(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
         Int64
@@ -1610,7 +1599,6 @@ namespace Ace
             {
                 return llvm::Type::getInt64Ty(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
 
@@ -1622,7 +1610,6 @@ namespace Ace
             {
                 return llvm::Type::getInt8Ty(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
         UInt16
@@ -1633,7 +1620,6 @@ namespace Ace
             {
                 return llvm::Type::getInt16Ty(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
         UInt32
@@ -1644,7 +1630,6 @@ namespace Ace
             {
                 return llvm::Type::getInt32Ty(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
         UInt64
@@ -1655,7 +1640,6 @@ namespace Ace
             {
                 return llvm::Type::getInt64Ty(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
 
@@ -1667,7 +1651,6 @@ namespace Ace
             {
                 return llvm::Type::getInt32Ty(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
 
@@ -1679,7 +1662,6 @@ namespace Ace
             {
                 return llvm::Type::getFloatTy(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
         Float64
@@ -1690,7 +1672,6 @@ namespace Ace
             {
                 return llvm::Type::getDoubleTy(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
 
@@ -1702,26 +1683,13 @@ namespace Ace
             {
                 return llvm::Type::getInt1Ty(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
-        },
-        Void
-        {
-            compilation,
-            std::vector{ "ace", "std", "Void" },
-            [compilation](llvm::LLVMContext& context) -> llvm::Type*
-            {
-                return llvm::Type::getVoidTy(context);
-            },
-            TypeSizeKind::Unsized,
-            NativeCopyabilityKind::NonTrivial,
         },
         String
         {
             compilation,
-            std::vector{ "ace", "std", "Void" },
+            std::vector{ "ace", "std", "String" },
             {},
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::NonTrivial,
         },
 
@@ -1733,7 +1701,6 @@ namespace Ace
             {
                 return llvm::Type::getInt8PtrTy(context);
             },
-            TypeSizeKind::Sized,
             NativeCopyabilityKind::Trivial,
         },
 
@@ -2400,7 +2367,6 @@ namespace Ace
                     &Float64,
 
                     &Bool,
-                    &Void,
                     &String,
 
                     &Ptr,

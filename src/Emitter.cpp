@@ -499,7 +499,7 @@ namespace Ace
     auto Emitter::EmitCopy(
         llvm::Value* const lhsValue, 
         llvm::Value* const rhsValue, 
-        ITypeSymbol* const typeSymbol
+        ISizedTypeSymbol* const typeSymbol
     ) -> void
     {
         auto* const type = GetIRType(typeSymbol);
@@ -541,12 +541,15 @@ namespace Ace
             return;
         }
 
-        const auto glueSymbol = dropData.TypeSymbol->GetDropGlue().value();
+        auto* const typeSymbol = dynamic_cast<ISizedTypeSymbol*>(
+            dropData.TypeSymbol
+        );
+        const auto glueSymbol = typeSymbol->GetDropGlue().value();
 
-        auto* const typeSymbol = glueSymbol->CollectParams().front()->GetType();
-        auto* const type = GetIRType(typeSymbol);
+        auto* const refTypeSymbol = glueSymbol->CollectParams().front()->GetType();
+        auto* const refType = GetIRType(refTypeSymbol);
 
-        auto* const allocaInst = m_BlockBuilder->Builder.CreateAlloca(type);
+        auto* const allocaInst = m_BlockBuilder->Builder.CreateAlloca(refType);
         m_BlockBuilder->Builder.CreateStore(dropData.Value, allocaInst);
 
         m_BlockBuilder->Builder.CreateCall(
@@ -706,6 +709,9 @@ namespace Ace
 
     auto Emitter::EmitNativeTypes() -> void
     {
+        m_TypeMap[GetCompilation()->GetVoidTypeSymbol()] =
+            llvm::Type::getVoidTy(GetContext());
+
         const auto nativeTypeMap =
             GetCompilation()->GetNatives().CollectIRTypeSymbolMap(GetContext());
 

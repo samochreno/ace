@@ -71,7 +71,7 @@ namespace Ace
         const std::vector<ITypeSymbol*>& args
     ) -> Diagnosed<TemplateSymbolsInstantationResult>
     {
-        auto diagnostics = DiagnosticBag::Create();
+        auto diagnostics = DiagnosticBag::CreateNoError();
 
         const auto implParamNames = m_TemplateNode->CollectImplParamNames();
         const auto paramNames = m_TemplateNode->CollectParamNames();
@@ -101,13 +101,13 @@ namespace Ace
             nodes
         ));
 
-        auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
+        auto* const symbol = diagnostics.Collect(Scope::ResolveOrInstantiateTemplateInstance(
             SrcLocation{},
             this,
             std::nullopt,
             implArgs,
             args
-        ).Unwrap();
+        )).value();
 
         return Diagnosed
         {

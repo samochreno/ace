@@ -1,5 +1,6 @@
 #include "Symbols/Types/StructTypeSymbol.hpp"
 
+#include <memory>
 #include <vector>
 #include <optional>
 
@@ -54,15 +55,20 @@ namespace Ace
         return m_AccessModifier;
     }
 
-    auto StructTypeSymbol::GetSizeKind() const -> Expected<TypeSizeKind>
+    auto StructTypeSymbol::DiagnoseCycle() const -> Diagnosed<void>
     {
-        if (m_OptSizeKindCache.has_value())
+        if (m_OptCycleDiagnosticsCache.has_value())
         {
-            return m_OptSizeKindCache.value();
+            return Diagnosed<void>{ m_OptCycleDiagnosticsCache.value() };
         }
 
-        const auto sizeKind = [&]() -> Expected<TypeSizeKind>
+        const auto diagnostics = [&]() -> DiagnosticBag
         {
+            if (m_IsPrimitivelyEmittable)
+            {
+                return DiagnosticBag::Create();
+            }
+
             auto diagnostics = DiagnosticBag::Create();
 
             if (m_ResolvingVar.has_value())
@@ -73,58 +79,20 @@ namespace Ace
                 return std::move(diagnostics);
             }
 
-            if (m_IsPrimitivelyEmittable)
-            {
-                return Expected{ TypeSizeKind::Sized, std::move(diagnostics) };
-            }
-
-            if (m_IsUnsized)
-            {
-                return Expected{ TypeSizeKind::Unsized, std::move(diagnostics) };
-            }
-
             const auto vars = CollectVars();
-            const auto unsizedVarIt = std::find_if_not(
-                begin(vars),
-                end  (vars),
-                [&](InstanceVarSymbol* const var)
-                {
-                    m_ResolvingVar = var;
-
-                    const auto optSizeKind = diagnostics.Collect(
-                        var->GetType()->GetSizeKind()
-                    );
-                    if (!optSizeKind.has_value())
-                    {
-                        return false;
-                    }
-
-                    if (optSizeKind.value() == TypeSizeKind::Unsized)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                }
-            );
+            std::for_each(begin(vars), end(vars),
+            [&](InstanceVarSymbol* const var)
+            {
+                m_ResolvingVar = var;
+                (void)var->GetType()->DiagnoseCycle();
+            });
 
             m_ResolvingVar = std::nullopt;
-
-            if (unsizedVarIt != end(vars))
-            {
-                return std::move(diagnostics);
-            }
-
-            return Expected{ TypeSizeKind::Sized, std::move(diagnostics) };
+            return std::move(diagnostics);
         }();
 
-        m_OptSizeKindCache = sizeKind;
-        return sizeKind;
-    }
-
-    auto StructTypeSymbol::SetAsUnsized() -> void
-    {
-        m_IsUnsized = true;
+        m_OptCycleDiagnosticsCache = diagnostics;
+        return Diagnosed<void>{ diagnostics };
     }
 
     auto StructTypeSymbol::SetAsPrimitivelyEmittable() -> void
@@ -199,16 +167,6 @@ namespace Ace
     auto StructTypeSymbol::GetDropGlue() const -> std::optional<FunctionSymbol*>
     {
         return m_OptDropGlue;
-    }
-
-    auto StructTypeSymbol::CollectTemplateArgs() const -> std::vector<ITypeSymbol*>
-    {
-        return m_SelfScope->CollectTemplateArgs();
-    }
-
-    auto StructTypeSymbol::CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*>
-    {
-        return m_SelfScope->CollectImplTemplateArgs();
     }
 
     auto StructTypeSymbol::CollectVars() const -> std::vector<InstanceVarSymbol*>

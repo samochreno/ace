@@ -152,7 +152,7 @@ namespace Ace::Application
         {
             if (
                 functionNode->GetSymbol()->GetType()->GetUnaliased() == 
-                compilation->GetNatives().Void.GetSymbol()
+                compilation->GetVoidTypeSymbol()
                 )
             {
                 return;
@@ -216,19 +216,14 @@ namespace Ace::Application
                 return;
             }
 
-            auto* const templatableSymbol = dynamic_cast<const ITemplatableSymbol*>(
-                typeSymbol
-            );
-            if (
-                templatableSymbol &&
-                templatableSymbol->IsTemplatePlaceholder()
-                )
+            auto* const templatableSymbol =
+                dynamic_cast<const ITemplatableSymbol*>(typeSymbol);
+            if (templatableSymbol && templatableSymbol->IsTemplatePlaceholder())
             {
                 return;
             }
 
-            const auto optSizeKind =
-                diagnostics.Collect(typeSymbol->GetSizeKind());
+            diagnostics.Collect(typeSymbol->DiagnoseCycle());
         });
 
         return Diagnosed<void>{ std::move(diagnostics) };
@@ -253,14 +248,7 @@ namespace Ace::Application
                 return;
             }
 
-            const auto optSizeKind =
-                diagnostics.Collect(typeSymbol->GetSizeKind());
-            if (!optSizeKind.has_value())
-            {
-                return;
-            }
-
-            if (optSizeKind.value() == TypeSizeKind::Sized)
+            if (dynamic_cast<const ISizedTypeSymbol*>(typeSymbol) != nullptr)
             {
                 return;
             }

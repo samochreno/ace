@@ -110,4 +110,9 @@ namespace Ace
         const SrcLocation& srcLocation,
         ITypeSymbol* const type
     ) -> DiagnosticGroup;
+
+    auto CreateUnsizedTemplateArgsError(
+        const SrcLocation& srcLocation,
+        const std::vector<ITypeSymbol*>& unsizedTemplateArgs
+    ) -> DiagnosticGroup;
 }

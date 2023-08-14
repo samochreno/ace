@@ -1,7 +1,7 @@
 #include "TemplateInstantiator.hpp"
 
 #include "Symbols/Templates/TemplateSymbol.hpp"
-#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
 #include "Symbols/TemplatableSymbol.hpp"
@@ -69,10 +69,7 @@ namespace Ace
         const auto placeholderImplArgIt = std::find_if(
             begin(implArgs),
             end  (implArgs),
-            [](ITypeSymbol* const implArg)
-            {
-                return IsArgPlaceholder(implArg);
-            }
+            [](ITypeSymbol* const implArg) { return IsArgPlaceholder(implArg); }
         );
         if (placeholderImplArgIt != end(implArgs))
         {
@@ -82,10 +79,7 @@ namespace Ace
         const auto placeholderArgIt = std::find_if(
             begin(args),
             end  (args),
-            [](ITypeSymbol* const arg)
-            {
-                return IsArgPlaceholder(arg);
-            }
+            [](ITypeSymbol* const arg) { return IsArgPlaceholder(arg); }
         );
         if (placeholderArgIt != end(args))
         {

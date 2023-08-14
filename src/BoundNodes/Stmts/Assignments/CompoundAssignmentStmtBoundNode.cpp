@@ -184,6 +184,11 @@ namespace Ace
 
         ACE_ASSERT(!expr->GetTypeInfo().Symbol->IsRef());
 
+        auto* const exprType = dynamic_cast<ISizedTypeSymbol*>(
+            expr->GetTypeInfo().Symbol
+        );
+        ACE_ASSERT(exprType);
+
         const Ident tempVarName
         {
             expr->GetSrcLocation(),
@@ -192,7 +197,7 @@ namespace Ace
         auto tempVarSymbolOwned = std::make_unique<LocalVarSymbol>(
             scope,
             tempVarName,
-            expr->GetTypeInfo().Symbol
+            exprType
         );
 
         auto* const tempVarSymbol = dynamic_cast<LocalVarSymbol*>(
@@ -289,6 +294,12 @@ namespace Ace
             end  (tempRefExprAndStmts.Stmts)
         );
 
+
+        auto* const tempRefType = dynamic_cast<ISizedTypeSymbol*>(
+            tempRefExpr->GetTypeInfo().Symbol
+        );
+        ACE_ASSERT(tempRefType);
+
         const Ident tempRefVarName
         {
             tempRefExpr->GetSrcLocation(),
@@ -297,7 +308,7 @@ namespace Ace
         auto tempRefVarSymbolOwned = std::make_unique<LocalVarSymbol>(
             scope,
             tempRefVarName,
-            tempRefExpr->GetTypeInfo().Symbol
+            tempRefType
         );
 
         auto* const tempRefVarSymbol = dynamic_cast<LocalVarSymbol*>(

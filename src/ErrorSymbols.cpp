@@ -22,7 +22,7 @@ namespace Ace
             selfScope,
             Ident{ SrcLocation{}, "$error_instance_var" },
             AccessModifier::Public,
-            GetType(),
+            GetSizedType(),
             0
         )).Unwrap();
 
@@ -44,6 +44,12 @@ namespace Ace
     }
 
     auto ErrorSymbols::GetType() const -> ITypeSymbol*
+    {
+        ACE_ASSERT(m_StructType);
+        return m_StructType;
+    }
+
+    auto ErrorSymbols::GetSizedType() const -> ISizedTypeSymbol*
     {
         ACE_ASSERT(m_StructType);
         return m_StructType;

@@ -109,7 +109,7 @@ namespace Ace
         DiagnosticGroup group{};
 
         auto* const compilation = srcLocation.Buffer->GetCompilation();
-        auto* const voidType = compilation->GetNatives().Void.GetSymbol();
+        auto* const voidType = compilation->GetVoidTypeSymbol();
         
         const std::string message =
             "returning an expression from a function of type `" +

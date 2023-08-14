@@ -558,7 +558,7 @@ namespace Ace
             const std::vector<ITypeSymbol*>& templateArgs
         ) -> Expected<ISymbol*>;
 
-        auto CollectTemplateArgs() const -> std::vector<ITypeSymbol*>;
+        auto CollectTemplateArgs()     const -> std::vector<ITypeSymbol*>;
         auto CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*>;
 
         auto DefineTemplateArgAliases(

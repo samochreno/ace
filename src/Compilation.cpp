@@ -18,6 +18,7 @@
 #include "Natives.hpp"
 #include "Scope.hpp"
 #include "TemplateInstantiator.hpp"
+#include "Symbols/Types/VoidTypeSymbol.hpp"
 #include "ErrorSymbols.hpp"
 
 namespace Ace
@@ -137,9 +138,17 @@ namespace Ace
             std::filesystem::create_directories(self->m_OutputPath);
         }
 
-        self->m_Natives = std::make_unique<const Ace::Natives>(self.get());
         self->m_GlobalScope = { self.get() };
+
+        auto ownedVoidTypeSymbol = std::make_unique<VoidTypeSymbol>(
+            self->GetGlobalScope()
+        );
+        self->m_VoidTypeSymbol = DiagnosticBag::CreateNoError().Collect(
+            self->GetGlobalScope()->DefineSymbol(std::move(ownedVoidTypeSymbol))
+        );
+
         self->m_ErrorSymbols = Ace::ErrorSymbols{ self.get() };
+        self->m_Natives = std::make_unique<const Ace::Natives>(self.get());
 
         if (diagnostics.HasErrors())
         {
@@ -173,11 +182,6 @@ namespace Ace
         return m_OutputPath;
     }
 
-    auto Compilation::GetNatives() const -> const Ace::Natives&
-    {
-        return *m_Natives.get();
-    }
-
     auto Compilation::GetGlobalScope() const -> const std::shared_ptr<Scope>&
     {
         return m_GlobalScope.Unwrap();
@@ -193,8 +197,18 @@ namespace Ace
         return m_TemplateInstantiator;
     }
 
+    auto Compilation::GetVoidTypeSymbol() const -> ITypeSymbol*
+    {
+        return m_VoidTypeSymbol;
+    }
+
     auto Compilation::GetErrorSymbols() const -> const Ace::ErrorSymbols&
     {
         return m_ErrorSymbols;
+    }
+
+    auto Compilation::GetNatives() const -> const Ace::Natives&
+    {
+        return *m_Natives.get();
     }
 }

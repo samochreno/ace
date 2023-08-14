@@ -129,11 +129,11 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTypeSymbol = diagnostics.Collect(m_Scope->ResolveStaticSymbol<ITypeSymbol>(
+        const auto optTypeSymbol = diagnostics.Collect(m_Scope->ResolveStaticSymbol<ISizedTypeSymbol>(
             m_TypeName.ToSymbolName(GetCompilation())
         ));
         auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetType()
+            GetCompilation()->GetErrorSymbols().GetSizedType()
         );
 
         return Diagnosed<std::unique_ptr<ISymbol>>

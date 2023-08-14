@@ -26,11 +26,11 @@ namespace Ace
     class DiagnosticBag
     {
     public:
-        DiagnosticBag([[deprecated]] const DiagnosticBag&) = default;
         ~DiagnosticBag() = default;
         
-        static auto Create()       -> DiagnosticBag;
-        static auto CreateGlobal() -> DiagnosticBag;
+        static auto Create()        -> DiagnosticBag;
+        static auto CreateNoError() -> DiagnosticBag;
+        static auto CreateGlobal()  -> DiagnosticBag;
 
         auto Add(DiagnosticBag diagnosticBag) -> DiagnosticBag&;
         auto Add(DiagnosticGroup diagnosticGroup) -> DiagnosticBag&;

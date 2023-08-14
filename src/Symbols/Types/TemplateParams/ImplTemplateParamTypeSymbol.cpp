@@ -1,31 +1,29 @@
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 
 #include <memory>
-#include <vector>
 
 #include "Scope.hpp"
 #include "Ident.hpp"
 #include "AccessModifier.hpp"
-#include "Diagnostic.hpp"
 
 namespace Ace
 {
     ImplTemplateParamTypeSymbol::ImplTemplateParamTypeSymbol(
         const std::shared_ptr<Scope>& scope,
         const Ident& name
-    ) : m_Scope{ scope },
+    ) : m_SelfScope{ scope->GetOrCreateChild({}) },
         m_Name{ name }
     {
     }
 
     auto ImplTemplateParamTypeSymbol::GetScope() const -> std::shared_ptr<Scope>
     {
-        return m_Scope;
+        return m_SelfScope->GetParent().value();
     }
 
     auto ImplTemplateParamTypeSymbol::GetSelfScope() const -> std::shared_ptr<Scope>
     {
-        ACE_UNREACHABLE();
+        return m_SelfScope;
     }
 
     auto ImplTemplateParamTypeSymbol::GetName() const -> const Ident&
@@ -46,92 +44,5 @@ namespace Ace
     auto ImplTemplateParamTypeSymbol::GetAccessModifier() const -> AccessModifier
     {
         return AccessModifier::Private;
-    }
-
-    auto ImplTemplateParamTypeSymbol::CollectTemplateArgs() const -> std::vector<ITypeSymbol*>
-    {
-        return {};
-    }
-
-    auto ImplTemplateParamTypeSymbol::CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*>
-    {
-        return {};
-    }
-
-    auto ImplTemplateParamTypeSymbol::GetSizeKind() const -> Expected<TypeSizeKind>
-    {
-        return Expected{ TypeSizeKind::Sized, DiagnosticBag::Create() };
-    }
-
-    auto ImplTemplateParamTypeSymbol::SetAsUnsized() -> void
-    {
-    }
-
-    auto ImplTemplateParamTypeSymbol::SetAsPrimitivelyEmittable() -> void
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::IsPrimitivelyEmittable() const -> bool
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::SetAsTriviallyCopyable() -> void
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::IsTriviallyCopyable() const -> bool
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::SetAsTriviallyDroppable() -> void
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::IsTriviallyDroppable() const -> bool
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::CreateCopyGlueBody(
-        FunctionSymbol* const glueSymbol
-    ) -> std::shared_ptr<const IEmittable<void>>
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::CreateDropGlueBody(
-        FunctionSymbol* const glueSymbol
-    ) -> std::shared_ptr<const IEmittable<void>>
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::BindCopyGlue(
-        FunctionSymbol* const glue
-    ) -> void
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::GetCopyGlue() const -> std::optional<FunctionSymbol*>
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::BindDropGlue(
-        FunctionSymbol* const glue
-    ) -> void
-    {
-        ACE_UNREACHABLE();
-    }
-
-    auto ImplTemplateParamTypeSymbol::GetDropGlue() const -> std::optional<FunctionSymbol*>
-    {
-        ACE_UNREACHABLE();
     }
 }

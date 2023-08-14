@@ -67,11 +67,6 @@ namespace Ace
         return m_AccessModifier;
     }
 
-    auto FunctionSymbol::GetType() const -> ITypeSymbol*
-    {
-        return m_Type;
-    }
-
     auto FunctionSymbol::CollectParams() const -> std::vector<IParamVarSymbol*>
     {
         auto normalParams = m_SelfScope->CollectSymbols<NormalParamVarSymbol>();
@@ -183,6 +178,11 @@ namespace Ace
         return typeInfos;
     }
 
+    auto FunctionSymbol::GetType() const -> ITypeSymbol*
+    {
+        return m_Type;
+    }
+
     auto FunctionSymbol::BindBody(const std::shared_ptr<const IEmittable<void>>& body) -> void
     {
         m_OptBody = body;
@@ -209,15 +209,5 @@ namespace Ace
         return DiagnosticBag::Create().Collect(
             GetScope()->ResolveStaticSymbol<FunctionTemplateSymbol>(name)
         );
-    }
-    
-    auto FunctionSymbol::CollectTemplateArgs() const -> std::vector<ITypeSymbol*>
-    {
-        return m_SelfScope->CollectTemplateArgs();
-    }
-
-    auto FunctionSymbol::CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*>
-    {
-        return m_SelfScope->CollectImplTemplateArgs();
     }
 }

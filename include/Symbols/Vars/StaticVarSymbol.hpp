@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "Symbols/Vars/VarSymbol.hpp"
-#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "Scope.hpp"
 #include "Ident.hpp"
 #include "AccessModifier.hpp"
@@ -17,7 +17,7 @@ namespace Ace
             const std::shared_ptr<Scope>& scope,
             const Ident& name,
             const AccessModifier accessModifier,
-            ITypeSymbol* const type
+            ISizedTypeSymbol* const type
         );
         virtual ~StaticVarSymbol() = default;
 
@@ -27,12 +27,12 @@ namespace Ace
         auto GetCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
 
-        auto GetType() const -> ITypeSymbol* final;
+        auto GetType() const -> ISizedTypeSymbol* final;
 
     private:
         std::shared_ptr<Scope> m_Scope{};
         Ident m_Name{};
         AccessModifier m_AccessModifier{};
-        ITypeSymbol* m_Type{};
+        ISizedTypeSymbol* m_Type{};
     };
 }

@@ -156,21 +156,17 @@ namespace Ace
         std::vector<ExprDropData> tmps{};
 
         std::vector<llvm::Value*> args{};
-        std::transform(
-            begin(m_Args),
-            end  (m_Args),
-            back_inserter(args),
-            [&](const std::shared_ptr<const IExprBoundNode>& arg)
-            {
-                const auto argEmitResult = arg->Emit(emitter);
-                tmps.insert(
-                    end(tmps),
-                    begin(argEmitResult.Tmps),
-                    end  (argEmitResult.Tmps)
-                );
-                return argEmitResult.Value;
-            }
-        );
+        std::transform(begin(m_Args), end(m_Args), back_inserter(args),
+        [&](const std::shared_ptr<const IExprBoundNode>& arg)
+        {
+            const auto argEmitResult = arg->Emit(emitter);
+            tmps.insert(
+                end(tmps),
+                begin(argEmitResult.Tmps),
+                end  (argEmitResult.Tmps)
+            );
+            return argEmitResult.Value;
+        });
 
         auto* const callInst = emitter.GetBlockBuilder().Builder.CreateCall(
             emitter.GetFunctionMap().at(m_FunctionSymbol),

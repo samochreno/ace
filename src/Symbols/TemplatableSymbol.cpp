@@ -1,10 +1,21 @@
 #include "Symbols/TemplatableSymbol.hpp"
 
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
 
 namespace Ace
 {
+    auto ITemplatableSymbol::CollectTemplateArgs() const -> std::vector<ITypeSymbol*>
+    {
+        return GetSelfScope()->CollectTemplateArgs();
+    }
+
+    auto ITemplatableSymbol::CollectImplTemplateArgs() const -> std::vector<ITypeSymbol*>
+    {
+        return GetSelfScope()->CollectImplTemplateArgs();
+    }
+
     static auto IsParam(const ITypeSymbol* arg) -> bool
     {
         arg = arg->GetUnaliased();

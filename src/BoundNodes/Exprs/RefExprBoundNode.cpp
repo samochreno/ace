@@ -112,9 +112,10 @@ namespace Ace
         auto* const allocaInst = emitter.GetBlockBuilder().Builder.CreateAlloca(
             exprEmitResult.Value->getType()
         );
-        tmps.emplace_back(
-            allocaInst, m_Expr->GetTypeInfo().Symbol->GetWithRef()
+        auto* const exprTypeSymbol = dynamic_cast<ISizedTypeSymbol*>(
+            m_Expr->GetTypeInfo().Symbol->GetWithRef()
         );
+        tmps.emplace_back(allocaInst, exprTypeSymbol);
 
         emitter.GetBlockBuilder().Builder.CreateStore(
             exprEmitResult.Value,

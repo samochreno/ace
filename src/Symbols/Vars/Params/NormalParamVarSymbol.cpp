@@ -4,7 +4,7 @@
 
 #include "Scope.hpp"
 #include "Ident.hpp"
-#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
@@ -12,7 +12,7 @@ namespace Ace
     NormalParamVarSymbol::NormalParamVarSymbol(
         const std::shared_ptr<Scope>& scope,
         const Ident& name,
-        ITypeSymbol* const type,
+        ISizedTypeSymbol* const type,
         const size_t index
     ) : m_Scope{ scope },
         m_Name{ name },
@@ -46,7 +46,7 @@ namespace Ace
         return AccessModifier::Public;
     }
 
-    auto NormalParamVarSymbol::GetType() const -> ITypeSymbol*
+    auto NormalParamVarSymbol::GetType() const -> ISizedTypeSymbol*
     {
         return m_Type;
     }

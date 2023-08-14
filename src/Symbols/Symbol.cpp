@@ -8,6 +8,7 @@
 #include "Assert.hpp"
 #include "Symbols/Symbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "Symbols/TemplatableSymbol.hpp"
 #include "Scope.hpp"
 #include "SrcLocation.hpp"

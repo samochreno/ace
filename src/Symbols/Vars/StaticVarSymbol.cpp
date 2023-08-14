@@ -12,7 +12,7 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         const Ident& name,
         const AccessModifier accessModifier,
-        ITypeSymbol* const type
+        ISizedTypeSymbol* const type
     ) : m_Scope{ scope },
         m_Name{ name },
         m_AccessModifier{ accessModifier },
@@ -45,7 +45,7 @@ namespace Ace
         return m_AccessModifier;
     }
 
-    auto StaticVarSymbol::GetType() const -> ITypeSymbol*
+    auto StaticVarSymbol::GetType() const -> ISizedTypeSymbol*
     {
         return m_Type;
     }

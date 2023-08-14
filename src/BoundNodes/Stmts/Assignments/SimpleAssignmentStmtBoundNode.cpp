@@ -138,7 +138,7 @@ namespace Ace
         emitter.EmitCopy(
             lhsEmitResult.Value,
             rhsEmitResult.Value,
-            m_LHSExpr->GetTypeInfo().Symbol
+            dynamic_cast<ISizedTypeSymbol*>(m_LHSExpr->GetTypeInfo().Symbol)
         );
 
         emitter.EmitDropTmps(tmps);

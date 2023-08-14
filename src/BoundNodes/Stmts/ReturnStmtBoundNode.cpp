@@ -58,7 +58,7 @@ namespace Ace
         auto* const compilation = functionTypeSymbol->GetCompilation();
 
         const bool isFunctionTypeVoid =
-            functionTypeSymbol == compilation->GetNatives().Void.GetSymbol();
+            functionTypeSymbol == compilation->GetVoidTypeSymbol();
 
         if (!isFunctionTypeVoid && !optExpr.has_value())
         {
@@ -89,12 +89,7 @@ namespace Ace
         const auto& expr = optExpr.value();
 
         auto* const exprTypeSymbol = expr->GetTypeInfo().Symbol->GetUnaliased();
-
-        const auto optExprTypeSizeKind = DiagnosticBag::Create().Collect(
-            exprTypeSymbol->GetSizeKind()
-        );
-
-        if (optExprTypeSizeKind == TypeSizeKind::Unsized)
+        if (dynamic_cast<ISizedTypeSymbol*>(exprTypeSymbol) == nullptr)
         {
             diagnostics.Add(CreateReturningUnsizedExprError(
                 expr->GetSrcLocation()
@@ -191,7 +186,7 @@ namespace Ace
             emitter.EmitCopy(
                 allocaInst,
                 exprEmitResult.Value,
-                typeSymbol
+                dynamic_cast<ISizedTypeSymbol*>(typeSymbol)
             );
 
             emitter.EmitDropTmps(exprEmitResult.Tmps);

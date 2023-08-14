@@ -5,7 +5,7 @@
 #include "Scope.hpp"
 #include "Ident.hpp"
 #include "AccessModifier.hpp"
-#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 
 namespace Ace
 {
@@ -13,7 +13,7 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         const Ident& name,
         const AccessModifier accessModifier,
-        ITypeSymbol* const type,
+        ISizedTypeSymbol* const type,
         const size_t index
     ) : m_Scope{ scope },
         m_Name{ name },
@@ -48,7 +48,7 @@ namespace Ace
         return m_AccessModifier;
     }
 
-    auto InstanceVarSymbol::GetType() const -> ITypeSymbol*
+    auto InstanceVarSymbol::GetType() const -> ISizedTypeSymbol*
     {
         return m_Type;
     }

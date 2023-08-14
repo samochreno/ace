@@ -34,7 +34,7 @@ namespace Ace
         auto _ExpectedVoid() -> void {}
 
         Expected() = default;
-        Expected([[deprecated]] const Expected&) = default;
+        Expected(const Expected&) = delete;
         Expected(
             Void value
         ) : m_Diagnostics{ std::move(value.Diagnostics) }
@@ -85,7 +85,8 @@ namespace Ace
         auto _ExpectedNotVoid() -> void {  }
 
         Expected() = default;
-        Expected([[deprecated]] const Expected&) = default;
+        Expected(const Expected&) = delete;
+        Expected(Expected&&) = default;
         Expected(
             const T& value,
             DiagnosticBag diagnostics

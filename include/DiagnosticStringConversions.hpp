@@ -124,4 +124,10 @@ namespace Ace
     {
         return "a variable";
     }
+    class ISizedTypeSymbol;
+    template<>
+    inline auto CreateSymbolTypeStringWithArticle<ISizedTypeSymbol>() -> std::string
+    {
+        return "a sized type";
+    }
 }

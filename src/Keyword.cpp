@@ -129,7 +129,7 @@ namespace Ace
 
             case TokenKind::VoidKeyword:
             {
-                return compilation->GetNatives().Void.GetSymbol();
+                return compilation->GetVoidTypeSymbol();
             }
 
             default:

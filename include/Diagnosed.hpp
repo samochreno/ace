@@ -19,7 +19,7 @@ namespace Ace
         [[deprecated]]
         auto _DiagnosedVoid() -> void {}
 
-        Diagnosed([[deprecated]] const Diagnosed&) = default;
+        Diagnosed(const Diagnosed&) = delete;
         Diagnosed(
             DiagnosticBag diagnostics
         ) : m_Diagnostics{ std::move(diagnostics) }
@@ -47,7 +47,7 @@ namespace Ace
         [[deprecated]]
         auto _DiagnosedNotVoid() -> void {}
 
-        Diagnosed([[deprecated]] const Diagnosed&) = default;
+        Diagnosed(const Diagnosed&) = delete;
         Diagnosed(
             const TValue& value,
             DiagnosticBag diagnostics

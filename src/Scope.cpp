@@ -464,7 +464,7 @@ namespace Ace
             return {};
         }
 
-        const auto argTypeTemplateParams = argType->CollectTemplateArgs();
+        const auto   argTypeTemplateParams =   argType->CollectTemplateArgs();
         const auto paramTypeTemplateParams = paramType->CollectTemplateArgs();
 
         std::vector<TemplateArgDeductionResult> finalDeductionResults{};
@@ -698,6 +698,60 @@ namespace Ace
             std::move(diagnostics),
         };
     }
+
+    static auto DiagnoseUnsizedTemplateArgs(
+        const SrcLocation& srcLocation,
+        ITemplateSymbol* const t3mplate,
+        const std::vector<ITypeSymbol*>& templateArgs
+    ) -> Diagnosed<void>
+    {
+        auto* const compilation = t3mplate->GetCompilation();
+        const bool isStrongPtr =
+            t3mplate == compilation->GetNatives().StrongPtr.GetSymbol();
+
+        if (isStrongPtr)
+        {
+            return Diagnosed<void>{ DiagnosticBag::Create() };
+        }
+
+        const auto placeholderArgIt = std::find_if(
+            begin(templateArgs),
+            end  (templateArgs),
+            [](ITypeSymbol* const arg)
+            {
+                return arg->IsTemplatePlaceholder();
+            }
+        );
+        if (placeholderArgIt != end(templateArgs))
+        {
+            return Diagnosed<void>{ DiagnosticBag::Create() };
+        }
+
+        auto diagnostics = DiagnosticBag::Create();
+
+        std::vector<ITypeSymbol*> unsizedArgs{};
+        std::copy_if(
+            begin(templateArgs),
+            end  (templateArgs),
+            back_inserter(unsizedArgs),
+            [](ITypeSymbol* const arg)
+            {
+                return
+                    dynamic_cast<ISizedTypeSymbol*>(arg->GetUnaliased()) ==
+                    nullptr;
+            }
+        );
+
+        if (!unsizedArgs.empty())
+        {
+            diagnostics.Add(CreateUnsizedTemplateArgsError(
+                srcLocation,
+                unsizedArgs
+            ));
+        }
+
+        return Diagnosed<void>{ std::move(diagnostics) };
+    }
     
     auto Scope::ResolveOrInstantiateTemplateInstance(
         const SrcLocation& srcLocation,
@@ -708,6 +762,16 @@ namespace Ace
     ) -> Expected<ISymbol*>
     {
         auto diagnostics = DiagnosticBag::Create();
+
+        diagnostics.Collect(DiagnoseUnsizedTemplateArgs(
+            srcLocation,
+            t3mplate,
+            templateArgs
+        ));
+        if (diagnostics.HasErrors())
+        {
+            return std::move(diagnostics);
+        }
 
         const auto optDeducedTemplateArgs = diagnostics.Collect(DeduceTemplateArgs(
             srcLocation,
