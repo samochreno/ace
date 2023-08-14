@@ -331,8 +331,9 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optStructSymbol =
-            diagnostics.Collect(m_Scope->ResolveStaticSymbol<StructTypeSymbol>(m_TypeName));
+        const auto optStructSymbol = diagnostics.Collect(
+            m_Scope->ResolveStaticSymbol<StructTypeSymbol>(m_TypeName)
+        );
 
         const auto boundArgs = [&]() -> std::vector<StructConstructionExprBoundArg>
         {
