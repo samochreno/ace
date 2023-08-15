@@ -24,6 +24,10 @@ namespace Ace
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 
+    auto CreateExpectedPtrExprError(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup;
+
     auto CreateUnexpectedArgCountError(
         const SrcLocation& srcLocation,
         FunctionSymbol* const functionSymbol,

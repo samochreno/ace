@@ -14,6 +14,8 @@ namespace Ace
             { std::string_view{ "__address_of" }, TokenKind::AddressOfKeyword },
             { std::string_view{    "__size_of" }, TokenKind::SizeOfKeyword    },
             { std::string_view{   "__deref_as" }, TokenKind::DerefAsKeyword   },
+            { std::string_view{       "__copy" }, TokenKind::CopyKeyword      },
+            { std::string_view{       "__drop" }, TokenKind::DropKeyword      },
             { std::string_view{           "if" }, TokenKind::IfKeyword        },
             { std::string_view{         "else" }, TokenKind::ElseKeyword      },
             { std::string_view{         "elif" }, TokenKind::ElifKeyword      },

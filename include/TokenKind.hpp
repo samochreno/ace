@@ -76,6 +76,8 @@ namespace Ace
         AddressOfKeyword,
         SizeOfKeyword,
         DerefAsKeyword,
+        CopyKeyword,
+        DropKeyword,
         IfKeyword,
         ElseKeyword,
         ElifKeyword,

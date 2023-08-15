@@ -58,6 +58,21 @@ namespace Ace
         return group;
     }
 
+    auto CreateExpectedPtrExprError(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            "expected a pointer"
+        );
+
+        return group;
+    }
+
     auto CreateUnexpectedArgCountError(
         const SrcLocation& srcLocation,
         FunctionSymbol* const functionSymbol,

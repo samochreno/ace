@@ -46,36 +46,36 @@ std::rc: module -> pub {
     }
 
     StrongPtr[T]: struct -> pub {
-        internal_data: StrongPtrInternalData[T],
+        data: StrongPtrData
     }
 
-    StrongPtrInternalData[T]: struct {
+    StrongPtrData: struct {
         value_ptr:         Ptr,
         control_block_ptr: Ptr,
     }
 
     impl[T] StrongPtr[T] {
         value_ptr(self: &StrongPtr[T]): Ptr {
-            ret __deref_as[StrongPtrInternalData[T]](self).value_ptr;
+            ret __deref_as[StrongPtrData](self).value_ptr;
         }
 
         set_value_ptr(self: &StrongPtr[T], value: Ptr): void {
-            __deref_as[StrongPtrInternalData[T]](self).value_ptr = value;
+            __deref_as[StrongPtrData](self).value_ptr = value;
         }
 
         control_block_ptr(self: &StrongPtr[T]): Ptr {
-            ret __deref_as[StrongPtrInternalData[T]](self).control_block_ptr;
+            ret __deref_as[StrongPtrData](self).control_block_ptr;
         }
 
         set_control_block_ptr(self: &StrongPtr[T], value: Ptr): void {
-            __deref_as[StrongPtrInternalData[T]](self).control_block_ptr = value;
+            __deref_as[StrongPtrData](self).control_block_ptr = value;
         }
 
         new(value: &T): StrongPtr[T] -> pub {
             value_ptr:         Ptr = mem::alloc(__size_of[T]);
             control_block_ptr: Ptr = mem::alloc(__size_of[ControlBlock]);
 
-            internal_data: StrongPtrInternalData[T] = new StrongPtrInternalData[T] {
+            data: StrongPtrData = new StrongPtrData {
                 value_ptr,
                 control_block_ptr,
             };
@@ -86,25 +86,25 @@ std::rc: module -> pub {
                 weak_count:   0,
             };
 
-            mem::copy(Ref[T]::ptr(value), value_ptr, __size_of[T]);
+            __copy[T](Ref[T]::ptr(value), value_ptr);
             mem::copy(
                 __address_of(control_block),
                 control_block_ptr,
                 __size_of[ControlBlock]
             );
 
-            ret new StrongPtr[T] { internal_data };
+            ret new StrongPtr[T] { data };
         }
 
         from(weak_ptr: &WeakPtr[T]): StrongPtr[T] {
             ControlBlock::increment_strong_count(weak_ptr.control_block_ptr);
 
-            internal_data: StrongPtrInternalData[T] = new StrongPtrInternalData[T] {
+            data: StrongPtrData = new StrongPtrData {
                 value_ptr: ControlBlock::value_ptr(weak_ptr.control_block_ptr),
                 control_block_ptr: weak_ptr.control_block_ptr,
             };
 
-            ret new StrongPtr[T] { internal_data };
+            ret new StrongPtr[T] { data };
         }
 
         op copy(self: &StrongPtr[T], other: &StrongPtr[T]): void -> pub {
@@ -118,6 +118,7 @@ std::rc: module -> pub {
             ControlBlock::decrement_strong_count(control_block_ptr(self));
 
             if ControlBlock::strong_count(control_block_ptr(self)) == 0 {
+                __drop[T](value_ptr(self));
                 mem::dealloc(value_ptr(self));
 
                 if ControlBlock::weak_count(control_block_ptr(self)) == 0 {

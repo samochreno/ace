@@ -2,6 +2,8 @@
 
 ## 🛠️ Refactor
 
+- Fix formatting for resolving symbols
+- ❓ Rename `Scope::Resolve...Symbol` to `Scope::Resolve...`
 - ❓ Eliminate local lambdas
 - ❓ String interning
 - ❓ Put braces on opening line
@@ -9,6 +11,8 @@
 
 ## 💥 High Priority
 
+- Put `void` in `std`
+- Change `module` to `mod`
 - Unit testing (Test that `CreateTokenKindString` handles all possible values, test `Keyword.cpp`)
 - Make it so defining two associated functions with a same name causes a symbol redefinition error
 - Traits:
@@ -26,7 +30,6 @@
   - `IEmittable` could hold this `CFAGraph`, so it could verify control flow
   - Possibly implement `CFANode`s for `LLVM IR` instructions
 - Templates:
-  - ❓ Give template symbols shared ownership of the ast
   - Constraints
   - Diagnostics
   - When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first

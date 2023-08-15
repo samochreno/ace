@@ -1185,6 +1185,8 @@ namespace Ace
             case TokenKind::ReturnKeyword:
             case TokenKind::ExitKeyword:
             case TokenKind::AssertKeyword:
+            case TokenKind::CopyKeyword:
+            case TokenKind::DropKeyword:
             {
                 return true;
             }
@@ -2714,6 +2716,231 @@ namespace Ace
         };
     }
 
+    static auto ParseCopyStmt(
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
+    ) -> Expected<std::shared_ptr<const CopyStmtNode>>
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        const auto beginSrcLocation = parser.GetSrcLocation();
+
+        if (parser.Peek() != TokenKind::CopyKeyword)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::CopyKeyword
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        if (parser.Peek() != TokenKind::OpenBracket)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::OpenBracket
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
+            parser,
+            scope,
+            RefParsingKind::Disallow
+        ));
+        if (!optTypeName.has_value())
+        {
+            return std::move(diagnostics);
+        }
+
+        if (parser.Peek() != TokenKind::CloseBracket)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::CloseBracket
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        if (parser.Peek() != TokenKind::OpenParen)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::OpenParen
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        const auto optSrcExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optSrcExpr.has_value())
+        {
+            return std::move(diagnostics);
+        }
+
+        if (parser.Peek() != TokenKind::Comma)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::Comma
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        const auto optDstExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optDstExpr.has_value())
+        {
+            return std::move(diagnostics);
+        }
+
+        if (parser.Peek() != TokenKind::CloseParen)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::CloseParen
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        if (parser.Peek() == TokenKind::Semicolon)
+        {
+            parser.Eat();
+        }
+        else
+        {
+            diagnostics.Add(CreateMissingTokenError(
+                parser.GetLastSrcLocation(),
+                TokenKind::Semicolon
+            ));
+        }
+
+        return Expected
+        {
+            std::make_shared<const CopyStmtNode>(
+                SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
+                optTypeName.value(),
+                optSrcExpr.value(),
+                optDstExpr.value()
+            ),
+            std::move(diagnostics),
+        };
+    }
+
+    static auto ParseDropStmt(
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
+    ) -> Expected<std::shared_ptr<const DropStmtNode>>
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        const auto beginSrcLocation = parser.GetSrcLocation();
+
+        if (parser.Peek() != TokenKind::DropKeyword)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::DropKeyword
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        if (parser.Peek() != TokenKind::OpenBracket)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::OpenBracket
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        const auto optTypeName = diagnostics.Collect(ParseTypeName(
+            parser,
+            scope,
+            RefParsingKind::Disallow
+        ));
+        if (!optTypeName.has_value())
+        {
+            return std::move(diagnostics);
+        }
+
+        if (parser.Peek() != TokenKind::CloseBracket)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::CloseBracket
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        if (parser.Peek() != TokenKind::OpenParen)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::OpenParen
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        const auto optExpr = diagnostics.Collect(ParseExpr(parser, scope));
+        if (!optExpr.has_value())
+        {
+            return std::move(diagnostics);
+        }
+
+        if (parser.Peek() != TokenKind::CloseParen)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::CloseParen
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        if (parser.Peek() == TokenKind::Semicolon)
+        {
+            parser.Eat();
+        }
+        else
+        {
+            diagnostics.Add(CreateMissingTokenError(
+                parser.GetLastSrcLocation(),
+                TokenKind::Semicolon
+            ));
+        }
+
+        return Expected
+        {
+            std::make_shared<const DropStmtNode>(
+                SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
+                optTypeName.value(),
+                optExpr.value()
+            ),
+            std::move(diagnostics),
+        };
+    }
+
+
     static auto ParseExprExpr(
         Parser& parser,
         const std::shared_ptr<Scope>& scope
@@ -3739,6 +3966,16 @@ namespace Ace
             case TokenKind::AssertKeyword:
             {
                 return ParseAssertStmt(parser, scope);
+            }
+
+            case TokenKind::CopyKeyword:
+            {
+                return ParseCopyStmt(parser, scope);
+            }
+
+            case TokenKind::DropKeyword:
+            {
+                return ParseDropStmt(parser, scope);
             }
 
             default:
