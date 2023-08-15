@@ -3595,16 +3595,17 @@ namespace Ace
             }
         }
 
-        if (parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() == TokenKind::Semicolon)
         {
-            diagnostics.Add(CreateUnexpectedTokenError(
-                parser.Peek(),
+            parser.Eat();
+        }
+        else
+        {
+            diagnostics.Add(CreateMissingTokenError(
+                parser.GetLastSrcLocation(),
                 TokenKind::Semicolon
             ));
-            return std::move(diagnostics);
         }
-
-        parser.Eat();
 
         return Expected
         {
@@ -3637,16 +3638,17 @@ namespace Ace
 
         parser.Eat();
 
-        if (parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() == TokenKind::Semicolon)
+        {
+            parser.Eat();
+        }
+        else
         {
             diagnostics.Add(CreateUnexpectedTokenError(
                 parser.Peek(),
                 TokenKind::Semicolon
             ));
-            return std::move(diagnostics);
         }
-
-        parser.Eat();
 
         return Expected
         {
@@ -3684,16 +3686,17 @@ namespace Ace
             return std::move(diagnostics);
         }
 
-        if (parser.Peek() != TokenKind::Semicolon)
+        if (parser.Peek() == TokenKind::Semicolon)
         {
-            diagnostics.Add(CreateUnexpectedTokenError(
-                parser.Peek(),
+            parser.Eat();
+        }
+        else
+        {
+            diagnostics.Add(CreateMissingTokenError(
+                parser.GetLastSrcLocation(),
                 TokenKind::Semicolon
             ));
-            return std::move(diagnostics);
         }
-
-        parser.Eat();
 
         return Expected
         {
@@ -3741,9 +3744,7 @@ namespace Ace
             default:
             {
                 auto diagnostics = DiagnosticBag::Create();
-                diagnostics.Add(CreateUnexpectedTokenError(
-                    parser.Peek()
-                ));
+                diagnostics.Add(CreateUnexpectedTokenError(parser.Peek()));
                 return std::move(diagnostics);
             }
         }
