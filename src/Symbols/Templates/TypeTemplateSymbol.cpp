@@ -118,13 +118,12 @@ namespace Ace
         const std::shared_ptr<const ITemplatableNode>& ast
     ) -> void
     {
+        auto diagnostics = DiagnosticBag::CreateNoError();
+
         const auto castedAST = std::dynamic_pointer_cast<const ITypeNode>(ast);
-
-        const auto boundAST = castedAST->CreateBoundType();
-        ACE_ASSERT(boundAST.GetDiagnostics().IsEmpty());
-
-        const auto finalAST = Application::CreateTransformedAndVerifiedAST(
-            boundAST.Unwrap(),
+        const auto boundAST = diagnostics.Collect(castedAST->CreateBoundType());
+        const auto finalAST = diagnostics.Collect(Application::CreateTransformedAndVerifiedAST(
+            boundAST,
             [](const std::shared_ptr<const ITypeBoundNode>& ast)
             {
                 return ast->CreateTypeCheckedType({});
@@ -133,9 +132,9 @@ namespace Ace
             {
                 return ast->CreateLoweredType({});
             }
-        ).Unwrap();
+        ));
 
-        auto* const selfSymbol = finalAST->GetSymbol();
+        auto* const selfSymbol = finalAST.value()->GetSymbol();
 
         const SrcLocation srcLocation{};
 
