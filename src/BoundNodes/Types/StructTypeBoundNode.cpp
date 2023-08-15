@@ -80,7 +80,7 @@ namespace Ace
         {
             std::make_shared<const StructTypeBoundNode>(
                 GetSrcLocation(),
-                m_Symbol,
+                GetSymbol(),
                 checkedAttributes,
                 checkedVars
             ),
@@ -127,7 +127,7 @@ namespace Ace
 
         return std::make_shared<const StructTypeBoundNode>(
             GetSrcLocation(),
-            m_Symbol,
+            GetSymbol(),
             loweredAttributes,
             loweredVars
         )->CreateLowered({});
