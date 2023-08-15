@@ -87,21 +87,23 @@ namespace Ace
         {
             const auto argTypeInfos = m_FunctionSymbol->CollectArgTypeInfos();
 
-            if (m_Args.size() != argTypeInfos.size())
+            if (m_Args.size() == argTypeInfos.size())
+            {
+                for (size_t i = 0; i < m_Args.size(); i++)
+                {
+                    convertedArgs.at(i) = diagnostics.Collect(CreateImplicitlyConverted(
+                        m_Args.at(i),
+                        argTypeInfos.at(i)
+                    ));
+                }
+            }
+            else
             {
                 diagnostics.Add(CreateUnexpectedArgCountError(
                     GetSrcLocation(),
                     m_FunctionSymbol,
                     m_Args.size(),
                     argTypeInfos.size()
-                ));
-            }
-
-            for (size_t i = 0; i < m_Args.size(); i++)
-            {
-                convertedArgs.at(i) = diagnostics.Collect(CreateImplicitlyConverted(
-                    m_Args.at(i),
-                    argTypeInfos.at(i)
                 ));
             }
 
