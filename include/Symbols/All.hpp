@@ -18,6 +18,7 @@
 #include "Symbols/Types/TemplateParams/ImplTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TemplateParams/NormalTemplateParamTypeSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/VoidTypeSymbol.hpp"
 #include "Symbols/Vars/VarSymbol.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 #include "Symbols/Vars/InstanceVarSymbol.hpp"
