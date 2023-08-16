@@ -141,23 +141,17 @@ namespace Ace
         {
             case TypeNameModifier::Ref:
             {
-                return natives.Ref.CreateFullyQualifiedName(
-                    srcLocation
-                );
+                return natives.Ref.CreateFullyQualifiedName(srcLocation);
             }
 
             case TypeNameModifier::StrongPtr:
             {
-                return natives.StrongPtr.CreateFullyQualifiedName(
-                    srcLocation
-                );
+                return natives.StrongPtr.CreateFullyQualifiedName(srcLocation);
             }
 
             case TypeNameModifier::WeakPtr:
             {
-                return natives.WeakPtr.CreateFullyQualifiedName(
-                    srcLocation
-                );
+                return natives.WeakPtr.CreateFullyQualifiedName(srcLocation);
             }
         }
     }
