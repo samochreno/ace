@@ -64,6 +64,13 @@ namespace Ace
 
     auto ExitStmtBoundNode::Emit(Emitter& emitter) const -> void
     {
+        const auto srcLocation = GetSrcLocation();
+        const auto location = srcLocation.Buffer->FormatLocation(srcLocation);
+
+        emitter.EmitPrintf(emitter.EmitString(
+            "Program aborted at " + location
+        ));
+
         auto* const argValue = llvm::ConstantInt::get(
             emitter.GetC().GetTypes().GetInt(),
             -1,
