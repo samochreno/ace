@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <string_view>
 #include <filesystem>
 #include <unordered_map>
 #include <chrono>
@@ -100,6 +101,9 @@ namespace Ace
             const IStmtBoundNode* const stmt
         ) -> void;
         auto EmitDropArgs() -> void;
+        auto EmitString(const std::string_view string) -> llvm::Value*;
+        auto EmitPrintf(llvm::Value* const message) -> void;
+        auto EmitPrintf(const std::vector<llvm::Value*>& args) -> void;
 
         auto GetCompilation() const -> Compilation*;
         auto GetContext() const -> const llvm::LLVMContext&;

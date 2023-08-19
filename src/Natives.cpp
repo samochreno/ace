@@ -1726,59 +1726,16 @@ namespace Ace
             std::vector{ "ace", "print_int" },
             [this, compilation](Emitter& emitter)
             {
-                std::string string{ "%" PRId32 "\n" };
+                auto* const compilation = emitter.GetCompilation();
 
-                auto* const charType = llvm::Type::getInt8Ty(
+                auto* const intType = compilation->GetNatives().Int.GetIRType(
                     emitter.GetContext()
                 );
 
-                std::vector<llvm::Constant*> chars(string.size());
-                for (size_t i = 0; i < string.size(); i++)
-                {
-                    chars.at(i) = llvm::ConstantInt::get(
-                        charType, string.at(i)
-                    );
-                }
-
-                chars.push_back(llvm::ConstantInt::get(charType, 0));
-
-                auto* const stringType = llvm::ArrayType::get(
-                    charType,
-                    chars.size()
-                );
-
-                auto* const globalDeclaration = llvm::cast<llvm::GlobalVariable>(
-                    emitter.GetModule().getOrInsertGlobal("printf_string_int", stringType)
-                );
-
-                globalDeclaration->setInitializer(
-                    llvm::ConstantArray::get(stringType, chars)
-                );
-                globalDeclaration->setConstant(true);
-                globalDeclaration->setLinkage(
-                    llvm::GlobalValue::LinkageTypes::PrivateLinkage
-                );
-                globalDeclaration->setUnnamedAddr(
-                    llvm::GlobalValue::UnnamedAddr::Global
-                );
-
-                auto* const printfFunction =
-                    emitter.GetC().GetFunctions().GetPrintf();
-
-                std::vector<llvm::Value*> args{};
-                args.push_back(llvm::ConstantExpr::getBitCast(
-                    globalDeclaration,
-                    llvm::PointerType::get(charType, 0)
-                ));
-                args.push_back(emitter.EmitLoadArg(
-                    0, 
-                    Int.GetIRType(emitter.GetContext())
-                ));
-
-                emitter.GetBlockBuilder().Builder.CreateCall(
-                    printfFunction,
-                    args
-                );
+                emitter.EmitPrintf({
+                    emitter.EmitString("%" PRId32 "\n"),
+                    emitter.EmitLoadArg(0, intType),
+                });
 
                 emitter.GetBlockBuilder().Builder.CreateRetVoid();
             }
@@ -1789,59 +1746,16 @@ namespace Ace
             std::vector{ "ace", "print_ptr" },
             [compilation](Emitter& emitter)
             {
-                std::string string{ "0x%" PRIXPTR "\n" };
+                auto* const compilation = emitter.GetCompilation();
 
-                auto* const charType = llvm::Type::getInt8Ty(
+                auto* const ptrType = compilation->GetNatives().Ptr.GetIRType(
                     emitter.GetContext()
                 );
 
-                std::vector<llvm::Constant*> chars(string.size());
-                for (size_t i = 0; i < string.size(); i++)
-                {
-                    chars.at(i) = llvm::ConstantInt::get(
-                        charType,
-                        string.at(i)
-                    );
-                }
-
-                chars.push_back(llvm::ConstantInt::get(charType, 0));
-
-                auto* const stringType = llvm::ArrayType::get(
-                    charType,
-                    chars.size()
-                );
-
-                auto* const globalDeclaration = llvm::cast<llvm::GlobalVariable>(
-                    emitter.GetModule().getOrInsertGlobal("printf_string_ptr", stringType)
-                );
-                globalDeclaration->setInitializer(
-                    llvm::ConstantArray::get(stringType, chars)
-                );
-                globalDeclaration->setConstant(true);
-                globalDeclaration->setLinkage(
-                    llvm::GlobalValue::LinkageTypes::PrivateLinkage
-                );
-                globalDeclaration->setUnnamedAddr(
-                    llvm::GlobalValue::UnnamedAddr::Global
-                );
-
-                auto* const printfFunction =
-                    emitter.GetC().GetFunctions().GetPrintf();
-
-                std::vector<llvm::Value*> args{};
-                args.push_back(llvm::ConstantExpr::getBitCast(
-                    globalDeclaration,
-                    llvm::PointerType::get(charType, 0)
-                ));
-                args.push_back(emitter.EmitLoadArg(
-                    0,
-                    llvm::Type::getInt8PtrTy(emitter.GetContext())
-                ));
-
-                emitter.GetBlockBuilder().Builder.CreateCall(
-                    printfFunction,
-                    args
-                );
+                emitter.EmitPrintf({
+                    emitter.EmitString("0x%" PRIXPTR "\n"),
+                    emitter.EmitLoadArg(0, ptrType),
+                });
 
                 emitter.GetBlockBuilder().Builder.CreateRetVoid();
             }

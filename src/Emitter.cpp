@@ -625,6 +625,59 @@ namespace Ace
         });
     }
 
+    auto Emitter::EmitString(const std::string_view string) -> llvm::Value*
+    {
+        auto* const charType = llvm::Type::getInt8Ty(GetContext());
+
+        std::vector<llvm::Constant*> chars(string.size());
+        for (size_t i = 0; i < string.size(); i++)
+        {
+            chars.at(i) = llvm::ConstantInt::get(charType, string.at(i));
+        }
+
+        chars.push_back(llvm::ConstantInt::get(charType, 0));
+
+        auto* const stringType = llvm::ArrayType::get(charType, chars.size());
+
+        auto* const globalDeclaration = llvm::cast<llvm::GlobalVariable>(
+            GetModule().getOrInsertGlobal(
+                SpecialIdent::CreateAnonymous(),
+                stringType
+            )
+        );
+
+        globalDeclaration->setInitializer(
+            llvm::ConstantArray::get(stringType, chars)
+        );
+        globalDeclaration->setConstant(true);
+        globalDeclaration->setLinkage(
+            llvm::GlobalValue::LinkageTypes::PrivateLinkage
+        );
+        globalDeclaration->setUnnamedAddr(
+            llvm::GlobalValue::UnnamedAddr::Global
+        );
+
+        return llvm::ConstantExpr::getBitCast(
+            globalDeclaration,
+            llvm::PointerType::get(charType, 0)
+        );
+    }
+
+    auto Emitter::EmitPrintf(llvm::Value* const message) -> void
+    {
+        EmitPrintf(std::vector{ message });
+    }
+
+    auto Emitter::EmitPrintf(const std::vector<llvm::Value*>& args) -> void
+    {
+        auto* const printfFunction = GetC().GetFunctions().GetPrintf();
+
+        GetBlockBuilder().Builder.CreateCall(
+            printfFunction,
+            args
+        );
+    }
+
     auto Emitter::GetCompilation() const -> Compilation*
     {
         return m_Compilation;
