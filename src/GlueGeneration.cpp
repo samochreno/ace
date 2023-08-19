@@ -539,14 +539,14 @@ namespace Ace::GlueGeneration
             auto* const varTypeGlueSymbol = 
                 varTypeSymbol->GetDropGlue().value();
             
-            const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
+            const auto varRefExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
                 SrcLocation{},
                 selfParamRefExprNode,
                 varSymbol
             );
 
             std::vector<std::shared_ptr<const IExprBoundNode>> args{};
-            args.push_back(selfParamVarRerefenceExprNode);
+            args.push_back(varRefExprNode);
 
             const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
                 SrcLocation{},
