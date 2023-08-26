@@ -30,30 +30,21 @@ namespace Ace
             begin(string),
             begin(highlight),
             back_inserter(highlightString),
-            [](const char character)
-            {
-                return ' ';
-            }
+            [](const char character) { return ' '; }
         );
 
         std::transform(
             begin(highlight),
             end  (highlight),
             back_inserter(highlightString),
-            [](const char character)
-            {
-                return '^';
-            }
+            [](const char character) { return '^'; }
         );
 
         std::transform(
             end(highlight),
             end(string),
             back_inserter(highlightString),
-            [](const char character)
-            {
-                return ' ';
-            }
+            [](const char character) { return ' '; }
         );
 
         return highlightString;

@@ -46,11 +46,9 @@ namespace Ace
                 end  (params),
             };
 
-            const auto placeholderSymbol = diagnostics.Collect(InstantiateSymbols(
-                symbol,
-                upcastedImplParams,
-                upcastedParams
-            ));
+            const auto placeholderSymbol = diagnostics.Collect(
+                InstantiateSymbols(symbol, upcastedImplParams, upcastedParams)
+            );
             symbol->SetPlaceholderSymbol(placeholderSymbol);
         });
 
@@ -89,20 +87,21 @@ namespace Ace
         return false;
     }
 
-    static auto IsArgPlaceholder(
-        ITypeSymbol* arg
-    ) -> bool
+    static auto IsArgPlaceholder(ITypeSymbol* arg) -> bool
     {
-        arg = arg->GetUnaliased();
+        arg = arg->GetUnaliasedType();
 
         if (dynamic_cast<ImplTemplateParamTypeSymbol*>(arg))
+        {
             return true;
+        }
 
         if (dynamic_cast<NormalTemplateParamTypeSymbol*>(arg))
+        {
             return true;
+        }
 
-        auto* const templatable =
-            dynamic_cast<ITemplatableSymbol*>(arg);
+        auto* const templatable = dynamic_cast<ITemplatableSymbol*>(arg);
         if (!templatable)
         {
             return false;
@@ -122,14 +121,11 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto symbolsInstantiationResult =
-            diagnostics.Collect(t3mplate->InstantiateSymbols(implArgs, args));
-
-        const bool areArgsPlaceholders = AreArgsPlaceholders(
-            implArgs,
-            args
+        const auto symbolsInstantiationResult = diagnostics.Collect(
+            t3mplate->InstantiateSymbols(implArgs, args)
         );
-        if (!areArgsPlaceholders)
+
+        if (!AreArgsPlaceholders(implArgs, args))
         {
             m_SymbolOnlyInstantiatedASTsMap[t3mplate].push_back(
                 symbolsInstantiationResult.AST
