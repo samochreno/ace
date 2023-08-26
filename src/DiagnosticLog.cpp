@@ -106,20 +106,11 @@ namespace Ace
             leftPadding  = padding - rightPadding;
         }
 
-        auto beginIt = begin(highlight);
-        auto endIt   = end  (highlight);
-
-        for (size_t i = 0; i < leftPadding; i++)
+        return std::string_view
         {
-            beginIt--;
-        }
-
-        for (size_t i = 0; i < rightPadding; i++)
-        {
-            endIt++;
-        }
-
-        return std::string_view{ beginIt, endIt };
+            begin(highlight) - leftPadding,
+            end  (highlight) + rightPadding,
+        };
     }
 
     static auto CalculateSnippetStringLine(
