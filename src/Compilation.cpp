@@ -17,20 +17,11 @@
 #include "Package.hpp"
 #include "Natives.hpp"
 #include "Scope.hpp"
-#include "TemplateInstantiator.hpp"
 #include "Symbols/Types/VoidTypeSymbol.hpp"
 #include "ErrorSymbols.hpp"
 
 namespace Ace
 {
-    static const CLIOptionDefinition HelpOptionDefinition
-    {
-        std::string_view{ "h" },
-        std::string_view{ "help" },
-        CLIOptionKind::WithoutValue,
-        std::nullopt,
-    };
-
     static const CLIOptionDefinition OutputPathOptionDefinition
     {
         std::string_view{ "o" },
@@ -43,7 +34,6 @@ namespace Ace
     {
         return
         {
-            &HelpOptionDefinition,
             &OutputPathOptionDefinition,
         };
     }
@@ -140,11 +130,14 @@ namespace Ace
 
         self->m_GlobalScope = { self.get() };
 
+        self->m_PackageBodyScope =
+            self->GetGlobalScope()->GetOrCreateChild(self->m_Package.Name);
+
         auto ownedVoidTypeSymbol = std::make_unique<VoidTypeSymbol>(
             self->GetGlobalScope()
         );
         self->m_VoidTypeSymbol = DiagnosticBag::CreateNoError().Collect(
-            self->GetGlobalScope()->DefineSymbol(std::move(ownedVoidTypeSymbol))
+            self->GetGlobalScope()->DeclareSymbol(std::move(ownedVoidTypeSymbol))
         );
 
         self->m_ErrorSymbols = Ace::ErrorSymbols{ self.get() };
@@ -187,14 +180,9 @@ namespace Ace
         return m_GlobalScope.Unwrap();
     }
 
-    auto Compilation::GetTemplateInstantiator() const -> const Ace::TemplateInstantiator&
+    auto Compilation::GetPackageBodyScope() const -> const std::shared_ptr<Scope>&
     {
-        return m_TemplateInstantiator;
-    }
-
-    auto Compilation::GetTemplateInstantiator() -> Ace::TemplateInstantiator&
-    {
-        return m_TemplateInstantiator;
+        return m_PackageBodyScope;
     }
 
     auto Compilation::GetVoidTypeSymbol() const -> ITypeSymbol*

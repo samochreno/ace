@@ -9,13 +9,16 @@
 #include "Emitter.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/EmittableTypeSymbol.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
+#include "Symbols/Vars/FieldVarSymbol.hpp"
+#include "AnonymousIdent.hpp"
 
 namespace Ace::GlueGeneration
 {
-    static auto GetOrDefineAndBindCopyGlueSymbols(
+    static auto GetOrDeclareAndBindCopyGlueSymbols(
         Compilation* const compilation,
-        ISizedTypeSymbol* const typeSymbol
+        IConcreteTypeSymbol* const typeSymbol
     ) -> FunctionSymbol*
     {
         if (typeSymbol->GetCopyGlue().has_value())
@@ -24,10 +27,11 @@ namespace Ace::GlueGeneration
         }
 
         const auto scope     = typeSymbol->GetUnaliased()->GetScope();
-        const auto selfScope = scope->GetOrCreateChild({});
+        const auto bodyScope = scope->CreateChild();
 
-        const auto nameString = SpecialIdent::CreateCopyGlue(
-            typeSymbol->CreatePartialSignature()
+        const std::string nameString = AnonymousIdent::Create(
+            "copy_glue",
+            typeSymbol->CreateLocalSignature()
         );
         const Ident name
         {
@@ -36,48 +40,53 @@ namespace Ace::GlueGeneration
         };
 
         auto ownedGlueSymbol = std::make_unique<FunctionSymbol>(
-            selfScope,
-            name,
+            bodyScope,
             SymbolCategory::Static,
-            AccessModifier::Public,
-            compilation->GetVoidTypeSymbol()
+            AccessModifier::Pub,
+            name,
+            compilation->GetVoidTypeSymbol(),
+            std::vector<ITypeSymbol*>{}
         );
 
-        auto* const glueSymbol = Scope::DefineSymbol(
-            std::move(ownedGlueSymbol)
-        ).Unwrap();
+        auto* const glueSymbol = DiagnosticBag::CreateNoError().Collect(
+            Scope::DeclareSymbol(std::move(ownedGlueSymbol))
+        );
         typeSymbol->BindCopyGlue(glueSymbol);
 
         const Ident selfName
         {
             typeSymbol->GetName().SrcLocation,
-            SpecialIdent::CreateAnonymous(),
+            AnonymousIdent::Create("self"),
         };
-        Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
-            selfScope,
-            selfName,
-            dynamic_cast<ISizedTypeSymbol*>(typeSymbol->GetWithRef()),
-            0
-        )).Unwrap();
+        (void)DiagnosticBag::CreateNoError().Collect(
+            Scope::DeclareSymbol(std::make_unique<NormalParamVarSymbol>(
+                bodyScope,
+                selfName,
+                dynamic_cast<ISizedTypeSymbol*>(typeSymbol->GetWithRef()),
+                0
+            ))
+        );
 
         const Ident otherName
         {
             typeSymbol->GetName().SrcLocation,
-            SpecialIdent::CreateAnonymous(),
+            AnonymousIdent::Create("other"),
         };
-        Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
-            selfScope,
-            otherName,
-            dynamic_cast<ISizedTypeSymbol*>(typeSymbol->GetWithRef()),
-            1
-        )).Unwrap();
+        (void)DiagnosticBag::CreateNoError().Collect(
+            Scope::DeclareSymbol(std::make_unique<NormalParamVarSymbol>(
+                bodyScope,
+                otherName,
+                dynamic_cast<ISizedTypeSymbol*>(typeSymbol->GetWithRef()),
+                1
+            ))
+        );
 
         return glueSymbol;
     }
 
-    static auto GetOrDefineAndBindDropGlueSymbols(
+    static auto GetOrDeclareAndBindDropGlueSymbols(
         Compilation* const compilation,
-        ISizedTypeSymbol* const typeSymbol
+        IConcreteTypeSymbol* const typeSymbol
     ) -> FunctionSymbol*
     {
         if (typeSymbol->GetDropGlue().has_value())
@@ -86,10 +95,11 @@ namespace Ace::GlueGeneration
         }
 
         const auto scope     = typeSymbol->GetUnaliased()->GetScope();
-        const auto selfScope = scope->GetOrCreateChild({});
+        const auto bodyScope = scope->CreateChild();
 
-        const auto nameString = SpecialIdent::CreateDropGlue(
-            typeSymbol->CreatePartialSignature()
+        const std::string nameString = AnonymousIdent::Create(
+            "drop_glue",
+            typeSymbol->CreateLocalSignature()
         );
         const Ident name
         {
@@ -98,37 +108,40 @@ namespace Ace::GlueGeneration
         };
 
         auto ownedGlueSymbol = std::make_unique<FunctionSymbol>(
-            selfScope,
-            name,
+            bodyScope,
             SymbolCategory::Static,
-            AccessModifier::Public,
-            compilation->GetVoidTypeSymbol()
+            AccessModifier::Pub,
+            name,
+            compilation->GetVoidTypeSymbol(),
+            std::vector<ITypeSymbol*>{}
         );
 
-        auto* const glueSymbol = Scope::DefineSymbol(
-            std::move(ownedGlueSymbol)
-        ).Unwrap();
+        auto* const glueSymbol = DiagnosticBag::CreateNoError().Collect(
+            Scope::DeclareSymbol(std::move(ownedGlueSymbol))
+        );
         typeSymbol->BindDropGlue(glueSymbol);
 
         const Ident selfName
         {
             typeSymbol->GetName().SrcLocation,
-            SpecialIdent::CreateAnonymous(),
+            AnonymousIdent::Create("self"),
         };
-        Scope::DefineSymbol(std::make_unique<NormalParamVarSymbol>(
-            selfScope,
-            selfName,
-            dynamic_cast<ISizedTypeSymbol*>(typeSymbol->GetWithRef()),
-            0
-        )).Unwrap();
+        (void)DiagnosticBag::CreateNoError().Collect(
+            Scope::DeclareSymbol(std::make_unique<NormalParamVarSymbol>(
+                bodyScope,
+                selfName,
+                dynamic_cast<ISizedTypeSymbol*>(typeSymbol->GetWithRef()),
+                0
+            ))
+        );
 
         return glueSymbol;
     }
 
-    static auto TryDefineAndBindGlueSymbols(
+    static auto TryDeclareAndBindGlueSymbols(
         Compilation* const compilation,
-        ISizedTypeSymbol* const typeSymbol,
-        const std::function<FunctionSymbol*(Compilation* const, ISizedTypeSymbol* const)>& getOrDefineAndBindGlueSymbols
+        IConcreteTypeSymbol* const typeSymbol,
+        const std::function<FunctionSymbol*(Compilation* const, IConcreteTypeSymbol* const)>& getOrDeclareAndBindGlueSymbols
     ) -> std::optional<FunctionSymbol*>
     {
         if (typeSymbol->IsError())
@@ -136,10 +149,8 @@ namespace Ace::GlueGeneration
             return std::nullopt;
         }
 
-        auto* const templatableSymbol = dynamic_cast<ITemplatableSymbol*>(
-            typeSymbol
-        );
-        if (templatableSymbol && templatableSymbol->IsTemplatePlaceholder())
+        auto* const genericSymbol = dynamic_cast<IGenericSymbol*>(typeSymbol);
+        if (genericSymbol && genericSymbol->IsPlaceholder())
         {
             return std::nullopt;
         }
@@ -149,42 +160,42 @@ namespace Ace::GlueGeneration
             return std::nullopt;
         }
 
-        return getOrDefineAndBindGlueSymbols(compilation, typeSymbol);
+        return getOrDeclareAndBindGlueSymbols(compilation, typeSymbol);
     }
 
-    static auto CreateAndBindGlueBody(
+    static auto CreateAndBindGlueBlock(
         Compilation* const compilation,
-        const std::function<std::shared_ptr<const IEmittable<void>>(ISizedTypeSymbol* const, FunctionSymbol* const)>& createGlueBody,
-        ISizedTypeSymbol* const typeSymbol,
+        const std::function<std::shared_ptr<const IEmittable<void>>(IConcreteTypeSymbol* const, FunctionSymbol* const)>& createGlueBlock,
+        IConcreteTypeSymbol* const typeSymbol,
         FunctionSymbol* const glueSymbol
     ) -> void
     {
-        const auto body = createGlueBody(typeSymbol, glueSymbol);
-        glueSymbol->BindBody(body);
+        const auto block = createGlueBlock(typeSymbol, glueSymbol);
+        glueSymbol->BindEmittableBlock(block);
     }
 
     static auto GenerateAndBindGlue(
         Compilation* const compilation,
-        const std::vector<ISizedTypeSymbol*>& typeSymbols,
-        const std::function<FunctionSymbol*(Compilation* const, ISizedTypeSymbol* const)>& getOrDefineGlueSymbols,
-        const std::function<std::shared_ptr<const IEmittable<void>>(ISizedTypeSymbol* const, FunctionSymbol* const)>& createGlueBody
+        const std::vector<IConcreteTypeSymbol*>& typeSymbols,
+        const std::function<FunctionSymbol*(Compilation* const, IConcreteTypeSymbol* const)>& getOrDeclareGlueSymbols,
+        const std::function<std::shared_ptr<const IEmittable<void>>(IConcreteTypeSymbol* const, FunctionSymbol* const)>& createGlueBlock
     ) -> void
     {
         struct TypeGlueSymbolPair
         {
-            ISizedTypeSymbol* TypeSymbol{};
+            IConcreteTypeSymbol* TypeSymbol{};
             FunctionSymbol* FunctionSymbol{};
         };
 
         std::vector<TypeGlueSymbolPair> typeGlueSymbolPairs{};
 
         std::for_each(begin(typeSymbols), end(typeSymbols),
-        [&](ISizedTypeSymbol* const typeSymbol)
+        [&](IConcreteTypeSymbol* const typeSymbol)
         {
-            const auto optGlueSymbol = TryDefineAndBindGlueSymbols(
+            const auto optGlueSymbol = TryDeclareAndBindGlueSymbols(
                 compilation,
                 typeSymbol, 
-                getOrDefineGlueSymbols
+                getOrDeclareGlueSymbols
             );
             if (!optGlueSymbol.has_value())
             {
@@ -200,9 +211,9 @@ namespace Ace::GlueGeneration
         std::for_each(begin(typeGlueSymbolPairs), end(typeGlueSymbolPairs),
         [&](const TypeGlueSymbolPair& typeGlueSymbolPair)
         {
-            CreateAndBindGlueBody(
+            CreateAndBindGlueBlock(
                 compilation,
-                createGlueBody,
+                createGlueBlock,
                 typeGlueSymbolPair.TypeSymbol,
                 typeGlueSymbolPair.FunctionSymbol
             );
@@ -211,32 +222,35 @@ namespace Ace::GlueGeneration
 
     static auto CollectTypeSymbols(
         Compilation* const compilation
-    ) -> std::vector<ISizedTypeSymbol*>
+    ) -> std::vector<IConcreteTypeSymbol*>
     {
         const auto allTypeSymbols =
-            compilation->GetGlobalScope()->CollectSymbolsRecursive<ISizedTypeSymbol>();
+            compilation->GetGlobalScope()->CollectSymbolsRecursive<IConcreteTypeSymbol>();
             
-        std::vector<ISizedTypeSymbol*> typeSymbols{};
+        std::vector<IConcreteTypeSymbol*> typeSymbols{};
         std::copy_if(
             begin(allTypeSymbols),
             end  (allTypeSymbols),
             back_inserter(typeSymbols),
-            [](ISizedTypeSymbol* const typeSymbol)
+            [](IConcreteTypeSymbol* const typeSymbol)
             {
-                return !typeSymbol->IsTemplatePlaceholder();
+                return !typeSymbol->IsPlaceholder();
             }
         );
 
-        std::set<ISizedTypeSymbol*> typeSymbolSet{};
+        std::set<IConcreteTypeSymbol*> typeSymbolSet{};
         std::for_each(begin(typeSymbols), end(typeSymbols),
-        [&](ISizedTypeSymbol* const typeSymbol)
+        [&](IConcreteTypeSymbol* const typeSymbol)
         {
-            typeSymbolSet.insert(dynamic_cast<ISizedTypeSymbol*>(
-                typeSymbol->GetUnaliased()
-            ));
+            auto* const unaliasedTypeSymbol =
+                dynamic_cast<IConcreteTypeSymbol*>(typeSymbol->GetUnaliased());
+            if (unaliasedTypeSymbol)
+            {
+                typeSymbolSet.insert(unaliasedTypeSymbol);
+            }
         });
 
-        return std::vector<ISizedTypeSymbol*>
+        return std::vector<IConcreteTypeSymbol*>
         {
             begin(typeSymbolSet),
             end  (typeSymbolSet),
@@ -250,337 +264,362 @@ namespace Ace::GlueGeneration
         GenerateAndBindGlue(
             compilation,
             typeSymbols,
-            &GetOrDefineAndBindCopyGlueSymbols,
+            &GetOrDeclareAndBindCopyGlueSymbols,
             [](
-                ISizedTypeSymbol* const typeSymbol,
+                IConcreteTypeSymbol* const typeSymbol,
                 FunctionSymbol* const glueSymbol
             ) 
             { 
-                return typeSymbol->CreateCopyGlueBody(glueSymbol);
+                return typeSymbol->CreateCopyGlueBlock(glueSymbol);
             }
         );
         GenerateAndBindGlue(
             compilation,
             typeSymbols,
-            &GetOrDefineAndBindDropGlueSymbols,
+            &GetOrDeclareAndBindDropGlueSymbols,
             [](
-                ISizedTypeSymbol* const typeSymbol,
+                IConcreteTypeSymbol* const typeSymbol,
                 FunctionSymbol* const glueSymbol
             ) 
             { 
-                return typeSymbol->CreateDropGlueBody(glueSymbol);
+                return typeSymbol->CreateDropGlueBlock(glueSymbol);
             }
         );
     }
 
-    static auto CreateTrivialCopyGlueBody(
+    static auto CreateTrivialCopyGlueBlock(
         Compilation* const compilation,
         FunctionSymbol* const glueSymbol,
         StructTypeSymbol* const structSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
-        class TrivialCopyGlueBodyEmitter : public virtual IEmittable<void>
+        class TrivialCopyGlueBlockEmitter : public virtual IEmittable<void>
         {
         public:
-            TrivialCopyGlueBodyEmitter(
-                ISizedTypeSymbol* const typeSymbol
+            TrivialCopyGlueBlockEmitter(
+                IConcreteTypeSymbol* const typeSymbol
             ) : m_TypeSymbol{ typeSymbol }
             {
             }
-            ~TrivialCopyGlueBodyEmitter() = default;
+            ~TrivialCopyGlueBlockEmitter() = default;
 
             auto Emit(Emitter& emitter) const -> void final
             {
-                auto* const type = emitter.GetIRType(m_TypeSymbol);
-                auto* const ptrType = llvm::PointerType::get(
-                    type,
-                    0
-                );
-                
-                auto* const selfPtr = emitter.EmitLoadArg(
-                    0,
-                    ptrType
-                );
+                auto* const    type = emitter.GetType(m_TypeSymbol);
+                auto* const ptrType = llvm::PointerType::get(type, 0);
 
-                auto* const otherPtr = emitter.EmitLoadArg(
-                    1, 
-                    ptrType
-                );
-                auto* const otherValue = emitter.GetBlockBuilder().Builder.CreateLoad(
+                auto* const  selfPtr = emitter.EmitLoadArg(0, ptrType);
+                auto* const otherPtr = emitter.EmitLoadArg(1, ptrType);
+
+                auto* const otherValue = emitter.GetBlock().Builder.CreateLoad(
                     type,
                     otherPtr
                 );
 
-                emitter.GetBlockBuilder().Builder.CreateStore(
-                    otherValue,
-                    selfPtr
-                );
-
-                emitter.GetBlockBuilder().Builder.CreateRetVoid();
+                emitter.GetBlock().Builder.CreateStore(otherValue, selfPtr);
+                emitter.GetBlock().Builder.CreateRetVoid();
             }
 
         private:
-            ISizedTypeSymbol* m_TypeSymbol{};
+            IConcreteTypeSymbol* m_TypeSymbol{};
         };
 
-        return std::make_shared<const TrivialCopyGlueBodyEmitter>(
+        return std::make_shared<const TrivialCopyGlueBlockEmitter>(
             structSymbol
         );
     }
 
-    static auto CreateTrivialDropGlueBody(
+    static auto CreateTrivialDropGlueBlock(
         Compilation* const compilation,
         FunctionSymbol* const glueSymbol,
-        ISizedTypeSymbol* const typeSymbol
+        IConcreteTypeSymbol* const typeSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
-        class TrivialDropGlueBodyEmitter : public virtual IEmittable<void>
+        class TrivialDropGlueBlockEmitter : public virtual IEmittable<void>
         {
         public:
-            TrivialDropGlueBodyEmitter() = default;
-            ~TrivialDropGlueBodyEmitter() = default;
+            TrivialDropGlueBlockEmitter() = default;
+            ~TrivialDropGlueBlockEmitter() = default;
 
             auto Emit(Emitter& emitter) const -> void final
             {
-                emitter.GetBlockBuilder().Builder.CreateRetVoid();
+                emitter.GetBlock().Builder.CreateRetVoid();
             }
         };
 
-        return std::make_shared<const TrivialDropGlueBodyEmitter>();
+        return std::make_shared<const TrivialDropGlueBlockEmitter>();
     }
 
-    auto CreateCopyGlueBody(
+    static auto GetCopyOpSymbol(
+        ITypeSymbol* const structSymbol
+    ) -> std::optional<FunctionSymbol*>
+    {
+        auto diagnostics = DiagnosticBag::CreateNoError();
+
+        auto* const compilation = structSymbol->GetCompilation();
+
+        const auto& opMap = compilation->GetNatives().GetCopyOpMap();
+        const auto opSymbolIt = opMap.find(
+            dynamic_cast<ITypeSymbol*>(structSymbol->GetRoot())
+        );
+        if (opSymbolIt == end(opMap))
+        {
+            return std::nullopt;
+        }
+
+        auto* const opSymbol = opSymbolIt->second;
+
+        if (!opSymbol->IsPlaceholder())
+        {
+            return opSymbol;
+        }
+
+        const SrcLocation srcLocation{ compilation };
+        const auto& typeArgs = structSymbol->GetTypeArgs();
+
+        return dynamic_cast<FunctionSymbol*>(
+            Scope::ForceCollectGenericInstance(opSymbol, typeArgs)
+        );
+    }
+
+    static auto GetDropOpSymbol(
+        ITypeSymbol* const structSymbol
+    ) -> std::optional<FunctionSymbol*>
+    {
+        auto diagnostics = DiagnosticBag::CreateNoError();
+
+        auto* const compilation = structSymbol->GetCompilation();
+
+        const auto& opMap = compilation->GetNatives().GetDropOpMap();
+        const auto opSymbolIt = opMap.find(
+            dynamic_cast<ITypeSymbol*>(structSymbol->GetRoot())
+        );
+        if (opSymbolIt == end(opMap))
+        {
+            return std::nullopt;
+        }
+
+        auto* const opSymbol = opSymbolIt->second;
+
+        if (!opSymbol->IsPlaceholder())
+        {
+            return opSymbol;
+        }
+
+        const SrcLocation srcLocation{ compilation };
+        const auto& typeArgs = structSymbol->GetTypeArgs();
+
+        return dynamic_cast<FunctionSymbol*>(
+            Scope::ForceCollectGenericInstance(opSymbol, typeArgs)
+        );
+    }
+
+    auto CreateCopyGlueBlock(
         Compilation* const compilation,
         FunctionSymbol* const glueSymbol,
         StructTypeSymbol* const structSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
+        auto diagnostics = DiagnosticBag::CreateNoError();
+
         if (structSymbol->IsTriviallyCopyable())
         {
-            return CreateTrivialCopyGlueBody(
+            return CreateTrivialCopyGlueBlock(
                 compilation,
                 glueSymbol,
                 structSymbol
             );
         }
 
-        const auto bodyScope = glueSymbol->GetSelfScope()->GetOrCreateChild({});
+        const SrcLocation srcLocation{ compilation };
+
+        const auto blockScope = glueSymbol->GetBodyScope()->CreateChild();
 
         const auto paramSymbols = glueSymbol->CollectParams();
-        const auto selfParamRefExprNode = std::make_shared<const StaticVarRefExprBoundNode>(
-            SrcLocation{},
-            bodyScope,
+        const auto selfParamRefExprSema = std::make_shared<const StaticVarRefExprSema>(
+            srcLocation,
+            blockScope,
             paramSymbols.at(0)
         );
-        const auto otherParamRefExprNode = std::make_shared<const StaticVarRefExprBoundNode>(
-            SrcLocation{},
-            bodyScope,
+        const auto otherParamRefExprSema = std::make_shared<const StaticVarRefExprSema>(
+            srcLocation,
+            blockScope,
             paramSymbols.at(1)
         );
 
-        auto opName = structSymbol->CreateFullyQualifiedName(
-            structSymbol->GetName().SrcLocation
-        );
-        opName.Sections.emplace_back(Ident{
-            structSymbol->GetName().SrcLocation,
-            SpecialIdent::Op::Copy,
-        });
+        const auto optOpSymbol = GetCopyOpSymbol(structSymbol);
 
-        const auto optOpSymbol = DiagnosticBag::Create().Collect(
-            compilation->GetGlobalScope()->ResolveStaticSymbol<FunctionSymbol>(opName)
-        );
-
-        std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
+        std::vector<std::shared_ptr<const IStmtSema>> stmts{};
         if (optOpSymbol.has_value())
         {
-            std::vector<std::shared_ptr<const IExprBoundNode>> args{};
-            args.push_back(selfParamRefExprNode);
-            args.push_back(otherParamRefExprNode);
+            std::vector<std::shared_ptr<const IExprSema>> args{};
+            args.push_back(selfParamRefExprSema);
+            args.push_back(otherParamRefExprSema);
 
-            const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
-                SrcLocation{},
-                bodyScope,
+            const auto callExprSema = std::make_shared<const StaticCallExprSema>(
+                srcLocation,
+                blockScope,
                 optOpSymbol.value(),
                 args
             );
 
-            const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
-                SrcLocation{},
-                functionCallExprNode
+            const auto exprStmtSema = std::make_shared<const ExprStmtSema>(
+                srcLocation,
+                callExprSema
             );
 
-            stmts.push_back(exprStmtNode);
+            stmts.push_back(exprStmtSema);
         }
         else
         {
-            const auto varSymbols = structSymbol->CollectVars();
-            std::for_each(begin(varSymbols), end(varSymbols),
-            [&](InstanceVarSymbol* const varSymbol)
+            const auto fieldSymbols = structSymbol->CollectFields();
+            std::for_each(begin(fieldSymbols), end(fieldSymbols),
+            [&](FieldVarSymbol* const fieldSymbol)
             {
-                auto* const varTypeSymbol = varSymbol->GetType();
-                auto* const varTypeGlueSymbol =
-                    varTypeSymbol->GetCopyGlue().value();
+                auto* const typeSymbol = dynamic_cast<IConcreteTypeSymbol*>(
+                    fieldSymbol->GetSizedType()->GetUnaliased()
+                );
+                ACE_ASSERT(typeSymbol);
+
+                auto* const typeGlueSymbol = typeSymbol->GetCopyGlue().value();
                 
-                const auto selfParamVarRerefenceExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
-                    SrcLocation{},
-                    selfParamRefExprNode,
-                    varSymbol
+                const auto selfParamVarRefExprSema = std::make_shared<const FieldVarRefExprSema>(
+                    srcLocation,
+                    selfParamRefExprSema,
+                    fieldSymbol
                 );
-                const auto otherParamVarRerefenceExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
-                    SrcLocation{},
-                    otherParamRefExprNode,
-                    varSymbol
+                const auto otherParamVarRefExprSema = std::make_shared<const FieldVarRefExprSema>(
+                    srcLocation,
+                    otherParamRefExprSema,
+                    fieldSymbol
                 );
 
-                std::vector<std::shared_ptr<const IExprBoundNode>> args{};
-                args.push_back(selfParamVarRerefenceExprNode);
-                args.push_back(otherParamVarRerefenceExprNode);
+                std::vector<std::shared_ptr<const IExprSema>> args{};
+                args.push_back(selfParamVarRefExprSema);
+                args.push_back(otherParamVarRefExprSema);
 
-                const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
-                    SrcLocation{},
-                    bodyScope,
-                    varTypeGlueSymbol,
+                const auto callExprSema = std::make_shared<const StaticCallExprSema>(
+                    srcLocation,
+                    blockScope,
+                    typeGlueSymbol,
                     args
                 );
 
-                const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
-                    SrcLocation{},
-                    functionCallExprNode
+                const auto exprStmtSema = std::make_shared<const ExprStmtSema>(
+                    srcLocation,
+                    callExprSema
                 );
 
-                stmts.push_back(exprStmtNode);
+                stmts.push_back(exprStmtSema);
             });
         }
 
-        const auto bodyNode = std::make_shared<const BlockStmtBoundNode>(
-            SrcLocation{},
-            bodyScope->GetParent().value(),
+        const auto blockSema = std::make_shared<const BlockStmtSema>(
+            srcLocation,
+            blockScope->GetParent().value(),
             stmts
         );
 
-        return Application::CreateTransformedAndVerifiedAST(
-            bodyNode,
-            [&](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
-            { 
-                return bodyNode->CreateTypeChecked({
-                    compilation->GetVoidTypeSymbol()
-                }); 
-            },
-            [](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
-            {
-                return bodyNode->CreateLowered({});
-            }
-        ).Unwrap();
+        return diagnostics.Collect(Application::CreateVerifiedFunctionBlock(
+            blockSema,
+            compilation->GetVoidTypeSymbol()
+        ));
     }
 
-    auto CreateDropGlueBody(
+    auto CreateDropGlueBlock(
         Compilation* const compilation,
         FunctionSymbol* const glueSymbol,
         StructTypeSymbol* const structSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
+        auto diagnostics = DiagnosticBag::CreateNoError();
+
         if (structSymbol->IsTriviallyDroppable())
         {
-            return CreateTrivialDropGlueBody(
+            return CreateTrivialDropGlueBlock(
                 compilation,
                 glueSymbol,
                 structSymbol
             );
         }
 
-        const auto bodyScope = glueSymbol->GetSelfScope()->GetOrCreateChild({});
+        const SrcLocation srcLocation{ compilation };
+
+        const auto blockScope = glueSymbol->GetBodyScope()->CreateChild();
 
         const auto paramSymbols = glueSymbol->CollectParams();
-        const auto selfParamRefExprNode = std::make_shared<const StaticVarRefExprBoundNode>(
-            SrcLocation{},
-            bodyScope,
+        const auto selfParamRefExprSema = std::make_shared<const StaticVarRefExprSema>(
+            srcLocation,
+            blockScope,
             paramSymbols.at(0)
         );
 
-        std::vector<std::shared_ptr<const IStmtBoundNode>> stmts{};
+        const auto optOpSymbol = GetDropOpSymbol(structSymbol);
 
-        auto opName = structSymbol->CreateFullyQualifiedName(
-            structSymbol->GetName().SrcLocation
-        );
-        opName.Sections.emplace_back(Ident{
-            structSymbol->GetName().SrcLocation,
-            SpecialIdent::Op::Drop,
-        });
-
-        const auto optOpSymbol = DiagnosticBag::Create().Collect(
-            compilation->GetGlobalScope()->ResolveStaticSymbol<FunctionSymbol>(opName)
-        );
-
+        std::vector<std::shared_ptr<const IStmtSema>> stmts{};
         if (optOpSymbol.has_value())
         {
-            std::vector<std::shared_ptr<const IExprBoundNode>> args{};
-            args.push_back(selfParamRefExprNode);
+            std::vector<std::shared_ptr<const IExprSema>> args{};
+            args.push_back(selfParamRefExprSema);
 
-            const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
-                SrcLocation{},
-                bodyScope,
+            const auto callExprSema = std::make_shared<const StaticCallExprSema>(
+                srcLocation,
+                blockScope,
                 optOpSymbol.value(),
                 args
             );
 
-            const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
-                SrcLocation{},
-                functionCallExprNode
+            const auto exprStmtSema = std::make_shared<const ExprStmtSema>(
+                srcLocation,
+                callExprSema
             );
 
-            stmts.push_back(exprStmtNode);
+            stmts.push_back(exprStmtSema);
         }
 
-        const auto varSymbols = structSymbol->CollectVars();
-        std::for_each(rbegin(varSymbols), rend(varSymbols),
-        [&](InstanceVarSymbol* const varSymbol)
+        const auto fieldSymbols = structSymbol->CollectFields();
+        std::for_each(rbegin(fieldSymbols), rend(fieldSymbols),
+        [&](FieldVarSymbol* const fieldSymbol)
         {
-            auto* const varTypeSymbol = varSymbol->GetType();
-            auto* const varTypeGlueSymbol = 
-                varTypeSymbol->GetDropGlue().value();
+            auto* const typeSymbol = dynamic_cast<IConcreteTypeSymbol*>(
+                fieldSymbol->GetSizedType()->GetUnaliased()
+            );
+            ACE_ASSERT(typeSymbol);
+
+            auto* const typeGlueSymbol = typeSymbol->GetDropGlue().value();
             
-            const auto varRefExprNode = std::make_shared<const InstanceVarRefExprBoundNode>(
-                SrcLocation{},
-                selfParamRefExprNode,
-                varSymbol
+            const auto varRefExprSema = std::make_shared<const FieldVarRefExprSema>(
+                srcLocation,
+                selfParamRefExprSema,
+                fieldSymbol
             );
 
-            std::vector<std::shared_ptr<const IExprBoundNode>> args{};
-            args.push_back(varRefExprNode);
+            std::vector<std::shared_ptr<const IExprSema>> args{};
+            args.push_back(varRefExprSema);
 
-            const auto functionCallExprNode = std::make_shared<const StaticFunctionCallExprBoundNode>(
-                SrcLocation{},
-                bodyScope,
-                varTypeGlueSymbol,
+            const auto callExprSema = std::make_shared<const StaticCallExprSema>(
+                srcLocation,
+                blockScope,
+                typeGlueSymbol,
                 args
             );
 
-            const auto exprStmtNode = std::make_shared<const ExprStmtBoundNode>(
-                SrcLocation{},
-                functionCallExprNode
+            const auto exprStmtSema = std::make_shared<const ExprStmtSema>(
+                srcLocation,
+                callExprSema
             );
 
-            stmts.push_back(exprStmtNode);
+            stmts.push_back(exprStmtSema);
         });
 
-        const auto bodyNode = std::make_shared<const BlockStmtBoundNode>(
-            SrcLocation{},
-            bodyScope->GetParent().value(),
+        auto blockSema = std::make_shared<const BlockStmtSema>(
+            srcLocation,
+            blockScope->GetParent().value(),
             stmts
         );
-
-        return Application::CreateTransformedAndVerifiedAST(
-            bodyNode,
-            [&](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
-            { 
-                return bodyNode->CreateTypeChecked({
-                    compilation->GetVoidTypeSymbol()
-                }); 
-            },
-            [](const std::shared_ptr<const BlockStmtBoundNode>& bodyNode)
-            {
-                return bodyNode->CreateLowered({});
-            }
-        ).Unwrap();
+        return diagnostics.Collect(Application::CreateVerifiedFunctionBlock(
+            blockSema,
+            compilation->GetVoidTypeSymbol()
+        ));
     }
 }

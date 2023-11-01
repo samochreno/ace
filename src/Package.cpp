@@ -146,7 +146,7 @@ namespace Ace
         return Diagnosed{ filePaths, std::move(diagnostics) };
     }
 
-    struct ExpandedLastFilePathPartData
+    struct ExpandedLastFilePathPart
     {
         std::optional<std::string> OptPath{};
         std::optional<std::string> OptExtension{};
@@ -156,7 +156,7 @@ namespace Ace
     static auto ExpandLastFilePathPart(
         const FileBuffer* const fileBuffer,
         std::string part
-    ) -> Diagnosed<ExpandedLastFilePathPartData>
+    ) -> Diagnosed<ExpandedLastFilePathPart>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -189,7 +189,7 @@ namespace Ace
         {
             return Diagnosed
             {
-                ExpandedLastFilePathPartData
+                ExpandedLastFilePathPart
                 {
                     part,
                     optExtension,
@@ -227,7 +227,7 @@ namespace Ace
 
         return Diagnosed
         {
-            ExpandedLastFilePathPartData
+            ExpandedLastFilePathPart
             {
                 std::nullopt,
                 optExtension,
@@ -295,7 +295,7 @@ namespace Ace
         const auto macroValueIt = pathMacroMap.find(pathMacro);
         if (macroValueIt == end(pathMacroMap))
         {
-            diagnostics.Add(CreateUndefinedRefToPackagePathMacroError(
+            diagnostics.Add(CreateUndeclaredRefToPackagePathMacroError(
                 fileBuffer,
                 pathMacro
             ));

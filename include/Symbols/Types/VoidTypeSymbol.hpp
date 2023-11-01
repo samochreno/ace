@@ -1,14 +1,13 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "Symbols/Types/TypeSymbol.hpp"
-#include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
+#include "Noun.hpp"
 #include "Ident.hpp"
 #include "AccessModifier.hpp"
-#include "Diagnostic.hpp"
-#include "Emittable.hpp"
 
 namespace Ace
 {
@@ -18,15 +17,22 @@ namespace Ace
         VoidTypeSymbol(const std::shared_ptr<Scope>& scope);
         virtual ~VoidTypeSymbol() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto GetSelfScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const Ident& final;
-        auto GetKind() const -> SymbolKind final;
+        auto CreateTypeNoun() const -> Noun final;
+        auto GetBodyScope() const -> std::shared_ptr<Scope> final;
         auto GetCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
+        auto GetName() const -> const Ident& final;
+
+        auto CreateInstantiated(
+            const std::shared_ptr<Scope>& scope,
+            const InstantiationContext& context
+        ) const -> std::unique_ptr<ISymbol> final;
+
+        auto SetBodyScope(const std::shared_ptr<Scope>& scope) -> void final;
+        auto GetTypeArgs() const -> const std::vector<ITypeSymbol*>& final;
 
     private:
-        std::shared_ptr<Scope> m_SelfScope{};
+        std::shared_ptr<Scope> m_BodyScope{};
         Ident m_Name{};
     };
 }

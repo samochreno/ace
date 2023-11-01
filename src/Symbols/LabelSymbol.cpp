@@ -1,7 +1,11 @@
 #include "Symbols/LabelSymbol.hpp"
 
+#include <memory>
+#include <vector>
+
 #include "Scope.hpp"
 #include "Ident.hpp"
+#include "Noun.hpp"
 #include "AccessModifier.hpp"
 
 namespace Ace
@@ -14,19 +18,14 @@ namespace Ace
     {
     }
 
+    auto LabelSymbol::CreateTypeNoun() const -> Noun
+    {
+        return Noun{ Article::A, "label" };
+    }
+
     auto LabelSymbol::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;
-    }
-
-    auto LabelSymbol::GetName() const -> const Ident&
-    {
-        return m_Name;
-    }
-
-    auto LabelSymbol::GetKind() const -> SymbolKind
-    {
-        return SymbolKind::Label;
     }
 
     auto LabelSymbol::GetCategory() const -> SymbolCategory
@@ -36,6 +35,19 @@ namespace Ace
 
     auto LabelSymbol::GetAccessModifier() const -> AccessModifier
     {
-        return AccessModifier::Public;
+        return AccessModifier::Pub;
+    }
+
+    auto LabelSymbol::GetName() const -> const Ident&
+    {
+        return m_Name;
+    }
+
+    auto LabelSymbol::CreateInstantiated(
+        const std::shared_ptr<Scope>& scope,
+        const InstantiationContext& context
+    ) const -> std::unique_ptr<ISymbol>
+    {
+        return std::make_unique<LabelSymbol>(scope, GetName());
     }
 }

@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "Symbols/Types/TypeSymbol.hpp"
-#include "ExprDropData.hpp"
+#include "ExprDropInfo.hpp"
 
 namespace llvm
 {
@@ -15,6 +15,6 @@ namespace Ace
     struct ExprEmitResult
     {
         llvm::Value* Value{};
-        std::vector<ExprDropData> Tmps{};
+        std::vector<ExprDropInfo> Tmps{};
     };
 }

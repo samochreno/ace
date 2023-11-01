@@ -1,4 +1,6 @@
-std: module -> pub {
-    Ptr: struct -> pub {
+pub ::
+std: mod {
+    pub ::
+    Ptr: struct {
     }
 }

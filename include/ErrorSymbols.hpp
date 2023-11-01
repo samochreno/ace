@@ -7,9 +7,12 @@ namespace Ace
     class ISymbol;
     class ITypeSymbol;
     class ISizedTypeSymbol;
+    class INominalTypeSymbol;
+    class TraitTypeSymbol;
     class StructTypeSymbol;
     class IVarSymbol;
-    class InstanceVarSymbol;
+    class FieldVarSymbol;
+    class ICallableSymbol;
     class FunctionSymbol;
 
     class ErrorSymbols
@@ -23,16 +26,20 @@ namespace Ace
 
         auto GetType() const -> ITypeSymbol*;
         auto GetSizedType() const -> ISizedTypeSymbol*;
-        auto GetStructType() const -> StructTypeSymbol*;
+        auto GetNominalType() const -> INominalTypeSymbol*;
+        auto GetTrait() const -> TraitTypeSymbol*;
+        auto GetStruct() const -> StructTypeSymbol*;
         auto GetVar() const -> IVarSymbol*;
-        auto GetInstanceVar() const -> InstanceVarSymbol*;
+        auto GetField() const -> FieldVarSymbol*;
+        auto GetCallable() const -> ICallableSymbol*;
         auto GetFunction() const -> FunctionSymbol*;
 
     private:
         Compilation* m_Compilation{};
 
-        StructTypeSymbol* m_StructType{};
-        InstanceVarSymbol* m_InstanceVar{};
+        TraitTypeSymbol* m_Trait{};
+        StructTypeSymbol* m_Struct{};
+        FieldVarSymbol* m_Field{};
         FunctionSymbol* m_Function{};
     };
 }

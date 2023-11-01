@@ -15,40 +15,36 @@ namespace Ace
         const AccessModifier newSymbolAccessModifier
     ) -> DiagnosticGroup;
 
-    auto CreateSymbolRedefinitionError(
+    auto CreateSymbolRedeclarationError(
         const ISymbol* const originalSymbol,
-        const ISymbol* const redefinedSymbol
+        const ISymbol* const redeclaredSymbol
     ) -> DiagnosticGroup;
 
-    auto CreateUnsizedSymbolTypeError(
-        ISymbol* const symbol
+    auto CreateStructFieldCausesCycleError(
+        FieldVarSymbol* const fieldSymbol
     ) -> DiagnosticGroup;
 
-    auto CreateStructVarCausesCycleError(
-        InstanceVarSymbol* const varSymbol
-    ) -> DiagnosticGroup;
-
-    auto CreateUnableToDeduceTemplateArgsError(
+    auto CreateUnableToDeduceTypeArgsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 
-    auto CreateUnableToDeduceTemplateArgError(
+    auto CreateUnableToDeduceTypeArgError(
         const SrcLocation& srcLocation,
-        const NormalTemplateParamTypeSymbol* const templateParam
+        const TypeParamTypeSymbol* const typeParam
     ) -> DiagnosticGroup;
 
-    auto CreateTooManyTemplateArgsError(
+    auto CreateTooManyTypeArgsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 
-    auto CreateTemplateArgDeductionConflict(
+    auto CreateTypeArgDeductionConflict(
         const SrcLocation& srcLocation,
-        const NormalTemplateParamTypeSymbol* const templateParam,
+        const TypeParamTypeSymbol* const typeParam,
         const ITypeSymbol* const deducedArg,
         const ITypeSymbol* const conflictingDeducedArg
     ) -> DiagnosticGroup;
 
-    auto CreateUndefinedSymbolRefError(
+    auto CreateUndeclaredSymbolRefError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 
@@ -57,7 +53,7 @@ namespace Ace
         const std::vector<ISymbol*>& candidateSymbols
     ) -> DiagnosticGroup;
 
-    auto CreateScopeAccessOfNonSelfScopedSymbolError(
+    auto CreateScopeAccessOfNonBodyScopedSymbolError(
         const SrcLocation& srcLocation,
         const ISymbol* const symbol
     ) -> DiagnosticGroup;
@@ -73,35 +69,35 @@ namespace Ace
         const SymbolCategory expectedCategory
     ) -> DiagnosticGroup;
 
-    auto CreateMissingStructVarsError(
+    auto CreateMissingStructFieldsError(
         const SrcLocation& srcLocation,
         StructTypeSymbol* const structSymbol,
-        const std::vector<InstanceVarSymbol*>& missingVarSymbols
+        const std::vector<FieldVarSymbol*>& missingFieldSymbols
     ) -> DiagnosticGroup;
 
-    auto CreateStructHasNoVarNamedError(
+    auto CreateStructHasNoFieldNamedError(
         StructTypeSymbol* const structSymbol,
         const Ident& fieldName
     ) -> DiagnosticGroup;
 
-    auto CreateStructVarInitializedMoreThanOnceError(
+    auto CreateStructFieldInitializedMoreThanOnceError(
         const SrcLocation& srcLocation,
         const SrcLocation& previousSrcLocation
     ) -> DiagnosticGroup;
 
-    auto CreateUndefinedUnaryOpError(
-        const Op& op,
+    auto CreateUndeclaredUnaryOpError(
+        const SrcLocation& srcLocation,
         ITypeSymbol* const type
     ) -> DiagnosticGroup;
 
-    auto CreateUndefinedBinaryOpError(
-        const Op& op,
+    auto CreateUndeclaredBinaryOpError(
+        const SrcLocation& srcLocation,
         ITypeSymbol* const lhsType,
         ITypeSymbol* const rhsType
     ) -> DiagnosticGroup;
 
     auto CreateAmbiguousBinaryOpRefError(
-        const Op& op,
+        const SrcLocation& srcLocation,
         ITypeSymbol* const lhsType,
         ITypeSymbol* const rhsType
     ) -> DiagnosticGroup;
@@ -111,8 +107,15 @@ namespace Ace
         ITypeSymbol* const type
     ) -> DiagnosticGroup;
 
-    auto CreateUnsizedTemplateArgsError(
-        const SrcLocation& srcLocation,
-        const std::vector<ITypeSymbol*>& unsizedTemplateArgs
+    auto CreateInherentImplOfForeignTypeError(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup;
+
+    auto CreateSelfReferenceInIncorrectContext(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup;
+
+    auto CreateAmbiguousTraitImplError(
+        const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 }

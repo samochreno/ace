@@ -3,13 +3,13 @@
 #include <memory>
 
 #include "Diagnostic.hpp"
-#include "BoundNodes/Exprs/ExprBoundNode.hpp"
+#include "Semas/Exprs/ExprSema.hpp"
 #include "TypeInfo.hpp"
 
 namespace Ace
 {
     auto CreateExpectedLValueExprError(
-        const std::shared_ptr<const IExprBoundNode>& expr
+        const std::shared_ptr<const IExprSema>& expr
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -23,16 +23,32 @@ namespace Ace
         return group;
     }
 
+    auto CreateExpectedSizedExprError(
+        const std::shared_ptr<const IExprSema>& expr
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            expr->GetSrcLocation(),
+            "expected a sized expression"
+        );
+
+        return group;
+    }
+
     auto CreateUnableToConvertExprError(
-        const std::shared_ptr<const IExprBoundNode>& expr,
+        const std::shared_ptr<const IExprSema>& expr,
         const TypeInfo& targetTypeInfo
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         const std::string message =
-            "unable to convert `" + expr->GetTypeInfo().Symbol->CreateSignature() +
-            "` to `" + targetTypeInfo.Symbol->CreateSignature() + "`";
+            "unable to convert `" +
+            expr->GetTypeInfo().Symbol->CreateDisplayName() + "` to `" +
+            targetTypeInfo.Symbol->CreateDisplayName() + "`";
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
@@ -58,7 +74,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateExpectedPtrExprError(
+    auto CreateExpectedPtrError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
@@ -73,9 +89,39 @@ namespace Ace
         return group;
     }
 
+    auto CreateExpectedStrongPtrError(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            "expected a strong pointer"
+        );
+
+        return group;
+    }
+
+    auto CreateExpectedNonDynStrongPtrError(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            "expected a non-dynamic strong pointer"
+        );
+
+        return group;
+    }
+
     auto CreateUnexpectedArgCountError(
         const SrcLocation& srcLocation,
-        FunctionSymbol* const functionSymbol,
+        ICallableSymbol* const callableSymbol,
         const size_t expectedArgCount,
         const size_t unexpectedArgCount
     ) -> DiagnosticGroup
@@ -95,29 +141,14 @@ namespace Ace
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Note,
-            functionSymbol->GetName().SrcLocation,
+            callableSymbol->GetName().SrcLocation,
             "function declaration"
         );
 
         return group;
     }
 
-    auto CreateExpectedStrongPtrExprError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "expected a strong pointer"
-        );
-
-        return group;
-    }
-
-    auto CreateReturningExprFromVoidFunctionError(
+    auto CreateExprRetFromVoidFunctionError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
@@ -128,7 +159,7 @@ namespace Ace
         
         const std::string message =
             "returning an expression from a function of type `" +
-            voidType->CreateSignature() + "`";
+            voidType->CreateDisplayName() + "`";
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
@@ -139,7 +170,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateReturningUnsizedExprError(
+    auto CreateUnsizedRetExprError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
@@ -154,7 +185,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateMissingReturnExprError(
+    auto CreateMissingRetExprError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
@@ -185,7 +216,22 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Note,
             selfParamSymbol->GetName().SrcLocation,
-            "parameter declaration"
+            "self parameter declaration"
+        );
+
+        return group;
+    }
+
+    auto CreateFunctionNotDynDispatchableError(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            "function is not dynamically dispatchable"
         );
 
         return group;

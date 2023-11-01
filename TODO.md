@@ -1,69 +1,56 @@
 # Ace To-Do List
 
-## 🛠️ Refactor
+## 🟢 Refactor
 
-- Fix formatting for resolving symbols
-- ❓ Rename `Scope::Resolve...Symbol` to `Scope::Resolve...`
+- Make `llvm::Value*` variable names consistent
+- Refer to `Self` and `self` consistently (`Self` is sometimes `SelfType`)
+- Cache `Scope::CollectSymbols` or just generally cache in `Scope` for performance
+- Rename `ControlFlowNode` to `ControlFlowInstruction` or something, node implies its a tree structure but really its linear
+- Make diagnostics take symbols, syntaxes, etc. instead of source locations, it allows focusing on the important code in the function
 - ❓ Eliminate local lambdas
 - ❓ String interning
-- ❓ Put braces on opening line
-- ❓ Align `GetScope` and `GetSelfScope`
+- ❓ Double underscore all public names that shouldnt be used: `__StrongPtr`, `__Ref`
 
-## 💥 High Priority
+## 🔴 High Priority
 
-- Put `void` in `std`
-- Change `module` to `mod`
+- Open source:
+  - Add `LICENSE`
+  - Add `README`
+  - Make repository public
+- Supertraits
+- Remove redundant undeclared symbol error for unimplemented function: When resolving associated functions, check if the type implements a trait with a function of that name, then just 'trust' it is implemented
+- Replace operators with traits
+- Fix that glue doesnt bind on private types
+- Dynamic casting (how to handle failed conversions?)
+
+## 🟡 Medium Priority
+
+- Make a user friendly version of `ISymbol::CreateSignature` that will be used in error messages (`ace::std::rc::StrongPtr[ace::std::Int32]` &rarr; `*i32`)
+- Forbid taking reference of a r-value
+- Add self type signature to member access resolution error message
+- Diagnostics when redeclared type parameter
+- Forbid constructing of non-pub struct
+- Trait operators:
+  - Change `__deref_as[T](...)` to take any type convertible to `std::Ptr` and remove `std::Ref[T]::ptr(...)`
+  - Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; possibly fixed by lifetime trait)
+  - Lifetime trait: default, copy, drop
 - Unit testing (Test that `CreateTokenKindString` handles all possible values, test `Keyword.cpp`)
-- Make it so defining two associated functions with a same name causes a symbol redefinition error
-- Traits:
-  - Parsing
-  - Symbols
-  - Binding
-  - Fix that glue doesnt bind on private types
-  - Replace operators with traits
-  - ❓ Rust's orphan rule
 
-## 🔔 Medium Priority
-
-- Make `Compilation` immutable: move uninstatiated templates (`TemplateInstantiator`) into `Scope` to keep all state there
-- CFA:
-  - `IEmittable` could hold this `CFAGraph`, so it could verify control flow
-  - Possibly implement `CFANode`s for `LLVM IR` instructions
-- Templates:
-  - Constraints
-  - Diagnostics
-  - When a template wants to be instantiated, check if the template has ever been instantiated, and if not, do semantic analysis on it first
-  - After compilation, do semantic analysis on templates that have never been instantiated
-  - ❓ Create unique signatures for template instances
-  - Default template arguments
-  - Specialization
-- Conversion operators with traits:
-  - Change `__deref_as[T](...)` to take any type convertible to `std::Pointer` and remove `std::Reference[T]::ptr(...)`
+- Add diagnosis for leaking private types in public interface
+- Add source location to unknown files like `.cpp`
 - Strings
-- Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; This could maybe be fixed by forcing the copy trait to also implement default trait)
-- Lifetime trait: default, copy, drop
+- Control flow flexibility improvement:
+  - `IEmittable` could hold `ControlFlowGraph`, so it could verify control flow
+  - Possibly implement `ControlFlowNode`s for `LLVM IR` instructions (check `llvm/IR/Instruction.def`)
 - Check if there is any better way to not use external programs like `llc` and `clang`
-- Check out LLVM attributes
+- New syntax for struct construction, the current `new Struct { ... }` and `Struct::new(...)` are too similiar
 - Struct update constructor syntax
 - Mutability/Immutability:
   - Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`
-- Dont allow private types to leak in public interface
-- Struct construction syntax:
-  - New syntax for struct construction. The current `new Struct { ... }` and `Struct::new(...)` are too similiar
-  - Struct update constructor syntax
-- Associated variables
--  Remove duplicate module filepaths: `./dawg/../dawg/` is the same as `./dawg/`
-- Operator verification:
-  - Operators must be public and static (this can be implemented in the parser)
-  - A conversion operator must convert to the enclosing type, from a type other than the enclosing type.
-  - You can have a `impl` or an `expl` operator to a type, not both
-  - First parameter of `drop` has to be of type `&Self`
-  - First and second parameters of `copy` have to be of type `&Self`
-  - `==` reqiures a matching `!=` &larr;
-  - `<=` requires a matching `>=` &larr; These will be handled by traits, eg.: `Equatable` &rarr; `operator ==(...)` and `operator !=(...)`
-  - `<` requires matching `>`     &larr;
+- Remove duplicate module filepaths in package: `./dawg/../dawg/` is the same as `./dawg/`
+- Enums
 
-## 🥶 Low Priority
+## ⚪ Low Priority
 
 - Local variable assignment analysis (data flow analysis), control flow graph
 - Metadata:
@@ -74,10 +61,9 @@
 - Dll package dependencies
 - Dll calls
 - Reflection
-- Enums
 - Figure out how to share globals between dlls
 - ❓ Remove local variable shadowing, it causes more mistakes than usefulness
-- Rewrite Package.json to package.ace:
+- Rewrite `package.json` to `package.ace`:
   ```rs
   import std::build;
 
@@ -98,124 +84,4 @@
           ],
       };
   }
-  ```
-
-## 💡 Ideas
-
-- Memory safe temporary references for things like Rc::...::unwrap()
-- Do block (it could be named something different, I'm not sure about the syntax either): https://www.youtube.com/watch?v=QM1iUe6IofM&ab_channel=BrianWill `41:51`
-  ```rs
-  start_scope: auto = do -> Scope 
-  {
-      scope: mut *Scope = self;
-      while scope
-      {
-          first_name_token: auto = options.name_tokens.front();
-  
-          if (scope.defined_symbols_map.contains(first_name_token.string_value))
-              break;
-  
-          scope = scope.get_parent();
-      }
-  
-      ret scope;
-  };
-  ```
-- Equivalent of Rust's `operator ?`:
-  ```rs
-  fn read_username_from_file() -> Result<String, io::Error> {
-      
-      // If this returns an error, operator ? automatically returns the error.
-      let mut f = File::open("hello.txt")?; 
-  
-      let mut s = String::new();
-      f.read_to_string(&mut s)?;
-  
-      Ok(s)
-  }
-  ```
-- Loops:
-  ```rs
-  main(): void -> pub
-  {
-      array_1: auto = List::Array[i32]::new({ 10, 51, 14, 38 });
-      array_2: auto = List::Array[i32]::new({ 50, 10, 51, 14, 38 });
-  
-      for_each(array_1[interval<begin, end)], item =>
-      {
-      });
-  
-      for_each(begin(array_1), end(array_1), item => 
-      {
-      });
-  
-      for_each(Zip::new(array_1.beg(), array_1.end(), array_2.beg() + 1, array_2.end()), pair => 
-      {
-          assert pair.First == pair.Second;
-      });
-  }
-  ```
-- Import and export functions (Export will disable name mangling):
-  ```rs
-  Program: struct
-  {
-      import_func(): void -> pub import;
-      
-      export_func(): void -> pub export
-      {
-          # Do something ...
-          import_func();
-      }
-  }
-  ```
-- Equivalent of Swift's `guard` statement:
-  ```swift
-  var i = 2
-  
-  while (i <= 10) {
-    // Guard condition to check the even number.
-    guard i % 2 == 0 else {
-      i = i + 1
-      continue
-    }
-  
-    print(i)
-    i = i + 1
-  } 
-  ```
-- Equivalent of Swift's wildcard:
-  ```swift
-  func allocateUTF8String(
-    _ string: String, // Wildcard allows not typing out the parameter name when calling the function.
-    nullTerminated: Bool = false
-  ) -> (UnsafePointer<UInt8>, Int) {
-    var string = string
-    return string.withUTF8 { utf8 in
-      let capacity = utf8.count + (nullTerminated ? 1 : 0)
-      let ptr = UnsafeMutablePointer<UInt8>.allocate(
-        capacity: capacity
-      )
-      if let baseAddress = utf8.baseAddress {
-        ptr.initialize(from: baseAddress, count: utf8.count)
-      }
-
-      if nullTerminated {
-        ptr[utf8.count] = 0
-      }
-
-      return (UnsafePointer<UInt8>(ptr), utf8.count)
-    }
-  }
-  ```
-- Equivalent of Rust's `Self` type
-- `Ret` type:
-  ```rs
-  func(): std::Optional[int] {
-      ret Ret::new(5);
-  }
-  ```
-- Make copying explicit:
-  ```
-  obj_1: Object = new Object {};
-  obj_2: Object = copy obj_1;
   ```

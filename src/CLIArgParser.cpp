@@ -84,9 +84,7 @@ namespace Ace
             end  (parser.Peek()),
         };
 
-        diagnostics.Add(CreateMissingCLIOptionNameError(
-            srcLocation
-        ));
+        diagnostics.Add(CreateMissingCLIOptionNameError(srcLocation));
         return std::move(diagnostics);
     }
 
@@ -110,9 +108,7 @@ namespace Ace
                 end  (parser.Peek()),
             };
 
-            diagnostics.Add(CreateMissingCLIOptionValueError(
-                srcLocation
-            ));
+            diagnostics.Add(CreateMissingCLIOptionValueError(srcLocation));
         }
 
         if (
@@ -127,17 +123,49 @@ namespace Ace
                 end  (optValue.value()),
             };
 
-            diagnostics.Add(CreateUnexpectedCLIOptionValueError(
-                srcLocation
-            ));
+            diagnostics.Add(CreateUnexpectedCLIOptionValueError(srcLocation));
         }
 
         return Diagnosed<void>{ std::move(diagnostics) };
     }
 
-    static auto ParseLongOption(
-        CLIArgParser& parser
-    ) -> Diagnosed<CLIOption>
+    static auto CreateLongOptionValue(
+        const CLIArgParser& parser,
+        const std::string_view name,
+        const bool isValueInFirstArg,
+        const CLIOptionDefinition* const definition
+    ) -> std::optional<std::string_view>
+    {
+        if (isValueInFirstArg)
+        {
+            const std::string_view value
+            {
+                end(name) + 1,
+                end(parser.Peek()),
+            };
+
+            if (value.empty())
+            {
+                return std::nullopt;
+            }
+
+            return value;
+        }
+
+        if (parser.IsEnd(1))
+        {
+            return std::nullopt;
+        }
+
+        if (definition->Kind == CLIOptionKind::WithoutValue)
+        {
+            return std::nullopt;
+        }
+
+        return parser.Peek(1);
+    }
+
+    static auto ParseLongOption(CLIArgParser& parser) -> Diagnosed<CLIOption>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -169,9 +197,7 @@ namespace Ace
                 end  (name),
             };
 
-            diagnostics.Add(CreateUnknownCLIOptionNameError(
-                srcLocation
-            ));
+            diagnostics.Add(CreateUnknownCLIOptionNameError(srcLocation));
         }
 
         const auto* const definition = diagnostics.HasErrors() ?
@@ -180,48 +206,14 @@ namespace Ace
 
         const bool isValueInFirstArg = end(name) != end(parser.Peek());
 
-        const auto optValue = [&]() -> std::optional<std::string_view>
-        {
-            if (isValueInFirstArg)
-            {
-                const std::string_view value
-                {
-                    end(name) + 1,
-                    end(parser.Peek()),
-                };
+        const auto optValue =
+            CreateLongOptionValue(parser, name, isValueInFirstArg, definition);
 
-                if (value.empty())
-                {
-                    return std::nullopt;
-                }
+        diagnostics.Collect(
+            DiagnoseMissingOrUnexpectedOptionValue(parser, definition, optValue)
+        );
 
-                return value;
-            }
-
-            if (parser.IsEnd(1))
-            {
-                return std::nullopt;
-            }
-
-            if (definition->Kind == CLIOptionKind::WithoutValue)
-            {
-                return std::nullopt;
-            }
-
-            return parser.Peek(1);
-        }();
-
-        diagnostics.Collect(DiagnoseMissingOrUnexpectedOptionValue(
-            parser,
-            definition,
-            optValue
-        ));
-
-        const CLIOption option
-        {
-            definition,
-            optValue,
-        };
+        const CLIOption option { definition, optValue };
 
         parser.Eat();
         if (optValue.has_value() && !isValueInFirstArg)
@@ -232,9 +224,36 @@ namespace Ace
         return Diagnosed{ option, std::move(diagnostics) };
     }
 
-    static auto ParseShortOption(
-        CLIArgParser& parser
-    ) -> Diagnosed<CLIOption>
+    static auto CreateShortOptionValue(
+        const CLIArgParser& parser,
+        const std::string_view name,
+        const bool isValueInFirstArg,
+        const CLIOptionDefinition* const definition
+    ) -> std::optional<std::string_view>
+    {
+        if (isValueInFirstArg)
+        {
+            return std::string_view
+            {
+                end(name),
+                end(parser.Peek()),
+            };
+        }
+
+        if (parser.IsEnd(1))
+        {
+            return std::nullopt;
+        }
+
+        if (definition->Kind == CLIOptionKind::WithoutValue)
+        {
+            return std::nullopt;
+        }
+
+        return parser.Peek(1);
+    }
+
+    static auto ParseShortOption(CLIArgParser& parser) -> Diagnosed<CLIOption>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -266,9 +285,7 @@ namespace Ace
                 end  (name),
             };
 
-            diagnostics.Add(CreateUnknownCLIOptionNameError(
-                srcLocation
-            ));
+            diagnostics.Add(CreateUnknownCLIOptionNameError(srcLocation));
         }
 
         const auto* const definition = diagnostics.HasErrors() ?
@@ -277,41 +294,14 @@ namespace Ace
 
         const bool isValueInFirstArg = parser.Peek().size() > 2;
 
-        const auto optValue = [&]() -> std::optional<std::string_view>
-        {
-            if (isValueInFirstArg)
-            {
-                return std::string_view
-                {
-                    end(name),
-                    end(parser.Peek()),
-                };
-            }
+        const auto optValue =
+            CreateShortOptionValue(parser, name, isValueInFirstArg, definition);
 
-            if (parser.IsEnd(1))
-            {
-                return std::nullopt;
-            }
+        diagnostics.Collect(
+            DiagnoseMissingOrUnexpectedOptionValue(parser, definition, optValue)
+        );
 
-            if (definition->Kind == CLIOptionKind::WithoutValue)
-            {
-                return std::nullopt;
-            }
-
-            return parser.Peek(1);
-        }();
-
-        diagnostics.Collect(DiagnoseMissingOrUnexpectedOptionValue(
-            parser,
-            definition,
-            optValue
-        ));
-
-        const CLIOption option
-        {
-            definition,
-            optValue,
-        };
+        const CLIOption option{ definition, optValue };
 
         parser.Eat();
         if (optValue.has_value() && !isValueInFirstArg)
@@ -322,9 +312,7 @@ namespace Ace
         return Diagnosed{ option, std::move(diagnostics) };
     }
 
-    static auto ParseOption(
-        CLIArgParser& parser
-    ) -> Diagnosed<CLIOption>
+    static auto ParseOption(CLIArgParser& parser) -> Diagnosed<CLIOption>
     {
         ACE_ASSERT(parser.Peek().at(0) == '-');
 
@@ -367,11 +355,7 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        CLIArgParser parser
-        {
-            argBuffer,
-            std::move(optionDefinitions),
-        };
+        CLIArgParser parser{ argBuffer, std::move(optionDefinitions) };
 
         auto optionMap = CreateDefaultOptionMap(parser);
         std::vector<std::string_view> positionalArgs{};

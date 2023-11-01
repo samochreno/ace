@@ -30,9 +30,9 @@ namespace Ace
             m_Configuration.Stream << value;
             return *this;
         }
-        auto operator<<(std::ostream& (*func)(std::ostream&)) const -> const Logger&
+        auto operator<<(std::ostream&(*function)(std::ostream&)) const -> const Logger&
         {
-            func(m_Configuration.Stream);
+            function(m_Configuration.Stream);
             return *this;
         }
 

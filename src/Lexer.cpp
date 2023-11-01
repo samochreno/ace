@@ -318,10 +318,9 @@ namespace Ace
                 suffixBeginSrcLocation,
                 lexer.GetLastSrcLocation(),
             };
-            const auto optTokenKind = diagnostics.Collect(CreateNumericLiteralTokenKind(
-                suffixSrcLocation,
-                suffix
-            ));
+            const auto optTokenKind = diagnostics.Collect(
+                CreateNumericLiteralTokenKind(suffixSrcLocation, suffix)
+            );
             if (optTokenKind.has_value())
             {
                 tokenKind = optTokenKind.value();
@@ -855,8 +854,9 @@ namespace Ace
 
         const auto beginSrcLocation = lexer.GetSrcLocation();
 
-        const auto optTokenKind =
-            diagnostics.Collect(LexDefaultTokenKind(lexer));
+        const auto optTokenKind = diagnostics.Collect(
+            LexDefaultTokenKind(lexer)
+        );
         if (!optTokenKind.has_value())
         {
             return std::move(diagnostics);
@@ -931,14 +931,11 @@ namespace Ace
 
         if (IsNumericLiteralBegin(lexer))
         {
-            const auto numericLiteral =
-                diagnostics.Collect(LexNumericLiteral(lexer));
+            const auto numericLiteral = diagnostics.Collect(
+                LexNumericLiteral(lexer)
+            );
 
-            return Expected
-            {
-                numericLiteral,
-                std::move(diagnostics),
-            };
+            return Expected{ numericLiteral, std::move(diagnostics) };
         }
 
         const auto optDefault = diagnostics.Collect(LexDefault(lexer));
@@ -947,11 +944,7 @@ namespace Ace
             return std::move(diagnostics);
         }
 
-        return Expected
-        {
-            optDefault.value(),
-            std::move(diagnostics),
-        };
+        return Expected{ optDefault.value(), std::move(diagnostics) };
     }
 
     static auto DiscardMultiLineComment(Lexer& lexer) -> Diagnosed<void>
@@ -966,10 +959,7 @@ namespace Ace
         ACE_ASSERT(lexer.Peek() == ':');
         lexer.Eat();
 
-        while (
-            !lexer.IsEnd() &&
-            !IsMultiLineCommentEnd(lexer)
-            )
+        while (!lexer.IsEnd() && !IsMultiLineCommentEnd(lexer))
         {
             lexer.Eat();
         }
@@ -1009,18 +999,20 @@ namespace Ace
 
     static auto DiscardComment(Lexer& lexer) -> Diagnosed<void>
     {
+        auto diagnostics = DiagnosticBag::Create();
+
         ACE_ASSERT(IsCommentBegin(lexer));
 
         if (lexer.Peek(1) == ':')
         {
-            return DiscardMultiLineComment(lexer);
+            diagnostics.Collect(DiscardMultiLineComment(lexer));
         }
         else
         {
             DiscardSingleLineComment(lexer);
         }
 
-        return { DiagnosticBag::Create() };
+        return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     static auto DiscardWhitespace(Lexer& lexer) -> void
@@ -1067,15 +1059,8 @@ namespace Ace
             }
         }
 
-        tokens.emplace_back(
-            lexer.GetLastSrcLocation(),
-            TokenKind::EndOfFile
-        );
+        tokens.emplace_back(lexer.GetLastSrcLocation(), TokenKind::EndOfFile);
 
-        return Diagnosed
-        {
-            tokens,
-            std::move(diagnostics),
-        };
+        return Diagnosed{ tokens, std::move(diagnostics) };
     }
 }

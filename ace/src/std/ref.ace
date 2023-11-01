@@ -1,11 +1,13 @@
-std: module -> pub {
-    Ref[T]: struct -> pub {
-        ptr: Ptr,
+pub ::
+std: mod {
+    pub ::
+    Ref[T]: struct {
+        ptr: Ptr
     }
 
     impl[T] Ref[T] {
-        ptr(self: Ref[T]): Ptr {
-            ret __deref_as[Ptr](__address_of(self));
+        ptr(this: Self): Ptr {
+            ret __deref_as[Ptr](__address_of(this));
         }
     }
 }

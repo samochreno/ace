@@ -1,0 +1,821 @@
+pub ::
+std: mod {
+    pub ::
+    Int8: struct {
+    }
+
+    pub extern ::
+    i8_from_i16(value: i16): i8;
+
+    pub extern ::
+    i8_from_i32(value: i32): i8;
+
+    pub extern ::
+    i8_from_i64(value: i64): i8;
+
+    pub extern ::
+    i8_from_u8(value: u8): i8;
+
+    pub extern ::
+    i8_from_u16(value: u16): i8;
+
+    pub extern ::
+    i8_from_u32(value: u32): i8;
+
+    pub extern ::
+    i8_from_u64(value: u64): i8;
+
+    pub extern ::
+    i8_from_int(value: int): i8;
+
+    pub extern ::
+    i8_from_f32(value: f32): i8;
+
+    pub extern ::
+    i8_from_f64(value: f64): i8;
+
+    pub extern ::
+    i8_unary_plus(value: i8): i8;
+
+    pub extern ::
+    i8_unary_negation(value: i8): i8;
+
+    pub extern ::
+    i8_one_complement(value: i8): i8;
+
+    pub extern ::
+    i8_multiplication(lhs: i8, rhs: i8): i8;
+
+    pub extern ::
+    i8_division(lhs: i8, rhs: i8): i8;
+
+    pub extern ::
+    i8_remainder(lhs: i8, rhs: i8): i8;
+
+    pub extern ::
+    i8_addition(lhs: i8, rhs: i8): i8;
+
+    pub extern ::
+    i8_subtraction(lhs: i8, rhs: i8): i8;
+
+    pub extern ::
+    i8_right_shift(lhs: i8, rhs: i8): i8;
+
+    pub extern ::
+    i8_left_shift(lhs: i8, rhs: i8): i8;
+
+    pub extern ::
+    i8_less_than(lhs: i8, rhs: i8): bool;
+
+    pub extern ::
+    i8_greater_than(lhs: i8, rhs: i8): bool;
+
+    pub extern ::
+    i8_less_than_equals(lhs: i8, rhs: i8): bool;
+
+    pub extern ::
+    i8_greater_than_equals(lhs: i8, rhs: i8): bool;
+
+    pub extern ::
+    i8_equals(lhs: i8, rhs: i8): bool;
+
+    pub extern ::
+    i8_not_equals(lhs: i8, rhs: i8): bool;
+
+    pub extern ::
+    i8_AND(lhs: i8, rhs: i8): i8;
+
+    pub extern ::
+    i8_XOR(lhs: i8, rhs: i8): i8;
+
+    pub extern ::
+    i8_OR(lhs: i8, rhs: i8): i8;
+
+    pub ::
+    Int16: struct {
+    }
+
+    pub extern ::
+    i16_from_i8(value: i8): i16;
+
+    pub extern ::
+    i16_from_i32(value: i32): i16;
+
+    pub extern ::
+    i16_from_i64(value: i64): i16;
+
+    pub extern ::
+    i16_from_u8(value: u8): i16;
+
+    pub extern ::
+    i16_from_u16(value: u16): i16;
+
+    pub extern ::
+    i16_from_u32(value: u32): i16;
+
+    pub extern ::
+    i16_from_u64(value: u64): i16;
+
+    pub extern ::
+    i16_from_int(value: int): i16;
+
+    pub extern ::
+    i16_from_f32(value: f32): i16;
+
+    pub extern ::
+    i16_from_f64(value: f64): i16;
+
+    pub extern ::
+    i16_unary_plus(value: i16): i16;
+
+    pub extern ::
+    i16_unary_negation(value: i16): i16;
+
+    pub extern ::
+    i16_one_complement(value: i16): i16;
+
+    pub extern ::
+    i16_multiplication(lhs: i16, rhs: i16): i16;
+
+    pub extern ::
+    i16_division(lhs: i16, rhs: i16): i16;
+
+    pub extern ::
+    i16_remainder(lhs: i16, rhs: i16): i16;
+
+    pub extern ::
+    i16_addition(lhs: i16, rhs: i16): i16;
+
+    pub extern ::
+    i16_subtraction(lhs: i16, rhs: i16): i16;
+
+    pub extern ::
+    i16_right_shift(lhs: i16, rhs: i16): i16;
+
+    pub extern ::
+    i16_left_shift(lhs: i16, rhs: i16): i16;
+
+    pub extern ::
+    i16_less_than(lhs: i16, rhs: i16): bool;
+
+    pub extern ::
+    i16_greater_than(lhs: i16, rhs: i16): bool;
+
+    pub extern ::
+    i16_less_than_equals(lhs: i16, rhs: i16): bool;
+
+    pub extern ::
+    i16_greater_than_equals(lhs: i16, rhs: i16): bool;
+
+    pub extern ::
+    i16_equals(lhs: i16, rhs: i16): bool;
+
+    pub extern ::
+    i16_not_equals(lhs: i16, rhs: i16): bool;
+
+    pub extern ::
+    i16_AND(lhs: i16, rhs: i16): i16;
+
+    pub extern ::
+    i16_XOR(lhs: i16, rhs: i16): i16;
+
+    pub extern ::
+    i16_OR(lhs: i16, rhs: i16): i16;
+
+    pub ::
+    Int32: struct {
+    }
+
+    pub extern ::
+    i32_from_i8(value: i8): i32;
+
+    pub extern ::
+    i32_from_i16(value: i16): i32;
+
+    pub extern ::
+    i32_from_i64(value: i64): i32;
+
+    pub extern ::
+    i32_from_u8(value: u8): i32;
+
+    pub extern ::
+    i32_from_u16(value: u16): i32;
+
+    pub extern ::
+    i32_from_u32(value: u32): i32;
+
+    pub extern ::
+    i32_from_u64(value: u64): i32;
+
+    pub extern ::
+    i32_from_int(value: int): i32;
+
+    pub extern ::
+    i32_from_f32(value: f32): i32;
+
+    pub extern ::
+    i32_from_f64(value: f64): i32;
+
+    pub extern ::
+    i32_unary_plus(value: i32): i32;
+
+    pub extern ::
+    i32_unary_negation(value: i32): i32;
+
+    pub extern ::
+    i32_one_complement(value: i32): i32;
+
+    pub extern ::
+    i32_multiplication(lhs: i32, rhs: i32): i32;
+
+    pub extern ::
+    i32_division(lhs: i32, rhs: i32): i32;
+
+    pub extern ::
+    i32_remainder(lhs: i32, rhs: i32): i32;
+
+    pub extern ::
+    i32_addition(lhs: i32, rhs: i32): i32;
+
+    pub extern ::
+    i32_subtraction(lhs: i32, rhs: i32): i32;
+
+    pub extern ::
+    i32_right_shift(lhs: i32, rhs: i32): i32;
+
+    pub extern ::
+    i32_left_shift(lhs: i32, rhs: i32): i32;
+
+    pub extern ::
+    i32_less_than(lhs: i32, rhs: i32): bool;
+
+    pub extern ::
+    i32_greater_than(lhs: i32, rhs: i32): bool;
+
+    pub extern ::
+    i32_less_than_equals(lhs: i32, rhs: i32): bool;
+
+    pub extern ::
+    i32_greater_than_equals(lhs: i32, rhs: i32): bool;
+
+    pub extern ::
+    i32_equals(lhs: i32, rhs: i32): bool;
+
+    pub extern ::
+    i32_not_equals(lhs: i32, rhs: i32): bool;
+
+    pub extern ::
+    i32_AND(lhs: i32, rhs: i32): i32;
+
+    pub extern ::
+    i32_XOR(lhs: i32, rhs: i32): i32;
+
+    pub extern ::
+    i32_OR(lhs: i32, rhs: i32): i32;
+
+    pub ::
+    Int64: struct {
+    }
+
+    pub extern ::
+    i64_from_i8(value: i8): i64;
+
+    pub extern ::
+    i64_from_i16(value: i16): i64;
+
+    pub extern ::
+    i64_from_i32(value: i32): i64;
+
+    pub extern ::
+    i64_from_u8(value: u8): i64;
+
+    pub extern ::
+    i64_from_u16(value: u16): i64;
+
+    pub extern ::
+    i64_from_u32(value: u32): i64;
+
+    pub extern ::
+    i64_from_u64(value: u64): i64;
+
+    pub extern ::
+    i64_from_int(value: int): i64;
+
+    pub extern ::
+    i64_from_f32(value: f32): i64;
+
+    pub extern ::
+    i64_from_f64(value: f64): i64;
+
+    pub extern ::
+    i64_unary_plus(value: i64): i64;
+
+    pub extern ::
+    i64_unary_negation(value: i64): i64;
+
+    pub extern ::
+    i64_one_complement(value: i64): i64;
+
+    pub extern ::
+    i64_multiplication(lhs: i64, rhs: i64): i64;
+
+    pub extern ::
+    i64_division(lhs: i64, rhs: i64): i64;
+
+    pub extern ::
+    i64_remainder(lhs: i64, rhs: i64): i64;
+
+    pub extern ::
+    i64_addition(lhs: i64, rhs: i64): i64;
+
+    pub extern ::
+    i64_subtraction(lhs: i64, rhs: i64): i64;
+
+    pub extern ::
+    i64_right_shift(lhs: i64, rhs: i64): i64;
+
+    pub extern ::
+    i64_left_shift(lhs: i64, rhs: i64): i64;
+
+    pub extern ::
+    i64_less_than(lhs: i64, rhs: i64): bool;
+
+    pub extern ::
+    i64_greater_than(lhs: i64, rhs: i64): bool;
+
+    pub extern ::
+    i64_less_than_equals(lhs: i64, rhs: i64): bool;
+
+    pub extern ::
+    i64_greater_than_equals(lhs: i64, rhs: i64): bool;
+
+    pub extern ::
+    i64_equals(lhs: i64, rhs: i64): bool;
+
+    pub extern ::
+    i64_not_equals(lhs: i64, rhs: i64): bool;
+
+    pub extern ::
+    i64_AND(lhs: i64, rhs: i64): i64;
+
+    pub extern ::
+    i64_XOR(lhs: i64, rhs: i64): i64;
+
+    pub extern ::
+    i64_OR(lhs: i64, rhs: i64): i64;
+
+    pub ::
+    UInt8: struct {
+    }
+
+    pub extern ::
+    u8_from_i8(value: i8): u8;
+
+    pub extern ::
+    u8_from_i16(value: i16): u8;
+
+    pub extern ::
+    u8_from_i32(value: i32): u8;
+
+    pub extern ::
+    u8_from_i64(value: i64): u8;
+
+    pub extern ::
+    u8_from_u16(value: u16): u8;
+
+    pub extern ::
+    u8_from_u32(value: u32): u8;
+
+    pub extern ::
+    u8_from_u64(value: u64): u8;
+
+    pub extern ::
+    u8_from_int(value: int): u8;
+
+    pub extern ::
+    u8_from_f32(value: f32): u8;
+
+    pub extern ::
+    u8_from_f64(value: f64): u8;
+
+    pub extern ::
+    u8_unary_plus(value: u8): u8;
+
+    pub extern ::
+    u8_unary_negation(value: u8): u8;
+
+    pub extern ::
+    u8_one_complement(value: u8): u8;
+
+    pub extern ::
+    u8_multiplication(lhs: u8, rhs: u8): u8;
+
+    pub extern ::
+    u8_division(lhs: u8, rhs: u8): u8;
+
+    pub extern ::
+    u8_remainder(lhs: u8, rhs: u8): u8;
+
+    pub extern ::
+    u8_addition(lhs: u8, rhs: u8): u8;
+
+    pub extern ::
+    u8_subtraction(lhs: u8, rhs: u8): u8;
+
+    pub extern ::
+    u8_right_shift(lhs: u8, rhs: u8): u8;
+
+    pub extern ::
+    u8_left_shift(lhs: u8, rhs: u8): u8;
+
+    pub extern ::
+    u8_less_than(lhs: u8, rhs: u8): bool;
+
+    pub extern ::
+    u8_greater_than(lhs: u8, rhs: u8): bool;
+
+    pub extern ::
+    u8_less_than_equals(lhs: u8, rhs: u8): bool;
+
+    pub extern ::
+    u8_greater_than_equals(lhs: u8, rhs: u8): bool;
+
+    pub extern ::
+    u8_equals(lhs: u8, rhs: u8): bool;
+
+    pub extern ::
+    u8_not_equals(lhs: u8, rhs: u8): bool;
+
+    pub extern ::
+    u8_AND(lhs: u8, rhs: u8): u8;
+
+    pub extern ::
+    u8_XOR(lhs: u8, rhs: u8): u8;
+
+    pub extern ::
+    u8_OR(lhs: u8, rhs: u8): u8;
+
+    pub ::
+    UInt16: struct { 
+    }
+
+    pub extern ::
+    u16_from_i8(value: i8): u16;
+
+    pub extern ::
+    u16_from_i16(value: i16): u16;
+
+    pub extern ::
+    u16_from_i32(value: i32): u16;
+
+    pub extern ::
+    u16_from_i64(value: i32): u16;
+
+    pub extern ::
+    u16_from_u8(value: u8): u16;
+
+    pub extern ::
+    u16_from_u32(value: u32): u16;
+
+    pub extern ::
+    u16_from_u64(value: u64): u16;
+
+    pub extern ::
+    u16_from_int(value: int): u16;
+
+    pub extern ::
+    u16_from_f32(value: f32): u16;
+
+    pub extern ::
+    u16_from_f64(value: f64): u16;
+
+    pub extern ::
+    u16_unary_plus(value: u16): u16;
+
+    pub extern ::
+    u16_unary_negation(value: u16): u16;
+
+    pub extern ::
+    u16_one_complement(value: u16): u16;
+
+    pub extern ::
+    u16_multiplication(lhs: u16, rhs: u16): u16;
+
+    pub extern ::
+    u16_division(lhs: u16, rhs: u16): u16;
+
+    pub extern ::
+    u16_remainder(lhs: u16, rhs: u16): u16;
+
+    pub extern ::
+    u16_addition(lhs: u16, rhs: u16): u16;
+
+    pub extern ::
+    u16_subtraction(lhs: u16, rhs: u16): u16;
+
+    pub extern ::
+    u16_right_shift(lhs: u16, rhs: u16): u16;
+
+    pub extern ::
+    u16_left_shift(lhs: u16, rhs: u16): u16;
+
+    pub extern ::
+    u16_less_than(lhs: u16, rhs: u16): bool;
+
+    pub extern ::
+    u16_greater_than(lhs: u16, rhs: u16): bool;
+
+    pub extern ::
+    u16_less_than_equals(lhs: u16, rhs: u16): bool;
+
+    pub extern ::
+    u16_greater_than_equals(lhs: u16, rhs: u16): bool;
+
+    pub extern ::
+    u16_equals(lhs: u16, rhs: u16): bool;
+
+    pub extern ::
+    u16_not_equals(lhs: u16, rhs: u16): bool;
+
+    pub extern ::
+    u16_AND(lhs: u16, rhs: u16): u16;
+
+    pub extern ::
+    u16_XOR(lhs: u16, rhs: u16): u16;
+
+    pub extern ::
+    u16_OR(lhs: u16, rhs: u16): u16;
+
+    pub ::
+    UInt32: struct {
+    }
+
+    pub extern ::
+    u32_from_i8(value: i8): u32;
+
+    pub extern ::
+    u32_from_i16(value: i16): u32;
+
+    pub extern ::
+    u32_from_i32(value: i32): u32;
+
+    pub extern ::
+    u32_from_i64(value: i32): u32;
+
+    pub extern ::
+    u32_from_u8(value: u8): u32;
+
+    pub extern ::
+    u32_from_u16(value: u16): u32;
+
+    pub extern ::
+    u32_from_u64(value: u64): u32;
+
+    pub extern ::
+    u32_from_int(value: int): u32;
+
+    pub extern ::
+    u32_from_f32(value: f32): u32;
+
+    pub extern ::
+    u32_from_f64(value: f64): u32;
+
+    pub extern ::
+    u32_unary_plus(value: u32): u32;
+
+    pub extern ::
+    u32_unary_negation(value: u32): u32;
+
+    pub extern ::
+    u32_one_complement(value: u32): u32;
+
+    pub extern ::
+    u32_multiplication(lhs: u32, rhs: u32): u32;
+
+    pub extern ::
+    u32_division(lhs: u32, rhs: u32): u32;
+
+    pub extern ::
+    u32_remainder(lhs: u32, rhs: u32): u32;
+
+    pub extern ::
+    u32_addition(lhs: u32, rhs: u32): u32;
+
+    pub extern ::
+    u32_subtraction(lhs: u32, rhs: u32): u32;
+
+    pub extern ::
+    u32_right_shift(lhs: u32, rhs: u32): u32;
+
+    pub extern ::
+    u32_left_shift(lhs: u32, rhs: u32): u32;
+
+    pub extern ::
+    u32_less_than(lhs: u32, rhs: u32): bool;
+
+    pub extern ::
+    u32_greater_than(lhs: u32, rhs: u32): bool;
+
+    pub extern ::
+    u32_less_than_equals(lhs: u32, rhs: u32): bool;
+
+    pub extern ::
+    u32_greater_than_equals(lhs: u32, rhs: u32): bool;
+
+    pub extern ::
+    u32_equals(lhs: u32, rhs: u32): bool;
+
+    pub extern ::
+    u32_not_equals(lhs: u32, rhs: u32): bool;
+
+    pub extern ::
+    u32_AND(lhs: u32, rhs: u32): u32;
+
+    pub extern ::
+    u32_XOR(lhs: u32, rhs: u32): u32;
+
+    pub extern ::
+    u32_OR(lhs: u32, rhs: u32): u32;
+
+    pub ::
+    UInt64: struct {
+    }
+
+    pub extern ::
+    u64_from_i8(value: i8): u64;
+
+    pub extern ::
+    u64_from_i16(value: i16): u64;
+
+    pub extern ::
+    u64_from_i32(value: i32): u64;
+
+    pub extern ::
+    u64_from_i64(value: i32): u64;
+
+    pub extern ::
+    u64_from_u8(value: u8): u64;
+
+    pub extern ::
+    u64_from_u16(value: u16): u64;
+
+    pub extern ::
+    u64_from_u32(value: u32): u64;
+
+    pub extern ::
+    u64_from_int(value: int): u64;
+
+    pub extern ::
+    u64_from_f32(value: f32): u64;
+
+    pub extern ::
+    u64_from_f64(value: f64): u64;
+
+    pub extern ::
+    u64_unary_plus(value: u64): u64;
+
+    pub extern ::
+    u64_unary_negation(value: u64): u64;
+
+    pub extern ::
+    u64_one_complement(value: u64): u64;
+
+    pub extern ::
+    u64_multiplication(lhs: u64, rhs: u64): u64;
+
+    pub extern ::
+    u64_division(lhs: u64, rhs: u64): u64;
+
+    pub extern ::
+    u64_remainder(lhs: u64, rhs: u64): u64;
+
+    pub extern ::
+    u64_addition(lhs: u64, rhs: u64): u64;
+
+    pub extern ::
+    u64_subtraction(lhs: u64, rhs: u64): u64;
+
+    pub extern ::
+    u64_right_shift(lhs: u64, rhs: u64): u64;
+
+    pub extern ::
+    u64_left_shift(lhs: u64, rhs: u64): u64;
+
+    pub extern ::
+    u64_less_than(lhs: u64, rhs: u64): bool;
+
+    pub extern ::
+    u64_greater_than(lhs: u64, rhs: u64): bool;
+
+    pub extern ::
+    u64_less_than_equals(lhs: u64, rhs: u64): bool;
+
+    pub extern ::
+    u64_greater_than_equals(lhs: u64, rhs: u64): bool;
+
+    pub extern ::
+    u64_equals(lhs: u64, rhs: u64): bool;
+
+    pub extern ::
+    u64_not_equals(lhs: u64, rhs: u64): bool;
+
+    pub extern ::
+    u64_AND(lhs: u64, rhs: u64): u64;
+
+    pub extern ::
+    u64_XOR(lhs: u64, rhs: u64): u64;
+
+    pub extern ::
+    u64_OR(lhs: u64, rhs: u64): u64;
+
+    pub ::
+    Int: struct {
+    }
+
+    pub extern ::
+    int_from_i8(value: i8): int;
+
+    pub extern ::
+    int_from_i16(value: i16): int;
+
+    pub extern ::
+    int_from_i32(value: i32): int;
+
+    pub extern ::
+    int_from_i64(value: i32): int;
+
+    pub extern ::
+    int_from_u8(value: u8): int;
+
+    pub extern ::
+    int_from_u16(value: u16): int;
+
+    pub extern ::
+    int_from_u32(value: u32): int;
+
+    pub extern ::
+    int_from_u64(value: u64): int;
+
+    pub extern ::
+    int_from_f32(value: f32): int;
+
+    pub extern ::
+    int_from_f64(value: f64): int;
+
+    pub extern ::
+    int_unary_plus(value: int): int;
+
+    pub extern ::
+    int_unary_negation(value: int): int;
+
+    pub extern ::
+    int_one_complement(value: int): int;
+
+    pub extern ::
+    int_multiplication(lhs: int, rhs: int): int;
+
+    pub extern ::
+    int_division(lhs: int, rhs: int): int;
+
+    pub extern ::
+    int_remainder(lhs: int, rhs: int): int;
+
+    pub extern ::
+    int_addition(lhs: int, rhs: int): int;
+
+    pub extern ::
+    int_subtraction(lhs: int, rhs: int): int;
+
+    pub extern ::
+    int_right_shift(lhs: int, rhs: int): int;
+
+    pub extern ::
+    int_left_shift(lhs: int, rhs: int): int;
+
+    pub extern ::
+    int_less_than(lhs: int, rhs: int): bool;
+
+    pub extern ::
+    int_greater_than(lhs: int, rhs: int): bool;
+
+    pub extern ::
+    int_less_than_equals(lhs: int, rhs: int): bool;
+
+    pub extern ::
+    int_greater_than_equals(lhs: int, rhs: int): bool;
+
+    pub extern ::
+    int_equals(lhs: int, rhs: int): bool;
+
+    pub extern ::
+    int_not_equals(lhs: int, rhs: int): bool;
+
+    pub extern ::
+    int_AND(lhs: int, rhs: int): int;
+
+    pub extern ::
+    int_XOR(lhs: int, rhs: int): int;
+
+    pub extern ::
+    int_OR(lhs: int, rhs: int): int;
+}

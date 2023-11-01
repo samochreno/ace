@@ -1,15 +1,21 @@
 #pragma once
 
 #include "Symbols/Symbol.hpp"
+#include "Symbols/TypedSymbol.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Types/SizedTypeSymbol.hpp"
 
 namespace Ace
 {
-    class IVarSymbol : public virtual ISymbol
+    class IVarSymbol :
+        public virtual ISymbol,
+        public virtual ITypedSymbol
     {
     public:
         virtual ~IVarSymbol() = default;
 
-        virtual auto GetType() const -> ISizedTypeSymbol* = 0;
+        auto GetType() const -> ITypeSymbol* final;
+
+        virtual auto GetSizedType() const -> ISizedTypeSymbol* = 0;
     };
 }

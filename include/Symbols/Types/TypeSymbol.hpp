@@ -1,27 +1,26 @@
 #pragma once
 
-#include <memory>
 #include <vector>
-#include <optional>
 
 #include "Symbols/Symbol.hpp"
-#include "Symbols/SelfScopedSymbol.hpp"
-#include "Symbols/TemplatableSymbol.hpp"
+#include "Symbols/AccessibleBodyScopedSymbol.hpp"
+#include "Symbols/GenericSymbol.hpp"
 #include "Diagnostic.hpp"
-#include "Emittable.hpp"
 
 namespace Ace
 {
-    class FunctionSymbol;
-    class TypeTemplateSymbol;
+    class TraitTypeSymbol;
 
     class ITypeSymbol :
         public virtual ISymbol,
-        public virtual ISelfScopedSymbol,
-        public virtual ITemplatableSymbol
+        public virtual IAccessibleBodyScopedSymbol,
+        public virtual IGenericSymbol
     {
     public:
         virtual ~ITypeSymbol() = default;
+
+        virtual auto GetUnaliasedType() const -> const ITypeSymbol* final;
+        virtual auto GetUnaliasedType()       ->       ITypeSymbol* final;
 
         virtual auto DiagnoseCycle() const -> Diagnosed<void>;
 
@@ -30,13 +29,15 @@ namespace Ace
         virtual auto GetWithoutRef() const -> const ITypeSymbol* final;
         virtual auto GetWithRef() -> ITypeSymbol* final;
         virtual auto IsStrongPtr() const -> bool final;
+        virtual auto IsDynStrongPtr() const -> bool final;
+        virtual auto IsAnyStrongPtr() const -> bool final;
         virtual auto GetWithoutStrongPtr() -> ITypeSymbol* final;
         virtual auto GetWithStrongPtr() -> ITypeSymbol* final;
+        virtual auto GetWithDynStrongPtr() -> ITypeSymbol* final;
+        virtual auto GetWithAutoStrongPtr() -> ITypeSymbol* final;
         virtual auto IsWeakPtr() const -> bool final;
         virtual auto GetWithoutWeakPtr() -> ITypeSymbol* final;
         virtual auto GetWithWeakPtr() -> ITypeSymbol* final;
-        virtual auto GetUnaliased() -> ITypeSymbol* final;
-        virtual auto GetUnaliased() const -> const ITypeSymbol* final;
-        virtual auto GetTemplate() const -> std::optional<TypeTemplateSymbol*> final;
+        virtual auto GetDerefed() -> ITypeSymbol* final;
     };
 }

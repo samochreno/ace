@@ -4,9 +4,10 @@
 #include <string>
 
 #include "Assert.hpp"
-#include "SpecialIdent.hpp"
 #include "Compilation.hpp"
 #include "Ident.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "Symbols/Types/SizedTypeSymbol.hpp"
 
 namespace Ace
 {
@@ -17,20 +18,24 @@ namespace Ace
         return symbolName.Sections.front().CreateSrcLocation();
     }
 
-    SymbolNameSection::SymbolNameSection()
-        : Name{}, TemplateArgs{}
+    SymbolNameSection::SymbolNameSection(
+    ) : Name{},
+        TypeArgs{}
     {
     }
 
-    SymbolNameSection::SymbolNameSection(const Ident& name)
-        : Name{ name }, TemplateArgs{}
+    SymbolNameSection::SymbolNameSection(
+        const Ident& name
+    ) : Name{ name },
+        TypeArgs{}
     {
     }
 
     SymbolNameSection::SymbolNameSection(
         const Ident& name,
-        const std::vector<SymbolName>& templateArgs
-    ) : Name{ name }, TemplateArgs{ templateArgs }
+        const std::vector<SymbolName>& typeArgs
+    ) : Name{ name },
+        TypeArgs{ typeArgs }
     {
     }
 
@@ -49,10 +54,10 @@ namespace Ace
         const SymbolNameSection& symbolNameSection
     ) -> SrcLocation
     {
-        if (!symbolNameSection.TemplateArgs.empty())
+        if (!symbolNameSection.TypeArgs.empty())
         {
             return CreateLastSrcLocation(
-                symbolNameSection.TemplateArgs.back().Sections.back()
+                symbolNameSection.TypeArgs.back().Sections.back()
             );
         }
         
@@ -131,7 +136,8 @@ namespace Ace
 
     static auto CreateModifierTypeFullyQualifiedName(
         const SrcLocation& srcLocation,
-        const TypeNameModifier modifier
+        const TypeNameModifier modifier,
+        const SymbolName& modifiedName
     ) -> SymbolName
     {
         const auto& natives =
@@ -141,54 +147,105 @@ namespace Ace
         {
             case TypeNameModifier::Ref:
             {
-                return natives.Ref.CreateFullyQualifiedName(srcLocation);
+                auto name = natives.Ref.CreateFullyQualifiedName(srcLocation);
+                name.Sections.back().TypeArgs.push_back(modifiedName);
+                return name;
             }
 
-            case TypeNameModifier::StrongPtr:
+            case TypeNameModifier::AutoStrongPtr:
             {
-                return natives.StrongPtr.CreateFullyQualifiedName(srcLocation);
+                auto name = natives.StrongPtr.CreateFullyQualifiedName(
+                    srcLocation
+                );
+                name.Sections.back().TypeArgs.push_back(modifiedName);
+                return name;
+            }
+
+            case TypeNameModifier::DynStrongPtr:
+            {
+                auto name = natives.DynStrongPtr.CreateFullyQualifiedName(
+                    srcLocation
+                );
+                name.Sections.back().TypeArgs.push_back(modifiedName);
+                return name;
             }
 
             case TypeNameModifier::WeakPtr:
             {
-                return natives.WeakPtr.CreateFullyQualifiedName(srcLocation);
+                auto name = natives.WeakPtr.CreateFullyQualifiedName(
+                    srcLocation
+                );
+
+                name.Sections.back().TypeArgs.push_back(
+                    natives.StrongPtr.CreateFullyQualifiedName(srcLocation)
+                );
+                name.Sections.back().TypeArgs.back().Sections.back().TypeArgs.push_back(
+                    modifiedName
+                );
+
+                name.Sections.back().TypeArgs.push_back(
+                    natives.Ptr.CreateFullyQualifiedName(srcLocation)
+                );
+
+                return name;
             }
         }
     }
 
-    auto TypeName::ToSymbolName(
-        Compilation* const compilation
-    ) const -> Ace::SymbolName
+    static auto ModifyTypeSymbol(
+        ITypeSymbol* const typeSymbol,
+        const TypeNameModifier modifier
+    ) -> ITypeSymbol*
     {
-        if (Modifiers.empty())
+        switch (modifier)
         {
-            return SymbolName;
+            case TypeNameModifier::Ref:
+            {
+                return typeSymbol->GetWithRef();
+            }
+
+            case TypeNameModifier::AutoStrongPtr:
+            {
+                return typeSymbol->GetWithAutoStrongPtr();
+            }
+
+            case TypeNameModifier::DynStrongPtr:
+            {
+                return typeSymbol->GetWithDynStrongPtr();
+            }
+            
+            case TypeNameModifier::WeakPtr:
+            {
+                return typeSymbol->GetWithWeakPtr();
+            }
+        }
+    }
+
+    auto ModifyTypeSymbol(
+        ITypeSymbol* const pureTypeSymbol,
+        std::vector<TypeNameModifier> modifiers
+    ) -> ISizedTypeSymbol*
+    {
+        ACE_ASSERT(!modifiers.empty());
+
+        ISizedTypeSymbol* typeSymbol = nullptr;
+        while (!modifiers.empty())
+        {
+            const auto modifier = modifiers.back();
+
+            auto* typeSymbolToModify = typeSymbol ?
+                dynamic_cast<ISizedTypeSymbol*>(typeSymbol) :
+                pureTypeSymbol;
+
+            typeSymbol = dynamic_cast<ISizedTypeSymbol*>(ModifyTypeSymbol(
+                typeSymbolToModify,
+                modifier
+            ));
+            ACE_ASSERT(typeSymbol);
+
+            modifiers.pop_back();
         }
 
-        auto name = SymbolName;
-        std::for_each(rbegin(Modifiers), rend(Modifiers),
-        [&](const TypeNameModifier modifier)
-        {
-            const auto& firstNameSectionSrcLocation =
-                SymbolName.Sections.front().Name.SrcLocation;
-            const auto&  lastNameSectionSrcLocation =
-                SymbolName.Sections.back().Name.SrcLocation;
-
-            const SrcLocation srcLocation
-            {
-                firstNameSectionSrcLocation.Buffer,
-                firstNameSectionSrcLocation.CharacterBeginIterator,
-                lastNameSectionSrcLocation.CharacterEndIterator,
-            };
-
-            auto modifiedName = CreateModifierTypeFullyQualifiedName(
-                srcLocation,
-                modifier
-            );
-            modifiedName.Sections.back().TemplateArgs.push_back(name);
-            name = modifiedName;
-        });
-
-        return name;
+        return typeSymbol;
     }
 }

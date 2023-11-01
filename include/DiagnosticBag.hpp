@@ -63,7 +63,10 @@ namespace Ace
                 return std::optional<std::decay_t<decltype(value.Unwrap())>>{};
             }
 
-            return std::optional{ std::move(value.Unwrap()) };
+            return std::optional<std::decay_t<decltype(value.Unwrap())>>
+            {
+                std::move(value.Unwrap())
+            };
         }
 
         auto IsEmpty() const -> bool;

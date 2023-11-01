@@ -94,7 +94,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateUndefinedRefToPackagePathMacroError(
+    auto CreateUndeclaredRefToPackagePathMacroError(
         const FileBuffer* const packageFileBuffer,
         const std::string& macro
     ) -> DiagnosticGroup
@@ -104,7 +104,7 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             packageFileBuffer->CreateFirstLocation(),
-            "undefined reference to macro `" + macro + "`"
+            "undeclared reference to macro `" + macro + "`"
         );
 
         return group;

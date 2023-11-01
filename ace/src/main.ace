@@ -1,5 +1,8 @@
-print_int(value: int): void -> pub extern;
-print_ptr(ptr: std::Ptr): void -> pub extern;
+pub extern ::
+print_int(value: int): void;
+
+pub extern ::
+print_ptr(ptr: std::Ptr): void;
 
 main(): int {
     test();
@@ -10,34 +13,194 @@ test(): void {
     i: int = 0;
 
     i += compound_assignment();
-    print_int(i);
     assert i == 11;
 
     i += struct_compound_assignment();
-    print_int(i);
     assert i == 37;
 
     i += boxed_struct_compound_assignment();
-    print_int(i);
     assert i == 41;
 
     i += boxed_self();
-    print_int(i);
     assert i == 53;
+
+    i += self_type();
+    assert i == 55;
+
+    i += traits();
+    assert i == 57;
+
+    i += static_trait_dispatch();
+    assert i == 66;
+
+    i += dyn_trait_dispatch();
+    assert i == 70;
+
+    i += vtbl_lookup();
+    assert i == 79;
+
+    i += constraint();
+    assert i == 81;
 
     print_int(0);
 }
 
-Node: struct -> pub {
+Constraint: trait {
+    self ::
+    get(): Self;
+}
+
+impl Constraint for int {
+    self ::
+    get(): Self {
+        ret self;
+    }
+}
+
+constrained[T](value: &T): T where T: Constraint {
+    ret value.get();
+}
+
+constraint(): int {
+    ret constrained(2);
+}
+
+vtbl_lookup(): int {
+    dyn: *Dyn = box 9;
+    dyn_weak: ~Dyn = dyn;
+    dyn_locked: *Dyn = lock dyn_weak;
+    ret dyn_locked.value();
+}
+
+Dyn: trait {
+    *self ::
+    ten(): int;
+
+    *self ::
+    value(): int;
+
+    self ::
+    self_value(): int;
+}
+
+impl Dyn for int {
+    *self ::
+    ten(): int {
+        ret 10;
+    }
+
+    *self ::
+    value(): int {
+        ret unbox self;
+    }
+
+    self ::
+    self_value(): int {
+        ret self;
+    }
+}
+
+dyn_trait_dispatch(): int {
+    dyn: *Dyn = box 4;
+    ret dyn.value();
+}
+
+Size: trait {
+    size(): Self;
+}
+
+size[T](): T
+where T: Size {
+    ret T::size();
+}
+
+impl Size for int {
+    size(): Self {
+        ret 8;
+    }
+}
+
+impl Size for i8 {
+    size(): Self {
+        ret 1i8;
+    }
+}
+
+static_trait_dispatch(): int {
+    ret size[int]() + cast[int](size[i8]());
+}
+
+pub ::
+Animal: trait {
+    new(): Self;
+
+    self ::
+    trait_method[T, U](): Wrapper[T];
+}
+
+pub ::
+AnimalTemplate[T]: trait {
+    method[U](): T;
+}
+
+pub ::
+Cow: struct {
+    value: int
+}
+
+impl Animal for Cow {
+    new(): Self {
+        ret new Self { value: 2 };
+    }
+
+    self ::
+    trait_method[T, U](): Wrapper[T] {
+        ret new Wrapper[T] { value: self.value };
+    }
+}
+
+traits(): int {
+    i: int = 0;
+
+    cow: Cow = Cow::new();
+    i += cow.trait_method[int, int]().value;
+    assert i == 2;
+
+    animal:      *Animal = box new Cow { value: 5 };
+    weak_animal: ~Animal = animal;
+
+    ret i;
+}
+
+impl[T] Template[T] {
+    new(field: int): Self {
+        ret new Self { field };
+    }
+}
+
+impl Node {
+    new(value: int): Self {
+        ret new Self { value };
+    }
+}
+
+self_type(): int {
+    ret Node::new(5).value - Template[int]::new(3).field;
+}
+
+pub ::
+Node: struct {
     value: int
 }
 
 impl Node {
-    value(): int -> self {
+    self ::
+    value(): int {
         ret self.value;
     }
 
-    area(): int -> *self {
+    *self ::
+    area(): int {
         ret self.value * self.value;
     }
 }
@@ -77,9 +240,10 @@ compound_assignment(): int {
     ret i;
 }
 
-Vector2: struct -> pub {
-    x: int -> pub, 
-    y: int -> pub,
+pub ::
+Vector2: pub struct {
+    x: int, 
+    y: int,
 }
 
 Template[T]: struct {
@@ -87,13 +251,15 @@ Template[T]: struct {
 }
 
 impl Vector2 {
-    increment_all(): void -> pub self {
+    pub self ::
+    increment_all(): void {
         self.x += 1;
         self.y += 1;
     }
 
-    increment_all_static(self: &Vector2): void -> pub {
-        self.increment_all();
+    pub ::
+    increment_all_static(value: &Self): void {
+        value.increment_all();
     }
 }
 
@@ -111,22 +277,25 @@ test_1(): int {
     ret vec.y;
 }
 
-test_2: module {
-    Type: struct -> pub {
+test_2: mod {
+    pub ::
+    Type: struct {
         field: int
     }
 
     impl Type {
-        new(field: int): Type -> pub {
-            ret new Type { field };
+        pub ::
+        new(field: int): Self {
+            ret new Self { field };
         }
 
-        field(): int -> pub self { 
+        pub self ::
+        field(): int { 
             ret self.field;
         }
     }
 
-    private: module {
+    private: mod {
         func(): int {
             obj: test_2::Type = new test_2::Type { field: 1 };
             ret obj.field;
@@ -134,17 +303,21 @@ test_2: module {
     }
 }
 
-test_3: module {
-    func(): int -> pub {
+test_3: mod {
+    pub ::
+    func(): int {
         ret -5;
     }
 }
 
-test_3::nested: module -> pub {
+pub ::
+test_3::nested: mod {
 }
 
-test_3::nested: module -> pub {
-    func(): int -> pub {
+pub ::
+test_3::nested: mod {
+    pub ::
+    func(): int {
         ret -10;
     }
 }
@@ -203,7 +376,8 @@ control_flow_analysis_2(): int {
 }
 
 impl[T] Template[T] {
-    field(): T -> pub self {
+    pub self ::
+    field(): T {
         ret self.field;
     }
 }
@@ -238,14 +412,15 @@ free_func_template_test(): int {
 }
 
 impl[T] Template[T] {
-    print_field[U](): void -> self {
-        print_int(self.field);
+    self ::
+    get_field_template[U](): T {
+        ret self.field;
     }
 }
 
 method_template(): int {
     obj: Template[int] = new Template[int] { field: -12 };
-    obj.print_field[std::Ptr]();
+    obj.get_field_template[std::Ptr]();
     ret 13;
 }
 
@@ -260,7 +435,8 @@ clamp(d: int, min: int, max: int): int {
 }
 
 impl Vector2 {
-    associated_func_template[T](): void -> self { 
+    self ::
+    associated_func_template[T](): void { 
     }
 }
 
@@ -271,7 +447,8 @@ type_associated_template_func(): int {
 }
 
 impl Vector2 {
-    increment_x_and_y(): void -> self {
+    self ::
+    increment_x_and_y(): void {
         self.x += 1;
         self.y += 1;
     }
@@ -292,172 +469,8 @@ reference(): int {
     ret vec_final.x;
 }
 
-impl Vector2 {
-    op +(lhs: &Vector2, rhs: &Vector2): Vector2 -> pub {
-        ret new Vector2 {
-            x: lhs.x + rhs.x,
-            y: lhs.y + rhs.y,
-        };
-    }
-}
-
-op_reference_parameter(): int {
-    vec_a: Vector2 = new Vector2 { x: 5,  y: 10 };
-    vec_b: Vector2 = new Vector2 { x: 10, y: 20 };
-
-    vec_c: Vector2 = vec_a + vec_b;
-
-    ret vec_c.y;
-}
-
-impl[T] Template[T] {
-    clone(value: Template[T]): Template[T] {
-        ret new Template[T] { field: value.field };
-    }
-}
-
-clone(): int {
-    original: Template[int] = new Template[int] { field: 5 };
-    cloned:   Template[int] = Template[int]::clone(original);
-    ret cloned.field;
-}
-
 argument(value: int): int {
     ret value;
-}
-
-RAII: struct { 
-}
-
-impl RAII {
-    new(): RAII {
-        print_int(11111);
-        ret new RAII {};
-    }
-
-    op copy(self: &RAII, other: &RAII): void -> pub {
-        print_int(22222);
-    }
-
-    op drop(self: &RAII): void -> pub {
-        print_int(33333);
-    }
-}
-
-raii(): int {
-    obj: RAII = RAII::new();
-    print_int(500);
-    ret -1;
-}
-
-TemplatedAddable[T]: struct {
-    value: T
-}
-
-impl[T] TemplatedAddable[T] { 
-    op +(lhs: &TemplatedAddable[T], rhs: &TemplatedAddable[T]): TemplatedAddable[T] -> pub {
-        ret new TemplatedAddable[T] {
-            value: lhs.value + rhs.value 
-        };
-    } 
-}
-
-templated_addable(): int {
-    a: TemplatedAddable[int] = new TemplatedAddable[int] { value: 5 };
-    b: TemplatedAddable[int] = new TemplatedAddable[int] { value: -10 };
-    c: TemplatedAddable[int] = a + b; 
-
-    ret c.value;
-}
-
-POD: struct {
-    value: int
-}
-
-impl POD {
-    op drop(self: &POD): void -> pub {
-        print_int(self.value);
-    }
-}
-
-print_on_drop(): int {
-    i: int = 0;
-
-    while i < 5 {
-        x: POD = new POD { value: -5 };
-        i += 1;
-    }
-
-    a: POD = new POD { value: 1 };
-    b: POD = new POD { value: 2 };
-
-    {
-        c: POD = new POD { value: 3 };
-    }
-
-    {
-        d: POD = new POD { value: 4 };
-
-        ret 0;
-
-        e: POD = new POD { value: 5 };
-    }
-
-    f: POD = new POD { value: 6 };
-
-    ret 0;
-}
-
-POC: struct {
-    value: int
-}
-
-impl POC {
-    op copy(self: &POC, other: &POC): void -> pub {
-        self.value = other.value;
-        print_int(self.value);
-    }
-}
-
-argument_copy_test(value: POC): void {
-}
-
-print_on_copy(): int {
-    a: POC;
-    b: POC;
-
-    a = new POC { value: 10 };
-    a.value = -5;
-
-    b = a;
-    b.value = 16;
-
-    argument_copy_test(b);
-
-    ret -28;
-}
-
-PL: struct {
-}
-
-impl PL {
-    new(): PL {
-        print_int(11111);
-        ret new PL {};
-    }
-
-    op copy(self: &PL, other: &PL): void -> pub {
-        print_int(22222);
-    }
-
-    op drop(self: &PL): void -> pub {
-        print_int(33333);
-    }
-}
-
-print_lifetime(): int {
-    pl: PL = PL::new();
-    ret 0;
 }
 
 address(): int {
@@ -509,7 +522,7 @@ reference_counting(): int {
 
     weak: ~Vector2 = strong;
 
-    locked: *Vector2 = weak.lock();
+    locked: *Vector2 = lock weak;
     print_vector_2_strong_ptr_x(locked);
 
     unboxed_value: Vector2 = unbox locked;
@@ -549,7 +562,8 @@ Getter: struct {
 }
 
 impl Getter {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -573,7 +587,7 @@ global(): int {
     ret global_value;
 }
 
-NewTemplate[T]: struct { }
+NewTemplate[T]: struct {}
 
 deducable[T, U](lhs: T, rhs: U): T {
     new NewTemplate[U] {};

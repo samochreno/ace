@@ -5,9 +5,11 @@
 #include <optional>
 
 #include "Scope.hpp"
-#include "Ident.hpp"
 #include "AccessModifier.hpp"
+#include "Ident.hpp"
 #include "Symbols/FunctionSymbol.hpp"
+#include "Symbols/Vars/FieldVarSymbol.hpp"
+#include "Noun.hpp"
 #include "Diagnostic.hpp"
 #include "Diagnostics/BindingDiagnostics.hpp"
 #include "Emittable.hpp"
@@ -16,33 +18,25 @@
 namespace Ace
 {
     StructTypeSymbol::StructTypeSymbol(
-        const std::shared_ptr<Scope>& selfScope,
+        const std::shared_ptr<Scope>& bodyScope,
+        const AccessModifier accessModifier,
         const Ident& name,
-        const AccessModifier accessModifier
-    ) : m_SelfScope{ selfScope },
+        const std::vector<ITypeSymbol*>& typeArgs
+    ) : m_BodyScope{ bodyScope },
+        m_AccessModifier{ accessModifier },
         m_Name{ name },
-        m_AccessModifier{ accessModifier }
+        m_TypeArgs{ typeArgs }
     {
     }
 
-    auto StructTypeSymbol::GetScope() const -> std::shared_ptr<Scope>
+    auto StructTypeSymbol::CreateTypeNoun() const -> Noun
     {
-        return m_SelfScope->GetParent().value();
+        return Noun{ Article::A, "struct" };
     }
 
-    auto StructTypeSymbol::GetSelfScope() const -> std::shared_ptr<Scope>
+    auto StructTypeSymbol::GetBodyScope() const -> std::shared_ptr<Scope>
     {
-        return m_SelfScope;
-    }
-
-    auto StructTypeSymbol::GetName() const -> const Ident&
-    {
-        return m_Name;
-    }
-
-    auto StructTypeSymbol::GetKind() const -> SymbolKind
-    {
-        return SymbolKind::Struct;
+        return m_BodyScope;
     }
 
     auto StructTypeSymbol::GetCategory() const -> SymbolCategory
@@ -53,6 +47,24 @@ namespace Ace
     auto StructTypeSymbol::GetAccessModifier() const -> AccessModifier
     {
         return m_AccessModifier;
+    }
+
+    auto StructTypeSymbol::GetName() const -> const Ident&
+    {
+        return m_Name;
+    }
+
+    auto StructTypeSymbol::CreateInstantiated(
+        const std::shared_ptr<Scope>& scope,
+        const InstantiationContext& context
+    ) const -> std::unique_ptr<ISymbol>
+    {
+        return std::make_unique<StructTypeSymbol>(
+            scope->CreateChild(),
+            GetAccessModifier(),
+            GetName(),
+            context.TypeArgs
+        );
     }
 
     auto StructTypeSymbol::DiagnoseCycle() const -> Diagnosed<void>
@@ -71,28 +83,40 @@ namespace Ace
 
             auto diagnostics = DiagnosticBag::Create();
 
-            if (m_ResolvingVar.has_value())
+            if (m_ResolvingField.has_value())
             {
-                diagnostics.Add(CreateStructVarCausesCycleError(
-                    m_ResolvingVar.value()
+                diagnostics.Add(CreateStructFieldCausesCycleError(
+                    m_ResolvingField.value()
                 ));
                 return std::move(diagnostics);
             }
 
-            const auto vars = CollectVars();
-            std::for_each(begin(vars), end(vars),
-            [&](InstanceVarSymbol* const var)
+            const auto fields = CollectFields();
+            std::for_each(begin(fields), end(fields),
+            [&](FieldVarSymbol* const field)
             {
-                m_ResolvingVar = var;
-                (void)var->GetType()->DiagnoseCycle();
+                m_ResolvingField = field;
+                (void)field->GetType()->DiagnoseCycle();
             });
 
-            m_ResolvingVar = std::nullopt;
+            m_ResolvingField = std::nullopt;
             return std::move(diagnostics);
         }();
 
         m_OptCycleDiagnosticsCache = diagnostics;
         return Diagnosed<void>{ diagnostics };
+    }
+
+    auto StructTypeSymbol::SetBodyScope(
+        const std::shared_ptr<Scope>& scope
+    ) -> void
+    {
+        m_BodyScope = scope;
+    }
+
+    auto StructTypeSymbol::GetTypeArgs() const -> const std::vector<ITypeSymbol*>&
+    {
+        return m_TypeArgs;
     }
 
     auto StructTypeSymbol::SetAsPrimitivelyEmittable() -> void
@@ -125,22 +149,22 @@ namespace Ace
         return m_IsTriviallyDroppable;
     }
 
-    auto StructTypeSymbol::CreateCopyGlueBody(
+    auto StructTypeSymbol::CreateCopyGlueBlock(
         FunctionSymbol* const glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>> 
     {
-        return GlueGeneration::CreateCopyGlueBody(
+        return GlueGeneration::CreateCopyGlueBlock(
             GetCompilation(),
             glueSymbol,
             this
         );
     }
 
-    auto StructTypeSymbol::CreateDropGlueBody(
+    auto StructTypeSymbol::CreateDropGlueBlock(
         FunctionSymbol* const glueSymbol
     ) -> std::shared_ptr<const IEmittable<void>>
     {
-        return GlueGeneration::CreateDropGlueBody(
+        return GlueGeneration::CreateDropGlueBlock(
             GetCompilation(),
             glueSymbol,
             this
@@ -169,18 +193,15 @@ namespace Ace
         return m_OptDropGlue;
     }
 
-    auto StructTypeSymbol::CollectVars() const -> std::vector<InstanceVarSymbol*>
+    auto StructTypeSymbol::CollectFields() const -> std::vector<FieldVarSymbol*>
     {
-        auto vars = m_SelfScope->CollectSymbols<InstanceVarSymbol>();
-        std::sort(begin(vars), end(vars),
-        [](
-            const InstanceVarSymbol* const lhs,
-            const InstanceVarSymbol* const rhs
-        )
+        auto fields = m_BodyScope->CollectSymbols<FieldVarSymbol>();
+        std::sort(begin(fields), end(fields),
+        [](FieldVarSymbol* const lhs, FieldVarSymbol* const rhs)
         {
             return lhs->GetIndex() < rhs->GetIndex();
         });
 
-        return vars;
+        return fields;
     }
 }

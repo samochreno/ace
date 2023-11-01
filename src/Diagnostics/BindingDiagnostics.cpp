@@ -1,4 +1,4 @@
-#include"Diagnostics/BindingDiagnostics.hpp"
+#include "Diagnostics/BindingDiagnostics.hpp"
 
 #include <memory>
 #include <string>
@@ -9,6 +9,7 @@
 #include "Symbols/All.hpp"
 #include "Op.hpp"
 #include "Token.hpp"
+#include "Keyword.hpp"
 
 namespace Ace
 {
@@ -29,65 +30,50 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Note,
             originalSymbol->GetName().SrcLocation,
-            "previous definition"
+            "previous declaration"
         );
 
         return group;
     }
 
-    auto CreateSymbolRedefinitionError(
+    auto CreateSymbolRedeclarationError(
         const ISymbol* const originalSymbol,
-        const ISymbol* const redefinedSymbol
+        const ISymbol* const redeclaredSymbol
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
-            redefinedSymbol->GetName().SrcLocation,
-            "symbol redefinition"
+            redeclaredSymbol->GetName().SrcLocation,
+            redeclaredSymbol->CreateTypeNoun().String + " redeclaration"
         );
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Note,
             originalSymbol->GetName().SrcLocation,
-            "previous definition"
+            "previous declaration"
         );
 
         return group;
     }
 
-    auto CreateUnsizedSymbolTypeError(
-        ISymbol* const symbol
+    auto CreateStructFieldCausesCycleError(
+        FieldVarSymbol* const fieldSymbol
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
-            symbol->GetName().SrcLocation,
-            "unsized " + CreateSymbolKindString(symbol->GetKind()) + " type"
-        );
-
-        return group;
-    }
-
-    auto CreateStructVarCausesCycleError(
-        InstanceVarSymbol* const varSymbol
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            varSymbol->GetName().SrcLocation,
+            fieldSymbol->GetName().SrcLocation,
             "field causes a cycle in struct layout"
         );
 
         return group;
     }
 
-    auto CreateUnableToDeduceTemplateArgsError(
+    auto CreateUnableToDeduceTypeArgsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
@@ -96,22 +82,22 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "unable to deduce template arguments"
+            "unable to deduce type arguments"
         );
 
         return group;
     }
 
-    auto CreateUnableToDeduceTemplateArgError(
+    auto CreateUnableToDeduceTypeArgError(
         const SrcLocation& srcLocation,
-        const NormalTemplateParamTypeSymbol* const templateParam
+        const TypeParamTypeSymbol* const typeParam
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         const std::string message =
-            "unable to deduce template argument for parameter `" +
-            templateParam->GetName().String + "`";
+            "unable to deduce argument for type parameter `" +
+            typeParam->GetName().String + "`";
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
@@ -122,7 +108,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateTooManyTemplateArgsError(
+    auto CreateTooManyTypeArgsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
@@ -131,15 +117,15 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "too many template arguments"
+            "too many type arguments"
         );
 
         return group;
     }
 
-    auto CreateTemplateArgDeductionConflict(
+    auto CreateTypeArgDeductionConflict(
         const SrcLocation& srcLocation,
-        const NormalTemplateParamTypeSymbol* const templateParam,
+        const TypeParamTypeSymbol* const typeParam,
         const ITypeSymbol* const deducedArg,
         const ITypeSymbol* const conflictingDeducedArg
     ) -> DiagnosticGroup
@@ -147,8 +133,8 @@ namespace Ace
         DiagnosticGroup group{};
 
         const std::string message =
-            "template argument deduction conflict for parameter `" + 
-            templateParam->GetName().String + "`: `" +
+            "argument deduction conflict for type parameter `" + 
+            typeParam->GetName().String + "`: `" +
             deducedArg->GetName().String + "` and `" +
             conflictingDeducedArg->GetName().String + "`";
 
@@ -161,7 +147,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateUndefinedSymbolRefError(
+    auto CreateUndeclaredSymbolRefError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
@@ -170,7 +156,7 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "undefined symbol reference "
+            "undeclared symbol reference"
         );
 
         return group;
@@ -202,7 +188,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateScopeAccessOfNonSelfScopedSymbolError(
+    auto CreateScopeAccessOfNonBodyScopedSymbolError(
         const SrcLocation& srcLocation,
         const ISymbol* const symbol
     ) -> DiagnosticGroup
@@ -211,7 +197,7 @@ namespace Ace
 
         const std::string message =
             "scope access of " +
-            CreateSymbolKindStringWithArticle(symbol->GetKind());
+            symbol->CreateTypeNoun().CreateStringWithArticle();
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
@@ -222,7 +208,7 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Note,
             symbol->GetName().SrcLocation,
-            CreateSymbolKindString(symbol->GetKind()) + " declaration"
+            symbol->CreateTypeNoun().String + " declaration"
         );
 
         return group;
@@ -238,13 +224,13 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "inaccessible " + CreateSymbolKindString(symbol->GetKind())
+            "inaccessible " + symbol->CreateTypeNoun().String
         );
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Note,
             symbol->GetName().SrcLocation,
-            CreateSymbolKindString(symbol->GetKind()) + " declaration"
+            symbol->CreateTypeNoun().String + " declaration"
         );
 
         return group;
@@ -278,10 +264,10 @@ namespace Ace
         return group;
     }
 
-    auto CreateMissingStructVarsError(
+    auto CreateMissingStructFieldsError(
         const SrcLocation& srcLocation,
         StructTypeSymbol* const structSymbol,
-        const std::vector<InstanceVarSymbol*>& missingVarSymbols
+        const std::vector<FieldVarSymbol*>& missingFieldSymbols
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -289,34 +275,29 @@ namespace Ace
         std::string message{};
 
         message += "missing field";
-        if (missingVarSymbols.size() > 1)
+        if (missingFieldSymbols.size() > 1)
         {
             message += "s";
         }
 
         message += " ";
 
-        std::for_each(begin(missingVarSymbols), end(missingVarSymbols),
-        [&](InstanceVarSymbol* const missingVarSymbol)
+        std::for_each(begin(missingFieldSymbols), end(missingFieldSymbols),
+        [&](FieldVarSymbol* const fieldSymbol)
         {
-            const bool isFirstMissingVar = missingVarSymbol == missingVarSymbols.front();
-            const bool  isLastMissingVar = missingVarSymbol == missingVarSymbols.back();
-
-            if (!isFirstMissingVar)
+            if (fieldSymbol != missingFieldSymbols.front())
             {
-                if (isLastMissingVar)
+                if (fieldSymbol != missingFieldSymbols.back())
                 {
-                    message += " and";
+                    message += ", ";
                 }
                 else
                 {
-                    message += ",";
+                    message += " and ";
                 }
-
-                message += " ";
             }
 
-            message += "`" + missingVarSymbol->GetName().String + "`";
+            message += "`" + fieldSymbol->GetName().String + "`";
         });
 
         group.Diagnostics.emplace_back(
@@ -334,7 +315,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateStructHasNoVarNamedError(
+    auto CreateStructHasNoFieldNamedError(
         StructTypeSymbol* const structSymbol,
         const Ident& fieldName
     ) -> DiagnosticGroup
@@ -342,7 +323,7 @@ namespace Ace
         DiagnosticGroup group{};
 
         const std::string message =
-            "`" + structSymbol->CreateSignature() +
+            "`" + structSymbol->CreateDisplayName() +
             "` has no field named `" + fieldName.String + "`";
 
         group.Diagnostics.emplace_back(
@@ -354,13 +335,13 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Note,
             structSymbol->GetName().SrcLocation,
-            "`" + structSymbol->CreateSignature() +  "` declaration"
+            "`" + structSymbol->CreateDisplayName() +  "` declaration"
         );
 
         return group;
     }
 
-    auto CreateStructVarInitializedMoreThanOnceError(
+    auto CreateStructFieldInitializedMoreThanOnceError(
         const SrcLocation& srcLocation,
         const SrcLocation& previousSrcLocation
     ) -> DiagnosticGroup
@@ -382,54 +363,37 @@ namespace Ace
         return group;
     }
 
-    auto CreateUndefinedUnaryOpError(
-        const Op& op,
+    auto CreateUndeclaredUnaryOpError(
+        const SrcLocation& srcLocation,
         ITypeSymbol* const type
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
-        const Token opToken
-        {
-            op.SrcLocation,
-            op.TokenKind,
-        };
-
-        const std::string message =
-            "undefined to operator " + CreateOpString(opToken) +
-            " for type `" + type->CreateSignature() + "`";
-
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
-            op.SrcLocation,
-            message
+            srcLocation,
+            "undeclared operator for type `" + type->CreateDisplayName() + "`"
         );
 
         return group;
     }
 
-    auto CreateUndefinedBinaryOpError(
-        const Op& op,
+    auto CreateUndeclaredBinaryOpError(
+        const SrcLocation& srcLocation,
         ITypeSymbol* const lhsType,
         ITypeSymbol* const rhsType
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
-        const Token opToken
-        {
-            op.SrcLocation,
-            op.TokenKind,
-        };
-
         const std::string message =
-            "undefined operator " + CreateOpString(opToken) +
-            " for types `" + lhsType->CreateSignature() + "` and `" +
-            rhsType->CreateSignature() + "`";
+            "undeclared operator for types `" + lhsType->CreateDisplayName() +
+            "` and `" + rhsType->CreateDisplayName() + "`";
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
-            op.SrcLocation,
+            srcLocation,
             message
         );
 
@@ -437,27 +401,20 @@ namespace Ace
     }
 
     auto CreateAmbiguousBinaryOpRefError(
-        const Op& op,
+        const SrcLocation& srcLocation,
         ITypeSymbol* const lhsType,
         ITypeSymbol* const rhsType
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
-        const Token opToken
-        {
-            op.SrcLocation,
-            op.TokenKind,
-        };
-
         const std::string message =
-            "ambiguous reference to operator " + CreateOpString(opToken) +
-            " for types `" + lhsType->CreateSignature() + "` and `" +
-            rhsType->CreateSignature() + "`";
+            "ambiguous operator for types `" + lhsType->CreateDisplayName() +
+            "` and `" + rhsType->CreateDisplayName() + "`";
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
-            op.SrcLocation,
+            srcLocation,
             message
         );
 
@@ -472,7 +429,7 @@ namespace Ace
         DiagnosticGroup group{};
 
         const std::string message =
-            "expected a function, found `" + type->CreateSignature() + "`";
+            "expected a function, found `" + type->CreateDisplayName() + "`";
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
@@ -483,16 +440,31 @@ namespace Ace
         return group;
     }
 
-    auto CreateUnsizedTemplateArgsError(
-        const SrcLocation& srcLocation,
-        const std::vector<ITypeSymbol*>& unsizedTemplateArgs
+    auto CreateInherentImplOfForeignTypeError(
+        const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
-        const std::string message = std::string{} +
-            "unsized template argument" +
-            (unsizedTemplateArgs.size() > 1 ? "s" : "");
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            "inherent implementation of foreign type"
+        );
+
+        return group;
+    }
+
+    auto CreateSelfReferenceInIncorrectContext(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        const std::string message =
+            "`" +
+            std::string{ TokenKindToKeywordMap.at(TokenKind::SelfTypeKeyword) } + 
+            "` reference in incorrect context";
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,

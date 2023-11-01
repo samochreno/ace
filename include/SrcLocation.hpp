@@ -1,14 +1,17 @@
 #pragma once
 
+#include <memory>
 #include <string_view>
 
 namespace Ace
 {
+    class Compilation;
     class ISrcBuffer;
 
     struct SrcLocation
     {
         SrcLocation() = default;
+        SrcLocation(Compilation* const compilation);
         SrcLocation(
             const ISrcBuffer* const buffer,
             const std::string_view::const_iterator characterBeginIt,

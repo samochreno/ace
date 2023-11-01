@@ -1,9 +1,12 @@
 #include "Symbols/Vars/Params/NormalParamVarSymbol.hpp"
 
 #include <memory>
+#include <vector>
 
 #include "Scope.hpp"
 #include "Ident.hpp"
+#include "Noun.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "AccessModifier.hpp"
 
@@ -21,19 +24,14 @@ namespace Ace
     {
     }
 
+    auto NormalParamVarSymbol::CreateTypeNoun() const -> Noun
+    {
+        return Noun{ Article::A, "parameter" };
+    }
+
     auto NormalParamVarSymbol::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;
-    }
-
-    auto NormalParamVarSymbol::GetName() const -> const Ident&
-    {
-        return m_Name;
-    }
-
-    auto NormalParamVarSymbol::GetKind() const -> SymbolKind
-    {
-        return SymbolKind::ParamVar;
     }
 
     auto NormalParamVarSymbol::GetCategory() const -> SymbolCategory
@@ -43,10 +41,28 @@ namespace Ace
 
     auto NormalParamVarSymbol::GetAccessModifier() const -> AccessModifier
     {
-        return AccessModifier::Public;
+        return AccessModifier::Pub;
     }
 
-    auto NormalParamVarSymbol::GetType() const -> ISizedTypeSymbol*
+    auto NormalParamVarSymbol::GetName() const -> const Ident&
+    {
+        return m_Name;
+    }
+
+    auto NormalParamVarSymbol::CreateInstantiated(
+        const std::shared_ptr<Scope>& scope,
+        const InstantiationContext& context
+    ) const -> std::unique_ptr<ISymbol>
+    {
+        return std::make_unique<NormalParamVarSymbol>(
+            scope,
+            GetName(),
+            CreateInstantiated<ISizedTypeSymbol>(GetType(), context),
+            GetIndex()
+        );
+    }
+
+    auto NormalParamVarSymbol::GetSizedType() const -> ISizedTypeSymbol*
     {
         return m_Type;
     }

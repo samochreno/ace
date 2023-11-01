@@ -1,13 +1,38 @@
 #pragma once
 
-#include "SrcLocation.hpp"
-#include "TokenKind.hpp"
-
 namespace Ace
 {
-    struct Op
+    enum class Op
     {
-        SrcLocation SrcLocation{};
-        TokenKind TokenKind{};
+        UnaryPlus,
+        UnaryNegation,
+
+        OneComplement,
+
+        Multiplication,
+        Division,
+
+        Remainder,
+
+        Addition,
+        Subtraction,
+
+        RightShift,
+        LeftShift,
+
+        LessThan,
+        GreaterThan,
+        LessThanEquals,
+        GreaterThanEquals,
+
+        Equals,
+        NotEquals,
+
+        AND,
+        XOR,
+        OR,
+
+        Copy,
+        Drop,
     };
 }

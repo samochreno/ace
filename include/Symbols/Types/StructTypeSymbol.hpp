@@ -4,35 +4,47 @@
 #include <vector>
 #include <optional>
 
-#include "Symbols/Types/SizedTypeSymbol.hpp"
+#include "Symbols/Types/EmittableTypeSymbol.hpp"
+#include "Symbols/Types/NominalTypeSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
-#include "Symbols/Vars/InstanceVarSymbol.hpp"
+#include "Symbols/Vars/FieldVarSymbol.hpp"
 #include "Scope.hpp"
-#include "Ident.hpp"
 #include "AccessModifier.hpp"
+#include "Ident.hpp"
+#include "Noun.hpp"
 #include "Diagnostic.hpp"
 #include "Emittable.hpp"
 
 namespace Ace
 {
-    class StructTypeSymbol : public virtual ISizedTypeSymbol
+    class StructTypeSymbol :
+        public virtual IConcreteTypeSymbol,
+        public virtual INominalTypeSymbol
     {
     public:
         StructTypeSymbol(
-            const std::shared_ptr<Scope>& selfScope,
+            const std::shared_ptr<Scope>& bodyScope,
+            const AccessModifier accessModifier,
             const Ident& name,
-            const AccessModifier accessModifier
+            const std::vector<ITypeSymbol*>& typeArgs
         );
         virtual ~StructTypeSymbol() = default;
 
-        auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto GetSelfScope() const -> std::shared_ptr<Scope> final;
-        auto GetName() const -> const Ident& final;
-        auto GetKind() const -> SymbolKind final;
+        auto CreateTypeNoun() const -> Noun final;
+        auto GetBodyScope() const -> std::shared_ptr<Scope> final;
         auto GetCategory() const -> SymbolCategory final;
         auto GetAccessModifier() const -> AccessModifier final;
+        auto GetName() const -> const Ident& final;
+
+        auto CreateInstantiated(
+            const std::shared_ptr<Scope>& scope,
+            const InstantiationContext& context
+        ) const -> std::unique_ptr<ISymbol> final;
 
         auto DiagnoseCycle() const -> Diagnosed<void> final;
+
+        auto SetBodyScope(const std::shared_ptr<Scope>& scope) -> void final;
+        auto GetTypeArgs() const -> const std::vector<ITypeSymbol*>& final;
 
         auto SetAsPrimitivelyEmittable() -> void final;
         auto IsPrimitivelyEmittable() const -> bool final;
@@ -42,10 +54,10 @@ namespace Ace
         auto SetAsTriviallyDroppable() -> void final;
         auto IsTriviallyDroppable() const -> bool final;
 
-        auto CreateCopyGlueBody(
+        auto CreateCopyGlueBlock(
             FunctionSymbol* const glueSymbol
         ) -> std::shared_ptr<const IEmittable<void>> final;
-        auto CreateDropGlueBody(
+        auto CreateDropGlueBlock(
             FunctionSymbol* const glueSymbol
         ) -> std::shared_ptr<const IEmittable<void>> final;
 
@@ -54,14 +66,15 @@ namespace Ace
         auto BindDropGlue(FunctionSymbol* const glue) -> void final;
         auto GetDropGlue() const -> std::optional<FunctionSymbol*> final;
 
-        auto CollectVars() const -> std::vector<InstanceVarSymbol*>;
+        auto CollectFields() const -> std::vector<FieldVarSymbol*>;
 
     private:
-        std::shared_ptr<Scope> m_SelfScope{};
-        Ident m_Name{};
+        std::shared_ptr<Scope> m_BodyScope{};
         AccessModifier m_AccessModifier{};
+        Ident m_Name{};
+        std::vector<ITypeSymbol*> m_TypeArgs{};
 
-        mutable std::optional<InstanceVarSymbol*> m_ResolvingVar{};
+        mutable std::optional<FieldVarSymbol*> m_ResolvingField{};
         mutable std::optional<DiagnosticBag> m_OptCycleDiagnosticsCache{};
         bool m_IsPrimitivelyEmittable{};
         

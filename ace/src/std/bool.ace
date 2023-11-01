@@ -1,4 +1,6 @@
-std: module -> pub {
-    Bool: struct -> pub { 
+pub ::
+std: mod {
+    pub ::
+    Bool: struct { 
     }
 }

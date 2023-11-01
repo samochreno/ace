@@ -1,21 +1,27 @@
-std::rc: module -> pub {
+pub ::
+std::rc: mod {
     ControlBlock: struct {
-        value_ptr:    Ptr,
-        strong_count: int,
-        weak_count:   int,
+        value_ptr:     Ptr,
+        type_info_ptr: Ptr,
+        strong_count:  int,
+        weak_count:    int,
     }
 
     impl ControlBlock {
         value_ptr(self_ptr: Ptr): Ptr {
-            ret __deref_as[ControlBlock](self_ptr).value_ptr;
+            ret __deref_as[Self](self_ptr).value_ptr;
+        }
+
+        type_info_ptr(self_ptr: Ptr): Ptr {
+            ret __deref_as[Self](self_ptr).type_info_ptr;
         }
 
         strong_count(self_ptr: Ptr): int {
-            ret __deref_as[ControlBlock](self_ptr).strong_count;
+            ret __deref_as[Self](self_ptr).strong_count;
         }
 
         set_strong_count(self_ptr: Ptr, value: int): void {
-            __deref_as[ControlBlock](self_ptr).strong_count = value;
+            __deref_as[Self](self_ptr).strong_count = value;
         }
 
         increment_strong_count(self_ptr: Ptr): void {
@@ -28,11 +34,11 @@ std::rc: module -> pub {
         }
 
         weak_count(self_ptr: Ptr): int {
-            ret __deref_as[ControlBlock](self_ptr).weak_count;
+            ret __deref_as[Self](self_ptr).weak_count;
         }
 
         set_weak_count(self_ptr: Ptr, value: int): void {
-            __deref_as[ControlBlock](self_ptr).weak_count = value;
+            __deref_as[Self](self_ptr).weak_count = value;
         }
 
         increment_weak_count(self_ptr: Ptr): void {
@@ -45,7 +51,59 @@ std::rc: module -> pub {
         }
     }
 
-    StrongPtr[T]: struct -> pub {
+    pub ::
+    WeakPtr[T]: struct {
+        control_block_ptr: Ptr,
+    }
+
+    pub ::
+    weak_ptr_from[T](strong_ptr: &StrongPtr[T]): WeakPtr[T] {
+        control_block_ptr: Ptr = strong_ptr_control_block_ptr[T](strong_ptr);
+        ControlBlock::increment_weak_count(control_block_ptr);
+        ret new WeakPtr[T] { control_block_ptr };
+    }
+
+    pub ::
+    weak_ptr_from_dyn[T](dyn_strong_ptr: &DynStrongPtr[T]): WeakPtr[T] {
+        control_block_ptr: Ptr =
+            dyn_strong_ptr_control_block_ptr[T](dyn_strong_ptr);
+        ControlBlock::increment_weak_count(control_block_ptr);
+        ret new WeakPtr[T] { control_block_ptr };
+    }
+
+    pub ::
+    weak_ptr_copy[T](this: &WeakPtr[T], other: &WeakPtr[T]): void {
+        this.control_block_ptr = other.control_block_ptr;
+
+        ControlBlock::increment_weak_count(this.control_block_ptr);
+    }
+
+    pub ::
+    weak_ptr_drop[T](this: &WeakPtr[T]): void {
+        ControlBlock::decrement_weak_count(this.control_block_ptr);
+
+        if 
+            (ControlBlock::strong_count(this.control_block_ptr) == 0) && 
+            (ControlBlock::weak_count(this.control_block_ptr) == 0) 
+        {
+            mem::dealloc(this.control_block_ptr);
+        }
+    }
+
+    pub ::
+    weak_ptr_lock[T](this: &WeakPtr[T]): StrongPtr[T] {
+        assert ControlBlock::strong_count(this.control_block_ptr) > 0;
+        ret strong_ptr_from[T](this);
+    }
+
+    pub ::
+    weak_ptr_lock_dyn[T](this: &WeakPtr[T]): DynStrongPtr[T] {
+        assert ControlBlock::strong_count(this.control_block_ptr) > 0;
+        ret dyn_strong_ptr_from[T](this);
+    }
+
+    pub ::
+    StrongPtr[T]: struct {
         data: StrongPtrData
     }
 
@@ -54,116 +112,219 @@ std::rc: module -> pub {
         control_block_ptr: Ptr,
     }
 
-    impl[T] StrongPtr[T] {
-        value_ptr(self: &StrongPtr[T]): Ptr {
-            ret __deref_as[StrongPtrData](self).value_ptr;
-        }
+    pub ::
+    strong_ptr_new[T](value: &T): StrongPtr[T] {
+        value_ptr:         Ptr = mem::alloc(__size_of[T]);
+        control_block_ptr: Ptr = mem::alloc(__size_of[ControlBlock]);
 
-        set_value_ptr(self: &StrongPtr[T], value: Ptr): void {
-            __deref_as[StrongPtrData](self).value_ptr = value;
-        }
+        __copy[T](Ref[T]::ptr(value), value_ptr);
 
-        control_block_ptr(self: &StrongPtr[T]): Ptr {
-            ret __deref_as[StrongPtrData](self).control_block_ptr;
-        }
+        type_info_ptr: Ptr = __type_info_ptr[T];
+        control_block: ControlBlock = new ControlBlock {
+            value_ptr,
+            type_info_ptr,
+            strong_count: 1, 
+            weak_count:   0,
+        };
+        mem::copy(
+            __address_of(control_block),
+            control_block_ptr,
+            __size_of[ControlBlock]
+        );
 
-        set_control_block_ptr(self: &StrongPtr[T], value: Ptr): void {
-            __deref_as[StrongPtrData](self).control_block_ptr = value;
-        }
+        data: StrongPtrData = new StrongPtrData {
+            value_ptr,
+            control_block_ptr,
+        };
+        ret new StrongPtr[T] { data };
+    }
 
-        new(value: &T): StrongPtr[T] -> pub {
-            value_ptr:         Ptr = mem::alloc(__size_of[T]);
-            control_block_ptr: Ptr = mem::alloc(__size_of[ControlBlock]);
+    strong_ptr_from[T](weak_ptr: &WeakPtr[T]): StrongPtr[T] {
+        control_block_ptr: Ptr = weak_ptr.control_block_ptr;
+        value_ptr:         Ptr = ControlBlock::value_ptr(control_block_ptr);
 
-            data: StrongPtrData = new StrongPtrData {
-                value_ptr,
-                control_block_ptr,
-            };
+        ControlBlock::increment_strong_count(control_block_ptr);
 
-            control_block: ControlBlock = new ControlBlock {
-                value_ptr,
-                strong_count: 1, 
-                weak_count:   0,
-            };
+        data: StrongPtrData = new StrongPtrData {
+            value_ptr,
+            control_block_ptr,
+        };
+        ret new StrongPtr[T] { data };
+    }
 
-            __copy[T](Ref[T]::ptr(value), value_ptr);
-            mem::copy(
-                __address_of(control_block),
-                control_block_ptr,
-                __size_of[ControlBlock]
-            );
+    pub ::
+    strong_ptr_copy[T](this: &StrongPtr[T], other: &StrongPtr[T]): void {
+        value_ptr:         Ptr = strong_ptr_value_ptr        [T](other);
+        control_block_ptr: Ptr = strong_ptr_control_block_ptr[T](other);
 
-            ret new StrongPtr[T] { data };
-        }
+        strong_ptr_set_value_ptr        [T](this, value_ptr);
+        strong_ptr_set_control_block_ptr[T](this, control_block_ptr);
 
-        from(weak_ptr: &WeakPtr[T]): StrongPtr[T] {
-            ControlBlock::increment_strong_count(weak_ptr.control_block_ptr);
+        ControlBlock::increment_strong_count(control_block_ptr);
+    }
 
-            data: StrongPtrData = new StrongPtrData {
-                value_ptr: ControlBlock::value_ptr(weak_ptr.control_block_ptr),
-                control_block_ptr: weak_ptr.control_block_ptr,
-            };
+    pub ::
+    strong_ptr_drop[T](this: &StrongPtr[T]): void {
+        value_ptr:         Ptr = strong_ptr_value_ptr        [T](this);
+        control_block_ptr: Ptr = strong_ptr_control_block_ptr[T](this);
 
-            ret new StrongPtr[T] { data };
-        }
+        ControlBlock::decrement_strong_count(control_block_ptr);
 
-        op copy(self: &StrongPtr[T], other: &StrongPtr[T]): void -> pub {
-            set_value_ptr        (self, value_ptr(other));
-            set_control_block_ptr(self, control_block_ptr(other));
+        if ControlBlock::strong_count(control_block_ptr) == 0 {
+            __drop[T](value_ptr);
+            mem::dealloc(value_ptr);
 
-            ControlBlock::increment_strong_count(control_block_ptr(self));
-        }
-
-        op drop(self: &StrongPtr[T]): void -> pub {
-            ControlBlock::decrement_strong_count(control_block_ptr(self));
-
-            if ControlBlock::strong_count(control_block_ptr(self)) == 0 {
-                __drop[T](value_ptr(self));
-                mem::dealloc(value_ptr(self));
-
-                if ControlBlock::weak_count(control_block_ptr(self)) == 0 {
-                    mem::dealloc(control_block_ptr(self));
-                }
+            if ControlBlock::weak_count(control_block_ptr) == 0 {
+                mem::dealloc(control_block_ptr);
             }
-        }
-
-        value(self: &StrongPtr[T]): T -> pub {
-            ret __deref_as[T](value_ptr(self));
         }
     }
 
-    WeakPtr[T]: struct -> pub {
+    strong_ptr_value_ptr[T](this: &StrongPtr[T]): Ptr {
+        ret __deref_as[StrongPtrData](this).value_ptr;
+    }
+
+    strong_ptr_set_value_ptr[T](this: &StrongPtr[T], value: Ptr): void {
+        __deref_as[StrongPtrData](this).value_ptr = value;
+    }
+
+    strong_ptr_control_block_ptr[T](this: &StrongPtr[T]): Ptr {
+        ret __deref_as[StrongPtrData](this).control_block_ptr;
+    }
+
+    strong_ptr_set_control_block_ptr[T](this: &StrongPtr[T], value: Ptr): void {
+        __deref_as[StrongPtrData](this).control_block_ptr = value;
+    }
+
+    pub ::
+    strong_ptr_value[T](this: &StrongPtr[T]): T {
+        ret __deref_as[T](strong_ptr_value_ptr[T](this));
+    }
+
+    pub ::
+    DynStrongPtrData: struct {
+        value_ptr:         Ptr,
         control_block_ptr: Ptr,
+        vtbl_ptr:          Ptr,
     }
 
-    impl[T] WeakPtr[T] {
-        from(strong_ptr: &StrongPtr[T]): WeakPtr[T] -> pub {
-            control_block_ptr: Ptr =
-                StrongPtr[T]::control_block_ptr(strong_ptr);
-            ControlBlock::increment_weak_count(control_block_ptr);
-            ret new WeakPtr[T] { control_block_ptr };
-        }
- 
-        op copy(self: &WeakPtr[T], other: &WeakPtr[T]): void -> pub {
-            self.control_block_ptr = other.control_block_ptr;
+    pub ::
+    DynStrongPtr[T]: struct {
+        data: DynStrongPtrData
+    }
 
-            ControlBlock::increment_weak_count(self.control_block_ptr);
-        }
+    pub ::
+    dyn_strong_ptr_from[T](weak_ptr: &WeakPtr[T]): DynStrongPtr[T] {
+        control_block_ptr: Ptr = weak_ptr.control_block_ptr;
+        value_ptr:         Ptr = ControlBlock::value_ptr(control_block_ptr);
+        type_info_ptr:     Ptr = ControlBlock::type_info_ptr(control_block_ptr);
 
-        op drop(self: &WeakPtr[T]): void -> pub {
-            ControlBlock::decrement_weak_count(self.control_block_ptr);
+        vtbl_ptr: Ptr = lookup_vtbl_ptr(type_info_ptr, __type_info_ptr[T]);
 
-            if 
-                (ControlBlock::strong_count(self.control_block_ptr) == 0) && 
-                (ControlBlock::weak_count(self.control_block_ptr) == 0) 
-            {
-                mem::dealloc(self.control_block_ptr);
+        ControlBlock::increment_strong_count(control_block_ptr);
+
+        data: DynStrongPtrData = new DynStrongPtrData {
+            value_ptr,
+            control_block_ptr,
+            vtbl_ptr,
+        };
+        ret new DynStrongPtr[T] { data };
+    }
+
+    pub ::
+    dyn_strong_ptr_copy[T](
+        this:  &DynStrongPtr[T],
+        other: &DynStrongPtr[T]
+    ): void
+    {
+        value_ptr:         Ptr = dyn_strong_ptr_value_ptr        [T](other);
+        vtbl_ptr:          Ptr = dyn_strong_ptr_vtbl_ptr         [T](other);
+        control_block_ptr: Ptr = dyn_strong_ptr_control_block_ptr[T](other);
+
+        dyn_strong_ptr_set_value_ptr        [T](this, value_ptr);
+        dyn_strong_ptr_set_vtbl_ptr         [T](this, vtbl_ptr);
+        dyn_strong_ptr_set_control_block_ptr[T](this, control_block_ptr);
+
+        ControlBlock::increment_strong_count(control_block_ptr);
+    }
+
+    pub ::
+    dyn_strong_ptr_drop[T](this: &DynStrongPtr[T]): void {
+        value_ptr:         Ptr = dyn_strong_ptr_value_ptr        [T](this);
+        vtbl_ptr:          Ptr = dyn_strong_ptr_vtbl_ptr         [T](this);
+        control_block_ptr: Ptr = dyn_strong_ptr_control_block_ptr[T](this);
+
+        ControlBlock::decrement_strong_count(control_block_ptr);
+
+        if ControlBlock::strong_count(control_block_ptr) == 0 {
+            dyn_drop(value_ptr, ControlBlock::type_info_ptr(control_block_ptr));
+            mem::dealloc(value_ptr);
+
+            if ControlBlock::weak_count(control_block_ptr) == 0 {
+                mem::dealloc(control_block_ptr);
             }
         }
+    }
 
-        lock(): StrongPtr[T] -> pub self {
-            assert ControlBlock::strong_count(self.control_block_ptr) > 0;
-            ret StrongPtr[T]::from(self);
-        }
+    pub ::
+    dyn_strong_ptr_value_ptr[T](this: &DynStrongPtr[T]): Ptr {
+        ret __deref_as[DynStrongPtrData](this).value_ptr;
+    }
+
+    pub ::
+    dyn_strong_ptr_set_value_ptr[T](this: &DynStrongPtr[T], value: Ptr): void {
+        __deref_as[DynStrongPtrData](this).value_ptr = value;
+    }
+
+    pub ::
+    dyn_strong_ptr_control_block_ptr[T](this: &DynStrongPtr[T]): Ptr {
+        ret __deref_as[DynStrongPtrData](this).control_block_ptr;
+    }
+
+    pub ::
+    dyn_strong_ptr_set_control_block_ptr[T](
+        this: &DynStrongPtr[T],
+        value: Ptr
+    ): void
+    {
+        __deref_as[DynStrongPtrData](this).control_block_ptr = value;
+    }
+
+    pub ::
+    dyn_strong_ptr_vtbl_ptr[T](this: &DynStrongPtr[T]): Ptr {
+        ret __deref_as[DynStrongPtrData](this).vtbl_ptr;
+    }
+
+    pub ::
+    dyn_strong_ptr_set_vtbl_ptr[T](this: &DynStrongPtr[T], value: Ptr): void {
+        __deref_as[DynStrongPtrData](this).vtbl_ptr = value;
+    }
+
+    pub extern ::
+    lookup_vtbl_ptr(type_info_ptr: Ptr, trait_type_info_ptr: Ptr): Ptr;
+
+    pub extern ::
+    sublookup_vtbl_ptr(type_info_ptr: Ptr, target_type_info_ptr: Ptr): Ptr;
+
+    pub extern ::
+    dyn_drop(value_ptr: Ptr, type_info_ptr: Ptr): void;
+
+    pub ::
+    strong_ptr_to_dyn_strong_ptr[From, To](
+        from: &StrongPtr[From]
+    ): DynStrongPtr[To]
+    {
+        value_ptr:         Ptr = strong_ptr_value_ptr[From](from);
+        vtbl_ptr:          Ptr = __vtbl_ptr[From, To];
+        control_block_ptr: Ptr = strong_ptr_control_block_ptr[From](from);
+
+        ControlBlock::increment_strong_count(control_block_ptr);
+        
+        data: DynStrongPtrData = new DynStrongPtrData {
+            value_ptr,
+            vtbl_ptr,
+            control_block_ptr
+        };
+        ret new DynStrongPtr[To] { data };
     }
 }

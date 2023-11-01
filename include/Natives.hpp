@@ -10,7 +10,7 @@
 #include "Diagnostic.hpp"
 #include "Scope.hpp"
 #include "Lazy.hpp"
-#include "Diagnostic.hpp"
+#include "Op.hpp"
 
 namespace llvm
 {
@@ -19,14 +19,12 @@ namespace llvm
 
 namespace Ace
 {
-    class FunctionSymbol;
     class ITypeSymbol;
-    class TypeTemplateSymbol;
-    class FunctionTemplateSymbol;
+    class FunctionSymbol;
 
     class Emitter;
 
-    using FunctionBodyEmitter = std::function<void(Emitter&)>;
+    using FunctionBlockEmitter = std::function<void(Emitter&)>;
 
     class INative
     {
@@ -42,6 +40,12 @@ namespace Ace
         virtual auto GetGenericSymbol() const -> ISymbol* = 0;
     };
 
+    enum class NativeSymbolKind
+    {
+        Concrete,
+        Root,
+    };
+
     enum class NativeCopyabilityKind
     {
         Trivial,
@@ -53,9 +57,10 @@ namespace Ace
     public:
         NativeType(
             Compilation* const compilation,
-            std::vector<const char*>&& nameSectionStrings,
-            std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>>&& irTypeGetter,
-            const NativeCopyabilityKind copyabilityKind
+            std::vector<const char*> nameSectionStrings,
+            const NativeSymbolKind symbolKind,
+            const NativeCopyabilityKind copyabilityKind,
+            std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>> irTypeGetter
         );
         ~NativeType() = default;
 
@@ -65,6 +70,7 @@ namespace Ace
             const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
+        auto TryGetSymbol() const -> std::optional<ITypeSymbol*>;
         auto GetSymbol() const -> ITypeSymbol*;
         auto GetGenericSymbol() const -> ISymbol* final;
 
@@ -75,43 +81,20 @@ namespace Ace
         Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
         std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>> m_IRTypeGetter{};
+        bool m_IsRoot{};
         bool m_IsTriviallyCopyable{};
         
-        Lazy<ITypeSymbol*> m_Symbol;
+        mutable std::optional<ITypeSymbol*> m_OptSymbol{};
     };
 
-    class NativeTypeTemplate : public virtual INative
-    {
-    public:
-        NativeTypeTemplate(
-            Compilation* const compilation,
-            std::vector<const char*>&& nameSectionStrings
-        );
-        ~NativeTypeTemplate() = default;
-
-        auto GetCompilation() const -> Compilation* final;
-
-        auto CreateFullyQualifiedName(
-            const SrcLocation& srcLocation
-        ) const -> SymbolName final;
-
-        auto GetSymbol() const -> TypeTemplateSymbol*;
-        auto GetGenericSymbol() const -> ISymbol* final;
-
-    private:
-        Compilation* m_Compilation{};
-        std::vector<const char*> m_NameSectionStrings{};
-
-        Lazy<TypeTemplateSymbol*> m_Symbol;
-    };
-    
     class NativeFunction : public virtual INative
     {
     public:
         NativeFunction(
             Compilation* const compilation,
-            std::vector<const char*>&& nameSectionStrings,
-            FunctionBodyEmitter&& bodyEmitter
+            std::vector<std::string> nameSectionStrings,
+            const NativeSymbolKind kind,
+            std::optional<FunctionBlockEmitter> optBlockEmitter
         );
         ~NativeFunction() = default;
 
@@ -121,92 +104,17 @@ namespace Ace
             const SrcLocation& srcLocation
         ) const -> SymbolName final;
 
+        auto TryGetSymbol() const -> std::optional<FunctionSymbol*>;
         auto GetSymbol() const -> FunctionSymbol*;
         auto GetGenericSymbol() const -> ISymbol* final;
         
     private:
         Compilation* m_Compilation{};
-        std::vector<const char*> m_NameSectionStrings{};
-        FunctionBodyEmitter m_BodyEmitter{};
+        std::vector<std::string> m_NameSectionStrings{};
+        bool m_IsRoot{};
+        std::optional<FunctionBlockEmitter> m_OptBlockEmitter{};
 
-        Lazy<FunctionSymbol*> m_Symbol;
-    };
-
-    class NativeFunctionTemplate : public virtual INative
-    {
-    public:
-        NativeFunctionTemplate(
-            Compilation* const compilation,
-            std::vector<const char*>&& nameSectionStrings
-        );
-        ~NativeFunctionTemplate() = default;
-
-        auto GetCompilation() const -> Compilation* final;
-
-        auto CreateFullyQualifiedName(
-            const SrcLocation& srcLocation
-        ) const -> SymbolName final;
-
-        auto GetSymbol() const -> FunctionTemplateSymbol*;
-        auto GetGenericSymbol() const -> ISymbol* final;
-
-    private:
-        Compilation* m_Compilation{};
-        std::vector<const char*> m_NameSectionStrings{};
-
-        Lazy<FunctionTemplateSymbol*> m_Symbol;
-    };
-
-    class NativeAssociatedFunction : public virtual INative
-    {
-    public:
-        NativeAssociatedFunction(
-            const INative& type,
-            const char* const name,
-            FunctionBodyEmitter&& bodyEmitter
-        );
-        ~NativeAssociatedFunction() = default;
-
-        auto GetCompilation() const -> Compilation* final;
-
-        auto CreateFullyQualifiedName(
-            const SrcLocation& srcLocation
-        ) const -> SymbolName final;
-
-        auto GetSymbol() const -> FunctionSymbol*;
-        auto GetGenericSymbol() const -> ISymbol* final;
-
-    private:
-        const INative& m_Type;
-        const char* m_Name{};
-        FunctionBodyEmitter m_BodyEmitter{};
-
-        Lazy<FunctionSymbol*> m_Symbol;
-    };
-
-    class NativeAssociatedFunctionTemplate : public virtual INative
-    {
-    public:
-        NativeAssociatedFunctionTemplate(
-            const INative& type,
-            const char* const name
-        );
-        ~NativeAssociatedFunctionTemplate() = default;
-
-        auto GetCompilation() const -> Compilation* final;
-
-        auto CreateFullyQualifiedName(
-            const SrcLocation& srcLocation
-        ) const -> SymbolName final;
-
-        auto GetSymbol() const -> FunctionTemplateSymbol*;
-        auto GetGenericSymbol() const -> ISymbol* final;
-
-    private:
-        const INative& m_Type;
-        const char* m_Name{};
-
-        Lazy<FunctionTemplateSymbol*> m_Symbol;
+        mutable std::optional<FunctionSymbol*> m_OptSymbol{};
     };
 
     class Natives
@@ -223,6 +131,12 @@ namespace Ace
 
         auto GetImplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
         auto GetExplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
+
+        auto GetUnaryOpMap()  const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&;
+        auto GetBinaryOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&;
+
+        auto GetCopyOpMap() const -> const std::unordered_map<ITypeSymbol*, FunctionSymbol*>&;
+        auto GetDropOpMap() const -> const std::unordered_map<ITypeSymbol*, FunctionSymbol*>&;
 
         auto IsIntTypeSigned(const NativeType& intType) const -> bool;
 
@@ -246,9 +160,11 @@ namespace Ace
 
         NativeType Ptr;
 
-        NativeTypeTemplate Ref;
-        NativeTypeTemplate StrongPtr;
-        NativeTypeTemplate WeakPtr;
+        NativeType Ref;
+        NativeType WeakPtr;
+        NativeType StrongPtr;
+        NativeType DynStrongPtr;
+        NativeType DynStrongPtrData;
 
         NativeFunction print_int;
         NativeFunction print_ptr;
@@ -257,340 +173,365 @@ namespace Ace
         NativeFunction dealloc;
         NativeFunction copy;
 
-        NativeAssociatedFunction i8__from_i16;
-        NativeAssociatedFunction i8__from_i32;
-        NativeAssociatedFunction i8__from_i64;
-        NativeAssociatedFunction i8__from_u8;
-        NativeAssociatedFunction i8__from_u16;
-        NativeAssociatedFunction i8__from_u32;
-        NativeAssociatedFunction i8__from_u64;
-        NativeAssociatedFunction i8__from_int;
-        NativeAssociatedFunction i8__from_f32;
-        NativeAssociatedFunction i8__from_f64;
-        NativeAssociatedFunction i8__unary_plus;
-        NativeAssociatedFunction i8__unary_negation;
-        NativeAssociatedFunction i8__one_complement;
-        NativeAssociatedFunction i8__multiplication;
-        NativeAssociatedFunction i8__division;
-        NativeAssociatedFunction i8__remainder;
-        NativeAssociatedFunction i8__addition;
-        NativeAssociatedFunction i8__subtraction;
-        NativeAssociatedFunction i8__right_shift;
-        NativeAssociatedFunction i8__left_shift;
-        NativeAssociatedFunction i8__less_than;
-        NativeAssociatedFunction i8__greater_than;
-        NativeAssociatedFunction i8__less_than_equals;
-        NativeAssociatedFunction i8__greater_than_equals;
-        NativeAssociatedFunction i8__equals;
-        NativeAssociatedFunction i8__not_equals;
-        NativeAssociatedFunction i8__AND;
-        NativeAssociatedFunction i8__XOR;
-        NativeAssociatedFunction i8__OR;
+        NativeFunction lookup_vtbl_ptr;
+        NativeFunction sublookup_vtbl_ptr;
+        NativeFunction dyn_drop;
 
-        NativeAssociatedFunction i16__from_i8;
-        NativeAssociatedFunction i16__from_i32;
-        NativeAssociatedFunction i16__from_i64;
-        NativeAssociatedFunction i16__from_u8;
-        NativeAssociatedFunction i16__from_u16;
-        NativeAssociatedFunction i16__from_u32;
-        NativeAssociatedFunction i16__from_u64;
-        NativeAssociatedFunction i16__from_int;
-        NativeAssociatedFunction i16__from_f32;
-        NativeAssociatedFunction i16__from_f64;
-        NativeAssociatedFunction i16__unary_plus;
-        NativeAssociatedFunction i16__unary_negation;
-        NativeAssociatedFunction i16__one_complement;
-        NativeAssociatedFunction i16__multiplication;
-        NativeAssociatedFunction i16__division;
-        NativeAssociatedFunction i16__remainder;
-        NativeAssociatedFunction i16__addition;
-        NativeAssociatedFunction i16__subtraction;
-        NativeAssociatedFunction i16__right_shift;
-        NativeAssociatedFunction i16__left_shift;
-        NativeAssociatedFunction i16__less_than;
-        NativeAssociatedFunction i16__greater_than;
-        NativeAssociatedFunction i16__less_than_equals;
-        NativeAssociatedFunction i16__greater_than_equals;
-        NativeAssociatedFunction i16__equals;
-        NativeAssociatedFunction i16__not_equals;
-        NativeAssociatedFunction i16__AND;
-        NativeAssociatedFunction i16__XOR;
-        NativeAssociatedFunction i16__OR;
+        NativeFunction i8_from_i16;
+        NativeFunction i8_from_i32;
+        NativeFunction i8_from_i64;
+        NativeFunction i8_from_u8;
+        NativeFunction i8_from_u16;
+        NativeFunction i8_from_u32;
+        NativeFunction i8_from_u64;
+        NativeFunction i8_from_int;
+        NativeFunction i8_from_f32;
+        NativeFunction i8_from_f64;
+        NativeFunction i8_unary_plus;
+        NativeFunction i8_unary_negation;
+        NativeFunction i8_one_complement;
+        NativeFunction i8_multiplication;
+        NativeFunction i8_division;
+        NativeFunction i8_remainder;
+        NativeFunction i8_addition;
+        NativeFunction i8_subtraction;
+        NativeFunction i8_right_shift;
+        NativeFunction i8_left_shift;
+        NativeFunction i8_less_than;
+        NativeFunction i8_greater_than;
+        NativeFunction i8_less_than_equals;
+        NativeFunction i8_greater_than_equals;
+        NativeFunction i8_equals;
+        NativeFunction i8_not_equals;
+        NativeFunction i8_AND;
+        NativeFunction i8_XOR;
+        NativeFunction i8_OR;
 
-        NativeAssociatedFunction i32__from_i8;
-        NativeAssociatedFunction i32__from_i16;
-        NativeAssociatedFunction i32__from_i64;
-        NativeAssociatedFunction i32__from_u8;
-        NativeAssociatedFunction i32__from_u16;
-        NativeAssociatedFunction i32__from_u32;
-        NativeAssociatedFunction i32__from_u64;
-        NativeAssociatedFunction i32__from_int;
-        NativeAssociatedFunction i32__from_f32;
-        NativeAssociatedFunction i32__from_f64;
-        NativeAssociatedFunction i32__unary_plus;
-        NativeAssociatedFunction i32__unary_negation;
-        NativeAssociatedFunction i32__one_complement;
-        NativeAssociatedFunction i32__multiplication;
-        NativeAssociatedFunction i32__division;
-        NativeAssociatedFunction i32__remainder;
-        NativeAssociatedFunction i32__addition;
-        NativeAssociatedFunction i32__subtraction;
-        NativeAssociatedFunction i32__right_shift;
-        NativeAssociatedFunction i32__left_shift;
-        NativeAssociatedFunction i32__less_than;
-        NativeAssociatedFunction i32__greater_than;
-        NativeAssociatedFunction i32__less_than_equals;
-        NativeAssociatedFunction i32__greater_than_equals;
-        NativeAssociatedFunction i32__equals;
-        NativeAssociatedFunction i32__not_equals;
-        NativeAssociatedFunction i32__AND;
-        NativeAssociatedFunction i32__XOR;
-        NativeAssociatedFunction i32__OR;
+        NativeFunction i16_from_i8;
+        NativeFunction i16_from_i32;
+        NativeFunction i16_from_i64;
+        NativeFunction i16_from_u8;
+        NativeFunction i16_from_u16;
+        NativeFunction i16_from_u32;
+        NativeFunction i16_from_u64;
+        NativeFunction i16_from_int;
+        NativeFunction i16_from_f32;
+        NativeFunction i16_from_f64;
+        NativeFunction i16_unary_plus;
+        NativeFunction i16_unary_negation;
+        NativeFunction i16_one_complement;
+        NativeFunction i16_multiplication;
+        NativeFunction i16_division;
+        NativeFunction i16_remainder;
+        NativeFunction i16_addition;
+        NativeFunction i16_subtraction;
+        NativeFunction i16_right_shift;
+        NativeFunction i16_left_shift;
+        NativeFunction i16_less_than;
+        NativeFunction i16_greater_than;
+        NativeFunction i16_less_than_equals;
+        NativeFunction i16_greater_than_equals;
+        NativeFunction i16_equals;
+        NativeFunction i16_not_equals;
+        NativeFunction i16_AND;
+        NativeFunction i16_XOR;
+        NativeFunction i16_OR;
 
-        NativeAssociatedFunction i64__from_i8;
-        NativeAssociatedFunction i64__from_i16;
-        NativeAssociatedFunction i64__from_i32;
-        NativeAssociatedFunction i64__from_u8;
-        NativeAssociatedFunction i64__from_u16;
-        NativeAssociatedFunction i64__from_u32;
-        NativeAssociatedFunction i64__from_u64;
-        NativeAssociatedFunction i64__from_int;
-        NativeAssociatedFunction i64__from_f32;
-        NativeAssociatedFunction i64__from_f64;
-        NativeAssociatedFunction i64__unary_plus;
-        NativeAssociatedFunction i64__unary_negation;
-        NativeAssociatedFunction i64__one_complement;
-        NativeAssociatedFunction i64__multiplication;
-        NativeAssociatedFunction i64__division;
-        NativeAssociatedFunction i64__remainder;
-        NativeAssociatedFunction i64__addition;
-        NativeAssociatedFunction i64__subtraction;
-        NativeAssociatedFunction i64__right_shift;
-        NativeAssociatedFunction i64__left_shift;
-        NativeAssociatedFunction i64__less_than;
-        NativeAssociatedFunction i64__greater_than;
-        NativeAssociatedFunction i64__less_than_equals;
-        NativeAssociatedFunction i64__greater_than_equals;
-        NativeAssociatedFunction i64__equals;
-        NativeAssociatedFunction i64__not_equals;
-        NativeAssociatedFunction i64__AND;
-        NativeAssociatedFunction i64__XOR;
-        NativeAssociatedFunction i64__OR;
+        NativeFunction i32_from_i8;
+        NativeFunction i32_from_i16;
+        NativeFunction i32_from_i64;
+        NativeFunction i32_from_u8;
+        NativeFunction i32_from_u16;
+        NativeFunction i32_from_u32;
+        NativeFunction i32_from_u64;
+        NativeFunction i32_from_int;
+        NativeFunction i32_from_f32;
+        NativeFunction i32_from_f64;
+        NativeFunction i32_unary_plus;
+        NativeFunction i32_unary_negation;
+        NativeFunction i32_one_complement;
+        NativeFunction i32_multiplication;
+        NativeFunction i32_division;
+        NativeFunction i32_remainder;
+        NativeFunction i32_addition;
+        NativeFunction i32_subtraction;
+        NativeFunction i32_right_shift;
+        NativeFunction i32_left_shift;
+        NativeFunction i32_less_than;
+        NativeFunction i32_greater_than;
+        NativeFunction i32_less_than_equals;
+        NativeFunction i32_greater_than_equals;
+        NativeFunction i32_equals;
+        NativeFunction i32_not_equals;
+        NativeFunction i32_AND;
+        NativeFunction i32_XOR;
+        NativeFunction i32_OR;
 
-        NativeAssociatedFunction u8__from_i8;
-        NativeAssociatedFunction u8__from_i16;
-        NativeAssociatedFunction u8__from_i32;
-        NativeAssociatedFunction u8__from_i64;
-        NativeAssociatedFunction u8__from_u16;
-        NativeAssociatedFunction u8__from_u32;
-        NativeAssociatedFunction u8__from_u64;
-        NativeAssociatedFunction u8__from_int;
-        NativeAssociatedFunction u8__from_f32;
-        NativeAssociatedFunction u8__from_f64;
-        NativeAssociatedFunction u8__unary_plus;
-        NativeAssociatedFunction u8__unary_negation;
-        NativeAssociatedFunction u8__one_complement;
-        NativeAssociatedFunction u8__multiplication;
-        NativeAssociatedFunction u8__division;
-        NativeAssociatedFunction u8__remainder;
-        NativeAssociatedFunction u8__addition;
-        NativeAssociatedFunction u8__subtraction;
-        NativeAssociatedFunction u8__right_shift;
-        NativeAssociatedFunction u8__left_shift;
-        NativeAssociatedFunction u8__less_than;
-        NativeAssociatedFunction u8__greater_than;
-        NativeAssociatedFunction u8__less_than_equals;
-        NativeAssociatedFunction u8__greater_than_equals;
-        NativeAssociatedFunction u8__equals;
-        NativeAssociatedFunction u8__not_equals;
-        NativeAssociatedFunction u8__AND;
-        NativeAssociatedFunction u8__XOR;
-        NativeAssociatedFunction u8__OR;
+        NativeFunction i64_from_i8;
+        NativeFunction i64_from_i16;
+        NativeFunction i64_from_i32;
+        NativeFunction i64_from_u8;
+        NativeFunction i64_from_u16;
+        NativeFunction i64_from_u32;
+        NativeFunction i64_from_u64;
+        NativeFunction i64_from_int;
+        NativeFunction i64_from_f32;
+        NativeFunction i64_from_f64;
+        NativeFunction i64_unary_plus;
+        NativeFunction i64_unary_negation;
+        NativeFunction i64_one_complement;
+        NativeFunction i64_multiplication;
+        NativeFunction i64_division;
+        NativeFunction i64_remainder;
+        NativeFunction i64_addition;
+        NativeFunction i64_subtraction;
+        NativeFunction i64_right_shift;
+        NativeFunction i64_left_shift;
+        NativeFunction i64_less_than;
+        NativeFunction i64_greater_than;
+        NativeFunction i64_less_than_equals;
+        NativeFunction i64_greater_than_equals;
+        NativeFunction i64_equals;
+        NativeFunction i64_not_equals;
+        NativeFunction i64_AND;
+        NativeFunction i64_XOR;
+        NativeFunction i64_OR;
 
-        NativeAssociatedFunction u16__from_i8;
-        NativeAssociatedFunction u16__from_i16;
-        NativeAssociatedFunction u16__from_i32;
-        NativeAssociatedFunction u16__from_i64;
-        NativeAssociatedFunction u16__from_u8;
-        NativeAssociatedFunction u16__from_u32;
-        NativeAssociatedFunction u16__from_u64;
-        NativeAssociatedFunction u16__from_int;
-        NativeAssociatedFunction u16__from_f32;
-        NativeAssociatedFunction u16__from_f64;
-        NativeAssociatedFunction u16__unary_plus;
-        NativeAssociatedFunction u16__unary_negation;
-        NativeAssociatedFunction u16__one_complement;
-        NativeAssociatedFunction u16__multiplication;
-        NativeAssociatedFunction u16__division;
-        NativeAssociatedFunction u16__remainder;
-        NativeAssociatedFunction u16__addition;
-        NativeAssociatedFunction u16__subtraction;
-        NativeAssociatedFunction u16__right_shift;
-        NativeAssociatedFunction u16__left_shift;
-        NativeAssociatedFunction u16__less_than;
-        NativeAssociatedFunction u16__greater_than;
-        NativeAssociatedFunction u16__less_than_equals;
-        NativeAssociatedFunction u16__greater_than_equals;
-        NativeAssociatedFunction u16__equals;
-        NativeAssociatedFunction u16__not_equals;
-        NativeAssociatedFunction u16__AND;
-        NativeAssociatedFunction u16__XOR;
-        NativeAssociatedFunction u16__OR;
+        NativeFunction u8_from_i8;
+        NativeFunction u8_from_i16;
+        NativeFunction u8_from_i32;
+        NativeFunction u8_from_i64;
+        NativeFunction u8_from_u16;
+        NativeFunction u8_from_u32;
+        NativeFunction u8_from_u64;
+        NativeFunction u8_from_int;
+        NativeFunction u8_from_f32;
+        NativeFunction u8_from_f64;
+        NativeFunction u8_unary_plus;
+        NativeFunction u8_unary_negation;
+        NativeFunction u8_one_complement;
+        NativeFunction u8_multiplication;
+        NativeFunction u8_division;
+        NativeFunction u8_remainder;
+        NativeFunction u8_addition;
+        NativeFunction u8_subtraction;
+        NativeFunction u8_right_shift;
+        NativeFunction u8_left_shift;
+        NativeFunction u8_less_than;
+        NativeFunction u8_greater_than;
+        NativeFunction u8_less_than_equals;
+        NativeFunction u8_greater_than_equals;
+        NativeFunction u8_equals;
+        NativeFunction u8_not_equals;
+        NativeFunction u8_AND;
+        NativeFunction u8_XOR;
+        NativeFunction u8_OR;
 
-        NativeAssociatedFunction u32__from_i8;
-        NativeAssociatedFunction u32__from_i16;
-        NativeAssociatedFunction u32__from_i32;
-        NativeAssociatedFunction u32__from_i64;
-        NativeAssociatedFunction u32__from_u8;
-        NativeAssociatedFunction u32__from_u16;
-        NativeAssociatedFunction u32__from_u64;
-        NativeAssociatedFunction u32__from_int;
-        NativeAssociatedFunction u32__from_f32;
-        NativeAssociatedFunction u32__from_f64;
-        NativeAssociatedFunction u32__unary_plus;
-        NativeAssociatedFunction u32__unary_negation;
-        NativeAssociatedFunction u32__one_complement;
-        NativeAssociatedFunction u32__multiplication;
-        NativeAssociatedFunction u32__division;
-        NativeAssociatedFunction u32__remainder;
-        NativeAssociatedFunction u32__addition;
-        NativeAssociatedFunction u32__subtraction;
-        NativeAssociatedFunction u32__right_shift;
-        NativeAssociatedFunction u32__left_shift;
-        NativeAssociatedFunction u32__less_than;
-        NativeAssociatedFunction u32__greater_than;
-        NativeAssociatedFunction u32__less_than_equals;
-        NativeAssociatedFunction u32__greater_than_equals;
-        NativeAssociatedFunction u32__equals;
-        NativeAssociatedFunction u32__not_equals;
-        NativeAssociatedFunction u32__AND;
-        NativeAssociatedFunction u32__XOR;
-        NativeAssociatedFunction u32__OR;
+        NativeFunction u16_from_i8;
+        NativeFunction u16_from_i16;
+        NativeFunction u16_from_i32;
+        NativeFunction u16_from_i64;
+        NativeFunction u16_from_u8;
+        NativeFunction u16_from_u32;
+        NativeFunction u16_from_u64;
+        NativeFunction u16_from_int;
+        NativeFunction u16_from_f32;
+        NativeFunction u16_from_f64;
+        NativeFunction u16_unary_plus;
+        NativeFunction u16_unary_negation;
+        NativeFunction u16_one_complement;
+        NativeFunction u16_multiplication;
+        NativeFunction u16_division;
+        NativeFunction u16_remainder;
+        NativeFunction u16_addition;
+        NativeFunction u16_subtraction;
+        NativeFunction u16_right_shift;
+        NativeFunction u16_left_shift;
+        NativeFunction u16_less_than;
+        NativeFunction u16_greater_than;
+        NativeFunction u16_less_than_equals;
+        NativeFunction u16_greater_than_equals;
+        NativeFunction u16_equals;
+        NativeFunction u16_not_equals;
+        NativeFunction u16_AND;
+        NativeFunction u16_XOR;
+        NativeFunction u16_OR;
 
-        NativeAssociatedFunction u64__from_i8;
-        NativeAssociatedFunction u64__from_i16;
-        NativeAssociatedFunction u64__from_i32;
-        NativeAssociatedFunction u64__from_i64;
-        NativeAssociatedFunction u64__from_u8;
-        NativeAssociatedFunction u64__from_u16;
-        NativeAssociatedFunction u64__from_u32;
-        NativeAssociatedFunction u64__from_int;
-        NativeAssociatedFunction u64__from_f32;
-        NativeAssociatedFunction u64__from_f64;
-        NativeAssociatedFunction u64__unary_plus;
-        NativeAssociatedFunction u64__unary_negation;
-        NativeAssociatedFunction u64__one_complement;
-        NativeAssociatedFunction u64__multiplication;
-        NativeAssociatedFunction u64__division;
-        NativeAssociatedFunction u64__remainder;
-        NativeAssociatedFunction u64__addition;
-        NativeAssociatedFunction u64__subtraction;
-        NativeAssociatedFunction u64__right_shift;
-        NativeAssociatedFunction u64__left_shift;
-        NativeAssociatedFunction u64__less_than;
-        NativeAssociatedFunction u64__greater_than;
-        NativeAssociatedFunction u64__less_than_equals;
-        NativeAssociatedFunction u64__greater_than_equals;
-        NativeAssociatedFunction u64__equals;
-        NativeAssociatedFunction u64__not_equals;
-        NativeAssociatedFunction u64__AND;
-        NativeAssociatedFunction u64__XOR;
-        NativeAssociatedFunction u64__OR;
+        NativeFunction u32_from_i8;
+        NativeFunction u32_from_i16;
+        NativeFunction u32_from_i32;
+        NativeFunction u32_from_i64;
+        NativeFunction u32_from_u8;
+        NativeFunction u32_from_u16;
+        NativeFunction u32_from_u64;
+        NativeFunction u32_from_int;
+        NativeFunction u32_from_f32;
+        NativeFunction u32_from_f64;
+        NativeFunction u32_unary_plus;
+        NativeFunction u32_unary_negation;
+        NativeFunction u32_one_complement;
+        NativeFunction u32_multiplication;
+        NativeFunction u32_division;
+        NativeFunction u32_remainder;
+        NativeFunction u32_addition;
+        NativeFunction u32_subtraction;
+        NativeFunction u32_right_shift;
+        NativeFunction u32_left_shift;
+        NativeFunction u32_less_than;
+        NativeFunction u32_greater_than;
+        NativeFunction u32_less_than_equals;
+        NativeFunction u32_greater_than_equals;
+        NativeFunction u32_equals;
+        NativeFunction u32_not_equals;
+        NativeFunction u32_AND;
+        NativeFunction u32_XOR;
+        NativeFunction u32_OR;
 
-        NativeAssociatedFunction int_from_i8;
-        NativeAssociatedFunction int_from_i16;
-        NativeAssociatedFunction int_from_i32;
-        NativeAssociatedFunction int_from_i64;
-        NativeAssociatedFunction int_from_u8;
-        NativeAssociatedFunction int_from_u16;
-        NativeAssociatedFunction int_from_u32;
-        NativeAssociatedFunction int_from_u64;
-        NativeAssociatedFunction int_from_f32;
-        NativeAssociatedFunction int_from_f64;
-        NativeAssociatedFunction int_unary_plus;
-        NativeAssociatedFunction int_unary_negation;
-        NativeAssociatedFunction int_one_complement;
-        NativeAssociatedFunction int_multiplication;
-        NativeAssociatedFunction int_division;
-        NativeAssociatedFunction int_remainder;
-        NativeAssociatedFunction int_addition;
-        NativeAssociatedFunction int_subtraction;
-        NativeAssociatedFunction int_right_shift;
-        NativeAssociatedFunction int_left_shift;
-        NativeAssociatedFunction int_less_than;
-        NativeAssociatedFunction int_greater_than;
-        NativeAssociatedFunction int_less_than_equals;
-        NativeAssociatedFunction int_greater_than_equals;
-        NativeAssociatedFunction int_equals;
-        NativeAssociatedFunction int_not_equals;
-        NativeAssociatedFunction int_AND;
-        NativeAssociatedFunction int_XOR;
-        NativeAssociatedFunction int_OR;
+        NativeFunction u64_from_i8;
+        NativeFunction u64_from_i16;
+        NativeFunction u64_from_i32;
+        NativeFunction u64_from_i64;
+        NativeFunction u64_from_u8;
+        NativeFunction u64_from_u16;
+        NativeFunction u64_from_u32;
+        NativeFunction u64_from_int;
+        NativeFunction u64_from_f32;
+        NativeFunction u64_from_f64;
+        NativeFunction u64_unary_plus;
+        NativeFunction u64_unary_negation;
+        NativeFunction u64_one_complement;
+        NativeFunction u64_multiplication;
+        NativeFunction u64_division;
+        NativeFunction u64_remainder;
+        NativeFunction u64_addition;
+        NativeFunction u64_subtraction;
+        NativeFunction u64_right_shift;
+        NativeFunction u64_left_shift;
+        NativeFunction u64_less_than;
+        NativeFunction u64_greater_than;
+        NativeFunction u64_less_than_equals;
+        NativeFunction u64_greater_than_equals;
+        NativeFunction u64_equals;
+        NativeFunction u64_not_equals;
+        NativeFunction u64_AND;
+        NativeFunction u64_XOR;
+        NativeFunction u64_OR;
 
-        NativeAssociatedFunction f32__from_i8;
-        NativeAssociatedFunction f32__from_i16;
-        NativeAssociatedFunction f32__from_i32;
-        NativeAssociatedFunction f32__from_i64;
-        NativeAssociatedFunction f32__from_u8;
-        NativeAssociatedFunction f32__from_u16;
-        NativeAssociatedFunction f32__from_u32;
-        NativeAssociatedFunction f32__from_u64;
-        NativeAssociatedFunction f32__from_int;
-        NativeAssociatedFunction f32__from_f64;
-        NativeAssociatedFunction f32__unary_plus;
-        NativeAssociatedFunction f32__unary_negation;
-        NativeAssociatedFunction f32__multiplication;
-        NativeAssociatedFunction f32__division;
-        NativeAssociatedFunction f32__remainder;
-        NativeAssociatedFunction f32__addition;
-        NativeAssociatedFunction f32__subtraction;
-        NativeAssociatedFunction f32__less_than;
-        NativeAssociatedFunction f32__greater_than;
-        NativeAssociatedFunction f32__less_than_equals;
-        NativeAssociatedFunction f32__greater_than_equals;
-        NativeAssociatedFunction f32__equals;
-        NativeAssociatedFunction f32__not_equals;
+        NativeFunction int_from_i8;
+        NativeFunction int_from_i16;
+        NativeFunction int_from_i32;
+        NativeFunction int_from_i64;
+        NativeFunction int_from_u8;
+        NativeFunction int_from_u16;
+        NativeFunction int_from_u32;
+        NativeFunction int_from_u64;
+        NativeFunction int_from_f32;
+        NativeFunction int_from_f64;
+        NativeFunction int_unary_plus;
+        NativeFunction int_unary_negation;
+        NativeFunction int_one_complement;
+        NativeFunction int_multiplication;
+        NativeFunction int_division;
+        NativeFunction int_remainder;
+        NativeFunction int_addition;
+        NativeFunction int_subtraction;
+        NativeFunction int_right_shift;
+        NativeFunction int_left_shift;
+        NativeFunction int_less_than;
+        NativeFunction int_greater_than;
+        NativeFunction int_less_than_equals;
+        NativeFunction int_greater_than_equals;
+        NativeFunction int_equals;
+        NativeFunction int_not_equals;
+        NativeFunction int_AND;
+        NativeFunction int_XOR;
+        NativeFunction int_OR;
 
-        NativeAssociatedFunction f64__from_i8;
-        NativeAssociatedFunction f64__from_i16;
-        NativeAssociatedFunction f64__from_i32;
-        NativeAssociatedFunction f64__from_i64;
-        NativeAssociatedFunction f64__from_u8;
-        NativeAssociatedFunction f64__from_u16;
-        NativeAssociatedFunction f64__from_u32;
-        NativeAssociatedFunction f64__from_u64;
-        NativeAssociatedFunction f64__from_int;
-        NativeAssociatedFunction f64__from_f32;
-        NativeAssociatedFunction f64__unary_plus;
-        NativeAssociatedFunction f64__unary_negation;
-        NativeAssociatedFunction f64__multiplication;
-        NativeAssociatedFunction f64__division;
-        NativeAssociatedFunction f64__remainder;
-        NativeAssociatedFunction f64__addition;
-        NativeAssociatedFunction f64__subtraction;
-        NativeAssociatedFunction f64__less_than;
-        NativeAssociatedFunction f64__greater_than;
-        NativeAssociatedFunction f64__less_than_equals;
-        NativeAssociatedFunction f64__greater_than_equals;
-        NativeAssociatedFunction f64__equals;
-        NativeAssociatedFunction f64__not_equals;
+        NativeFunction f32_from_i8;
+        NativeFunction f32_from_i16;
+        NativeFunction f32_from_i32;
+        NativeFunction f32_from_i64;
+        NativeFunction f32_from_u8;
+        NativeFunction f32_from_u16;
+        NativeFunction f32_from_u32;
+        NativeFunction f32_from_u64;
+        NativeFunction f32_from_int;
+        NativeFunction f32_from_f64;
+        NativeFunction f32_unary_plus;
+        NativeFunction f32_unary_negation;
+        NativeFunction f32_multiplication;
+        NativeFunction f32_division;
+        NativeFunction f32_remainder;
+        NativeFunction f32_addition;
+        NativeFunction f32_subtraction;
+        NativeFunction f32_less_than;
+        NativeFunction f32_greater_than;
+        NativeFunction f32_less_than_equals;
+        NativeFunction f32_greater_than_equals;
+        NativeFunction f32_equals;
+        NativeFunction f32_not_equals;
 
-        NativeAssociatedFunctionTemplate StrongPtr__new;
-        NativeAssociatedFunctionTemplate StrongPtr__value;
+        NativeFunction f64_from_i8;
+        NativeFunction f64_from_i16;
+        NativeFunction f64_from_i32;
+        NativeFunction f64_from_i64;
+        NativeFunction f64_from_u8;
+        NativeFunction f64_from_u16;
+        NativeFunction f64_from_u32;
+        NativeFunction f64_from_u64;
+        NativeFunction f64_from_int;
+        NativeFunction f64_from_f32;
+        NativeFunction f64_unary_plus;
+        NativeFunction f64_unary_negation;
+        NativeFunction f64_multiplication;
+        NativeFunction f64_division;
+        NativeFunction f64_remainder;
+        NativeFunction f64_addition;
+        NativeFunction f64_subtraction;
+        NativeFunction f64_less_than;
+        NativeFunction f64_greater_than;
+        NativeFunction f64_less_than_equals;
+        NativeFunction f64_greater_than_equals;
+        NativeFunction f64_equals;
+        NativeFunction f64_not_equals;
 
-        NativeAssociatedFunctionTemplate WeakPtr__from;
+        NativeFunction weak_ptr_from;
+        NativeFunction weak_ptr_from_dyn;
+        NativeFunction weak_ptr_copy;
+        NativeFunction weak_ptr_drop;
+        NativeFunction weak_ptr_lock;
+        NativeFunction weak_ptr_lock_dyn;
+
+        NativeFunction strong_ptr_new;
+        NativeFunction strong_ptr_value;
+        NativeFunction strong_ptr_copy;
+        NativeFunction strong_ptr_drop;
+
+        NativeFunction dyn_strong_ptr_from;
+        NativeFunction dyn_strong_ptr_copy;
+        NativeFunction dyn_strong_ptr_drop;
+        NativeFunction dyn_strong_ptr_value_ptr;
+        NativeFunction dyn_strong_ptr_set_value_ptr;
+        NativeFunction dyn_strong_ptr_vtbl_ptr;
+        NativeFunction dyn_strong_ptr_set_vtbl_ptr;
+        NativeFunction dyn_strong_ptr_control_block_ptr;
+        NativeFunction dyn_strong_ptr_set_control_block_ptr;
+
+        NativeFunction strong_ptr_to_dyn_strong_ptr;
 
     private:
         Lazy<std::vector<INative*>> m_Natives;
         Lazy<std::vector<NativeType*>> m_Types;
-        Lazy<std::vector<NativeTypeTemplate*>> m_TypeTemplates;
         Lazy<std::vector<NativeFunction*>> m_Functions;
-        Lazy<std::vector<NativeFunctionTemplate*>> m_FunctionTemplates;
-        Lazy<std::vector<NativeAssociatedFunction*>> m_AssociatedFunctions;
-        Lazy<std::vector<NativeAssociatedFunctionTemplate*>> m_AssociatedFunctionTemplates;
 
         Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>> m_ImplicitFromOpMap;
         Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>> m_ExplicitFromOpMap;
+
+        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>> m_UnaryOpMap;
+        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>> m_BinaryOpMap;
+
+        Lazy<std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_CopyOpMap;
+        Lazy<std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_DropOpMap;
 
         Lazy<std::set<const NativeType*>> m_SignedIntTypesSet;
     };

@@ -106,26 +106,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateUnexpectedTokenExpectedOverloadableOpError(
-        const Token& unexpectedToken
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        const std::string message =
-            "unexpected " + CreateTokenKindString(unexpectedToken.Kind) +
-            ", expected an overloadable operator";
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            unexpectedToken.SrcLocation,
-            message
-        );
-
-        return group;
-    }
-
-    auto CreateEmptyTemplateParamsError(
+    auto CreateEmptyTypeParamsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
@@ -134,13 +115,13 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "empty template parameters"
+            "empty type parameters"
         );
 
         return group;
     }
 
-    auto CreateEmptyTemplateArgsError(
+    auto CreateEmptyTypeArgsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
@@ -149,7 +130,7 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "empty template arguments"
+            "empty type arguments"
         );
 
         return group;
@@ -201,14 +182,14 @@ namespace Ace
     }
 
     auto CreateEmptyModifiersError(
-        const Token& minusGreaterThanToken
+        const Token& colonColonToken
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
-            minusGreaterThanToken.SrcLocation,
+            colonColonToken.SrcLocation,
             "empty modifier list"
         );
 
@@ -238,7 +219,27 @@ namespace Ace
         return group;
     }
 
-    auto CreateTemplateSpecializationError(
+    auto CreateMissingSelfModifierAfterStrongPtrError(
+        const Token& strongPtrModifierToken
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        const std::string message =
+            "missing `" +
+            std::string{ TokenKindToKeywordMap.at(TokenKind::SelfKeyword) } +
+            "` modifier after " + CreateTokenKindString(TokenKind::Asterisk);
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            strongPtrModifierToken.SrcLocation.CreateLast(),
+            message
+        );
+
+        return group;
+    }
+
+    auto CreateUnconstrainedTypeParamError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
@@ -247,126 +248,37 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "template specialization"
+            "unconstrained type parameter"
         );
 
         return group;
     }
 
-    auto CreateUnexpectedUnaryOpParamCountError(
-        const Token& opToken
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        const std::string message = 
-            "operator " + CreateOpString(opToken) + " must have 1 parameter";
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            opToken.SrcLocation,
-            message
-        );
-
-        return group;
-    }
-
-    auto CreateUnexpectedBinaryOpParamCountError(
-        const Token& opToken
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        const std::string message = 
-            "operator " + CreateOpString(opToken) + " must have 2 parameters";
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            opToken.SrcLocation,
-            message
-        );
-
-        return group;
-    }
-
-    auto CreateUnexpectedUnaryOrBinaryOpParamCountError(
-        const Token& opToken
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        const std::string message = 
-            "operator " + CreateOpString(opToken) +
-            " must have 1 or 2 parameters";
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            opToken.SrcLocation,
-            message
-        );
-
-        return group;
-    }
-
-    auto CreateUnknownIdentOpError(
-        const Token& opToken
+    auto CreateConstrainedNonGenericSymbolError(
+        const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
-            opToken.SrcLocation,
-            "unknown operator"
+            srcLocation,
+            "constrained non-generic symbol"
         );
 
         return group;
     }
 
-    auto CreateOpMustBePublicError(
-        const Token& nameToken
+    auto CreateEmptyConstraintsError(
+        const Token& whereToken
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
-            nameToken.SrcLocation,
-            "operator is not public"
-        );
-
-        return group;
-    }
-
-    auto CreateInstanceOpError(
-        const Token& nameToken
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            nameToken.SrcLocation,
-            "instance operator"
-        );
-
-        return group;
-    }
-
-    auto CreateMissingSelfModifierAfterStrongPtrError(
-        const Token& strongPtrModifierToken
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        const std::string message = std::string{} +
-            "missing `" + SpecialIdent::Self + "` modifier after " +
-            CreateTokenKindString(TokenKind::Asterisk);
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            strongPtrModifierToken.SrcLocation.CreateLast(),
-            message
+            whereToken.SrcLocation,
+            "empty constraint list"
         );
 
         return group;

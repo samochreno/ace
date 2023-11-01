@@ -12,7 +12,6 @@
 #include "Package.hpp"
 #include "Scope.hpp"
 #include "Natives.hpp"
-#include "TemplateInstantiator.hpp"
 #include "ErrorSymbols.hpp"
 
 namespace Ace
@@ -34,8 +33,7 @@ namespace Ace
         auto GetOutputPath() const -> const std::filesystem::path&;
 
         auto GetGlobalScope() const -> const std::shared_ptr<Scope>&;
-        auto GetTemplateInstantiator() const -> const TemplateInstantiator&;
-        auto GetTemplateInstantiator()       ->       TemplateInstantiator&;
+        auto GetPackageBodyScope() const -> const std::shared_ptr<Scope>&;
 
         auto GetVoidTypeSymbol() const -> ITypeSymbol*;
         auto GetErrorSymbols() const -> const ErrorSymbols&;
@@ -49,7 +47,7 @@ namespace Ace
         std::filesystem::path m_OutputPath{};
 
         GlobalScope m_GlobalScope{};
-        TemplateInstantiator m_TemplateInstantiator{};
+        std::shared_ptr<Scope> m_PackageBodyScope{};
 
         ITypeSymbol* m_VoidTypeSymbol{};
         ErrorSymbols m_ErrorSymbols{};

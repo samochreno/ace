@@ -1,11 +1,14 @@
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 
 #include <memory>
+#include <vector>
 
 #include "Scope.hpp"
 #include "Ident.hpp"
+#include "Noun.hpp"
 #include "AccessModifier.hpp"
 #include "Symbols/Types/SizedTypeSymbol.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 
 namespace Ace
 {
@@ -19,19 +22,14 @@ namespace Ace
     {
     }
 
+    auto LocalVarSymbol::CreateTypeNoun() const -> Noun
+    {
+        return Noun{ Article::A, "local variable" };
+    }
+
     auto LocalVarSymbol::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_Scope;
-    }
-
-    auto LocalVarSymbol::GetName() const -> const Ident&
-    {
-        return m_Name;
-    }
-
-    auto LocalVarSymbol::GetKind() const -> SymbolKind
-    {
-        return SymbolKind::LocalVar;
     }
 
     auto LocalVarSymbol::GetCategory() const -> SymbolCategory
@@ -41,10 +39,27 @@ namespace Ace
 
     auto LocalVarSymbol::GetAccessModifier() const -> AccessModifier
     {
-        return AccessModifier::Private;
+        return AccessModifier::Priv;
     }
 
-    auto LocalVarSymbol::GetType() const -> ISizedTypeSymbol*
+    auto LocalVarSymbol::GetName() const -> const Ident&
+    {
+        return m_Name;
+    }
+
+    auto LocalVarSymbol::CreateInstantiated(
+        const std::shared_ptr<Scope>& scope,
+        const InstantiationContext& context
+    ) const -> std::unique_ptr<ISymbol>
+    {
+        return std::make_unique<LocalVarSymbol>(
+            scope,
+            GetName(),
+            CreateInstantiated<ISizedTypeSymbol>(GetType(), context)
+        );
+    }
+
+    auto LocalVarSymbol::GetSizedType() const -> ISizedTypeSymbol*
     {
         return m_Type;
     }

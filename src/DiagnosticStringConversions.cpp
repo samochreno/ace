@@ -3,10 +3,10 @@
 #include <string>
 #include <nlohmann/json.hpp>
 
+#include "Assert.hpp"
 #include "TokenKind.hpp"
 #include "Keyword.hpp"
 #include "AccessModifier.hpp"
-#include "SymbolKind.hpp"
 #include "SymbolCategory.hpp"
 #include "TokenKind.hpp"
 
@@ -316,118 +316,14 @@ namespace Ace
     {
         switch (accessModifier)
         {
-            case AccessModifier::Public:
-            {
-                return "public";
-            }
-
-            case AccessModifier::Private:
+            case AccessModifier::Priv:
             {
                 return "private";
             }
-        }
-    }
 
-    auto CreateSymbolKindString(const SymbolKind symbolKind) -> std::string
-    {
-        switch (symbolKind)
-        {
-            case SymbolKind::Module:
+            case AccessModifier::Pub:
             {
-                return "module";
-            }
-
-            case SymbolKind::Void:
-            {
-                return "void";
-            }
-
-            case SymbolKind::Trait:
-            {
-                return "trait";
-            }
-
-            case SymbolKind::Struct:
-            {
-                return "struct";
-            }
-
-            case SymbolKind::Label:
-            {
-                return "label";
-            }
-
-            case SymbolKind::Function:
-            {
-                return "function";
-            }
-
-            case SymbolKind::StaticVar:
-            {
-                return "global variable";
-            }
-
-            case SymbolKind::InstanceVar:
-            {
-                return "field";
-            }
-
-            case SymbolKind::LocalVar:
-            {
-                return "local variable";
-            }
-
-            case SymbolKind::ParamVar:
-            {
-                return "parameter";
-            }
-
-            case SymbolKind::FunctionTemplate:
-            {
-                return "function template";
-            }
-
-            case SymbolKind::TypeTemplate:
-            {
-                return "type template";
-            }
-            
-            case SymbolKind::TypeAlias:
-            {
-                return "type alias";
-            }
-
-            case SymbolKind::ImplTemplateParam:
-            case SymbolKind::TemplateParam:
-            {
-                return "template parameter";
-            }
-        }
-    }
-
-    auto CreateSymbolKindStringWithArticle(
-        const SymbolKind symbolKind
-    ) -> std::string
-    {
-        switch (symbolKind)
-        {
-            case SymbolKind::Module:
-            case SymbolKind::Void:
-            case SymbolKind::Trait:
-            case SymbolKind::Struct:
-            case SymbolKind::Label:
-            case SymbolKind::Function:
-            case SymbolKind::StaticVar:
-            case SymbolKind::InstanceVar:
-            case SymbolKind::LocalVar:
-            case SymbolKind::ParamVar:
-            case SymbolKind::FunctionTemplate:
-            case SymbolKind::TypeTemplate:
-            case SymbolKind::TypeAlias:
-            case SymbolKind::ImplTemplateParam:
-            case SymbolKind::TemplateParam:
-            {
-                return "a " + CreateSymbolKindString(symbolKind);
+                return "public";
             }
         }
     }

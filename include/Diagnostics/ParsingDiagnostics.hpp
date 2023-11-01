@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Token.hpp"
@@ -29,15 +27,11 @@ namespace Ace
         const Token& unexpectedToken
     ) -> DiagnosticGroup;
 
-    auto CreateUnexpectedTokenExpectedOverloadableOpError(
-        const Token& unexpectedToken
-    ) -> DiagnosticGroup;
-
-    auto CreateEmptyTemplateParamsError(
+    auto CreateEmptyTypeParamsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 
-    auto CreateEmptyTemplateArgsError(
+    auto CreateEmptyTypeArgsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 
@@ -54,7 +48,7 @@ namespace Ace
     ) -> DiagnosticGroup;
 
     auto CreateEmptyModifiersError(
-        const Token& minusGreaterThanToken
+        const Token& colonColonToken
     ) -> DiagnosticGroup;
 
     auto CreateMissingTokenError(
@@ -62,35 +56,19 @@ namespace Ace
         const TokenKind expectedTokenKind
     ) -> DiagnosticGroup;
 
-    auto CreateTemplateSpecializationError(
+    auto CreateMissingSelfModifierAfterStrongPtrError(
+        const Token& strongPtrModifierToken
+    ) -> DiagnosticGroup;
+
+    auto CreateUnconstrainedTypeParamError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 
-    auto CreateUnexpectedUnaryOpParamCountError(
-        const Token& opToken
+    auto CreateConstrainedNonGenericSymbolError(
+        const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 
-    auto CreateUnexpectedBinaryOpParamCountError(
-        const Token& opToken
-    ) -> DiagnosticGroup;
-
-    auto CreateUnexpectedUnaryOrBinaryOpParamCountError(
-        const Token& opToken
-    ) -> DiagnosticGroup;
-
-    auto CreateUnknownIdentOpError(
-        const Token& opToken
-    ) -> DiagnosticGroup;
-
-    auto CreateOpMustBePublicError(
-        const Token& nameToken
-    ) -> DiagnosticGroup;
-
-    auto CreateInstanceOpError(
-        const Token& nameToken
-    ) -> DiagnosticGroup;
-
-    auto CreateMissingSelfModifierAfterStrongPtrError(
-        const Token& strongPtrModifierToken
+    auto CreateEmptyConstraintsError(
+        const Token& whereToken
     ) -> DiagnosticGroup;
 }

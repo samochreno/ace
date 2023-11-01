@@ -35,7 +35,8 @@ id_0_5: struct {
 }
 
 impl id_0_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -84,7 +85,8 @@ id_1_5: struct {
 }
 
 impl id_1_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -133,7 +135,8 @@ id_2_5: struct {
 }
 
 impl id_2_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -182,7 +185,8 @@ id_3_5: struct {
 }
 
 impl id_3_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -231,7 +235,8 @@ id_4_5: struct {
 }
 
 impl id_4_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -280,7 +285,8 @@ id_5_5: struct {
 }
 
 impl id_5_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -329,7 +335,8 @@ id_6_5: struct {
 }
 
 impl id_6_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -378,7 +385,8 @@ id_7_5: struct {
 }
 
 impl id_7_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -427,7 +435,8 @@ id_8_5: struct {
 }
 
 impl id_8_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -476,7 +485,8 @@ id_9_5: struct {
 }
 
 impl id_9_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -525,7 +535,8 @@ id_10_5: struct {
 }
 
 impl id_10_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -574,7 +585,8 @@ id_11_5: struct {
 }
 
 impl id_11_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -623,7 +635,8 @@ id_12_5: struct {
 }
 
 impl id_12_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -672,7 +685,8 @@ id_13_5: struct {
 }
 
 impl id_13_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -721,7 +735,8 @@ id_14_5: struct {
 }
 
 impl id_14_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -770,7 +785,8 @@ id_15_5: struct {
 }
 
 impl id_15_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -819,7 +835,8 @@ id_16_5: struct {
 }
 
 impl id_16_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -868,7 +885,8 @@ id_17_5: struct {
 }
 
 impl id_17_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -917,7 +935,8 @@ id_18_5: struct {
 }
 
 impl id_18_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -966,7 +985,8 @@ id_19_5: struct {
 }
 
 impl id_19_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1015,7 +1035,8 @@ id_20_5: struct {
 }
 
 impl id_20_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1064,7 +1085,8 @@ id_21_5: struct {
 }
 
 impl id_21_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1113,7 +1135,8 @@ id_22_5: struct {
 }
 
 impl id_22_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1162,7 +1185,8 @@ id_23_5: struct {
 }
 
 impl id_23_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1211,7 +1235,8 @@ id_24_5: struct {
 }
 
 impl id_24_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1260,7 +1285,8 @@ id_25_5: struct {
 }
 
 impl id_25_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1309,7 +1335,8 @@ id_26_5: struct {
 }
 
 impl id_26_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1358,7 +1385,8 @@ id_27_5: struct {
 }
 
 impl id_27_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1407,7 +1435,8 @@ id_28_5: struct {
 }
 
 impl id_28_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1456,7 +1485,8 @@ id_29_5: struct {
 }
 
 impl id_29_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1505,7 +1535,8 @@ id_30_5: struct {
 }
 
 impl id_30_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1554,7 +1585,8 @@ id_31_5: struct {
 }
 
 impl id_31_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1603,7 +1635,8 @@ id_32_5: struct {
 }
 
 impl id_32_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1652,7 +1685,8 @@ id_33_5: struct {
 }
 
 impl id_33_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1701,7 +1735,8 @@ id_34_5: struct {
 }
 
 impl id_34_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1750,7 +1785,8 @@ id_35_5: struct {
 }
 
 impl id_35_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1799,7 +1835,8 @@ id_36_5: struct {
 }
 
 impl id_36_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1848,7 +1885,8 @@ id_37_5: struct {
 }
 
 impl id_37_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1897,7 +1935,8 @@ id_38_5: struct {
 }
 
 impl id_38_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1946,7 +1985,8 @@ id_39_5: struct {
 }
 
 impl id_39_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -1995,7 +2035,8 @@ id_40_5: struct {
 }
 
 impl id_40_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2044,7 +2085,8 @@ id_41_5: struct {
 }
 
 impl id_41_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2093,7 +2135,8 @@ id_42_5: struct {
 }
 
 impl id_42_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2142,7 +2185,8 @@ id_43_5: struct {
 }
 
 impl id_43_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2191,7 +2235,8 @@ id_44_5: struct {
 }
 
 impl id_44_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2240,7 +2285,8 @@ id_45_5: struct {
 }
 
 impl id_45_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2289,7 +2335,8 @@ id_46_5: struct {
 }
 
 impl id_46_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2338,7 +2385,8 @@ id_47_5: struct {
 }
 
 impl id_47_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2387,7 +2435,8 @@ id_48_5: struct {
 }
 
 impl id_48_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2436,7 +2485,8 @@ id_49_5: struct {
 }
 
 impl id_49_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2485,7 +2535,8 @@ id_50_5: struct {
 }
 
 impl id_50_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2534,7 +2585,8 @@ id_51_5: struct {
 }
 
 impl id_51_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2583,7 +2635,8 @@ id_52_5: struct {
 }
 
 impl id_52_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2632,7 +2685,8 @@ id_53_5: struct {
 }
 
 impl id_53_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2681,7 +2735,8 @@ id_54_5: struct {
 }
 
 impl id_54_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2730,7 +2785,8 @@ id_55_5: struct {
 }
 
 impl id_55_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2779,7 +2835,8 @@ id_56_5: struct {
 }
 
 impl id_56_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2828,7 +2885,8 @@ id_57_5: struct {
 }
 
 impl id_57_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2877,7 +2935,8 @@ id_58_5: struct {
 }
 
 impl id_58_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2926,7 +2985,8 @@ id_59_5: struct {
 }
 
 impl id_59_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -2975,7 +3035,8 @@ id_60_5: struct {
 }
 
 impl id_60_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3024,7 +3085,8 @@ id_61_5: struct {
 }
 
 impl id_61_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3073,7 +3135,8 @@ id_62_5: struct {
 }
 
 impl id_62_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3122,7 +3185,8 @@ id_63_5: struct {
 }
 
 impl id_63_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3171,7 +3235,8 @@ id_64_5: struct {
 }
 
 impl id_64_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3220,7 +3285,8 @@ id_65_5: struct {
 }
 
 impl id_65_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3269,7 +3335,8 @@ id_66_5: struct {
 }
 
 impl id_66_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3318,7 +3385,8 @@ id_67_5: struct {
 }
 
 impl id_67_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3367,7 +3435,8 @@ id_68_5: struct {
 }
 
 impl id_68_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3416,7 +3485,8 @@ id_69_5: struct {
 }
 
 impl id_69_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3465,7 +3535,8 @@ id_70_5: struct {
 }
 
 impl id_70_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3514,7 +3585,8 @@ id_71_5: struct {
 }
 
 impl id_71_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3563,7 +3635,8 @@ id_72_5: struct {
 }
 
 impl id_72_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3612,7 +3685,8 @@ id_73_5: struct {
 }
 
 impl id_73_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3661,7 +3735,8 @@ id_74_5: struct {
 }
 
 impl id_74_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3710,7 +3785,8 @@ id_75_5: struct {
 }
 
 impl id_75_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3759,7 +3835,8 @@ id_76_5: struct {
 }
 
 impl id_76_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3808,7 +3885,8 @@ id_77_5: struct {
 }
 
 impl id_77_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3857,7 +3935,8 @@ id_78_5: struct {
 }
 
 impl id_78_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3906,7 +3985,8 @@ id_79_5: struct {
 }
 
 impl id_79_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -3955,7 +4035,8 @@ id_80_5: struct {
 }
 
 impl id_80_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4004,7 +4085,8 @@ id_81_5: struct {
 }
 
 impl id_81_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4053,7 +4135,8 @@ id_82_5: struct {
 }
 
 impl id_82_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4102,7 +4185,8 @@ id_83_5: struct {
 }
 
 impl id_83_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4151,7 +4235,8 @@ id_84_5: struct {
 }
 
 impl id_84_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4200,7 +4285,8 @@ id_85_5: struct {
 }
 
 impl id_85_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4249,7 +4335,8 @@ id_86_5: struct {
 }
 
 impl id_86_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4298,7 +4385,8 @@ id_87_5: struct {
 }
 
 impl id_87_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4347,7 +4435,8 @@ id_88_5: struct {
 }
 
 impl id_88_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4396,7 +4485,8 @@ id_89_5: struct {
 }
 
 impl id_89_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4445,7 +4535,8 @@ id_90_5: struct {
 }
 
 impl id_90_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4494,7 +4585,8 @@ id_91_5: struct {
 }
 
 impl id_91_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4543,7 +4635,8 @@ id_92_5: struct {
 }
 
 impl id_92_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4592,7 +4685,8 @@ id_93_5: struct {
 }
 
 impl id_93_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4641,7 +4735,8 @@ id_94_5: struct {
 }
 
 impl id_94_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4690,7 +4785,8 @@ id_95_5: struct {
 }
 
 impl id_95_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4739,7 +4835,8 @@ id_96_5: struct {
 }
 
 impl id_96_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4788,7 +4885,8 @@ id_97_5: struct {
 }
 
 impl id_97_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4837,7 +4935,8 @@ id_98_5: struct {
 }
 
 impl id_98_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4886,7 +4985,8 @@ id_99_5: struct {
 }
 
 impl id_99_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4935,7 +5035,8 @@ id_100_5: struct {
 }
 
 impl id_100_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -4984,7 +5085,8 @@ id_101_5: struct {
 }
 
 impl id_101_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5033,7 +5135,8 @@ id_102_5: struct {
 }
 
 impl id_102_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5082,7 +5185,8 @@ id_103_5: struct {
 }
 
 impl id_103_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5131,7 +5235,8 @@ id_104_5: struct {
 }
 
 impl id_104_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5180,7 +5285,8 @@ id_105_5: struct {
 }
 
 impl id_105_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5229,7 +5335,8 @@ id_106_5: struct {
 }
 
 impl id_106_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5278,7 +5385,8 @@ id_107_5: struct {
 }
 
 impl id_107_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5327,7 +5435,8 @@ id_108_5: struct {
 }
 
 impl id_108_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5376,7 +5485,8 @@ id_109_5: struct {
 }
 
 impl id_109_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5425,7 +5535,8 @@ id_110_5: struct {
 }
 
 impl id_110_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5474,7 +5585,8 @@ id_111_5: struct {
 }
 
 impl id_111_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5523,7 +5635,8 @@ id_112_5: struct {
 }
 
 impl id_112_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5572,7 +5685,8 @@ id_113_5: struct {
 }
 
 impl id_113_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5621,7 +5735,8 @@ id_114_5: struct {
 }
 
 impl id_114_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5670,7 +5785,8 @@ id_115_5: struct {
 }
 
 impl id_115_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5719,7 +5835,8 @@ id_116_5: struct {
 }
 
 impl id_116_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5768,7 +5885,8 @@ id_117_5: struct {
 }
 
 impl id_117_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5817,7 +5935,8 @@ id_118_5: struct {
 }
 
 impl id_118_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5866,7 +5985,8 @@ id_119_5: struct {
 }
 
 impl id_119_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5915,7 +6035,8 @@ id_120_5: struct {
 }
 
 impl id_120_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -5964,7 +6085,8 @@ id_121_5: struct {
 }
 
 impl id_121_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6013,7 +6135,8 @@ id_122_5: struct {
 }
 
 impl id_122_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6062,7 +6185,8 @@ id_123_5: struct {
 }
 
 impl id_123_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6111,7 +6235,8 @@ id_124_5: struct {
 }
 
 impl id_124_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6160,7 +6285,8 @@ id_125_5: struct {
 }
 
 impl id_125_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6209,7 +6335,8 @@ id_126_5: struct {
 }
 
 impl id_126_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6258,7 +6385,8 @@ id_127_5: struct {
 }
 
 impl id_127_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6307,7 +6435,8 @@ id_128_5: struct {
 }
 
 impl id_128_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6356,7 +6485,8 @@ id_129_5: struct {
 }
 
 impl id_129_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6405,7 +6535,8 @@ id_130_5: struct {
 }
 
 impl id_130_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6454,7 +6585,8 @@ id_131_5: struct {
 }
 
 impl id_131_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6503,7 +6635,8 @@ id_132_5: struct {
 }
 
 impl id_132_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6552,7 +6685,8 @@ id_133_5: struct {
 }
 
 impl id_133_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6601,7 +6735,8 @@ id_134_5: struct {
 }
 
 impl id_134_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6650,7 +6785,8 @@ id_135_5: struct {
 }
 
 impl id_135_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6699,7 +6835,8 @@ id_136_5: struct {
 }
 
 impl id_136_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6748,7 +6885,8 @@ id_137_5: struct {
 }
 
 impl id_137_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6797,7 +6935,8 @@ id_138_5: struct {
 }
 
 impl id_138_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6846,7 +6985,8 @@ id_139_5: struct {
 }
 
 impl id_139_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6895,7 +7035,8 @@ id_140_5: struct {
 }
 
 impl id_140_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6944,7 +7085,8 @@ id_141_5: struct {
 }
 
 impl id_141_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -6993,7 +7135,8 @@ id_142_5: struct {
 }
 
 impl id_142_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -7042,7 +7185,8 @@ id_143_5: struct {
 }
 
 impl id_143_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -7091,7 +7235,8 @@ id_144_5: struct {
 }
 
 impl id_144_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -7140,7 +7285,8 @@ id_145_5: struct {
 }
 
 impl id_145_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -7189,7 +7335,8 @@ id_146_5: struct {
 }
 
 impl id_146_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -7238,7 +7385,8 @@ id_147_5: struct {
 }
 
 impl id_147_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -7287,7 +7435,8 @@ id_148_5: struct {
 }
 
 impl id_148_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }
@@ -7336,7 +7485,8 @@ id_149_5: struct {
 }
 
 impl id_149_5 {
-    field(): int -> self {
+    self ::
+    field(): int {
         ret self.field;
     }
 }

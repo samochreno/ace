@@ -1,45 +1,45 @@
 #include "Natives.hpp"
 
+#include <memory>
 #include <vector>
 #include <optional>
 #include <set>
-#include <algorithm>
+#include <string_view>
 
 #include "Diagnostic.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
-#include "Symbols/Templates/TypeTemplateSymbol.hpp"
-#include "Symbols/Templates/FunctionTemplateSymbol.hpp"
 #include "Emittable.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Emitter.hpp"
-#include "SpecialIdent.hpp"
-#include "Diagnostic.hpp"
+#include "Op.hpp"
 
 namespace Ace
 {
-    class FunctionEmittableBody : public IEmittable<void>
+    class FunctionEmittableBlock : public IEmittable<void>
     {
     public:
-        FunctionEmittableBody(const FunctionBodyEmitter& bodyEmitter)
-            : m_BodyEmitter{ bodyEmitter }
+        FunctionEmittableBlock(
+            const FunctionBlockEmitter& blockEmitter
+        ) : m_BlockEmitter{ blockEmitter }
         {
         }
-        virtual ~FunctionEmittableBody() = default;
+        virtual ~FunctionEmittableBlock() = default;
 
         auto Emit(Emitter& emitter) const -> void final
         {
-            m_BodyEmitter(emitter);
+            m_BlockEmitter(emitter);
         }
-
+        
    private:
-        FunctionBodyEmitter m_BodyEmitter;
+        FunctionBlockEmitter m_BlockEmitter;
     };
 
+    template<typename T>
     static auto CreateSymbolName(
         const SrcLocation& srcLocation,
-        const std::vector<const char*>& nameSectionStrings
+        const std::vector<T>& nameSectionStrings
     ) -> SymbolName
     {
         std::vector<SymbolNameSection> sections{};
@@ -47,11 +47,11 @@ namespace Ace
             begin(nameSectionStrings),
             end  (nameSectionStrings),
             back_inserter(sections),
-            [&](const char* const nameSectionString)
+            [&](const std::string_view nameSectionString)
             {
                 return SymbolNameSection
                 {
-                    Ident{ srcLocation, nameSectionString }
+                    Ident{ srcLocation, std::string{ nameSectionString } }
                 };
             }
         );
@@ -59,51 +59,19 @@ namespace Ace
         return SymbolName{ sections, SymbolNameResolutionScope::Global };
     }
 
-    static auto CreateAssociatedSymbolName(
-        const SrcLocation& srcLocation,
-        const INative& type,
-        const char* const name
-    ) -> SymbolName
-    {
-        auto symbolName = type.CreateFullyQualifiedName(srcLocation);
-        symbolName.Sections.emplace_back(Ident{ srcLocation, name });
-        return symbolName;
-    }
-
     NativeType::NativeType(
         Compilation* const compilation,
-        std::vector<const char*>&& nameSectionStrings,
-        std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>>&& irTypeGetter,
-        const NativeCopyabilityKind copyabilityKind
+        std::vector<const char*> nameSectionStrings,
+        const NativeSymbolKind kind,
+        const NativeCopyabilityKind copyabilityKind,
+        std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>> irTypeGetter
     ) : m_Compilation{ compilation },
         m_NameSectionStrings{ std::move(nameSectionStrings) },
         m_IRTypeGetter{ std::move(irTypeGetter) },
-        m_IsTriviallyCopyable{ copyabilityKind == NativeCopyabilityKind::Trivial },
-        m_Symbol
+        m_IsRoot{ kind == NativeSymbolKind::Root },
+        m_IsTriviallyCopyable
         {
-            [this]()
-            {
-                const auto globalScope = GetCompilation()->GetGlobalScope();
-                auto* const symbol = globalScope->ResolveStaticSymbol<ITypeSymbol>(
-                    CreateFullyQualifiedName(SrcLocation{})
-                ).Unwrap();
-
-                if (m_IRTypeGetter.has_value())
-                {
-                    dynamic_cast<ISizedTypeSymbol*>(
-                        symbol
-                    )->SetAsPrimitivelyEmittable();
-                }
-
-                if (m_IsTriviallyCopyable)
-                {
-                    dynamic_cast<ISizedTypeSymbol*>(
-                        symbol
-                    )->SetAsTriviallyCopyable();
-                }        
-
-                return symbol;
-            }
+            copyabilityKind == NativeCopyabilityKind::Trivial
         }
     {
         ACE_ASSERT(
@@ -121,15 +89,48 @@ namespace Ace
         const SrcLocation& srcLocation
     ) const -> SymbolName
     {
-        return CreateSymbolName(
-            srcLocation,
-            m_NameSectionStrings
+        return CreateSymbolName(srcLocation, m_NameSectionStrings);
+    }
+
+    auto NativeType::TryGetSymbol() const -> std::optional<ITypeSymbol*>
+    {
+        if (m_OptSymbol.has_value())
+        {
+            return m_OptSymbol;
+        }
+
+        const auto globalScope = GetCompilation()->GetGlobalScope();
+        const auto name =
+            CreateFullyQualifiedName(SrcLocation{ GetCompilation() });
+
+        m_OptSymbol = DiagnosticBag::Create().Collect(m_IsRoot ?
+            globalScope->ResolveRoot        <ITypeSymbol>(name) :
+            globalScope->ResolveStaticSymbol<ITypeSymbol>(name)
         );
+
+        if (m_OptSymbol.has_value())
+        {
+            if (m_IRTypeGetter.has_value())
+            {
+                dynamic_cast<IConcreteTypeSymbol*>(
+                    m_OptSymbol.value()
+                )->SetAsPrimitivelyEmittable();
+            }
+
+            if (m_IsTriviallyCopyable)
+            {
+                dynamic_cast<IConcreteTypeSymbol*>(
+                    m_OptSymbol.value()
+                )->SetAsTriviallyCopyable();
+            }        
+        }
+
+        return m_OptSymbol;
     }
 
     auto NativeType::GetSymbol() const -> ITypeSymbol*
     {
-        return m_Symbol.Get();
+        return TryGetSymbol().value();
     }
 
     auto NativeType::GetGenericSymbol() const -> ISymbol*
@@ -148,77 +149,15 @@ namespace Ace
         return m_IRTypeGetter.value()(context);
     }
 
-    NativeTypeTemplate::NativeTypeTemplate(
-        Compilation* const compilation,
-        std::vector<const char*>&& nameSectionStrings
-    ) : m_Compilation{ compilation },
-        m_NameSectionStrings{ std::move(nameSectionStrings) },
-        m_Symbol
-        {
-            [this]()
-            {
-                auto name = CreateFullyQualifiedName(SrcLocation{});
-                name.Sections.back().Name.String = SpecialIdent::CreateTemplate(
-                    name.Sections.back().Name.String
-                );
-
-                const auto globalScope = GetCompilation()->GetGlobalScope();
-                return globalScope->ResolveStaticSymbol<TypeTemplateSymbol>(
-                    name
-                ).Unwrap();
-            }
-        }
-    {
-    }
-
-    auto NativeTypeTemplate::GetCompilation() const -> Compilation*
-    {
-        return m_Compilation;
-    }
-
-    auto NativeTypeTemplate::CreateFullyQualifiedName(
-        const SrcLocation& srcLocation
-    ) const -> SymbolName
-    {
-        return CreateSymbolName(
-            srcLocation,
-            m_NameSectionStrings
-        );
-    }
-
-    auto NativeTypeTemplate::GetSymbol() const -> TypeTemplateSymbol*
-    {
-        return m_Symbol.Get();
-    }
-
-    auto NativeTypeTemplate::GetGenericSymbol() const -> ISymbol*
-    {
-        return GetSymbol();
-    }
-
     NativeFunction::NativeFunction(
         Compilation* const compilation,
-        std::vector<const char*>&& nameSectionStrings,
-        FunctionBodyEmitter&& bodyEmitter
+        std::vector<std::string> nameSectionStrings,
+        const NativeSymbolKind kind,
+        std::optional<FunctionBlockEmitter> optBlockEmitter
     ) : m_Compilation{ compilation },
         m_NameSectionStrings{ std::move(nameSectionStrings) },
-        m_BodyEmitter{ std::move(bodyEmitter) },
-        m_Symbol
-        {
-            [this]()
-            {
-                const auto globalScope = GetCompilation()->GetGlobalScope();
-                auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
-                    CreateFullyQualifiedName(SrcLocation{})
-                ).Unwrap();
-
-                symbol->BindBody(std::make_shared<FunctionEmittableBody>(
-                    m_BodyEmitter
-                ));
-
-                return symbol;
-            }
-        }
+        m_IsRoot{ kind == NativeSymbolKind::Root },
+        m_OptBlockEmitter{ std::move(optBlockEmitter) }
     {
     }
 
@@ -231,15 +170,50 @@ namespace Ace
         const SrcLocation& srcLocation
     ) const -> SymbolName
     {
-        return CreateSymbolName(
-            srcLocation,
-            m_NameSectionStrings
-        );
+        return CreateSymbolName(srcLocation, m_NameSectionStrings);
+    }
+
+    auto NativeFunction::TryGetSymbol() const -> std::optional<FunctionSymbol*>
+    {
+        if (m_OptSymbol.has_value())
+        {
+            return m_OptSymbol;
+        }
+
+        const auto globalScope = GetCompilation()->GetGlobalScope();
+        const auto name =
+            CreateFullyQualifiedName(SrcLocation{ GetCompilation() });
+
+        if (m_IsRoot)
+        {
+            m_OptSymbol = DiagnosticBag::Create().Collect(
+                globalScope->ResolveRoot<FunctionSymbol>(name)
+            );
+
+            ACE_ASSERT(!m_OptBlockEmitter.has_value());
+        }
+        else
+        {
+            m_OptSymbol = DiagnosticBag::Create().Collect(
+                globalScope->ResolveStaticSymbol<FunctionSymbol>(name)
+            );
+
+            if (m_OptSymbol.has_value() && m_OptBlockEmitter.has_value())
+            {
+                m_OptSymbol.value()->BindEmittableBlock(
+                    std::make_shared<FunctionEmittableBlock>(
+                        m_OptBlockEmitter.value()
+                    )
+                );
+            }
+        }
+
+        return m_OptSymbol;
     }
 
     auto NativeFunction::GetSymbol() const -> FunctionSymbol*
     {
-        return m_Symbol.Get();
+        return TryGetSymbol().value();
     }
 
     auto NativeFunction::GetGenericSymbol() const -> ISymbol*
@@ -247,1314 +221,1328 @@ namespace Ace
         return GetSymbol();
     }
 
-    NativeFunctionTemplate::NativeFunctionTemplate(
-        Compilation* const compilation,
-        std::vector<const char*>&& nameSectionStrings
-    ) : m_Compilation{ compilation },
-        m_NameSectionStrings{ std::move(nameSectionStrings) },
-        m_Symbol
+    static auto CreateTypeAliasNameString(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::string
+    {
+        if (&type == &natives.Int8)
         {
-            [this]()
-            {
-                const auto globalScope = GetCompilation()->GetGlobalScope();
-                return globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
-                    CreateFullyQualifiedName(SrcLocation{})
-                ).Unwrap();
-            }
+            return "i8";
         }
-    {
+        else if (&type == &natives.Int16)
+        {
+            return "i16";
+        }
+        else if (&type == &natives.Int32)
+        {
+            return "i32";
+        }
+        else if (&type == &natives.Int64)
+        {
+            return "i64";
+        }
+        else if (&type == &natives.UInt8)
+        {
+            return "u8";
+        }
+        else if (&type == &natives.UInt16)
+        {
+            return "u16";
+        }
+        else if (&type == &natives.UInt32)
+        {
+            return "u32";
+        }
+        else if (&type == &natives.UInt64)
+        {
+            return "u64";
+        }
+        else if (&type == &natives.Int)
+        {
+            return "int";
+        }
+        else if (&type == &natives.Float32)
+        {
+            return "f32";
+        }
+        else if (&type == &natives.Float64)
+        {
+            return "f64";
+        }
+
+        ACE_UNREACHABLE();
     }
 
-    auto NativeFunctionTemplate::GetCompilation() const -> Compilation*
+    static auto CreateName(
+        std::string mainName
+    ) -> std::vector<std::string>
     {
-        return m_Compilation;
+        return { "ace", "std", mainName };
     }
 
-    auto NativeFunctionTemplate::CreateFullyQualifiedName(
-        const SrcLocation& srcLocation
-    ) const -> SymbolName
+    static auto CreateFromName(
+        const Natives& natives,
+        const NativeType& targetType,
+        const NativeType& fromType
+    ) -> std::vector<std::string>
     {
-        return CreateSymbolName(
-            srcLocation,
-            m_NameSectionStrings
+        return CreateName(
+            CreateTypeAliasNameString(natives, targetType) +
+            "_from_" +
+            CreateTypeAliasNameString(natives, fromType)
         );
     }
 
-    auto NativeFunctionTemplate::GetSymbol() const -> FunctionTemplateSymbol*
+    static auto CreateUnaryPlusName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
     {
-        return m_Symbol.Get();
-    }
-
-    auto NativeFunctionTemplate::GetGenericSymbol() const -> ISymbol*
-    {
-        return GetSymbol();
-    }
-
-    NativeAssociatedFunction::NativeAssociatedFunction(
-        const INative& type,
-        const char* const name,
-        FunctionBodyEmitter&& bodyEmitter
-    ) : m_Type{ type },
-        m_Name{ name },
-        m_BodyEmitter{ std::move(bodyEmitter) },
-        m_Symbol
-        {
-            [this]()
-            {
-                const auto globalScope = GetCompilation()->GetGlobalScope();
-                auto* const symbol = globalScope->ResolveStaticSymbol<FunctionSymbol>(
-                    CreateFullyQualifiedName(SrcLocation{})
-                ).Unwrap();
-
-                symbol->BindBody(std::make_shared<FunctionEmittableBody>(
-                    m_BodyEmitter
-                ));
-
-                return symbol;
-            }
-        }
-    {
-    }
-
-    auto NativeAssociatedFunction::GetCompilation() const -> Compilation*
-    {
-        return m_Type.GetCompilation();
-    }
-
-    auto NativeAssociatedFunction::CreateFullyQualifiedName(
-        const SrcLocation& srcLocation
-    ) const -> SymbolName
-    {
-        return CreateAssociatedSymbolName(
-            srcLocation,
-            m_Type,
-            m_Name
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_unary_plus"
         );
     }
 
-    auto NativeAssociatedFunction::GetSymbol() const -> FunctionSymbol*
+    static auto CreateUnaryNegationName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
     {
-        return m_Symbol.Get();
-    }
-
-    auto NativeAssociatedFunction::GetGenericSymbol() const -> ISymbol*
-    {
-        return GetSymbol();
-    }
-
-    NativeAssociatedFunctionTemplate::NativeAssociatedFunctionTemplate(
-        const INative& type,
-        const char* const name
-    ) : m_Type{ type },
-        m_Name{ name },
-        m_Symbol
-        {
-            [this]()
-            {
-                const auto globalScope = GetCompilation()->GetGlobalScope();
-                return globalScope->ResolveStaticSymbol<FunctionTemplateSymbol>(
-                    CreateFullyQualifiedName(SrcLocation{})
-                ).Unwrap();
-            }
-        }
-    {
-    }
-
-    auto NativeAssociatedFunctionTemplate::GetCompilation() const -> Compilation*
-    {
-        return m_Type.GetCompilation();
-    }
-
-    auto NativeAssociatedFunctionTemplate::CreateFullyQualifiedName(
-        const SrcLocation& srcLocation
-    ) const -> SymbolName
-    {
-        return CreateAssociatedSymbolName(
-            srcLocation,
-            m_Type,
-            m_Name
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_unary_negation"
         );
     }
 
-    auto NativeAssociatedFunctionTemplate::GetSymbol() const -> FunctionTemplateSymbol*
+    static auto CreateOneComplementName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
     {
-        return m_Symbol.Get();
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_one_complement"
+        );
     }
 
-    auto NativeAssociatedFunctionTemplate::GetGenericSymbol() const -> ISymbol*
+    static auto CreateMultiplicationName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
     {
-        return GetSymbol();
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_multiplication"
+        );
+    }
+
+    static auto CreateDivisionName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_division"
+        );
+    }
+
+    static auto CreateRemainderName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_remainder"
+        );
+    }
+
+    static auto CreateAdditionName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_addition"
+        );
+    }
+
+    static auto CreateSubtractionName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_subtraction"
+        );
+    }
+
+    static auto CreateRightShiftName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_right_shift"
+        );
+    }
+
+    static auto CreateLeftShiftName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_left_shift"
+        );
+    }
+
+    static auto CreateLessThanName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_less_than"
+        );
+    }
+
+    static auto CreateGreaterThanName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_greater_than"
+        );
+    }
+
+    static auto CreateLessThanEqualsName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_less_than_equals"
+        );
+    }
+
+    static auto CreateGreaterThanEqualsName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_greater_than_equals"
+        );
+    }
+
+    static auto CreateEqualsName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_equals");
+    }
+
+    static auto CreateNotEqualsName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(
+            CreateTypeAliasNameString(natives, type) + "_not_equals"
+        );
+    }
+
+    static auto CreateANDName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_AND");
+    }
+
+    static auto CreateXORName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_XOR");
+    }
+
+    static auto CreateORName(
+        const Natives& natives,
+        const NativeType& type
+    ) -> std::vector<std::string>
+    {
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_OR");
     }
 
     namespace I
-    {        
-        static auto FromIntImpl(
-            const char* const name,
-            const NativeType& fromType,
-            const NativeType& targetType
-        ) -> NativeAssociatedFunction
-        {
-            return
-            {
-                targetType,
-                name,
-                [&](Emitter& emitter)
-                {
-                    auto* const value = [&]() -> llvm::Value*
-                    {
-                        auto* const fromIRType = fromType.GetIRType(
-                            emitter.GetContext()
-                        );
-                        auto* const toIRType = targetType.GetIRType(
-                            emitter.GetContext()
-                        );
-
-                        if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(fromType))
-                        {
-                            return emitter.GetBlockBuilder().Builder.CreateSExtOrTrunc(
-                                emitter.EmitLoadArg(0, fromIRType),
-                                toIRType
-                            );
-                        }
-                        else
-                        {
-                            return emitter.GetBlockBuilder().Builder.CreateZExtOrTrunc(
-                                emitter.EmitLoadArg(0, fromIRType),
-                                toIRType
-                            );
-                        }
-                    }();
-
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
-            };
-        }
-
-        static auto FromInt8(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_i8",
-                natives->Int8,
-                targetType
-            );
-        }
-
-        static auto FromInt16(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_i16",
-                natives->Int16,
-                targetType
-            );
-        }
-
-        static auto FromInt32(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_i32",
-                natives->Int32,
-                targetType
-            );
-        }
-
-        static auto FromInt64(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_i64", 
-                natives->Int64,
-                targetType
-            );
-        }
-
-        static auto FromUInt8(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_u8",
-                natives->UInt8,
-                targetType
-            );
-        }
-
-        static auto FromUInt16(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_u16",
-                natives->UInt16,
-                targetType
-            );
-        }
-
-        static auto FromUInt32(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_u32",
-                natives->UInt32,
-                targetType
-            );
-        }
-
-        static auto FromUInt64(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_u64",
-                natives->UInt64,
-                targetType
-            );
-        }
-
+    {
         static auto FromInt(
+            const Natives& natives,
             const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
+            const NativeType& fromType
+        ) -> NativeFunction
         {
-            return FromIntImpl(
-                "from_int",
-                natives->Int,
-                targetType
-            );
+            auto* const compilation = fromType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
+            {
+                auto* const fromIRType =
+                    fromType.GetIRType(emitter.GetContext());
+                auto* const toIRType =
+                    targetType.GetIRType(emitter.GetContext());
+
+                const bool isSigned = natives.IsIntTypeSigned(fromType);
+
+                auto* const value = isSigned ?
+                    emitter.GetBlock().Builder.CreateSExtOrTrunc(
+                        emitter.EmitLoadArg(0, fromIRType),
+                        toIRType
+                    ) :
+                    emitter.GetBlock().Builder.CreateZExtOrTrunc(
+                        emitter.EmitLoadArg(0, fromIRType),
+                        toIRType
+                    );
+
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateFromName(natives, targetType, fromType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
+            };
         }
 
         static auto FromFloat(
-            const char* const name,
-            const NativeType& fromType,
-            const NativeType& targetType
-        ) -> NativeAssociatedFunction
-        {
-            return
-            {
-                targetType,
-                name,
-                [&](Emitter& emitter)
-                {
-                    auto* const value = [&]() -> llvm::Value*
-                    {
-                        auto* const fromIRType = fromType.GetIRType(
-                            emitter.GetContext()
-                        );
-                        auto* const toIRType = targetType.GetIRType(
-                            emitter.GetContext()
-                        );
-
-                        if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(targetType))
-                        {
-                            return emitter.GetBlockBuilder().Builder.CreateFPToSI(
-                                emitter.EmitLoadArg(0, fromIRType),
-                                toIRType
-                            );
-                        }
-                        else
-                        {
-                            return emitter.GetBlockBuilder().Builder.CreateFPToUI(
-                                emitter.EmitLoadArg(0, fromIRType),
-                                toIRType
-                            );
-                        }
-                    }();
-
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
-            };
-        }
-
-        static auto FromFloat32(
+            const Natives& natives,
             const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
+            const NativeType& fromType
+        ) -> NativeFunction
         {
-            return FromFloat(
-                "from_f32",
-                natives->Float32,
-                targetType
-            );
-        }
+            auto* const compilation = fromType.GetCompilation();
 
-        static auto FromFloat64(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromFloat(
-                "from_f64",
-                natives->Float64,
-                targetType
-            );
-        }
-
-        static auto Division(
-            const NativeType& selfType
-        ) -> NativeAssociatedFunction
-        {
-            return
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::Division,
-                [&](Emitter& emitter)
-                {
-                    auto* const value = [&]() -> llvm::Value*
-                    {
-                        auto* const selfIRType = selfType.GetIRType(
-                            emitter.GetContext()
-                        );
+                auto* const fromIRType =
+                    fromType.GetIRType(emitter.GetContext());
+                auto* const toIRType =
+                    targetType.GetIRType(emitter.GetContext());
 
-                        if (selfType.GetCompilation()->GetNatives().IsIntTypeSigned(selfType))
-                        {
-                            return emitter.GetBlockBuilder().Builder.CreateSDiv(
-                                emitter.EmitLoadArg(0, selfIRType),
-                                emitter.EmitLoadArg(1, selfIRType)
-                            );
-                        }
-                        else
-                        {
-                            return emitter.GetBlockBuilder().Builder.CreateUDiv(
-                                emitter.EmitLoadArg(0, selfIRType),
-                                emitter.EmitLoadArg(1, selfIRType)
-                            );
-                        }
-                    }();
+                const bool isSigned = natives.IsIntTypeSigned(targetType);
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
-            };
-        }
-
-        static auto Remainder(
-            const NativeType& selfType
-        ) -> NativeAssociatedFunction
-        {
-            return
-            {
-                selfType,
-                SpecialIdent::Op::Remainder,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
+                auto* const value = isSigned ?
+                    emitter.GetBlock().Builder.CreateFPToSI(
+                        emitter.EmitLoadArg(0, fromIRType),
+                        toIRType
+                    ) :
+                    emitter.GetBlock().Builder.CreateFPToUI(
+                        emitter.EmitLoadArg(0, fromIRType),
+                        toIRType
                     );
 
-                    auto* const value = [&]() -> llvm::Value*
-                    {
-                        if (selfType.GetCompilation()->GetNatives().IsIntTypeSigned(selfType))
-                        {
-                            return emitter.GetBlockBuilder().Builder.CreateSRem(
-                                emitter.EmitLoadArg(0, selfIRType),
-                                emitter.EmitLoadArg(1, selfIRType)
-                            );
-                        }
-                        else
-                        {
-                            return emitter.GetBlockBuilder().Builder.CreateURem(
-                                emitter.EmitLoadArg(0, selfIRType),
-                                emitter.EmitLoadArg(1, selfIRType)
-                            );
-                        }
-                    }();
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+            return NativeFunction
+            {
+                compilation,
+                CreateFromName(natives, targetType, fromType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto UnaryPlus(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
-            {
-                selfType,
-                SpecialIdent::Op::UnaryPlus,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+            auto* const compilation = selfType.GetCompilation();
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(
-                        emitter.EmitLoadArg(0, selfIRType)
-                    );
-                }
+            auto blockEmitter = [&](Emitter& emitter)
+            {
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
+
+                emitter.GetBlock().Builder.CreateRet(
+                    emitter.EmitLoadArg(0, selfIRType)
+                );
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateUnaryPlusName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto UnaryNegation(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::UnaryNegation,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateMul(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        llvm::ConstantInt::get(selfIRType, -1)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateMul(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    llvm::ConstantInt::get(selfIRType, -1)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
             };
 
+            return NativeFunction
+            {
+                compilation,
+                CreateUnaryNegationName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
+            };
         }
 
         static auto OneComplement(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::OneComplement,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateXor(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        llvm::ConstantInt::get(selfIRType, -1)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateXor(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    llvm::ConstantInt::get(selfIRType, -1)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateOneComplementName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto Multiplication(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return 
-            {
-                selfType,
-                SpecialIdent::Op::Multiplication,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+            auto* const compilation = selfType.GetCompilation();
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateMul(
+            auto blockEmitter = [&](Emitter& emitter)
+            {
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
+
+                auto* const value = emitter.GetBlock().Builder.CreateMul(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
+
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateMultiplicationName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
+            };
+        }
+
+        static auto Division(
+            const Natives& natives,
+            const NativeType& selfType
+        ) -> NativeFunction
+        {
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
+            {
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
+                
+                const bool isSigned = natives.IsIntTypeSigned(selfType);
+
+                auto* const value = isSigned ?
+                    emitter.GetBlock().Builder.CreateSDiv(
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
+                    ) :
+                    emitter.GetBlock().Builder.CreateUDiv(
                         emitter.EmitLoadArg(0, selfIRType),
                         emitter.EmitLoadArg(1, selfIRType)
                     );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateDivisionName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
+            };
+        }
+
+        static auto Remainder(
+            const Natives& natives,
+            const NativeType& selfType
+        ) -> NativeFunction
+        {
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
+            {
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
+
+                const bool isSigned = natives.IsIntTypeSigned(selfType);
+
+                auto* const value = isSigned ?
+                    emitter.GetBlock().Builder.CreateSRem(
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
+                    ) :
+                    emitter.GetBlock().Builder.CreateURem(
+                        emitter.EmitLoadArg(0, selfIRType),
+                        emitter.EmitLoadArg(1, selfIRType)
+                    );
+
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateRemainderName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto Addition(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::Addition,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateAdd(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateAdd(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateAdditionName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto Subtraction(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::Subtraction,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateSub(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateSub(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateSubtractionName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto RightShift(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::RightShift,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateAShr(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateAShr(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateRightShiftName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         };
 
         static auto LeftShift(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::LeftShift,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateShl(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateShl(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateLeftShiftName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto LessThan(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::LessThan,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
-                        llvm::CmpInst::Predicate::ICMP_SLT,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateCmp(
+                    llvm::CmpInst::Predicate::ICMP_SLT,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateLessThanName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto GreaterThan(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::GreaterThan,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
-                        llvm::CmpInst::Predicate::ICMP_SGT,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateCmp(
+                    llvm::CmpInst::Predicate::ICMP_SGT,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateGreaterThanName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto LessThanEquals(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::LessThanEquals,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
-                        llvm::CmpInst::Predicate::ICMP_SLE,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateCmp(
+                    llvm::CmpInst::Predicate::ICMP_SLE,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateLessThanEqualsName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto GreaterThanEquals(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::GreaterThanEquals,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
-                        llvm::CmpInst::Predicate::ICMP_SGE,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateCmp(
+                    llvm::CmpInst::Predicate::ICMP_SGE,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateGreaterThanEqualsName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto Equals(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::Equals,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
-                        llvm::CmpInst::Predicate::ICMP_EQ,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateCmp(
+                    llvm::CmpInst::Predicate::ICMP_EQ,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateEqualsName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto NotEquals(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::NotEquals,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateCmp(
-                        llvm::CmpInst::Predicate::ICMP_NE,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateCmp(
+                    llvm::CmpInst::Predicate::ICMP_NE,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateNotEqualsName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto AND(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::AND,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateAnd(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateAnd(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateANDName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto XOR(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::XOR,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateXor(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateXor(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateXORName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto OR(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::OR,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateOr(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateOr(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateORName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
     }
 
     namespace F
     {
-        static auto FromIntImpl(
-            const char* const name,
-            const NativeType& fromType,
-            const NativeType& targetType
-        ) -> NativeAssociatedFunction
+        static auto FromInt(
+            const Natives& natives,
+            const NativeType& targetType,
+            const NativeType& fromType
+        ) -> NativeFunction
         {
+            auto* const compilation = fromType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
+            {
+                auto* const fromIRType =
+                    fromType.GetIRType(emitter.GetContext());
+                auto* const toIRType =
+                    targetType.GetIRType(emitter.GetContext());
+
+                const bool isSigned = natives.IsIntTypeSigned(fromType);
+
+                auto* const value = isSigned ? 
+                    emitter.GetBlock().Builder.CreateSIToFP(
+                        emitter.EmitLoadArg(0, fromIRType),
+                        toIRType
+                    ) :
+                    emitter.GetBlock().Builder.CreateUIToFP(
+                        emitter.EmitLoadArg(0, fromIRType),
+                        toIRType
+                    );
+
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
             return
             {
-                targetType,
-                name,
-                [&](Emitter& emitter)
-                {
-                    auto* const fromIRType = fromType.GetIRType(
-                        emitter.GetContext()
-                    );
-                    auto* const toIRType = targetType.GetIRType(
-                        emitter.GetContext()
-                    );
-
-                    auto* const value = [&]() -> llvm::Value*
-                    {
-                        if (fromType.GetCompilation()->GetNatives().IsIntTypeSigned(fromType))
-                        {
-                            return emitter.GetBlockBuilder().Builder.CreateSIToFP(
-                                emitter.EmitLoadArg(0, fromIRType),
-                                toIRType
-                            );
-                        }
-                        else
-                        {
-                            return emitter.GetBlockBuilder().Builder.CreateUIToFP(
-                                emitter.EmitLoadArg(0, fromIRType),
-                                toIRType
-                            );
-                        }
-                    }();
-
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                compilation,
+                CreateFromName(natives, targetType, fromType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
-        static auto FromInt8(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_i8",
-                natives->Int8,
-                targetType
-            );
-        }
-
-        static auto FromInt16(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_i16",
-                natives->Int16,
-                targetType
-            );
-        }
-
-        static auto FromInt32(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_i32",
-                natives->Int32,
-                targetType
-            );
-        }
-
-        static auto FromInt64(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_i64",
-                natives->Int64,
-                targetType
-            );
-        }
-
-        static auto FromUInt8(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_u8",
-                natives->UInt8,
-                targetType
-            );
-        }
-
-        static auto FromUInt16(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_u16",
-                natives->UInt16,
-                targetType
-            );
-        }
-
-        static auto FromUInt32(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_u32",
-                natives->UInt32,
-                targetType
-            );
-        }
-
-        static auto FromUInt64(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_u64",
-                natives->UInt64,
-                targetType
-            );
-        }
-
-        static auto FromInt(
-            const NativeType& targetType,
-            const Natives* const natives
-        ) -> NativeAssociatedFunction
-        {
-            return FromIntImpl(
-                "from_int",
-                natives->Int,
-                targetType
-            );
-        }
-
         static auto UnaryPlus(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
-            {
-                selfType,
-                SpecialIdent::Op::UnaryPlus,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+            auto* const compilation = selfType.GetCompilation();
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(
-                        emitter.EmitLoadArg(0, selfIRType)
-                    );
-                }
+            auto blockEmitter = [&](Emitter& emitter)
+            {
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
+
+                emitter.GetBlock().Builder.CreateRet(
+                    emitter.EmitLoadArg(0, selfIRType)
+                );
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateUnaryPlusName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto UnaryNegation(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::UnaryNegation,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFMul(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        llvm::ConstantFP::get(selfIRType, -1)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFMul(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    llvm::ConstantFP::get(selfIRType, -1)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateUnaryNegationName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto Multiplication(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::Multiplication,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFMul(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFMul(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateMultiplicationName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto Division(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
-            {
-                selfType,
-                SpecialIdent::Op::Division,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+            auto* const compilation = selfType.GetCompilation();
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFDiv(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
-            
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+            auto blockEmitter = [&](Emitter& emitter)
+            {
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
+
+                auto* const value = emitter.GetBlock().Builder.CreateFDiv(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
+        
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateDivisionName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto Remainder(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::Remainder,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFRem(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFRem(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateRemainderName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto Addition(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::Addition,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFAdd(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFAdd(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateAdditionName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto Subtraction(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::Subtraction,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFSub(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFSub(
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateSubtractionName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto LessThan(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::LessThan,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
-                        llvm::CmpInst::Predicate::FCMP_OLT,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFCmp(
+                    llvm::CmpInst::Predicate::FCMP_OLT,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateLessThanName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto GreaterThan(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::GreaterThan,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
-                        llvm::CmpInst::Predicate::FCMP_OGT,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFCmp(
+                    llvm::CmpInst::Predicate::FCMP_OGT,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateGreaterThanName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto LessThanEquals(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::LessThanEquals,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
-                        llvm::CmpInst::Predicate::FCMP_OLE,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFCmp(
+                    llvm::CmpInst::Predicate::FCMP_OLE,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateLessThanEqualsName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto GreaterThanEquals(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::GreaterThanEquals,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
-                        llvm::CmpInst::Predicate::FCMP_OGE,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFCmp(
+                    llvm::CmpInst::Predicate::FCMP_OGE,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateGreaterThanEqualsName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto Equals(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::Equals,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
-                        llvm::CmpInst::Predicate::FCMP_OEQ,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFCmp(
+                    llvm::CmpInst::Predicate::FCMP_OEQ,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateEqualsName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
 
         static auto NotEquals(
+            const Natives& natives,
             const NativeType& selfType
-        ) -> NativeAssociatedFunction
+        ) -> NativeFunction
         {
-            return
+            auto* const compilation = selfType.GetCompilation();
+
+            auto blockEmitter = [&](Emitter& emitter)
             {
-                selfType,
-                SpecialIdent::Op::NotEquals,
-                [&](Emitter& emitter)
-                {
-                    auto* const selfIRType = selfType.GetIRType(
-                        emitter.GetContext()
-                    );
+                auto* const selfIRType =
+                    selfType.GetIRType(emitter.GetContext());
 
-                    auto* const value = emitter.GetBlockBuilder().Builder.CreateFCmp(
-                        llvm::CmpInst::Predicate::FCMP_ONE,
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value = emitter.GetBlock().Builder.CreateFCmp(
+                    llvm::CmpInst::Predicate::FCMP_ONE,
+                    emitter.EmitLoadArg(0, selfIRType),
+                    emitter.EmitLoadArg(1, selfIRType)
+                );
 
-                    emitter.GetBlockBuilder().Builder.CreateRet(value);
-                }
+                emitter.GetBlock().Builder.CreateRet(value);
+            };
+
+            return NativeFunction
+            {
+                compilation,
+                CreateNotEqualsName(natives, selfType),
+                NativeSymbolKind::Concrete,
+                std::move(blockEmitter),
             };
         }
     }
@@ -1565,171 +1553,211 @@ namespace Ace
         {
             compilation,
             std::vector{ "ace", "std", "Int8" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt8Ty(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
         Int16
         {
             compilation,
             std::vector{ "ace", "std", "Int16" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt16Ty(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
         Int32
         {
             compilation,
             std::vector{ "ace", "std", "Int32" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
         Int64
         {
             compilation,
             std::vector{ "ace", "std", "Int64" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt64Ty(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
 
         UInt8
         {
             compilation,
             std::vector{ "ace", "std", "UInt8" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt8Ty(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
         UInt16
         {
             compilation,
             std::vector{ "ace", "std", "UInt16" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt16Ty(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
         UInt32
         {
             compilation,
             std::vector{ "ace", "std", "UInt32" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
         UInt64
         {
             compilation,
             std::vector{ "ace", "std", "UInt64" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt64Ty(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
 
         Int
         {
             compilation,
             std::vector{ "ace", "std", "Int" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt32Ty(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
 
         Float32
         {
             compilation,
             std::vector{ "ace", "std", "Float32" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getFloatTy(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
         Float64
         {
             compilation,
             std::vector{ "ace", "std", "Float64" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getDoubleTy(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
 
         Bool
         {
             compilation,
             std::vector{ "ace", "std", "Bool" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt1Ty(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
         String
         {
             compilation,
             std::vector{ "ace", "std", "String" },
-            {},
+            NativeSymbolKind::Concrete,
             NativeCopyabilityKind::NonTrivial,
+            {},
         },
 
         Ptr
         {
             compilation,
             std::vector{ "ace", "std", "Ptr" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
             {
                 return llvm::Type::getInt8PtrTy(context);
             },
-            NativeCopyabilityKind::Trivial,
         },
 
         Ref
         {
             compilation,
             std::vector{ "ace", "std", "Ref" },
-        },
-        StrongPtr
-        {
-            compilation,
-            std::vector{ "ace", "std", "rc", "StrongPtr" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
         },
         WeakPtr
         {
             compilation,
             std::vector{ "ace", "std", "rc", "WeakPtr" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        StrongPtr
+        {
+            compilation,
+            std::vector{ "ace", "std", "rc", "StrongPtr" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        DynStrongPtr
+        {
+            compilation,
+            std::vector{ "ace", "std", "rc", "DynStrongPtr" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        DynStrongPtrData
+        {
+            compilation,
+            std::vector{ "ace", "std", "rc", "DynStrongPtrData" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
         },
 
         print_int
         {
             compilation,
-            std::vector{ "ace", "print_int" },
+            std::vector<std::string>{ "ace", "print_int" },
+            NativeSymbolKind::Concrete,
             [this, compilation](Emitter& emitter)
             {
                 auto* const compilation = emitter.GetCompilation();
 
-                auto* const intType = compilation->GetNatives().Int.GetIRType(
-                    emitter.GetContext()
+                auto* const intType = emitter.GetType(
+                    compilation->GetNatives().Int.GetSymbol()
                 );
 
                 emitter.EmitPrintf({
@@ -1737,483 +1765,848 @@ namespace Ace
                     emitter.EmitLoadArg(0, intType),
                 });
 
-                emitter.GetBlockBuilder().Builder.CreateRetVoid();
-            }
+                emitter.GetBlock().Builder.CreateRetVoid();
+            },
         },
         print_ptr
         {
             compilation,
-            std::vector{ "ace", "print_ptr" },
+            std::vector<std::string>{ "ace", "print_ptr" },
+            NativeSymbolKind::Concrete,
             [compilation](Emitter& emitter)
             {
                 auto* const compilation = emitter.GetCompilation();
 
-                auto* const ptrType = compilation->GetNatives().Ptr.GetIRType(
-                    emitter.GetContext()
-                );
-
                 emitter.EmitPrintf({
                     emitter.EmitString("0x%" PRIXPTR "\n"),
-                    emitter.EmitLoadArg(0, ptrType),
+                    emitter.EmitLoadArg(0, emitter.GetPtrType()),
                 });
 
-                emitter.GetBlockBuilder().Builder.CreateRetVoid();
+                emitter.GetBlock().Builder.CreateRetVoid();
             }
         },
 
         alloc
         {
             compilation,
-            std::vector{ "ace", "std", "mem", "alloc" },
+            std::vector<std::string>{ "ace", "std", "mem", "alloc" },
+            NativeSymbolKind::Concrete,
             [this](Emitter& emitter)
             {
                 auto* const mallocFunction =
                     emitter.GetC().GetFunctions().GetMalloc();
 
                 auto* const intTypeSymbol = Int.GetSymbol();
-                auto* const intType = emitter.GetIRType(intTypeSymbol);
+                auto* const intType = emitter.GetType(intTypeSymbol);
 
                 auto* const cSizeType = mallocFunction->arg_begin()->getType();
 
                 auto* const sizeValue = emitter.EmitLoadArg(0, intType);
 
-                auto* const convertedSizeValue = emitter.GetBlockBuilder().Builder.CreateZExtOrTrunc(
+                auto* const convertedSizeValue = emitter.GetBlock().Builder.CreateZExtOrTrunc(
                     sizeValue,
                     cSizeType
                 );
 
-                auto* const callInst = emitter.GetBlockBuilder().Builder.CreateCall(
+                auto* const callInst = emitter.GetBlock().Builder.CreateCall(
                     mallocFunction,
                     { convertedSizeValue }
                 );
 
-                emitter.GetBlockBuilder().Builder.CreateRet(callInst);
+                emitter.GetBlock().Builder.CreateRet(callInst);
             }
         },
         dealloc
         {
             compilation,
-            std::vector{ "ace", "std", "mem", "dealloc" },
+            std::vector<std::string>{ "ace", "std", "mem", "dealloc" },
+            NativeSymbolKind::Concrete,
             [this](Emitter& emitter)
             {
                 auto* const freeFunction =
                     emitter.GetC().GetFunctions().GetFree();
 
-                auto* const ptrType = Ptr.GetIRType(emitter.GetContext());
+                auto* const blockValue =
+                    emitter.EmitLoadArg(0, emitter.GetPtrType());
 
-                auto* const blockValue = emitter.EmitLoadArg(
-                    0,
-                    ptrType
-                );
-
-                emitter.GetBlockBuilder().Builder.CreateCall(
+                emitter.GetBlock().Builder.CreateCall(
                     freeFunction,
                     { blockValue }
                 );
 
-                emitter.GetBlockBuilder().Builder.CreateRetVoid();
+                emitter.GetBlock().Builder.CreateRetVoid();
             }
         },
         copy
         {
             compilation,
-            std::vector{ "ace", "std", "mem", "copy" },
+            std::vector<std::string>{ "ace", "std", "mem", "copy" },
+            NativeSymbolKind::Concrete,
             [this](Emitter& emitter)
             {
                 auto* const memcpyFunction =
                     emitter.GetC().GetFunctions().GetMemcpy();
 
-                auto* const ptrType = Ptr.GetIRType(emitter.GetContext());
-
                 auto* const intTypeSymbol = Int.GetSymbol();
-                auto* const intType = emitter.GetIRType(intTypeSymbol);
+                auto* const intType = emitter.GetType(intTypeSymbol);
 
                 auto* const cSizeType =
                     (memcpyFunction->arg_begin() + 2)->getType();
 
-                auto* const srcValue = emitter.EmitLoadArg(0, ptrType);
-                auto* const dstValue = emitter.EmitLoadArg(1, ptrType);
+                auto* const srcValue =
+                    emitter.EmitLoadArg(0, emitter.GetPtrType());
+                auto* const dstValue =
+                    emitter.EmitLoadArg(1, emitter.GetPtrType());
                 auto* const sizeValue = emitter.EmitLoadArg(2, intType);
 
-                auto* const convertedSizeValue = emitter.GetBlockBuilder().Builder.CreateZExtOrTrunc(
+                auto* const convertedSizeValue = emitter.GetBlock().Builder.CreateZExtOrTrunc(
                     sizeValue,
                     cSizeType
                 );
 
-                emitter.GetBlockBuilder().Builder.CreateCall(
+                emitter.GetBlock().Builder.CreateCall(
                     memcpyFunction,
                     { dstValue, srcValue, convertedSizeValue }
                 );
 
-                emitter.GetBlockBuilder().Builder.CreateRetVoid();
+                emitter.GetBlock().Builder.CreateRetVoid();
             }
         },
 
-        i8__from_i16{ I::FromInt16(Int8, this) },
-        i8__from_i32{ I::FromInt32(Int8, this) },
-        i8__from_i64{ I::FromInt64(Int8, this) },
-        i8__from_u8{ I::FromUInt8(Int8, this) },
-        i8__from_u16{ I::FromUInt16(Int8, this) },
-        i8__from_u32{ I::FromUInt32(Int8, this) },
-        i8__from_u64{ I::FromUInt64(Int8, this) },
-        i8__from_int{ I::FromInt(Int8, this) },
-        i8__from_f32{ I::FromFloat32(Int8, this) },
-        i8__from_f64{ I::FromFloat64(Int8, this) },
-        i8__unary_plus{ I::UnaryPlus(Int8) },
-        i8__unary_negation{ I::UnaryNegation(Int8) },
-        i8__one_complement{ I::OneComplement(Int8) },
-        i8__multiplication{ I::Multiplication(Int8) },
-        i8__division{ I::Division(Int8) },
-        i8__remainder{ I::Remainder(Int8) },
-        i8__addition{ I::Addition(Int8) },
-        i8__subtraction{ I::Subtraction(Int8) },
-        i8__right_shift{ I::RightShift(Int8) },
-        i8__left_shift{ I::LeftShift(Int8) },
-        i8__less_than{ I::LessThan(Int8) },
-        i8__greater_than{ I::GreaterThan(Int8) },
-        i8__less_than_equals{ I::LessThanEquals(Int8) },
-        i8__greater_than_equals{ I::GreaterThanEquals(Int8) },
-        i8__equals{ I::Equals(Int8) },
-        i8__not_equals{ I::NotEquals(Int8) },
-        i8__AND{ I::AND(Int8) },
-        i8__XOR{ I::XOR(Int8) },
-        i8__OR{ I::OR(Int8) },
-
-        i16__from_i8{ I::FromInt8(Int16, this) },
-        i16__from_i32{ I::FromInt32(Int16, this) },
-        i16__from_i64{ I::FromInt64(Int16, this) },
-        i16__from_u8{ I::FromUInt8(Int16, this) },
-        i16__from_u16{ I::FromUInt16(Int16, this) },
-        i16__from_u32{ I::FromUInt32(Int16, this) },
-        i16__from_u64{ I::FromUInt64(Int16, this) },
-        i16__from_int{ I::FromInt(Int16, this) },
-        i16__from_f32{ I::FromFloat32(Int16, this) },
-        i16__from_f64{ I::FromFloat64(Int16, this) },
-        i16__unary_plus{ I::UnaryPlus(Int16) },
-        i16__unary_negation{ I::UnaryNegation(Int16) },
-        i16__one_complement{ I::OneComplement(Int16) },
-        i16__multiplication{ I::Multiplication(Int16) },
-        i16__division{ I::Division(Int16) },
-        i16__remainder{ I::Remainder(Int16) },
-        i16__addition{ I::Addition(Int16) },
-        i16__subtraction{ I::Subtraction(Int16) },
-        i16__right_shift{ I::RightShift(Int16) },
-        i16__left_shift{ I::LeftShift(Int16) },
-        i16__less_than{ I::LessThan(Int16) },
-        i16__greater_than{ I::GreaterThan(Int16) },
-        i16__less_than_equals{ I::LessThanEquals(Int16) },
-        i16__greater_than_equals{ I::GreaterThanEquals(Int16) },
-        i16__equals{ I::Equals(Int16) },
-        i16__not_equals{ I::NotEquals(Int16) },
-        i16__AND{ I::AND(Int16) },
-        i16__XOR{ I::XOR(Int16) },
-        i16__OR{ I::OR(Int16) },
-
-        i32__from_i8{ I::FromInt8(Int32, this) },
-        i32__from_i16{ I::FromInt16(Int32, this) },
-        i32__from_i64{ I::FromInt64(Int32, this) },
-        i32__from_u8{ I::FromUInt8(Int32, this) },
-        i32__from_u16{ I::FromUInt16(Int32, this) },
-        i32__from_u32{ I::FromUInt32(Int32, this) },
-        i32__from_u64{ I::FromUInt64(Int32, this) },
-        i32__from_int{ I::FromInt(Int32, this) },
-        i32__from_f32{ I::FromFloat32(Int32, this) },
-        i32__from_f64{ I::FromFloat64(Int32, this) },
-        i32__unary_plus{ I::UnaryPlus(Int32) },
-        i32__unary_negation{ I::UnaryNegation(Int32) },
-        i32__one_complement{ I::OneComplement(Int32) },
-        i32__multiplication{ I::Multiplication(Int32) },
-        i32__division{ I::Division(Int32) },
-        i32__remainder{ I::Remainder(Int32) },
-        i32__addition{ I::Addition(Int32) },
-        i32__subtraction{ I::Subtraction(Int32) },
-        i32__right_shift{ I::RightShift(Int32) },
-        i32__left_shift{ I::LeftShift(Int32) },
-        i32__less_than{ I::LessThan(Int32) },
-        i32__greater_than{ I::GreaterThan(Int32) },
-        i32__less_than_equals{ I::LessThanEquals(Int32) },
-        i32__greater_than_equals{ I::GreaterThanEquals(Int32) },
-        i32__equals{ I::Equals(Int32) },
-        i32__not_equals{ I::NotEquals(Int32) },
-        i32__AND{ I::AND(Int32) },
-        i32__XOR{ I::XOR(Int32) },
-        i32__OR{ I::OR(Int32) },
-
-        i64__from_i8{ I::FromInt8(Int64, this) },
-        i64__from_i16{ I::FromInt16(Int64, this) },
-        i64__from_i32{ I::FromInt32(Int64, this) },
-        i64__from_u8{ I::FromUInt8(Int64, this) },
-        i64__from_u16{ I::FromUInt16(Int64, this) },
-        i64__from_u32{ I::FromUInt32(Int64, this) },
-        i64__from_u64{ I::FromUInt64(Int64, this) },
-        i64__from_int{ I::FromInt(Int64, this) },
-        i64__from_f32{ I::FromFloat32(Int64, this) },
-        i64__from_f64{ I::FromFloat64(Int64, this) },
-        i64__unary_plus{ I::UnaryPlus(Int64) },
-        i64__unary_negation{ I::UnaryNegation(Int64) },
-        i64__one_complement{ I::OneComplement(Int64) },
-        i64__multiplication{ I::Multiplication(Int64) },
-        i64__division{ I::Division(Int64) },
-        i64__remainder{ I::Remainder(Int64) },
-        i64__addition{ I::Addition(Int64) },
-        i64__subtraction{ I::Subtraction(Int64) },
-        i64__right_shift{ I::RightShift(Int64) },
-        i64__left_shift{ I::LeftShift(Int64) },
-        i64__less_than{ I::LessThan(Int64) },
-        i64__greater_than{ I::GreaterThan(Int64) },
-        i64__less_than_equals{ I::LessThanEquals(Int64) },
-        i64__greater_than_equals{ I::GreaterThanEquals(Int64) },
-        i64__equals{ I::Equals(Int64) },
-        i64__not_equals{ I::NotEquals(Int64) },
-        i64__AND{ I::AND(Int64) },
-        i64__XOR{ I::XOR(Int64) },
-        i64__OR{ I::OR(Int64) },
-
-        u8__from_i8{ I::FromInt8(UInt8, this) },
-        u8__from_i16{ I::FromInt16(UInt8, this) },
-        u8__from_i32{ I::FromInt32(UInt8, this) },
-        u8__from_i64{ I::FromInt64(UInt8, this) },
-        u8__from_u16{ I::FromUInt16(UInt8, this) },
-        u8__from_u32{ I::FromUInt32(UInt8, this) },
-        u8__from_u64{ I::FromUInt64(UInt8, this) },
-        u8__from_int{ I::FromInt(UInt8, this) },
-        u8__from_f32{ I::FromFloat32(UInt8, this) },
-        u8__from_f64{ I::FromFloat64(UInt8, this) },
-        u8__unary_plus{ I::UnaryPlus(UInt8) },
-        u8__unary_negation{ I::UnaryNegation(UInt8) },
-        u8__one_complement{ I::OneComplement(UInt8) },
-        u8__multiplication{ I::Multiplication(UInt8) },
-        u8__division{ I::Division(UInt8) },
-        u8__remainder{ I::Remainder(UInt8) },
-        u8__addition{ I::Addition(UInt8) },
-        u8__subtraction{ I::Subtraction(UInt8) },
-        u8__right_shift{ I::RightShift(UInt8) },
-        u8__left_shift{ I::LeftShift(UInt8) },
-        u8__less_than{ I::LessThan(UInt8) },
-        u8__greater_than{ I::GreaterThan(UInt8) },
-        u8__less_than_equals{ I::LessThanEquals(UInt8) },
-        u8__greater_than_equals{ I::GreaterThanEquals(UInt8) },
-        u8__equals{ I::Equals(UInt8) },
-        u8__not_equals{ I::NotEquals(UInt8) },
-        u8__AND{ I::AND(UInt8) },
-        u8__XOR{ I::XOR(UInt8) },
-        u8__OR{ I::OR(UInt8) },
-
-        u16__from_i8{ I::FromInt8(UInt16, this) },
-        u16__from_i16{ I::FromInt16(UInt16, this) },
-        u16__from_i32{ I::FromInt32(UInt16, this) },
-        u16__from_i64{ I::FromInt64(UInt16, this) },
-        u16__from_u8{ I::FromUInt8(UInt16, this) },
-        u16__from_u32{ I::FromUInt32(UInt16, this) },
-        u16__from_u64{ I::FromUInt64(UInt16, this) },
-        u16__from_int{ I::FromInt(UInt16, this) },
-        u16__from_f32{ I::FromFloat32(UInt16, this) },
-        u16__from_f64{ I::FromFloat64(UInt16, this) },
-        u16__unary_plus{ I::UnaryPlus(UInt16) },
-        u16__unary_negation{ I::UnaryNegation(UInt16) },
-        u16__one_complement{ I::OneComplement(UInt16) },
-        u16__multiplication{ I::Multiplication(UInt16) },
-        u16__division{ I::Division(UInt16) },
-        u16__remainder{ I::Remainder(UInt16) },
-        u16__addition{ I::Addition(UInt16) },
-        u16__subtraction{ I::Subtraction(UInt16) },
-        u16__right_shift{ I::RightShift(UInt16) },
-        u16__left_shift{ I::LeftShift(UInt16) },
-        u16__less_than{ I::LessThan(UInt16) },
-        u16__greater_than{ I::GreaterThan(UInt16) },
-        u16__less_than_equals{ I::LessThanEquals(UInt16) },
-        u16__greater_than_equals{ I::GreaterThanEquals(UInt16) },
-        u16__equals{ I::Equals(UInt16) },
-        u16__not_equals{ I::NotEquals(UInt16) },
-        u16__AND{ I::AND(UInt16) },
-        u16__XOR{ I::XOR(UInt16) },
-        u16__OR{ I::OR(UInt16) },
-
-        u32__from_i8{ I::FromInt8(UInt32, this) },
-        u32__from_i16{ I::FromInt16(UInt32, this) },
-        u32__from_i32{ I::FromInt32(UInt32, this) },
-        u32__from_i64{ I::FromInt64(UInt32, this) },
-        u32__from_u8{ I::FromUInt8(UInt32, this) },
-        u32__from_u16{ I::FromUInt16(UInt32, this) },
-        u32__from_u64{ I::FromUInt64(UInt32, this) },
-        u32__from_int{ I::FromInt(UInt32, this) },
-        u32__from_f32{ I::FromFloat32(UInt32, this) },
-        u32__from_f64{ I::FromFloat64(UInt32, this) },
-        u32__unary_plus{ I::UnaryPlus(UInt32) },
-        u32__unary_negation{ I::UnaryNegation(UInt32) },
-        u32__one_complement{ I::OneComplement(UInt32) },
-        u32__multiplication{ I::Multiplication(UInt32) },
-        u32__division{ I::Division(UInt32) },
-        u32__remainder{ I::Remainder(UInt32) },
-        u32__addition{ I::Addition(UInt32) },
-        u32__subtraction{ I::Subtraction(UInt32) },
-        u32__right_shift{ I::RightShift(UInt32) },
-        u32__left_shift{ I::LeftShift(UInt32) },
-        u32__less_than{ I::LessThan(UInt32) },
-        u32__greater_than{ I::GreaterThan(UInt32) },
-        u32__less_than_equals{ I::LessThanEquals(UInt32) },
-        u32__greater_than_equals{ I::GreaterThanEquals(UInt32) },
-        u32__equals{ I::Equals(UInt32) },
-        u32__not_equals{ I::NotEquals(UInt32) },
-        u32__AND{ I::AND(UInt32) },
-        u32__XOR{ I::XOR(UInt32) },
-        u32__OR{ I::OR(UInt32) },
-
-        u64__from_i8{ I::FromInt8(UInt64, this) },
-        u64__from_i16{ I::FromInt16(UInt64, this) },
-        u64__from_i32{ I::FromInt32(UInt64, this) },
-        u64__from_i64{ I::FromInt64(UInt64, this) },
-        u64__from_u8{ I::FromUInt8(UInt64, this) },
-        u64__from_u16{ I::FromUInt16(UInt64, this) },
-        u64__from_u32{ I::FromUInt32(UInt64, this) },
-        u64__from_int{ I::FromInt(UInt64, this) },
-        u64__from_f32{ I::FromFloat32(UInt64, this) },
-        u64__from_f64{ I::FromFloat64(UInt64, this) },
-        u64__unary_plus{ I::UnaryPlus(UInt64) },
-        u64__unary_negation{ I::UnaryNegation(UInt64) },
-        u64__one_complement{ I::OneComplement(UInt64) },
-        u64__multiplication{ I::Multiplication(UInt64) },
-        u64__division{ I::Division(UInt64) },
-        u64__remainder{ I::Remainder(UInt64) },
-        u64__addition{ I::Addition(UInt64) },
-        u64__subtraction{ I::Subtraction(UInt64) },
-        u64__right_shift{ I::RightShift(UInt64) },
-        u64__left_shift{ I::LeftShift(UInt64) },
-        u64__less_than{ I::LessThan(UInt64) },
-        u64__greater_than{ I::GreaterThan(UInt64) },
-        u64__less_than_equals{ I::LessThanEquals(UInt64) },
-        u64__greater_than_equals{ I::GreaterThanEquals(UInt64) },
-        u64__equals{ I::Equals(UInt64) },
-        u64__not_equals{ I::NotEquals(UInt64) },
-        u64__AND{ I::AND(UInt64) },
-        u64__XOR{ I::XOR(UInt64) },
-        u64__OR{ I::OR(UInt64) },
-
-        int_from_i8{ I::FromInt8(Int, this) },
-        int_from_i16{ I::FromInt16(Int, this) },
-        int_from_i32{ I::FromInt32(Int, this) },
-        int_from_i64{ I::FromInt64(Int, this) },
-        int_from_u8{ I::FromUInt8(Int, this) },
-        int_from_u16{ I::FromUInt16(Int, this) },
-        int_from_u32{ I::FromUInt32(Int, this) },
-        int_from_u64{ I::FromUInt64(Int, this) },
-        int_from_f32{ I::FromFloat32(Int, this) },
-        int_from_f64{ I::FromFloat64(Int, this) },
-        int_unary_plus{ I::UnaryPlus(Int) },
-        int_unary_negation{ I::UnaryNegation(Int) },
-        int_one_complement{ I::OneComplement(Int) },
-        int_multiplication{ I::Multiplication(Int) },
-        int_division{ I::Division(Int) },
-        int_remainder{ I::Remainder(Int) },
-        int_addition{ I::Addition(Int) },
-        int_subtraction{ I::Subtraction(Int) },
-        int_right_shift{ I::RightShift(Int) },
-        int_left_shift{ I::LeftShift(Int) },
-        int_less_than{ I::LessThan(Int) },
-        int_greater_than{ I::GreaterThan(Int) },
-        int_less_than_equals{ I::LessThanEquals(Int) },
-        int_greater_than_equals{ I::GreaterThanEquals(Int) },
-        int_equals{ I::Equals(Int) },
-        int_not_equals{ I::NotEquals(Int) },
-        int_AND{ I::AND(Int) },
-        int_XOR{ I::XOR(Int) },
-        int_OR{ I::OR(Int) },
-
-        f32__from_i8{ F::FromInt8(Float32, this) },
-        f32__from_i16{ F::FromInt16(Float32, this) },
-        f32__from_i32{ F::FromInt32(Float32, this) },
-        f32__from_i64{ F::FromInt64(Float32, this) },
-        f32__from_u8{ F::FromUInt8(Float32, this) },
-        f32__from_u16{ F::FromUInt16(Float32, this) },
-        f32__from_u32{ F::FromUInt32(Float32, this) },
-        f32__from_u64{ F::FromUInt64(Float32, this) },
-        f32__from_int{ F::FromInt(Float32, this) },
-        f32__from_f64
+        lookup_vtbl_ptr
         {
-            Float32,
-            "from_f64",
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "lookup_vtbl_ptr" },
+            NativeSymbolKind::Concrete,
+            [this](Emitter& emitter)
+            {
+                auto* const typeInfoPtr =
+                    emitter.EmitLoadArg(0, emitter.GetPtrType());
+                auto* const traitTypeInfoPtr =
+                    emitter.EmitLoadArg(1, emitter.GetPtrType());
+
+                auto* const typeInfoPtrPtr = emitter.GetBlock().Builder.CreateAlloca(
+                    emitter.GetPtrType()
+                );
+                emitter.GetBlock().Builder.CreateStore(
+                    typeInfoPtr,
+                    typeInfoPtrPtr
+                );
+
+                auto* const traitTypeInfoPtrPtr = emitter.GetBlock().Builder.CreateAlloca(
+                    emitter.GetPtrType()
+                );
+                emitter.GetBlock().Builder.CreateStore(
+                    traitTypeInfoPtr,
+                    traitTypeInfoPtrPtr
+                );
+
+                auto* const typeVtblPtr = emitter.EmitCall(
+                    sublookup_vtbl_ptr.GetSymbol(),
+                    { typeInfoPtrPtr, traitTypeInfoPtrPtr }
+                );
+
+                auto* const condition = emitter.GetBlock().Builder.CreateICmpEQ(
+                    typeVtblPtr,
+                    llvm::ConstantPointerNull::get(emitter.GetPtrType())
+                );
+                auto nullBlock = std::make_unique<EmittingBlock>(
+                    emitter.GetContext(),
+                    emitter.GetFunction()
+                );
+                auto nonNullBlock = std::make_unique<EmittingBlock>(
+                    emitter.GetContext(),
+                    emitter.GetFunction()
+                );
+                emitter.GetBlock().Builder.CreateCondBr(
+                    condition,
+                    nullBlock->Block,
+                    nonNullBlock->Block
+                );
+
+                emitter.SetBlock(std::move(nonNullBlock));
+                emitter.GetBlock().Builder.CreateRet(typeVtblPtr);
+
+                emitter.SetBlock(std::move(nullBlock));
+
+                auto* const traitTypeVtblPtr = emitter.EmitCall(
+                    sublookup_vtbl_ptr.GetSymbol(),
+                    { traitTypeInfoPtrPtr, typeInfoPtrPtr }
+                );
+
+                emitter.GetBlock().Builder.CreateRet(traitTypeVtblPtr);
+            }       
+        },
+        sublookup_vtbl_ptr
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "sublookup_vtbl_ptr" },
+            NativeSymbolKind::Concrete,
+            [this](Emitter& emitter)
+            {
+                auto* const typeInfoPtr =
+                    emitter.EmitLoadArg(0, emitter.GetPtrType());
+                auto* const targetTypeInfoPtr =
+                    emitter.EmitLoadArg(1, emitter.GetPtrType());
+
+                auto* const intType = emitter.GetType(Int.GetSymbol());
+                auto* const arrayType =
+                    llvm::ArrayType::get(emitter.GetPtrType(), 0);
+
+                auto* const i = emitter.GetBlock().Builder.CreateAlloca(
+                    intType,
+                    nullptr,
+                    "i"
+                );
+                emitter.GetBlock().Builder.CreateStore(
+                    llvm::ConstantInt::get(intType, 0),
+                    i
+                );
+
+                auto* const arrayPtr = emitter.GetBlock().Builder.CreateStructGEP(
+                    emitter.GetTypeInfoType(),
+                    typeInfoPtr,
+                    2
+                );
+
+                auto beginBlock = std::make_unique<EmittingBlock>(
+                    emitter.GetContext(),
+                    emitter.GetFunction()
+                );
+                auto matchingBlock = std::make_unique<EmittingBlock>(
+                    emitter.GetContext(),
+                    emitter.GetFunction()
+                );
+                auto continueBlock = std::make_unique<EmittingBlock>(
+                    emitter.GetContext(),
+                    emitter.GetFunction()
+                );
+                auto endBlock = std::make_unique<EmittingBlock>(
+                    emitter.GetContext(),
+                    emitter.GetFunction()
+                );
+
+                auto* const rawBeginBlock    =    beginBlock->Block;
+                auto* const rawMatchingBlock = matchingBlock->Block;
+                auto* const rawContinueBlock = continueBlock->Block;
+                auto* const rawEndBlock      =      endBlock->Block;
+
+                emitter.GetBlock().Builder.CreateBr(continueBlock->Block);
+
+                emitter.SetBlock(std::move(continueBlock));
+
+                auto* const countPtr = emitter.GetBlock().Builder.CreateStructGEP(
+                    emitter.GetTypeInfoType(),
+                    typeInfoPtr,
+                    1
+                );
+
+                auto* const continueCondition = emitter.GetBlock().Builder.CreateICmpSLT(
+                    emitter.GetBlock().Builder.CreateLoad(intType, i),
+                    emitter.GetBlock().Builder.CreateLoad(intType, countPtr)
+                );
+
+                emitter.GetBlock().Builder.CreateCondBr(
+                    continueCondition,
+                    rawBeginBlock,
+                    rawEndBlock
+                );
+
+                emitter.SetBlock(std::move(beginBlock));
+
+                auto* const typeInfoIndex = emitter.GetBlock().Builder.CreateMul(
+                    emitter.GetBlock().Builder.CreateLoad(intType, i),
+                    llvm::ConstantInt::get(intType, 2)
+                );
+                auto* const otherTypeInfoPtrPtr = emitter.GetBlock().Builder.CreateGEP(
+                    arrayType,
+                    arrayPtr,
+                    { llvm::ConstantInt::get(intType, 0), typeInfoIndex }
+                );
+                auto* const otherTypeInfoPtr = emitter.GetBlock().Builder.CreateLoad(
+                    emitter.GetPtrType(),
+                    otherTypeInfoPtrPtr
+                );
+
+                auto* const a = emitter.GetBlock().Builder.CreateAlloca(
+                    emitter.GetPtrType()
+                );
+                emitter.GetBlock().Builder.CreateStore(targetTypeInfoPtr, a);
+
+                auto* const matchingCondition = emitter.GetBlock().Builder.CreateICmpEQ(
+                    otherTypeInfoPtr,
+                    targetTypeInfoPtr
+                );
+
+                emitter.GetBlock().Builder.CreateStore(
+                    emitter.GetBlock().Builder.CreateAdd(
+                        emitter.GetBlock().Builder.CreateLoad(intType, i),
+                        llvm::ConstantInt::get(intType, 1)
+                    ),
+                    i
+                );
+
+                emitter.GetBlock().Builder.CreateCondBr(
+                    matchingCondition,
+                    rawMatchingBlock,
+                    rawContinueBlock
+                );
+
+                emitter.SetBlock(std::move(matchingBlock));
+
+                auto* const vtblIndex = emitter.GetBlock().Builder.CreateAdd(
+                    typeInfoIndex,
+                    llvm::ConstantInt::get(intType, 1)
+                );
+                auto* const vtblPtrPtr = emitter.GetBlock().Builder.CreateGEP(
+                    arrayType,
+                    arrayPtr,
+                    { llvm::ConstantInt::get(intType, 0), vtblIndex }
+                );
+                auto* const vtblPtr = emitter.GetBlock().Builder.CreateLoad(
+                    emitter.GetPtrType(),
+                    vtblPtrPtr
+                );
+                emitter.GetBlock().Builder.CreateRet(vtblPtr);
+
+                emitter.SetBlock(std::move(endBlock));
+
+                emitter.GetBlock().Builder.CreateRet(
+                    llvm::ConstantPointerNull::get(emitter.GetPtrType())
+                );
+            }
+        },
+        dyn_drop
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "dyn_drop" },
+            NativeSymbolKind::Concrete,
+            [this](Emitter& emitter)
+            {
+                auto* const valuePtr =
+                    emitter.EmitLoadArg(0, emitter.GetPtrType());
+                auto* const typeInfoPtr =
+                    emitter.EmitLoadArg(1, emitter.GetPtrType());
+
+                auto* const valuePtrPtr = emitter.GetBlock().Builder.CreateAlloca(
+                    emitter.GetPtrType()
+                );
+                emitter.GetBlock().Builder.CreateStore(valuePtr, valuePtrPtr);
+
+                auto* const dropGluePtrPtr = emitter.GetBlock().Builder.CreateStructGEP(
+                    emitter.GetTypeInfoType(),
+                    typeInfoPtr,
+                    0
+                );
+                auto* const dropGluePtr = emitter.GetBlock().Builder.CreateLoad(
+                    emitter.GetPtrType(),
+                    dropGluePtrPtr
+                );
+
+                emitter.GetBlock().Builder.CreateCall(
+                    emitter.GetDropGlueType(),
+                    dropGluePtr,
+                    { valuePtrPtr }
+                );
+
+                emitter.GetBlock().Builder.CreateRetVoid();
+            }
+        },
+
+        i8_from_i16{ I::FromInt(*this, Int8, Int16) },
+        i8_from_i32{ I::FromInt(*this, Int8, Int32) },
+        i8_from_i64{ I::FromInt(*this, Int8, Int64) },
+        i8_from_u8{ I::FromInt(*this, Int8, UInt8) },
+        i8_from_u16{ I::FromInt(*this, Int8, UInt16) },
+        i8_from_u32{ I::FromInt(*this, Int8, UInt32) },
+        i8_from_u64{ I::FromInt(*this, Int8, UInt64) },
+        i8_from_int{ I::FromInt(*this, Int8, Int) },
+        i8_from_f32{ I::FromFloat(*this, Int8, Float32) },
+        i8_from_f64{ I::FromFloat(*this, Int8, Float64) },
+        i8_unary_plus{ I::UnaryPlus(*this, Int8) },
+        i8_unary_negation{ I::UnaryNegation(*this, Int8) },
+        i8_one_complement{ I::OneComplement(*this, Int8) },
+        i8_multiplication{ I::Multiplication(*this, Int8) },
+        i8_division{ I::Division(*this, Int8) },
+        i8_remainder{ I::Remainder(*this, Int8) },
+        i8_addition{ I::Addition(*this, Int8) },
+        i8_subtraction{ I::Subtraction(*this, Int8) },
+        i8_right_shift{ I::RightShift(*this, Int8) },
+        i8_left_shift{ I::LeftShift(*this, Int8) },
+        i8_less_than{ I::LessThan(*this, Int8) },
+        i8_greater_than{ I::GreaterThan(*this, Int8) },
+        i8_less_than_equals{ I::LessThanEquals(*this, Int8) },
+        i8_greater_than_equals{ I::GreaterThanEquals(*this, Int8) },
+        i8_equals{ I::Equals(*this, Int8) },
+        i8_not_equals{ I::NotEquals(*this, Int8) },
+        i8_AND{ I::AND(*this, Int8) },
+        i8_XOR{ I::XOR(*this, Int8) },
+        i8_OR{ I::OR(*this, Int8) },
+
+        i16_from_i8{ I::FromInt(*this, Int16, Int8) },
+        i16_from_i32{ I::FromInt(*this, Int16, Int32) },
+        i16_from_i64{ I::FromInt(*this, Int16, Int64) },
+        i16_from_u8{ I::FromInt(*this, Int16, UInt8) },
+        i16_from_u16{ I::FromInt(*this, Int16, UInt16) },
+        i16_from_u32{ I::FromInt(*this, Int16, UInt32) },
+        i16_from_u64{ I::FromInt(*this, Int16, UInt64) },
+        i16_from_int{ I::FromInt(*this, Int16, Int) },
+        i16_from_f32{ I::FromFloat(*this, Int16, Float32) },
+        i16_from_f64{ I::FromFloat(*this, Int16, Float64) },
+        i16_unary_plus{ I::UnaryPlus(*this, Int16) },
+        i16_unary_negation{ I::UnaryNegation(*this, Int16) },
+        i16_one_complement{ I::OneComplement(*this, Int16) },
+        i16_multiplication{ I::Multiplication(*this, Int16) },
+        i16_division{ I::Division(*this, Int16) },
+        i16_remainder{ I::Remainder(*this, Int16) },
+        i16_addition{ I::Addition(*this, Int16) },
+        i16_subtraction{ I::Subtraction(*this, Int16) },
+        i16_right_shift{ I::RightShift(*this, Int16) },
+        i16_left_shift{ I::LeftShift(*this, Int16) },
+        i16_less_than{ I::LessThan(*this, Int16) },
+        i16_greater_than{ I::GreaterThan(*this, Int16) },
+        i16_less_than_equals{ I::LessThanEquals(*this, Int16) },
+        i16_greater_than_equals{ I::GreaterThanEquals(*this, Int16) },
+        i16_equals{ I::Equals(*this, Int16) },
+        i16_not_equals{ I::NotEquals(*this, Int16) },
+        i16_AND{ I::AND(*this, Int16) },
+        i16_XOR{ I::XOR(*this, Int16) },
+        i16_OR{ I::OR(*this, Int16) },
+
+        i32_from_i8{ I::FromInt(*this, Int32, Int8) },
+        i32_from_i16{ I::FromInt(*this, Int32, Int16) },
+        i32_from_i64{ I::FromInt(*this, Int32, Int64) },
+        i32_from_u8{ I::FromInt(*this, Int32, UInt8) },
+        i32_from_u16{ I::FromInt(*this, Int32, UInt16) },
+        i32_from_u32{ I::FromInt(*this, Int32, UInt32) },
+        i32_from_u64{ I::FromInt(*this, Int32, UInt64) },
+        i32_from_int{ I::FromInt(*this, Int32, Int) },
+        i32_from_f32{ I::FromFloat(*this, Int32, Float32) },
+        i32_from_f64{ I::FromFloat(*this, Int32, Float64) },
+        i32_unary_plus{ I::UnaryPlus(*this, Int32) },
+        i32_unary_negation{ I::UnaryNegation(*this, Int32) },
+        i32_one_complement{ I::OneComplement(*this, Int32) },
+        i32_multiplication{ I::Multiplication(*this, Int32) },
+        i32_division{ I::Division(*this, Int32) },
+        i32_remainder{ I::Remainder(*this, Int32) },
+        i32_addition{ I::Addition(*this, Int32) },
+        i32_subtraction{ I::Subtraction(*this, Int32) },
+        i32_right_shift{ I::RightShift(*this, Int32) },
+        i32_left_shift{ I::LeftShift(*this, Int32) },
+        i32_less_than{ I::LessThan(*this, Int32) },
+        i32_greater_than{ I::GreaterThan(*this, Int32) },
+        i32_less_than_equals{ I::LessThanEquals(*this, Int32) },
+        i32_greater_than_equals{ I::GreaterThanEquals(*this, Int32) },
+        i32_equals{ I::Equals(*this, Int32) },
+        i32_not_equals{ I::NotEquals(*this, Int32) },
+        i32_AND{ I::AND(*this, Int32) },
+        i32_XOR{ I::XOR(*this, Int32) },
+        i32_OR{ I::OR(*this, Int32) },
+
+        i64_from_i8{ I::FromInt(*this, Int64, Int8) },
+        i64_from_i16{ I::FromInt(*this, Int64, Int16) },
+        i64_from_i32{ I::FromInt(*this, Int64, Int32) },
+        i64_from_u8{ I::FromInt(*this, Int64, UInt8) },
+        i64_from_u16{ I::FromInt(*this, Int64, UInt16) },
+        i64_from_u32{ I::FromInt(*this, Int64, UInt32) },
+        i64_from_u64{ I::FromInt(*this, Int64, UInt64) },
+        i64_from_int{ I::FromInt(*this, Int64, Int) },
+        i64_from_f32{ I::FromFloat(*this, Int64, Float32) },
+        i64_from_f64{ I::FromFloat(*this, Int64, Float64) },
+        i64_unary_plus{ I::UnaryPlus(*this, Int64) },
+        i64_unary_negation{ I::UnaryNegation(*this, Int64) },
+        i64_one_complement{ I::OneComplement(*this, Int64) },
+        i64_multiplication{ I::Multiplication(*this, Int64) },
+        i64_division{ I::Division(*this, Int64) },
+        i64_remainder{ I::Remainder(*this, Int64) },
+        i64_addition{ I::Addition(*this, Int64) },
+        i64_subtraction{ I::Subtraction(*this, Int64) },
+        i64_right_shift{ I::RightShift(*this, Int64) },
+        i64_left_shift{ I::LeftShift(*this, Int64) },
+        i64_less_than{ I::LessThan(*this, Int64) },
+        i64_greater_than{ I::GreaterThan(*this, Int64) },
+        i64_less_than_equals{ I::LessThanEquals(*this, Int64) },
+        i64_greater_than_equals{ I::GreaterThanEquals(*this, Int64) },
+        i64_equals{ I::Equals(*this, Int64) },
+        i64_not_equals{ I::NotEquals(*this, Int64) },
+        i64_AND{ I::AND(*this, Int64) },
+        i64_XOR{ I::XOR(*this, Int64) },
+        i64_OR{ I::OR(*this, Int64) },
+
+        u8_from_i8{ I::FromInt(*this, UInt8, Int8) },
+        u8_from_i16{ I::FromInt(*this, UInt8, Int16) },
+        u8_from_i32{ I::FromInt(*this, UInt8, Int32) },
+        u8_from_i64{ I::FromInt(*this, UInt8, Int64) },
+        u8_from_u16{ I::FromInt(*this, UInt8, UInt16) },
+        u8_from_u32{ I::FromInt(*this, UInt8, UInt32) },
+        u8_from_u64{ I::FromInt(*this, UInt8, UInt64) },
+        u8_from_int{ I::FromInt(*this, UInt8, Int) },
+        u8_from_f32{ I::FromFloat(*this, UInt8, Float32) },
+        u8_from_f64{ I::FromFloat(*this, UInt8, Float64) },
+        u8_unary_plus{ I::UnaryPlus(*this, UInt8) },
+        u8_unary_negation{ I::UnaryNegation(*this, UInt8) },
+        u8_one_complement{ I::OneComplement(*this, UInt8) },
+        u8_multiplication{ I::Multiplication(*this, UInt8) },
+        u8_division{ I::Division(*this, UInt8) },
+        u8_remainder{ I::Remainder(*this, UInt8) },
+        u8_addition{ I::Addition(*this, UInt8) },
+        u8_subtraction{ I::Subtraction(*this, UInt8) },
+        u8_right_shift{ I::RightShift(*this, UInt8) },
+        u8_left_shift{ I::LeftShift(*this, UInt8) },
+        u8_less_than{ I::LessThan(*this, UInt8) },
+        u8_greater_than{ I::GreaterThan(*this, UInt8) },
+        u8_less_than_equals{ I::LessThanEquals(*this, UInt8) },
+        u8_greater_than_equals{ I::GreaterThanEquals(*this, UInt8) },
+        u8_equals{ I::Equals(*this, UInt8) },
+        u8_not_equals{ I::NotEquals(*this, UInt8) },
+        u8_AND{ I::AND(*this, UInt8) },
+        u8_XOR{ I::XOR(*this, UInt8) },
+        u8_OR{ I::OR(*this, UInt8) },
+
+        u16_from_i8{ I::FromInt(*this, UInt16, Int8) },
+        u16_from_i16{ I::FromInt(*this, UInt16, Int16) },
+        u16_from_i32{ I::FromInt(*this, UInt16, Int32) },
+        u16_from_i64{ I::FromInt(*this, UInt16, Int64) },
+        u16_from_u8{ I::FromInt(*this, UInt16, UInt8) },
+        u16_from_u32{ I::FromInt(*this, UInt16, UInt32) },
+        u16_from_u64{ I::FromInt(*this, UInt16, UInt64) },
+        u16_from_int{ I::FromInt(*this, UInt16, Int) },
+        u16_from_f32{ I::FromFloat(*this, UInt16, Float32) },
+        u16_from_f64{ I::FromFloat(*this, UInt16, Float64) },
+        u16_unary_plus{ I::UnaryPlus(*this, UInt16) },
+        u16_unary_negation{ I::UnaryNegation(*this, UInt16) },
+        u16_one_complement{ I::OneComplement(*this, UInt16) },
+        u16_multiplication{ I::Multiplication(*this, UInt16) },
+        u16_division{ I::Division(*this, UInt16) },
+        u16_remainder{ I::Remainder(*this, UInt16) },
+        u16_addition{ I::Addition(*this, UInt16) },
+        u16_subtraction{ I::Subtraction(*this, UInt16) },
+        u16_right_shift{ I::RightShift(*this, UInt16) },
+        u16_left_shift{ I::LeftShift(*this, UInt16) },
+        u16_less_than{ I::LessThan(*this, UInt16) },
+        u16_greater_than{ I::GreaterThan(*this, UInt16) },
+        u16_less_than_equals{ I::LessThanEquals(*this, UInt16) },
+        u16_greater_than_equals{ I::GreaterThanEquals(*this, UInt16) },
+        u16_equals{ I::Equals(*this, UInt16) },
+        u16_not_equals{ I::NotEquals(*this, UInt16) },
+        u16_AND{ I::AND(*this, UInt16) },
+        u16_XOR{ I::XOR(*this, UInt16) },
+        u16_OR{ I::OR(*this, UInt16) },
+
+        u32_from_i8{ I::FromInt(*this, UInt32, Int8) },
+        u32_from_i16{ I::FromInt(*this, UInt32, Int16) },
+        u32_from_i32{ I::FromInt(*this, UInt32, Int32) },
+        u32_from_i64{ I::FromInt(*this, UInt32, Int64) },
+        u32_from_u8{ I::FromInt(*this, UInt32, UInt8) },
+        u32_from_u16{ I::FromInt(*this, UInt32, UInt16) },
+        u32_from_u64{ I::FromInt(*this, UInt32, UInt64) },
+        u32_from_int{ I::FromInt(*this, UInt32, Int) },
+        u32_from_f32{ I::FromFloat(*this, UInt32, Float32) },
+        u32_from_f64{ I::FromFloat(*this, UInt32, Float64) },
+        u32_unary_plus{ I::UnaryPlus(*this, UInt32) },
+        u32_unary_negation{ I::UnaryNegation(*this, UInt32) },
+        u32_one_complement{ I::OneComplement(*this, UInt32) },
+        u32_multiplication{ I::Multiplication(*this, UInt32) },
+        u32_division{ I::Division(*this, UInt32) },
+        u32_remainder{ I::Remainder(*this, UInt32) },
+        u32_addition{ I::Addition(*this, UInt32) },
+        u32_subtraction{ I::Subtraction(*this, UInt32) },
+        u32_right_shift{ I::RightShift(*this, UInt32) },
+        u32_left_shift{ I::LeftShift(*this, UInt32) },
+        u32_less_than{ I::LessThan(*this, UInt32) },
+        u32_greater_than{ I::GreaterThan(*this, UInt32) },
+        u32_less_than_equals{ I::LessThanEquals(*this, UInt32) },
+        u32_greater_than_equals{ I::GreaterThanEquals(*this, UInt32) },
+        u32_equals{ I::Equals(*this, UInt32) },
+        u32_not_equals{ I::NotEquals(*this, UInt32) },
+        u32_AND{ I::AND(*this, UInt32) },
+        u32_XOR{ I::XOR(*this, UInt32) },
+        u32_OR{ I::OR(*this, UInt32) },
+
+        u64_from_i8{ I::FromInt(*this, UInt64, Int8) },
+        u64_from_i16{ I::FromInt(*this, UInt64, Int16) },
+        u64_from_i32{ I::FromInt(*this, UInt64, Int32) },
+        u64_from_i64{ I::FromInt(*this, UInt64, Int64) },
+        u64_from_u8{ I::FromInt(*this, UInt64, UInt8) },
+        u64_from_u16{ I::FromInt(*this, UInt64, UInt16) },
+        u64_from_u32{ I::FromInt(*this, UInt64, UInt32) },
+        u64_from_int{ I::FromInt(*this, UInt64, Int) },
+        u64_from_f32{ I::FromFloat(*this, UInt64, Float32) },
+        u64_from_f64{ I::FromFloat(*this, UInt64, Float64) },
+        u64_unary_plus{ I::UnaryPlus(*this, UInt64) },
+        u64_unary_negation{ I::UnaryNegation(*this, UInt64) },
+        u64_one_complement{ I::OneComplement(*this, UInt64) },
+        u64_multiplication{ I::Multiplication(*this, UInt64) },
+        u64_division{ I::Division(*this, UInt64) },
+        u64_remainder{ I::Remainder(*this, UInt64) },
+        u64_addition{ I::Addition(*this, UInt64) },
+        u64_subtraction{ I::Subtraction(*this, UInt64) },
+        u64_right_shift{ I::RightShift(*this, UInt64) },
+        u64_left_shift{ I::LeftShift(*this, UInt64) },
+        u64_less_than{ I::LessThan(*this, UInt64) },
+        u64_greater_than{ I::GreaterThan(*this, UInt64) },
+        u64_less_than_equals{ I::LessThanEquals(*this, UInt64) },
+        u64_greater_than_equals{ I::GreaterThanEquals(*this, UInt64) },
+        u64_equals{ I::Equals(*this, UInt64) },
+        u64_not_equals{ I::NotEquals(*this, UInt64) },
+        u64_AND{ I::AND(*this, UInt64) },
+        u64_XOR{ I::XOR(*this, UInt64) },
+        u64_OR{ I::OR(*this, UInt64) },
+
+        int_from_i8{ I::FromInt(*this, Int, Int8) },
+        int_from_i16{ I::FromInt(*this, Int, Int16) },
+        int_from_i32{ I::FromInt(*this, Int, Int32) },
+        int_from_i64{ I::FromInt(*this, Int, Int64) },
+        int_from_u8{ I::FromInt(*this, Int, UInt8) },
+        int_from_u16{ I::FromInt(*this, Int, UInt16) },
+        int_from_u32{ I::FromInt(*this, Int, UInt32) },
+        int_from_u64{ I::FromInt(*this, Int, UInt64) },
+        int_from_f32{ I::FromFloat(*this, Int, Float32) },
+        int_from_f64{ I::FromFloat(*this, Int, Float64) },
+        int_unary_plus{ I::UnaryPlus(*this, Int) },
+        int_unary_negation{ I::UnaryNegation(*this, Int) },
+        int_one_complement{ I::OneComplement(*this, Int) },
+        int_multiplication{ I::Multiplication(*this, Int) },
+        int_division{ I::Division(*this, Int) },
+        int_remainder{ I::Remainder(*this, Int) },
+        int_addition{ I::Addition(*this, Int) },
+        int_subtraction{ I::Subtraction(*this, Int) },
+        int_right_shift{ I::RightShift(*this, Int) },
+        int_left_shift{ I::LeftShift(*this, Int) },
+        int_less_than{ I::LessThan(*this, Int) },
+        int_greater_than{ I::GreaterThan(*this, Int) },
+        int_less_than_equals{ I::LessThanEquals(*this, Int) },
+        int_greater_than_equals{ I::GreaterThanEquals(*this, Int) },
+        int_equals{ I::Equals(*this, Int) },
+        int_not_equals{ I::NotEquals(*this, Int) },
+        int_AND{ I::AND(*this, Int) },
+        int_XOR{ I::XOR(*this, Int) },
+        int_OR{ I::OR(*this, Int) },
+
+        f32_from_i8{ F::FromInt(*this, Float32, Int8) },
+        f32_from_i16{ F::FromInt(*this, Float32, Int16) },
+        f32_from_i32{ F::FromInt(*this, Float32, Int32) },
+        f32_from_i64{ F::FromInt(*this, Float32, Int64) },
+        f32_from_u8{ F::FromInt(*this, Float32, UInt8) },
+        f32_from_u16{ F::FromInt(*this, Float32, UInt16) },
+        f32_from_u32{ F::FromInt(*this, Float32, UInt32) },
+        f32_from_u64{ F::FromInt(*this, Float32, UInt64) },
+        f32_from_int{ F::FromInt(*this, Float32, Int) },
+        f32_from_f64
+        {
+            compilation,
+            CreateFromName(*this, Float32, Float64),
+            NativeSymbolKind::Concrete,
             [this, compilation](Emitter& emitter)
             {
                 auto* const float64IRType =
                     Float64.GetIRType(emitter.GetContext());
 
-                auto* const value = emitter.GetBlockBuilder().Builder.CreateFPTrunc(
+                auto* const value = emitter.GetBlock().Builder.CreateFPTrunc(
                     emitter.EmitLoadArg(0, float64IRType),
                     llvm::Type::getFloatTy(emitter.GetContext())
                 );
 
-                emitter.GetBlockBuilder().Builder.CreateRet(value);
+                emitter.GetBlock().Builder.CreateRet(value);
             }
         },
-        f32__unary_plus{ F::UnaryPlus(Float32) },
-        f32__unary_negation{ F::UnaryNegation(Float32) },
-        f32__multiplication{ F::Multiplication(Float32) },
-        f32__division{ F::Division(Float32) },
-        f32__remainder{ F::Remainder(Float32) },
-        f32__addition{ F::Addition(Float32) },
-        f32__subtraction{ F::Subtraction(Float32) },
-        f32__less_than{ F::LessThan(Float32) },
-        f32__greater_than{ F::GreaterThan(Float32) },
-        f32__less_than_equals{ F::LessThanEquals(Float32) },
-        f32__greater_than_equals{ F::GreaterThanEquals(Float32) },
-        f32__equals{ F::Equals(Float32) },
-        f32__not_equals{ F::NotEquals(Float32) },
+        f32_unary_plus{ F::UnaryPlus(*this, Float32) },
+        f32_unary_negation{ F::UnaryNegation(*this, Float32) },
+        f32_multiplication{ F::Multiplication(*this, Float32) },
+        f32_division{ F::Division(*this, Float32) },
+        f32_remainder{ F::Remainder(*this, Float32) },
+        f32_addition{ F::Addition(*this, Float32) },
+        f32_subtraction{ F::Subtraction(*this, Float32) },
+        f32_less_than{ F::LessThan(*this, Float32) },
+        f32_greater_than{ F::GreaterThan(*this, Float32) },
+        f32_less_than_equals{ F::LessThanEquals(*this, Float32) },
+        f32_greater_than_equals{ F::GreaterThanEquals(*this, Float32) },
+        f32_equals{ F::Equals(*this, Float32) },
+        f32_not_equals{ F::NotEquals(*this, Float32) },
 
-        f64__from_i8{ F::FromInt8(Float64, this) },
-        f64__from_i16{ F::FromInt16(Float64, this) },
-        f64__from_i32{ F::FromInt32(Float64, this) },
-        f64__from_i64{ F::FromInt64(Float64, this) },
-        f64__from_u8{ F::FromUInt8(Float64, this) },
-        f64__from_u16{ F::FromUInt16(Float64, this) },
-        f64__from_u32{ F::FromUInt32(Float64, this) },
-        f64__from_u64{ F::FromUInt64(Float64, this) },
-        f64__from_int{ F::FromInt(Float64, this) },
-        f64__from_f32
+        f64_from_i8{ F::FromInt(*this, Float64, Int8) },
+        f64_from_i16{ F::FromInt(*this, Float64, Int16) },
+        f64_from_i32{ F::FromInt(*this, Float64, Int32) },
+        f64_from_i64{ F::FromInt(*this, Float64, Int64) },
+        f64_from_u8{ F::FromInt(*this, Float64, UInt8) },
+        f64_from_u16{ F::FromInt(*this, Float64, UInt16) },
+        f64_from_u32{ F::FromInt(*this, Float64, UInt32) },
+        f64_from_u64{ F::FromInt(*this, Float64, UInt64) },
+        f64_from_int{ F::FromInt(*this, Float64, Int) },
+        f64_from_f32
         {
-            Float64,
-            "from_f32",
+            compilation,
+            CreateFromName(*this, Float64, Float32),
+            NativeSymbolKind::Concrete,
             [this, compilation](Emitter& emitter)
             {
                 auto* const float32IRType =
                     Float32.GetIRType(emitter.GetContext());
 
-                auto* const value = emitter.GetBlockBuilder().Builder.CreateFPExt(
+                auto* const value = emitter.GetBlock().Builder.CreateFPExt(
                     emitter.EmitLoadArg(0, float32IRType),
                     llvm::Type::getDoubleTy(emitter.GetContext())
                 );
 
-                emitter.GetBlockBuilder().Builder.CreateRet(value);
+                emitter.GetBlock().Builder.CreateRet(value);
             }
         },
-        f64__unary_plus{ F::UnaryPlus(Float64) },
-        f64__unary_negation{ F::UnaryNegation(Float64) },
-        f64__multiplication{ F::Multiplication(Float64) },
-        f64__division{ F::Division(Float64) },
-        f64__remainder{ F::Remainder(Float64) },
-        f64__addition{ F::Addition(Float64) },
-        f64__subtraction{ F::Subtraction(Float64) },
-        f64__less_than{ F::LessThan(Float64) },
-        f64__greater_than{ F::GreaterThan(Float64) },
-        f64__less_than_equals{ F::LessThanEquals(Float64) },
-        f64__greater_than_equals{ F::GreaterThanEquals(Float64) },
-        f64__equals{ F::Equals(Float64) },
-        f64__not_equals{ F::NotEquals(Float64) },
+        f64_unary_plus{ F::UnaryPlus(*this, Float64) },
+        f64_unary_negation{ F::UnaryNegation(*this, Float64) },
+        f64_multiplication{ F::Multiplication(*this, Float64) },
+        f64_division{ F::Division(*this, Float64) },
+        f64_remainder{ F::Remainder(*this, Float64) },
+        f64_addition{ F::Addition(*this, Float64) },
+        f64_subtraction{ F::Subtraction(*this, Float64) },
+        f64_less_than{ F::LessThan(*this, Float64) },
+        f64_greater_than{ F::GreaterThan(*this, Float64) },
+        f64_less_than_equals{ F::LessThanEquals(*this, Float64) },
+        f64_greater_than_equals{ F::GreaterThanEquals(*this, Float64) },
+        f64_equals{ F::Equals(*this, Float64) },
+        f64_not_equals{ F::NotEquals(*this, Float64) },
 
-        StrongPtr__new
+        weak_ptr_from
         {
-            StrongPtr,
-            "new"
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "weak_ptr_from" },
+            NativeSymbolKind::Root,
+            std::nullopt,
         },
-        StrongPtr__value
+        weak_ptr_from_dyn
         {
-            StrongPtr,
-            "value"
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "weak_ptr_from_dyn" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        weak_ptr_copy
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "weak_ptr_copy" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        weak_ptr_drop
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "weak_ptr_drop" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        weak_ptr_lock
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "weak_ptr_lock" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        weak_ptr_lock_dyn
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "weak_ptr_lock_dyn" },
+            NativeSymbolKind::Root,
+            std::nullopt,
         },
 
-        WeakPtr__from
+        strong_ptr_new
         {
-            WeakPtr,
-            "from"
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "strong_ptr_new" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        strong_ptr_value
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "strong_ptr_value" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        strong_ptr_copy
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "strong_ptr_copy" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        strong_ptr_drop
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "strong_ptr_drop" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+
+        dyn_strong_ptr_from
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "dyn_strong_ptr_from" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        dyn_strong_ptr_copy
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "dyn_strong_ptr_copy" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        dyn_strong_ptr_drop
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "dyn_strong_ptr_drop" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        dyn_strong_ptr_value_ptr
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "dyn_strong_ptr_value_ptr" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        dyn_strong_ptr_set_value_ptr
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "dyn_strong_ptr_set_value_ptr" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        dyn_strong_ptr_control_block_ptr
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "dyn_strong_ptr_control_block_ptr" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        dyn_strong_ptr_set_control_block_ptr
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "dyn_strong_ptr_set_control_block_ptr" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        dyn_strong_ptr_vtbl_ptr
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "dyn_strong_ptr_vtbl_ptr" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+        dyn_strong_ptr_set_vtbl_ptr
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "dyn_strong_ptr_set_vtbl_ptr" },
+            NativeSymbolKind::Root,
+            std::nullopt,
+        },
+
+        strong_ptr_to_dyn_strong_ptr
+        {
+            compilation,
+            std::vector<std::string>{ "ace", "std", "rc", "strong_ptr_to_dyn_strong_ptr" },
+            NativeSymbolKind::Root,
+            std::nullopt,
         },
 
         m_Natives
@@ -2225,36 +2618,8 @@ namespace Ace
                 const auto types = m_Types.Get();
                 natives.insert(end(natives), begin(types), end(types));
 
-                const auto typeTemplates = m_TypeTemplates.Get();
-                natives.insert(
-                    end(natives),
-                    begin(typeTemplates),
-                    end  (typeTemplates)
-                );
-
                 const auto functions = m_Functions.Get();
                 natives.insert(end(natives), begin(functions), end(functions));
-
-                const auto functionTemplates = m_FunctionTemplates.Get();
-                natives.insert(
-                    end(natives),
-                    begin(functionTemplates),
-                    end  (functionTemplates)
-                );
-
-                const auto associatedFunctions = m_AssociatedFunctions.Get();
-                natives.insert(
-                    end(natives),
-                    begin(associatedFunctions),
-                    end  (associatedFunctions)
-                );
-
-                const auto associatedFunctionTemplates = m_AssociatedFunctionTemplates.Get();
-                natives.insert(
-                    end(natives),
-                    begin(associatedFunctionTemplates),
-                    end  (associatedFunctionTemplates)
-                );
 
                 return natives;
             }
@@ -2269,14 +2634,14 @@ namespace Ace
                     &Int16,
                     &Int32,
                     &Int64,
-                
+
                     &UInt8,
                     &UInt16,
                     &UInt32,
                     &UInt64,
 
                     &Int,
-                
+
                     &Float32,
                     &Float64,
 
@@ -2284,18 +2649,12 @@ namespace Ace
                     &String,
 
                     &Ptr,
-                };
-            }
-        },
-        m_TypeTemplates
-        {
-            [this]()
-            {
-                return std::vector
-                {
+
                     &Ref,
-                    &StrongPtr,
                     &WeakPtr,
+                    &StrongPtr,
+                    &DynStrongPtr,
+                    &DynStrongPtrData,
                 };
             }
         },
@@ -2311,263 +2670,250 @@ namespace Ace
                     &alloc,
                     &dealloc,
                     &copy,
-                };
-            }
-        },
-        m_FunctionTemplates
-        {
-            [this]()
-            {
-                return std::vector<NativeFunctionTemplate*>
-                {
-                };
-            }
-        },
-        m_AssociatedFunctions
-        {
-            [this]()
-            {
-                return std::vector
-                {
-                    &i8__from_i16,
-                    &i8__from_i32,
-                    &i8__from_i64,
-                    &i8__from_u8,
-                    &i8__from_u16,
-                    &i8__from_u32,
-                    &i8__from_u64,
-                    &i8__from_int,
-                    &i8__from_f32,
-                    &i8__from_f64,
-                    &i8__unary_plus,
-                    &i8__unary_negation,
-                    &i8__one_complement,
-                    &i8__multiplication,
-                    &i8__division,
-                    &i8__remainder,
-                    &i8__addition,
-                    &i8__subtraction,
-                    &i8__right_shift,
-                    &i8__left_shift,
-                    &i8__less_than,
-                    &i8__greater_than,
-                    &i8__less_than_equals,
-                    &i8__greater_than_equals,
-                    &i8__equals,
-                    &i8__not_equals,
-                    &i8__AND,
-                    &i8__XOR,
-                    &i8__OR,
 
-                    &i16__from_i8,
-                    &i16__from_i32,
-                    &i16__from_i64,
-                    &i16__from_u8,
-                    &i16__from_u16,
-                    &i16__from_u32,
-                    &i16__from_u64,
-                    &i16__from_int,
-                    &i16__from_f32,
-                    &i16__from_f64,
-                    &i16__unary_plus,
-                    &i16__unary_negation,
-                    &i16__one_complement,
-                    &i16__multiplication,
-                    &i16__division,
-                    &i16__remainder,
-                    &i16__addition,
-                    &i16__subtraction,
-                    &i16__right_shift,
-                    &i16__left_shift,
-                    &i16__less_than,
-                    &i16__greater_than,
-                    &i16__less_than_equals,
-                    &i16__greater_than_equals,
-                    &i16__equals,
-                    &i16__not_equals,
-                    &i16__AND,
-                    &i16__XOR,
-                    &i16__OR,
+                    &lookup_vtbl_ptr,
+                    &sublookup_vtbl_ptr,
+                    &dyn_drop,
 
-                    &i32__from_i8,
-                    &i32__from_i16,
-                    &i32__from_i64,
-                    &i32__from_u8,
-                    &i32__from_u16,
-                    &i32__from_u32,
-                    &i32__from_u64,
-                    &i32__from_int,
-                    &i32__from_f32,
-                    &i32__from_f64,
-                    &i32__unary_plus,
-                    &i32__unary_negation,
-                    &i32__one_complement,
-                    &i32__multiplication,
-                    &i32__division,
-                    &i32__remainder,
-                    &i32__addition,
-                    &i32__subtraction,
-                    &i32__right_shift,
-                    &i32__left_shift,
-                    &i32__less_than,
-                    &i32__greater_than,
-                    &i32__less_than_equals,
-                    &i32__greater_than_equals,
-                    &i32__equals,
-                    &i32__not_equals,
-                    &i32__AND,
-                    &i32__XOR,
-                    &i32__OR,
+                    &i8_from_i16,
+                    &i8_from_i32,
+                    &i8_from_i64,
+                    &i8_from_u8,
+                    &i8_from_u16,
+                    &i8_from_u32,
+                    &i8_from_u64,
+                    &i8_from_int,
+                    &i8_from_f32,
+                    &i8_from_f64,
+                    &i8_unary_plus,
+                    &i8_unary_negation,
+                    &i8_one_complement,
+                    &i8_multiplication,
+                    &i8_division,
+                    &i8_remainder,
+                    &i8_addition,
+                    &i8_subtraction,
+                    &i8_right_shift,
+                    &i8_left_shift,
+                    &i8_less_than,
+                    &i8_greater_than,
+                    &i8_less_than_equals,
+                    &i8_greater_than_equals,
+                    &i8_equals,
+                    &i8_not_equals,
+                    &i8_AND,
+                    &i8_XOR,
+                    &i8_OR,
 
-                    &i64__from_i8,
-                    &i64__from_i16,
-                    &i64__from_i32,
-                    &i64__from_u8,
-                    &i64__from_u16,
-                    &i64__from_u32,
-                    &i64__from_u64,
-                    &i64__from_int,
-                    &i64__from_f32,
-                    &i64__from_f64,
-                    &i64__unary_plus,
-                    &i64__unary_negation,
-                    &i64__one_complement,
-                    &i64__multiplication,
-                    &i64__division,
-                    &i64__remainder,
-                    &i64__addition,
-                    &i64__subtraction,
-                    &i64__right_shift,
-                    &i64__left_shift,
-                    &i64__less_than,
-                    &i64__greater_than,
-                    &i64__less_than_equals,
-                    &i64__greater_than_equals,
-                    &i64__equals,
-                    &i64__not_equals,
-                    &i64__AND,
-                    &i64__XOR,
-                    &i64__OR,
+                    &i16_from_i8,
+                    &i16_from_i32,
+                    &i16_from_i64,
+                    &i16_from_u8,
+                    &i16_from_u16,
+                    &i16_from_u32,
+                    &i16_from_u64,
+                    &i16_from_int,
+                    &i16_from_f32,
+                    &i16_from_f64,
+                    &i16_unary_plus,
+                    &i16_unary_negation,
+                    &i16_one_complement,
+                    &i16_multiplication,
+                    &i16_division,
+                    &i16_remainder,
+                    &i16_addition,
+                    &i16_subtraction,
+                    &i16_right_shift,
+                    &i16_left_shift,
+                    &i16_less_than,
+                    &i16_greater_than,
+                    &i16_less_than_equals,
+                    &i16_greater_than_equals,
+                    &i16_equals,
+                    &i16_not_equals,
+                    &i16_AND,
+                    &i16_XOR,
+                    &i16_OR,
 
-                    &u8__from_i8,
-                    &u8__from_i16,
-                    &u8__from_i32,
-                    &u8__from_i64,
-                    &u8__from_u16,
-                    &u8__from_u32,
-                    &u8__from_u64,
-                    &u8__from_int,
-                    &u8__from_f32,
-                    &u8__from_f64,
-                    &u8__unary_plus,
-                    &u8__unary_negation,
-                    &u8__one_complement,
-                    &u8__multiplication,
-                    &u8__division,
-                    &u8__remainder,
-                    &u8__addition,
-                    &u8__subtraction,
-                    &u8__right_shift,
-                    &u8__left_shift,
-                    &u8__less_than,
-                    &u8__greater_than,
-                    &u8__less_than_equals,
-                    &u8__greater_than_equals,
-                    &u8__equals,
-                    &u8__not_equals,
-                    &u8__AND,
-                    &u8__XOR,
-                    &u8__OR,
+                    &i32_from_i8,
+                    &i32_from_i16,
+                    &i32_from_i64,
+                    &i32_from_u8,
+                    &i32_from_u16,
+                    &i32_from_u32,
+                    &i32_from_u64,
+                    &i32_from_int,
+                    &i32_from_f32,
+                    &i32_from_f64,
+                    &i32_unary_plus,
+                    &i32_unary_negation,
+                    &i32_one_complement,
+                    &i32_multiplication,
+                    &i32_division,
+                    &i32_remainder,
+                    &i32_addition,
+                    &i32_subtraction,
+                    &i32_right_shift,
+                    &i32_left_shift,
+                    &i32_less_than,
+                    &i32_greater_than,
+                    &i32_less_than_equals,
+                    &i32_greater_than_equals,
+                    &i32_equals,
+                    &i32_not_equals,
+                    &i32_AND,
+                    &i32_XOR,
+                    &i32_OR,
 
-                    &u16__from_i8,
-                    &u16__from_i16,
-                    &u16__from_i32,
-                    &u16__from_i64,
-                    &u16__from_u8,
-                    &u16__from_u32,
-                    &u16__from_u64,
-                    &u16__from_int,
-                    &u16__from_f32,
-                    &u16__from_f64,
-                    &u16__unary_plus,
-                    &u16__unary_negation,
-                    &u16__one_complement,
-                    &u16__multiplication,
-                    &u16__division,
-                    &u16__remainder,
-                    &u16__addition,
-                    &u16__subtraction,
-                    &u16__right_shift,
-                    &u16__left_shift,
-                    &u16__less_than,
-                    &u16__greater_than,
-                    &u16__less_than_equals,
-                    &u16__greater_than_equals,
-                    &u16__equals,
-                    &u16__not_equals,
-                    &u16__AND,
-                    &u16__XOR,
-                    &u16__OR,
+                    &i64_from_i8,
+                    &i64_from_i16,
+                    &i64_from_i32,
+                    &i64_from_u8,
+                    &i64_from_u16,
+                    &i64_from_u32,
+                    &i64_from_u64,
+                    &i64_from_int,
+                    &i64_from_f32,
+                    &i64_from_f64,
+                    &i64_unary_plus,
+                    &i64_unary_negation,
+                    &i64_one_complement,
+                    &i64_multiplication,
+                    &i64_division,
+                    &i64_remainder,
+                    &i64_addition,
+                    &i64_subtraction,
+                    &i64_right_shift,
+                    &i64_left_shift,
+                    &i64_less_than,
+                    &i64_greater_than,
+                    &i64_less_than_equals,
+                    &i64_greater_than_equals,
+                    &i64_equals,
+                    &i64_not_equals,
+                    &i64_AND,
+                    &i64_XOR,
+                    &i64_OR,
 
-                    &u32__from_i8,
-                    &u32__from_i16,
-                    &u32__from_i32,
-                    &u32__from_i64,
-                    &u32__from_u8,
-                    &u32__from_u16,
-                    &u32__from_u64,
-                    &u32__from_int,
-                    &u32__from_f32,
-                    &u32__from_f64,
-                    &u32__unary_plus,
-                    &u32__unary_negation,
-                    &u32__one_complement,
-                    &u32__multiplication,
-                    &u32__division,
-                    &u32__remainder,
-                    &u32__addition,
-                    &u32__subtraction,
-                    &u32__right_shift,
-                    &u32__left_shift,
-                    &u32__less_than,
-                    &u32__greater_than,
-                    &u32__less_than_equals,
-                    &u32__greater_than_equals,
-                    &u32__equals,
-                    &u32__not_equals,
-                    &u32__AND,
-                    &u32__XOR,
-                    &u32__OR,
+                    &u8_from_i8,
+                    &u8_from_i16,
+                    &u8_from_i32,
+                    &u8_from_i64,
+                    &u8_from_u16,
+                    &u8_from_u32,
+                    &u8_from_u64,
+                    &u8_from_int,
+                    &u8_from_f32,
+                    &u8_from_f64,
+                    &u8_unary_plus,
+                    &u8_unary_negation,
+                    &u8_one_complement,
+                    &u8_multiplication,
+                    &u8_division,
+                    &u8_remainder,
+                    &u8_addition,
+                    &u8_subtraction,
+                    &u8_right_shift,
+                    &u8_left_shift,
+                    &u8_less_than,
+                    &u8_greater_than,
+                    &u8_less_than_equals,
+                    &u8_greater_than_equals,
+                    &u8_equals,
+                    &u8_not_equals,
+                    &u8_AND,
+                    &u8_XOR,
+                    &u8_OR,
 
-                    &u64__from_i8,
-                    &u64__from_i16,
-                    &u64__from_i32,
-                    &u64__from_i64,
-                    &u64__from_u8,
-                    &u64__from_u16,
-                    &u64__from_u32,
-                    &u64__from_int,
-                    &u64__from_f32,
-                    &u64__from_f64,
-                    &u64__unary_plus,
-                    &u64__unary_negation,
-                    &u64__one_complement,
-                    &u64__multiplication,
-                    &u64__division,
-                    &u64__remainder,
-                    &u64__addition,
-                    &u64__subtraction,
-                    &u64__right_shift,
-                    &u64__left_shift,
-                    &u64__less_than,
-                    &u64__greater_than,
-                    &u64__less_than_equals,
-                    &u64__greater_than_equals,
-                    &u64__equals,
-                    &u64__not_equals,
-                    &u64__AND,
-                    &u64__XOR,
-                    &u64__OR,
+                    &u16_from_i8,
+                    &u16_from_i16,
+                    &u16_from_i32,
+                    &u16_from_i64,
+                    &u16_from_u8,
+                    &u16_from_u32,
+                    &u16_from_u64,
+                    &u16_from_int,
+                    &u16_from_f32,
+                    &u16_from_f64,
+                    &u16_unary_plus,
+                    &u16_unary_negation,
+                    &u16_one_complement,
+                    &u16_multiplication,
+                    &u16_division,
+                    &u16_remainder,
+                    &u16_addition,
+                    &u16_subtraction,
+                    &u16_right_shift,
+                    &u16_left_shift,
+                    &u16_less_than,
+                    &u16_greater_than,
+                    &u16_less_than_equals,
+                    &u16_greater_than_equals,
+                    &u16_equals,
+                    &u16_not_equals,
+                    &u16_AND,
+                    &u16_XOR,
+                    &u16_OR,
+
+                    &u32_from_i8,
+                    &u32_from_i16,
+                    &u32_from_i32,
+                    &u32_from_i64,
+                    &u32_from_u8,
+                    &u32_from_u16,
+                    &u32_from_u64,
+                    &u32_from_int,
+                    &u32_from_f32,
+                    &u32_from_f64,
+                    &u32_unary_plus,
+                    &u32_unary_negation,
+                    &u32_one_complement,
+                    &u32_multiplication,
+                    &u32_division,
+                    &u32_remainder,
+                    &u32_addition,
+                    &u32_subtraction,
+                    &u32_right_shift,
+                    &u32_left_shift,
+                    &u32_less_than,
+                    &u32_greater_than,
+                    &u32_less_than_equals,
+                    &u32_greater_than_equals,
+                    &u32_equals,
+                    &u32_not_equals,
+                    &u32_AND,
+                    &u32_XOR,
+                    &u32_OR,
+
+                    &u64_from_i8,
+                    &u64_from_i16,
+                    &u64_from_i32,
+                    &u64_from_i64,
+                    &u64_from_u8,
+                    &u64_from_u16,
+                    &u64_from_u32,
+                    &u64_from_int,
+                    &u64_from_f32,
+                    &u64_from_f64,
+                    &u64_unary_plus,
+                    &u64_unary_negation,
+                    &u64_one_complement,
+                    &u64_multiplication,
+                    &u64_division,
+                    &u64_remainder,
+                    &u64_addition,
+                    &u64_subtraction,
+                    &u64_right_shift,
+                    &u64_left_shift,
+                    &u64_less_than,
+                    &u64_greater_than,
+                    &u64_less_than_equals,
+                    &u64_greater_than_equals,
+                    &u64_equals,
+                    &u64_not_equals,
+                    &u64_AND,
+                    &u64_XOR,
+                    &u64_OR,
 
                     &int_from_i8,
                     &int_from_i16,
@@ -2599,66 +2945,77 @@ namespace Ace
                     &int_XOR,
                     &int_OR,
 
-                    &f32__from_i8,
-                    &f32__from_i16,
-                    &f32__from_i32,
-                    &f32__from_i64,
-                    &f32__from_u8,
-                    &f32__from_u16,
-                    &f32__from_u32,
-                    &f32__from_u64,
-                    &f32__from_int,
-                    &f32__from_f64,
-                    &f32__unary_plus,
-                    &f32__unary_negation,
-                    &f32__multiplication,
-                    &f32__division,
-                    &f32__remainder,
-                    &f32__addition,
-                    &f32__subtraction,
-                    &f32__less_than,
-                    &f32__greater_than,
-                    &f32__less_than_equals,
-                    &f32__greater_than_equals,
-                    &f32__equals,
-                    &f32__not_equals,
+                    &f32_from_i8,
+                    &f32_from_i16,
+                    &f32_from_i32,
+                    &f32_from_i64,
+                    &f32_from_u8,
+                    &f32_from_u16,
+                    &f32_from_u32,
+                    &f32_from_u64,
+                    &f32_from_int,
+                    &f32_from_f64,
+                    &f32_unary_plus,
+                    &f32_unary_negation,
+                    &f32_multiplication,
+                    &f32_division,
+                    &f32_remainder,
+                    &f32_addition,
+                    &f32_subtraction,
+                    &f32_less_than,
+                    &f32_greater_than,
+                    &f32_less_than_equals,
+                    &f32_greater_than_equals,
+                    &f32_equals,
+                    &f32_not_equals,
 
-                    &f64__from_i8,
-                    &f64__from_i16,
-                    &f64__from_i32,
-                    &f64__from_i64,
-                    &f64__from_u8,
-                    &f64__from_u16,
-                    &f64__from_u32,
-                    &f64__from_u64,
-                    &f64__from_int,
-                    &f64__from_f32,
-                    &f64__unary_plus,
-                    &f64__unary_negation,
-                    &f64__multiplication,
-                    &f64__division,
-                    &f64__remainder,
-                    &f64__addition,
-                    &f64__subtraction,
-                    &f64__less_than,
-                    &f64__greater_than,
-                    &f64__less_than_equals,
-                    &f64__greater_than_equals,
-                    &f64__equals,
-                    &f64__not_equals,
-                };
-            }
-        },
-        m_AssociatedFunctionTemplates
-        {
-            [this]()
-            {
-                return std::vector
-                {
-                    &StrongPtr__new,
-                    &StrongPtr__value,
+                    &f64_from_i8,
+                    &f64_from_i16,
+                    &f64_from_i32,
+                    &f64_from_i64,
+                    &f64_from_u8,
+                    &f64_from_u16,
+                    &f64_from_u32,
+                    &f64_from_u64,
+                    &f64_from_int,
+                    &f64_from_f32,
+                    &f64_unary_plus,
+                    &f64_unary_negation,
+                    &f64_multiplication,
+                    &f64_division,
+                    &f64_remainder,
+                    &f64_addition,
+                    &f64_subtraction,
+                    &f64_less_than,
+                    &f64_greater_than,
+                    &f64_less_than_equals,
+                    &f64_greater_than_equals,
+                    &f64_equals,
+                    &f64_not_equals,
 
-                    &WeakPtr__from,
+                    &weak_ptr_from,
+                    &weak_ptr_from_dyn,
+                    &weak_ptr_copy,
+                    &weak_ptr_drop,
+                    &weak_ptr_lock,
+                    &weak_ptr_lock_dyn,
+
+                    &strong_ptr_new,
+                    &strong_ptr_value,
+                    &strong_ptr_copy,
+                    &strong_ptr_drop,
+
+                    &dyn_strong_ptr_from,
+                    &dyn_strong_ptr_copy,
+                    &dyn_strong_ptr_drop,
+                    &dyn_strong_ptr_value_ptr,
+                    &dyn_strong_ptr_set_value_ptr,
+                    &dyn_strong_ptr_control_block_ptr,
+                    &dyn_strong_ptr_set_control_block_ptr,
+                    &dyn_strong_ptr_vtbl_ptr,
+                    &dyn_strong_ptr_set_vtbl_ptr,
+
+                    &strong_ptr_to_dyn_strong_ptr,
                 };
             }
         },
@@ -2674,24 +3031,24 @@ namespace Ace
                 };
                 map[Int16.GetSymbol()] =
                 {
-                    { Int8.GetSymbol(), i16__from_i8.GetSymbol() },
-                    { UInt8.GetSymbol(), i16__from_u8.GetSymbol() },
+                    { Int8.GetSymbol(), i16_from_i8.GetSymbol() },
+                    { UInt8.GetSymbol(), i16_from_u8.GetSymbol() },
                 };
                 map[Int32.GetSymbol()] = 
                 {
-                    { Int8.GetSymbol(), i32__from_i8.GetSymbol() },
-                    { Int16.GetSymbol(), i32__from_i16.GetSymbol() },
-                    { UInt8.GetSymbol(), i32__from_u8.GetSymbol() },
-                    { UInt16.GetSymbol(), i32__from_u16.GetSymbol() },
+                    { Int8.GetSymbol(), i32_from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), i32_from_i16.GetSymbol() },
+                    { UInt8.GetSymbol(), i32_from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), i32_from_u16.GetSymbol() },
                 };
                 map[Int64.GetSymbol()] =
                 {
-                    { Int8.GetSymbol(), i64__from_i8.GetSymbol() },
-                    { Int16.GetSymbol(), i64__from_i16.GetSymbol() },
-                    { Int32.GetSymbol(), i64__from_i32.GetSymbol() },
-                    { UInt8.GetSymbol(), i64__from_u8.GetSymbol() },
-                    { UInt16.GetSymbol(), i64__from_u16.GetSymbol() },
-                    { UInt32.GetSymbol(), i64__from_u32.GetSymbol() },
+                    { Int8.GetSymbol(), i64_from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), i64_from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), i64_from_i32.GetSymbol() },
+                    { UInt8.GetSymbol(), i64_from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), i64_from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), i64_from_u32.GetSymbol() },
                 };
 
                 map[UInt8.GetSymbol()] =
@@ -2699,43 +3056,43 @@ namespace Ace
                 };
                 map[UInt16.GetSymbol()] =
                 {
-                    { UInt8.GetSymbol(), u16__from_u8.GetSymbol() },
+                    { UInt8.GetSymbol(), u16_from_u8.GetSymbol() },
                 };
                 map[UInt32.GetSymbol()] = 
                 {
-                    { UInt8.GetSymbol(), u32__from_u8.GetSymbol() },
-                    { UInt16.GetSymbol(), u32__from_u16.GetSymbol() },
+                    { UInt8.GetSymbol(), u32_from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), u32_from_u16.GetSymbol() },
                 };
                 map[UInt64.GetSymbol()] =
                 {
-                    { UInt8.GetSymbol(), u64__from_u8.GetSymbol() },
-                    { UInt16.GetSymbol(), u64__from_u16.GetSymbol() },
-                    { UInt32.GetSymbol(), u64__from_u32.GetSymbol() },
+                    { UInt8.GetSymbol(), u64_from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), u64_from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), u64_from_u32.GetSymbol() },
                 };
                 map[Float32.GetSymbol()] =
                 {
-                    { Int8.GetSymbol(), f32__from_i8.GetSymbol() },
-                    { Int16.GetSymbol(), f32__from_i16.GetSymbol() },
-                    { Int32.GetSymbol(), f32__from_i32.GetSymbol() },
-                    { Int64.GetSymbol(), f32__from_i64.GetSymbol() },
-                    { UInt8.GetSymbol(), f32__from_u8.GetSymbol() },
-                    { UInt16.GetSymbol(), f32__from_u16.GetSymbol() },
-                    { UInt32.GetSymbol(), f32__from_u32.GetSymbol() },
-                    { UInt64.GetSymbol(), f32__from_u64.GetSymbol() },
-                    { Int.GetSymbol(), f32__from_int.GetSymbol() },
+                    { Int8.GetSymbol(), f32_from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), f32_from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), f32_from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), f32_from_i64.GetSymbol() },
+                    { UInt8.GetSymbol(), f32_from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), f32_from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), f32_from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), f32_from_u64.GetSymbol() },
+                    { Int.GetSymbol(), f32_from_int.GetSymbol() },
                 };
                 map[Float64.GetSymbol()] =
                 {
-                    { Int8.GetSymbol(), f64__from_i8.GetSymbol() },
-                    { Int16.GetSymbol(), f64__from_i16.GetSymbol() },
-                    { Int32.GetSymbol(), f64__from_i32.GetSymbol() },
-                    { Int64.GetSymbol(), f64__from_i64.GetSymbol() },
-                    { UInt8.GetSymbol(), f64__from_u8.GetSymbol() },
-                    { UInt16.GetSymbol(), f64__from_u16.GetSymbol() },
-                    { UInt32.GetSymbol(), f64__from_u32.GetSymbol() },
-                    { UInt64.GetSymbol(), f64__from_u64.GetSymbol() },
-                    { Int.GetSymbol(), f64__from_int.GetSymbol() },
-                    { Float32.GetSymbol(), f64__from_f32.GetSymbol() },
+                    { Int8.GetSymbol(), f64_from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), f64_from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), f64_from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), f64_from_i64.GetSymbol() },
+                    { UInt8.GetSymbol(), f64_from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), f64_from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), f64_from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), f64_from_u64.GetSymbol() },
+                    { Int.GetSymbol(), f64_from_int.GetSymbol() },
+                    { Float32.GetSymbol(), f64_from_f32.GetSymbol() },
                 };
 
                 return map;
@@ -2749,90 +3106,90 @@ namespace Ace
 
                 map[Int8.GetSymbol()] =
                 {
-                    { Int16.GetSymbol(), i8__from_i16.GetSymbol() },
-                    { Int32.GetSymbol(), i8__from_i32.GetSymbol() },
-                    { Int64.GetSymbol(), i8__from_i64.GetSymbol() },
-                    { UInt8.GetSymbol(), i8__from_u8.GetSymbol() },
-                    { UInt16.GetSymbol(), i8__from_u16.GetSymbol() },
-                    { UInt32.GetSymbol(), i8__from_u32.GetSymbol() },
-                    { UInt64.GetSymbol(), i8__from_u64.GetSymbol() },
-                    { Int.GetSymbol(), i8__from_int.GetSymbol() },
-                    { Float32.GetSymbol(), i8__from_f32.GetSymbol() },
-                    { Float64.GetSymbol(), i8__from_f64.GetSymbol() },
+                    { Int16.GetSymbol(), i8_from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), i8_from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), i8_from_i64.GetSymbol() },
+                    { UInt8.GetSymbol(), i8_from_u8.GetSymbol() },
+                    { UInt16.GetSymbol(), i8_from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), i8_from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), i8_from_u64.GetSymbol() },
+                    { Int.GetSymbol(), i8_from_int.GetSymbol() },
+                    { Float32.GetSymbol(), i8_from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), i8_from_f64.GetSymbol() },
                 };
                 map[Int16.GetSymbol()] =
                 {
-                    { Int32.GetSymbol(), i16__from_i32.GetSymbol() },
-                    { Int64.GetSymbol(), i16__from_i64.GetSymbol() },
-                    { UInt16.GetSymbol(), i16__from_u16.GetSymbol() },
-                    { UInt32.GetSymbol(), i16__from_u32.GetSymbol() },
-                    { UInt64.GetSymbol(), i16__from_u64.GetSymbol() },
-                    { Int.GetSymbol(), i16__from_int.GetSymbol() },
-                    { Float32.GetSymbol(), i16__from_f32.GetSymbol() },
-                    { Float64.GetSymbol(), i16__from_f64.GetSymbol() },
+                    { Int32.GetSymbol(), i16_from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), i16_from_i64.GetSymbol() },
+                    { UInt16.GetSymbol(), i16_from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), i16_from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), i16_from_u64.GetSymbol() },
+                    { Int.GetSymbol(), i16_from_int.GetSymbol() },
+                    { Float32.GetSymbol(), i16_from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), i16_from_f64.GetSymbol() },
                 };
                 map[Int32.GetSymbol()] =
                 {
-                    { Int64.GetSymbol(), i32__from_i64.GetSymbol() },
-                    { UInt32.GetSymbol(), i32__from_u32.GetSymbol() },
-                    { UInt64.GetSymbol(), i32__from_u64.GetSymbol() },
-                    { Int.GetSymbol(), i32__from_int.GetSymbol() },
-                    { Float32.GetSymbol(), i32__from_f32.GetSymbol() },
-                    { Float64.GetSymbol(), i32__from_f64.GetSymbol() },
+                    { Int64.GetSymbol(), i32_from_i64.GetSymbol() },
+                    { UInt32.GetSymbol(), i32_from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), i32_from_u64.GetSymbol() },
+                    { Int.GetSymbol(), i32_from_int.GetSymbol() },
+                    { Float32.GetSymbol(), i32_from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), i32_from_f64.GetSymbol() },
                 };
                 map[Int64.GetSymbol()] =
                 {
-                    { UInt64.GetSymbol(), i64__from_u64.GetSymbol() },
-                    { Int.GetSymbol(), i64__from_int.GetSymbol() },
-                    { Float32.GetSymbol(), i64__from_f32.GetSymbol() },
-                    { Float64.GetSymbol(), i64__from_f64.GetSymbol() },
+                    { UInt64.GetSymbol(), i64_from_u64.GetSymbol() },
+                    { Int.GetSymbol(), i64_from_int.GetSymbol() },
+                    { Float32.GetSymbol(), i64_from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), i64_from_f64.GetSymbol() },
                 };
 
                 map[UInt8.GetSymbol()] =
                 {
-                    { Int8.GetSymbol(), u8__from_i8.GetSymbol() },
-                    { Int16.GetSymbol(), u8__from_i16.GetSymbol() },
-                    { Int32.GetSymbol(), u8__from_i32.GetSymbol() },
-                    { Int64.GetSymbol(), u8__from_i64.GetSymbol() },
-                    { UInt16.GetSymbol(), u8__from_u16.GetSymbol() },
-                    { UInt32.GetSymbol(), u8__from_u32.GetSymbol() },
-                    { UInt64.GetSymbol(), u8__from_u64.GetSymbol() },
-                    { Int.GetSymbol(), u8__from_int.GetSymbol() },
-                    { Float32.GetSymbol(), u8__from_f32.GetSymbol() },
-                    { Float64.GetSymbol(), u8__from_f64.GetSymbol() },
+                    { Int8.GetSymbol(), u8_from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), u8_from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), u8_from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), u8_from_i64.GetSymbol() },
+                    { UInt16.GetSymbol(), u8_from_u16.GetSymbol() },
+                    { UInt32.GetSymbol(), u8_from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), u8_from_u64.GetSymbol() },
+                    { Int.GetSymbol(), u8_from_int.GetSymbol() },
+                    { Float32.GetSymbol(), u8_from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), u8_from_f64.GetSymbol() },
                 };
                 map[UInt16.GetSymbol()] =
                 {
-                    { Int8.GetSymbol(), u16__from_i8.GetSymbol() },
-                    { Int16.GetSymbol(), u16__from_i16.GetSymbol() },
-                    { Int32.GetSymbol(), u16__from_i32.GetSymbol() },
-                    { Int64.GetSymbol(), u16__from_i64.GetSymbol() },
-                    { UInt32.GetSymbol(), u16__from_u32.GetSymbol() },
-                    { UInt64.GetSymbol(), u16__from_u64.GetSymbol() },
-                    { Int.GetSymbol(), u16__from_int.GetSymbol() },
-                    { Float32.GetSymbol(), u16__from_f32.GetSymbol() },
-                    { Float64.GetSymbol(), u16__from_f64.GetSymbol() },
+                    { Int8.GetSymbol(), u16_from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), u16_from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), u16_from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), u16_from_i64.GetSymbol() },
+                    { UInt32.GetSymbol(), u16_from_u32.GetSymbol() },
+                    { UInt64.GetSymbol(), u16_from_u64.GetSymbol() },
+                    { Int.GetSymbol(), u16_from_int.GetSymbol() },
+                    { Float32.GetSymbol(), u16_from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), u16_from_f64.GetSymbol() },
                 };
                 map[UInt32.GetSymbol()] =
                 {
-                    { Int8.GetSymbol(), u32__from_i8.GetSymbol() },
-                    { Int16.GetSymbol(), u32__from_i16.GetSymbol() },
-                    { Int32.GetSymbol(), u32__from_i32.GetSymbol() },
-                    { Int64.GetSymbol(), u32__from_i64.GetSymbol() },
-                    { UInt64.GetSymbol(), u32__from_u64.GetSymbol() },
-                    { Int.GetSymbol(), u32__from_int.GetSymbol() },
-                    { Float32.GetSymbol(), u32__from_f32.GetSymbol() },
-                    { Float64.GetSymbol(), u32__from_f64.GetSymbol() },
+                    { Int8.GetSymbol(), u32_from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), u32_from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), u32_from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), u32_from_i64.GetSymbol() },
+                    { UInt64.GetSymbol(), u32_from_u64.GetSymbol() },
+                    { Int.GetSymbol(), u32_from_int.GetSymbol() },
+                    { Float32.GetSymbol(), u32_from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), u32_from_f64.GetSymbol() },
                 };
                 map[UInt64.GetSymbol()] =
                 {
-                    { Int8.GetSymbol(), u64__from_i8.GetSymbol() },
-                    { Int16.GetSymbol(), u64__from_i16.GetSymbol() },
-                    { Int32.GetSymbol(), u64__from_i32.GetSymbol() },
-                    { Int64.GetSymbol(), u64__from_i64.GetSymbol() },
-                    { Int.GetSymbol(), u64__from_int.GetSymbol() },
-                    { Float32.GetSymbol(), u64__from_f32.GetSymbol() },
-                    { Float64.GetSymbol(), u64__from_f64.GetSymbol() },
+                    { Int8.GetSymbol(), u64_from_i8.GetSymbol() },
+                    { Int16.GetSymbol(), u64_from_i16.GetSymbol() },
+                    { Int32.GetSymbol(), u64_from_i32.GetSymbol() },
+                    { Int64.GetSymbol(), u64_from_i64.GetSymbol() },
+                    { Int.GetSymbol(), u64_from_int.GetSymbol() },
+                    { Float32.GetSymbol(), u64_from_f32.GetSymbol() },
+                    { Float64.GetSymbol(), u64_from_f64.GetSymbol() },
                 };
 
                 map[Int.GetSymbol()] =
@@ -2851,13 +3208,328 @@ namespace Ace
 
                 map[Float32.GetSymbol()] =
                 {
-                    { Float64.GetSymbol(), f32__from_f64.GetSymbol() },
+                    { Float64.GetSymbol(), f32_from_f64.GetSymbol() },
                 };
                 map[Float64.GetSymbol()] =
                 {
                 };
 
                 return map;
+            }
+        },
+
+        m_UnaryOpMap
+        {
+            [this]()
+            {
+                std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>> map{};
+
+                map[Int8.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, i8_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, i8_unary_negation.GetSymbol() },
+                    { Op::OneComplement, i8_one_complement.GetSymbol() },
+                };
+                map[Int16.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, i16_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, i16_unary_negation.GetSymbol() },
+                    { Op::OneComplement, i16_one_complement.GetSymbol() },
+                };
+                map[Int32.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, i32_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, i32_unary_negation.GetSymbol() },
+                    { Op::OneComplement, i32_one_complement.GetSymbol() },
+                };
+                map[Int64.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, i64_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, i64_unary_negation.GetSymbol() },
+                    { Op::OneComplement, i64_one_complement.GetSymbol() },
+                };
+
+                map[UInt8.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, u8_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, u8_unary_negation.GetSymbol() },
+                    { Op::OneComplement, u8_one_complement.GetSymbol() },
+                };
+                map[UInt16.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, u16_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, u16_unary_negation.GetSymbol() },
+                    { Op::OneComplement, u16_one_complement.GetSymbol() },
+                };
+                map[UInt32.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, u32_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, u32_unary_negation.GetSymbol() },
+                    { Op::OneComplement, u32_one_complement.GetSymbol() },
+                };
+                map[UInt64.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, u64_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, u64_unary_negation.GetSymbol() },
+                    { Op::OneComplement, u64_one_complement.GetSymbol() },
+                };
+
+                map[Int.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, int_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, int_unary_negation.GetSymbol() },
+                    { Op::OneComplement, int_one_complement.GetSymbol() },
+                };
+
+                map[Float32.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, f32_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, f32_unary_negation.GetSymbol() },
+                };
+                map[Float64.GetSymbol()] =
+                {
+                    { Op::UnaryPlus, f64_unary_plus.GetSymbol() },
+                    { Op::UnaryNegation, f64_unary_negation.GetSymbol() },
+                };
+
+                return map;
+            }
+        },
+        m_BinaryOpMap
+        {
+            [this]()
+            {
+                std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>> map{};
+
+                map[Int8.GetSymbol()] =
+                {
+                    { Op::Multiplication, i8_multiplication.GetSymbol() },
+                    { Op::Division, i8_division.GetSymbol() },
+                    { Op::Remainder, i8_remainder.GetSymbol() },
+                    { Op::Addition, i8_addition.GetSymbol() },
+                    { Op::Subtraction, i8_subtraction.GetSymbol() },
+                    { Op::RightShift, i8_right_shift.GetSymbol() },
+                    { Op::LeftShift, i8_left_shift.GetSymbol() },
+                    { Op::LessThan, i8_less_than.GetSymbol() },
+                    { Op::GreaterThan, i8_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, i8_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, i8_greater_than_equals.GetSymbol() },
+                    { Op::Equals, i8_equals.GetSymbol() },
+                    { Op::NotEquals, i8_not_equals.GetSymbol() },
+                    { Op::AND, i8_AND.GetSymbol() },
+                    { Op::XOR, i8_XOR.GetSymbol() },
+                    { Op::OR, i8_OR.GetSymbol() },
+                };
+                map[Int16.GetSymbol()] =
+                {
+                    { Op::Multiplication, i16_multiplication.GetSymbol() },
+                    { Op::Division, i16_division.GetSymbol() },
+                    { Op::Remainder, i16_remainder.GetSymbol() },
+                    { Op::Addition, i16_addition.GetSymbol() },
+                    { Op::Subtraction, i16_subtraction.GetSymbol() },
+                    { Op::RightShift, i16_right_shift.GetSymbol() },
+                    { Op::LeftShift, i16_left_shift.GetSymbol() },
+                    { Op::LessThan, i16_less_than.GetSymbol() },
+                    { Op::GreaterThan, i16_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, i16_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, i16_greater_than_equals.GetSymbol() },
+                    { Op::Equals, i16_equals.GetSymbol() },
+                    { Op::NotEquals, i16_not_equals.GetSymbol() },
+                    { Op::AND, i16_AND.GetSymbol() },
+                    { Op::XOR, i16_XOR.GetSymbol() },
+                    { Op::OR, i16_OR.GetSymbol() },
+                };
+                map[Int32.GetSymbol()] =
+                {
+                    { Op::Multiplication, i32_multiplication.GetSymbol() },
+                    { Op::Division, i32_division.GetSymbol() },
+                    { Op::Remainder, i32_remainder.GetSymbol() },
+                    { Op::Addition, i32_addition.GetSymbol() },
+                    { Op::Subtraction, i32_subtraction.GetSymbol() },
+                    { Op::RightShift, i32_right_shift.GetSymbol() },
+                    { Op::LeftShift, i32_left_shift.GetSymbol() },
+                    { Op::LessThan, i32_less_than.GetSymbol() },
+                    { Op::GreaterThan, i32_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, i32_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, i32_greater_than_equals.GetSymbol() },
+                    { Op::Equals, i32_equals.GetSymbol() },
+                    { Op::NotEquals, i32_not_equals.GetSymbol() },
+                    { Op::AND, i32_AND.GetSymbol() },
+                    { Op::XOR, i32_XOR.GetSymbol() },
+                    { Op::OR, i32_OR.GetSymbol() },
+                };
+                map[Int64.GetSymbol()] =
+                {
+                    { Op::Multiplication, i64_multiplication.GetSymbol() },
+                    { Op::Division, i64_division.GetSymbol() },
+                    { Op::Remainder, i64_remainder.GetSymbol() },
+                    { Op::Addition, i64_addition.GetSymbol() },
+                    { Op::Subtraction, i64_subtraction.GetSymbol() },
+                    { Op::RightShift, i64_right_shift.GetSymbol() },
+                    { Op::LeftShift, i64_left_shift.GetSymbol() },
+                    { Op::LessThan, i64_less_than.GetSymbol() },
+                    { Op::GreaterThan, i64_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, i64_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, i64_greater_than_equals.GetSymbol() },
+                    { Op::Equals, i64_equals.GetSymbol() },
+                    { Op::NotEquals, i64_not_equals.GetSymbol() },
+                    { Op::AND, i64_AND.GetSymbol() },
+                    { Op::XOR, i64_XOR.GetSymbol() },
+                    { Op::OR, i64_OR.GetSymbol() },
+                };
+
+                map[UInt8.GetSymbol()] =
+                {
+                    { Op::Multiplication, u8_multiplication.GetSymbol() },
+                    { Op::Division, u8_division.GetSymbol() },
+                    { Op::Remainder, u8_remainder.GetSymbol() },
+                    { Op::Addition, u8_addition.GetSymbol() },
+                    { Op::Subtraction, u8_subtraction.GetSymbol() },
+                    { Op::RightShift, u8_right_shift.GetSymbol() },
+                    { Op::LeftShift, u8_left_shift.GetSymbol() },
+                    { Op::LessThan, u8_less_than.GetSymbol() },
+                    { Op::GreaterThan, u8_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, u8_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, u8_greater_than_equals.GetSymbol() },
+                    { Op::Equals, u8_equals.GetSymbol() },
+                    { Op::NotEquals, u8_not_equals.GetSymbol() },
+                    { Op::AND, u8_AND.GetSymbol() },
+                    { Op::XOR, u8_XOR.GetSymbol() },
+                    { Op::OR, u8_OR.GetSymbol() },
+                };
+                map[UInt16.GetSymbol()] =
+                {
+                    { Op::Multiplication, u16_multiplication.GetSymbol() },
+                    { Op::Division, u16_division.GetSymbol() },
+                    { Op::Remainder, u16_remainder.GetSymbol() },
+                    { Op::Addition, u16_addition.GetSymbol() },
+                    { Op::Subtraction, u16_subtraction.GetSymbol() },
+                    { Op::RightShift, u16_right_shift.GetSymbol() },
+                    { Op::LeftShift, u16_left_shift.GetSymbol() },
+                    { Op::LessThan, u16_less_than.GetSymbol() },
+                    { Op::GreaterThan, u16_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, u16_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, u16_greater_than_equals.GetSymbol() },
+                    { Op::Equals, u16_equals.GetSymbol() },
+                    { Op::NotEquals, u16_not_equals.GetSymbol() },
+                    { Op::AND, u16_AND.GetSymbol() },
+                    { Op::XOR, u16_XOR.GetSymbol() },
+                    { Op::OR, u16_OR.GetSymbol() },
+                };
+                map[UInt32.GetSymbol()] =
+                {
+                    { Op::Multiplication, u32_multiplication.GetSymbol() },
+                    { Op::Division, u32_division.GetSymbol() },
+                    { Op::Remainder, u32_remainder.GetSymbol() },
+                    { Op::Addition, u32_addition.GetSymbol() },
+                    { Op::Subtraction, u32_subtraction.GetSymbol() },
+                    { Op::RightShift, u32_right_shift.GetSymbol() },
+                    { Op::LeftShift, u32_left_shift.GetSymbol() },
+                    { Op::LessThan, u32_less_than.GetSymbol() },
+                    { Op::GreaterThan, u32_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, u32_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, u32_greater_than_equals.GetSymbol() },
+                    { Op::Equals, u32_equals.GetSymbol() },
+                    { Op::NotEquals, u32_not_equals.GetSymbol() },
+                    { Op::AND, u32_AND.GetSymbol() },
+                    { Op::XOR, u32_XOR.GetSymbol() },
+                    { Op::OR, u32_OR.GetSymbol() },
+                };
+                map[UInt64.GetSymbol()] =
+                {
+                    { Op::Multiplication, u64_multiplication.GetSymbol() },
+                    { Op::Division, u64_division.GetSymbol() },
+                    { Op::Remainder, u64_remainder.GetSymbol() },
+                    { Op::Addition, u64_addition.GetSymbol() },
+                    { Op::Subtraction, u64_subtraction.GetSymbol() },
+                    { Op::RightShift, u64_right_shift.GetSymbol() },
+                    { Op::LeftShift, u64_left_shift.GetSymbol() },
+                    { Op::LessThan, u64_less_than.GetSymbol() },
+                    { Op::GreaterThan, u64_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, u64_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, u64_greater_than_equals.GetSymbol() },
+                    { Op::Equals, u64_equals.GetSymbol() },
+                    { Op::NotEquals, u64_not_equals.GetSymbol() },
+                    { Op::AND, u64_AND.GetSymbol() },
+                    { Op::XOR, u64_XOR.GetSymbol() },
+                    { Op::OR, u64_OR.GetSymbol() },
+                };
+
+                map[Int.GetSymbol()] =
+                {
+                    { Op::Multiplication, int_multiplication.GetSymbol() },
+                    { Op::Division, int_division.GetSymbol() },
+                    { Op::Remainder, int_remainder.GetSymbol() },
+                    { Op::Addition, int_addition.GetSymbol() },
+                    { Op::Subtraction, int_subtraction.GetSymbol() },
+                    { Op::RightShift, int_right_shift.GetSymbol() },
+                    { Op::LeftShift, int_left_shift.GetSymbol() },
+                    { Op::LessThan, int_less_than.GetSymbol() },
+                    { Op::GreaterThan, int_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, int_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, int_greater_than_equals.GetSymbol() },
+                    { Op::Equals, int_equals.GetSymbol() },
+                    { Op::NotEquals, int_not_equals.GetSymbol() },
+                    { Op::AND, int_AND.GetSymbol() },
+                    { Op::XOR, int_XOR.GetSymbol() },
+                    { Op::OR, int_OR.GetSymbol() },
+                };
+
+                map[Float32.GetSymbol()] =
+                {
+                    { Op::Multiplication, f32_multiplication.GetSymbol() },
+                    { Op::Division, f32_division.GetSymbol() },
+                    { Op::Remainder, f32_remainder.GetSymbol() },
+                    { Op::Addition, f32_addition.GetSymbol() },
+                    { Op::Subtraction, f32_subtraction.GetSymbol() },
+                    { Op::LessThan, f32_less_than.GetSymbol() },
+                    { Op::GreaterThan, f32_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, f32_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, f32_greater_than_equals.GetSymbol() },
+                    { Op::Equals, f32_equals.GetSymbol() },
+                    { Op::NotEquals, f32_not_equals.GetSymbol() },
+                };
+                map[Float64.GetSymbol()] =
+                {
+                    { Op::Multiplication, f64_multiplication.GetSymbol() },
+                    { Op::Division, f64_division.GetSymbol() },
+                    { Op::Remainder, f64_remainder.GetSymbol() },
+                    { Op::Addition, f64_addition.GetSymbol() },
+                    { Op::Subtraction, f64_subtraction.GetSymbol() },
+                    { Op::LessThan, f64_less_than.GetSymbol() },
+                    { Op::GreaterThan, f64_greater_than.GetSymbol() },
+                    { Op::LessThanEquals, f64_less_than_equals.GetSymbol() },
+                    { Op::GreaterThanEquals, f64_greater_than_equals.GetSymbol() },
+                    { Op::Equals, f64_equals.GetSymbol() },
+                    { Op::NotEquals, f64_not_equals.GetSymbol() },
+                };
+
+                return map;
+            }
+        },
+
+        m_CopyOpMap
+        {
+            [this]()
+            {
+                return std::unordered_map<ITypeSymbol*, FunctionSymbol*>
+                {
+                    { WeakPtr.GetSymbol(), weak_ptr_copy.GetSymbol() },
+                    { StrongPtr.GetSymbol(), strong_ptr_copy.GetSymbol() },
+                    { DynStrongPtr.GetSymbol(), dyn_strong_ptr_copy.GetSymbol() },
+                };
+            }
+        },
+        m_DropOpMap
+        {
+            [this]()
+            {
+                return std::unordered_map<ITypeSymbol*, FunctionSymbol*>
+                {
+                    { WeakPtr.GetSymbol(), weak_ptr_drop.GetSymbol() },
+                    { StrongPtr.GetSymbol(), strong_ptr_drop.GetSymbol() },
+                    { DynStrongPtr.GetSymbol(), dyn_strong_ptr_drop.GetSymbol() },
+                };
             }
         },
         
@@ -2915,6 +3587,26 @@ namespace Ace
     auto Natives::GetExplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
     {
         return m_ExplicitFromOpMap.Get();
+    }
+
+    auto Natives::GetUnaryOpMap()  const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&
+    {
+        return m_UnaryOpMap.Get();
+    }
+
+    auto Natives::GetBinaryOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&
+    {
+        return m_BinaryOpMap.Get();
+    }
+
+    auto Natives::GetCopyOpMap() const -> const std::unordered_map<ITypeSymbol*, FunctionSymbol*>&
+    {
+        return m_CopyOpMap.Get();
+    }
+
+    auto Natives::GetDropOpMap() const -> const std::unordered_map<ITypeSymbol*, FunctionSymbol*>&
+    {
+        return m_DropOpMap.Get();
     }
 
     auto Natives::IsIntTypeSigned(const NativeType& intType) const -> bool

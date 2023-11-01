@@ -1,10 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <optional>
-#include <type_traits>
-#include <algorithm>
 
 #include "DiagnosticBase.hpp"
 #include "DiagnosticBag.hpp"

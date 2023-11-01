@@ -6,24 +6,29 @@
 #include <filesystem>
 #include <fstream>
 #include <chrono>
+#include <map>
 #include <llvm/Support/TargetSelect.h>
 
 #include "Log.hpp"
-#include "Diagnostic.hpp"
-#include "Diagnostics/BindingDiagnostics.hpp"
-#include "FileBuffer.hpp"
 #include "Compilation.hpp"
-#include "Lexer.hpp"
-#include "Parser.hpp"
-#include "SpecialIdent.hpp"
-#include "Nodes/All.hpp"
+#include "FileBuffer.hpp"
 #include "DynamicCastFilter.hpp"
 #include "Scope.hpp"
-#include "Symbols/All.hpp"
-#include "BoundNodes/All.hpp"
-#include "CFA.hpp"
+#include "Lexer.hpp"
+#include "Parser.hpp"
+#include "FunctionBlockBinding.hpp"
 #include "Emitter.hpp"
+#include "Syntaxes/All.hpp"
+#include "Symbols/All.hpp"
+#include "Semas/All.hpp"
+#include "Diagnostic.hpp"
 #include "GlueGeneration.hpp"
+#include "Diagnoses/InvalidControlFlowDiagnosis.hpp"
+#include "Diagnoses/LayoutCycleDiagnosis.hpp"
+#include "Diagnoses/OrphanDiagnosis.hpp"
+#include "Diagnoses/InvalidTraitImplDiagnosis.hpp"
+#include "Diagnoses/OverlappingInherentImplDiagnosis.hpp"
+#include "Diagnoses/ConcreteConstraintDiagnosis.hpp"
 
 namespace Ace::Application
 {
@@ -37,72 +42,65 @@ namespace Ace::Application
     static auto ParseAST(
         Compilation* const compilation,
         const FileBuffer* const fileBuffer
-    ) -> Expected<std::shared_ptr<const ModuleNode>>
+    ) -> Expected<std::shared_ptr<const ModSyntax>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         const auto tokens = diagnostics.Collect(LexTokens(fileBuffer));
 
-        const auto optAST = diagnostics.Collect(ParseAST(
-            fileBuffer,
-            std::move(tokens)
-        ));
+        const auto optAST = diagnostics.Collect(
+            ParseAST(fileBuffer, std::move(tokens))
+        );
         if (!optAST.has_value())
         {
             return std::move(diagnostics);
         }
 
-        return Expected
-        {
-            optAST.value(),
-            std::move(diagnostics),
-        };
+        return Expected{ optAST.value(), std::move(diagnostics) };
     }
 
-    auto CreateAndDefineSymbols(
-        Compilation* const compilation,
-        const std::vector<const INode*>& nodes
-    ) -> Diagnosed<void>
+    auto CollectSyntaxes(
+        const std::shared_ptr<const ISyntax>& ast
+    ) -> std::vector<const ISyntax*>
+    {
+        auto syntaxes = ast->CollectChildren();
+        syntaxes.push_back(ast.get());
+        return syntaxes;
+    }
+
+    auto CreateAndDeclareSymbols(
+        const std::vector<const ISyntax*>& syntaxes
+    ) -> Diagnosed<std::vector<FunctionBlockBinding>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        auto symbolCreatableNodes =
-            DynamicCastFilter<const ISymbolCreatableNode*>(nodes);
+        auto declSyntaxes = DynamicCastFilter<const IDeclSyntax*>(syntaxes);
 
-        std::sort(begin(symbolCreatableNodes), end(symbolCreatableNodes),
-        [](
-            const ISymbolCreatableNode* const lhs,
-            const ISymbolCreatableNode* const rhs
-        )
+        std::sort(begin(declSyntaxes), end(declSyntaxes),
+        [](const IDeclSyntax* const lhs, const IDeclSyntax* const rhs)
         {
-            const auto lhsCreationOrder =
-                GetSymbolCreationOrder(lhs->GetSymbolKind());
+            const auto lhsOrder = lhs->GetDeclOrder();
+            const auto rhsOrder = rhs->GetDeclOrder();
 
-            const auto rhsCreationOrder =
-                GetSymbolCreationOrder(rhs->GetSymbolKind());
-
-            if (lhsCreationOrder < rhsCreationOrder)
+            if (lhsOrder < rhsOrder)
             {
                 return true;
             }
 
-            if (lhsCreationOrder > rhsCreationOrder)
+            if (lhsOrder > rhsOrder)
             {
                 return false;
             }
 
-            const auto lhsKindSpecificCreationOrder =
-                lhs->GetSymbolCreationSuborder();
+            const auto lhsSuborder = lhs->GetDeclSuborder();
+            const auto rhsSuborder = rhs->GetDeclSuborder();
 
-            const auto rhsKindSpecificCreationOrder =
-                rhs->GetSymbolCreationSuborder();
-
-            if (lhsKindSpecificCreationOrder < rhsKindSpecificCreationOrder)
+            if (lhsSuborder < rhsSuborder)
             {
                 return true;
             }
 
-            if (lhsKindSpecificCreationOrder > rhsKindSpecificCreationOrder)
+            if (lhsSuborder > rhsSuborder)
             {
                 return false;
             }
@@ -110,150 +108,105 @@ namespace Ace::Application
             return false;
         });
 
-        std::for_each(begin(symbolCreatableNodes), end(symbolCreatableNodes),
-        [&](const ISymbolCreatableNode* const symbolCreatableNode)
+        std::vector<FunctionBlockBinding> functionBlockBindings{};
+        std::for_each(begin(declSyntaxes), end(declSyntaxes),
+        [&](const IDeclSyntax* const declSyntax)
         {
-            (void)diagnostics.Collect(Scope::DefineSymbol(symbolCreatableNode));
-        });
+            auto* const symbol = diagnostics.Collect(
+                Scope::DeclareSymbol(declSyntax)
+            );
 
-        return Diagnosed<void>{ std::move(diagnostics) };
-    }
-
-    auto DefineAssociations(
-        Compilation* const compilation,
-        const std::vector<const INode*>& nodes
-    ) -> Diagnosed<void>
-    {
-        auto diagnostics = DiagnosticBag::Create();
-
-        const auto implNodes = DynamicCastFilter<const IImplNode*>(nodes);
-
-        std::for_each(begin(implNodes), end(implNodes),
-        [&](const IImplNode* const implNode)
-        {
-            diagnostics.Collect(implNode->DefineAssociations());
-        });
-
-        return Diagnosed<void>{ std::move(diagnostics) };
-    }
-
-    auto DiagnoseNotAllControlPathsReturn(
-        Compilation* const compilation,
-        const std::vector<const IBoundNode*>& nodes
-    ) -> Diagnosed<void>
-    {
-        auto diagnostics = DiagnosticBag::Create();
-
-        const auto functionNodes =
-            DynamicCastFilter<const FunctionBoundNode*>(nodes);
-
-        std::for_each(begin(functionNodes), end(functionNodes),
-        [&](const FunctionBoundNode* const functionNode)
-        {
-            if (
-                functionNode->GetSymbol()->GetType()->GetUnaliased() == 
-                compilation->GetVoidTypeSymbol()
-                )
+            auto* const functionSyntax =
+                dynamic_cast<const FunctionSyntax*>(declSyntax);
+            if (!functionSyntax)
             {
                 return;
             }
 
-            if (!functionNode->GetBody().has_value())
-            {
-                return;
-            }
+            auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
+            ACE_ASSERT(functionSymbol);
 
-            const CFAGraph cfaGraph
-            {
-                functionNode->GetBody().value()->CreateCFANodes()
-            };
-
-            diagnostics.Collect(CFA(
-                functionNode->GetSymbol()->GetName().SrcLocation,
-                cfaGraph
-            ));
-        });
-
-        return Diagnosed<void>{ std::move(diagnostics) };
-    }
-
-    auto BindFunctionSymbolsBodies(
-        Compilation* const compilation,
-        const std::vector<const IBoundNode*>& nodes
-    ) -> void
-    {
-        const auto functionNodes =
-            DynamicCastFilter<const FunctionBoundNode*>(nodes);
-
-        std::for_each(begin(functionNodes), end(functionNodes),
-        [&](const FunctionBoundNode* const functionNode)
-        {
-            if (!functionNode->GetBody().has_value())
-            {
-                return;
-            }
-
-            functionNode->GetSymbol()->BindBody(
-                functionNode->GetBody().value()
+            functionBlockBindings.emplace_back(
+                functionSymbol,
+                functionSyntax->GetBlock()
             );
         });
+
+        return Diagnosed
+        {
+            std::move(functionBlockBindings),
+            std::move(diagnostics),
+        };
     }
 
-    static auto DiagnoseLayoutCycles(
-        Compilation* const compilation
+    auto CreateVerifiedFunctionBlock(
+        std::shared_ptr<const BlockStmtSema> block,
+        ITypeSymbol* const functionTypeSymbol
+    ) -> Diagnosed<std::shared_ptr<const BlockStmtSema>>
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        block = diagnostics.Collect(
+            block->CreateTypeChecked({ functionTypeSymbol })
+        );
+        block = block->CreateLowered({});
+
+        return Diagnosed{ std::move(block), std::move(diagnostics) };
+    }
+
+    static auto CreateAndBindFunctionBlock(
+        FunctionBlockBinding binding
     ) -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto typeSymbols =
-            compilation->GetGlobalScope()->CollectSymbolsRecursive<ITypeSymbol>();
-
-        std::for_each(begin(typeSymbols), end(typeSymbols),
-        [&](const ITypeSymbol* const typeSymbol)
+        if (!binding.OptBlockSyntax.has_value())
         {
-            if (typeSymbol->IsError())
-            {
-                return;
-            }
+            return Diagnosed<void>{ std::move(diagnostics) };
+        }
 
-            auto* const templatableSymbol =
-                dynamic_cast<const ITemplatableSymbol*>(typeSymbol);
-            if (templatableSymbol && templatableSymbol->IsTemplatePlaceholder())
-            {
-                return;
-            }
+        auto* const symbol = binding.Symbol;
+        if (symbol->GetBlockSema().has_value())
+        {
+            return Diagnosed<void>{ std::move(diagnostics) };
+        }
 
-            diagnostics.Collect(typeSymbol->DiagnoseCycle());
-        });
+        const auto& blockSyntax = binding.OptBlockSyntax.value();
+
+        const auto block = diagnostics.Collect(CreateVerifiedFunctionBlock(
+            diagnostics.Collect(blockSyntax->CreateSema()),
+            symbol->GetType()
+        ));
+
+        symbol->BindBlockSema(block);
+
+        auto* const compilation = symbol->GetCompilation();
+
+        const bool isVoid =
+            symbol->GetType()->GetUnaliased() ==
+            compilation->GetVoidTypeSymbol();
+
+        if (!isVoid)
+        {
+            diagnostics.Collect(DiagnoseInvalidControlFlow(
+                symbol->GetName().SrcLocation,
+                ControlFlowGraph{ block->CreateControlFlowNodes() }
+            ));
+        }
 
         return Diagnosed<void>{ std::move(diagnostics) };
     }
 
-    static auto DiagnoseUnsizedVarTypes(
-        Compilation* const compilation
+    auto CreateAndBindFunctionBodies(
+        const std::vector<FunctionBlockBinding>& bindings
     ) -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto varSymbols =
-            compilation->GetGlobalScope()->CollectSymbolsRecursive<IVarSymbol>();
-
-        std::for_each(begin(varSymbols), end(varSymbols),
-        [&](IVarSymbol* const varSymbol)
+        std::for_each(begin(bindings), end(bindings),
+        [&](const FunctionBlockBinding& binding)
         {
-            auto* const typeSymbol = varSymbol->GetType();
-
-            if (typeSymbol->IsError())
-            {
-                return;
-            }
-
-            if (dynamic_cast<const ISizedTypeSymbol*>(typeSymbol) != nullptr)
-            {
-                return;
-            }
-
-            diagnostics.Add(CreateUnsizedSymbolTypeError(varSymbol));
+            diagnostics.Collect(CreateAndBindFunctionBlock(binding));
         });
 
         return Diagnosed<void>{ std::move(diagnostics) };
@@ -274,16 +227,15 @@ namespace Ace::Application
         const auto timeFrontendBegin = now();
         const auto timeParsingBegin = now();
 
-        std::vector<std::shared_ptr<const ModuleNode>> asts{};
+        std::vector<std::shared_ptr<const ModSyntax>> asts{};
         std::for_each(
             begin(compilation->GetPackage().SrcFileBuffers),
             end  (compilation->GetPackage().SrcFileBuffers),
             [&](const FileBuffer* const srcFileBuffer)
             {
-                const auto optAST = diagnostics.Collect(ParseAST(
-                    compilation,
-                    srcFileBuffer
-                ));
+                const auto optAST = diagnostics.Collect(
+                    ParseAST(compilation, srcFileBuffer)
+                );
                 if (!optAST.has_value())
                 {
                     return;
@@ -295,83 +247,57 @@ namespace Ace::Application
 
         const auto timeParsingEnd = now();
 
-        const auto nodes = GetAllNodes(begin(asts), end(asts));
+        std::vector<const ISyntax*> syntaxes{};
+        std::for_each(begin(asts), end(asts),
+        [&](const std::shared_ptr<const ModSyntax>& ast)
+        {
+            const auto children = CollectSyntaxes(ast);
+            syntaxes.insert(end(syntaxes), begin(children), end(children));
+        });
 
-        const auto timeSymbolCreationBegin = now();
+        const auto timeDeclBegin = now();
 
-        diagnostics.Collect(CreateAndDefineSymbols(
-            compilation,
-            nodes
-        ));
-
-        diagnostics.Collect(DefineAssociations(
-            compilation,
-            nodes
-        ));
-
-        const auto timeSymbolCreationEnd = now();
-
-        const auto templateSymbols = globalScope->CollectSymbolsRecursive<ITemplateSymbol>();
-        compilation->GetTemplateInstantiator().SetSymbols(templateSymbols);
-        diagnostics.Collect(
-            compilation->GetTemplateInstantiator().InstantiatePlaceholderSymbols()
+        const auto functionBlockBindings = diagnostics.Collect(
+            CreateAndDeclareSymbols(syntaxes)
         );
+        diagnostics.Collect(globalScope->GetGenericInstantiator().InstantiateBodies(
+            functionBlockBindings
+        ));
+
+        const auto timeDeclEnd = now();
 
         const auto timeBindingAndVerificationBegin = now();
 
         compilation->GetNatives().Verify();
+        diagnostics.Collect(CreateAndBindFunctionBodies(functionBlockBindings));
 
-        std::vector<std::shared_ptr<const ModuleBoundNode>> boundASTs{};
-        std::transform(begin(asts), end(asts), back_inserter(boundASTs),
-        [&](const std::shared_ptr<const ModuleNode>& ast)
-        {
-            return diagnostics.Collect(ast->CreateBound());
-        });
+        globalScope->GetGenericInstantiator().InstantiateReferencedMonos();
+        GlueGeneration::GenerateAndBindGlue(compilation);
+        globalScope->GetGenericInstantiator().InstantiateReferencedMonos();
 
-        std::vector<std::shared_ptr<const ModuleBoundNode>> finalASTs{};
-        std::for_each(begin(boundASTs), end(boundASTs),
-        [&](const std::shared_ptr<const ModuleBoundNode>& boundAST)
-        {
-            const auto optFinalAST = diagnostics.Collect(CreateTransformedAndVerifiedAST(
-                boundAST,
-                [](const std::shared_ptr<const ModuleBoundNode>& ast)
-                { 
-                    return ast->CreateTypeChecked({});
-                },
-                [](const std::shared_ptr<const ModuleBoundNode>& ast)
-                {
-                    return ast->CreateLowered({});
-                }
-            ));
-            if (!optFinalAST.has_value())
-            {
-                return;
-            }
+        diagnostics.Collect(DiagnoseLayoutCycles(compilation));
+        diagnostics.Collect(DiagnoseOrphans(compilation));
+        diagnostics.Collect(DiagnoseInvalidTraitImpls(compilation));
+        diagnostics.Collect(DiagnoseOverlappingInherentImpls(compilation));
+        diagnostics.Collect(DiagnoseConcreteConstraints(compilation));
 
-            finalASTs.push_back(optFinalAST.value());
-        });
+        const auto timeBindingAndVerificationEnd = now();
 
-        compilation->GetTemplateInstantiator().InstantiateSemanticsForSymbols();
+        const auto timeFrontendEnd = now();
 
         if (diagnostics.HasErrors())
         {
             return std::move(diagnostics);
         }
 
-        diagnostics.Collect(DiagnoseLayoutCycles(compilation));
-        diagnostics.Collect(DiagnoseUnsizedVarTypes(compilation));
-
-        const auto timeBindingAndVerificationEnd = now();
-
-        const auto timeFrontendEnd = now();
-
         const auto timeBackendBegin = now();
 
-        GlueGeneration::GenerateAndBindGlue(compilation);
-
         Emitter emitter{ compilation };
-        emitter.SetASTs(finalASTs);
-        const auto emitterResult = emitter.Emit();
+        const auto optEmittingResult = diagnostics.Collect(emitter.Emit());
+        if (!optEmittingResult.has_value())
+        {
+            return std::move(diagnostics);
+        }
 
         const auto timeBackendEnd = now();
         
@@ -397,13 +323,14 @@ namespace Ace::Application
         LogDebug << createDurationString(timeEnd - timeBegin) + " - total\n";
         LogDebug << createDurationString(timeFrontendEnd - timeFrontendBegin) + " - frontend\n";
         LogDebug << createDurationString(timeParsingEnd - timeParsingBegin) + " - frontend | parsing\n";
-        LogDebug << createDurationString(timeSymbolCreationEnd - timeSymbolCreationBegin) + " - frontend | symbol creation\n";
+        LogDebug << createDurationString(timeDeclEnd - timeDeclBegin) + " - frontend | declaration\n";
         LogDebug << createDurationString(timeBindingAndVerificationEnd - timeBindingAndVerificationBegin) + " - frontend | binding and verification\n";
         LogDebug << createDurationString(timeBackendEnd - timeBackendBegin) + " - backend\n";
-        LogDebug << createDurationString(emitterResult.Durations.IREmitting) + " - backend | ir emitting\n";
-        LogDebug << createDurationString(emitterResult.Durations.Analyses) + " - backend | analyses\n";
-        LogDebug << createDurationString(emitterResult.Durations.LLC) + " - backend | llc\n";
-        LogDebug << createDurationString(emitterResult.Durations.Clang) + " - backend | clang\n";
+        LogDebug << createDurationString(optEmittingResult.value().Durations.GlueGeneration) + " - backend | glue generation\n";
+        LogDebug << createDurationString(optEmittingResult.value().Durations.IREmitting) + " - backend | ir emitting\n";
+        LogDebug << createDurationString(optEmittingResult.value().Durations.Analyses) + " - backend | analyses\n";
+        LogDebug << createDurationString(optEmittingResult.value().Durations.LLC) + " - backend | llc\n";
+        LogDebug << createDurationString(optEmittingResult.value().Durations.Clang) + " - backend | clang\n";
 
         return Void{ std::move(diagnostics) };
     }
@@ -430,9 +357,9 @@ namespace Ace::Application
         Log << optCompilation.value()->GetPackage().Name << "\n";
         IndentLevel++;
 
-        const auto didCompile = diagnostics.Collect(CompileCompilation(
-            optCompilation.value().get()
-        ));
+        const auto didCompile = diagnostics.Collect(
+            CompileCompilation(optCompilation.value().get())
+        );
         if (!didCompile || diagnostics.HasErrors())
         {
             Log << CreateIndent() << termcolor::bright_red << "Failed";
@@ -458,11 +385,7 @@ namespace Ace::Application
 
         const auto didCompile = Compile(
             &srcBuffers,
-            std::vector<std::string_view>
-            {
-                { "-oace/build" },
-                { "ace/package.json" },
-            }
+            { { "-oace/build" }, { "ace/package.json" } }
         );
         if (!didCompile)
         {

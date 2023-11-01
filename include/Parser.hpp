@@ -5,7 +5,7 @@
 
 #include "Diagnostic.hpp"
 #include "Token.hpp"
-#include "Nodes/All.hpp"
+#include "Syntaxes/All.hpp"
 #include "FileBuffer.hpp"
 
 namespace Ace
@@ -13,5 +13,5 @@ namespace Ace
     auto ParseAST(
         const FileBuffer* const fileBuffer,
         std::vector<Token> tokens
-    ) -> Expected<std::shared_ptr<const ModuleNode>>;
+    ) -> Expected<std::shared_ptr<const ModSyntax>>;
 }

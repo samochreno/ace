@@ -4,41 +4,43 @@
 #include <optional>
 
 #include "Symbols/Types/Aliases/AliasTypeSymbol.hpp"
-#include "Symbols/Types/Aliases/TemplateArgs/NormalTemplateArgAliasTypeSymbol.hpp"
-#include "Symbols/Templates/TypeTemplateSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Scope.hpp"
 #include "Assert.hpp"
 #include "Diagnostic.hpp"
+#include "Compilation.hpp"
 
 namespace Ace
 {
+    static auto IsInstanceOf(
+        const ISymbol* const symbol,
+        IGenericSymbol* const root
+    ) -> bool
+    {
+        return symbol->GetRoot() == root;
+    }
+
+    auto ITypeSymbol::GetUnaliasedType() const -> const ITypeSymbol*
+    {
+        return dynamic_cast<const ITypeSymbol*>(GetUnaliased());
+    }
+
+    auto ITypeSymbol::GetUnaliasedType() -> ITypeSymbol*
+    {
+        return dynamic_cast<ITypeSymbol*>(GetUnaliased());
+    }
+
     auto ITypeSymbol::DiagnoseCycle() const -> Diagnosed<void>
     {
         return Diagnosed<void>{ DiagnosticBag::Create() };
     }
 
-
     auto ITypeSymbol::IsRef() const -> bool
     {
-        auto* const self = GetUnaliased();
-
-        const auto& ref = GetCompilation()->GetNatives().Ref;
-
-        if (self->GetScope() != ref.GetSymbol()->GetScope())
-        {
-            return false;
-        }
-
-        const auto refName = ref.CreateFullyQualifiedName(
-            SrcLocation{}
+        return IsInstanceOf(
+            GetUnaliased(),
+            GetCompilation()->GetNatives().Ref.GetSymbol()
         );
-        if (self->GetName().String != refName.Sections.back().Name.String)
-        {
-            return false;
-        }
-
-        return true;
     }
 
     auto ITypeSymbol::GetWithoutRef() -> ITypeSymbol*
@@ -48,8 +50,7 @@ namespace Ace
             return this;
         }
 
-        auto* const self = GetUnaliased();
-        return self->CollectTemplateArgs().front();
+        return GetUnaliasedType()->GetTypeArgs().front();
     }
 
     auto ITypeSymbol::GetWithoutRef() const -> const ITypeSymbol*
@@ -59,97 +60,116 @@ namespace Ace
             return this;
         }
 
-        const auto* const self = GetUnaliased();
-        return self->CollectTemplateArgs().front()->GetUnaliased();
+        return GetUnaliasedType()->GetTypeArgs().front();
     }
 
     auto ITypeSymbol::GetWithRef() -> ITypeSymbol*
     {
         ACE_ASSERT(!IsRef());
 
-        auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            SrcLocation{},
+        auto* const symbol = Scope::ForceCollectGenericInstance(
             GetCompilation()->GetNatives().Ref.GetSymbol(),
-            std::nullopt,
-            {},
-            { this->GetUnaliased() }
-        ).Unwrap();
+            { this }
+        );
 
-        auto* const typeSymbol = dynamic_cast<ITypeSymbol*>(symbol);
-        ACE_ASSERT(typeSymbol);
-
-        return typeSymbol;
+        auto* const type = dynamic_cast<ITypeSymbol*>(symbol);
+        ACE_ASSERT(type);
+        return type;
     }
 
     auto ITypeSymbol::IsStrongPtr() const -> bool
     {
-        auto* const self = GetUnaliased();
-
-        const auto& strongPtr = GetCompilation()->GetNatives().StrongPtr;
-
-        if (self->GetScope() != strongPtr.GetSymbol()->GetScope())
-        {
-            return false;
-        }
-
-        const auto strongPtrName = strongPtr.CreateFullyQualifiedName(
-            SrcLocation{}
+        return IsInstanceOf(
+            GetUnaliased(),
+            GetCompilation()->GetNatives().StrongPtr.GetSymbol()
         );
-        if (self->GetName().String != strongPtrName.Sections.back().Name.String)
+    }
+
+    auto ITypeSymbol::IsDynStrongPtr() const -> bool
+    {
+        return IsInstanceOf(
+            GetUnaliased(),
+            GetCompilation()->GetNatives().DynStrongPtr.GetSymbol()
+        );
+    }
+
+    auto ITypeSymbol::IsAnyStrongPtr() const -> bool
+    {
+        if (IsStrongPtr())
         {
-            return false;
+            return true;
         }
 
-        return true;
+        if (IsDynStrongPtr())
+        {
+            return true;
+        }
+
+        return false;
     }
 
     auto ITypeSymbol::GetWithoutStrongPtr() -> ITypeSymbol*
     {
-        if (!IsStrongPtr())
+        if (!IsAnyStrongPtr())
         {
             return this;
         }
 
-        auto* const self = GetUnaliased();
-        return self->CollectTemplateArgs().front()->GetUnaliased();
+        return GetUnaliasedType()->GetTypeArgs().front();
     }
 
     auto ITypeSymbol::GetWithStrongPtr() -> ITypeSymbol*
     {
-        auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            SrcLocation{},
+        auto diagnostics = DiagnosticBag::CreateNoError();
+
+        auto* const symbol = Scope::ForceCollectGenericInstance(
             GetCompilation()->GetNatives().StrongPtr.GetSymbol(),
-            std::nullopt,
-            {},
-            { this->GetUnaliased() }
-        ).Unwrap();
+            { this }
+        );
 
-        auto* const typeSymbol = dynamic_cast<ITypeSymbol*>(symbol);
-        ACE_ASSERT(typeSymbol);
+        auto* const type = dynamic_cast<ITypeSymbol*>(symbol);
+        ACE_ASSERT(type);
+        return type;
+    }
 
-        return typeSymbol;
+    auto ITypeSymbol::GetWithDynStrongPtr() -> ITypeSymbol*
+    {
+        auto diagnostics = DiagnosticBag::CreateNoError();
+
+        auto* const symbol = Scope::ForceCollectGenericInstance(
+            GetCompilation()->GetNatives().DynStrongPtr.GetSymbol(),
+            { this }
+        );
+
+        auto* const type = dynamic_cast<ITypeSymbol*>(symbol);
+        ACE_ASSERT(type);
+        return type;
+    }
+
+    auto ITypeSymbol::GetWithAutoStrongPtr() -> ITypeSymbol*
+    {
+        auto diagnostics = DiagnosticBag::CreateNoError();
+
+        auto* const sizedSelf = dynamic_cast<ISizedTypeSymbol*>(GetUnaliased());
+
+        auto* const strongPtr = sizedSelf ?
+            GetCompilation()->GetNatives().StrongPtr.GetSymbol() :
+            GetCompilation()->GetNatives().DynStrongPtr.GetSymbol();
+
+        auto* const symbol =
+            Scope::ForceCollectGenericInstance(strongPtr, { this });
+
+        auto* const type = dynamic_cast<ITypeSymbol*>(symbol);
+        ACE_ASSERT(type);
+        return type;
     }
 
     auto ITypeSymbol::IsWeakPtr() const -> bool
     {
-        auto* const self = GetUnaliased();
-
-        const auto& weakPtr = GetCompilation()->GetNatives().WeakPtr;
-
-        if (self->GetScope() != weakPtr.GetSymbol()->GetScope())
-        {
-            return false;
-        }
-
-        const auto weakPtrName = weakPtr.CreateFullyQualifiedName(
-            SrcLocation{}
+        return IsInstanceOf(
+            GetUnaliased(),
+            GetCompilation()->GetNatives().WeakPtr.GetSymbol()
         );
-        if (self->GetName().String != weakPtrName.Sections.back().Name.String)
-        {
-            return false;
-        }
-
-        return true;
     }
 
     auto ITypeSymbol::GetWithoutWeakPtr() -> ITypeSymbol*
@@ -159,60 +179,33 @@ namespace Ace
             return this;
         }
 
-        auto* const self = GetUnaliased();
-        return self->CollectTemplateArgs().front();
+        return GetUnaliasedType()->GetTypeArgs().front();
     }
 
     auto ITypeSymbol::GetWithWeakPtr() -> ITypeSymbol*
     {
-        auto* const symbol = Scope::ResolveOrInstantiateTemplateInstance(
-            SrcLocation{},
+        auto* const symbol = Scope::ForceCollectGenericInstance(
             GetCompilation()->GetNatives().WeakPtr.GetSymbol(),
-            std::nullopt,
-            {},
-            { this->GetUnaliased() }
-        ).Unwrap();
-
-        auto* const typeSymbol = dynamic_cast<ITypeSymbol*>(symbol);
-        ACE_ASSERT(typeSymbol);
-
-        return typeSymbol;
-    }
-
-    auto ITypeSymbol::GetUnaliased() -> ITypeSymbol*
-    {
-        ITypeSymbol* self = this;
-        while (auto* const aliasType = dynamic_cast<IAliasTypeSymbol*>(self))
-        {
-            self = aliasType->GetAliasedType();
-        }
-
-        return self;
-    }
-
-    auto ITypeSymbol::GetUnaliased() const -> const ITypeSymbol*
-    {
-        const ITypeSymbol* self = this;
-        while (auto* const aliasType = dynamic_cast<const IAliasTypeSymbol*>(self))
-        {
-            self = aliasType->GetAliasedType();
-        }
-
-        return self;
-    }
-
-    auto ITypeSymbol::GetTemplate() const -> std::optional<TypeTemplateSymbol*>
-    {
-        auto* const self = GetUnaliased();
-
-        const Ident name
-        {
-            self->GetName().SrcLocation,
-            SpecialIdent::CreateTemplate(self->GetName().String),
-        };
-
-        return DiagnosticBag::Create().Collect(
-            GetScope()->ResolveStaticSymbol<TypeTemplateSymbol>(name)
+            { this }
         );
+
+        auto* const type = dynamic_cast<ITypeSymbol*>(symbol);
+        ACE_ASSERT(type);
+        return type;
+    }
+
+    auto ITypeSymbol::GetDerefed() -> ITypeSymbol*
+    {
+        if (IsRef())
+        {
+            return GetWithoutRef()->GetDerefed();
+        }
+
+        if (IsAnyStrongPtr())
+        {
+            return GetWithoutStrongPtr()->GetDerefed();
+        }
+
+        return GetUnaliasedType();
     }
 }

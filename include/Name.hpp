@@ -1,14 +1,19 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <string>
 
 #include "Ident.hpp"
 #include "SrcLocation.hpp"
+#include "Diagnostic.hpp"
 
 namespace Ace
 {
     class Compilation;
+    class Scope;
+    class ITypeSymbol;
+    class ISizedTypeSymbol;
 
     struct SymbolName;
 
@@ -18,14 +23,14 @@ namespace Ace
         SymbolNameSection(const Ident& name);
         SymbolNameSection(
             const Ident& name,
-            const std::vector<SymbolName>& templateArgs
+            const std::vector<SymbolName>& typeArgs
         );
         ~SymbolNameSection();
 
         auto CreateSrcLocation() const -> SrcLocation;
 
         Ident Name;
-        std::vector<SymbolName> TemplateArgs;
+        std::vector<SymbolName> TypeArgs;
     };
 
     enum class SymbolNameResolutionScope
@@ -56,7 +61,8 @@ namespace Ace
     enum class TypeNameModifier
     {
         Ref,
-        StrongPtr,
+        AutoStrongPtr,
+        DynStrongPtr,
         WeakPtr,
     };
 
@@ -69,11 +75,12 @@ namespace Ace
         );
         ~TypeName();
 
-        auto ToSymbolName(
-            Compilation* const compilation
-        ) const -> SymbolName;
-
         SymbolName SymbolName;
         std::vector<TypeNameModifier> Modifiers;
     };
+
+    auto ModifyTypeSymbol(
+        ITypeSymbol* const pureTypeSymbol,
+        std::vector<TypeNameModifier> modifiers
+    ) -> ISizedTypeSymbol*;
 }

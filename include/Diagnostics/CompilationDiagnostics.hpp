@@ -33,7 +33,7 @@ namespace Ace
         const nlohmann::json::value_t expectedType
     ) -> DiagnosticGroup;
 
-    auto CreateUndefinedRefToPackagePathMacroError(
+    auto CreateUndeclaredRefToPackagePathMacroError(
         const FileBuffer* const packageFileBuffer,
         const std::string& macro
     ) -> DiagnosticGroup;
