@@ -13,41 +13,37 @@
 
 ## 🔴 High Priority
 
-- Open source:
-  - Add `README`
-  - Make repository public
+- `README`:
+  - Add commits badge (commit count)
+  - Add `Usage` chapter
 - Supertraits
 - Remove redundant undeclared symbol error for unimplemented function: When resolving associated functions, check if the type implements a trait with a function of that name, then just 'trust' it is implemented
 - Replace operators with traits
+- Change `__deref_as[T](...)` to take any type convertible to `std::Ptr` and remove `std::Ref[T]::ptr(...)`
+- Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; possibly fixed by lifetime trait)
+- Lifetime trait: default, copy, drop
 - Fix that glue doesnt bind on private types
 - Dynamic casting (how to handle failed conversions?)
+- Strings
 
 ## 🟡 Medium Priority
 
-- Make a user friendly version of `ISymbol::CreateSignature` that will be used in error messages (`ace::std::rc::StrongPtr[ace::std::Int32]` &rarr; `*i32`)
 - Forbid taking reference of a r-value
 - Add self type signature to member access resolution error message
 - Diagnostics when redeclared type parameter
 - Forbid constructing of non-pub struct
-- Trait operators:
-  - Change `__deref_as[T](...)` to take any type convertible to `std::Ptr` and remove `std::Ref[T]::ptr(...)`
-  - Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; possibly fixed by lifetime trait)
-  - Lifetime trait: default, copy, drop
-- Unit testing (Test that `CreateTokenKindString` handles all possible values, test `Keyword.cpp`)
-
+- Struct update constructor syntax
 - Add diagnosis for leaking private types in public interface
 - Add source location to unknown files like `.cpp`
-- Strings
 - Control flow flexibility improvement:
   - `IEmittable` could hold `ControlFlowGraph`, so it could verify control flow
   - Possibly implement `ControlFlowNode`s for `LLVM IR` instructions (check `llvm/IR/Instruction.def`)
-- Check if there is any better way to not use external programs like `llc` and `clang`
-- New syntax for struct construction, the current `new Struct { ... }` and `Struct::new(...)` are too similiar
-- Struct update constructor syntax
-- Mutability/Immutability:
-  - Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`
+- Check if there is any a better way than to depend on external executables like `llc` and `clang`
 - Remove duplicate module filepaths in package: `./dawg/../dawg/` is the same as `./dawg/`
 - Enums
+- Mutability/Immutability:
+  - Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`
+- Unit testing (Test that `CreateTokenKindString` handles all possible values, test `Keyword.cpp`)
 
 ## ⚪ Low Priority
 
@@ -62,25 +58,3 @@
 - Reflection
 - Figure out how to share globals between dlls
 - ❓ Remove local variable shadowing, it causes more mistakes than usefulness
-- Rewrite `package.json` to `package.ace`:
-  ```rs
-  import std::build;
-
-  package(): std::Package {
-      ret new std::Package {
-          name: "ace",
-          path_macros: [
-              new std::PathMacro {
-                  name: "$project_path",
-                  value: "/home/samo/repos/ace/ace/src/",
-              },
-          ],
-          file_paths: [
-              "$project_path/**.ace",
-          ],
-          dependency_file_paths: [
-              "$project_path/**.dll"
-          ],
-      };
-  }
-  ```
