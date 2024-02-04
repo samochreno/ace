@@ -14,7 +14,6 @@
 ## 🔴 High Priority
 
 - Open source:
-  - Add `LICENSE`
   - Add `README`
   - Make repository public
 - Supertraits
