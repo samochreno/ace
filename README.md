@@ -4,7 +4,8 @@
 
 # Ace Programming Language
 
-![license](https://img.shields.io/badge/license-MIT-%23FF033E?logoColor=%23FF033E)
+![License](https://img.shields.io/badge/license-MIT-ee1d48)
+![Code size](https://img.shields.io/github/languages/code-size/samochreno/ace)
 
 Ace is a statically typed, memory safe, multi paradigm programming language with consistent syntax.
 
@@ -24,7 +25,7 @@ cd dep
 ```
 
 ```bash
-# termcolor/termcolor
+# ikalnytskyi/termcolor
 cd termcolor
 cmake -B build
 cmake --build build
@@ -47,6 +48,13 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 cmake --build build --target install
 cd ../..
+```
+
+- Build the project
+
+```bash
+cmake -B build
+cmake --build build
 ```
 
 ## License

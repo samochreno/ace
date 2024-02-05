@@ -13,9 +13,8 @@
 
 ## 🔴 High Priority
 
-- `README`:
-  - Add commits badge (commit count)
-  - Add `Usage` chapter
+- Embed `std` or add support for multiple packages
+- Add a `Usage` chapter to `README` 
 - Supertraits
 - Remove redundant undeclared symbol error for unimplemented function: When resolving associated functions, check if the type implements a trait with a function of that name, then just 'trust' it is implemented
 - Replace operators with traits
