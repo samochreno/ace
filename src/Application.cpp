@@ -336,15 +336,16 @@ namespace Ace::Application
     }
 
     static auto Compile(
-        std::vector<std::shared_ptr<const ISrcBuffer>>* const srcBuffers,
         const std::vector<std::string_view>& args
     ) -> Expected<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
+        std::vector<std::shared_ptr<const ISrcBuffer>> srcBuffers{};
+
         auto compilationDiagnostics = DiagnosticBag::CreateGlobal();
         const auto optCompilation = compilationDiagnostics.Collect(
-            Compilation::Parse(srcBuffers, args)
+            Compilation::Parse(&srcBuffers, args)
         );
         diagnostics.Add(std::move(compilationDiagnostics));
         if (!optCompilation.has_value())
@@ -381,13 +382,7 @@ namespace Ace::Application
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
 
-        std::vector<std::shared_ptr<const ISrcBuffer>> srcBuffers{};
-
-        const auto didCompile = Compile(
-            &srcBuffers,
-            { { "-oace/build" }, { "ace/package.json" } }
-        );
-        if (!didCompile)
+        if (!Compile(args))
         {
             return;
         }
