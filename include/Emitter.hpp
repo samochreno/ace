@@ -16,6 +16,21 @@
 
 namespace Ace
 {
+    class LabelBlockMap
+    {
+    public:
+        LabelBlockMap(Emitter& emitter);
+
+        auto GetOrCreateAt(
+            const LabelSymbol* const labelSymbol
+        ) -> llvm::BasicBlock*;
+        auto Clear() -> void;
+
+    private:
+        Emitter& m_Emitter;
+        std::map<const LabelSymbol*, llvm::BasicBlock*> m_Map{};
+    };
+
     struct EmittingBlock
     {
         EmittingBlock(
@@ -37,46 +52,13 @@ namespace Ace
         llvm::IRBuilder<>  Builder;
     };
 
-    class LabelBlockMap
-    {
-    public:
-        LabelBlockMap(Emitter& emitter);
-
-        auto GetOrCreateAt(
-            const LabelSymbol* const labelSymbol
-        ) -> llvm::BasicBlock*;
-        auto Clear() -> void;
-
-    private:
-        Emitter& m_Emitter;
-        std::map<const LabelSymbol*, llvm::BasicBlock*> m_Map{};
-    };
-
-    struct LocalVarSymbolStmtIndexPair
-    {
-        LocalVarSymbol* LocalVarSymbol{};
-        size_t StmtIndex{};
-    };
-
-    struct EmittingResult
-    {
-        struct DurationInfo
-        {
-            std::chrono::nanoseconds GlueGeneration{};
-            std::chrono::nanoseconds IREmitting{};
-            std::chrono::nanoseconds Analyses{};
-            std::chrono::nanoseconds LLC{};
-            std::chrono::nanoseconds Clang{};
-        } Durations{};
-    };
-
     class Emitter
     {
     public:
         Emitter(Compilation* const compilation);
         ~Emitter();
 
-        auto Emit() -> Expected<EmittingResult>;
+        auto Emit() -> Expected<void>;
 
         template<typename T>
         auto CreateInstantiated(const IGenericSymbol* const symbol) const -> T*
@@ -183,6 +165,12 @@ namespace Ace
             std::vector<llvm::Constant*> Vtbls{};
         };
 
+        struct LocalVarSymbolStmtIndexPair
+        {
+            LocalVarSymbol* LocalVarSymbol{};
+            size_t StmtIndex{};
+        };
+
         auto EmitGlobalVar(
             const std::string& name,
             llvm::Type* const type,
@@ -228,6 +216,11 @@ namespace Ace
         auto GetDropGluePtr(
             ITypeSymbol* const typeSymbol
         ) const -> llvm::Constant*;
+
+        auto CreateOutputFilePath(
+            const std::string_view name,
+            const std::string_view extension
+        ) -> std::filesystem::path;
 
         Compilation* m_Compilation{};
 

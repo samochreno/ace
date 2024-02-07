@@ -96,13 +96,9 @@ namespace Ace
     static auto SaveModuleToFile(
         Compilation* const compilation,
         const llvm::Module& module,
-        const char* const extension
+        const std::filesystem::path& filePath
     ) -> void
     {
-        const std::filesystem::path filePath = 
-            compilation->GetOutputPath() /
-            (compilation->GetPackage().Name + "." + extension);
-
         std::string moduleString{};
 
         llvm::raw_string_ostream moduleOStream{ moduleString };
@@ -132,7 +128,7 @@ namespace Ace
         return !genericSymbol->IsPlaceholder();
     }
 
-    auto Emitter::Emit() -> Expected<EmittingResult>
+    auto Emitter::Emit() -> Expected<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -140,10 +136,6 @@ namespace Ace
         const auto& packageName = GetCompilation()->GetPackage().Name;
 
         m_C.Initialize(GetContext(), GetModule());
-
-        const auto& now = std::chrono::steady_clock::now;
-
-        const auto timeIREmittingBegin = now();
 
         const auto allSymbols = globalScope->CollectAllSymbolsRecursive();
         std::set<ISymbol*> symbolSet{};
@@ -250,6 +242,12 @@ namespace Ace
             }
         });
 
+        const auto bcFilePath    = CreateOutputFilePath(packageName, "bc");
+        const auto llFilePath    = CreateOutputFilePath(packageName, "ll");
+        const auto optLlFilePath = CreateOutputFilePath(packageName, "opt.ll");
+        const auto objFilePath   = CreateOutputFilePath(packageName, "obj");
+        const auto exeFilePath   = CreateOutputFilePath(packageName, "");
+
         std::string originalModuleString{};
         llvm::raw_string_ostream originalModuleOStream{ originalModuleString };
         originalModuleOStream << GetModule();
@@ -257,11 +255,7 @@ namespace Ace
         originalModuleString.clear();
 
         // TODO: Make this optional with a CLI option
-        SaveModuleToFile(GetCompilation(), GetModule(), "ll");
-
-        const auto timeIREmittingEnd = now();
-
-        const auto timeAnalysesBegin = now();
+        SaveModuleToFile(GetCompilation(), GetModule(), llFilePath);
 
         llvm::LoopAnalysisManager lam{};
         llvm::FunctionAnalysisManager fam{};
@@ -281,61 +275,36 @@ namespace Ace
 
         mpm.run(GetModule(), mam);
 
-        const auto timeAnalysesEnd = now();
-
         // TODO: Make this optional with a CLI option
-        SaveModuleToFile(GetCompilation(), GetModule(), "opt.ll");
+        SaveModuleToFile(GetCompilation(), GetModule(), optLlFilePath);
 
         std::error_code errorCode{};
         llvm::raw_fd_ostream bitcodeFileOStream
         { 
-            (GetCompilation()->GetOutputPath() / (packageName + ".bc")).string(),
+            bcFilePath.string(),
             errorCode, 
-            llvm::sys::fs::OF_None 
+            llvm::sys::fs::OF_None,
         };
         ACE_ASSERT(!errorCode);
         llvm::WriteBitcodeToFile(GetModule(), bitcodeFileOStream);
         bitcodeFileOStream.close();
-        
-        const auto timeLLCBegin = now();
 
         system((
             "llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj -o " +
-            (GetCompilation()->GetOutputPath() / (packageName + ".obj")).string() +
-            " " + (GetCompilation()->GetOutputPath() / (packageName + ".bc")).string()
+            objFilePath.string() + " " + bcFilePath.string()
         ).c_str());
-
-        const auto timeLLCEnd = now();
-
-        const auto timeClangBegin = now();
 
         system((
-            "clang -lc -lm "
-            "-o " + (GetCompilation()->GetOutputPath() / packageName).string() +
-            " " + (GetCompilation()->GetOutputPath() / (packageName + ".obj")).string()
+            "clang -lc -lm -o " + exeFilePath.string() + " " +
+            objFilePath.string()
         ).c_str());
-
-        const auto timeClangEnd = now();
 
         if (diagnostics.HasErrors())
         {
             return std::move(diagnostics);
         }
 
-        return Expected
-        {
-            EmittingResult
-            {
-                EmittingResult::DurationInfo
-                {
-                    timeIREmittingEnd - timeIREmittingBegin,
-                    timeAnalysesEnd - timeAnalysesBegin,
-                    timeLLCEnd - timeLLCBegin,
-                    timeClangEnd - timeClangBegin,
-                }
-            },
-            std::move(diagnostics),
-        };
+        return Void{ std::move(diagnostics) };
     }
 
     auto Emitter::EmitFunctionBlockStmts(
@@ -1382,5 +1351,19 @@ namespace Ace
         }
 
         return GetFunction(concreteTypeSymbol->GetDropGlue().value());
+    }
+
+    auto Emitter::CreateOutputFilePath(
+        const std::string_view name,
+        const std::string_view extension
+    ) -> std::filesystem::path
+    {
+        std::string fileName{ name };
+        if (!extension.empty())
+        {
+            fileName += extension;
+        }
+
+        return GetCompilation()->GetOutputPath() / fileName;
     }
 }

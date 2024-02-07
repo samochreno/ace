@@ -221,12 +221,6 @@ namespace Ace::Application
         const auto& packageName = compilation->GetPackage().Name;
         const auto globalScope = compilation->GetGlobalScope();
 
-        const auto& now = std::chrono::steady_clock::now;
-
-        const auto timeBegin = now();
-        const auto timeFrontendBegin = now();
-        const auto timeParsingBegin = now();
-
         std::vector<std::shared_ptr<const ModSyntax>> asts{};
         std::for_each(
             begin(compilation->GetPackage().SrcFileBuffers),
@@ -245,8 +239,6 @@ namespace Ace::Application
             }
         );
 
-        const auto timeParsingEnd = now();
-
         std::vector<const ISyntax*> syntaxes{};
         std::for_each(begin(asts), end(asts),
         [&](const std::shared_ptr<const ModSyntax>& ast)
@@ -255,18 +247,12 @@ namespace Ace::Application
             syntaxes.insert(end(syntaxes), begin(children), end(children));
         });
 
-        const auto timeDeclBegin = now();
-
         const auto functionBlockBindings = diagnostics.Collect(
             CreateAndDeclareSymbols(syntaxes)
         );
         diagnostics.Collect(globalScope->GetGenericInstantiator().InstantiateBodies(
             functionBlockBindings
         ));
-
-        const auto timeDeclEnd = now();
-
-        const auto timeBindingAndVerificationBegin = now();
 
         compilation->GetNatives().Verify();
         diagnostics.Collect(CreateAndBindFunctionBodies(functionBlockBindings));
@@ -281,56 +267,17 @@ namespace Ace::Application
         diagnostics.Collect(DiagnoseOverlappingInherentImpls(compilation));
         diagnostics.Collect(DiagnoseConcreteConstraints(compilation));
 
-        const auto timeBindingAndVerificationEnd = now();
-
-        const auto timeFrontendEnd = now();
-
         if (diagnostics.HasErrors())
         {
             return std::move(diagnostics);
         }
 
-        const auto timeBackendBegin = now();
-
         Emitter emitter{ compilation };
-        const auto optEmittingResult = diagnostics.Collect(emitter.Emit());
-        if (!optEmittingResult.has_value())
+        const auto didEmit = diagnostics.Collect(emitter.Emit());
+        if (!didEmit)
         {
             return std::move(diagnostics);
         }
-
-        const auto timeBackendEnd = now();
-        
-        const auto timeEnd = now();
-
-        const auto createDurationString = [](std::chrono::nanoseconds duration) -> std::string
-        {
-            const auto minutes     = std::chrono::duration_cast<std::chrono::minutes>     (duration);
-            const auto seconds     = std::chrono::duration_cast<std::chrono::seconds>     (duration -= minutes);
-            const auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration -= seconds);
-
-            std::string value{};
-            value += std::to_string(minutes.count());
-            value += "m ";
-            value += std::to_string(seconds.count());
-            value += "s ";
-            value += std::to_string(miliseconds.count());
-            value += "ms";
-
-            return value;
-        };
-
-        LogDebug << createDurationString(timeEnd - timeBegin) + " - total\n";
-        LogDebug << createDurationString(timeFrontendEnd - timeFrontendBegin) + " - frontend\n";
-        LogDebug << createDurationString(timeParsingEnd - timeParsingBegin) + " - frontend | parsing\n";
-        LogDebug << createDurationString(timeDeclEnd - timeDeclBegin) + " - frontend | declaration\n";
-        LogDebug << createDurationString(timeBindingAndVerificationEnd - timeBindingAndVerificationBegin) + " - frontend | binding and verification\n";
-        LogDebug << createDurationString(timeBackendEnd - timeBackendBegin) + " - backend\n";
-        LogDebug << createDurationString(optEmittingResult.value().Durations.GlueGeneration) + " - backend | glue generation\n";
-        LogDebug << createDurationString(optEmittingResult.value().Durations.IREmitting) + " - backend | ir emitting\n";
-        LogDebug << createDurationString(optEmittingResult.value().Durations.Analyses) + " - backend | analyses\n";
-        LogDebug << createDurationString(optEmittingResult.value().Durations.LLC) + " - backend | llc\n";
-        LogDebug << createDurationString(optEmittingResult.value().Durations.Clang) + " - backend | clang\n";
 
         return Void{ std::move(diagnostics) };
     }
