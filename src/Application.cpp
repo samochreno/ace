@@ -14,7 +14,6 @@
 #include "FileBuffer.hpp"
 #include "DynamicCastFilter.hpp"
 #include "Scope.hpp"
-#include "Lexer.hpp"
 #include "Parser.hpp"
 #include "FunctionBlockBinding.hpp"
 #include "Emitter.hpp"
@@ -37,26 +36,6 @@ namespace Ace::Application
     static auto CreateIndent() -> std::string
     {
         return std::string(IndentLevel, ' ');
-    }
-
-    static auto ParseAST(
-        Compilation* const compilation,
-        const FileBuffer* const fileBuffer
-    ) -> Expected<std::shared_ptr<const ModSyntax>>
-    {
-        auto diagnostics = DiagnosticBag::Create();
-
-        const auto tokens = diagnostics.Collect(LexTokens(fileBuffer));
-
-        const auto optAST = diagnostics.Collect(
-            ParseAST(fileBuffer, std::move(tokens))
-        );
-        if (!optAST.has_value())
-        {
-            return std::move(diagnostics);
-        }
-
-        return Expected{ optAST.value(), std::move(diagnostics) };
     }
 
     auto CollectSyntaxes(
@@ -228,7 +207,7 @@ namespace Ace::Application
             [&](const FileBuffer* const srcFileBuffer)
             {
                 const auto optAST = diagnostics.Collect(
-                    ParseAST(compilation, srcFileBuffer)
+                    ParseAST(srcFileBuffer)
                 );
                 if (!optAST.has_value())
                 {

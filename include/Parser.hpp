@@ -3,15 +3,14 @@
 #include <memory>
 #include <vector>
 
-#include "Diagnostic.hpp"
-#include "Token.hpp"
-#include "Syntaxes/All.hpp"
 #include "FileBuffer.hpp"
+#include "Token.hpp"
+#include "Diagnostic.hpp"
+#include "Syntaxes/All.hpp"
 
 namespace Ace
 {
     auto ParseAST(
-        const FileBuffer* const fileBuffer,
-        std::vector<Token> tokens
+        const FileBuffer* const fileBuffer
     ) -> Expected<std::shared_ptr<const ModSyntax>>;
 }

@@ -11,6 +11,7 @@
 #include "Diagnostic.hpp"
 #include "Diagnostics/ParsingDiagnostics.hpp"
 #include "Token.hpp"
+#include "Lexer.hpp"
 #include "Syntaxes/All.hpp"
 #include "Compilation.hpp"
 #include "FileBuffer.hpp"
@@ -5911,11 +5912,12 @@ namespace Ace
     }
 
     auto ParseAST(
-        const FileBuffer* const fileBuffer,
-        std::vector<Token> tokens
+        const FileBuffer* const fileBuffer
     ) -> Expected<std::shared_ptr<const ModSyntax>>
     {
         auto diagnostics = DiagnosticBag::Create();
+
+        const auto tokens = diagnostics.Collect(LexTokens(fileBuffer));
 
         Parser parser{ fileBuffer, std::move(tokens) };
 
