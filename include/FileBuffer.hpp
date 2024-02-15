@@ -26,6 +26,10 @@ namespace Ace
             Compilation* const compilation,
             const std::filesystem::path& path
         ) -> Expected<std::shared_ptr<const FileBuffer>>;
+        static auto Create(
+            Compilation* const compilation,
+            const std::string_view string
+        ) -> std::shared_ptr<const FileBuffer>;
 
         auto GetCompilation() const -> Compilation* final;
         auto GetBuffer() const -> const std::string& final;
@@ -44,8 +48,7 @@ namespace Ace
             Compilation* const compilation,
             const std::filesystem::path& path,
             std::string&& buffer,
-            std::vector<std::string_view>&& lines,
-            std::vector<std::string_view::const_iterator>&& lineBeginIterators
+            std::vector<std::string_view>&& lines
         );
 
         auto FindLineIndex(
@@ -60,6 +63,5 @@ namespace Ace
         std::filesystem::path m_Path{};
         std::string m_Buffer{};
         std::vector<std::string_view> m_Lines{};
-        std::vector<std::string_view::const_iterator> m_LineBeginIterators{};
     };
 }

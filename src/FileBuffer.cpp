@@ -60,17 +60,6 @@ namespace Ace
             }
         );
 
-        std::vector<std::string_view::const_iterator> lineBeginIterators{};
-        std::transform(
-            begin(lines),
-            end  (lines),
-            back_inserter(lineBeginIterators),
-            [&](const std::string_view line)
-            {
-                return begin(line);
-            }
-        );
-
         return
         {
             std::shared_ptr<const FileBuffer>(new FileBuffer{
@@ -78,10 +67,45 @@ namespace Ace
                 path,
                 std::move(buffer),
                 std::move(lines),
-                std::move(lineBeginIterators),
             }),
             std::move(diagnostics),
         };
+    }
+
+    auto FileBuffer::Create(
+        Compilation* const compilation,
+        const std::string_view string
+    ) -> std::shared_ptr<const FileBuffer>
+    {
+        std::string buffer{ string };
+
+        std::vector<std::string_view> lines{};
+        size_t i = 0;
+
+        if (buffer.front() == '\n')
+        {
+            lines.emplace_back(begin(buffer), begin(buffer));
+            i++;
+        }
+
+        while (i < buffer.size())
+        {
+            size_t j = i + 1;
+            while ((j < buffer.size()) && (buffer.at(j) != '\n'))
+            {
+                ++j;
+            }
+
+            lines.emplace_back(begin(buffer) + i, begin(buffer) + j);
+            i = j + 1;
+        }
+
+        return std::shared_ptr<const FileBuffer>(new FileBuffer{
+            compilation,
+            std::filesystem::path{},
+            std::move(buffer),
+            std::move(lines),
+        });
     }
 
     auto FileBuffer::GetCompilation() const -> Compilation*
@@ -139,13 +163,11 @@ namespace Ace
         Compilation* const compilation,
         const std::filesystem::path& path,
         std::string&& buffer,
-        std::vector<std::string_view>&& lines,
-        std::vector<std::string_view::const_iterator>&& lineBeginIterators
+        std::vector<std::string_view>&& lines
     ) : m_Compilation{ compilation },
         m_Path{ path },
         m_Buffer{ std::move(buffer) },
-        m_Lines{ std::move(lines) },
-        m_LineBeginIterators{ std::move(lineBeginIterators) }
+        m_Lines{ std::move(lines) }
     {
     }
 
@@ -153,16 +175,13 @@ namespace Ace
         const std::string_view::const_iterator characterIt
     ) const -> size_t
     {
-        const auto lineIt = std::upper_bound(
-            begin(m_LineBeginIterators),
-            end  (m_LineBeginIterators),
-            characterIt
-        ) - 1;
+        auto lineIt = begin(m_Lines);
+        while (characterIt >= end(*lineIt))
+        {
+            ++lineIt;
+        }
 
-        return std::distance(
-            begin(m_LineBeginIterators),
-            lineIt
-        );
+        return std::distance(begin(m_Lines), lineIt);
     }
 
     auto FileBuffer::FindCharacterIndex(
@@ -171,7 +190,7 @@ namespace Ace
     ) const -> size_t
     {
         return std::distance(
-            m_LineBeginIterators.at(lineIndex),
+            begin(m_Lines.at(lineIndex)),
             characterIt
         );
     }
