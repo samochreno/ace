@@ -1,42 +1,54 @@
 main(): int {
-    test();
+    i: int = 0;
+
+    i += generic_argument_deduction();
+    assert i == 2;
+
+    i += referencing();
+    assert i == 9;
+
+    i += compound_assignment();
+    assert i == 20;
+
+    i += member_compound_assignment();
+    assert i == 46;
+
+    i += boxed_member_compound_assignment();
+    assert i == 50;
+
+    i += boxed_self();
+    assert i == 62;
+
+    i += self_type();
+    assert i == 64;
+
+    i += traits();
+    assert i == 66;
+
+    i += static_trait_dispatch();
+    assert i == 75;
+
+    i += dyn_trait_dispatch();
+    assert i == 79;
+
+    i += vtbl_lookup();
+    assert i == 88;
+
+    i += constraint();
+    assert i == 90;
+
+    std::print_int(0);
     ret 0;
 }
 
-test(): void {
-    i: int = 0;
+pub ::
+Vector2: pub struct {
+    x: int, 
+    y: int,
+}
 
-    i += compound_assignment();
-    assert i == 11;
-
-    i += struct_compound_assignment();
-    assert i == 37;
-
-    i += boxed_struct_compound_assignment();
-    assert i == 41;
-
-    i += boxed_self();
-    assert i == 53;
-
-    i += self_type();
-    assert i == 55;
-
-    i += traits();
-    assert i == 57;
-
-    i += static_trait_dispatch();
-    assert i == 66;
-
-    i += dyn_trait_dispatch();
-    assert i == 70;
-
-    i += vtbl_lookup();
-    assert i == 79;
-
-    i += constraint();
-    assert i == 81;
-
-    std::print_int(0);
+Generic[T]: struct {
+    field: T
 }
 
 Constraint: trait {
@@ -133,11 +145,6 @@ Animal: trait {
 }
 
 pub ::
-AnimalTemplate[T]: trait {
-    method[U](): T;
-}
-
-pub ::
 Cow: struct {
     value: int
 }
@@ -166,7 +173,7 @@ traits(): int {
     ret i;
 }
 
-impl[T] Template[T] {
+impl[T] Generic[T] {
     new(field: int): Self {
         ret new Self { field };
     }
@@ -179,7 +186,7 @@ impl Node {
 }
 
 self_type(): int {
-    ret Node::new(5).value - Template[int]::new(3).field;
+    ret Node::new(5).value - Generic[int]::new(3).field;
 }
 
 pub ::
@@ -213,7 +220,7 @@ boxed_self(): int {
     ret i;
 }
 
-boxed_struct_compound_assignment(): int {
+boxed_member_compound_assignment(): int {
     value: Vector2 = new Vector2 { x: 0, y: 2 };
 
     boxed_value: *Vector2 = box value;
@@ -222,7 +229,7 @@ boxed_struct_compound_assignment(): int {
     ret boxed_value.y;
 }
 
-struct_compound_assignment(): int {
+member_compound_assignment(): int {
     value: Vector2 = new Vector2 { x: 0, y: 27 };
     value.y -= 1;
     ret value.y;
@@ -234,44 +241,47 @@ compound_assignment(): int {
     ret i;
 }
 
-pub ::
-Vector2: pub struct {
-    x: int, 
-    y: int,
+increment_vector_2(value: &Vector2): void {
+    value.x += 1;
+    value.y += 1;
 }
 
-Template[T]: struct {
-    field: T
+increment_int(value: &int): void {
+    value += 1;
 }
 
-impl Vector2 {
-    pub self ::
-    increment_all(): void {
-        self.x += 1;
-        self.y += 1;
-    }
+referencing(): int {
+    i: int = 0;
 
-    pub ::
-    increment_all_static(value: &Self): void {
-        value.increment_all();
-    }
+    increment_int(i);
+    assert i == 1;
+
+    vec: Vector2 = new Vector2 { x: 1, y: 3 };
+    increment_vector_2(vec);
+    assert vec.x == 2;
+    assert vec.y == 4;
+
+    i += vec.x;
+    i += vec.y;
+    assert i == 7;
+
+    ret i;
 }
 
-test_1(): int {
-    vec: Vector2 = new Vector2 { x: 15, y: 15 };
-    vec.increment_all();
-
-    vec_ref: &Vector2 = vec;
-    vec_ref.increment_all();
-
-    vec.increment_all();
-
-    Vector2::increment_all_static(vec_ref);
-
-    ret vec.y;
+Wrapper[T]: struct {
+    value: T
 }
 
-test_2: mod {
+unwrap[T](wrapped: Wrapper[T]): T {
+    ret wrapped.value;
+}
+
+generic_argument_deduction(): int {
+    wrapped: Wrapper[int] = new Wrapper[int] { value: 2 }; 
+    ret unwrap(wrapped);
+}
+
+lib: mod {
     pub ::
     Type: struct {
         field: int
@@ -289,42 +299,29 @@ test_2: mod {
         }
     }
 
+    pub ::
+    func(): int {
+        ret -5;
+    }
+
     private: mod {
         func(): int {
-            obj: test_2::Type = new test_2::Type { field: 1 };
+            obj: lib::Type = new lib::Type { field: 1 };
             ret obj.field;
         }
     }
 }
 
-test_3: mod {
-    pub ::
-    func(): int {
-        ret -5;
-    }
+pub ::
+lib::nested: mod {
 }
 
 pub ::
-test_3::nested: mod {
-}
-
-pub ::
-test_3::nested: mod {
+lib::nested: mod {
     pub ::
     func(): int {
         ret -10;
     }
-}
-
-test_4(): int {
-    i: int = 0; 
-
-    while i < 10 {
-        std::print_int(i);
-        i += 1;
-    }
-
-    ret i;
 }
 
 fizz_buzz(n: int): int {
@@ -369,155 +366,54 @@ control_flow_analysis_2(): int {
     ret 16;
 }
 
-impl[T] Template[T] {
+impl[T] Generic[T] {
     pub self ::
     field(): T {
         ret self.field;
     }
 }
 
-type_template_associated_func(): int {
-    obj: Template[int] = new Template[int] { field: 4 };
+generic_associated_func(): int {
+    obj: Generic[int] = new Generic[int] { field: 4 };
     ret obj.field();
 }
 
-impl[T] Template[T] {
-    func_normal(): void {
+impl[T] Generic[T] {
+    func(): void {
         std::print_int(15);
     }
 
-    func_template[U](): void {
+    generic_func[U](): void {
         std::print_int(25);
     }
 }
 
-type_template_associated_func_template(): int {
-    Template[int]::func_normal();
-    Template[int]::func_template[std::Ptr]();
+generic_associated_generic_func(): int {
+    Generic[int]::func();
+    Generic[int]::generic_func[std::Ptr]();
     ret 10;
 }
 
-free_func_template[T](value: T): T {
-    ret value;
-}
-
-free_func_template_test(): int {
-    ret free_func_template[int](-13);
-}
-
-impl[T] Template[T] {
-    self ::
-    get_field_template[U](): T {
-        ret self.field;
-    }
-}
-
-method_template(): int {
-    obj: Template[int] = new Template[int] { field: -12 };
-    obj.get_field_template[std::Ptr]();
-    ret 13;
-}
-
-clamp(d: int, min: int, max: int): int {
-    t: int;
-
-    if d < min { t = min; }
-    else       { t = d; }
-
-    if t > max { ret max; }
-    else       { ret t; }
-}
-
 impl Vector2 {
     self ::
-    associated_func_template[T](): void { 
+    func[T](): void { 
     }
 }
 
-type_associated_template_func(): int {
+associated_generic_func(): int {
     vec: Vector2 = new Vector2 { x: 0, y: 0 };
-    vec.associated_func_template[int]();
+    vec.func[int]();
     ret vec.x + vec.y;
-}
-
-impl Vector2 {
-    self ::
-    increment_x_and_y(): void {
-        self.x += 1;
-        self.y += 1;
-    }
-}
-
-reference(): int {
-    vec_a: Vector2 = new Vector2 { x: 48, y: 11 };
-    vec_b: Vector2 = new Vector2 { x: -9, y: 59 };
-
-    vec_b.increment_x_and_y();
-
-    vec_ref: &Vector2 = vec_b;
-
-    vec_b.x += 1;
-
-    vec_final: Vector2 = vec_ref;
-
-    ret vec_final.x;
-}
-
-argument(value: int): int {
-    ret value;
-}
-
-address(): int {
-    value: int = 0;
-    address_of_value: std::Ptr = __address_of(value);
-    ret value;
-}
-
-size_of_vector_2(): int {
-    ret __size_of[Vector2];
-}
-
-memory_allocation(): int {
-    size_of_int: int = __size_of[int];
-    block: std::Ptr = std::mem::alloc(size_of_int);
-    std::mem::dealloc(block);
-    ret 0;
-}
-
-memory_allocation_copy_access(): int {
-    vector_2_size: int = __size_of[Vector2];
-    vector_2_ptr: std::Ptr = std::mem::alloc(vector_2_size);
-
-    init_value: Vector2 = new Vector2 { x: 15, y: 7 };
-    init_value_ptr: std::Ptr = __address_of(init_value);
-
-    std::mem::copy(init_value_ptr, vector_2_ptr, vector_2_size);
-
-    __deref_as[Vector2](vector_2_ptr).y = 46;
-
-    vector_2_deref_y: int = __deref_as[Vector2](vector_2_ptr).y;
-
-    std::mem::dealloc(vector_2_ptr);
-
-    ret vector_2_deref_y;
-}
-
-print_vector_2_strong_ptr_x(value: &*Vector2): void {
-    std::print_int(value.x);
-}
-
-print_vector_2_strong_ptr_y(value: &*Vector2): void {
-    std::print_int(value.y);
 }
 
 reference_counting(): int {
     strong: *Vector2 = box new Vector2 { x: 16, y: 10 };
-    print_vector_2_strong_ptr_y(strong);
+    std::print_int(strong.x);
 
     weak: ~Vector2 = strong;
 
     locked: *Vector2 = lock weak;
-    print_vector_2_strong_ptr_x(locked);
+    std::print_int(locked.y);
 
     unboxed_value: Vector2 = unbox locked;
     std::print_int(unboxed_value.y);
@@ -533,76 +429,14 @@ multiple_indirection(): int {
     ret vec_3.x;
 }
 
-increment_int(value: &int): void {
-    value += 1;
-}
-
-op_precedence(): int {
-    i: int = -int_value();
-    std::print_int(i);
-    ret 0;
-}
-
-int_value(): int {
-    ret -131255;
-}
-
 op_associativity(): int {
     ret 1 * -100 + 50 / 10 / 5;
-}
-
-Getter: struct {
-    field: int,
-}
-
-impl Getter {
-    self ::
-    field(): int {
-        ret self.field;
-    }
-}
-
-getter(): int {
-    std::print_int(15);
-    obj: Getter = new Getter { field: int_value_and_print() };
-    std::print_int(60);
-    ret obj.field();
-}
-
-int_value_and_print(): int {
-    value: int = -123152;
-    std::print_int(value);
-    ret value;
 }
 
 global_value: int;
 global(): int {
     global_value = -9843;
     ret global_value;
-}
-
-NewTemplate[T]: struct {}
-
-deducable[T, U](lhs: T, rhs: U): T {
-    new NewTemplate[U] {};
-    ret lhs;
-}
-
-deducer(): int {
-    ret deducable(2, 5i8);
-}
-
-Wrapper[T]: struct {
-    value: T
-}
-
-unwrap[T](wrapped: Wrapper[T]): T {
-    ret wrapped.value;
-}
-
-unwrapper(): int {
-    wrapped: Wrapper[int] = new Wrapper[int] { value: -1001001 };
-    ret unwrap(wrapped);
 }
 
 implicit_conversion_with_binary_op(): int {

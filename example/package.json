@@ -1,0 +1,14 @@
+{
+    "name": "example",
+    "path_macros": [
+        {
+            "name": "src_directory",
+            "value": "src"
+        }
+    ],
+    "src_files": [
+        "$src_directory/**.ace"
+    ],
+    "dep_files": [
+    ]
+}

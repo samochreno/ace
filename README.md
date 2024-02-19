@@ -57,6 +57,14 @@ cmake -B build
 cmake --build build
 ```
 
+## Usage
+
+- See [example](/example)
+
+```bash
+ace -oexample/build example/package.json
+```
+
 ## License
 
 - The project is licensed under the MIT License. See [LICENSE](/LICENSE.md) for details.
