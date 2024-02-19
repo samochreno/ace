@@ -1361,6 +1361,7 @@ namespace Ace
         std::string fileName{ name };
         if (!extension.empty())
         {
+            fileName += ".";
             fileName += extension;
         }
 
