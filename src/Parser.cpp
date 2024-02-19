@@ -4999,11 +4999,8 @@ namespace Ace
             accessModifier = AccessModifier::Pub;
         }
 
-        bool isExtern = false;
-        if (header.ModifierToTokenMap.contains(Modifier::Extern))
-        {
-            isExtern = true;
-        }
+        const bool isExtern =
+            header.ModifierToTokenMap.contains(Modifier::Extern);
 
         const auto optTypeName = diagnostics.Collect(
             ParseTypeName(parser, header.BodyScope, RefParsingKind::Forbid)
