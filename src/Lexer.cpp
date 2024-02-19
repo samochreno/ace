@@ -62,7 +62,7 @@ namespace Ace
         {
             const auto beginSrcLocation = m_SrcLocation;
 
-            if (m_CharacterIterator == m_EndCharacterIterator)
+            if (IsEndOfLine())
             {
                 ACE_ASSERT(!IsEnd());
 
@@ -230,7 +230,8 @@ namespace Ace
             (lexer.Peek() == ' ') ||
             (lexer.Peek() == '\f') || 
             (lexer.Peek() == '\t') ||
-            (lexer.Peek() == '\v');
+            (lexer.Peek() == '\v') ||
+            (lexer.Peek() == '\n');
     }
 
     static auto IsCommentBegin(const Lexer& lexer) -> bool
@@ -1017,7 +1018,7 @@ namespace Ace
 
     static auto DiscardWhitespace(Lexer& lexer) -> void
     {
-        while (IsWhitespace(lexer))
+        while (!lexer.IsEnd() && IsWhitespace(lexer))
         {
             lexer.Eat();
         }
@@ -1034,11 +1035,9 @@ namespace Ace
         std::vector<Token> tokens{};
         while (!lexer.IsEnd())
         {
-            DiscardWhitespace(lexer);
-
-            if (lexer.IsEndOfLine())
+            if (IsWhitespace(lexer))
             {
-                lexer.Eat();
+                DiscardWhitespace(lexer);
                 continue;
             }
 
