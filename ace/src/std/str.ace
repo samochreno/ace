@@ -1,6 +1,0 @@
-pub ::
-std: mod {
-    pub ::
-    String: struct {
-    }
-}

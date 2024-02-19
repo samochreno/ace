@@ -5773,7 +5773,8 @@ namespace Ace
     }
 
     static auto ParseTopLevelMod(
-        Parser& parser
+        Parser& parser,
+        const std::string& packageName
     ) -> Expected<std::shared_ptr<const ModSyntax>>
     {
         auto diagnostics = DiagnosticBag::Create();
@@ -5781,8 +5782,6 @@ namespace Ace
         const auto beginSrcLocation = parser.GetSrcLocation();
 
         auto* const compilation = parser.GetFileBuffer()->GetCompilation();
-
-        const auto packageName = compilation->GetPackage().Name;
 
         const auto     scope = compilation->GetGlobalScope();
         const auto bodyScope = scope->GetOrCreateChild(packageName);
@@ -5909,6 +5908,7 @@ namespace Ace
     }
 
     auto ParseAST(
+        const std::string& packageName,
         const FileBuffer* const fileBuffer
     ) -> Expected<std::shared_ptr<const ModSyntax>>
     {
@@ -5918,7 +5918,9 @@ namespace Ace
 
         Parser parser{ fileBuffer, std::move(tokens) };
 
-        const auto optMod = diagnostics.Collect(ParseTopLevelMod(parser));
+        const auto optMod = diagnostics.Collect(
+            ParseTopLevelMod(parser, packageName)
+        );
         if (!optMod.has_value())
         {
             return std::move(diagnostics);

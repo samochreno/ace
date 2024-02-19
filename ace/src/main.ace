@@ -1,9 +1,3 @@
-pub extern ::
-print_int(value: int): void;
-
-pub extern ::
-print_ptr(ptr: std::Ptr): void;
-
 main(): int {
     test();
     ret 0;
@@ -42,7 +36,7 @@ test(): void {
     i += constraint();
     assert i == 81;
 
-    print_int(0);
+    std::print_int(0);
 }
 
 Constraint: trait {
@@ -326,7 +320,7 @@ test_4(): int {
     i: int = 0; 
 
     while i < 10 {
-        print_int(i);
+        std::print_int(i);
         i += 1;
     }
 
@@ -341,15 +335,15 @@ fizz_buzz(n: int): int {
 
         if is_divisable_by_three {
             if is_divisable_by_five {
-                print_int(88881111);
+                std::print_int(88881111);
             } else {
-                print_int(8888);
+                std::print_int(8888);
             }
         } else {
             if is_divisable_by_five {
-                print_int(1111);
+                std::print_int(1111);
             } else {
-                print_int(i);
+                std::print_int(i);
             }
         }
 
@@ -389,11 +383,11 @@ type_template_associated_func(): int {
 
 impl[T] Template[T] {
     func_normal(): void {
-        print_int(15);
+        std::print_int(15);
     }
 
     func_template[U](): void {
-        print_int(25);
+        std::print_int(25);
     }
 }
 
@@ -509,11 +503,11 @@ memory_allocation_copy_access(): int {
 }
 
 print_vector_2_strong_ptr_x(value: &*Vector2): void {
-    print_int(value.x);
+    std::print_int(value.x);
 }
 
 print_vector_2_strong_ptr_y(value: &*Vector2): void {
-    print_int(value.y);
+    std::print_int(value.y);
 }
 
 reference_counting(): int {
@@ -526,7 +520,7 @@ reference_counting(): int {
     print_vector_2_strong_ptr_x(locked);
 
     unboxed_value: Vector2 = unbox locked;
-    print_int(unboxed_value.y);
+    std::print_int(unboxed_value.y);
 
     ret 0;
 }
@@ -545,7 +539,7 @@ increment_int(value: &int): void {
 
 op_precedence(): int {
     i: int = -int_value();
-    print_int(i);
+    std::print_int(i);
     ret 0;
 }
 
@@ -569,15 +563,15 @@ impl Getter {
 }
 
 getter(): int {
-    print_int(15);
+    std::print_int(15);
     obj: Getter = new Getter { field: int_value_and_print() };
-    print_int(60);
+    std::print_int(60);
     ret obj.field();
 }
 
 int_value_and_print(): int {
     value: int = -123152;
-    print_int(value);
+    std::print_int(value);
     ret value;
 }
 

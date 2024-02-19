@@ -12,6 +12,7 @@
 #include "Log.hpp"
 #include "Compilation.hpp"
 #include "FileBuffer.hpp"
+#include "Std.hpp"
 #include "DynamicCastFilter.hpp"
 #include "Scope.hpp"
 #include "Parser.hpp"
@@ -197,17 +198,32 @@ namespace Ace::Application
     {
         auto diagnostics = DiagnosticBag::CreateGlobal();
 
-        const auto& packageName = compilation->GetPackage().Name;
         const auto globalScope = compilation->GetGlobalScope();
 
         std::vector<std::shared_ptr<const ModSyntax>> asts{};
+
+        const auto stdFileBuffers = Std::CreateFileBuffers(compilation);
+        std::for_each(begin(stdFileBuffers), end(stdFileBuffers),
+        [&](const std::shared_ptr<const FileBuffer>& fileBuffer)
+        {
+            const auto optAST = diagnostics.Collect(
+                ParseAST(Std::GetName(), fileBuffer.get())
+            );
+            if (!optAST.has_value())
+            {
+                return;
+            }
+
+            asts.push_back(optAST.value());
+        });
+
         std::for_each(
             begin(compilation->GetPackage().SrcFileBuffers),
             end  (compilation->GetPackage().SrcFileBuffers),
-            [&](const FileBuffer* const srcFileBuffer)
+            [&](const FileBuffer* const fileBuffer)
             {
                 const auto optAST = diagnostics.Collect(
-                    ParseAST(srcFileBuffer)
+                    ParseAST(compilation->GetPackage().Name, fileBuffer)
                 );
                 if (!optAST.has_value())
                 {
