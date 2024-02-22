@@ -113,7 +113,7 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "expected a non-dynamic strong pointer"
+            "expected a non-trait strong pointer"
         );
 
         return group;
