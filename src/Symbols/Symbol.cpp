@@ -367,9 +367,18 @@ namespace Ace
             scopes.push_back(optScope.value());
         }
 
+        size_t startScopeIndex = 1;
+        if (
+            (rbegin(scopes) + 1)->get() ==
+            GetCompilation()->GetPackageBodyScope().get()
+            )
+        {
+            startScopeIndex++;
+        }
+
         std::string signature{};
         bool isFirstScope = true;
-        std::for_each(rbegin(scopes) + 1, rend(scopes),
+        std::for_each(rbegin(scopes) + startScopeIndex, rend(scopes),
         [&](const std::shared_ptr<Scope>& scope)
         {
             if (isFirstScope)
