@@ -7,7 +7,7 @@ namespace Ace
         UnaryPlus,
         UnaryNegation,
 
-        OneComplement,
+        NOT,
 
         Multiplication,
         Division,

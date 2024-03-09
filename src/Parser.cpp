@@ -331,7 +331,7 @@ namespace Ace
 
             case TokenKind::Tilde:
             {
-                return Op::OneComplement;
+                return Op::NOT;
             }
 
             default:

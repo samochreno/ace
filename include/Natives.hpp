@@ -189,7 +189,7 @@ namespace Ace
         NativeFunction i8_from_f64;
         NativeFunction i8_unary_plus;
         NativeFunction i8_unary_negation;
-        NativeFunction i8_one_complement;
+        NativeFunction i8_NOT;
         NativeFunction i8_multiplication;
         NativeFunction i8_division;
         NativeFunction i8_remainder;
@@ -219,7 +219,7 @@ namespace Ace
         NativeFunction i16_from_f64;
         NativeFunction i16_unary_plus;
         NativeFunction i16_unary_negation;
-        NativeFunction i16_one_complement;
+        NativeFunction i16_NOT;
         NativeFunction i16_multiplication;
         NativeFunction i16_division;
         NativeFunction i16_remainder;
@@ -249,7 +249,7 @@ namespace Ace
         NativeFunction i32_from_f64;
         NativeFunction i32_unary_plus;
         NativeFunction i32_unary_negation;
-        NativeFunction i32_one_complement;
+        NativeFunction i32_NOT;
         NativeFunction i32_multiplication;
         NativeFunction i32_division;
         NativeFunction i32_remainder;
@@ -279,7 +279,7 @@ namespace Ace
         NativeFunction i64_from_f64;
         NativeFunction i64_unary_plus;
         NativeFunction i64_unary_negation;
-        NativeFunction i64_one_complement;
+        NativeFunction i64_NOT;
         NativeFunction i64_multiplication;
         NativeFunction i64_division;
         NativeFunction i64_remainder;
@@ -309,7 +309,7 @@ namespace Ace
         NativeFunction u8_from_f64;
         NativeFunction u8_unary_plus;
         NativeFunction u8_unary_negation;
-        NativeFunction u8_one_complement;
+        NativeFunction u8_NOT;
         NativeFunction u8_multiplication;
         NativeFunction u8_division;
         NativeFunction u8_remainder;
@@ -339,7 +339,7 @@ namespace Ace
         NativeFunction u16_from_f64;
         NativeFunction u16_unary_plus;
         NativeFunction u16_unary_negation;
-        NativeFunction u16_one_complement;
+        NativeFunction u16_NOT;
         NativeFunction u16_multiplication;
         NativeFunction u16_division;
         NativeFunction u16_remainder;
@@ -369,7 +369,7 @@ namespace Ace
         NativeFunction u32_from_f64;
         NativeFunction u32_unary_plus;
         NativeFunction u32_unary_negation;
-        NativeFunction u32_one_complement;
+        NativeFunction u32_NOT;
         NativeFunction u32_multiplication;
         NativeFunction u32_division;
         NativeFunction u32_remainder;
@@ -399,7 +399,7 @@ namespace Ace
         NativeFunction u64_from_f64;
         NativeFunction u64_unary_plus;
         NativeFunction u64_unary_negation;
-        NativeFunction u64_one_complement;
+        NativeFunction u64_NOT;
         NativeFunction u64_multiplication;
         NativeFunction u64_division;
         NativeFunction u64_remainder;
@@ -429,7 +429,7 @@ namespace Ace
         NativeFunction int_from_f64;
         NativeFunction int_unary_plus;
         NativeFunction int_unary_negation;
-        NativeFunction int_one_complement;
+        NativeFunction int_NOT;
         NativeFunction int_multiplication;
         NativeFunction int_division;
         NativeFunction int_remainder;

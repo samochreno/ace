@@ -203,7 +203,7 @@ pub extern ::
 i8_unary_negation(value: i8): i8;
 
 pub extern ::
-i8_one_complement(value: i8): i8;
+i8_NOT(value: i8): i8;
 
 pub extern ::
 i8_multiplication(lhs: i8, rhs: i8): i8;
@@ -294,7 +294,7 @@ pub extern ::
 i16_unary_negation(value: i16): i16;
 
 pub extern ::
-i16_one_complement(value: i16): i16;
+i16_NOT(value: i16): i16;
 
 pub extern ::
 i16_multiplication(lhs: i16, rhs: i16): i16;
@@ -385,7 +385,7 @@ pub extern ::
 i32_unary_negation(value: i32): i32;
 
 pub extern ::
-i32_one_complement(value: i32): i32;
+i32_NOT(value: i32): i32;
 
 pub extern ::
 i32_multiplication(lhs: i32, rhs: i32): i32;
@@ -476,7 +476,7 @@ pub extern ::
 i64_unary_negation(value: i64): i64;
 
 pub extern ::
-i64_one_complement(value: i64): i64;
+i64_NOT(value: i64): i64;
 
 pub extern ::
 i64_multiplication(lhs: i64, rhs: i64): i64;
@@ -567,7 +567,7 @@ pub extern ::
 u8_unary_negation(value: u8): u8;
 
 pub extern ::
-u8_one_complement(value: u8): u8;
+u8_NOT(value: u8): u8;
 
 pub extern ::
 u8_multiplication(lhs: u8, rhs: u8): u8;
@@ -658,7 +658,7 @@ pub extern ::
 u16_unary_negation(value: u16): u16;
 
 pub extern ::
-u16_one_complement(value: u16): u16;
+u16_NOT(value: u16): u16;
 
 pub extern ::
 u16_multiplication(lhs: u16, rhs: u16): u16;
@@ -749,7 +749,7 @@ pub extern ::
 u32_unary_negation(value: u32): u32;
 
 pub extern ::
-u32_one_complement(value: u32): u32;
+u32_NOT(value: u32): u32;
 
 pub extern ::
 u32_multiplication(lhs: u32, rhs: u32): u32;
@@ -840,7 +840,7 @@ pub extern ::
 u64_unary_negation(value: u64): u64;
 
 pub extern ::
-u64_one_complement(value: u64): u64;
+u64_NOT(value: u64): u64;
 
 pub extern ::
 u64_multiplication(lhs: u64, rhs: u64): u64;
@@ -931,7 +931,7 @@ pub extern ::
 int_unary_negation(value: int): int;
 
 pub extern ::
-int_one_complement(value: int): int;
+int_NOT(value: int): int;
 
 pub extern ::
 int_multiplication(lhs: int, rhs: int): int;
