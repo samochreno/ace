@@ -57,7 +57,7 @@ namespace Ace
                 GetSrcLocation(),
                 checkedExpr
             ),
-    std::move(        diagnostics),
+            std::move(diagnostics),
         };
     }
 
