@@ -49,9 +49,6 @@ pub extern ::
 f32_from_f64(value: f64): f32;
 
 pub extern ::
-f32_unary_plus(value: f32): f32;
-
-pub extern ::
 f32_unary_negation(value: f32): f32;
 
 pub extern ::
@@ -120,9 +117,6 @@ f64_from_int(value: int): f64;
 
 pub extern ::
 f64_from_f32(value: f32): f64;
-
-pub extern ::
-f64_unary_plus(value: f64): f64;
 
 pub extern ::
 f64_unary_negation(value: f64): f64;
@@ -195,9 +189,6 @@ i8_from_f32(value: f32): i8;
 
 pub extern ::
 i8_from_f64(value: f64): i8;
-
-pub extern ::
-i8_unary_plus(value: i8): i8;
 
 pub extern ::
 i8_unary_negation(value: i8): i8;
@@ -288,9 +279,6 @@ pub extern ::
 i16_from_f64(value: f64): i16;
 
 pub extern ::
-i16_unary_plus(value: i16): i16;
-
-pub extern ::
 i16_unary_negation(value: i16): i16;
 
 pub extern ::
@@ -377,9 +365,6 @@ i32_from_f32(value: f32): i32;
 
 pub extern ::
 i32_from_f64(value: f64): i32;
-
-pub extern ::
-i32_unary_plus(value: i32): i32;
 
 pub extern ::
 i32_unary_negation(value: i32): i32;
@@ -470,9 +455,6 @@ pub extern ::
 i64_from_f64(value: f64): i64;
 
 pub extern ::
-i64_unary_plus(value: i64): i64;
-
-pub extern ::
 i64_unary_negation(value: i64): i64;
 
 pub extern ::
@@ -559,9 +541,6 @@ u8_from_f32(value: f32): u8;
 
 pub extern ::
 u8_from_f64(value: f64): u8;
-
-pub extern ::
-u8_unary_plus(value: u8): u8;
 
 pub extern ::
 u8_unary_negation(value: u8): u8;
@@ -652,9 +631,6 @@ pub extern ::
 u16_from_f64(value: f64): u16;
 
 pub extern ::
-u16_unary_plus(value: u16): u16;
-
-pub extern ::
 u16_unary_negation(value: u16): u16;
 
 pub extern ::
@@ -741,9 +717,6 @@ u32_from_f32(value: f32): u32;
 
 pub extern ::
 u32_from_f64(value: f64): u32;
-
-pub extern ::
-u32_unary_plus(value: u32): u32;
 
 pub extern ::
 u32_unary_negation(value: u32): u32;
@@ -834,9 +807,6 @@ pub extern ::
 u64_from_f64(value: f64): u64;
 
 pub extern ::
-u64_unary_plus(value: u64): u64;
-
-pub extern ::
 u64_unary_negation(value: u64): u64;
 
 pub extern ::
@@ -923,9 +893,6 @@ int_from_f32(value: f32): int;
 
 pub extern ::
 int_from_f64(value: f64): int;
-
-pub extern ::
-int_unary_plus(value: int): int;
 
 pub extern ::
 int_unary_negation(value: int): int;

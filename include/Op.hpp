@@ -4,7 +4,6 @@ namespace Ace
 {
     enum class Op
     {
-        UnaryPlus,
         UnaryNegation,
 
         NOT,

@@ -293,16 +293,6 @@ namespace Ace
         );
     }
 
-    static auto CreateUnaryPlusName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
-    {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_unary_plus"
-        );
-    }
-
     static auto CreateUnaryNegationName(
         const Natives& natives,
         const NativeType& type
@@ -550,32 +540,6 @@ namespace Ace
             {
                 compilation,
                 CreateFromName(natives, targetType, fromType),
-                NativeSymbolKind::Concrete,
-                std::move(blockEmitter),
-            };
-        }
-
-        static auto UnaryPlus(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
-        {
-            auto* const compilation = selfType.GetCompilation();
-
-            auto blockEmitter = [&](Emitter& emitter)
-            {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
-
-                emitter.GetBlock().Builder.CreateRet(
-                    emitter.EmitLoadArg(0, selfIRType)
-                );
-            };
-
-            return NativeFunction
-            {
-                compilation,
-                CreateUnaryPlusName(natives, selfType),
                 NativeSymbolKind::Concrete,
                 std::move(blockEmitter),
             };
@@ -1160,32 +1124,6 @@ namespace Ace
             {
                 compilation,
                 CreateFromName(natives, targetType, fromType),
-                NativeSymbolKind::Concrete,
-                std::move(blockEmitter),
-            };
-        }
-
-        static auto UnaryPlus(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
-        {
-            auto* const compilation = selfType.GetCompilation();
-
-            auto blockEmitter = [&](Emitter& emitter)
-            {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
-
-                emitter.GetBlock().Builder.CreateRet(
-                    emitter.EmitLoadArg(0, selfIRType)
-                );
-            };
-
-            return NativeFunction
-            {
-                compilation,
-                CreateUnaryPlusName(natives, selfType),
                 NativeSymbolKind::Concrete,
                 std::move(blockEmitter),
             };
@@ -2122,7 +2060,6 @@ namespace Ace
         i8_from_int{ I::FromInt(*this, Int8, Int) },
         i8_from_f32{ I::FromFloat(*this, Int8, Float32) },
         i8_from_f64{ I::FromFloat(*this, Int8, Float64) },
-        i8_unary_plus{ I::UnaryPlus(*this, Int8) },
         i8_unary_negation{ I::UnaryNegation(*this, Int8) },
         i8_NOT{ I::NOT(*this, Int8) },
         i8_multiplication{ I::Multiplication(*this, Int8) },
@@ -2152,7 +2089,6 @@ namespace Ace
         i16_from_int{ I::FromInt(*this, Int16, Int) },
         i16_from_f32{ I::FromFloat(*this, Int16, Float32) },
         i16_from_f64{ I::FromFloat(*this, Int16, Float64) },
-        i16_unary_plus{ I::UnaryPlus(*this, Int16) },
         i16_unary_negation{ I::UnaryNegation(*this, Int16) },
         i16_NOT{ I::NOT(*this, Int16) },
         i16_multiplication{ I::Multiplication(*this, Int16) },
@@ -2182,7 +2118,6 @@ namespace Ace
         i32_from_int{ I::FromInt(*this, Int32, Int) },
         i32_from_f32{ I::FromFloat(*this, Int32, Float32) },
         i32_from_f64{ I::FromFloat(*this, Int32, Float64) },
-        i32_unary_plus{ I::UnaryPlus(*this, Int32) },
         i32_unary_negation{ I::UnaryNegation(*this, Int32) },
         i32_NOT{ I::NOT(*this, Int32) },
         i32_multiplication{ I::Multiplication(*this, Int32) },
@@ -2212,7 +2147,6 @@ namespace Ace
         i64_from_int{ I::FromInt(*this, Int64, Int) },
         i64_from_f32{ I::FromFloat(*this, Int64, Float32) },
         i64_from_f64{ I::FromFloat(*this, Int64, Float64) },
-        i64_unary_plus{ I::UnaryPlus(*this, Int64) },
         i64_unary_negation{ I::UnaryNegation(*this, Int64) },
         i64_NOT{ I::NOT(*this, Int64) },
         i64_multiplication{ I::Multiplication(*this, Int64) },
@@ -2242,7 +2176,6 @@ namespace Ace
         u8_from_int{ I::FromInt(*this, UInt8, Int) },
         u8_from_f32{ I::FromFloat(*this, UInt8, Float32) },
         u8_from_f64{ I::FromFloat(*this, UInt8, Float64) },
-        u8_unary_plus{ I::UnaryPlus(*this, UInt8) },
         u8_unary_negation{ I::UnaryNegation(*this, UInt8) },
         u8_NOT{ I::NOT(*this, UInt8) },
         u8_multiplication{ I::Multiplication(*this, UInt8) },
@@ -2272,7 +2205,6 @@ namespace Ace
         u16_from_int{ I::FromInt(*this, UInt16, Int) },
         u16_from_f32{ I::FromFloat(*this, UInt16, Float32) },
         u16_from_f64{ I::FromFloat(*this, UInt16, Float64) },
-        u16_unary_plus{ I::UnaryPlus(*this, UInt16) },
         u16_unary_negation{ I::UnaryNegation(*this, UInt16) },
         u16_NOT{ I::NOT(*this, UInt16) },
         u16_multiplication{ I::Multiplication(*this, UInt16) },
@@ -2302,7 +2234,6 @@ namespace Ace
         u32_from_int{ I::FromInt(*this, UInt32, Int) },
         u32_from_f32{ I::FromFloat(*this, UInt32, Float32) },
         u32_from_f64{ I::FromFloat(*this, UInt32, Float64) },
-        u32_unary_plus{ I::UnaryPlus(*this, UInt32) },
         u32_unary_negation{ I::UnaryNegation(*this, UInt32) },
         u32_NOT{ I::NOT(*this, UInt32) },
         u32_multiplication{ I::Multiplication(*this, UInt32) },
@@ -2332,7 +2263,6 @@ namespace Ace
         u64_from_int{ I::FromInt(*this, UInt64, Int) },
         u64_from_f32{ I::FromFloat(*this, UInt64, Float32) },
         u64_from_f64{ I::FromFloat(*this, UInt64, Float64) },
-        u64_unary_plus{ I::UnaryPlus(*this, UInt64) },
         u64_unary_negation{ I::UnaryNegation(*this, UInt64) },
         u64_NOT{ I::NOT(*this, UInt64) },
         u64_multiplication{ I::Multiplication(*this, UInt64) },
@@ -2362,7 +2292,6 @@ namespace Ace
         int_from_u64{ I::FromInt(*this, Int, UInt64) },
         int_from_f32{ I::FromFloat(*this, Int, Float32) },
         int_from_f64{ I::FromFloat(*this, Int, Float64) },
-        int_unary_plus{ I::UnaryPlus(*this, Int) },
         int_unary_negation{ I::UnaryNegation(*this, Int) },
         int_NOT{ I::NOT(*this, Int) },
         int_multiplication{ I::Multiplication(*this, Int) },
@@ -2409,7 +2338,6 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             }
         },
-        f32_unary_plus{ F::UnaryPlus(*this, Float32) },
         f32_unary_negation{ F::UnaryNegation(*this, Float32) },
         f32_multiplication{ F::Multiplication(*this, Float32) },
         f32_division{ F::Division(*this, Float32) },
@@ -2450,7 +2378,6 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             }
         },
-        f64_unary_plus{ F::UnaryPlus(*this, Float64) },
         f64_unary_negation{ F::UnaryNegation(*this, Float64) },
         f64_multiplication{ F::Multiplication(*this, Float64) },
         f64_division{ F::Division(*this, Float64) },
@@ -2684,7 +2611,6 @@ namespace Ace
                     &i8_from_int,
                     &i8_from_f32,
                     &i8_from_f64,
-                    &i8_unary_plus,
                     &i8_unary_negation,
                     &i8_NOT,
                     &i8_multiplication,
@@ -2714,7 +2640,6 @@ namespace Ace
                     &i16_from_int,
                     &i16_from_f32,
                     &i16_from_f64,
-                    &i16_unary_plus,
                     &i16_unary_negation,
                     &i16_NOT,
                     &i16_multiplication,
@@ -2744,7 +2669,6 @@ namespace Ace
                     &i32_from_int,
                     &i32_from_f32,
                     &i32_from_f64,
-                    &i32_unary_plus,
                     &i32_unary_negation,
                     &i32_NOT,
                     &i32_multiplication,
@@ -2774,7 +2698,6 @@ namespace Ace
                     &i64_from_int,
                     &i64_from_f32,
                     &i64_from_f64,
-                    &i64_unary_plus,
                     &i64_unary_negation,
                     &i64_NOT,
                     &i64_multiplication,
@@ -2804,7 +2727,6 @@ namespace Ace
                     &u8_from_int,
                     &u8_from_f32,
                     &u8_from_f64,
-                    &u8_unary_plus,
                     &u8_unary_negation,
                     &u8_NOT,
                     &u8_multiplication,
@@ -2834,7 +2756,6 @@ namespace Ace
                     &u16_from_int,
                     &u16_from_f32,
                     &u16_from_f64,
-                    &u16_unary_plus,
                     &u16_unary_negation,
                     &u16_NOT,
                     &u16_multiplication,
@@ -2864,7 +2785,6 @@ namespace Ace
                     &u32_from_int,
                     &u32_from_f32,
                     &u32_from_f64,
-                    &u32_unary_plus,
                     &u32_unary_negation,
                     &u32_NOT,
                     &u32_multiplication,
@@ -2894,7 +2814,6 @@ namespace Ace
                     &u64_from_int,
                     &u64_from_f32,
                     &u64_from_f64,
-                    &u64_unary_plus,
                     &u64_unary_negation,
                     &u64_NOT,
                     &u64_multiplication,
@@ -2924,7 +2843,6 @@ namespace Ace
                     &int_from_u64,
                     &int_from_f32,
                     &int_from_f64,
-                    &int_unary_plus,
                     &int_unary_negation,
                     &int_NOT,
                     &int_multiplication,
@@ -2954,7 +2872,6 @@ namespace Ace
                     &f32_from_u64,
                     &f32_from_int,
                     &f32_from_f64,
-                    &f32_unary_plus,
                     &f32_unary_negation,
                     &f32_multiplication,
                     &f32_division,
@@ -2978,7 +2895,6 @@ namespace Ace
                     &f64_from_u64,
                     &f64_from_int,
                     &f64_from_f32,
-                    &f64_unary_plus,
                     &f64_unary_negation,
                     &f64_multiplication,
                     &f64_division,
@@ -3225,69 +3141,58 @@ namespace Ace
 
                 map[Int8.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, i8_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, i8_unary_negation.GetSymbol() },
                     { Op::NOT, i8_NOT.GetSymbol() },
                 };
                 map[Int16.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, i16_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, i16_unary_negation.GetSymbol() },
                     { Op::NOT, i16_NOT.GetSymbol() },
                 };
                 map[Int32.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, i32_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, i32_unary_negation.GetSymbol() },
                     { Op::NOT, i32_NOT.GetSymbol() },
                 };
                 map[Int64.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, i64_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, i64_unary_negation.GetSymbol() },
                     { Op::NOT, i64_NOT.GetSymbol() },
                 };
 
                 map[UInt8.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, u8_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, u8_unary_negation.GetSymbol() },
                     { Op::NOT, u8_NOT.GetSymbol() },
                 };
                 map[UInt16.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, u16_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, u16_unary_negation.GetSymbol() },
                     { Op::NOT, u16_NOT.GetSymbol() },
                 };
                 map[UInt32.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, u32_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, u32_unary_negation.GetSymbol() },
                     { Op::NOT, u32_NOT.GetSymbol() },
                 };
                 map[UInt64.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, u64_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, u64_unary_negation.GetSymbol() },
                     { Op::NOT, u64_NOT.GetSymbol() },
                 };
 
                 map[Int.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, int_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, int_unary_negation.GetSymbol() },
                     { Op::NOT, int_NOT.GetSymbol() },
                 };
 
                 map[Float32.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, f32_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, f32_unary_negation.GetSymbol() },
                 };
                 map[Float64.GetSymbol()] =
                 {
-                    { Op::UnaryPlus, f64_unary_plus.GetSymbol() },
                     { Op::UnaryNegation, f64_unary_negation.GetSymbol() },
                 };
 

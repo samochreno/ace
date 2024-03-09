@@ -187,7 +187,6 @@ namespace Ace
         NativeFunction i8_from_int;
         NativeFunction i8_from_f32;
         NativeFunction i8_from_f64;
-        NativeFunction i8_unary_plus;
         NativeFunction i8_unary_negation;
         NativeFunction i8_NOT;
         NativeFunction i8_multiplication;
@@ -217,7 +216,6 @@ namespace Ace
         NativeFunction i16_from_int;
         NativeFunction i16_from_f32;
         NativeFunction i16_from_f64;
-        NativeFunction i16_unary_plus;
         NativeFunction i16_unary_negation;
         NativeFunction i16_NOT;
         NativeFunction i16_multiplication;
@@ -247,7 +245,6 @@ namespace Ace
         NativeFunction i32_from_int;
         NativeFunction i32_from_f32;
         NativeFunction i32_from_f64;
-        NativeFunction i32_unary_plus;
         NativeFunction i32_unary_negation;
         NativeFunction i32_NOT;
         NativeFunction i32_multiplication;
@@ -277,7 +274,6 @@ namespace Ace
         NativeFunction i64_from_int;
         NativeFunction i64_from_f32;
         NativeFunction i64_from_f64;
-        NativeFunction i64_unary_plus;
         NativeFunction i64_unary_negation;
         NativeFunction i64_NOT;
         NativeFunction i64_multiplication;
@@ -307,7 +303,6 @@ namespace Ace
         NativeFunction u8_from_int;
         NativeFunction u8_from_f32;
         NativeFunction u8_from_f64;
-        NativeFunction u8_unary_plus;
         NativeFunction u8_unary_negation;
         NativeFunction u8_NOT;
         NativeFunction u8_multiplication;
@@ -337,7 +332,6 @@ namespace Ace
         NativeFunction u16_from_int;
         NativeFunction u16_from_f32;
         NativeFunction u16_from_f64;
-        NativeFunction u16_unary_plus;
         NativeFunction u16_unary_negation;
         NativeFunction u16_NOT;
         NativeFunction u16_multiplication;
@@ -367,7 +361,6 @@ namespace Ace
         NativeFunction u32_from_int;
         NativeFunction u32_from_f32;
         NativeFunction u32_from_f64;
-        NativeFunction u32_unary_plus;
         NativeFunction u32_unary_negation;
         NativeFunction u32_NOT;
         NativeFunction u32_multiplication;
@@ -397,7 +390,6 @@ namespace Ace
         NativeFunction u64_from_int;
         NativeFunction u64_from_f32;
         NativeFunction u64_from_f64;
-        NativeFunction u64_unary_plus;
         NativeFunction u64_unary_negation;
         NativeFunction u64_NOT;
         NativeFunction u64_multiplication;
@@ -427,7 +419,6 @@ namespace Ace
         NativeFunction int_from_u64;
         NativeFunction int_from_f32;
         NativeFunction int_from_f64;
-        NativeFunction int_unary_plus;
         NativeFunction int_unary_negation;
         NativeFunction int_NOT;
         NativeFunction int_multiplication;
@@ -457,7 +448,6 @@ namespace Ace
         NativeFunction f32_from_u64;
         NativeFunction f32_from_int;
         NativeFunction f32_from_f64;
-        NativeFunction f32_unary_plus;
         NativeFunction f32_unary_negation;
         NativeFunction f32_multiplication;
         NativeFunction f32_division;
@@ -481,7 +471,6 @@ namespace Ace
         NativeFunction f64_from_u64;
         NativeFunction f64_from_int;
         NativeFunction f64_from_f32;
-        NativeFunction f64_unary_plus;
         NativeFunction f64_unary_negation;
         NativeFunction f64_multiplication;
         NativeFunction f64_division;

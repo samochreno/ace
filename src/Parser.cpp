@@ -319,11 +319,6 @@ namespace Ace
     {
         switch (op)
         {
-            case TokenKind::Plus:
-            {
-                return Op::UnaryPlus;
-            }
-
             case TokenKind::Minus:
             {
                 return Op::UnaryNegation;
