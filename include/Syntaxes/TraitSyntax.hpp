@@ -9,6 +9,7 @@
 #include "Syntaxes/PrototypeSyntax.hpp"
 #include "Syntaxes/TypeParamSyntax.hpp"
 #include "Syntaxes/TypeReimportSyntax.hpp"
+#include "Syntaxes/SupertraitSyntax.hpp"
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
@@ -33,7 +34,8 @@ namespace Ace
             const std::shared_ptr<const TraitSelfSyntax>& self,
             const std::vector<std::shared_ptr<const PrototypeSyntax>>& prototypes,
             const std::vector<std::shared_ptr<const TypeParamSyntax>>& typeParams,
-            const std::vector<std::shared_ptr<const TypeReimportSyntax>>& typeParamReimports 
+            const std::vector<std::shared_ptr<const TypeReimportSyntax>>& typeParamReimports,
+            const std::vector<std::shared_ptr<const SupertraitSyntax>>& supertraits
         );
         virtual ~TraitSyntax() = default;
 
@@ -56,5 +58,6 @@ namespace Ace
         std::vector<std::shared_ptr<const PrototypeSyntax>> m_Prototypes{};
         std::vector<std::shared_ptr<const TypeParamSyntax>> m_TypeParams{};
         std::vector<std::shared_ptr<const TypeReimportSyntax>> m_TypeParamReimports{};
+        std::vector<std::shared_ptr<const SupertraitSyntax>> m_Supertraits{};
     };
 }

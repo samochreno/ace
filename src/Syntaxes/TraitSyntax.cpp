@@ -26,7 +26,8 @@ namespace Ace
         const std::shared_ptr<const TraitSelfSyntax>& self,
         const std::vector<std::shared_ptr<const PrototypeSyntax>>& prototypes,
         const std::vector<std::shared_ptr<const TypeParamSyntax>>& typeParams,
-        const std::vector<std::shared_ptr<const TypeReimportSyntax>>& typeParamReimports 
+        const std::vector<std::shared_ptr<const TypeReimportSyntax>>& typeParamReimports,
+        const std::vector<std::shared_ptr<const SupertraitSyntax>>& supertraits
     ) : m_SrcLocation{ srcLocation },
         m_BodyScope{ bodyScope },
         m_PrototypeScope{ prototypeScope },
@@ -36,7 +37,8 @@ namespace Ace
         m_Self{ self },
         m_Prototypes{ prototypes },
         m_TypeParams{ typeParams },
-        m_TypeParamReimports{ typeParamReimports }
+        m_TypeParamReimports{ typeParamReimports },
+        m_Supertraits{ supertraits }
     {
     }
 
@@ -58,6 +60,7 @@ namespace Ace
             .Collect(m_Prototypes)
             .Collect(m_TypeParams)
             .Collect(m_TypeParamReimports)
+            .Collect(m_Supertraits)
             .Build();
     }
 

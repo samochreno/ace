@@ -106,6 +106,21 @@ namespace Ace
         return group;
     }
 
+    auto CreateExpectedTraitError(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            "expected a trait"
+        );
+
+        return group;
+    }
+
     auto CreateEmptyTypeParamsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup
@@ -270,14 +285,14 @@ namespace Ace
     }
 
     auto CreateEmptyConstraintsError(
-        const Token& whereToken
+        const SrcLocation& srcLocation
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
-            whereToken.SrcLocation,
+            srcLocation,
             "empty constraint list"
         );
 

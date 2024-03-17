@@ -29,6 +29,7 @@
 #include "Diagnoses/InvalidTraitImplDiagnosis.hpp"
 #include "Diagnoses/OverlappingInherentImplDiagnosis.hpp"
 #include "Diagnoses/ConcreteConstraintDiagnosis.hpp"
+#include "Diagnoses/UnimplementedSupertraitDiagnosis.hpp"
 
 namespace Ace::Application
 {
@@ -261,6 +262,7 @@ namespace Ace::Application
         diagnostics.Collect(DiagnoseInvalidTraitImpls(compilation));
         diagnostics.Collect(DiagnoseOverlappingInherentImpls(compilation));
         diagnostics.Collect(DiagnoseConcreteConstraints(compilation));
+        diagnostics.Collect(DiagnoseUnimplementedSupertraits(compilation));
 
         if (diagnostics.HasErrors())
         {
@@ -324,7 +326,7 @@ namespace Ace::Application
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
 
-        if (!Compile(args))
+        if (!Compile(std::vector<std::string_view>{ "-oexample/build", "example/package.json" }))
         {
             return;
         }

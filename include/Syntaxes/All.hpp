@@ -44,6 +44,7 @@
 #include "Syntaxes/Stmts/VarStmtSyntax.hpp"
 #include "Syntaxes/Stmts/WhileStmtSyntax.hpp"
 #include "Syntaxes/StructSyntax.hpp"
+#include "Syntaxes/SupertraitSyntax.hpp"
 #include "Syntaxes/Syntax.hpp"
 #include "Syntaxes/TraitSyntax.hpp"
 #include "Syntaxes/TypeParamSyntax.hpp"

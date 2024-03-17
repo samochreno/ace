@@ -78,7 +78,10 @@ vtbl_lookup(): int {
     ret dyn_locked.value();
 }
 
-Dyn: trait {
+Pes: trait {
+}
+
+Dyn: trait: Pes {
     *self ::
     ten(): int;
 
@@ -105,6 +108,8 @@ impl Dyn for int {
         ret self;
     }
 }
+
+impl Pes for int { }
 
 dyn_trait_dispatch(): int {
     dyn: *Dyn = box 4;

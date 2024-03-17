@@ -1042,7 +1042,7 @@ namespace Ace
         );
     }
 
-    static auto CollectDynDispatchableTraitPrototypeSymbol(
+    static auto CollectDynDispatchableTraitPrototypeSymbols(
         TraitTypeSymbol* const traitSymbol
     ) -> std::vector<PrototypeSymbol*>
     {
@@ -1055,7 +1055,20 @@ namespace Ace
             return prototypeSymbol->IsDynDispatchable();
         });
 
-        // TODO: Collect super traits' prototypes
+        const auto supertraitSymbols = traitSymbol->CollectSupertraits();
+        std::for_each(begin(supertraitSymbols), end(supertraitSymbols),
+        [&](SupertraitSymbol* const supertraitSymbol)
+        {
+            auto* const supertraitTraitSymbol = supertraitSymbol->GetTrait();
+            const auto supertraitPrototypeSymbols =
+                CollectDynDispatchableTraitPrototypeSymbols(supertraitTraitSymbol);
+
+            symbols.insert(
+                end(symbols),
+                begin(supertraitPrototypeSymbols),
+                end  (supertraitPrototypeSymbols)
+            );
+        });
 
         return symbols;
     }
@@ -1074,7 +1087,7 @@ namespace Ace
     auto Emitter::EmitVtbl(TraitImplSymbol* const implSymbol) -> void
     {
         const auto prototypeSymbols =
-            CollectDynDispatchableTraitPrototypeSymbol(implSymbol->GetTrait());
+            CollectDynDispatchableTraitPrototypeSymbols(implSymbol->GetTrait());
 
         auto* const type =
             llvm::ArrayType::get(GetPtrType(), prototypeSymbols.size());
@@ -1260,7 +1273,7 @@ namespace Ace
         PrototypeSymbol* const symbol
     ) -> size_t
     {
-        const auto symbols = CollectDynDispatchableTraitPrototypeSymbol(
+        const auto symbols = CollectDynDispatchableTraitPrototypeSymbols(
             symbol->GetParentTrait()
         );
         

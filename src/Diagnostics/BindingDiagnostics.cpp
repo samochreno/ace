@@ -73,6 +73,21 @@ namespace Ace
         return group;
     }
 
+    auto CreateSupertraitCausesCycleError(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            "supertrait causes a cycle"
+        );
+
+        return group;
+    }
+
     auto CreateUnableToDeduceTypeArgsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup

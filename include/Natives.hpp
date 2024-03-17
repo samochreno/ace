@@ -166,6 +166,18 @@ namespace Ace
         NativeType DynStrongPtr;
         NativeType DynStrongPtrData;
 
+        NativeType Minus;
+        NativeType Multiply;
+        NativeType Divide;
+        NativeType Remainder;
+        NativeType Add;
+        NativeType Subtract;
+        NativeType Equal;
+        NativeType AND;
+        NativeType OR;
+        NativeType XOR;
+        NativeType Lifetime;
+
         NativeFunction print_int;
         NativeFunction print_ptr;
 

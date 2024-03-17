@@ -27,6 +27,10 @@ namespace Ace
         const Token& unexpectedToken
     ) -> DiagnosticGroup;
 
+    auto CreateExpectedTraitError(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup;
+
     auto CreateEmptyTypeParamsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
@@ -69,6 +73,6 @@ namespace Ace
     ) -> DiagnosticGroup;
 
     auto CreateEmptyConstraintsError(
-        const Token& whereToken
+        const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 }

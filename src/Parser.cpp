@@ -2345,33 +2345,12 @@ namespace Ace
         };
     }
 
-    static auto ParseConstraint(
+    static auto ParseTraitNames(
         Parser& parser,
         const std::shared_ptr<Scope>& scope
-    ) -> Expected<std::shared_ptr<const ConstraintSyntax>>
+    ) -> Expected<std::vector<SymbolName>>
     {
         auto diagnostics = DiagnosticBag::Create();
-
-        const auto beginSrcLocation = parser.GetSrcLocation();
-
-        const auto optTypeName = diagnostics.Collect(
-            ParseSymbolName(parser, scope)
-        );
-        if (!optTypeName.has_value())
-        {
-            return std::move(diagnostics);
-        }
-
-        if (parser.Peek() != TokenKind::Colon)
-        {
-            diagnostics.Add(CreateUnexpectedTokenError(
-                parser.Peek(),
-                TokenKind::Colon
-            ));
-            return std::move(diagnostics);
-        }
-
-        parser.Eat();
 
         std::vector<SymbolName> traitNames{};
         bool isFirstTraitName = true;
@@ -2423,13 +2402,61 @@ namespace Ace
             );
         }
 
+        if (traitNames.empty())
+        {
+            const auto srcLocation = SrcLocation::CreateInterstice(
+                parser.GetLastSrcLocation(),
+                parser.Peek().SrcLocation
+            );
+            diagnostics.Add(CreateExpectedTraitError(srcLocation));
+        }
+
+        return Expected{ std::move(traitNames), std::move(diagnostics) };
+    }
+
+    static auto ParseConstraint(
+        Parser& parser,
+        const std::shared_ptr<Scope>& scope
+    ) -> Expected<std::shared_ptr<const ConstraintSyntax>>
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        const auto beginSrcLocation = parser.GetSrcLocation();
+
+        const auto optTypeName = diagnostics.Collect(
+            ParseSymbolName(parser, scope)
+        );
+        if (!optTypeName.has_value())
+        {
+            return std::move(diagnostics);
+        }
+
+        if (parser.Peek() != TokenKind::Colon)
+        {
+            diagnostics.Add(CreateUnexpectedTokenError(
+                parser.Peek(),
+                TokenKind::Colon
+            ));
+            return std::move(diagnostics);
+        }
+
+        parser.Eat();
+
+        const auto optTraitNames = diagnostics.Collect(
+            ParseTraitNames(parser, scope)
+        );
+        if (!optTraitNames.has_value())
+        {
+            return std::move(diagnostics);
+        }
+
         return Expected
         {
             std::make_shared<const ConstraintSyntax>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
                 scope,
                 optTypeName.value(),
-                traitNames
+                optTraitNames.value()
             ),
             std::move(diagnostics),
         };
@@ -2470,7 +2497,13 @@ namespace Ace
 
         if (optConstraints.value().empty())
         {
-            diagnostics.Add(CreateEmptyConstraintsError(whereToken));
+            const auto constraintsSrcLocation = SrcLocation::CreateInterstice(
+                whereToken.SrcLocation,
+                parser.Peek().SrcLocation
+            );
+            diagnostics.Add(CreateEmptyConstraintsError(
+                constraintsSrcLocation
+            ));
         }
 
         if (!optConstraints.value().empty() && header.TypeParams.empty())
@@ -5235,6 +5268,37 @@ namespace Ace
 
         parser.Eat();
 
+        std::vector<SymbolName> supertraitNames{};
+        if (parser.Peek() == TokenKind::Colon)
+        {
+            parser.Eat();
+
+            const auto optSupertraitNames = diagnostics.Collect(
+                ParseTraitNames(parser, scope)
+            );
+            if (!optSupertraitNames.has_value())
+            {
+                return std::move(diagnostics);
+            }
+
+            supertraitNames = std::move(optSupertraitNames.value());
+        }
+
+        std::vector<std::shared_ptr<const SupertraitSyntax>> supertraits{};
+        std::transform(
+            begin(supertraitNames),
+            end  (supertraitNames),
+            back_inserter(supertraits),
+            [&](const SymbolName& name)
+            {
+                return std::make_shared<const SupertraitSyntax>(
+                    name,
+                    header.Name,
+                    header.BodyScope
+                );
+            }
+        );
+
         if (parser.Peek() != TokenKind::OpenBrace)
         {
             diagnostics.Add(CreateUnexpectedTokenError(
@@ -5319,7 +5383,8 @@ namespace Ace
                 self,
                 prototypes,
                 header.TypeParams,
-                typeParamReimports
+                typeParamReimports,
+                supertraits
             ),
             std::move(diagnostics),
         };

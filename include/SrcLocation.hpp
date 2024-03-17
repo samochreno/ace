@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string_view>
+#include "Assert.hpp"
 
 namespace Ace
 {
@@ -16,38 +17,19 @@ namespace Ace
             const ISrcBuffer* const buffer,
             const std::string_view::const_iterator characterBeginIt,
             const std::string_view::const_iterator characterEndIt
-        ) : Buffer{ buffer },
-            CharacterBeginIterator{ characterBeginIt },
-            CharacterEndIterator{ characterEndIt }
-        {
-        }
+        );
         SrcLocation(
             const SrcLocation& first,
             const SrcLocation& last
-        ) : Buffer{ first.Buffer },
-            CharacterBeginIterator{ first.CharacterBeginIterator },
-            CharacterEndIterator{ last.CharacterEndIterator }
-        {
-        }
+        );
 
-        auto CreateFirst() const -> SrcLocation
-        {
-            return
-            {
-                Buffer,
-                CharacterBeginIterator,
-                CharacterBeginIterator + 1,
-            };
-        }
-        auto CreateLast() const -> SrcLocation
-        {
-            return
-            {
-                Buffer,
-                CharacterEndIterator - 1,
-                CharacterEndIterator,
-            };
-        }
+        auto CreateFirst() const -> SrcLocation;
+        auto CreateLast()  const -> SrcLocation;
+
+        static auto CreateInterstice(
+            const SrcLocation& first,
+            const SrcLocation& last
+        ) -> SrcLocation;
 
         const ISrcBuffer* Buffer{};
         std::string_view::const_iterator CharacterBeginIterator{};

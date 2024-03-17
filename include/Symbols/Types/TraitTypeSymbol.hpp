@@ -13,6 +13,8 @@
 
 namespace Ace
 {
+    class SupertraitSymbol;
+
     class TraitTypeSymbol : public virtual ITypeSymbol
     {
     public:
@@ -42,6 +44,8 @@ namespace Ace
         auto GetPrototypeScope() const -> const std::shared_ptr<Scope>&;
         auto CollectPrototypes() const -> std::vector<PrototypeSymbol*>;
         auto CollectSelf() const -> TraitSelfTypeSymbol*;
+
+        auto CollectSupertraits() const -> std::vector<SupertraitSymbol*>;
 
     private:
         std::shared_ptr<Scope> m_BodyScope{};

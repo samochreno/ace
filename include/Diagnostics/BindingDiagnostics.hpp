@@ -24,6 +24,10 @@ namespace Ace
         FieldVarSymbol* const fieldSymbol
     ) -> DiagnosticGroup;
 
+    auto CreateSupertraitCausesCycleError(
+        const SrcLocation& srcLocation
+    ) -> DiagnosticGroup;
+
     auto CreateUnableToDeduceTypeArgsError(
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup;

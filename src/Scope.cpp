@@ -810,7 +810,7 @@ namespace Ace
             {
                 return
                     DoPlaceholdersOverlap(trait, impl->GetTrait()) &&
-                    DoPlaceholdersOverlap(type, impl->GetType());
+                    DoPlaceholdersOverlap(type,  impl->GetType());
             });
         });
 

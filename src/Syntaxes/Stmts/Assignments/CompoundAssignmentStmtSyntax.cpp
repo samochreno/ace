@@ -7,8 +7,8 @@
 #include "Scope.hpp"
 #include "Op.hpp"
 #include "Diagnostic.hpp"
-#include "Diagnostics/BindingDiagnostics.hpp"
 #include "Semas/Stmts/Assignments/CompoundAssignmentStmtSema.hpp"
+#include "OpResolution.hpp"
 
 namespace Ace
 {
@@ -46,65 +46,6 @@ namespace Ace
             .Build();
     }
 
-    static auto GetOpSymbol(
-        ITypeSymbol* const typeSymbol,
-        const Op op
-    ) -> std::optional<FunctionSymbol*>
-    {
-        auto* const compilation = typeSymbol->GetCompilation();
-
-        const auto& opMap = compilation->GetNatives().GetBinaryOpMap();
-
-        const auto typeOpsMapIt = opMap.find(
-            typeSymbol->GetWithoutRef()->GetUnaliasedType()
-        );
-        if (typeOpsMapIt == end(opMap))
-        {
-            return std::nullopt;
-        }
-
-        const auto& typeOpMap = typeOpsMapIt->second;
-
-        const auto opSymbolIt = typeOpMap.find(op);
-        if (opSymbolIt == end(typeOpMap))
-        {
-            return std::nullopt;
-        }
-
-        return opSymbolIt->second;
-    }
-
-    static auto ResolveOpSymbol(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<Scope>& scope,
-        ITypeSymbol* const lhsTypeSymbol,
-        ITypeSymbol* const rhsTypeSymbol,
-        const Op op
-    ) -> Diagnosed<FunctionSymbol*>
-    {
-        auto diagnostics = DiagnosticBag::Create();
-
-        std::optional<FunctionSymbol*> optSymbol{};
-        if (!lhsTypeSymbol->IsError() && !rhsTypeSymbol->IsError())
-        {
-            optSymbol = GetOpSymbol(lhsTypeSymbol, op);
-            if (!optSymbol.has_value())
-            {
-                diagnostics.Add(CreateUndeclaredBinaryOpError(
-                    srcLocation,
-                    lhsTypeSymbol,
-                    rhsTypeSymbol
-                ));
-            }
-        }
-
-        auto* const symbol = optSymbol.value_or(
-            scope->GetCompilation()->GetErrorSymbols().GetFunction()
-        );
-
-        return Diagnosed{ symbol, std::move(diagnostics) };
-    }
-
     auto CompoundAssignmentStmtSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const CompoundAssignmentStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
@@ -116,16 +57,21 @@ namespace Ace
             m_RHSExpr->CreateExprSema()
         );
 
-        auto* const lhsTypeSymbol = lhsExprSema->GetTypeInfo().Symbol;
-        auto* const rhsTypeSymbol = rhsExprSema->GetTypeInfo().Symbol;
+        const std::vector<TypeInfo> argTypeInfos
+        {
+            lhsExprSema->GetTypeInfo(),
+            rhsExprSema->GetTypeInfo(),
+        };
 
-        const auto opSymbol = diagnostics.Collect(ResolveOpSymbol(
+        const auto opSymbol = diagnostics.Collect(ResolveBinaryOpSymbol(
             m_OpSrcLocation,
             GetScope(),
-            lhsTypeSymbol,
-            rhsTypeSymbol,
+            std::vector{ argTypeInfos.front().Symbol },
+            argTypeInfos,
             m_Op
-        ));
+        )).value_or(
+            GetCompilation()->GetErrorSymbols().GetFunction()
+        );
 
         return Diagnosed
         {

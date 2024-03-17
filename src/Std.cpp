@@ -84,6 +84,48 @@ f32_equals(lhs: f32, rhs: f32): bool;
 pub extern ::
 f32_not_equals(lhs: f32, rhs: f32): bool;
 
+impl Minus for f32 {
+    self ::
+    minus(): Self {
+        ret f32_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for f32 {
+    self ::
+    multiply(other: &Self): Self {
+        ret f32_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for f32 {
+    self ::
+    divide(other: &Self): Self {
+        ret f32_division(self, other);
+    }
+}
+
+impl Remainder[Self] for f32 {
+    self ::
+    remainder(other: &Self): Self {
+        ret f32_remainder(self, other);
+    }
+}
+
+impl Add[Self] for f32 {
+    self ::
+    add(other: &Self): Self {
+        ret f32_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for f32 {
+    self ::
+    subtract(other: &Self): Self {
+        ret f32_subtraction(self, other);
+    }
+}
+
 pub ::
 Float64: struct { 
 }
@@ -153,6 +195,48 @@ f64_equals(lhs: f64, rhs: f64): bool;
 
 pub extern ::
 f64_not_equals(lhs: f64, rhs: f64): bool;
+
+impl Minus for f64 {
+    self ::
+    minus(): Self {
+        ret f64_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for f64 {
+    self ::
+    multiply(other: &Self): Self {
+        ret f64_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for f64 {
+    self ::
+    divide(other: &Self): Self {
+        ret f64_division(self, other);
+    }
+}
+
+impl Remainder[Self] for f64 {
+    self ::
+    remainder(other: &Self): Self {
+        ret f64_remainder(self, other);
+    }
+}
+
+impl Add[Self] for f64 {
+    self ::
+    add(other: &Self): Self {
+        ret f64_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for f64 {
+    self ::
+    subtract(other: &Self): Self {
+        ret f64_subtraction(self, other);
+    }
+}
 )";
 
 static inline constexpr const char* int_ = R"(
@@ -244,6 +328,69 @@ i8_XOR(lhs: i8, rhs: i8): i8;
 pub extern ::
 i8_OR(lhs: i8, rhs: i8): i8;
 
+impl Minus for i8 {
+    self ::
+    minus(): Self {
+        ret i8_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for i8 {
+    self ::
+    multiply(other: &Self): Self {
+        ret i8_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for i8 {
+    self ::
+    divide(other: &Self): Self {
+        ret i8_division(self, other);
+    }
+}
+
+impl Remainder[Self] for i8 {
+    self ::
+    remainder(other: &Self): Self {
+        ret i8_remainder(self, other);
+    }
+}
+
+impl Add[Self] for i8 {
+    self ::
+    add(other: &Self): Self {
+        ret i8_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for i8 {
+    self ::
+    subtract(other: &Self): Self {
+        ret i8_subtraction(self, other);
+    }
+}
+
+impl AND[Self] for i8 {
+    self ::
+    and(other: &Self): Self {
+        ret i8_AND(self, other);
+    }
+}
+
+impl OR[Self] for i8 {
+    self ::
+    or(other: &Self): Self {
+        ret i8_OR(self, other);
+    }
+}
+
+impl XOR[Self] for i8 {
+    self ::
+    xor(other: &Self): Self {
+        ret i8_XOR(self, other);
+    }
+}
+
 pub ::
 Int16: struct {
 }
@@ -331,6 +478,69 @@ i16_XOR(lhs: i16, rhs: i16): i16;
 
 pub extern ::
 i16_OR(lhs: i16, rhs: i16): i16;
+
+impl Minus for i16 {
+    self ::
+    minus(): Self {
+        ret i16_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for i16 {
+    self ::
+    multiply(other: &Self): Self {
+        ret i16_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for i16 {
+    self ::
+    divide(other: &Self): Self {
+        ret i16_division(self, other);
+    }
+}
+
+impl Remainder[Self] for i16 {
+    self ::
+    remainder(other: &Self): Self {
+        ret i16_remainder(self, other);
+    }
+}
+
+impl Add[Self] for i16 {
+    self ::
+    add(other: &Self): Self {
+        ret i16_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for i16 {
+    self ::
+    subtract(other: &Self): Self {
+        ret i16_subtraction(self, other);
+    }
+}
+
+impl AND[Self] for i16 {
+    self ::
+    and(other: &Self): Self {
+        ret i16_AND(self, other);
+    }
+}
+
+impl OR[Self] for i16 {
+    self ::
+    or(other: &Self): Self {
+        ret i16_OR(self, other);
+    }
+}
+
+impl XOR[Self] for i16 {
+    self ::
+    xor(other: &Self): Self {
+        ret i16_XOR(self, other);
+    }
+}
 
 pub ::
 Int32: struct {
@@ -420,6 +630,69 @@ i32_XOR(lhs: i32, rhs: i32): i32;
 pub extern ::
 i32_OR(lhs: i32, rhs: i32): i32;
 
+impl Minus for i32 {
+    self ::
+    minus(): Self {
+        ret i32_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for i32 {
+    self ::
+    multiply(other: &Self): Self {
+        ret i32_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for i32 {
+    self ::
+    divide(other: &Self): Self {
+        ret i32_division(self, other);
+    }
+}
+
+impl Remainder[Self] for i32 {
+    self ::
+    remainder(other: &Self): Self {
+        ret i32_remainder(self, other);
+    }
+}
+
+impl Add[Self] for i32 {
+    self ::
+    add(other: &Self): Self {
+        ret i32_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for i32 {
+    self ::
+    subtract(other: &Self): Self {
+        ret i32_subtraction(self, other);
+    }
+}
+
+impl AND[Self] for i32 {
+    self ::
+    and(other: &Self): Self {
+        ret i32_AND(self, other);
+    }
+}
+
+impl OR[Self] for i32 {
+    self ::
+    or(other: &Self): Self {
+        ret i32_OR(self, other);
+    }
+}
+
+impl XOR[Self] for i32 {
+    self ::
+    xor(other: &Self): Self {
+        ret i32_XOR(self, other);
+    }
+}
+
 pub ::
 Int64: struct {
 }
@@ -507,6 +780,69 @@ i64_XOR(lhs: i64, rhs: i64): i64;
 
 pub extern ::
 i64_OR(lhs: i64, rhs: i64): i64;
+
+impl Minus for i64 {
+    self ::
+    minus(): Self {
+        ret i64_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for i64 {
+    self ::
+    multiply(other: &Self): Self {
+        ret i64_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for i64 {
+    self ::
+    divide(other: &Self): Self {
+        ret i64_division(self, other);
+    }
+}
+
+impl Remainder[Self] for i64 {
+    self ::
+    remainder(other: &Self): Self {
+        ret i64_remainder(self, other);
+    }
+}
+
+impl Add[Self] for i64 {
+    self ::
+    add(other: &Self): Self {
+        ret i64_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for i64 {
+    self ::
+    subtract(other: &Self): Self {
+        ret i64_subtraction(self, other);
+    }
+}
+
+impl AND[Self] for i64 {
+    self ::
+    and(other: &Self): Self {
+        ret i64_AND(self, other);
+    }
+}
+
+impl OR[Self] for i64 {
+    self ::
+    or(other: &Self): Self {
+        ret i64_OR(self, other);
+    }
+}
+
+impl XOR[Self] for i64 {
+    self ::
+    xor(other: &Self): Self {
+        ret i64_XOR(self, other);
+    }
+}
 
 pub ::
 UInt8: struct {
@@ -596,6 +932,69 @@ u8_XOR(lhs: u8, rhs: u8): u8;
 pub extern ::
 u8_OR(lhs: u8, rhs: u8): u8;
 
+impl Minus for u8 {
+    self ::
+    minus(): Self {
+        ret u8_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for u8 {
+    self ::
+    multiply(other: &Self): Self {
+        ret u8_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for u8 {
+    self ::
+    divide(other: &Self): Self {
+        ret u8_division(self, other);
+    }
+}
+
+impl Remainder[Self] for u8 {
+    self ::
+    remainder(other: &Self): Self {
+        ret u8_remainder(self, other);
+    }
+}
+
+impl Add[Self] for u8 {
+    self ::
+    add(other: &Self): Self {
+        ret u8_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for u8 {
+    self ::
+    subtract(other: &Self): Self {
+        ret u8_subtraction(self, other);
+    }
+}
+
+impl AND[Self] for u8 {
+    self ::
+    and(other: &Self): Self {
+        ret u8_AND(self, other);
+    }
+}
+
+impl OR[Self] for u8 {
+    self ::
+    or(other: &Self): Self {
+        ret u8_OR(self, other);
+    }
+}
+
+impl XOR[Self] for u8 {
+    self ::
+    xor(other: &Self): Self {
+        ret u8_XOR(self, other);
+    }
+}
+
 pub ::
 UInt16: struct { 
 }
@@ -683,6 +1082,69 @@ u16_XOR(lhs: u16, rhs: u16): u16;
 
 pub extern ::
 u16_OR(lhs: u16, rhs: u16): u16;
+
+impl Minus for u16 {
+    self ::
+    minus(): Self {
+        ret u16_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for u16 {
+    self ::
+    multiply(other: &Self): Self {
+        ret u16_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for u16 {
+    self ::
+    divide(other: &Self): Self {
+        ret u16_division(self, other);
+    }
+}
+
+impl Remainder[Self] for u16 {
+    self ::
+    remainder(other: &Self): Self {
+        ret u16_remainder(self, other);
+    }
+}
+
+impl Add[Self] for u16 {
+    self ::
+    add(other: &Self): Self {
+        ret u16_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for u16 {
+    self ::
+    subtract(other: &Self): Self {
+        ret u16_subtraction(self, other);
+    }
+}
+
+impl AND[Self] for u16 {
+    self ::
+    and(other: &Self): Self {
+        ret u16_AND(self, other);
+    }
+}
+
+impl OR[Self] for u16 {
+    self ::
+    or(other: &Self): Self {
+        ret u16_OR(self, other);
+    }
+}
+
+impl XOR[Self] for u16 {
+    self ::
+    xor(other: &Self): Self {
+        ret u16_XOR(self, other);
+    }
+}
 
 pub ::
 UInt32: struct {
@@ -772,6 +1234,69 @@ u32_XOR(lhs: u32, rhs: u32): u32;
 pub extern ::
 u32_OR(lhs: u32, rhs: u32): u32;
 
+impl Minus for u32 {
+    self ::
+    minus(): Self {
+        ret u32_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for u32 {
+    self ::
+    multiply(other: &Self): Self {
+        ret u32_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for u32 {
+    self ::
+    divide(other: &Self): Self {
+        ret u32_division(self, other);
+    }
+}
+
+impl Remainder[Self] for u32 {
+    self ::
+    remainder(other: &Self): Self {
+        ret u32_remainder(self, other);
+    }
+}
+
+impl Add[Self] for u32 {
+    self ::
+    add(other: &Self): Self {
+        ret u32_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for u32 {
+    self ::
+    subtract(other: &Self): Self {
+        ret u32_subtraction(self, other);
+    }
+}
+
+impl AND[Self] for u32 {
+    self ::
+    and(other: &Self): Self {
+        ret u32_AND(self, other);
+    }
+}
+
+impl OR[Self] for u32 {
+    self ::
+    or(other: &Self): Self {
+        ret u32_OR(self, other);
+    }
+}
+
+impl XOR[Self] for u32 {
+    self ::
+    xor(other: &Self): Self {
+        ret u32_XOR(self, other);
+    }
+}
+
 pub ::
 UInt64: struct {
 }
@@ -860,6 +1385,69 @@ u64_XOR(lhs: u64, rhs: u64): u64;
 pub extern ::
 u64_OR(lhs: u64, rhs: u64): u64;
 
+impl Minus for u64 {
+    self ::
+    minus(): Self {
+        ret u64_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for u64 {
+    self ::
+    multiply(other: &Self): Self {
+        ret u64_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for u64 {
+    self ::
+    divide(other: &Self): Self {
+        ret u64_division(self, other);
+    }
+}
+
+impl Remainder[Self] for u64 {
+    self ::
+    remainder(other: &Self): Self {
+        ret u64_remainder(self, other);
+    }
+}
+
+impl Add[Self] for u64 {
+    self ::
+    add(other: &Self): Self {
+        ret u64_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for u64 {
+    self ::
+    subtract(other: &Self): Self {
+        ret u64_subtraction(self, other);
+    }
+}
+
+impl AND[Self] for u64 {
+    self ::
+    and(other: &Self): Self {
+        ret u64_AND(self, other);
+    }
+}
+
+impl OR[Self] for u64 {
+    self ::
+    or(other: &Self): Self {
+        ret u64_OR(self, other);
+    }
+}
+
+impl XOR[Self] for u64 {
+    self ::
+    xor(other: &Self): Self {
+        ret u64_XOR(self, other);
+    }
+}
+
 pub ::
 Int: struct {
 }
@@ -947,6 +1535,69 @@ int_XOR(lhs: int, rhs: int): int;
 
 pub extern ::
 int_OR(lhs: int, rhs: int): int;
+
+impl Minus for int {
+    self ::
+    minus(): Self {
+        ret int_unary_negation(self);
+    }
+}
+
+impl Multiply[Self] for int {
+    self ::
+    multiply(other: &Self): Self {
+        ret int_multiplication(self, other);
+    }
+}
+
+impl Divide[Self] for int {
+    self ::
+    divide(other: &Self): Self {
+        ret int_division(self, other);
+    }
+}
+
+impl Remainder[Self] for int {
+    self ::
+    remainder(other: &Self): Self {
+        ret int_remainder(self, other);
+    }
+}
+
+impl Add[Self] for int {
+    self ::
+    add(other: &Self): Self {
+        ret int_addition(self, other);
+    }
+}
+
+impl Subtract[Self] for int {
+    self ::
+    subtract(other: &Self): Self {
+        ret int_subtraction(self, other);
+    }
+}
+
+impl AND[Self] for int {
+    self ::
+    and(other: &Self): Self {
+        ret int_AND(self, other);
+    }
+}
+
+impl OR[Self] for int {
+    self ::
+    or(other: &Self): Self {
+        ret int_OR(self, other);
+    }
+}
+
+impl XOR[Self] for int {
+    self ::
+    xor(other: &Self): Self {
+        ret int_XOR(self, other);
+    }
+}
 )";
 
 static inline constexpr const char* mem = R"(
@@ -960,6 +1611,80 @@ mem: mod {
 
     pub extern ::
     copy(src_block: Ptr, dst_block: Ptr, block_size: int): void;
+}
+)";
+
+static inline constexpr const char* op = R"(
+pub ::
+Minus: trait {
+    self ::
+    minus(): Self;
+}
+
+pub ::
+Multiply[Other]: trait {
+    self ::
+    multiply(other: &Other): Self;
+}
+
+pub ::
+Divide[Other]: trait {
+    self ::
+    divide(other: &Other): Self;
+}
+
+pub ::
+Remainder[Other]: trait {
+    self ::
+    remainder(other: &Other): Self;
+}
+
+pub ::
+Add[Other]: trait {
+    self ::
+    add(other: &Other): Self;
+}
+
+pub ::
+Subtract[Other]: trait {
+    self ::
+    subtract(other: &Other): Self;
+}
+
+pub ::
+Equal[Other]: trait {
+    self ::
+    equal(other: &Other): Self;
+
+    self ::
+    not_equal(other: &Other): Self;
+}
+
+pub ::
+AND[Other]: trait {
+    self ::
+    and(other: &Other): Self;
+}
+
+pub ::
+OR[Other]: trait {
+    self ::
+    or(other: &Other): Self;
+}
+
+pub ::
+XOR[Other]: trait {
+    self ::
+    xor(other: &Other): Self;
+}
+
+pub ::
+Lifetime: trait {
+    self ::
+    copy(other: &Self): void;
+
+    self ::
+    drop(): void;
 }
 )";
 
@@ -1349,6 +2074,7 @@ namespace Ace::Std
             float_,
             int_,
             mem,
+            op,
             print,
             ptr,
             rc,

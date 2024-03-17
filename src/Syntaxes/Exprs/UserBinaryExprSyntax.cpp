@@ -7,9 +7,8 @@
 #include "Op.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
-#include "Diagnostics/BindingDiagnostics.hpp"
 #include "Semas/Exprs/UserBinaryExprSema.hpp"
-#include "Symbols/FunctionSymbol.hpp"
+#include "OpResolution.hpp"
 
 namespace Ace
 {
@@ -45,179 +44,6 @@ namespace Ace
             .Build();
     }
 
-    static auto CollectTypeSymbols(
-        const std::vector<TypeInfo>& typeInfos
-    ) -> std::vector<ITypeSymbol*>
-    {
-        std::vector<ITypeSymbol*> typeSymbols{};
-        std::transform(
-            begin(typeInfos),
-            end  (typeInfos),
-            back_inserter(typeSymbols),
-            [](const auto& typeInfo) { return typeInfo.Symbol; }
-        );
-
-        return typeSymbols;
-    }
-
-    static auto ResolveOpSymbol(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<Scope>& scope,
-        ITypeSymbol* const typeSymbol,
-        const Op op,
-        const std::vector<TypeInfo>& argTypeInfos
-    ) -> std::optional<FunctionSymbol*>
-    {
-        auto diagnostics = DiagnosticBag::Create();
-
-        const auto argTypeSymbols = CollectTypeSymbols(argTypeInfos);
-
-        auto* const compilation = scope->GetCompilation();
-
-        const auto& opMap = compilation->GetNatives().GetBinaryOpMap();
-
-        const auto typeOpsIt = opMap.find(typeSymbol->GetUnaliasedType());
-        if (typeOpsIt == end(opMap))
-        {
-            return std::nullopt;
-        }
-
-        const auto& typeOps = typeOpsIt->second;
-
-        const auto opSymbolIt = typeOps.find(op);
-        if (opSymbolIt == end(typeOps))
-        {
-            return std::nullopt;
-        }
-
-        auto* const opSymbol = opSymbolIt->second;
-
-        const bool areArgsConvertible = AreTypesConvertible(
-            scope,
-            argTypeInfos,
-            opSymbol->CollectArgTypeInfos()
-        );
-        if (!areArgsConvertible)
-        {
-            return std::nullopt;
-        }
-
-        return opSymbol;
-    }
-
-    static auto PickOpSymbol(
-        const SrcLocation& srcLocation,
-        ITypeSymbol* const lhsTypeSymbol,
-        ITypeSymbol* const rhsTypeSymbol,
-        Expected<FunctionSymbol*> expLHSOpSymbol,
-        Expected<FunctionSymbol*> expRHSOpSymbol,
-        const Op op
-    ) -> Diagnosed<FunctionSymbol*>
-    {
-        auto diagnostics = DiagnosticBag::Create();
-
-        if (!expLHSOpSymbol && !expRHSOpSymbol)
-        {
-            diagnostics.Add(CreateUndeclaredBinaryOpError(
-                srcLocation,
-                lhsTypeSymbol,
-                rhsTypeSymbol
-            ));
-            
-            auto* compilation = srcLocation.Buffer->GetCompilation();
-            return Diagnosed
-            {
-                compilation->GetErrorSymbols().GetFunction(),
-                std::move(diagnostics),
-            };
-        }
-
-        if (
-            (expLHSOpSymbol && expRHSOpSymbol) &&
-            (expLHSOpSymbol.Unwrap() != expRHSOpSymbol.Unwrap())
-            )
-        {
-            diagnostics.Add(CreateAmbiguousBinaryOpRefError(
-                srcLocation,
-                lhsTypeSymbol,
-                rhsTypeSymbol
-            ));
-        }
-
-        const auto optOpSymbol = diagnostics.Collect(expLHSOpSymbol ?
-            std::move(expLHSOpSymbol) :
-            std::move(expRHSOpSymbol)
-        );
-        return Diagnosed{ optOpSymbol.value(), std::move(diagnostics) };
-    }
-
-    static auto ResolveAndPickOpSymbol(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<Scope>& scope,
-        const std::vector<TypeInfo>& argTypeInfos,
-        ITypeSymbol* const lhsTypeSymbol,
-        ITypeSymbol* const rhsTypeSymbol,
-        const Op op
-    ) -> Diagnosed<FunctionSymbol*>
-    {
-        auto diagnostics = DiagnosticBag::Create();
-
-        std::optional<FunctionSymbol*> optOpSymbol{};
-        if (!lhsTypeSymbol->IsError() && !rhsTypeSymbol->IsError())
-        {
-            const auto optLHSOpSymbol = ResolveOpSymbol(
-                srcLocation,
-                scope,
-                lhsTypeSymbol,
-                op,
-                argTypeInfos
-            );
-
-            const auto optRHSOpSymbol = ResolveOpSymbol(
-                srcLocation,
-                scope,
-                rhsTypeSymbol,
-                op,
-                argTypeInfos
-            );
-
-            if (!optLHSOpSymbol.has_value() && !optRHSOpSymbol.has_value())
-            {
-                diagnostics.Add(CreateUndeclaredBinaryOpError(
-                    srcLocation,
-                    lhsTypeSymbol,
-                    rhsTypeSymbol
-                ));
-            }
-
-            if (
-                (optLHSOpSymbol.has_value() && optRHSOpSymbol.has_value()) &&
-                (optLHSOpSymbol != optRHSOpSymbol)
-                )
-            {
-                diagnostics.Add(CreateAmbiguousBinaryOpRefError(
-                    srcLocation,
-                    lhsTypeSymbol,
-                    rhsTypeSymbol
-                ));
-            }
-
-            if (optLHSOpSymbol.has_value())
-            {
-                optOpSymbol = optLHSOpSymbol.value();
-            }
-            else if (optRHSOpSymbol.has_value())
-            {
-                optOpSymbol = optRHSOpSymbol.value();
-            }
-        }
-
-        auto* const opSymbol = optOpSymbol.value_or(
-            scope->GetCompilation()->GetErrorSymbols().GetFunction()
-        );
-
-        return Diagnosed{ opSymbol, std::move(diagnostics) };
-    }
 
     auto UserBinaryExprSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const UserBinaryExprSema>>
     {
@@ -236,17 +62,21 @@ namespace Ace
             rhsExprSema->GetTypeInfo(),
         };
 
-        auto* const lhsTypeSymbol = argTypeInfos.at(0).Symbol;
-        auto* const rhsTypeSymbol = argTypeInfos.at(1).Symbol;
+        const std::vector<ITypeSymbol*> typeSymbols
+        {
+            argTypeInfos.front().Symbol,
+            argTypeInfos. back().Symbol,
+        };
 
-        const auto opSymbol = diagnostics.Collect(ResolveAndPickOpSymbol(
+        auto* const opSymbol = diagnostics.Collect(ResolveBinaryOpSymbol(
             m_OpSrcLocation,
             GetScope(),
+            typeSymbols,
             argTypeInfos,
-            lhsTypeSymbol,
-            rhsTypeSymbol,
             m_Op
-        ));
+        )).value_or(
+            GetCompilation()->GetErrorSymbols().GetFunction()
+        );
 
         return Diagnosed
         {

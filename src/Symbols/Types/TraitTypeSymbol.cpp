@@ -6,8 +6,9 @@
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "Ident.hpp"
-#include "Noun.hpp"
+#include "Symbols/SupertraitSymbol.hpp"
 #include "Symbols/Types/TraitSelfTypeSymbol.hpp"
+#include "Noun.hpp"
 #include "Symbols/PrototypeSymbol.hpp"
 
 namespace Ace
@@ -117,5 +118,24 @@ namespace Ace
     auto TraitTypeSymbol::CollectSelf() const -> TraitSelfTypeSymbol*
     {
         return GetBodyScope()->CollectSymbols<TraitSelfTypeSymbol>().front();
+    }
+
+    auto TraitTypeSymbol::CollectSupertraits() const -> std::vector<SupertraitSymbol*>
+    {
+        const auto allSupertraits =
+            GetBodyScope()->CollectSymbols<SupertraitSymbol>();
+
+        std::vector<SupertraitSymbol*> supertraits{};
+        std::copy_if(
+            begin(allSupertraits),
+            end  (allSupertraits),
+            back_inserter(supertraits),
+            [](SupertraitSymbol* const supertrait)
+            {
+                return !supertrait->GetTrait()->IsError();
+            }
+        );
+
+        return supertraits;
     }
 }

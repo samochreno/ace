@@ -1684,6 +1684,95 @@ namespace Ace
             std::nullopt,
         },
 
+        Minus
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "Minus" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        Multiply
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "Multiply" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        Divide
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "Divide" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        Remainder
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "Remainder" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        Add
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "Add" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        Subtract
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "Subtract" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        Equal
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "Equal" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        AND
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "AND" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        OR
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "OR" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        XOR
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "XOR" },
+            NativeSymbolKind::Root,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+        Lifetime
+        {
+            compilation,
+            std::vector{ Std::GetName().data(), "Lifetime" },
+            NativeSymbolKind::Concrete,
+            NativeCopyabilityKind::NonTrivial,
+            std::nullopt,
+        },
+
         print_int
         {
             compilation,
@@ -2581,6 +2670,18 @@ namespace Ace
                     &StrongPtr,
                     &DynStrongPtr,
                     &DynStrongPtrData,
+
+                    &Minus,
+                    &Multiply,
+                    &Divide,
+                    &Remainder,
+                    &Add,
+                    &Subtract,
+                    &Equal,
+                    &AND,
+                    &OR,
+                    &XOR,
+                    &Lifetime,
                 };
             }
         },
@@ -3207,205 +3308,101 @@ namespace Ace
 
                 map[Int8.GetSymbol()] =
                 {
-                    { Op::Multiplication, i8_multiplication.GetSymbol() },
-                    { Op::Division, i8_division.GetSymbol() },
-                    { Op::Remainder, i8_remainder.GetSymbol() },
-                    { Op::Addition, i8_addition.GetSymbol() },
-                    { Op::Subtraction, i8_subtraction.GetSymbol() },
                     { Op::RightShift, i8_right_shift.GetSymbol() },
                     { Op::LeftShift, i8_left_shift.GetSymbol() },
                     { Op::LessThan, i8_less_than.GetSymbol() },
                     { Op::GreaterThan, i8_greater_than.GetSymbol() },
                     { Op::LessThanEquals, i8_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, i8_greater_than_equals.GetSymbol() },
-                    { Op::Equals, i8_equals.GetSymbol() },
-                    { Op::NotEquals, i8_not_equals.GetSymbol() },
-                    { Op::AND, i8_AND.GetSymbol() },
-                    { Op::XOR, i8_XOR.GetSymbol() },
-                    { Op::OR, i8_OR.GetSymbol() },
                 };
                 map[Int16.GetSymbol()] =
                 {
-                    { Op::Multiplication, i16_multiplication.GetSymbol() },
-                    { Op::Division, i16_division.GetSymbol() },
-                    { Op::Remainder, i16_remainder.GetSymbol() },
-                    { Op::Addition, i16_addition.GetSymbol() },
-                    { Op::Subtraction, i16_subtraction.GetSymbol() },
                     { Op::RightShift, i16_right_shift.GetSymbol() },
                     { Op::LeftShift, i16_left_shift.GetSymbol() },
                     { Op::LessThan, i16_less_than.GetSymbol() },
                     { Op::GreaterThan, i16_greater_than.GetSymbol() },
                     { Op::LessThanEquals, i16_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, i16_greater_than_equals.GetSymbol() },
-                    { Op::Equals, i16_equals.GetSymbol() },
-                    { Op::NotEquals, i16_not_equals.GetSymbol() },
-                    { Op::AND, i16_AND.GetSymbol() },
-                    { Op::XOR, i16_XOR.GetSymbol() },
-                    { Op::OR, i16_OR.GetSymbol() },
                 };
                 map[Int32.GetSymbol()] =
                 {
-                    { Op::Multiplication, i32_multiplication.GetSymbol() },
-                    { Op::Division, i32_division.GetSymbol() },
-                    { Op::Remainder, i32_remainder.GetSymbol() },
-                    { Op::Addition, i32_addition.GetSymbol() },
-                    { Op::Subtraction, i32_subtraction.GetSymbol() },
                     { Op::RightShift, i32_right_shift.GetSymbol() },
                     { Op::LeftShift, i32_left_shift.GetSymbol() },
                     { Op::LessThan, i32_less_than.GetSymbol() },
                     { Op::GreaterThan, i32_greater_than.GetSymbol() },
                     { Op::LessThanEquals, i32_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, i32_greater_than_equals.GetSymbol() },
-                    { Op::Equals, i32_equals.GetSymbol() },
-                    { Op::NotEquals, i32_not_equals.GetSymbol() },
-                    { Op::AND, i32_AND.GetSymbol() },
-                    { Op::XOR, i32_XOR.GetSymbol() },
-                    { Op::OR, i32_OR.GetSymbol() },
                 };
                 map[Int64.GetSymbol()] =
                 {
-                    { Op::Multiplication, i64_multiplication.GetSymbol() },
-                    { Op::Division, i64_division.GetSymbol() },
-                    { Op::Remainder, i64_remainder.GetSymbol() },
-                    { Op::Addition, i64_addition.GetSymbol() },
-                    { Op::Subtraction, i64_subtraction.GetSymbol() },
                     { Op::RightShift, i64_right_shift.GetSymbol() },
                     { Op::LeftShift, i64_left_shift.GetSymbol() },
                     { Op::LessThan, i64_less_than.GetSymbol() },
                     { Op::GreaterThan, i64_greater_than.GetSymbol() },
                     { Op::LessThanEquals, i64_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, i64_greater_than_equals.GetSymbol() },
-                    { Op::Equals, i64_equals.GetSymbol() },
-                    { Op::NotEquals, i64_not_equals.GetSymbol() },
-                    { Op::AND, i64_AND.GetSymbol() },
-                    { Op::XOR, i64_XOR.GetSymbol() },
-                    { Op::OR, i64_OR.GetSymbol() },
                 };
 
                 map[UInt8.GetSymbol()] =
                 {
-                    { Op::Multiplication, u8_multiplication.GetSymbol() },
-                    { Op::Division, u8_division.GetSymbol() },
-                    { Op::Remainder, u8_remainder.GetSymbol() },
-                    { Op::Addition, u8_addition.GetSymbol() },
-                    { Op::Subtraction, u8_subtraction.GetSymbol() },
                     { Op::RightShift, u8_right_shift.GetSymbol() },
                     { Op::LeftShift, u8_left_shift.GetSymbol() },
                     { Op::LessThan, u8_less_than.GetSymbol() },
                     { Op::GreaterThan, u8_greater_than.GetSymbol() },
                     { Op::LessThanEquals, u8_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, u8_greater_than_equals.GetSymbol() },
-                    { Op::Equals, u8_equals.GetSymbol() },
-                    { Op::NotEquals, u8_not_equals.GetSymbol() },
-                    { Op::AND, u8_AND.GetSymbol() },
-                    { Op::XOR, u8_XOR.GetSymbol() },
-                    { Op::OR, u8_OR.GetSymbol() },
                 };
                 map[UInt16.GetSymbol()] =
                 {
-                    { Op::Multiplication, u16_multiplication.GetSymbol() },
-                    { Op::Division, u16_division.GetSymbol() },
-                    { Op::Remainder, u16_remainder.GetSymbol() },
-                    { Op::Addition, u16_addition.GetSymbol() },
-                    { Op::Subtraction, u16_subtraction.GetSymbol() },
                     { Op::RightShift, u16_right_shift.GetSymbol() },
                     { Op::LeftShift, u16_left_shift.GetSymbol() },
                     { Op::LessThan, u16_less_than.GetSymbol() },
                     { Op::GreaterThan, u16_greater_than.GetSymbol() },
                     { Op::LessThanEquals, u16_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, u16_greater_than_equals.GetSymbol() },
-                    { Op::Equals, u16_equals.GetSymbol() },
-                    { Op::NotEquals, u16_not_equals.GetSymbol() },
-                    { Op::AND, u16_AND.GetSymbol() },
-                    { Op::XOR, u16_XOR.GetSymbol() },
-                    { Op::OR, u16_OR.GetSymbol() },
                 };
                 map[UInt32.GetSymbol()] =
                 {
-                    { Op::Multiplication, u32_multiplication.GetSymbol() },
-                    { Op::Division, u32_division.GetSymbol() },
-                    { Op::Remainder, u32_remainder.GetSymbol() },
-                    { Op::Addition, u32_addition.GetSymbol() },
-                    { Op::Subtraction, u32_subtraction.GetSymbol() },
                     { Op::RightShift, u32_right_shift.GetSymbol() },
                     { Op::LeftShift, u32_left_shift.GetSymbol() },
                     { Op::LessThan, u32_less_than.GetSymbol() },
                     { Op::GreaterThan, u32_greater_than.GetSymbol() },
                     { Op::LessThanEquals, u32_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, u32_greater_than_equals.GetSymbol() },
-                    { Op::Equals, u32_equals.GetSymbol() },
-                    { Op::NotEquals, u32_not_equals.GetSymbol() },
-                    { Op::AND, u32_AND.GetSymbol() },
-                    { Op::XOR, u32_XOR.GetSymbol() },
-                    { Op::OR, u32_OR.GetSymbol() },
                 };
                 map[UInt64.GetSymbol()] =
                 {
-                    { Op::Multiplication, u64_multiplication.GetSymbol() },
-                    { Op::Division, u64_division.GetSymbol() },
-                    { Op::Remainder, u64_remainder.GetSymbol() },
-                    { Op::Addition, u64_addition.GetSymbol() },
-                    { Op::Subtraction, u64_subtraction.GetSymbol() },
                     { Op::RightShift, u64_right_shift.GetSymbol() },
                     { Op::LeftShift, u64_left_shift.GetSymbol() },
                     { Op::LessThan, u64_less_than.GetSymbol() },
                     { Op::GreaterThan, u64_greater_than.GetSymbol() },
                     { Op::LessThanEquals, u64_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, u64_greater_than_equals.GetSymbol() },
-                    { Op::Equals, u64_equals.GetSymbol() },
-                    { Op::NotEquals, u64_not_equals.GetSymbol() },
-                    { Op::AND, u64_AND.GetSymbol() },
-                    { Op::XOR, u64_XOR.GetSymbol() },
-                    { Op::OR, u64_OR.GetSymbol() },
                 };
 
                 map[Int.GetSymbol()] =
                 {
-                    { Op::Multiplication, int_multiplication.GetSymbol() },
-                    { Op::Division, int_division.GetSymbol() },
-                    { Op::Remainder, int_remainder.GetSymbol() },
-                    { Op::Addition, int_addition.GetSymbol() },
-                    { Op::Subtraction, int_subtraction.GetSymbol() },
                     { Op::RightShift, int_right_shift.GetSymbol() },
                     { Op::LeftShift, int_left_shift.GetSymbol() },
                     { Op::LessThan, int_less_than.GetSymbol() },
                     { Op::GreaterThan, int_greater_than.GetSymbol() },
                     { Op::LessThanEquals, int_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, int_greater_than_equals.GetSymbol() },
-                    { Op::Equals, int_equals.GetSymbol() },
-                    { Op::NotEquals, int_not_equals.GetSymbol() },
-                    { Op::AND, int_AND.GetSymbol() },
-                    { Op::XOR, int_XOR.GetSymbol() },
-                    { Op::OR, int_OR.GetSymbol() },
                 };
 
                 map[Float32.GetSymbol()] =
                 {
-                    { Op::Multiplication, f32_multiplication.GetSymbol() },
-                    { Op::Division, f32_division.GetSymbol() },
-                    { Op::Remainder, f32_remainder.GetSymbol() },
-                    { Op::Addition, f32_addition.GetSymbol() },
-                    { Op::Subtraction, f32_subtraction.GetSymbol() },
                     { Op::LessThan, f32_less_than.GetSymbol() },
                     { Op::GreaterThan, f32_greater_than.GetSymbol() },
                     { Op::LessThanEquals, f32_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, f32_greater_than_equals.GetSymbol() },
-                    { Op::Equals, f32_equals.GetSymbol() },
-                    { Op::NotEquals, f32_not_equals.GetSymbol() },
                 };
                 map[Float64.GetSymbol()] =
                 {
-                    { Op::Multiplication, f64_multiplication.GetSymbol() },
-                    { Op::Division, f64_division.GetSymbol() },
-                    { Op::Remainder, f64_remainder.GetSymbol() },
-                    { Op::Addition, f64_addition.GetSymbol() },
-                    { Op::Subtraction, f64_subtraction.GetSymbol() },
                     { Op::LessThan, f64_less_than.GetSymbol() },
                     { Op::GreaterThan, f64_greater_than.GetSymbol() },
                     { Op::LessThanEquals, f64_less_than_equals.GetSymbol() },
                     { Op::GreaterThanEquals, f64_greater_than_equals.GetSymbol() },
-                    { Op::Equals, f64_equals.GetSymbol() },
-                    { Op::NotEquals, f64_not_equals.GetSymbol() },
                 };
 
                 return map;

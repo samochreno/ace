@@ -31,6 +31,32 @@ namespace Ace
         return group;
     }
 
+    auto CreateUnimplementedSupertraitError(
+        SupertraitSymbol* const supertrait,
+        TraitImplSymbol* impl
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        const std::string message =
+            "unimplemented supertrait `" +
+            supertrait->GetTrait()->CreateDisplayName() + "`";
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            impl->GetName().SrcLocation,
+            message
+        );
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            supertrait->GetName().SrcLocation,
+            "supertrait declaration"
+        );
+
+        return group;
+    }
+
     auto CreateMismatchedTraitImplTypeError(
         ISymbol* const symbol,
         const SrcLocation& functionTypeSrcLocation,

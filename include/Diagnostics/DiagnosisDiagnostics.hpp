@@ -15,6 +15,11 @@ namespace Ace
         ISymbol* const function
     ) -> DiagnosticGroup;
 
+    auto CreateUnimplementedSupertraitError(
+        SupertraitSymbol* const supertrait,
+        TraitImplSymbol* impl
+    ) -> DiagnosticGroup;
+
     auto CreateMismatchedTraitImplTypeError(
         ISymbol* const symbol,
         const SrcLocation& functionTypeSrcLocation,

@@ -13,6 +13,7 @@
 #include "Symbols/PrototypeSymbol.hpp"
 #include "Symbols/BodyScopedSymbol.hpp"
 #include "Symbols/GenericSymbol.hpp"
+#include "Symbols/SupertraitSymbol.hpp"
 #include "Symbols/Types/Aliases/AliasTypeSymbol.hpp"
 #include "Symbols/Types/Aliases/ImplSelfAliasTypeSymbol.hpp"
 #include "Symbols/Types/Aliases/ReimportAliasTypeSymbol.hpp"
