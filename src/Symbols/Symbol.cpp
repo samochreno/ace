@@ -421,6 +421,12 @@ namespace Ace
 
     auto ISymbol::IsError() const -> bool
     {
+        auto* const symbol = GetUnaliased();
+        if (symbol != this)
+        {
+            return symbol->IsError();
+        }
+
         if (GetCompilation()->GetErrorSymbols().Contains(this))
         {
             return true;
