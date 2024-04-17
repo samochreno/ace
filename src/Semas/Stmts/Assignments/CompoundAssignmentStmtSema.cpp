@@ -150,19 +150,12 @@ namespace Ace
 
         if (expr->GetTypeInfo().Symbol->IsRef())
         {
-            return TempRefExprAndStmts
-            {
-                expr,
-                stmts,
-            };
+            return TempRefExprAndStmts{ expr, stmts };
         }
 
         return TempRefExprAndStmts
         {
-            std::make_shared<const RefExprSema>(
-                expr->GetSrcLocation(),
-                expr
-            ),
+            std::make_shared<const RefExprSema>(expr->GetSrcLocation(), expr),
             stmts,
         };
     }
@@ -192,9 +185,11 @@ namespace Ace
             exprType
         );
 
-        auto* const tmpVarSymbol = dynamic_cast<LocalVarSymbol*>(DiagnosticBag::CreateNoError().Collect(
-            scope->DeclareSymbol(std::move(tmpVarSymbolOwned))
-        ));
+        auto* const tmpVarSymbol = dynamic_cast<LocalVarSymbol*>(
+            DiagnosticBag::CreateNoError().Collect(
+                scope->DeclareSymbol(std::move(tmpVarSymbolOwned))
+            )
+        );
         ACE_ASSERT(tmpVarSymbol);
 
         const auto tmpVarStmt = std::make_shared<const VarStmtSema>(
@@ -246,7 +241,8 @@ namespace Ace
         }
     }
 
-    static auto CreateFieldVarRefExprLoweredStmts( const SrcLocation& srcLocation,
+    static auto CreateFieldVarRefExprLoweredStmts(
+        const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const FieldVarRefExprSema* const lhsExpr,
         const std::shared_ptr<const IExprSema>& rhsExpr,
@@ -301,9 +297,11 @@ namespace Ace
             tmpRefType
         );
 
-        auto* const tmpRefVarSymbol = dynamic_cast<LocalVarSymbol*>(DiagnosticBag::CreateNoError().Collect(
-            scope->DeclareSymbol(std::move(tmpRefVarSymbolOwned))
-        ));
+        auto* const tmpRefVarSymbol = dynamic_cast<LocalVarSymbol*>(
+            DiagnosticBag::CreateNoError().Collect(
+                scope->DeclareSymbol(std::move(tmpRefVarSymbolOwned))
+            )
+        );
         ACE_ASSERT(tmpRefVarSymbol);
 
         const auto tmpRefVarStmt = std::make_shared<const VarStmtSema>(
