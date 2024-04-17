@@ -42,7 +42,7 @@ namespace Ace
         auto convertedExpr = m_Expr;
         if (!m_OpSymbol->IsError())
         {
-            const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
+            const auto argTypeInfos = m_OpSymbol->CollectAllArgTypeInfos();
             ACE_ASSERT(argTypeInfos.size() == 1);
 
             convertedExpr = diagnostics.Collect(

@@ -56,7 +56,7 @@ namespace Ace
         auto convertedRHSExpr = m_RHSExpr;
         if (!m_OpSymbol->IsError())
         {
-            const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
+            const auto argTypeInfos = m_OpSymbol->CollectAllArgTypeInfos();
             ACE_ASSERT(argTypeInfos.size() == 2);
 
             convertedLHSExpr = diagnostics.Collect(CreateImplicitlyConverted(

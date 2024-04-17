@@ -44,7 +44,7 @@ namespace Ace
         auto convertedRHSExpr = m_RHSExpr;
         if (!m_OpSymbol->IsError())
         {
-            const auto argTypeInfos = m_OpSymbol->CollectArgTypeInfos();
+            const auto argTypeInfos = m_OpSymbol->CollectAllArgTypeInfos();
 
             convertedLHSExpr = diagnostics.Collect(
                 CreateImplicitlyConverted(m_LHSExpr, argTypeInfos.at(0))
