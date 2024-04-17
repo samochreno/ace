@@ -116,6 +116,20 @@ namespace Ace
         return typeInfos;
     }
 
+    auto ICallableSymbol::CollectAllArgTypeInfos() const -> std::vector<TypeInfo>
+    {
+        const auto params = CollectAllParams();
+
+        std::vector<TypeInfo> typeInfos{};
+        std::transform(begin(params), end(params), back_inserter(typeInfos),
+        [](const IParamVarSymbol* const param)
+        {
+            return TypeInfo{ param->GetType(), ValueKind::R };
+        });
+
+        return typeInfos;
+    }
+
     auto ICallableSymbol::CollectSelfType() const -> std::optional<ITypeSymbol*>
     {
         return DiagnosticBag::Create().Collect(

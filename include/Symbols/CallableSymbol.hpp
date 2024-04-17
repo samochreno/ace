@@ -27,7 +27,9 @@ namespace Ace
         virtual auto CollectSelfParam() const -> std::optional<SelfParamVarSymbol*> final;
 
         virtual auto CollectParamTypes() const -> std::vector<ITypeSymbol*> final;
-        virtual auto CollectArgTypeInfos() const -> std::vector<TypeInfo> final;
+
+        virtual auto CollectArgTypeInfos()    const -> std::vector<TypeInfo> final;
+        virtual auto CollectAllArgTypeInfos() const -> std::vector<TypeInfo> final;
 
         virtual auto CollectSelfType() const -> std::optional<ITypeSymbol*> final;
     };
