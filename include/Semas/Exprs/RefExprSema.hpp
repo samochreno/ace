@@ -43,6 +43,8 @@ namespace Ace
 
         auto GetTypeInfo() const -> TypeInfo final;
 
+        auto GetExpr() const -> std::shared_ptr<const IExprSema>;
+
     private:
         SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprSema> m_Expr{};

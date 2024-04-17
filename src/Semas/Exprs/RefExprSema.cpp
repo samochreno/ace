@@ -128,4 +128,9 @@ namespace Ace
 
         return { typeSymbol->GetWithRef(), ValueKind::R };
     }
+
+    auto RefExprSema::GetExpr() const -> std::shared_ptr<const IExprSema>
+    {
+        return m_Expr;
+    }
 }
