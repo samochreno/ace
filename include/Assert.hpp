@@ -8,13 +8,13 @@
 #define ACE_ASSERT(condition) \
     if (!(condition)) \
     { \
-        Log << termcolor::bright_red << "Assertion failed in file"; \
-        Log << __FILE__ << " at line " << __LINE__ << ": " << #condition; \
-        Log << "\n" << std::flush; \
+        Out << termcolor::bright_red << "Assertion failed in file"; \
+        Out << __FILE__ << " at line " << __LINE__ << ": " << #condition; \
+        Out << "\n" << std::flush; \
         std::terminate(); \
     } static_assert(true, "Semicolon required.")
 
 #define ACE_UNREACHABLE() \
-    Log << termcolor::bright_red << "Reached unreachable location in file"; \
-    Log << __FILE__ << " at line " << __LINE__ << "\n" << std::flush; \
+    Out << termcolor::bright_red << "Reached unreachable location in file"; \
+    Out << __FILE__ << " at line " << __LINE__ << "\n" << std::flush; \
     std::terminate()

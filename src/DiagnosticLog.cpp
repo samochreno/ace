@@ -183,19 +183,19 @@ namespace Ace
 
             case DiagnosticSeverity::Note:
             {
-                Log << termcolor::bright_green;
+                Out << termcolor::bright_green;
                 break;
             }
 
             case DiagnosticSeverity::Warning:
             {
-                Log << termcolor::bright_yellow;
+                Out << termcolor::bright_yellow;
                 break;
             }
 
             case DiagnosticSeverity::Error:
             {
-                Log << termcolor::bright_red;
+                Out << termcolor::bright_red;
                 break;
             }
         }
@@ -207,16 +207,16 @@ namespace Ace
             diagnostic.OptSrcLocation.value()
         );
 
-        Log << termcolor::bright_blue << " | " << termcolor::reset;
+        Out << termcolor::bright_blue << " | " << termcolor::reset;
 
-        Log << displayInfo.String;
-        Log << "\n";
+        Out << displayInfo.String;
+        Out << "\n";
 
-        Log << termcolor::bright_blue << " | ";
+        Out << termcolor::bright_blue << " | ";
 
         LogSeverityColor(diagnostic.Severity);
-        Log << displayInfo.Highlight << termcolor::reset;
-        Log << "\n";
+        Out << displayInfo.Highlight << termcolor::reset;
+        Out << "\n";
     }
 
     static auto LogDiagnostic(const Diagnostic& diagnostic) -> void
@@ -227,38 +227,38 @@ namespace Ace
         {
             case DiagnosticSeverity::Info:
             {
-                Log << "info";
+                Out << "info";
                 break;
             }
 
             case DiagnosticSeverity::Note:
             {
-                Log << "note";
+                Out << "note";
                 break;
             }
 
             case DiagnosticSeverity::Warning:
             {
-                Log << "warning";
+                Out << "warning";
             }
 
             case DiagnosticSeverity::Error:
             {
-                Log << "error";
+                Out << "error";
             }
         }
 
-        Log << termcolor::reset << ": ";
-        Log << diagnostic.Message << "\n";
+        Out << termcolor::reset << ": ";
+        Out << diagnostic.Message << "\n";
         
         if (diagnostic.OptSrcLocation.has_value())
         {
-            Log << termcolor::bright_blue << "--> ";
-            Log << termcolor::reset;
-            Log << diagnostic.OptSrcLocation.value().Buffer->FormatLocation(
+            Out << termcolor::bright_blue << "--> ";
+            Out << termcolor::reset;
+            Out << diagnostic.OptSrcLocation.value().Buffer->FormatLocation(
                 diagnostic.OptSrcLocation.value()
             );
-            Log << "\n";
+            Out << "\n";
 
             LogSnippet(diagnostic);
         }
@@ -274,7 +274,7 @@ namespace Ace
         }
         else
         {
-            Log << "\n";
+            Out << "\n";
         }
 
         std::for_each(

@@ -30,8 +30,8 @@ namespace Ace
     
     } NullStream{};
 
-    Logger Log{ LoggerConfiguration{ std::cout } };
-    Logger LogDebug
+    Logger Out{ LoggerConfiguration{ std::cout } };
+    Logger DebugOut
     {
         LoggerConfiguration
         {
@@ -45,6 +45,4 @@ namespace Ace
             }()
         }
     };
-
-    
 }

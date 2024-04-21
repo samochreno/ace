@@ -297,9 +297,9 @@ namespace Ace::Application
             return std::move(diagnostics);
         }
 
-        Log << CreateIndent() << termcolor::bright_green << "Compiling ";
-        Log << termcolor::reset;
-        Log << optCompilation.value()->GetPackage().Name << "\n";
+        Out << CreateIndent() << termcolor::bright_green << "Compiling ";
+        Out << termcolor::reset;
+        Out << optCompilation.value()->GetPackage().Name << "\n";
         IndentLevel++;
 
         const auto didCompile = diagnostics.Collect(
@@ -307,15 +307,15 @@ namespace Ace::Application
         );
         if (!didCompile || diagnostics.HasErrors())
         {
-            Log << CreateIndent() << termcolor::bright_red << "Failed";
-            Log << termcolor::reset << " to compile\n";
+            Out << CreateIndent() << termcolor::bright_red << "Failed";
+            Out << termcolor::reset << " to compile\n";
             IndentLevel++;
 
             return std::move(diagnostics);
         }
 
-        Log << CreateIndent() << termcolor::bright_green << "Finished";
-        Log << termcolor::reset << " compilation\n";
+        Out << CreateIndent() << termcolor::bright_green << "Finished";
+        Out << termcolor::reset << " compilation\n";
         IndentLevel++;
 
         return Void{ std::move(diagnostics) };

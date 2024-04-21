@@ -40,6 +40,6 @@ namespace Ace
         LoggerConfiguration m_Configuration;
     };
 
-    extern Logger Log;
-    extern Logger LogDebug;
+    extern Logger Out;
+    extern Logger DebugOut;
 }
