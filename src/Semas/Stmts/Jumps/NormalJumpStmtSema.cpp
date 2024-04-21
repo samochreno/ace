@@ -6,6 +6,7 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Symbols/LabelSymbol.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "Emitter.hpp"
 #include "ControlFlow.hpp"
@@ -20,6 +21,14 @@ namespace Ace
         m_Scope{ scope },
         m_LabelSymbol{ labelSymbol }
     {
+    }
+
+    auto NormalJumpStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("NormalJumpStmtSema", [&]()
+        {
+            logger.Log("m_LabelSymbol", m_LabelSymbol);
+        });
     }
 
     auto NormalJumpStmtSema::GetSrcLocation() const -> const SrcLocation&

@@ -5,6 +5,7 @@
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "Emitter.hpp"
 #include "ControlFlow.hpp"
@@ -17,6 +18,11 @@ namespace Ace
     ) : m_SrcLocation{ srcLocation },
         m_Scope{ scope }
     {
+    }
+
+    auto ExitStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("ExitStmtSema", [&]() {});
     }
 
     auto ExitStmtSema::GetSrcLocation() const -> const SrcLocation&

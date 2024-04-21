@@ -6,6 +6,7 @@
 #include "SrcLocation.hpp"
 #include "Semas/Exprs/ExprSema.hpp"
 #include "Symbols/Vars/FieldVarSymbol.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Assert.hpp"
@@ -24,6 +25,15 @@ namespace Ace
         m_Expr{ expr },
         m_FieldSymbol{ fieldSymbol }
     {
+    }
+
+    auto FieldVarRefExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("FieldVarRefExprSema", [&]()
+        {
+            logger.Log("m_Expr", m_Expr);
+            logger.Log("m_FieldSymbol", m_FieldSymbol);
+        });
     }
 
     auto FieldVarRefExprSema::GetSrcLocation() const -> const SrcLocation&

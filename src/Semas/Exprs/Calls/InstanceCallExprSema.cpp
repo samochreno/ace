@@ -7,6 +7,7 @@
 #include "Semas/Exprs/RefExprSema.hpp"
 #include "SrcLocation.hpp"
 #include "Symbols/CallableSymbol.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Diagnostics/TypeCheckingDiagnostics.hpp"
@@ -27,6 +28,16 @@ namespace Ace
         m_CallableSymbol{ callableSymbol },
         m_Args{ args }
     {
+    }
+
+    auto InstanceCallExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("InstanceCallExprSema", [&]()
+        {
+            logger.Log("m_Expr", m_Expr);
+            logger.Log("m_CallableSymbol", m_CallableSymbol);
+            logger.Log("m_Args", m_Args);
+        });
     }
 
     auto InstanceCallExprSema::GetSrcLocation() const -> const SrcLocation&

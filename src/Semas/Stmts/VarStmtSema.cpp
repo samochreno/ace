@@ -10,6 +10,7 @@
 #include "Semas/Exprs/VarRefs/StaticVarRefExprSema.hpp"
 #include "Semas/Stmts/StmtSema.hpp"
 #include "Semas/Stmts/Assignments/SimpleAssignmentStmtSema.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
@@ -27,6 +28,15 @@ namespace Ace
         m_Symbol{ symbol },
         m_OptAssignedExpr{ optAssignedExpr }
     {
+    }
+
+    auto VarStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("VarStmtSema", [&]()
+        {
+            logger.Log("m_Symbol", m_Symbol);
+            logger.Log("m_OptAssignedExpr", m_OptAssignedExpr);
+        });
     }
 
     auto VarStmtSema::GetSrcLocation() const -> const SrcLocation&

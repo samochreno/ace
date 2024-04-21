@@ -26,6 +26,8 @@ namespace Ace
             const std::vector<std::shared_ptr<const IStmtSema>>& stmts
         );
         virtual ~BlockStmtSema() = default;
+
+        auto Log(SemaLogger& logger) const -> void final;
         
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;

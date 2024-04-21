@@ -26,6 +26,8 @@ namespace Ace
         );
         virtual ~StaticVarRefExprSema() = default;
 
+        auto Log(SemaLogger& logger) const -> void final;
+
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CreateTypeChecked(

@@ -5,6 +5,8 @@
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
@@ -22,6 +24,14 @@ namespace Ace
         m_Scope{ scope },
         m_TypeSymbol{ typeSymbol }
     {
+    }
+
+    auto SizeOfExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("SizeOfExprSema", [&]()
+        {
+            logger.Log("m_TypeSymbol", m_TypeSymbol);
+        });
     }
 
     auto SizeOfExprSema::GetSrcLocation() const -> const SrcLocation&

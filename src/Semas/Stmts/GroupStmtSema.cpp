@@ -5,6 +5,7 @@
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "ControlFlow.hpp"
 
@@ -18,6 +19,14 @@ namespace Ace
         m_Scope{ scope },
         m_Stmts{ stmts }
     {
+    }
+
+    auto GroupStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("GroupStmtSema", [&]()
+        {
+            logger.Log("m_Stmts", m_Stmts);
+        });
     }
 
     auto GroupStmtSema::GetSrcLocation() const -> const SrcLocation&

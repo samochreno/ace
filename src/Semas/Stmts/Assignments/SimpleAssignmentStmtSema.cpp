@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "SrcLocation.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
@@ -23,6 +24,15 @@ namespace Ace
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr }
     {
+    }
+
+    auto SimpleAssignmentStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("SimpleAssignmentStmtSema", [&]()
+        {
+            logger.Log("m_LHSExpr", m_LHSExpr);
+            logger.Log("m_RHSExpr", m_RHSExpr);
+        });
     }
 
     auto SimpleAssignmentStmtSema::GetSrcLocation() const -> const SrcLocation&

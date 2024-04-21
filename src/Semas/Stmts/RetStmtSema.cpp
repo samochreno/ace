@@ -6,6 +6,8 @@
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "Semas/Exprs/ExprSema.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "TypeInfo.hpp"
@@ -23,6 +25,14 @@ namespace Ace
         m_Scope{ scope },
         m_OptExpr{ optExpr }
     {
+    }
+
+    auto RetStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("RetStmtSema", [&]()
+        {
+            logger.Log("m_OptExpr", m_OptExpr);
+        });
     }
 
     auto RetStmtSema::GetSrcLocation() const -> const SrcLocation&

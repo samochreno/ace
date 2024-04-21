@@ -4,8 +4,6 @@
 #include <vector>
 
 #include "SrcLocation.hpp"
-#include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "Semas/Exprs/ExprSema.hpp"
 #include "Semas/Exprs/LogicalNegationExprSema.hpp"
 #include "Semas/Exprs/Calls/StaticCallExprSema.hpp"
@@ -13,6 +11,9 @@
 #include "Semas/Stmts/GroupStmtSema.hpp"
 #include "Semas/Stmts/BlockStmtSema.hpp"
 #include "Semas/Stmts/ExitStmtSema.hpp"
+#include "SemaLogger.hpp"
+#include "Scope.hpp"
+#include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "ControlFlow.hpp"
@@ -25,6 +26,14 @@ namespace Ace
     ) : m_SrcLocation{ srcLocation },
         m_Condition{ condition }
     {
+    }
+
+    auto AssertStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("AssertStmtSema", [&]()
+        {
+            logger.Log("m_Condition", m_Condition);
+        });
     }
 
     auto AssertStmtSema::GetSrcLocation() const -> const SrcLocation&

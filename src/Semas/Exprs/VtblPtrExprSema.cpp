@@ -7,6 +7,7 @@
 #include "Scope.hpp"
 #include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "Emitter.hpp"
@@ -27,6 +28,15 @@ namespace Ace
         m_TypeSymbol{ typeSymbol },
         m_TraitSymbol{ traitSymbol }
     {
+    }
+
+    auto VtblPtrExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("VtblPtrExprSema", [&]()
+        {
+            logger.Log("m_TypeSymbol", m_TypeSymbol);
+            logger.Log("m_TraitSymbol", m_TraitSymbol);
+        });
     }
 
     auto VtblPtrExprSema::GetSrcLocation() const -> const SrcLocation&

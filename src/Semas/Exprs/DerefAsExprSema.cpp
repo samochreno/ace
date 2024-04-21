@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "SrcLocation.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "Emitter.hpp"
@@ -22,6 +23,15 @@ namespace Ace
         m_TypeSymbol{ typeSymbol },
         m_Expr{ expr }
     {
+    }
+
+    auto DerefAsExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("DerefAsExprSema", [&]()
+        {
+            logger.Log("m_Expr", m_Expr);
+            logger.Log("m_TypeSymbol", m_TypeSymbol);
+        });
     }
 
     auto DerefAsExprSema::GetSrcLocation() const -> const SrcLocation&

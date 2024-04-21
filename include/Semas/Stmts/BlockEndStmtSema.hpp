@@ -24,6 +24,8 @@ namespace Ace
         );
         virtual ~BlockEndStmtSema() = default;
 
+        auto Log(SemaLogger& logger) const -> void final;
+
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto GetBodyScope() const -> std::shared_ptr<Scope>;

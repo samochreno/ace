@@ -5,6 +5,7 @@
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "ControlFlow.hpp"
 
@@ -16,6 +17,11 @@ namespace Ace
     ) : m_SrcLocation{ srcLocation },
         m_BodyScope{ bodyScope }
     {
+    }
+
+    auto BlockEndStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("BlockEndStmtSema", [&]() {});
     }
 
     auto BlockEndStmtSema::GetSrcLocation() const -> const SrcLocation&

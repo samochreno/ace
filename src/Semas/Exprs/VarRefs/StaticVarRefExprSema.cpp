@@ -11,6 +11,7 @@
 #include "Symbols/Vars/Params/ParamVarSymbol.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Vars/VarSymbol.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "Assert.hpp"
 #include "Emitter.hpp"
@@ -28,6 +29,14 @@ namespace Ace
         m_Scope{ scope },
         m_VarSymbol{ varSymbol }
     {
+    }
+
+    auto StaticVarRefExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("StaticVarRefExprSema", [&]()
+        {
+            logger.Log("m_VarSymbol", m_VarSymbol);
+        });
     }
 
     auto StaticVarRefExprSema::GetSrcLocation() const -> const SrcLocation&

@@ -3,9 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include "Semas/Exprs/Calls/StaticCallExprSema.hpp"
 #include "SrcLocation.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
+#include "Semas/Exprs/Calls/StaticCallExprSema.hpp"
 #include "Diagnostic.hpp"
 #include "Assert.hpp"
 #include "TypeInfo.hpp"
@@ -21,6 +22,15 @@ namespace Ace
         m_Expr{ expr },
         m_OpSymbol{ opSymbol }
     {
+    }
+
+    auto UserUnaryExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("UserUnaryExprSema", [&]()
+        {
+            logger.Log("m_Expr", m_Expr);
+            logger.Log("m_OpSymbol", m_OpSymbol);
+        });
     }
 
     auto UserUnaryExprSema::GetSrcLocation() const -> const SrcLocation&

@@ -5,11 +5,12 @@
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "SemaLogger.hpp"
+#include "Symbols/Types/EmittableTypeSymbol.hpp"
 #include "Diagnostic.hpp"
 #include "Assert.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
-#include "Symbols/Types/EmittableTypeSymbol.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 
@@ -25,6 +26,20 @@ namespace Ace
         m_StructSymbol{ structSymbol },
         m_Args{ args }
     {
+    }
+
+    auto StructConstructionExprSema::Log(SemaLogger &logger) const -> void
+    {
+        logger.Log("StructConstructionExprSema", [&]()
+        {
+            logger.Log("m_StructSymbol", m_StructSymbol);
+
+            std::for_each(begin(m_Args), end(m_Args),
+            [&](const StructConstructionExprSemaArg& arg)
+            {
+                logger.Log(arg.Symbol->GetName().String, arg.Value);
+            });
+        });
     }
 
     auto StructConstructionExprSema::GetSrcLocation() const -> const SrcLocation&

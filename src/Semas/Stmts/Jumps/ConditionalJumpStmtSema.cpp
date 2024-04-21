@@ -6,6 +6,7 @@
 #include "SrcLocation.hpp"
 #include "Semas/Exprs/ExprSema.hpp"
 #include "Symbols/LabelSymbol.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
@@ -23,6 +24,15 @@ namespace Ace
         m_Condition{ condition },
         m_LabelSymbol{ labelSymbol }
     {
+    }
+
+    auto ConditionalJumpStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("ConditionalJumpStmtSema", [&]()
+        {
+            logger.Log("m_Condition", m_Condition);
+            logger.Log("m_LabelSymbol", m_LabelSymbol);
+        });
     }
 
     auto ConditionalJumpStmtSema::GetSrcLocation() const -> const SrcLocation&

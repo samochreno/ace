@@ -7,6 +7,7 @@
 #include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "Symbols/Types/EmittableTypeSymbol.hpp"
 #include "Semas/Exprs/ExprSema.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Diagnostics/TypeCheckingDiagnostics.hpp"
@@ -23,6 +24,15 @@ namespace Ace
         m_TypeSymbol{ typeSymbol },
         m_Expr{ expr }
     {
+    }
+
+    auto DropStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("DropStmtSema", [&]()
+        {
+            logger.Log("m_TypeSymbol", m_TypeSymbol);
+            logger.Log("m_Expr", m_Expr);
+        });
     }
 
     auto DropStmtSema::GetSrcLocation() const -> const SrcLocation&

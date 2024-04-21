@@ -3,9 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include "Semas/Exprs/Calls/StaticCallExprSema.hpp"
 #include "SrcLocation.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
+#include "Semas/Exprs/Calls/StaticCallExprSema.hpp"
 #include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -22,6 +23,16 @@ namespace Ace
         m_RHSExpr{ rhsExpr },
         m_OpSymbol{ opSymbol }
     {
+    }
+
+    auto UserBinaryExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("UserBinaryExprSema", [&]()
+        {
+            logger.Log("m_LHSExpr", m_LHSExpr);
+            logger.Log("m_RHSExpr", m_RHSExpr);
+            logger.Log("m_OpSymbol", m_OpSymbol);
+        });
     }
 
     auto UserBinaryExprSema::GetSrcLocation() const -> const SrcLocation&

@@ -6,6 +6,7 @@
 
 #include "SrcLocation.hpp"
 #include "Symbols/LabelSymbol.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "ControlFlow.hpp"
@@ -18,6 +19,14 @@ namespace Ace
     ) : m_SrcLocation{ srcLocation },
         m_Symbol{ symbol }
     {
+    }
+
+    auto LabelStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("LabelStmtSema", [&]()
+        {
+            logger.Log("m_Symbol", m_Symbol);
+        });
     }
 
     auto LabelStmtSema::GetSrcLocation() const -> const SrcLocation&

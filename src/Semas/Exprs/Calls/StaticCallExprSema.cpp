@@ -6,13 +6,15 @@
 #include "Semas/Exprs/ExprSema.hpp"
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "Symbols/CallableSymbol.hpp"
+#include "Symbols/GenericSymbol.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
-#include "Symbols/GenericSymbol.hpp"
 
 namespace Ace
 {
@@ -26,6 +28,15 @@ namespace Ace
         m_CallableSymbol{ callableSymbol },
         m_Args{ args }
     {
+    }
+
+    auto StaticCallExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("StaticCallExprSema", [&]()
+        {
+            logger.Log("m_CallableSymbol", m_CallableSymbol);
+            logger.Log("m_Args", m_Args);
+        });
     }
 
     auto StaticCallExprSema::GetSrcLocation() const -> const SrcLocation&

@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "SrcLocation.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Emitter.hpp"
@@ -17,6 +18,14 @@ namespace Ace
     ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
+    }
+
+    auto ExprExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("ExprExprSema", [&]()
+        {
+            logger.Log("m_Expr", m_Expr);
+        });
     }
 
     auto ExprExprSema::GetSrcLocation() const -> const SrcLocation&

@@ -14,6 +14,7 @@
 #include "Semas/Stmts/LabelStmtSema.hpp"
 #include "Semas/Stmts/Jumps/ConditionalJumpStmtSema.hpp"
 #include "Semas/Stmts/Jumps/NormalJumpStmtSema.hpp"
+#include "SemaLogger.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "AnonymousIdent.hpp"
 #include "TypeInfo.hpp"
@@ -31,6 +32,15 @@ namespace Ace
         m_Conditions{ conditions },
         m_Blocks{ blocks }
     {
+    }
+
+    auto IfStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("IfStmtSema", [&]()
+        {
+            logger.Log("m_Conditions", m_Conditions);
+            logger.Log("m_Blocks", m_Blocks);
+        });
     }
 
     auto IfStmtSema::GetSrcLocation() const -> const SrcLocation&

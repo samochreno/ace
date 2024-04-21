@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "SrcLocation.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Semas/Exprs/Calls/StaticCallExprSema.hpp"
@@ -21,6 +22,14 @@ namespace Ace
     ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
+    }
+
+    auto LockExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("LockExprSema", [&]()
+        {
+            logger.Log("m_Expr", m_Expr);
+        });
     }
 
     auto LockExprSema::GetSrcLocation() const -> const SrcLocation&

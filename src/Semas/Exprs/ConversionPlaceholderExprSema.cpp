@@ -4,6 +4,7 @@
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
 
@@ -17,6 +18,14 @@ namespace Ace
         m_Scope{ scope },
         m_TypeInfo{ typeInfo }
     {
+    }
+
+    auto ConversionPlaceholderExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("ConversionPlaceholderExprSema", [&]()
+        {
+            logger.Log("m_TypeInfo", m_TypeInfo);
+        });
     }
 
     auto ConversionPlaceholderExprSema::GetSrcLocation() const -> const SrcLocation&

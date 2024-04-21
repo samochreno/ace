@@ -8,6 +8,7 @@
 #include "Diagnostic.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
+#include "SemaLogger.hpp"
 #include "Semas/Exprs/RefExprSema.hpp"
 #include "Semas/Exprs/DerefExprSema.hpp"
 #include "Semas/Exprs/VarRefs/StaticVarRefExprSema.hpp"
@@ -34,6 +35,16 @@ namespace Ace
         m_RHSExpr{ rhsExpr },
         m_OpSymbol{ opSymbol }
     {
+    }
+
+    auto CompoundAssignmentStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("CompoundAssignmentStmtSema", [&]()
+        {
+            logger.Log("m_LHSExpr", m_LHSExpr);
+            logger.Log("m_RHSExpr", m_RHSExpr);
+            logger.Log("m_OpSymbol", m_OpSymbol);
+        });
     }
 
     auto CompoundAssignmentStmtSema::GetSrcLocation() const -> const SrcLocation&

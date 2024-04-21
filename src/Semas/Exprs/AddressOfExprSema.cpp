@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "SrcLocation.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
@@ -20,6 +21,14 @@ namespace Ace
     ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
+    }
+
+    auto AddressOfExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("AddressOfExprSema", [&]()
+        {
+            logger.Log("m_Expr", m_Expr);
+        });
     }
 
     auto AddressOfExprSema::GetSrcLocation() const -> const SrcLocation&

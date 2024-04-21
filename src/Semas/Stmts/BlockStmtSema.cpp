@@ -7,6 +7,7 @@
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "Semas/Stmts/StmtSema.hpp"
 #include "Semas/Stmts/LabelStmtSema.hpp"
@@ -32,6 +33,14 @@ namespace Ace
         m_BodyScope{ bodyScope },
         m_Stmts{ stmts }
     {
+    }
+
+    auto BlockStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("BlockStmtSema", [&]()
+        {
+            logger.Log("m_Stmts", m_Stmts);
+        });
     }
 
     auto BlockStmtSema::GetSrcLocation() const -> const SrcLocation&

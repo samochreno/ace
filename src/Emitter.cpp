@@ -24,6 +24,7 @@
 #include "Scope.hpp"
 #include "Symbols/All.hpp"
 #include "Semas/All.hpp"
+#include "SemaLogger.hpp"
 #include "Log.hpp"
 #include "Assert.hpp"
 #include "DynamicCastFilter.hpp"
@@ -93,6 +94,17 @@ namespace Ace
     {
     }
 
+    static auto SaveStringToFile(
+        Compilation* const compilation,
+        const std::string& string,
+        const std::filesystem::path& filePath
+    ) -> void
+    {
+        std::ofstream fileStream{ filePath };
+        ACE_ASSERT(fileStream);
+        fileStream << string;
+    }
+
     static auto SaveModuleToFile(
         Compilation* const compilation,
         const llvm::Module& module,
@@ -105,11 +117,43 @@ namespace Ace
         moduleOStream << module;
         moduleOStream.flush();
 
-        std::ofstream irFileStream{ filePath };
-        ACE_ASSERT(irFileStream);
-        irFileStream << moduleString;
+        SaveStringToFile(compilation, moduleString, filePath);
 
         moduleString.clear();
+    }
+
+    static auto SaveSemasToFile(
+        Compilation* const compilation,
+        const std::filesystem::path& filePath
+    ) -> void
+    {
+        std::string semasString{};
+
+        const auto functionSymbols =
+            compilation->GetGlobalScope()->CollectSymbolsRecursive<FunctionSymbol>();
+
+        std::for_each(
+            begin(functionSymbols),
+            end  (functionSymbols),
+            [&](FunctionSymbol* const functionSymbol)
+            {
+                if (!functionSymbol->GetBlockSema().has_value())
+                {
+                    return;
+                }
+
+                SemaLogger logger{};
+                logger.Log(
+                    functionSymbol->CreateSignature(),
+                    functionSymbol->GetBlockSema().value()
+                );
+
+                semasString += logger.CreateString();
+                semasString += "\n";
+            }
+        );
+
+        SaveStringToFile(compilation, semasString, filePath);
     }
 
     static auto IsConcreteSymbol(ISymbol* const symbol) -> bool
@@ -242,11 +286,15 @@ namespace Ace
             }
         });
 
+        const auto semaFilePath  = CreateOutputFilePath(packageName, "sema");
         const auto bcFilePath    = CreateOutputFilePath(packageName, "bc");
         const auto llFilePath    = CreateOutputFilePath(packageName, "ll");
         const auto optLlFilePath = CreateOutputFilePath(packageName, "opt.ll");
         const auto objFilePath   = CreateOutputFilePath(packageName, "obj");
         const auto exeFilePath   = CreateOutputFilePath(packageName, "");
+
+        // TODO: Enable this in debug only
+        SaveSemasToFile(GetCompilation(), semaFilePath);
 
         std::string originalModuleString{};
         llvm::raw_string_ostream originalModuleOStream{ originalModuleString };

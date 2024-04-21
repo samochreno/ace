@@ -5,8 +5,8 @@
 #include "Semas/Exprs/ExprSema.hpp"
 #include "Semas/Exprs/Calls/StaticCallExprSema.hpp"
 #include "SrcLocation.hpp"
-#include "Scope.hpp"
 #include "Symbols/FunctionSymbol.hpp"
+#include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "ExprEmitResult.hpp"
 #include "TypeInfo.hpp"
@@ -27,6 +27,8 @@ namespace Ace
             FunctionSymbol* const opSymbol
         );
         virtual ~UserBinaryExprSema() = default;
+
+        auto Log(SemaLogger& logger) const -> void final;
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;

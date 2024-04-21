@@ -5,13 +5,14 @@
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
-#include "Diagnostic.hpp"
 #include "Semas/Exprs/ExprSema.hpp"
 #include "Semas/Stmts/BlockStmtSema.hpp"
 #include "Semas/Stmts/GroupStmtSema.hpp"
 #include "Semas/Stmts/LabelStmtSema.hpp"
 #include "Semas/Stmts/Jumps/NormalJumpStmtSema.hpp"
 #include "Semas/Stmts/Jumps/ConditionalJumpStmtSema.hpp"
+#include "SemaLogger.hpp"
+#include "Diagnostic.hpp"
 #include "Symbols/LabelSymbol.hpp"
 #include "AnonymousIdent.hpp"
 #include "TypeInfo.hpp"
@@ -30,6 +31,15 @@ namespace Ace
         m_Condition{ condition },
         m_Block{ block }
     {
+    }
+
+    auto WhileStmtSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("WhileStmtSema", [&]()
+        {
+            logger.Log("m_Condition", m_Condition);
+            logger.Log("m_Block", m_Block);
+        });
     }
 
     auto WhileStmtSema::GetSrcLocation() const -> const SrcLocation&

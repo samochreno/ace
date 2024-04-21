@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "SrcLocation.hpp"
+#include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Semas/Exprs/Calls/StaticCallExprSema.hpp"
 #include "Symbols/FunctionSymbol.hpp"
@@ -21,6 +22,14 @@ namespace Ace
     ) : m_SrcLocation{ srcLocation },
         m_Expr{ expr }
     {
+    }
+
+    auto UnboxExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("UnboxExprSema", [&]()
+        {
+            logger.Log("m_Expr", m_Expr);
+        });
     }
 
     auto UnboxExprSema::GetSrcLocation() const -> const SrcLocation&

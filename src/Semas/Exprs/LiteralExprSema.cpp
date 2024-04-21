@@ -4,6 +4,7 @@
 
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
+#include "SemaLogger.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Diagnostic.hpp"
 #include "Assert.hpp"
@@ -25,6 +26,14 @@ namespace Ace
         m_Kind{ kind },
         m_String{ string }
     {
+    }
+
+    auto LiteralExprSema::Log(SemaLogger& logger) const -> void
+    {
+        logger.Log("LiteralExprSema", [&]()
+        {
+            logger.Log("m_String", m_String);
+        });
     }
     
     auto LiteralExprSema::GetSrcLocation() const -> const SrcLocation&

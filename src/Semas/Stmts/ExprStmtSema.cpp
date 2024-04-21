@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "SrcLocation.hpp"
+#include "SemaLogger.hpp"
 #include "Diagnostic.hpp"
 #include "Emitter.hpp"
 #include "ControlFlow.hpp"
@@ -15,6 +16,14 @@ namespace Ace
         const std::shared_ptr<const IExprSema>& expr
     ) : m_Expr{ expr }
     {
+    }
+
+    auto ExprStmtSema::Log(SemaLogger &logger) const -> void
+    {
+        logger.Log("ExprStmtSema", [&]()
+        {
+            logger.Log("m_Expr", m_Expr);
+        });
     }
 
     auto ExprStmtSema::GetSrcLocation() const -> const SrcLocation&

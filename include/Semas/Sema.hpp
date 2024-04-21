@@ -14,6 +14,8 @@
 
 namespace Ace
 {
+    class SemaLogger;
+
     struct TypeCheckingContext
     {
     };
@@ -103,6 +105,8 @@ namespace Ace
     {
     public:
         virtual ~ISema() = default;
+
+        virtual auto Log(SemaLogger& logger) const -> void = 0;
 
         virtual auto GetCompilation() const -> Compilation* final;
         virtual auto GetSrcLocation() const -> const SrcLocation& = 0;
