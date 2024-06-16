@@ -15,58 +15,76 @@ namespace Ace
     static auto GetOpTraitTypePrototypeNamePair(
         Compilation* const compilation,
         const Op& op
-    ) -> std::pair<ITypeSymbol*, std::string_view>
+    ) -> std::optional<std::pair<ITypeSymbol*, std::string_view>>
     {
         const auto& natives = compilation->GetNatives();
         
         switch (op)
         {
             case Op::UnaryNegation:
-                return { natives.Minus.GetSymbol(), "minus" };
+                return std::pair{ natives.Minus.GetSymbol(), "minus" };
 
             case Op::Multiplication:
-                return { natives.Multiply.GetSymbol(), "multiply" };
+                return std::pair{ natives.Multiply.GetSymbol(), "multiply" };
             case Op::Division:
-                return { natives.Divide.GetSymbol(), "divide" };
+                return std::pair{ natives.Divide.GetSymbol(), "divide" };
 
             case Op::Remainder:
-                return { natives.Remainder.GetSymbol(), "remainder" };
+                return std::pair{ natives.Remainder.GetSymbol(), "remainder" };
 
             case Op::Addition:
-                return { natives.Add.GetSymbol(), "add" };
+                return std::pair{ natives.Add.GetSymbol(), "add" };
             case Op::Subtraction:
-                return { natives.Subtract.GetSymbol(), "subtract" };
+                return std::pair{ natives.Subtract.GetSymbol(), "subtract" };
 
             case Op::Equals:
-                return { natives.Equal.GetSymbol(), "equal" };
+                return std::pair{ natives.Equal.GetSymbol(), "equal" };
             case Op::NotEquals:
-                return { natives.Equal.GetSymbol(), "not_equal" };
+                return std::pair{ natives.Equal.GetSymbol(), "not_equal" };
 
             case Op::AND:
-                return { natives.AND.GetSymbol(), "and" };
+                return std::pair{ natives.AND.GetSymbol(), "and" };
             case Op::XOR:
-                return { natives.XOR.GetSymbol(), "xor" };
+                return std::pair{ natives.XOR.GetSymbol(), "xor" };
             case Op::OR:
-                return { natives.OR.GetSymbol(), "or" };
+                return std::pair{ natives.OR.GetSymbol(), "or" };
 
             default:
-                ACE_UNREACHABLE();
+                return std::nullopt;
         }
-
     }
 
     static auto CollectOpPrototype(
         Compilation* const compilation,
         const Op& op
-    ) -> PrototypeSymbol*
+    ) -> std::optional<PrototypeSymbol*>
     {
-        const auto [traitType, prototypeName] =
-            GetOpTraitTypePrototypeNamePair(compilation, op);
+        const auto optPair = GetOpTraitTypePrototypeNamePair(compilation, op);
+        if (!optPair.has_value())
+        {
+            return std::nullopt;
+        }
+
+        auto* const traitType = optPair.value().first;
+        const auto& prototypeName = optPair.value().second;
+
 
         auto* const trait = dynamic_cast<TraitTypeSymbol*>(traitType);
         ACE_ASSERT(trait);
 
-        return trait->CollectPrototypes() // TODO
+        const auto prototypes = trait->CollectPrototypes();
+        const auto prototypeIt = std::find_if(
+            begin(prototypes),
+            end  (prototypes),
+            [&](PrototypeSymbol* const prototype)
+            {
+                return prototype->GetName().String == prototypeName;
+            }
+        );
+
+
+        ACE_ASSERT(prototypeIt != end(prototypes));
+        return *prototypeIt;
     }
 
     static auto ResolveNativeUnaryOpSymbol(
@@ -125,12 +143,38 @@ namespace Ace
         return Expected{ symbol, std::move(diagnostics) };
     }
 
+    static auto ResolveUserBinaryOpSymbol(
+        const SrcLocation& srcLocation,
+        const std::shared_ptr<Scope>& scope,
+        const TypeInfo& lhsTypeInfo,
+        const TypeInfo& rhsTypeInfo,
+        const Op op
+    ) -> std::optional<FunctionSymbol*>
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        auto* const compilation = scope->GetCompilation();
+
+        const auto optPrototype = CollectOpPrototype(compilation, op);
+        if (!optPrototype.has_value())
+        {
+            return std::nullopt;
+        }
+
+        return optPrototype.has_value()
+            ? Scope::CollectImplOfFor(
+                optPrototype.value(),
+                lhsTypeInfo.Symbol
+            )
+            : std::nullopt;
+    }
+
     static auto ResolveNativeBinaryOpSymbol(
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
-        ITypeSymbol* const typeSymbol,
-        const Op op,
-        const std::vector<TypeInfo>& argTypeInfos
+        const TypeInfo& lhsTypeInfo,
+        const TypeInfo& rhsTypeInfo,
+        const Op op
     ) -> std::optional<FunctionSymbol*>
     {
         auto diagnostics = DiagnosticBag::Create();
@@ -139,7 +183,9 @@ namespace Ace
 
         const auto& opMap = compilation->GetNatives().GetBinaryOpMap();
 
-        const auto opSymbolsIt = opMap.find(typeSymbol->GetUnaliasedType());
+        const auto opSymbolsIt = opMap.find(
+            lhsTypeInfo.Symbol->GetUnaliasedType()
+        );
         if (opSymbolsIt == end(opMap))
         {
             return std::nullopt;
@@ -153,113 +199,82 @@ namespace Ace
             return std::nullopt;
         }
 
-        auto* const opSymbol = opSymbolIt->second;
-
-        const bool areArgsConvertible = AreTypesConvertible(
-            scope,
-            argTypeInfos,
-            opSymbol->CollectArgTypeInfos()
-        );
-        if (!areArgsConvertible)
-        {
-            return std::nullopt;
-        }
-
-        return opSymbol;
-    }
-
-    static auto ResolveBinaryOpSymbol(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<Scope>& scope,
-        ITypeSymbol* const typeSymbol,
-        const Op op,
-        const std::vector<TypeInfo>& argTypeInfos
-    ) -> std::optional<FunctionSymbol*>
-    {
-        auto diagnostics = DiagnosticBag::Create();
-
-        const auto optNativeSymbol = ResolveNativeBinaryOpSymbol(
-            srcLocation,
-            scope,
-            typeSymbol,
-            op,
-            argTypeInfos
-        );
-        if (optNativeSymbol.has_value())
-        {
-            return optNativeSymbol;
-        }
-
-        return std::nullopt;
+        return opSymbolIt->second;
     }
 
     auto ResolveBinaryOpSymbol(
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
-        const std::vector<ITypeSymbol*>& typeSymbols, 
-        const std::vector<TypeInfo>& argTypeInfos,
+        const TypeInfo& lhsTypeInfo,
+        const TypeInfo& rhsTypeInfo,
         const Op& op
     ) -> Expected<FunctionSymbol*>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        ACE_ASSERT(typeSymbols.size() == 1 || typeSymbols.size() == 2);
-        ACE_ASSERT(argTypeInfos.size() == 2);
-
-        const auto hasErrorType = std::find_if(
-            begin(typeSymbols),
-            end  (typeSymbols),
-            [](ITypeSymbol* const typeSymbol) { return typeSymbol->IsError(); }
-        ) != end(typeSymbols);
-
-        const auto hasErrorArg =
-            argTypeInfos.front().Symbol->IsError() ||
-            argTypeInfos.back().Symbol->IsError();
-
-        if (hasErrorType || hasErrorArg)
+        if (lhsTypeInfo.Symbol->IsError() || rhsTypeInfo.Symbol->IsError())
         {
             return std::move(diagnostics);
         }
 
-        std::set<FunctionSymbol*> opSymbols{};
-        std::for_each(begin(typeSymbols), end(typeSymbols),
-        [&](ITypeSymbol* const typeSymbol)
-        {
-            const auto optOpSymbol = ResolveBinaryOpSymbol(
-                srcLocation,
-                scope,
-                typeSymbol,
-                op,
-                argTypeInfos
-            );
-            if (optOpSymbol.has_value())
-            {
-                opSymbols.insert(dynamic_cast<FunctionSymbol*>(
-                    optOpSymbol.value()->GetUnaliased()
-                ));
-            }
-        });
+        const auto optNativeSymbol = ResolveNativeBinaryOpSymbol(
+            srcLocation,
+            scope,
+            lhsTypeInfo,
+            rhsTypeInfo,
+            op
+        );
+        const auto optUserSymbol = ResolveUserBinaryOpSymbol(
+            srcLocation,
+            scope,
+            lhsTypeInfo,
+            rhsTypeInfo,
+            op
+        );
 
-        if (opSymbols.empty())
+        if (!optNativeSymbol.has_value() && !optUserSymbol.has_value())
         {
             diagnostics.Add(CreateUndeclaredBinaryOpError(
                 srcLocation,
-                argTypeInfos.front().Symbol,
-                argTypeInfos.back().Symbol
+                lhsTypeInfo.Symbol,
+                rhsTypeInfo.Symbol
             ));
+
+            const auto optUserSymbol = ResolveUserBinaryOpSymbol(
+                srcLocation,
+                scope,
+                lhsTypeInfo,
+                rhsTypeInfo,
+                op
+            );
+
             return std::move(diagnostics);
         }
 
-        if (opSymbols.size() > 1)
+        if (optNativeSymbol.has_value() && optUserSymbol.has_value())
         {
             diagnostics.Add(CreateAmbiguousBinaryOpRefError(
                 srcLocation,
-                argTypeInfos.front().Symbol,
-                argTypeInfos.back().Symbol
+                lhsTypeInfo.Symbol,
+                rhsTypeInfo.Symbol
             ));
             return std::move(diagnostics);
         }
 
-        return Expected{ *opSymbols.begin(), std::move(diagnostics) };
+        auto* const symbol = optNativeSymbol.has_value()
+            ? optNativeSymbol.value()
+            : optUserSymbol.value();
+
+        const bool areArgsConvertible = AreTypesConvertible(
+            scope,
+            { lhsTypeInfo, rhsTypeInfo },
+            symbol->CollectAllArgTypeInfos()
+        );
+        if (!areArgsConvertible)
+        {
+            return std::move(diagnostics);
+        }
+
+        return Expected{ symbol, std::move(diagnostics) };
     }
 }

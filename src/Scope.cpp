@@ -814,6 +814,7 @@ namespace Ace
             });
         });
 
+        ACE_ASSERT(impls.empty() || impls.size() == 1);
         return impls.empty() ? std::nullopt : std::optional{ impls.front() };
     }
 

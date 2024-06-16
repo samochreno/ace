@@ -18,8 +18,8 @@ namespace Ace
     auto ResolveBinaryOpSymbol(
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
-        const std::vector<ITypeSymbol*>& typeSymbols, 
-        const std::vector<TypeInfo>& argTypeInfos,
+        const TypeInfo& lhsTypeInfo,
+        const TypeInfo& rhsTypeInfo,
         const Op& op
     ) -> Expected<FunctionSymbol*>;
 }

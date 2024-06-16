@@ -15,7 +15,15 @@ namespace Ace
     ) -> bool
     {
         conversative = conversative->GetUnaliasedType();
-        speculative = speculative->GetUnaliasedType();
+         speculative =  speculative->GetUnaliasedType();
+
+         if (
+             conversative->CreateSignature() == "std::Add[std::?658::?659_add::Other]" &&
+             speculative->CreateSignature() == "std::Add[std::Int]"
+            )
+         {
+             [](){}();
+         }
 
         if (conversative == speculative)
         {
