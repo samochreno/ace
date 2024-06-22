@@ -57,17 +57,11 @@ namespace Ace
             m_RHSExpr->CreateExprSema()
         );
 
-        const std::vector<TypeInfo> argTypeInfos
-        {
-            lhsExprSema->GetTypeInfo(),
-            rhsExprSema->GetTypeInfo(),
-        };
-
         const auto opSymbol = diagnostics.Collect(ResolveBinaryOpSymbol(
             m_OpSrcLocation,
             GetScope(),
-            std::vector{ argTypeInfos.front().Symbol },
-            argTypeInfos,
+            lhsExprSema->GetTypeInfo(),
+            rhsExprSema->GetTypeInfo(),
             m_Op
         )).value_or(
             GetCompilation()->GetErrorSymbols().GetFunction()

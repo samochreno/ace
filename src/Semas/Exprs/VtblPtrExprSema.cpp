@@ -101,7 +101,7 @@ namespace Ace
                 return true;
             }
 
-            return Scope::CollectImplOfFor(traitSymbol, typeSymbol).has_value();
+            return Scope::HasImpl(traitSymbol, typeSymbol);
         }());
 
         auto* const allocaInst = emitter.GetBlock().Builder.CreateAlloca(

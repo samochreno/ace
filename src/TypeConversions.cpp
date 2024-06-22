@@ -116,11 +116,7 @@ namespace Ace
             return std::nullopt;
         }
 
-        const auto optImplSymbol = Scope::CollectImplOfFor(
-            targetTrait,
-            concreteType
-        );
-        if (!optImplSymbol.has_value())
+        if (!Scope::HasImpl(targetTrait, concreteType))
         {
             return std::nullopt;
         }

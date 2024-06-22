@@ -2,6 +2,7 @@
 
 ## 🟢 Refactor
 
+- Reformat ternaries
 - Make `llvm::Value*` variable names consistent
 - Refer to `Self` and `self` consistently (`Self` is sometimes `SelfType`)
 - Cache `Scope::CollectSymbols` or just generally cache in `Scope` for performance
@@ -14,8 +15,8 @@
 ## 🔴 High Priority
 
 - Replace operators with traits:
-  - Finish `OpResolution`
-  - Check `[](){}()`
+  - Finish `OpResolution` -> resolve user operators
+- Add parent symbol reference to children (type param -> generic, param -> function)
 - Reformat `optSymbol... symbol = optSymbol.value_or` to `symbol = diagnostics.Collect(...).value_or`
 - Remove `m_Scope` from `CompoundAssignmentStmtSyntax` like in other binary syntaxes
 - Associated types

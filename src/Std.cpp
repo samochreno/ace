@@ -370,6 +370,18 @@ impl Subtract[Self] for i8 {
     }
 }
 
+impl Equal[Self] for i8 {
+    self ::
+    equal(other: &Self): bool {
+        ret i8_equals(self, other);
+    }
+
+    self ::
+    not_equal(other: &Self): bool {
+        ret i8_not_equals(self, other);
+    }
+}
+
 impl AND[Self] for i8 {
     self ::
     and(other: &Self): Self {
@@ -518,6 +530,18 @@ impl Subtract[Self] for i16 {
     self ::
     subtract(other: &Self): Self {
         ret i16_subtraction(self, other);
+    }
+}
+
+impl Equal[Self] for i16 {
+    self ::
+    equal(other: &Self): bool {
+        ret i16_equals(self, other);
+    }
+
+    self ::
+    not_equal(other: &Self): bool {
+        ret i16_not_equals(self, other);
     }
 }
 
@@ -672,6 +696,18 @@ impl Subtract[Self] for i32 {
     }
 }
 
+impl Equal[Self] for i32 {
+    self ::
+    equal(other: &Self): bool {
+        ret i32_equals(self, other);
+    }
+
+    self ::
+    not_equal(other: &Self): bool {
+        ret i32_not_equals(self, other);
+    }
+}
+
 impl AND[Self] for i32 {
     self ::
     and(other: &Self): Self {
@@ -820,6 +856,18 @@ impl Subtract[Self] for i64 {
     self ::
     subtract(other: &Self): Self {
         ret i64_subtraction(self, other);
+    }
+}
+
+impl Equal[Self] for i64 {
+    self ::
+    equal(other: &Self): bool {
+        ret i64_equals(self, other);
+    }
+
+    self ::
+    not_equal(other: &Self): bool {
+        ret i64_not_equals(self, other);
     }
 }
 
@@ -974,6 +1022,18 @@ impl Subtract[Self] for u8 {
     }
 }
 
+impl Equal[Self] for u8 {
+    self ::
+    equal(other: &Self): bool {
+        ret u8_equals(self, other);
+    }
+
+    self ::
+    not_equal(other: &Self): bool {
+        ret u8_not_equals(self, other);
+    }
+}
+
 impl AND[Self] for u8 {
     self ::
     and(other: &Self): Self {
@@ -1122,6 +1182,18 @@ impl Subtract[Self] for u16 {
     self ::
     subtract(other: &Self): Self {
         ret u16_subtraction(self, other);
+    }
+}
+
+impl Equal[Self] for u16 {
+    self ::
+    equal(other: &Self): bool {
+        ret u16_equals(self, other);
+    }
+
+    self ::
+    not_equal(other: &Self): bool {
+        ret u16_not_equals(self, other);
     }
 }
 
@@ -1276,6 +1348,18 @@ impl Subtract[Self] for u32 {
     }
 }
 
+impl Equal[Self] for u32 {
+    self ::
+    equal(other: &Self): bool {
+        ret u32_equals(self, other);
+    }
+
+    self ::
+    not_equal(other: &Self): bool {
+        ret u32_not_equals(self, other);
+    }
+}
+
 impl AND[Self] for u32 {
     self ::
     and(other: &Self): Self {
@@ -1424,6 +1508,18 @@ impl Subtract[Self] for u64 {
     self ::
     subtract(other: &Self): Self {
         ret u64_subtraction(self, other);
+    }
+}
+
+impl Equal[Self] for u64 {
+    self ::
+    equal(other: &Self): bool {
+        ret u64_equals(self, other);
+    }
+
+    self ::
+    not_equal(other: &Self): bool {
+        ret u64_not_equals(self, other);
     }
 }
 
@@ -1578,6 +1674,18 @@ impl Subtract[Self] for int {
     }
 }
 
+impl Equal[Self] for int {
+    self ::
+    equal(other: &Self): bool {
+        ret int_equals(self, other);
+    }
+
+    self ::
+    not_equal(other: &Self): bool {
+        ret int_not_equals(self, other);
+    }
+}
+
 impl AND[Self] for int {
     self ::
     and(other: &Self): Self {
@@ -1654,10 +1762,10 @@ Subtract[Other]: trait {
 pub ::
 Equal[Other]: trait {
     self ::
-    equal(other: &Other): Self;
+    equal(other: &Other): bool;
 
     self ::
-    not_equal(other: &Other): Self;
+    not_equal(other: &Other): bool;
 }
 
 pub ::

@@ -786,6 +786,38 @@ namespace Ace
         return params;
     }
 
+    auto Scope::HasImpl(
+        TraitTypeSymbol* const trait,
+        ITypeSymbol* const type
+    ) -> bool
+    {
+        std::vector scopes{ trait->GetUnaliased()->GetScope() };
+        
+        const auto typeScope = type->GetUnaliased()->GetScope();
+        if (typeScope != scopes.front())
+        {
+            scopes.push_back(typeScope);
+        }
+
+        std::vector<TraitImplSymbol*> impls{};
+        std::for_each(begin(scopes), end(scopes),
+        [&](const std::shared_ptr<Scope>& scope)
+        {
+            const auto allImpls = scope->CollectSymbols<TraitImplSymbol>();
+
+            std::copy_if(begin(allImpls), end(allImpls), back_inserter(impls),
+            [&](TraitImplSymbol* const impl)
+            {
+                return
+                    DoPlaceholdersOverlap(trait, impl->GetTrait()) &&
+                    DoPlaceholdersOverlap(type,  impl->GetType());
+            });
+        });
+
+        ACE_ASSERT(impls.empty() || impls.size() == 1);
+        return !impls.empty();
+    }
+
     auto Scope::CollectImplOfFor(
         TraitTypeSymbol* const trait,
         ITypeSymbol* const type
@@ -814,6 +846,7 @@ namespace Ace
             });
         });
 
+        ACE_ASSERT(impls.empty() || impls.size() == 1);
         return impls.empty() ? std::nullopt : std::optional{ impls.front() };
     }
 
@@ -822,6 +855,8 @@ namespace Ace
         ITypeSymbol* const type
     ) -> std::optional<FunctionSymbol*>
     {
+        // TODO: Remove
+
         const auto optImpl = CollectImplOfFor(
             prototype->GetParentTrait(),
             type
@@ -1465,7 +1500,10 @@ namespace Ace
         else
         {
             const auto optTraitScopes = diagnostics.Collect(
-                context.BeginScope->CollectTraitScopes(nextNameSection->Name, type)
+                context.BeginScope->CollectTraitScopes(
+                    nextNameSection->Name,
+                    type
+                )
             );
             if (!optTraitScopes.has_value())
             {
@@ -1675,7 +1713,7 @@ namespace Ace
     }
 
     auto Scope::CollectTraitImplFor(
-        const Ident& name,
+        const SymbolNameSection& name,
         ITypeSymbol* type
     ) const -> Expected<std::optional<TraitImplSymbol*>>
     {
@@ -1698,8 +1736,9 @@ namespace Ace
 
         std::set<TraitImplSymbol*> implSet{};
         std::for_each(begin(rootTraits), end(rootTraits),
-        [&](TraitTypeSymbol* trait)
+        [&](TraitTypeSymbol* const trait)
         {
+            // TODO: Remove
             if (const auto optImpl = CollectImplOfFor(trait, type))
             {
                 implSet.insert(optImpl.value());
@@ -1749,62 +1788,6 @@ namespace Ace
         }
 
         return scopes;
-    }
-
-    auto Scope::CollectTraitScopes(
-        const Ident& name,
-        ITypeSymbol* const type
-    ) const -> Expected<std::vector<std::shared_ptr<const Scope>>>
-    {
-        auto diagnostics = DiagnosticBag::Create();
-
-        auto* const trait =
-            dynamic_cast<TraitTypeSymbol*>(type->GetUnaliased());
-        if (trait)
-        {
-            return Expected
-            {
-                std::vector<std::shared_ptr<const Scope>>
-                {
-                    trait->GetPrototypeScope()
-                },
-                std::move(diagnostics),
-            };
-        }
-
-        const auto optOptImpl = diagnostics.Collect(
-            CollectTraitImplFor(name, type)
-        );
-        if (!optOptImpl.has_value())
-        {
-            return std::move(diagnostics);
-        }
-
-        if (optOptImpl.value().has_value())
-        {
-            return Expected
-            {
-                std::vector<std::shared_ptr<const Scope>>
-                {
-                    optOptImpl.value().value()->GetBodyScope()
-                },
-                std::move(diagnostics),
-            };
-        }
-
-        const auto traits = CollectConstrainedTraits(type);
-
-        std::vector<std::shared_ptr<const Scope>> scopes{};
-        std::for_each(begin(traits), end(traits),
-        [&](TraitTypeSymbol* const trait)
-        {
-            if (trait->GetPrototypeScope()->HasSymbolWithName(name.String))
-            {
-                scopes.push_back(trait->GetPrototypeScope());
-            }
-        });
-
-        return Expected{ scopes, std::move(diagnostics) };
     }
 
     auto Scope::ResolveSpecialSymbol(

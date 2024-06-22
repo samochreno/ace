@@ -235,7 +235,6 @@ namespace Ace
             const std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>& optArgTypes
         ) const -> Expected<T*>
         {
-
             const SymbolName symbolName
             {
                 SymbolNameSection{ name },
@@ -360,15 +359,18 @@ namespace Ace
             }
             else
             {
-                const auto optTraitScopes = diagnostics.Collect(
-                    CollectTraitScopes(name.Name, selfType)
+                auto traitDiagnostics = DiagnosticBag::Create();
+                optSymbol = traitDiagnostics.Collect(
+                    CollectTraitImplFor(name, selfType)
                 );
-                if (!optTraitScopes.has_value())
+                if (!optSymbol.has_value())
                 {
                     return std::move(diagnostics);
                 }
 
-                auto traitDiagnostics = DiagnosticBag::Create();
+                    name
+                ));
+
                 optSymbol = traitDiagnostics.Collect(ResolveSymbolInScopes({
                     srcLocation,
                     shared_from_this(),
@@ -516,6 +518,10 @@ namespace Ace
 
         auto CollectTypeParams() const -> std::vector<TypeParamTypeSymbol*>;
 
+        static auto HasImpl(
+            TraitTypeSymbol* const trait,
+            ITypeSymbol* const type
+        ) -> bool;
         static auto CollectImplOfFor(
             TraitTypeSymbol* const trait,
             ITypeSymbol* const type
@@ -593,7 +599,7 @@ namespace Ace
             ITypeSymbol* const type
         ) -> std::optional<InherentImplSymbol*>;
         auto CollectTraitImplFor(
-            const Ident& name,
+            const SymbolNameSection& name,
             ITypeSymbol* const type
         ) const -> Expected<std::optional<TraitImplSymbol*>>;
 
@@ -601,10 +607,6 @@ namespace Ace
             const std::string& name,
             ITypeSymbol* const type
         ) -> std::vector<std::shared_ptr<const Scope>>;
-        auto CollectTraitScopes(
-            const Ident& name,
-            ITypeSymbol* const type
-        ) const -> Expected<std::vector<std::shared_ptr<const Scope>>>;
 
         static auto ResolveSpecialSymbol(
             const SymbolResolutionContext& context

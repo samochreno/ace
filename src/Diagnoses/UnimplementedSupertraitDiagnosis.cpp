@@ -17,11 +17,7 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optSupertraitImpl = Scope::CollectImplOfFor(
-            supertrait->GetTrait(),
-            impl->GetType()
-        );
-        if (!optSupertraitImpl.has_value())
+        if (!Scope::HasImpl(supertrait->GetTrait(), impl->GetType()))
         {
             diagnostics.Add(CreateUnimplementedSupertraitError(
                 supertrait,

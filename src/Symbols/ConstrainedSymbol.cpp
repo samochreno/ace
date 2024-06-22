@@ -33,12 +33,7 @@ namespace Ace
                 InstantiationContext{ typeArgs, std::nullopt }
             );
 
-            const bool doesTypeImplementTrait = Scope::CollectImplOfFor(
-                trait,
-                constrainedType
-            ).has_value();
-
-            if (doesTypeImplementTrait)
+            if (Scope::HasImpl(trait, constrainedType))
             {
                 return;
             }
