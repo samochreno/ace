@@ -1,0 +1,10 @@
+increment(value: &int): void {
+    value += 1;
+}
+
+main(): int {
+    value: int = 10;
+    increment(value);
+    std::print_int(value);
+    ret 0;
+}

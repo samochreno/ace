@@ -1,0 +1,12 @@
+Vector2: struct {
+    x: int,
+    y: int,
+}
+
+main(): int {
+    vec_1: *Vector2 = box new Vector2 { x: -7, y: 4 };
+    vec_2: **Vector2 = box vec_1;
+    vec_3: &**Vector2 = vec_2;
+    std::print_int(vec_3.x);
+    ret 0;
+}

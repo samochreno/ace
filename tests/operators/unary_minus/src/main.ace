@@ -1,0 +1,4 @@
+main(): int {
+    std::print_int(-5);
+    ret 0;
+}

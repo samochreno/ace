@@ -1,0 +1,10 @@
+Node: struct {
+    value: int
+}
+
+main(): int {
+    strong: *Node = box new Node { value: 8 };
+    copy: *Node = strong;
+    std::print_int(copy.value);
+    ret 0;
+}

@@ -27,7 +27,7 @@ function(ace_read_expectation_lines file_path output_var)
         list(APPEND lines "${line}")
     endforeach()
 
-    set(${output_var} "${lines}" PARENT_SCOPE)
+    set(${output_var} ${lines} PARENT_SCOPE)
 endfunction()
 
 function(ace_assert_contains_all haystack description file_path)

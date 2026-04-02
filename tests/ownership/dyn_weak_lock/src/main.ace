@@ -1,0 +1,19 @@
+Dyn: trait {
+    *self ::
+    value(): int;
+}
+
+impl Dyn for int {
+    *self ::
+    value(): int {
+        ret unbox self;
+    }
+}
+
+main(): int {
+    strong: *Dyn = box 9;
+    weak: ~Dyn = strong;
+    locked: *Dyn = lock weak;
+    std::print_int(locked.value());
+    ret 0;
+}

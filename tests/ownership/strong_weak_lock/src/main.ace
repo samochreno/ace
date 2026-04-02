@@ -1,0 +1,11 @@
+Node: struct {
+    value: int
+}
+
+main(): int {
+    strong: *Node = box new Node { value: 6 };
+    weak: ~Node = strong;
+    locked: *Node = lock weak;
+    std::print_int(locked.value);
+    ret 0;
+}

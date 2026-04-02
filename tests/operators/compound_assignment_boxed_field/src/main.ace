@@ -1,0 +1,12 @@
+Vector2: struct {
+    x: int,
+    y: int,
+}
+
+main(): int {
+    value: Vector2 = new Vector2 { x: 0, y: 2 };
+    boxed_value: *Vector2 = box value;
+    boxed_value.y *= 2;
+    std::print_int(boxed_value.y);
+    ret 0;
+}

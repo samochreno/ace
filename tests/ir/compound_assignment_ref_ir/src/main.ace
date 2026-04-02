@@ -1,0 +1,9 @@
+increment(value: &int): void {
+    value += 1;
+}
+
+main(): int {
+    value: int = 5;
+    increment(value);
+    ret 0;
+}

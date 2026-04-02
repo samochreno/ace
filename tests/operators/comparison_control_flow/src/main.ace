@@ -1,0 +1,9 @@
+main(): int {
+    if 3 < 5 {
+        std::print_int(1);
+    } else {
+        std::print_int(0);
+    }
+
+    ret 0;
+}

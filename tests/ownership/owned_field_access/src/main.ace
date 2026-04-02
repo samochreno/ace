@@ -1,0 +1,13 @@
+Node: struct {
+    value: int
+}
+
+Holder: struct {
+    node: *Node
+}
+
+main(): int {
+    holder: Holder = new Holder { node: box new Node { value: 6 } };
+    std::print_int(holder.node.value);
+    ret 0;
+}

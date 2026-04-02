@@ -1,0 +1,5 @@
+main(): int {
+    value: i32 = 5i32 + 9i16;
+    std::print_int(cast[int](value));
+    ret 0;
+}

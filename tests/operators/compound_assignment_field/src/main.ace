@@ -1,0 +1,11 @@
+Vector2: struct {
+    x: int,
+    y: int,
+}
+
+main(): int {
+    value: Vector2 = new Vector2 { x: 0, y: 27 };
+    value.y -= 1;
+    std::print_int(value.y);
+    ret 0;
+}

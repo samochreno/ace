@@ -1,0 +1,18 @@
+Node: struct {
+    value: int
+}
+
+Holder: struct {
+    node: *Node
+}
+
+increment(value: &int): void {
+    value += 1;
+}
+
+main(): int {
+    holder: Holder = new Holder { node: box new Node { value: 7 } };
+    increment(holder.node.value);
+    std::print_int(holder.node.value);
+    ret 0;
+}

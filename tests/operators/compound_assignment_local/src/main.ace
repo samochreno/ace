@@ -1,0 +1,6 @@
+main(): int {
+    value: int = 10;
+    value += 1;
+    std::print_int(value);
+    ret 0;
+}
