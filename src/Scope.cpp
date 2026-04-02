@@ -791,6 +791,11 @@ namespace Ace
         ITypeSymbol* const type
     ) -> bool
     {
+        if (dynamic_cast<TypeParamTypeSymbol*>(type->GetUnaliasedType()))
+        {
+            return false;
+        }
+
         std::vector scopes{ trait->GetUnaliased()->GetScope() };
         
         const auto typeScope = type->GetUnaliased()->GetScope();
@@ -799,18 +804,24 @@ namespace Ace
             scopes.push_back(typeScope);
         }
 
-        std::vector<TraitImplSymbol*> impls{};
+        std::set<TraitImplSymbol*> impls{};
         std::for_each(begin(scopes), end(scopes),
         [&](const std::shared_ptr<Scope>& scope)
         {
             const auto allImpls = scope->CollectSymbols<TraitImplSymbol>();
 
-            std::copy_if(begin(allImpls), end(allImpls), back_inserter(impls),
+            std::for_each(begin(allImpls), end(allImpls),
             [&](TraitImplSymbol* const impl)
             {
-                return
+                const bool doesOverlap =
                     DoPlaceholdersOverlap(trait, impl->GetTrait()) &&
                     DoPlaceholdersOverlap(type,  impl->GetType());
+                if (doesOverlap)
+                {
+                    impls.insert(dynamic_cast<TraitImplSymbol*>(
+                        impl->GetUnaliased()
+                    ));
+                }
             });
         });
 
@@ -823,6 +834,11 @@ namespace Ace
         ITypeSymbol* const type
     ) -> std::optional<TraitImplSymbol*>
     {
+        if (dynamic_cast<TypeParamTypeSymbol*>(type->GetUnaliasedType()))
+        {
+            return std::nullopt;
+        }
+
         std::vector scopes{ trait->GetUnaliased()->GetScope() };
         
         const auto typeScope = type->GetUnaliased()->GetScope();
@@ -831,23 +847,29 @@ namespace Ace
             scopes.push_back(typeScope);
         }
 
-        std::vector<TraitImplSymbol*> impls{};
+        std::set<TraitImplSymbol*> impls{};
         std::for_each(begin(scopes), end(scopes),
         [&](const std::shared_ptr<Scope>& scope)
         {
             const auto allImpls = scope->CollectSymbols<TraitImplSymbol>();
 
-            std::copy_if(begin(allImpls), end(allImpls), back_inserter(impls),
+            std::for_each(begin(allImpls), end(allImpls),
             [&](TraitImplSymbol* const impl)
             {
-                return
+                const bool doesOverlap =
                     DoPlaceholdersOverlap(trait, impl->GetTrait()) &&
                     DoPlaceholdersOverlap(type,  impl->GetType());
+                if (doesOverlap)
+                {
+                    impls.insert(dynamic_cast<TraitImplSymbol*>(
+                        impl->GetUnaliased()
+                    ));
+                }
             });
         });
 
         ACE_ASSERT(impls.empty() || impls.size() == 1);
-        return impls.empty() ? std::nullopt : std::optional{ impls.front() };
+        return impls.empty() ? std::nullopt : std::optional{ *begin(impls) };
     }
 
     auto Scope::CollectImplOfFor(
@@ -1500,7 +1522,7 @@ namespace Ace
         else
         {
             const auto optTraitScopes = diagnostics.Collect(
-                context.BeginScope->CollectTraitScopes(
+                context.BeginScope->CollectTraitResolutionScopes(
                     nextNameSection->Name,
                     type
                 )
@@ -1749,7 +1771,7 @@ namespace Ace
         std::copy_if(begin(implSet), end(implSet), back_inserter(impls),
         [&](TraitImplSymbol* const impl)
         {
-            return impl->GetBodyScope()->HasSymbolWithName(name.String);
+            return impl->GetBodyScope()->HasSymbolWithName(name.Name.String);
         });
 
         if (impls.empty())
@@ -1764,13 +1786,69 @@ namespace Ace
         if (impls.size() > 1)
         {
             diagnostics.Add(CreateAmbiguousSymbolRefError(
-                name.SrcLocation,
-                CollectMatchingNameImplSymbols(name.String, impls)
+                name.CreateSrcLocation(),
+                CollectMatchingNameImplSymbols(name.Name.String, impls)
             ));
             return std::move(diagnostics);
         }
 
         return Expected{ impls.front(), std::move(diagnostics) };
+    }
+
+    auto Scope::CollectTraitResolutionScopes(
+        const SymbolNameSection& name,
+        ITypeSymbol* type
+    ) const -> Expected<std::vector<std::shared_ptr<const Scope>>>
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        type = type->GetUnaliasedType();
+
+        if (auto* const trait = dynamic_cast<TraitTypeSymbol*>(type))
+        {
+            return Expected
+            {
+                std::vector<std::shared_ptr<const Scope>>
+                {
+                    trait->GetPrototypeScope()
+                },
+                std::move(diagnostics),
+            };
+        }
+
+        const auto optOptImpl = diagnostics.Collect(
+            CollectTraitImplFor(name, type)
+        );
+        if (!optOptImpl.has_value())
+        {
+            return std::move(diagnostics);
+        }
+
+        if (optOptImpl.value().has_value())
+        {
+            return Expected
+            {
+                std::vector<std::shared_ptr<const Scope>>
+                {
+                    optOptImpl.value().value()->GetBodyScope()
+                },
+                std::move(diagnostics),
+            };
+        }
+
+        const auto traits = CollectConstrainedTraits(type);
+
+        std::vector<std::shared_ptr<const Scope>> scopes{};
+        std::for_each(begin(traits), end(traits),
+        [&](TraitTypeSymbol* const trait)
+        {
+            if (trait->GetPrototypeScope()->HasSymbolWithName(name.Name.String))
+            {
+                scopes.push_back(trait->GetPrototypeScope());
+            }
+        });
+
+        return Expected{ scopes, std::move(diagnostics) };
     }
 
     auto Scope::CollectInherentScopes(

@@ -15,18 +15,7 @@ namespace Ace
     ) -> bool
     {
         conversative = conversative->GetUnaliasedType();
-         speculative =  speculative->GetUnaliasedType();
-
-        Out << "C: "<< conversative->CreateSignature() << "\n";
-        Out << "S: "<< speculative->CreateSignature() << "\n";
-
-        if (
-            conversative->CreateSignature() == "std::Add[std::?658::?659_add::Other]" &&
-            speculative->CreateSignature() == "std::Add[std::Int]"
-           )
-        {
-            [](){}();
-        }
+        speculative = speculative->GetUnaliasedType();
 
         if (conversative == speculative)
         {
@@ -43,7 +32,6 @@ namespace Ace
             return true;
         }
 
-#if 0
         if (speculativeParam)
         {
             const auto scope = speculativeParam->GetScope();
@@ -63,7 +51,7 @@ namespace Ace
             );
             return unimplementedTrait == end(traits);
         }
-#else
+
         if (conversativeParam)
         {
             const auto scope = conversativeParam->GetScope();
@@ -75,12 +63,14 @@ namespace Ace
                 end  (traits),
                 [&](TraitTypeSymbol* const trait)
                 {
-                    return Scope::HasImpl(trait, speculative);
+                    return Scope::CollectImplOfFor(
+                        trait,
+                        speculative
+                    ).has_value();
                 }
             );
             return unimplementedTrait == end(traits);
         }
-#endif
 
         if (conversative->GetRoot() != speculative->GetRoot())
         {

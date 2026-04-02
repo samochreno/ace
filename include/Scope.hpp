@@ -360,16 +360,14 @@ namespace Ace
             else
             {
                 auto traitDiagnostics = DiagnosticBag::Create();
-                optSymbol = traitDiagnostics.Collect(
-                    CollectTraitImplFor(name, selfType)
+                const auto optTraitScopes = traitDiagnostics.Collect(
+                    CollectTraitResolutionScopes(name, selfType)
                 );
-                if (!optSymbol.has_value())
+                if (!optTraitScopes.has_value())
                 {
+                    diagnostics.Add(std::move(traitDiagnostics));
                     return std::move(diagnostics);
                 }
-
-                    name
-                ));
 
                 optSymbol = traitDiagnostics.Collect(ResolveSymbolInScopes({
                     srcLocation,
@@ -602,6 +600,10 @@ namespace Ace
             const SymbolNameSection& name,
             ITypeSymbol* const type
         ) const -> Expected<std::optional<TraitImplSymbol*>>;
+        auto CollectTraitResolutionScopes(
+            const SymbolNameSection& name,
+            ITypeSymbol* const type
+        ) const -> Expected<std::vector<std::shared_ptr<const Scope>>>;
 
         static auto CollectInherentScopes(
             const std::string& name,
