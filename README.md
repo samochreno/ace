@@ -18,43 +18,17 @@ git clone --recursive https://github.com/samochreno/ace
 cd ace
 ```
 
-- Build the dependencies
+- Install dependencies with Homebrew
 
 ```bash
-cd dep
+brew install cmake ninja llvm@16 termcolor nlohmann-json
 ```
 
-```bash
-# ikalnytskyi/termcolor
-cd termcolor
-cmake -B build
-cmake --build build
-cmake --build build --target install
-```
+- Configure and build
 
 ```bash
-# nlohmann/json
-cd nlohmann/json
-cmake -B build
-cmake --build build
-cmake --build build --target install
-cd ../..
-```
-
-```bash
-# llvm/llvm-project
-cd llvm-project/llvm
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-cmake --build build --target install
-cd ../..
-```
-
-- Build the project
-
-```bash
-cmake -B build
-cmake --build build
+cmake --preset dev
+cmake --build --preset dev
 ```
 
 ## Usage
@@ -62,7 +36,13 @@ cmake --build build
 - See [example](/example)
 
 ```bash
-ace -oexample/build example/package.json
+./build/ace -oexample/build example/package.json
+```
+
+## Smoke Test
+
+```bash
+ctest --preset smoke
 ```
 
 ## License

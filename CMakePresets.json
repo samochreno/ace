@@ -1,0 +1,44 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 29,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "dev",
+      "displayName": "Development",
+      "description": "Configure Ace against Homebrew LLVM 16 and local dependencies.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "LLVM_DIR": "/opt/homebrew/opt/llvm@16/lib/cmake/llvm",
+        "CMAKE_PREFIX_PATH": "/opt/homebrew/opt/termcolor;/opt/homebrew/opt/nlohmann-json"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "dev",
+      "displayName": "Build",
+      "configurePreset": "dev",
+      "environment": {
+        "PATH": "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/opt/llvm@16/bin:$penv{PATH}"
+      }
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "smoke",
+      "displayName": "Smoke",
+      "configurePreset": "dev",
+      "environment": {
+        "PATH": "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/opt/llvm@16/bin:$penv{PATH}"
+      },
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
