@@ -321,14 +321,16 @@ namespace Ace::Application
         return Void{ std::move(diagnostics) };
     }
 
-    auto Main(const std::vector<std::string_view>& args) -> void
+    auto Main(const std::vector<std::string_view>& args) -> int
     {
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
 
-        if (!Compile(std::vector<std::string_view>{ "-oexample/build", "example/package.json" }))
+        if (!Compile(args))
         {
-            return;
+            return 1;
         }
+
+        return 0;
     }
 }

@@ -48,4 +48,31 @@ if(BUILD_TESTING)
             -DLLVM_BIN_DIR=${ACE_LLVM_BIN_DIR}
             -P ${CMAKE_SOURCE_DIR}/cmake/SmokeExample.cmake
     )
+
+    file(GLOB_RECURSE ACE_BEHAVIOR_PACKAGES CONFIGURE_DEPENDS
+        "${CMAKE_SOURCE_DIR}/tests/*/package.json"
+    )
+    foreach(ACE_BEHAVIOR_PACKAGE IN LISTS ACE_BEHAVIOR_PACKAGES)
+        get_filename_component(ACE_BEHAVIOR_CASE_DIR "${ACE_BEHAVIOR_PACKAGE}" DIRECTORY)
+        file(RELATIVE_PATH ACE_BEHAVIOR_CASE_RELATIVE "${CMAKE_SOURCE_DIR}/tests" "${ACE_BEHAVIOR_CASE_DIR}")
+        string(REPLACE "/" ";" ACE_BEHAVIOR_CASE_PARTS "${ACE_BEHAVIOR_CASE_RELATIVE}")
+        list(GET ACE_BEHAVIOR_CASE_PARTS 0 ACE_BEHAVIOR_AREA)
+        string(REPLACE "/" "__" ACE_BEHAVIOR_CASE_NAME "${ACE_BEHAVIOR_CASE_RELATIVE}")
+
+        add_test(
+            NAME behavior__${ACE_BEHAVIOR_CASE_NAME}
+            COMMAND ${CMAKE_COMMAND}
+                -DACE_BINARY=$<TARGET_FILE:${PROJECT_NAME}>
+                -DBUILD_DIR=${CMAKE_BINARY_DIR}
+                -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+                -DLLVM_BIN_DIR=${ACE_LLVM_BIN_DIR}
+                -DCASE_DIR=${ACE_BEHAVIOR_CASE_DIR}
+                -P ${CMAKE_SOURCE_DIR}/cmake/RunBehaviorCase.cmake
+        )
+        set_tests_properties(
+            behavior__${ACE_BEHAVIOR_CASE_NAME}
+            PROPERTIES
+                LABELS "behavior;${ACE_BEHAVIOR_AREA}"
+        )
+    endforeach()
 endif()

@@ -27,5 +27,5 @@ namespace Ace::Application
         ITypeSymbol* const functionTypeSymbol
     ) -> Diagnosed<std::shared_ptr<const BlockStmtSema>>;
 
-    auto Main(const std::vector<std::string_view>& args) -> void;
+    auto Main(const std::vector<std::string_view>& args) -> int;
 }
