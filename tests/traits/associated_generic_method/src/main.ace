@@ -1,0 +1,17 @@
+Vector2: struct {
+    x: int,
+    y: int,
+}
+
+impl Vector2 {
+    self ::
+    pick[T](): int {
+        ret self.x + self.y;
+    }
+}
+
+main(): int {
+    vec: Vector2 = new Vector2 { x: 2, y: 3 };
+    std::print_int(vec.pick[int]());
+    ret 0;
+}

@@ -1,0 +1,17 @@
+Dyn: trait {
+    *self ::
+    value(): int;
+}
+
+impl Dyn for int {
+    *self ::
+    value(): int {
+        ret unbox self;
+    }
+}
+
+main(): int {
+    dyn: *Dyn = box 4;
+    std::print_int(dyn.value());
+    ret 0;
+}

@@ -1,0 +1,20 @@
+Need: trait {
+    self ::
+    get(): int;
+}
+
+impl Need for int {
+    self ::
+    get(): int {
+        ret self;
+    }
+}
+
+need[T](value: &T): int where T: Need {
+    ret value.get();
+}
+
+main(): int {
+    std::print_int(need(4));
+    ret 0;
+}

@@ -1,0 +1,14 @@
+Generic[T]: struct {
+    value: T
+}
+
+impl[T] Generic[T] {
+    new(value: int): Self {
+        ret new Self { value };
+    }
+}
+
+main(): int {
+    std::print_int(Generic[int]::new(3).value);
+    ret 0;
+}

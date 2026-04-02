@@ -1,0 +1,19 @@
+Size: trait {
+    size(): Self;
+}
+
+size[T](): T
+where T: Size {
+    ret T::size();
+}
+
+impl Size for int {
+    size(): Self {
+        ret 8;
+    }
+}
+
+main(): int {
+    std::print_int(size[int]());
+    ret 0;
+}

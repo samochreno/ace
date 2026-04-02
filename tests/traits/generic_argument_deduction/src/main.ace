@@ -1,0 +1,13 @@
+Wrapper[T]: struct {
+    value: T
+}
+
+unwrap[T](wrapped: Wrapper[T]): T {
+    ret wrapped.value;
+}
+
+main(): int {
+    wrapped: Wrapper[int] = new Wrapper[int] { value: 2 };
+    std::print_int(unwrap(wrapped));
+    ret 0;
+}

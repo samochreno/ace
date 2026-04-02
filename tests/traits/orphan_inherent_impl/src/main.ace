@@ -1,0 +1,10 @@
+impl int {
+    self ::
+    value(): int {
+        ret self;
+    }
+}
+
+main(): int {
+    ret 0;
+}

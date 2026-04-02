@@ -1,0 +1,12 @@
+Need: trait {
+    self ::
+    get(): int;
+}
+
+need[T](value: &T): int where T: Need {
+    ret value.get();
+}
+
+main(): int {
+    ret need(4);
+}

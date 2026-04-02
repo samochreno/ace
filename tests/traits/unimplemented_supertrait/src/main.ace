@@ -1,0 +1,12 @@
+Base: trait {
+}
+
+Derived: trait: Base {
+}
+
+impl Derived for int {
+}
+
+main(): int {
+    ret 0;
+}

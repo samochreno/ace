@@ -1,0 +1,29 @@
+Base: trait {
+    self ::
+    base(): int;
+}
+
+Derived: trait: Base {
+    self ::
+    derived(): int;
+}
+
+impl Base for int {
+    self ::
+    base(): int {
+        ret self;
+    }
+}
+
+impl Derived for int {
+    self ::
+    derived(): int {
+        ret 5;
+    }
+}
+
+main(): int {
+    value: int = 4;
+    std::print_int(value.base() + value.derived());
+    ret 0;
+}
