@@ -1,0 +1,5 @@
+main(): int {
+    obj: lib::Type = lib::Type::new(5);
+    std::print_int(obj.field());
+    ret 0;
+}

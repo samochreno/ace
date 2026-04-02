@@ -1,0 +1,12 @@
+value(flag: bool): int {
+    if flag {
+        ret 15;
+    } else {
+        ret 16;
+    }
+}
+
+main(): int {
+    std::print_int(value(false));
+    ret 0;
+}

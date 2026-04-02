@@ -30,11 +30,27 @@
   ],
   "testPresets": [
     {
+      "name": "behavior",
+      "displayName": "Behavior",
+      "configurePreset": "dev",
+      "environment": {
+        "PATH": "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/opt/llvm@16/bin:$penv{PATH}"
+      },
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
       "name": "smoke",
       "displayName": "Smoke",
       "configurePreset": "dev",
       "environment": {
         "PATH": "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/opt/llvm@16/bin:$penv{PATH}"
+      },
+      "filter": {
+        "include": {
+          "name": "smoke_example"
+        }
       },
       "output": {
         "outputOnFailure": true

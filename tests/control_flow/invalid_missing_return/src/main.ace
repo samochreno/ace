@@ -1,0 +1,9 @@
+value(flag: bool): int {
+    if flag {
+        ret 4;
+    }
+}
+
+main(): int {
+    ret value(true);
+}

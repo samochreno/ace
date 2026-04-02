@@ -1,0 +1,4 @@
+main(): int {
+    std::print_int(cast[int](1i8) + cast[int](2i16) + cast[int](3i32));
+    ret 0;
+}

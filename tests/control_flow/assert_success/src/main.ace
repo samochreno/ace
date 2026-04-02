@@ -1,0 +1,6 @@
+main(): int {
+    value: int = 7;
+    assert value == 7;
+    std::print_int(value);
+    ret 0;
+}

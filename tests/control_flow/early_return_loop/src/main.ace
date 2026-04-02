@@ -1,0 +1,12 @@
+value(): int {
+    while true {
+        ret 12;
+    }
+
+    ret 16;
+}
+
+main(): int {
+    std::print_int(value());
+    ret 0;
+}

@@ -1,0 +1,11 @@
+lib: mod {
+    private: mod {
+        func(): int {
+            ret 9;
+        }
+    }
+}
+
+main(): int {
+    ret lib::private::func();
+}

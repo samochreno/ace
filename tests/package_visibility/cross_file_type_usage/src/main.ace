@@ -1,0 +1,5 @@
+main(): int {
+    node: Node = new Node { value: 3 };
+    std::print_int(node.value);
+    ret 0;
+}

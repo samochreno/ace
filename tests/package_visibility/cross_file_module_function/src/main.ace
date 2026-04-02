@@ -1,0 +1,4 @@
+main(): int {
+    std::print_int(lib::func());
+    ret 0;
+}

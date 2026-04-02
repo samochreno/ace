@@ -1,0 +1,18 @@
+lib: mod {
+    pub ::
+    Type: struct {
+        field: int
+    }
+
+    impl Type {
+        pub ::
+        new(field: int): Self {
+            ret new Self { field };
+        }
+
+        pub self ::
+        field(): int {
+            ret self.field;
+        }
+    }
+}

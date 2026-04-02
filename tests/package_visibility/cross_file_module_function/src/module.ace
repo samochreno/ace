@@ -1,0 +1,6 @@
+lib: mod {
+    pub ::
+    func(): int {
+        ret 10;
+    }
+}

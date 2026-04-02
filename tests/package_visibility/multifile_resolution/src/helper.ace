@@ -1,0 +1,3 @@
+helper(): int {
+    ret 7;
+}

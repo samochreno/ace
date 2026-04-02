@@ -12,7 +12,7 @@ Ace is a statically typed, memory safe, multi paradigm programming language with
 ## Installation
 
 - Tested setup: macOS Apple Silicon with Homebrew and LLVM 16
-- The bundled `dev` and `smoke` presets currently assume Homebrew is installed under `/opt/homebrew`
+- The bundled `dev`, `behavior`, and `smoke` presets currently assume Homebrew is installed under `/opt/homebrew`
 - Clone the repository
 
 ```bash
@@ -41,12 +41,27 @@ cmake --build --preset dev
 ./build/ace -oexample/build example/package.json
 ```
 
-## Smoke Test
+## Tests
 
-- Runs the full end-to-end check: builds `ace`, compiles the bundled example, runs `./example/build/example`, and verifies the output is `0`
+- Runs the full behavioral suite:
+
+```bash
+ctest --preset behavior
+```
+
+- Runs only the original end-to-end smoke check: builds `ace`, compiles the bundled example, runs `./example/build/example`, and verifies the output is `0`
 
 ```bash
 ctest --preset smoke
+```
+
+- To focus on one area:
+
+```bash
+cd build
+ctest --output-on-failure -L scope
+ctest --output-on-failure -L traits
+ctest --output-on-failure -L operators
 ```
 
 ## License

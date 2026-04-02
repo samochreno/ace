@@ -1,0 +1,6 @@
+impl Node {
+    self ::
+    value(): int {
+        ret self.value;
+    }
+}

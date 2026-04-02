@@ -1,0 +1,10 @@
+main(): int {
+    value: int = 3;
+
+    while value < 3 {
+        value += 1;
+    }
+
+    std::print_int(value);
+    ret 0;
+}
