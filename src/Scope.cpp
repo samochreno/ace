@@ -898,24 +898,28 @@ namespace Ace
 
         auto* const firstFunction = 
             dynamic_cast<FunctionSymbol*>(it->second.front().get());
-        if (!firstFunction->IsInstance())
-        {
-            ACE_ASSERT(it->second.size() == 1);
-            return firstFunction;
-        }
+        ACE_ASSERT(firstFunction);
+        ACE_ASSERT(it->second.size() == 1);
+
+        auto* const functionRoot = firstFunction->IsInstance() ?
+            dynamic_cast<FunctionSymbol*>(firstFunction->GetGenericRoot()) :
+            firstFunction;
+        ACE_ASSERT(functionRoot);
 
         const auto optFunction = DiagnosticBag::Create().Collect(
             Scope::CollectGenericInstance(
                 SrcLocation{ prototype->GetCompilation() },
-                firstFunction->GetGenericRoot(),
-                prototype->GetTypeArgs(),
+                functionRoot,
+                optImpl.value()->GetTrait()->GetTypeArgs(),
                 std::nullopt,
-                prototype->GetSelfType()
+                optImpl.value()->GetType()
             )
         );
         if (!optFunction.has_value())
         {
-            return std::nullopt;
+            return firstFunction->IsPlaceholder() ?
+                std::nullopt :
+                std::optional{ firstFunction };
         }
 
         auto* const castedFunction =

@@ -270,6 +270,11 @@ namespace Ace
         );
         if (!areArgsConvertible)
         {
+            diagnostics.Add(CreateUndeclaredBinaryOpError(
+                srcLocation,
+                lhsTypeInfo.Symbol,
+                rhsTypeInfo.Symbol
+            ));
             return std::move(diagnostics);
         }
 

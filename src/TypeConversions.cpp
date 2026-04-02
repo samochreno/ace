@@ -26,6 +26,9 @@ namespace Ace
         const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>& fromOpMap
     ) -> std::optional<FunctionSymbol*>
     {
+        fromType = fromType->GetWithoutRef()->GetUnaliasedType();
+        targetType = targetType->GetWithoutRef()->GetUnaliasedType();
+
         const auto fromOpMapIt = fromOpMap.find(targetType);
         if (fromOpMapIt == end(fromOpMap))
         {
@@ -295,6 +298,31 @@ namespace Ace
 
         const bool isRef = expr->GetTypeInfo().Symbol->IsRef();
         const bool isTargetRef = targetTypeInfo.Symbol->IsRef();
+        auto* const exprValueType = expr->GetTypeInfo().Symbol->GetWithoutRef();
+        auto* const targetValueType = targetTypeInfo.Symbol->GetWithoutRef();
+
+        if (
+            isTargetRef &&
+            (exprValueType->GetUnaliased() != targetValueType->GetUnaliased())
+        )
+        {
+            const auto convertedValueExpr = diagnostics.Collect(CreateConverted(
+                expr,
+                TypeInfo
+                {
+                    targetValueType,
+                    expr->GetTypeInfo().ValueKind,
+                },
+                function
+            ));
+
+            expr = std::make_shared<const RefExprSema>(
+                convertedValueExpr->GetSrcLocation(),
+                convertedValueExpr
+            );
+
+            return CreateConvertedReturn(expr, std::move(diagnostics));
+        }
 
         if (isRef)
         {

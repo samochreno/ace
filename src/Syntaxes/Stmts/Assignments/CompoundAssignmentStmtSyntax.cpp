@@ -57,10 +57,20 @@ namespace Ace
             m_RHSExpr->CreateExprSema()
         );
 
+        const auto lhsTypeInfo = [&]()
+        {
+            const auto typeInfo = lhsExprSema->GetTypeInfo();
+            return TypeInfo
+            {
+                typeInfo.Symbol->GetWithoutRef(),
+                typeInfo.ValueKind,
+            };
+        }();
+
         const auto opSymbol = diagnostics.Collect(ResolveBinaryOpSymbol(
             m_OpSrcLocation,
             GetScope(),
-            lhsExprSema->GetTypeInfo(),
+            lhsTypeInfo,
             rhsExprSema->GetTypeInfo(),
             m_Op
         )).value_or(

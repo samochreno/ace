@@ -116,12 +116,26 @@ namespace Ace
 
     static auto CreateStaticVarRefExprLoweredStmts(
         const SrcLocation& srcLocation,
-        const std::shared_ptr<const IExprSema>& lhsExpr,
+        const std::shared_ptr<const IExprSema>& assignmentLHSExpr,
+        const std::shared_ptr<const IExprSema>& opLHSExpr,
         const std::shared_ptr<const IExprSema>& rhsExpr,
         FunctionSymbol* const opSymbol
     ) -> std::vector<std::shared_ptr<const IStmtSema>>
     {
         std::vector<std::shared_ptr<const IStmtSema>> stmts{};
+
+        const auto loweredAssignmentLHSExpr = [&]() -> std::shared_ptr<const IExprSema>
+        {
+            if (!assignmentLHSExpr->GetTypeInfo().Symbol->IsRef())
+            {
+                return assignmentLHSExpr;
+            }
+
+            return std::make_shared<const DerefExprSema>(
+                assignmentLHSExpr->GetSrcLocation(),
+                assignmentLHSExpr
+            );
+        }();
 
         // From:
         // lhs += rhs;
@@ -131,14 +145,14 @@ namespace Ace
 
         const auto userBinaryExpr = std::make_shared<const UserBinaryExprSema>(
             srcLocation,
-            lhsExpr,
+            opLHSExpr,
             rhsExpr,
             opSymbol
         );
 
         const auto assignmentStmt = std::make_shared<const SimpleAssignmentStmtSema>(
             srcLocation,
-            lhsExpr,
+            loweredAssignmentLHSExpr,
             userBinaryExpr
         );
         stmts.push_back(assignmentStmt);
@@ -256,6 +270,7 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const FieldVarRefExprSema* const lhsExpr,
+        const std::shared_ptr<const IExprSema>& opLHSExprTemplate,
         const std::shared_ptr<const IExprSema>& rhsExpr,
         FunctionSymbol* const opSymbol
     ) -> std::vector<std::shared_ptr<const IStmtSema>>
@@ -334,16 +349,50 @@ namespace Ace
             lhsExpr->GetFieldSymbol()
         );
 
+        const auto loweredAssignmentLHSExpr = [&]() -> std::shared_ptr<const IExprSema>
+        {
+            if (!tmpRefVarFieldRefExpr->GetTypeInfo().Symbol->IsRef())
+            {
+                return tmpRefVarFieldRefExpr;
+            }
+
+            return std::make_shared<const DerefExprSema>(
+                tmpRefVarFieldRefExpr->GetSrcLocation(),
+                tmpRefVarFieldRefExpr
+            );
+        }();
+
+        const auto compoundLHSExpr = [&]() -> std::shared_ptr<const IExprSema>
+        {
+            if (const auto* const refExpr = dynamic_cast<const RefExprSema*>(opLHSExprTemplate.get()))
+            {
+                return std::make_shared<const RefExprSema>(
+                    refExpr->GetSrcLocation(),
+                    tmpRefVarFieldRefExpr
+                );
+            }
+
+            if (const auto* const derefExpr = dynamic_cast<const DerefExprSema*>(opLHSExprTemplate.get()))
+            {
+                return std::make_shared<const DerefExprSema>(
+                    derefExpr->GetSrcLocation(),
+                    tmpRefVarFieldRefExpr
+                );
+            }
+
+            return tmpRefVarFieldRefExpr;
+        }();
+
         const auto userBinaryExpr = std::make_shared<const UserBinaryExprSema>(
             rhsExpr->GetSrcLocation(),
-            tmpRefVarFieldRefExpr,
+            compoundLHSExpr,
             rhsExpr,
             opSymbol
         );
 
         const auto assignmentStmt = std::make_shared<const SimpleAssignmentStmtSema>(
             srcLocation,
-            tmpRefVarFieldRefExpr,
+            loweredAssignmentLHSExpr,
             userBinaryExpr
         );
         stmts.push_back(assignmentStmt);
@@ -355,12 +404,29 @@ namespace Ace
         const IExprSema* expr
     ) -> bool
     {
-        while (const auto* const derefExpr = dynamic_cast<const DerefExprSema*>(expr))
-        {
-            expr = derefExpr->GetExpr().get();
-        }
-
         return dynamic_cast<const StaticVarRefExprSema*>(expr) != nullptr;
+    }
+
+    static auto StripCompoundAssignmentWrappers(
+        std::shared_ptr<const IExprSema> expr
+    ) -> std::shared_ptr<const IExprSema>
+    {
+        while (true)
+        {
+            if (const auto* const refExpr = dynamic_cast<const RefExprSema*>(expr.get()))
+            {
+                expr = refExpr->GetExpr();
+                continue;
+            }
+
+            if (const auto* const derefExpr = dynamic_cast<const DerefExprSema*>(expr.get()))
+            {
+                expr = derefExpr->GetExpr();
+                continue;
+            }
+
+            return expr;
+        }
     }
 
     auto CompoundAssignmentStmtSema::CreateLowered(
@@ -378,10 +444,13 @@ namespace Ace
 
         const auto stmts = [&]() -> std::vector<std::shared_ptr<const IStmtSema>>
         {
-            if (IsStaticVarRefExpr(m_LHSExpr.get()))
+            const auto unwrappedLHSExpr = StripCompoundAssignmentWrappers(m_LHSExpr);
+
+            if (IsStaticVarRefExpr(unwrappedLHSExpr.get()))
             {
                 return CreateStaticVarRefExprLoweredStmts(
                     GetSrcLocation(),
+                    unwrappedLHSExpr,
                     m_LHSExpr,
                     m_RHSExpr,
                     m_OpSymbol
@@ -389,13 +458,14 @@ namespace Ace
             }
             
             const auto* const fieldRefExpr =
-                dynamic_cast<const FieldVarRefExprSema*>(m_LHSExpr.get());
+                dynamic_cast<const FieldVarRefExprSema*>(unwrappedLHSExpr.get());
             if (fieldRefExpr)
             {
                 return CreateFieldVarRefExprLoweredStmts(
                     GetSrcLocation(),
                     GetScope(),
                     fieldRefExpr,
+                    m_LHSExpr,
                     m_RHSExpr,
                     m_OpSymbol
                 );
