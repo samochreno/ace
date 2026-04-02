@@ -1,0 +1,11 @@
+math: mod {
+    pub ::
+    answer(): int {
+        ret 11;
+    }
+}
+
+main(): int {
+    std::print_int(math::answer());
+    ret 0;
+}

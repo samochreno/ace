@@ -1,0 +1,11 @@
+global_value: int;
+
+read(global_value: int): int {
+    ret global_value;
+}
+
+main(): int {
+    global_value = 3;
+    std::print_int(read(7));
+    ret 0;
+}

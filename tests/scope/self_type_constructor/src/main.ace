@@ -1,0 +1,14 @@
+Boxed: struct {
+    value: int
+}
+
+impl Boxed {
+    new(value: int): Self {
+        ret new Self { value };
+    }
+}
+
+main(): int {
+    std::print_int(Boxed::new(13).value);
+    ret 0;
+}

@@ -1,0 +1,20 @@
+Show: trait {
+    self ::
+    show(): int;
+}
+
+impl Show for int {
+    self ::
+    show(): int {
+        ret self;
+    }
+}
+
+show[T](value: &T): int where T: Show {
+    ret value.show() + 1;
+}
+
+main(): int {
+    std::print_int(show(7));
+    ret 0;
+}

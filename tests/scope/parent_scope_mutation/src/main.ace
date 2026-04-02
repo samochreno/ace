@@ -1,0 +1,10 @@
+main(): int {
+    value: int = 1;
+
+    if true {
+        value = 9;
+    }
+
+    std::print_int(value);
+    ret 0;
+}

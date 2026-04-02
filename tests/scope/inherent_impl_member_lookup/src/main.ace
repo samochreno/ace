@@ -1,0 +1,16 @@
+Node: struct {
+    value: int
+}
+
+impl Node {
+    self ::
+    square(): int {
+        ret self.value * self.value;
+    }
+}
+
+main(): int {
+    node: Node = new Node { value: 4 };
+    std::print_int(node.square());
+    ret 0;
+}

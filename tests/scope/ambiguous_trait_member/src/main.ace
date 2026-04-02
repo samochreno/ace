@@ -1,0 +1,27 @@
+A: trait {
+    self ::
+    value(): int;
+}
+
+B: trait {
+    self ::
+    value(): int;
+}
+
+impl A for int {
+    self ::
+    value(): int {
+        ret 1;
+    }
+}
+
+impl B for int {
+    self ::
+    value(): int {
+        ret 2;
+    }
+}
+
+main(): int {
+    ret 4.value();
+}

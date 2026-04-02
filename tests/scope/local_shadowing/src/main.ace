@@ -1,0 +1,11 @@
+main(): int {
+    value: int = 2;
+
+    if true {
+        value: int = 5;
+        std::print_int(value);
+    }
+
+    std::print_int(value);
+    ret 0;
+}

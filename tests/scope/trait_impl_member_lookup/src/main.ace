@@ -1,0 +1,16 @@
+Show: trait {
+    self ::
+    show(): int;
+}
+
+impl Show for int {
+    self ::
+    show(): int {
+        ret self;
+    }
+}
+
+main(): int {
+    std::print_int(12.show());
+    ret 0;
+}
