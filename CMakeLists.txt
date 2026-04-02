@@ -3,6 +3,7 @@ project(ace)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_BUILD_TYPE Debug)
+include(CTest)
 
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
@@ -33,3 +34,18 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     ${LLVM_LIBS}
 )
+
+if(BUILD_TESTING)
+    get_filename_component(ACE_LLVM_PREFIX "${LLVM_DIR}/../../.." ABSOLUTE)
+    set(ACE_LLVM_BIN_DIR "${ACE_LLVM_PREFIX}/bin")
+
+    add_test(
+        NAME smoke_example
+        COMMAND ${CMAKE_COMMAND}
+            -DACE_BINARY=$<TARGET_FILE:${PROJECT_NAME}>
+            -DBUILD_DIR=${CMAKE_BINARY_DIR}
+            -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+            -DLLVM_BIN_DIR=${ACE_LLVM_BIN_DIR}
+            -P ${CMAKE_SOURCE_DIR}/cmake/SmokeExample.cmake
+    )
+endif()
