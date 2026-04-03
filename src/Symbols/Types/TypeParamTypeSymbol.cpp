@@ -16,6 +16,7 @@ namespace Ace
         const size_t index
     ) : m_BodyScope{ scope->CreateChild() },
         m_Name{ name },
+        m_ParentGeneric{},
         m_Index{ index }
     {
     }
@@ -64,6 +65,18 @@ namespace Ace
     {
         static const std::vector<ITypeSymbol*> args{};
         return args;
+    }
+
+    auto TypeParamTypeSymbol::SetParentGeneric(
+        IGenericSymbol* const parentGeneric
+    ) -> void
+    {
+        m_ParentGeneric = parentGeneric;
+    }
+
+    auto TypeParamTypeSymbol::GetParentGeneric() const -> IGenericSymbol*
+    {
+        return m_ParentGeneric;
     }
 
     auto TypeParamTypeSymbol::GetIndex() const -> size_t

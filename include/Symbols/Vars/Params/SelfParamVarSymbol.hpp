@@ -14,6 +14,8 @@
 
 namespace Ace
 {
+    class ICallableSymbol;
+
     class SelfParamVarSymbol : public virtual IParamVarSymbol
     {
     public:
@@ -36,10 +38,13 @@ namespace Ace
         ) const -> std::unique_ptr<ISymbol> final;
 
         auto GetSizedType() const -> ISizedTypeSymbol* final;
+        auto SetParentCallable(ICallableSymbol* const callable) -> void final;
+        auto GetParentCallable() const -> ICallableSymbol* final;
 
     private:
         Ident m_Name{};
         std::shared_ptr<Scope> m_Scope{};
         ISizedTypeSymbol* m_Type{};
+        ICallableSymbol* m_ParentCallable{};
     };
 }

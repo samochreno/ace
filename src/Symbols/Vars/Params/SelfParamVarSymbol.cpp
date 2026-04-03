@@ -9,6 +9,7 @@
 #include "Ident.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Types/SizedTypeSymbol.hpp"
+#include "Symbols/CallableSymbol.hpp"
 #include "SpecialIdent.hpp"
 #include "AccessModifier.hpp"
 
@@ -20,6 +21,7 @@ namespace Ace
         ISizedTypeSymbol* const type
     ) : m_Scope{ scope },
         m_Type{ type },
+        m_ParentCallable{},
         m_Name{ srcLocation, SpecialIdent::Self }
     {
     }
@@ -64,5 +66,17 @@ namespace Ace
     auto SelfParamVarSymbol::GetSizedType() const -> ISizedTypeSymbol*
     {
         return m_Type;
+    }
+
+    auto SelfParamVarSymbol::SetParentCallable(
+        ICallableSymbol* const callable
+    ) -> void
+    {
+        m_ParentCallable = callable;
+    }
+
+    auto SelfParamVarSymbol::GetParentCallable() const -> ICallableSymbol*
+    {
+        return m_ParentCallable;
     }
 }
