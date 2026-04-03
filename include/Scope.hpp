@@ -37,6 +37,11 @@ namespace Ace
         const std::shared_ptr<const Scope>& beginScope
     ) -> Diagnosed<void>;
 
+    auto DiagnosePublicInterfaceLeaks(
+        const SrcLocation& srcLocation,
+        ISymbol* const symbol
+    ) -> Diagnosed<void>;
+
     auto GetUnaliasedSymbol(ISymbol* const symbol) -> ISymbol*;
 
     template<typename TSymbol>
@@ -212,6 +217,9 @@ namespace Ace
                 std::move(ownedSymbol)
             );
             scope->OnSymbolDeclared(symbol);
+            diagnostics.Collect(
+                DiagnosePublicInterfaceLeaks(symbol->GetName().SrcLocation, symbol)
+            );
 
             return Diagnosed{ symbol, std::move(diagnostics) };
         }

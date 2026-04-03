@@ -52,6 +52,11 @@ namespace Ace
         const SrcLocation& srcLocation
     ) -> DiagnosticGroup;
 
+    auto CreatePublicInterfaceLeaksPrivateTypeError(
+        const SrcLocation& srcLocation,
+        const ISymbol* const leakedType
+    ) -> DiagnosticGroup;
+
     auto CreateAmbiguousSymbolRefError(
         const SrcLocation& srcLocation,
         const std::vector<ISymbol*>& candidateSymbols

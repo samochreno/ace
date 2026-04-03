@@ -5,6 +5,7 @@
 #include <string>
 #include <optional>
 #include <map>
+#include <set>
 
 #include "Assert.hpp"
 #include "Diagnostic.hpp"
@@ -79,6 +80,135 @@ namespace Ace
         if (!IsSymbolAccessibleFromScope(symbol, beginScope))
         {
             diagnostics.Add(CreateInaccessibleSymbolError(srcLocation, symbol));
+        }
+
+        return Diagnosed<void>{ std::move(diagnostics) };
+    }
+
+    static auto GetPublicInterfaceVisibilityScope(
+        std::shared_ptr<Scope> scope
+    ) -> std::shared_ptr<const Scope>
+    {
+        for (size_t i = 0; i < 2; ++i)
+        {
+            if (!scope->GetParent().has_value())
+            {
+                break;
+            }
+
+            scope = scope->GetParent().value();
+        }
+
+        return scope;
+    }
+
+    static auto CollectPublicInterfaceTypeDiagnostics(
+        const SrcLocation& srcLocation,
+        ITypeSymbol* const type,
+        const std::shared_ptr<const Scope>& beginScope,
+        std::set<const ITypeSymbol*>& visitedTypes
+    ) -> DiagnosticBag
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        if (!type)
+        {
+            return diagnostics;
+        }
+
+        auto* const unaliasedType = const_cast<ITypeSymbol*>(
+            type->GetUnaliasedType()
+        );
+
+        if (!visitedTypes.insert(unaliasedType).second)
+        {
+            return diagnostics;
+        }
+
+        if (unaliasedType->IsError())
+        {
+            return diagnostics;
+        }
+
+        if (const auto* const generic =
+            dynamic_cast<const IGenericSymbol*>(unaliasedType))
+        {
+            if (generic->IsPlaceholder())
+            {
+                return diagnostics;
+            }
+        }
+
+        if (!IsSymbolAccessibleFromScope(unaliasedType, beginScope))
+        {
+            diagnostics.Add(CreatePublicInterfaceLeaksPrivateTypeError(
+                srcLocation,
+                unaliasedType
+            ));
+        }
+
+        std::for_each(
+            begin(unaliasedType->GetTypeArgs()),
+            end  (unaliasedType->GetTypeArgs()),
+            [&](ITypeSymbol* const typeArg)
+        {
+            diagnostics.Add(CollectPublicInterfaceTypeDiagnostics(
+                srcLocation,
+                typeArg,
+                beginScope,
+                visitedTypes
+            ));
+        });
+
+        return diagnostics;
+    }
+
+    auto DiagnosePublicInterfaceLeaks(
+        const SrcLocation& srcLocation,
+        ISymbol* const symbol
+    ) -> Diagnosed<void>
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        if (symbol->GetAccessModifier() != AccessModifier::Pub)
+        {
+            return Diagnosed<void>{ std::move(diagnostics) };
+        }
+
+        const auto visibilityScope = GetPublicInterfaceVisibilityScope(
+            symbol->GetScope()
+        );
+
+        const auto collectFromType = [&](ITypeSymbol* const type) -> void
+        {
+            std::set<const ITypeSymbol*> visitedTypes{};
+            diagnostics.Add(CollectPublicInterfaceTypeDiagnostics(
+                srcLocation,
+                type,
+                visibilityScope,
+                visitedTypes
+            ));
+        };
+
+        if (const auto* const callable =
+            dynamic_cast<const ICallableSymbol*>(symbol))
+        {
+            collectFromType(callable->GetType());
+
+            const auto paramTypes = callable->CollectParamTypes();
+            std::for_each(begin(paramTypes), end(paramTypes),
+            [&](ITypeSymbol* const paramType)
+            {
+                collectFromType(paramType);
+            });
+        }
+
+        if (const auto* const field = dynamic_cast<const FieldVarSymbol*>(symbol))
+        {
+            if (field->GetAccessModifier() == AccessModifier::Pub)
+            {
+                collectFromType(field->GetType());
+            }
         }
 
         return Diagnosed<void>{ std::move(diagnostics) };

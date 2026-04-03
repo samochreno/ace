@@ -177,6 +177,28 @@ namespace Ace
         return group;
     }
 
+    auto CreatePublicInterfaceLeaksPrivateTypeError(
+        const SrcLocation& srcLocation,
+        const ISymbol* const leakedType
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            "public interface leaks a private type"
+        );
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            leakedType->GetName().SrcLocation,
+            "private type declaration"
+        );
+
+        return group;
+    }
+
     auto CreateAmbiguousSymbolRefError(
         const SrcLocation& srcLocation,
         const std::vector<ISymbol*>& candidateSymbols
