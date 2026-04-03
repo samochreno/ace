@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
@@ -50,6 +51,12 @@ namespace Ace
 
     auto CreateUndeclaredSymbolRefError(
         const SrcLocation& srcLocation
+    ) -> DiagnosticGroup;
+
+    auto CreateUndeclaredMemberRefError(
+        const SrcLocation& srcLocation,
+        ITypeSymbol* const selfType,
+        const std::string& memberName
     ) -> DiagnosticGroup;
 
     auto CreateAmbiguousSymbolRefError(

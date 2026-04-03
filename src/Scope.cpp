@@ -1433,9 +1433,20 @@ namespace Ace
 
         if (matchingSymbols.empty())
         {
-            diagnostics.Add(CreateUndeclaredSymbolRefError(
-                context.SrcLocation
-            ));
+            if (context.OptSelfType.has_value())
+            {
+                diagnostics.Add(CreateUndeclaredMemberRefError(
+                    context.SrcLocation,
+                    context.OptSelfType.value(),
+                    context.GetName()
+                ));
+            }
+            else
+            {
+                diagnostics.Add(CreateUndeclaredSymbolRefError(
+                    context.SrcLocation
+                ));
+            }
             return std::move(diagnostics);
         }
 
@@ -1597,9 +1608,20 @@ namespace Ace
 
         if (matchingSymbols.empty())
         {
-            diagnostics.Add(CreateUndeclaredSymbolRefError(
-                context.SrcLocation
-            ));
+            if (context.OptSelfType.has_value())
+            {
+                diagnostics.Add(CreateUndeclaredMemberRefError(
+                    context.SrcLocation,
+                    context.OptSelfType.value(),
+                    context.GetName()
+                ));
+            }
+            else
+            {
+                diagnostics.Add(CreateUndeclaredSymbolRefError(
+                    context.SrcLocation
+                ));
+            }
             return std::move(diagnostics);
         }
 

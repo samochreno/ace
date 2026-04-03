@@ -177,6 +177,27 @@ namespace Ace
         return group;
     }
 
+    auto CreateUndeclaredMemberRefError(
+        const SrcLocation& srcLocation,
+        ITypeSymbol* const selfType,
+        const std::string& memberName
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        const std::string message =
+            "`" + selfType->CreateSignature() +
+            "` has no member named `" + memberName + "`";
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            message
+        );
+
+        return group;
+    }
+
     auto CreateAmbiguousSymbolRefError(
         const SrcLocation& srcLocation,
         const std::vector<ISymbol*>& candidateSymbols
