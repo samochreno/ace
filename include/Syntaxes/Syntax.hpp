@@ -111,5 +111,5 @@ namespace Ace
     auto ResolveTypeParamSymbols(
         const std::shared_ptr<Scope>& scope,
         const std::vector<std::shared_ptr<const TypeParamSyntax>>& typeParams
-    ) -> std::vector<ITypeSymbol*>;
+    ) -> Diagnosed<std::vector<ITypeSymbol*>>;
 }

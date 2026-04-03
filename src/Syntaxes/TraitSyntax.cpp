@@ -76,6 +76,12 @@ namespace Ace
 
     auto TraitSyntax::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
+        auto diagnostics = DiagnosticBag::Create();
+
+        const auto typeArgs = diagnostics.Collect(
+            ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
+        );
+
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<TraitTypeSymbol>(
@@ -83,9 +89,9 @@ namespace Ace
                 m_PrototypeScope,
                 m_AccessModifier,
                 m_Name,
-                ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
+                typeArgs
             ),
-            DiagnosticBag::Create(),
+            std::move(diagnostics),
         };
     }
 }

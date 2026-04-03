@@ -20,6 +20,11 @@ namespace Ace
         const ISymbol* const redeclaredSymbol
     ) -> DiagnosticGroup;
 
+    auto CreateTypeParamRedeclarationError(
+        const SrcLocation& originalSrcLocation,
+        const SrcLocation& redeclaredSrcLocation
+    ) -> DiagnosticGroup;
+
     auto CreateStructFieldCausesCycleError(
         FieldVarSymbol* const fieldSymbol
     ) -> DiagnosticGroup;

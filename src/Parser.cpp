@@ -5,10 +5,12 @@
 #include <string>
 #include <optional>
 #include <set>
+#include <unordered_map>
 #include <unordered_set>
 #include <map>
 
 #include "Diagnostic.hpp"
+#include "Diagnostics/BindingDiagnostics.hpp"
 #include "Diagnostics/ParsingDiagnostics.hpp"
 #include "Token.hpp"
 #include "Lexer.hpp"
@@ -1822,6 +1824,7 @@ namespace Ace
         auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const TypeParamSyntax>> params{};
+        std::unordered_map<std::string, SrcLocation> declaredNameToSrcLocation{};
         
         std::transform(
             begin(parentParams),
@@ -1832,6 +1835,15 @@ namespace Ace
                 return CloneTypeParamInScope(param, scope);
             }
         );
+
+        std::for_each(begin(params), end(params),
+        [&](const std::shared_ptr<const TypeParamSyntax>& param)
+        {
+            declaredNameToSrcLocation.emplace(
+                param->GetName().String,
+                param->GetSrcLocation()
+            );
+        });
 
         const auto optNames = diagnostics.Collect(
             ParseTypeParamNames(parser, scope)
@@ -1847,10 +1859,25 @@ namespace Ace
             back_inserter(params),
             [&](const Ident& name)
             {
+                auto finalName = name;
+
+                const auto duplicateNameIt =
+                    declaredNameToSrcLocation.find(name.String);
+                if (duplicateNameIt != end(declaredNameToSrcLocation))
+                {
+                    diagnostics.Add(CreateTypeParamRedeclarationError(
+                        duplicateNameIt->second,
+                        name.SrcLocation
+                    ));
+                    finalName.String = AnonymousIdent::Create(name.String);
+                }
+
+                declaredNameToSrcLocation[finalName.String] = name.SrcLocation;
+
                 return std::make_shared<const TypeParamSyntax>(
                     name.SrcLocation,
                     scope,
-                    name,
+                    finalName,
                     params.size()
                 );
             }

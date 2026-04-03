@@ -100,6 +100,10 @@ namespace Ace
             GetCompilation()->GetErrorSymbols().GetType()
         );
 
+        const auto typeArgs = diagnostics.Collect(
+            ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
+        );
+
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<FunctionSymbol>(
@@ -108,7 +112,7 @@ namespace Ace
                 m_AccessModifier,
                 m_Name,
                 typeSymbol,
-                ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
+                typeArgs
             ),
             std::move(diagnostics),
         };
