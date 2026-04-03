@@ -1,0 +1,8 @@
+increment(value: &int): void {
+}
+
+main(): int {
+    increment(1);
+    ref: &int = __address_of(1);
+    ret 0;
+}

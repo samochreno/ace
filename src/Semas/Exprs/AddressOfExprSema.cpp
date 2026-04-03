@@ -8,6 +8,7 @@
 #include "Scope.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
+#include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "Diagnostic.hpp"
 #include "Emitter.hpp"
 #include "ExprEmitResult.hpp"
@@ -49,6 +50,14 @@ namespace Ace
 
         const auto checkedExpr =
             diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
+
+        if (
+            !checkedExpr->GetTypeInfo().Symbol->IsError() &&
+            (checkedExpr->GetTypeInfo().ValueKind == ValueKind::R)
+        )
+        {
+            diagnostics.Add(CreateExpectedLValueExprError(checkedExpr));
+        }
 
         if (checkedExpr == m_Expr)
         {
