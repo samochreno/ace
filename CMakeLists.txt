@@ -75,4 +75,20 @@ if(BUILD_TESTING)
                 LABELS "behavior;${ACE_BEHAVIOR_AREA}"
         )
     endforeach()
+
+    add_test(
+        NAME cliarg_location
+        COMMAND ${CMAKE_COMMAND}
+            -DACE_BINARY=$<TARGET_FILE:${PROJECT_NAME}>
+            -DBUILD_DIR=${CMAKE_BINARY_DIR}
+            -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+            -DLLVM_BIN_DIR=${ACE_LLVM_BIN_DIR}
+            -DCASE_DIR=${CMAKE_SOURCE_DIR}/tests/cliarg_location
+            -P ${CMAKE_SOURCE_DIR}/cmake/RunCliArgLocationCase.cmake
+    )
+    set_tests_properties(
+        cliarg_location
+        PROPERTIES
+            LABELS "cli"
+    )
 endif()

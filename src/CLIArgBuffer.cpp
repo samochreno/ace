@@ -1,5 +1,6 @@
 #include "CLIArgBuffer.hpp"
 
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <string_view>
@@ -53,7 +54,32 @@ namespace Ace
         const SrcLocation& location
     ) const -> std::string
     {
-        return {};
+        const auto lineIt = std::find_if(
+            begin(m_Args),
+            end  (m_Args),
+            [&](const std::string_view arg)
+            {
+                return
+                    (location.CharacterBeginIterator >= begin(arg)) &&
+                    (location.CharacterBeginIterator <= end(arg));
+            }
+        );
+
+        if (lineIt == end(m_Args))
+        {
+            return "command line";
+        }
+
+        const size_t lineIndex = std::distance(begin(m_Args), lineIt);
+        const size_t characterIndex = std::distance(
+            begin(*lineIt),
+            location.CharacterBeginIterator
+        );
+
+        return
+            "command line:" +
+            std::to_string(lineIndex + 1) + ":" +
+            std::to_string(characterIndex + 1);
     }
 
     auto CLIArgBuffer::GetArgs() const -> const std::vector<std::string_view>&
