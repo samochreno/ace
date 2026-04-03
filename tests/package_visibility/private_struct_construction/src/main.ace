@@ -1,0 +1,12 @@
+lib: mod {
+    private: mod {
+        Node: struct {
+            value: int
+        }
+    }
+}
+
+main(): int {
+    node: lib::private::Node = new lib::private::Node { value: 3 };
+    ret 0;
+}

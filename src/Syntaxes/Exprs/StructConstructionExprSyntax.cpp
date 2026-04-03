@@ -293,6 +293,12 @@ namespace Ace
             GetCompilation()->GetErrorSymbols().GetStruct()
         );
 
+        diagnostics.Collect(DiagnoseInaccessibleSymbol(
+            m_TypeName.CreateSrcLocation(),
+            structSymbol,
+            GetScope()
+        ));
+
         const auto semaArgs = [&]() -> std::vector<StructConstructionExprSemaArg>
         {
             if (!optStructSymbol.has_value())
