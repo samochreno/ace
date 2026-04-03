@@ -125,9 +125,9 @@ namespace Ace
         ACE_UNREACHABLE();
     }
 
-    auto GroupStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowNode>
+    auto GroupStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
     {
-        std::vector<ControlFlowNode> nodes{};
+        std::vector<ControlFlowInstruction> nodes{};
         std::for_each(begin(m_Stmts), end(m_Stmts),
         [&](const std::shared_ptr<const IStmtSema>& stmt)
         {

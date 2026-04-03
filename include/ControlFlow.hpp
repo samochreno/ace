@@ -15,7 +15,7 @@ namespace Ace
         Exit,
     };
 
-    struct ControlFlowNode
+    struct ControlFlowInstruction
     {
         ControlFlowKind Kind{};
         LabelSymbol* LabelSymbol{};
@@ -23,6 +23,6 @@ namespace Ace
 
     struct ControlFlowGraph
     {
-        std::vector<ControlFlowNode> Nodes{};
+        std::vector<ControlFlowInstruction> Nodes{};
     };
 }

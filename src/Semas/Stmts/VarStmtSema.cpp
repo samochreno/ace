@@ -147,7 +147,7 @@ namespace Ace
         assignmentStmt->Emit(emitter);
     }
 
-    auto VarStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowNode>
+    auto VarStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
     {
         return {};
     }

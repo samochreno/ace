@@ -140,9 +140,9 @@ namespace Ace
         emitter.EmitFunctionBlockStmts(stmts);
     }
 
-    auto BlockStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowNode>
+    auto BlockStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
     {
-        std::vector<ControlFlowNode> nodes{};
+        std::vector<ControlFlowInstruction> nodes{};
         std::for_each(
             begin(m_Stmts),
             end  (m_Stmts),

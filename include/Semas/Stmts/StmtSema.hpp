@@ -30,6 +30,6 @@ namespace Ace
             const LoweringContext& context
         ) const -> std::shared_ptr<const IStmtSema> = 0;
 
-        virtual auto CreateControlFlowNodes() const -> std::vector<ControlFlowNode> = 0;
+        virtual auto CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction> = 0;
     };
 }

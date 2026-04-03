@@ -49,7 +49,7 @@ namespace Ace
 
         auto Emit(Emitter& emitter) const -> void final;
 
-        auto CreateControlFlowNodes() const -> std::vector<ControlFlowNode> final;
+        auto CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction> final;
 
     private:
         SrcLocation m_SrcLocation{};

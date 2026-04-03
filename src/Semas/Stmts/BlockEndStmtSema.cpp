@@ -76,7 +76,7 @@ namespace Ace
     {
     }
 
-    auto BlockEndStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowNode>
+    auto BlockEndStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
     {
         return {};
     }

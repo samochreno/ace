@@ -11,12 +11,12 @@
 namespace Ace
 {
     static auto IsEnd(
-        const std::vector<ControlFlowNode>::const_iterator nodeIt,
-        const std::vector<std::vector<ControlFlowNode>::const_iterator>& ends
+        const std::vector<ControlFlowInstruction>::const_iterator nodeIt,
+        const std::vector<std::vector<ControlFlowInstruction>::const_iterator>& ends
     ) -> bool
     {
         const auto matchingEndIt = std::find_if(begin(ends), end(ends),
-        [&](const std::vector<ControlFlowNode>::const_iterator end)
+        [&](const std::vector<ControlFlowInstruction>::const_iterator end)
         {
             return nodeIt == end;
         });
@@ -27,10 +27,10 @@ namespace Ace
     static auto FindLabelNode(
         const ControlFlowGraph& graph,
         LabelSymbol* const labelSymbol
-    ) -> std::vector<ControlFlowNode>::const_iterator
+    ) -> std::vector<ControlFlowInstruction>::const_iterator
     {
         return std::find_if(begin(graph.Nodes), end(graph.Nodes),
-        [&](const ControlFlowNode& node)
+        [&](const ControlFlowInstruction& node)
         {
             return 
                 (node.Kind == ControlFlowKind::Label) &&
@@ -40,8 +40,8 @@ namespace Ace
 
     static auto IsEndReachableWithoutRet(
         const ControlFlowGraph& graph,
-        const std::vector<ControlFlowNode>::const_iterator begin,
-        const std::vector<std::vector<ControlFlowNode>::const_iterator>& ends
+        const std::vector<ControlFlowInstruction>::const_iterator begin,
+        const std::vector<std::vector<ControlFlowInstruction>::const_iterator>& ends
     ) -> bool
     {
         for (auto nodeIt = begin; nodeIt != end(graph.Nodes); ++nodeIt)

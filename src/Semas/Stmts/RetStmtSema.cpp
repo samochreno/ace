@@ -208,8 +208,8 @@ namespace Ace
         }
     }
 
-    auto RetStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowNode>
+    auto RetStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
     {
-        return std::vector{ ControlFlowNode{ ControlFlowKind::Ret } };
+        return std::vector{ ControlFlowInstruction{ ControlFlowKind::Ret } };
     }
 }
