@@ -42,7 +42,7 @@ namespace Ace::GlueGeneration
         auto ownedGlueSymbol = std::make_unique<FunctionSymbol>(
             bodyScope,
             SymbolCategory::Static,
-            AccessModifier::Pub,
+            AccessModifier::Priv,
             name,
             compilation->GetVoidTypeSymbol(),
             std::vector<ITypeSymbol*>{}
@@ -110,7 +110,7 @@ namespace Ace::GlueGeneration
         auto ownedGlueSymbol = std::make_unique<FunctionSymbol>(
             bodyScope,
             SymbolCategory::Static,
-            AccessModifier::Pub,
+            AccessModifier::Priv,
             name,
             compilation->GetVoidTypeSymbol(),
             std::vector<ITypeSymbol*>{}

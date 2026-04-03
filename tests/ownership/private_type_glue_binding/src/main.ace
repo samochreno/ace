@@ -1,0 +1,10 @@
+Secret: struct {
+    value: *int
+}
+
+main(): int {
+    first: Secret = new Secret { value: box 8 };
+    second: Secret = first;
+    std::print_int(unbox second.value);
+    ret 0;
+}
