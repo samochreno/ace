@@ -4005,7 +4005,6 @@ namespace Ace
         {
             std::make_shared<const CompoundAssignmentStmtSyntax>(
                 SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
-                scope,
                 optLhsExpr.value(),
                 optRhsExpr.value(),
                 opToken.SrcLocation,
@@ -4588,7 +4587,6 @@ namespace Ace
             {
                 std::make_shared<const CompoundAssignmentStmtSyntax>(
                     SrcLocation{ beginSrcLocation, parser.GetLastSrcLocation() },
-                    scope,
                     optExpr.value(),
                     optRhsExpr.value(),
                     opToken.SrcLocation,
