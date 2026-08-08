@@ -28,7 +28,6 @@
 
 ## 🟡 Medium Priority
 
-- Forbid constructing of non-pub struct
 - Struct update constructor syntax
 - Add diagnosis for leaking private types in public interface
 - Add source location to unknown files like `.cpp`
