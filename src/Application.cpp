@@ -17,6 +17,7 @@
 #include "Scope.hpp"
 #include "Parser.hpp"
 #include "FunctionBlockBinding.hpp"
+#include "SymbolParentBinding.hpp"
 #include "Emitter.hpp"
 #include "Syntaxes/All.hpp"
 #include "Symbols/All.hpp"
@@ -106,6 +107,11 @@ namespace Ace::Application
 
             auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
             ACE_ASSERT(functionSymbol);
+
+            if (functionSymbol->GetBodyScope() != functionSyntax->GetBodyScope())
+            {
+                return;
+            }
 
             functionBlockBindings.emplace_back(
                 functionSymbol,
@@ -246,6 +252,7 @@ namespace Ace::Application
         const auto functionBlockBindings = diagnostics.Collect(
             CreateAndDeclareSymbols(syntaxes)
         );
+        BindSymbolParents(globalScope);
         diagnostics.Collect(globalScope->GetGenericInstantiator().InstantiateBodies(
             functionBlockBindings
         ));

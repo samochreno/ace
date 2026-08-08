@@ -1,0 +1,27 @@
+Container[T]: trait {
+    self ::
+    get(): T;
+}
+
+Wrapper[T]: struct {
+    value: T
+}
+
+impl[T] Wrapper[T] {
+    self ::
+    choose[U](value: U): U {
+        ret value;
+    }
+}
+
+identity[T](value: T): T {
+    ret value;
+}
+
+main(): int {
+    wrapper: Wrapper[int] = new Wrapper[int] { value: 0 };
+    result: int = wrapper.choose[int](3);
+    result += identity[int](5);
+    std::print_int(result);
+    ret 0;
+}

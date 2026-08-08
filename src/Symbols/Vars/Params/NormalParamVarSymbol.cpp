@@ -8,7 +8,9 @@
 #include "Noun.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Types/SizedTypeSymbol.hpp"
+#include "Symbols/CallableSymbol.hpp"
 #include "AccessModifier.hpp"
+#include "Assert.hpp"
 
 namespace Ace
 {
@@ -20,6 +22,7 @@ namespace Ace
     ) : m_Scope{ scope },
         m_Name{ name },
         m_Type{ type },
+        m_Parent{},
         m_Index{ index }
     {
     }
@@ -65,6 +68,21 @@ namespace Ace
     auto NormalParamVarSymbol::GetSizedType() const -> ISizedTypeSymbol*
     {
         return m_Type;
+    }
+
+    auto NormalParamVarSymbol::BindParent(
+        ICallableSymbol* const parent
+    ) -> void
+    {
+        ACE_ASSERT(parent);
+        ACE_ASSERT(!m_Parent || m_Parent == parent);
+        m_Parent = parent;
+    }
+
+    auto NormalParamVarSymbol::GetParent() const -> ICallableSymbol*
+    {
+        ACE_ASSERT(m_Parent);
+        return m_Parent;
     }
 
     auto NormalParamVarSymbol::GetIndex() const -> size_t
