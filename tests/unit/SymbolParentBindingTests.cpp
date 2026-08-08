@@ -1,7 +1,7 @@
-#include <cassert>
 #include <memory>
 #include <vector>
 
+#include "Assert.hpp"
 #include "Diagnostic.hpp"
 #include "Scope.hpp"
 #include "SymbolParentBinding.hpp"
@@ -90,6 +90,31 @@ auto main() -> int
         std::vector<ITypeSymbol*>{}
     ));
 
+    const auto prototypeBody = traitPrototypeScope->CreateChild();
+    auto* const prototypeTypeParam = Declare(
+        std::make_unique<TypeParamTypeSymbol>(
+            prototypeBody,
+            Name("T"),
+            0
+        )
+    );
+    auto* const selfParam = Declare(std::make_unique<SelfParamVarSymbol>(
+        SrcLocation{},
+        prototypeBody,
+        structType
+    ));
+    auto ownedPrototype = std::make_unique<PrototypeSymbol>(
+        prototypeBody,
+        SymbolCategory::Instance,
+        Name("get"),
+        0,
+        trait,
+        structType,
+        structType,
+        std::vector<ITypeSymbol*>{}
+    );
+    auto* const prototype = ownedPrototype.get();
+
     const auto traitImplBody = globalScope->CreateChild();
     auto* const traitImplTypeParam = Declare(
         std::make_unique<TypeParamTypeSymbol>(
@@ -106,10 +131,13 @@ auto main() -> int
     ));
 
     BindSymbolParents(globalScope);
+    BindSymbolParents(prototype);
 
-    assert(functionTypeParam->GetParent() == function);
-    assert(functionParam->GetParent() == function);
-    assert(structTypeParam->GetParent() == structType);
-    assert(inherentImplTypeParam->GetParent() == inherentImpl);
-    assert(traitImplTypeParam->GetParent() == traitImpl);
+    ACE_ASSERT(functionTypeParam->GetParent() == function);
+    ACE_ASSERT(functionParam->GetParent() == function);
+    ACE_ASSERT(structTypeParam->GetParent() == structType);
+    ACE_ASSERT(prototypeTypeParam->GetParent() == prototype);
+    ACE_ASSERT(selfParam->GetParent() == prototype);
+    ACE_ASSERT(inherentImplTypeParam->GetParent() == inherentImpl);
+    ACE_ASSERT(traitImplTypeParam->GetParent() == traitImpl);
 }
