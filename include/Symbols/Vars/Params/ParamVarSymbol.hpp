@@ -11,7 +11,7 @@ namespace Ace
     public:
         virtual ~IParamVarSymbol() = default;
 
-        virtual auto SetParentCallable(ICallableSymbol* const callable) -> void = 0;
-        virtual auto GetParentCallable() const -> ICallableSymbol* = 0;
+        virtual auto BindParent(ICallableSymbol* const parent) -> void = 0;
+        virtual auto GetParent() const -> ICallableSymbol* = 0;
     };
 }

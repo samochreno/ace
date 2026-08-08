@@ -11,7 +11,7 @@
 
 namespace Ace
 {
-    class IGenericSymbol;
+    class ITypeParamOwnerSymbol;
 
     class TypeParamTypeSymbol : public virtual ISizedTypeSymbol
     {
@@ -37,15 +37,15 @@ namespace Ace
         auto SetBodyScope(const std::shared_ptr<Scope>& scope) -> void final;
         auto GetTypeArgs() const -> const std::vector<ITypeSymbol*>& final;
 
-        auto SetParentGeneric(IGenericSymbol* const parentGeneric) -> void;
-        auto GetParentGeneric() const -> IGenericSymbol*;
+        auto BindParent(ITypeParamOwnerSymbol* const parent) -> void;
+        auto GetParent() const -> ITypeParamOwnerSymbol*;
 
         auto GetIndex() const -> size_t;
 
     private:
         std::shared_ptr<Scope> m_BodyScope{};
         Ident m_Name{};
-        IGenericSymbol* m_ParentGeneric{};
+        ITypeParamOwnerSymbol* m_Parent{};
         size_t m_Index{};
     };
 }

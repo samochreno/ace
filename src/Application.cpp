@@ -17,6 +17,7 @@
 #include "Scope.hpp"
 #include "Parser.hpp"
 #include "FunctionBlockBinding.hpp"
+#include "SymbolParentBinding.hpp"
 #include "Emitter.hpp"
 #include "Syntaxes/All.hpp"
 #include "Symbols/All.hpp"
@@ -246,6 +247,7 @@ namespace Ace::Application
         const auto functionBlockBindings = diagnostics.Collect(
             CreateAndDeclareSymbols(syntaxes)
         );
+        BindSymbolParents(globalScope);
         diagnostics.Collect(globalScope->GetGenericInstantiator().InstantiateBodies(
             functionBlockBindings
         ));

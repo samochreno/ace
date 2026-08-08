@@ -89,41 +89,6 @@ namespace Ace
         return symbol->GetUnaliased();
     }
 
-    template<typename TParentSymbol>
-    static auto FindParentSymbolForBodyScope(
-        const std::shared_ptr<Scope>& bodyScope
-    ) -> TParentSymbol*
-    {
-        const auto parentScope = bodyScope->GetParent();
-        if (!parentScope.has_value())
-        {
-            return nullptr;
-        }
-
-        const auto symbols = parentScope.value()->CollectAllSymbols();
-        const auto symbolIt = std::find_if(
-            begin(symbols),
-            end  (symbols),
-            [&](ISymbol* const symbol)
-            {
-                auto* const parentSymbol = dynamic_cast<TParentSymbol*>(symbol);
-                if (!parentSymbol)
-                {
-                    return false;
-                }
-
-                return parentSymbol->GetBodyScope() == bodyScope;
-            }
-        );
-
-        if (symbolIt == end(symbols))
-        {
-            return nullptr;
-        }
-
-        return dynamic_cast<TParentSymbol*>(*symbolIt);
-    }
-
     auto IsCorrectSymbolCategory(
         const SrcLocation& srcLocation,
         const ISymbol* const symbol,
@@ -1144,24 +1109,6 @@ namespace Ace
 
     auto Scope::OnSymbolDeclared(ISymbol* const symbol) -> void
     {
-        if (auto* const typeParam = dynamic_cast<TypeParamTypeSymbol*>(symbol))
-        {
-            typeParam->SetParentGeneric(
-                FindParentSymbolForBodyScope<IGenericSymbol>(
-                    typeParam->GetScope()
-                )
-            );
-        }
-
-        if (auto* const param = dynamic_cast<IParamVarSymbol*>(symbol))
-        {
-            param->SetParentCallable(
-                FindParentSymbolForBodyScope<ICallableSymbol>(
-                    param->GetScope()
-                )
-            );
-        }
-
         GenericInstantiator::OnSymbolDeclared(symbol);
     }
 

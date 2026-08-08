@@ -12,6 +12,7 @@
 #include "Symbols/CallableSymbol.hpp"
 #include "SpecialIdent.hpp"
 #include "AccessModifier.hpp"
+#include "Assert.hpp"
 
 namespace Ace
 {
@@ -21,7 +22,7 @@ namespace Ace
         ISizedTypeSymbol* const type
     ) : m_Scope{ scope },
         m_Type{ type },
-        m_ParentCallable{},
+        m_Parent{},
         m_Name{ srcLocation, SpecialIdent::Self }
     {
     }
@@ -68,15 +69,18 @@ namespace Ace
         return m_Type;
     }
 
-    auto SelfParamVarSymbol::SetParentCallable(
-        ICallableSymbol* const callable
+    auto SelfParamVarSymbol::BindParent(
+        ICallableSymbol* const parent
     ) -> void
     {
-        m_ParentCallable = callable;
+        ACE_ASSERT(parent);
+        ACE_ASSERT(!m_Parent || m_Parent == parent);
+        m_Parent = parent;
     }
 
-    auto SelfParamVarSymbol::GetParentCallable() const -> ICallableSymbol*
+    auto SelfParamVarSymbol::GetParent() const -> ICallableSymbol*
     {
-        return m_ParentCallable;
+        ACE_ASSERT(m_Parent);
+        return m_Parent;
     }
 }
