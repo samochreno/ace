@@ -1,8 +1,8 @@
-Box[T]: struct {
+Wrapper[T]: struct {
     value: T
 }
 
 main(): int {
-    wrapped: Box[int] = new Box[int] { value: 3 };
+    wrapped: Wrapper[int] = new Wrapper[int] { value: 3 };
     ret wrapped.missing;
 }
