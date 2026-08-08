@@ -16,7 +16,6 @@
 
 - Add parent symbol reference to children (type param -> generic, param -> function)
 - Reformat `optSymbol... symbol = optSymbol.value_or` to `symbol = diagnostics.Collect(...).value_or`
-- Remove `m_Scope` from `CompoundAssignmentStmtSyntax` like in other binary syntaxes
 - Associated types
 - ❓ Make logical negation backed by trait
 - Remove redundant undeclared symbol error for unimplemented function: When resolving associated functions, check if the type implements a trait with a function of that name, then just 'trust' it is implemented
