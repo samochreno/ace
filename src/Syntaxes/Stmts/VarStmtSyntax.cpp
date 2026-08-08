@@ -10,7 +10,10 @@
 #include "Syntaxes/Exprs/ExprSyntax.hpp"
 #include "Semas/Stmts/VarStmtSema.hpp"
 #include "Diagnostic.hpp"
+#include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "TypeResolution.hpp"
+#include "TypeInfo.hpp"
+#include "ValueKind.hpp"
 #include "Symbols/Vars/LocalVarSymbol.hpp"
 
 namespace Ace
@@ -63,6 +66,10 @@ namespace Ace
             optAssignedExprSema = diagnostics.Collect(
                 m_OptAssignedExpr.value()->CreateExprSema()
             );
+            diagnostics.Collect(DiagnoseReferenceBinding(
+                optAssignedExprSema.value(),
+                TypeInfo{ selfSymbol->GetType(), ValueKind::R }
+            ));
         }
 
         return Diagnosed

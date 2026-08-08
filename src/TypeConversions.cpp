@@ -306,12 +306,6 @@ namespace Ace
             (exprValueType->GetUnaliased() != targetValueType->GetUnaliased())
         )
         {
-            if (expr->GetTypeInfo().ValueKind == ValueKind::R)
-            {
-                diagnostics.Add(CreateExpectedLValueExprError(expr));
-                return CreateConvertedReturn(expr, std::move(diagnostics));
-            }
-
             const auto convertedValueExpr = diagnostics.Collect(CreateConverted(
                 expr,
                 TypeInfo

@@ -1,0 +1,4 @@
+main(): int {
+    ref: &int = __address_of(1);
+    ret 0;
+}

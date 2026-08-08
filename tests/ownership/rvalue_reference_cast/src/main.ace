@@ -1,4 +1,4 @@
 main(): int {
-    ref: &int = 1;
+    cast[&int](1);
     ret 0;
 }

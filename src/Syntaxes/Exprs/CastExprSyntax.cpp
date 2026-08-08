@@ -6,6 +6,7 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
+#include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "TypeResolution.hpp"
 #include "Semas/Exprs/ExprSema.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -50,6 +51,11 @@ namespace Ace
         auto* const typeSymbol = optTypeSymbol.value_or(
             GetCompilation()->GetErrorSymbols().GetType()
         );
+
+        diagnostics.Collect(DiagnoseReferenceBinding(
+            exprSema,
+            TypeInfo{ typeSymbol, ValueKind::R }
+        ));
 
         const auto convertedExprSema = diagnostics.Collect(
             CreateExplicitlyConverted(
