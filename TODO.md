@@ -29,7 +29,6 @@
 ## 🟡 Medium Priority
 
 - Forbid taking reference of a r-value
-- Add self type signature to member access resolution error message
 - Diagnostics when redeclared type parameter
 - Forbid constructing of non-pub struct
 - Struct update constructor syntax
