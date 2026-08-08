@@ -43,7 +43,7 @@ namespace Ace
         auto CollectMonos() const -> MonoCollector final;
         auto Emit(Emitter& emitter) const -> void final;
 
-        auto CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction> final;
+        auto CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction> final;
 
     private:
         SrcLocation m_SrcLocation{};

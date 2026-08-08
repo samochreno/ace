@@ -177,7 +177,7 @@ namespace Ace::Application
         {
             diagnostics.Collect(DiagnoseInvalidControlFlow(
                 symbol->GetName().SrcLocation,
-                ControlFlowGraph{ block->CreateControlFlowNodes() }
+                ControlFlowGraph{ block->CreateControlFlowInstructions() }
             ));
         }
 

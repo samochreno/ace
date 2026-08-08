@@ -6,7 +6,6 @@
 - Make `llvm::Value*` variable names consistent
 - Refer to `Self` and `self` consistently (`Self` is sometimes `SelfType`)
 - Cache `Scope::CollectSymbols` or just generally cache in `Scope` for performance
-- Rename `ControlFlowNode` to `ControlFlowInstruction` or something, node implies its a tree structure but really its linear
 - Make diagnostics take symbols, syntaxes, etc. instead of source locations, it allows focusing on the important code in the function
 - ❓ Eliminate local lambdas
 - ❓ String interning
@@ -31,7 +30,7 @@
 - Add source location to unknown files like `.cpp`
 - Control flow flexibility improvement:
   - `IEmittable` could hold `ControlFlowGraph`, so it could verify control flow
-  - Possibly implement `ControlFlowNode`s for `LLVM IR` instructions (check `llvm/IR/Instruction.def`)
+  - Possibly implement `ControlFlowInstruction`s for `LLVM IR` instructions (check `llvm/IR/Instruction.def`)
 - Check if there is any a better way than to depend on external executables like `llc` and `clang`
 - Enums
 - Mutability/Immutability:

@@ -89,7 +89,7 @@ namespace Ace
         emitter.GetBlock().Builder.CreateUnreachable();
     }
 
-    auto ExitStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
+    auto ExitStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
         return std::vector{ ControlFlowInstruction{ ControlFlowKind::Exit } };
     }

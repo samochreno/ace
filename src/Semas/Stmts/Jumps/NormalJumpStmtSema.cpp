@@ -81,7 +81,7 @@ namespace Ace
         );
     }
 
-    auto NormalJumpStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
+    auto NormalJumpStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
         return std::vector
         {

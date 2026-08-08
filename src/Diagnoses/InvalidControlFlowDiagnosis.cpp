@@ -11,30 +11,30 @@
 namespace Ace
 {
     static auto IsEnd(
-        const std::vector<ControlFlowInstruction>::const_iterator nodeIt,
+        const std::vector<ControlFlowInstruction>::const_iterator instructionIt,
         const std::vector<std::vector<ControlFlowInstruction>::const_iterator>& ends
     ) -> bool
     {
         const auto matchingEndIt = std::find_if(begin(ends), end(ends),
         [&](const std::vector<ControlFlowInstruction>::const_iterator end)
         {
-            return nodeIt == end;
+            return instructionIt == end;
         });
 
         return matchingEndIt != end(ends);
     }
 
-    static auto FindLabelNode(
+    static auto FindLabelInstruction(
         const ControlFlowGraph& graph,
         LabelSymbol* const labelSymbol
     ) -> std::vector<ControlFlowInstruction>::const_iterator
     {
-        return std::find_if(begin(graph.Nodes), end(graph.Nodes),
-        [&](const ControlFlowInstruction& node)
+        return std::find_if(begin(graph.Instructions), end(graph.Instructions),
+        [&](const ControlFlowInstruction& instruction)
         {
             return 
-                (node.Kind == ControlFlowKind::Label) &&
-                (node.LabelSymbol == labelSymbol);
+                (instruction.Kind == ControlFlowKind::Label) &&
+                (instruction.LabelSymbol == labelSymbol);
         });
     }
 
@@ -44,16 +44,16 @@ namespace Ace
         const std::vector<std::vector<ControlFlowInstruction>::const_iterator>& ends
     ) -> bool
     {
-        for (auto nodeIt = begin; nodeIt != end(graph.Nodes); ++nodeIt)
+        for (auto instructionIt = begin; instructionIt != end(graph.Instructions); ++instructionIt)
         {
-            if (IsEnd(nodeIt, ends))
+            if (IsEnd(instructionIt, ends))
             {
                 return false;
             }
 
-            const auto& node = *nodeIt;
+            const auto& instruction = *instructionIt;
 
-            switch (node.Kind)
+            switch (instruction.Kind)
             {
                 case ControlFlowKind::Label:
                 {
@@ -62,38 +62,38 @@ namespace Ace
 
                 case ControlFlowKind::Jump:
                 {
-                    const auto labelNodeIt =
-                        FindLabelNode(graph, node.LabelSymbol);
-                    ACE_ASSERT(labelNodeIt != end(graph.Nodes));
+                    const auto labelInstructionIt =
+                        FindLabelInstruction(graph, instruction.LabelSymbol);
+                    ACE_ASSERT(labelInstructionIt != end(graph.Instructions));
 
                     auto newEnds = ends;
-                    newEnds.push_back(nodeIt);
+                    newEnds.push_back(instructionIt);
 
                     return IsEndReachableWithoutRet(
                         graph,
-                        labelNodeIt,
+                        labelInstructionIt,
                         newEnds
                     );
                 }
 
                 case ControlFlowKind::ConditionalJump:
                 {
-                    const auto labelNodeIt =
-                        FindLabelNode(graph, node.LabelSymbol);
-                    ACE_ASSERT(labelNodeIt != end(graph.Nodes));
+                    const auto labelInstructionIt =
+                        FindLabelInstruction(graph, instruction.LabelSymbol);
+                    ACE_ASSERT(labelInstructionIt != end(graph.Instructions));
 
                     auto whenTrueEnds = ends;
-                    whenTrueEnds.push_back(nodeIt);
+                    whenTrueEnds.push_back(instructionIt);
 
                     const bool whenTrue = IsEndReachableWithoutRet(
                         graph,
-                        labelNodeIt,
+                        labelInstructionIt,
                         whenTrueEnds
                     );
 
                     const bool whenFalse = IsEndReachableWithoutRet(
                         graph,
-                        nodeIt + 1,
+                        instructionIt + 1,
                         ends
                     );
 
@@ -118,7 +118,7 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        if (IsEndReachableWithoutRet(graph, begin(graph.Nodes), {}))
+        if (IsEndReachableWithoutRet(graph, begin(graph.Instructions), {}))
         {
             diagnostics.Add(CreateNotAllControlPathsRetError(srcLocation));
         }

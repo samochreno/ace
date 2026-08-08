@@ -140,20 +140,20 @@ namespace Ace
         emitter.EmitFunctionBlockStmts(stmts);
     }
 
-    auto BlockStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
+    auto BlockStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
-        std::vector<ControlFlowInstruction> nodes{};
+        std::vector<ControlFlowInstruction> instructions{};
         std::for_each(
             begin(m_Stmts),
             end  (m_Stmts),
             [&](const std::shared_ptr<const IStmtSema>& stmt)
             {
-                const auto stmtNodes = stmt->CreateControlFlowNodes();
-                nodes.insert(end(nodes), begin(stmtNodes), end(stmtNodes));
+                const auto stmtInstructions = stmt->CreateControlFlowInstructions();
+                instructions.insert(end(instructions), begin(stmtInstructions), end(stmtInstructions));
             }
         );
 
-        return nodes;
+        return instructions;
     }
 
     auto BlockStmtSema::CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const IStmtSema>>

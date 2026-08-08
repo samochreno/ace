@@ -76,7 +76,7 @@ namespace Ace
     {
     }
 
-    auto LabelStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
+    auto LabelStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
         return std::vector
         {

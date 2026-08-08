@@ -156,7 +156,7 @@ namespace Ace
         emitter.EmitDropTmps(tmps);
     }
 
-    auto SimpleAssignmentStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
+    auto SimpleAssignmentStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
         return {};
     }

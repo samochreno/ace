@@ -498,7 +498,7 @@ namespace Ace
         ACE_UNREACHABLE();
     }
 
-    auto CompoundAssignmentStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction>
+    auto CompoundAssignmentStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
         ACE_UNREACHABLE();
     }

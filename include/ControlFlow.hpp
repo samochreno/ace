@@ -23,6 +23,6 @@ namespace Ace
 
     struct ControlFlowGraph
     {
-        std::vector<ControlFlowInstruction> Nodes{};
+        std::vector<ControlFlowInstruction> Instructions{};
     };
 }

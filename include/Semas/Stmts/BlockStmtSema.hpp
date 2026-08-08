@@ -46,7 +46,7 @@ namespace Ace
         auto CollectMonos() const -> MonoCollector final;
         auto Emit(Emitter& emitter) const -> void final;
 
-        auto CreateControlFlowNodes() const -> std::vector<ControlFlowInstruction> final;
+        auto CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction> final;
 
         auto CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const IStmtSema>> final;
 
