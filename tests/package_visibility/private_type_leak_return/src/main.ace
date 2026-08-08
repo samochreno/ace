@@ -1,0 +1,11 @@
+Secret: struct {
+}
+
+pub ::
+expose(): Secret {
+    ret new Secret {};
+}
+
+main(): int {
+    ret 0;
+}

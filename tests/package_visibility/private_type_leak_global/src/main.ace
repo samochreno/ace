@@ -1,0 +1,9 @@
+Secret: struct {
+}
+
+pub ::
+value: Secret;
+
+main(): int {
+    ret 0;
+}
