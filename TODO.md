@@ -14,7 +14,6 @@
 
 ## 🔴 High Priority
 
-- Add parent symbol reference to children (type param -> generic, param -> function)
 - Reformat `optSymbol... symbol = optSymbol.value_or` to `symbol = diagnostics.Collect(...).value_or`
 - Associated types
 - ❓ Make logical negation backed by trait
