@@ -1,0 +1,10 @@
+Wrapper[T]: struct {
+    value: T
+}
+
+impl[T, T] Wrapper[T] {
+}
+
+main(): int {
+    ret 0;
+}

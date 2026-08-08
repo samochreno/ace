@@ -58,6 +58,28 @@ namespace Ace
         return group;
     }
 
+    auto CreateTypeParamRedeclarationError(
+        const SrcLocation& originalSrcLocation,
+        const SrcLocation& redeclaredSrcLocation
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            redeclaredSrcLocation,
+            "type parameter redeclaration"
+        );
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            originalSrcLocation,
+            "previous declaration"
+        );
+
+        return group;
+    }
+
     auto CreateStructFieldCausesCycleError(
         FieldVarSymbol* const fieldSymbol
     ) -> DiagnosticGroup
