@@ -294,6 +294,29 @@ namespace Ace
         return group;
     }
 
+    auto CreatePublicInterfaceLeaksPrivateTypeError(
+        const SrcLocation& srcLocation,
+        const ITypeSymbol* const leakedType
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            "public interface leaks private type `" +
+                leakedType->CreateSignature() + "`"
+        );
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            leakedType->GetName().SrcLocation,
+            "private type declaration"
+        );
+
+        return group;
+    }
+
     auto CreateIncorrectSymbolCategoryError(
         const SrcLocation& srcLocation,
         const ISymbol* const symbol,

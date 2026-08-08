@@ -30,6 +30,7 @@
 #include "Diagnoses/OverlappingInherentImplDiagnosis.hpp"
 #include "Diagnoses/ConcreteConstraintDiagnosis.hpp"
 #include "Diagnoses/UnimplementedSupertraitDiagnosis.hpp"
+#include "Diagnoses/PublicInterfaceLeakDiagnosis.hpp"
 
 namespace Ace::Application
 {
@@ -246,6 +247,7 @@ namespace Ace::Application
         const auto functionBlockBindings = diagnostics.Collect(
             CreateAndDeclareSymbols(syntaxes)
         );
+        diagnostics.Collect(DiagnosePublicInterfaceLeaks(compilation));
         diagnostics.Collect(globalScope->GetGenericInstantiator().InstantiateBodies(
             functionBlockBindings
         ));

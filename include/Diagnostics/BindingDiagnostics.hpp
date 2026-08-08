@@ -79,6 +79,11 @@ namespace Ace
         ISymbol* const symbol
     ) -> DiagnosticGroup;
 
+    auto CreatePublicInterfaceLeaksPrivateTypeError(
+        const SrcLocation& srcLocation,
+        const ITypeSymbol* const leakedType
+    ) -> DiagnosticGroup;
+
     auto CreateIncorrectSymbolCategoryError(
         const SrcLocation& srcLocation,
         const ISymbol* const symbol,

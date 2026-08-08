@@ -273,6 +273,7 @@ referencing(): int {
     ret i;
 }
 
+pub ::
 Wrapper[T]: struct {
     value: T
 }
