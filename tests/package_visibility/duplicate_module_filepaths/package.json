@@ -1,0 +1,1 @@
+{"name":"duplicate_module_filepaths","path_macros":[{"name":"src_directory","value":"src"}],"src_files":["$src_directory/main.ace","$src_directory/../src/main.ace"],"dep_files":[]}

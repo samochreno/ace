@@ -1100,6 +1100,11 @@ namespace Ace
             return firstSymbol;
         }
 
+        if (generic->GetTypeArgs().empty() && !optSelfType.has_value())
+        {
+            return firstSymbol;
+        }
+
         return ResolveGenericInstance(
             generic->GetGenericRoot(),
             typeArgs,
@@ -1433,9 +1438,20 @@ namespace Ace
 
         if (matchingSymbols.empty())
         {
-            diagnostics.Add(CreateUndeclaredSymbolRefError(
-                context.SrcLocation
-            ));
+            if (context.OptSelfType.has_value())
+            {
+                diagnostics.Add(CreateUndeclaredMemberRefError(
+                    context.SrcLocation,
+                    context.OptSelfType.value(),
+                    context.GetName()
+                ));
+            }
+            else
+            {
+                diagnostics.Add(CreateUndeclaredSymbolRefError(
+                    context.SrcLocation
+                ));
+            }
             return std::move(diagnostics);
         }
 
@@ -1597,9 +1613,20 @@ namespace Ace
 
         if (matchingSymbols.empty())
         {
-            diagnostics.Add(CreateUndeclaredSymbolRefError(
-                context.SrcLocation
-            ));
+            if (context.OptSelfType.has_value())
+            {
+                diagnostics.Add(CreateUndeclaredMemberRefError(
+                    context.SrcLocation,
+                    context.OptSelfType.value(),
+                    context.GetName()
+                ));
+            }
+            else
+            {
+                diagnostics.Add(CreateUndeclaredSymbolRefError(
+                    context.SrcLocation
+                ));
+            }
             return std::move(diagnostics);
         }
 

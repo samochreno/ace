@@ -57,6 +57,11 @@ namespace Ace
         return m_SrcLocation;
     }
 
+    auto FunctionSyntax::GetBodyScope() const -> const std::shared_ptr<Scope>&
+    {
+        return m_BodyScope;
+    }
+
     auto FunctionSyntax::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_BodyScope->GetParent().value();
@@ -100,6 +105,10 @@ namespace Ace
             GetCompilation()->GetErrorSymbols().GetType()
         );
 
+        const auto typeArgs = diagnostics.Collect(
+            ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
+        );
+
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<FunctionSymbol>(
@@ -108,7 +117,7 @@ namespace Ace
                 m_AccessModifier,
                 m_Name,
                 typeSymbol,
-                ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
+                typeArgs
             ),
             std::move(diagnostics),
         };

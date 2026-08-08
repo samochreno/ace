@@ -4,10 +4,35 @@
 
 #include "Diagnostic.hpp"
 #include "Semas/Exprs/ExprSema.hpp"
+#include "Symbols/Types/TypeSymbol.hpp"
 #include "TypeInfo.hpp"
+#include "ValueKind.hpp"
 
 namespace Ace
 {
+    auto DiagnoseReferenceBinding(
+        const std::shared_ptr<const IExprSema>& expr,
+        const TypeInfo& targetTypeInfo
+    ) -> Diagnosed<void>
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        auto* const exprType = expr->GetTypeInfo().Symbol;
+        auto* const targetType = targetTypeInfo.Symbol;
+        if (
+            !exprType->IsError() &&
+            !targetType->IsError() &&
+            !exprType->IsRef() &&
+            targetType->IsRef() &&
+            (expr->GetTypeInfo().ValueKind == ValueKind::R)
+        )
+        {
+            diagnostics.Add(CreateExpectedLValueExprError(expr));
+        }
+
+        return Diagnosed<void>{ std::move(diagnostics) };
+    }
+
     auto CreateExpectedLValueExprError(
         const std::shared_ptr<const IExprSema>& expr
     ) -> DiagnosticGroup

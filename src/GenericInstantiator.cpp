@@ -14,6 +14,7 @@
 #include "Symbols/ConstraintSymbol.hpp"
 #include "Symbols/GenericSymbol.hpp"
 #include "Symbols/PrototypeSymbol.hpp"
+#include "SymbolParentBinding.hpp"
 
 namespace Ace
 {
@@ -396,6 +397,7 @@ namespace Ace
             instance->GetBodyScope(),
             InstantiationContext{ instance->GetTypeArgs(), std::nullopt }
         );
+        BindSymbolParents(instance);
 
         self.m_ReferencedMonosInstances.emplace_back(instance);
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include "Diagnostic.hpp"
 #include "SrcLocation.hpp"
@@ -18,6 +19,11 @@ namespace Ace
     auto CreateSymbolRedeclarationError(
         const ISymbol* const originalSymbol,
         const ISymbol* const redeclaredSymbol
+    ) -> DiagnosticGroup;
+
+    auto CreateTypeParamRedeclarationError(
+        const SrcLocation& originalSrcLocation,
+        const SrcLocation& redeclaredSrcLocation
     ) -> DiagnosticGroup;
 
     auto CreateStructFieldCausesCycleError(
@@ -50,6 +56,12 @@ namespace Ace
 
     auto CreateUndeclaredSymbolRefError(
         const SrcLocation& srcLocation
+    ) -> DiagnosticGroup;
+
+    auto CreateUndeclaredMemberRefError(
+        const SrcLocation& srcLocation,
+        ITypeSymbol* const selfType,
+        const std::string& memberName
     ) -> DiagnosticGroup;
 
     auto CreateAmbiguousSymbolRefError(

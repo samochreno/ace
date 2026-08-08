@@ -1,0 +1,1 @@
+{"name":"self_type_member_access_resolution_error","path_macros":[{"name":"src_directory","value":"src"}],"src_files":["$src_directory/**.ace"],"dep_files":[]}

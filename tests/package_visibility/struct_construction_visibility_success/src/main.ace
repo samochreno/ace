@@ -1,0 +1,20 @@
+lib: mod {
+    Secret: struct {
+    }
+
+    pub ::
+    PublicEmpty: struct {
+    }
+
+    pub ::
+    construct_private(): int {
+        secret: Secret = new Secret {};
+        ret 7;
+    }
+}
+
+main(): int {
+    public_empty: lib::PublicEmpty = new lib::PublicEmpty {};
+    std::print_int(lib::construct_private());
+    ret 0;
+}

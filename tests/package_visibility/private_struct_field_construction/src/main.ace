@@ -1,0 +1,11 @@
+lib: mod {
+    pub ::
+    Record: struct {
+        value: int
+    }
+}
+
+main(): int {
+    new lib::Record { value: 3 };
+    ret 0;
+}

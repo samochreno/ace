@@ -102,6 +102,10 @@ namespace Ace
             m_BodyScope->ResolveSelfType(SrcLocation{ GetCompilation() })
         ).value();
 
+        const auto typeArgs = diagnostics.Collect(
+            ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
+        );
+
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<PrototypeSymbol>(
@@ -112,7 +116,7 @@ namespace Ace
                 parentTraitSymbol,
                 typeSymbol,
                 selfTypeSymbol,
-                ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
+                typeArgs
             ),
             std::move(diagnostics),
         };

@@ -1,0 +1,6 @@
+Dup[T, T]: struct {
+}
+
+main(): int {
+    ret 0;
+}

@@ -1,0 +1,16 @@
+Wrapper[T]: struct {
+    value: T
+}
+
+impl[T] Wrapper[T] {
+    self ::
+    choose[U](value: U): U {
+        ret value;
+    }
+}
+
+main(): int {
+    wrapper: Wrapper[int] = new Wrapper[int] { value: 0 };
+    std::print_int(wrapper.choose[int](9));
+    ret 0;
+}

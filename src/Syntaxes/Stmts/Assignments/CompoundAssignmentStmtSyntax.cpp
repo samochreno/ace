@@ -14,13 +14,11 @@ namespace Ace
 {
     CompoundAssignmentStmtSyntax::CompoundAssignmentStmtSyntax(
         const SrcLocation& srcLocation,
-        const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprSyntax>& lhsExpr,
         const std::shared_ptr<const IExprSyntax>& rhsExpr,
         const SrcLocation& opSrcLocation,
         const Op op
     ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
         m_LHSExpr{ lhsExpr },
         m_RHSExpr{ rhsExpr },
         m_OpSrcLocation{ opSrcLocation },
@@ -35,7 +33,7 @@ namespace Ace
 
     auto CompoundAssignmentStmtSyntax::GetScope() const -> std::shared_ptr<Scope>
     {
-        return m_Scope;
+        return m_LHSExpr->GetScope();
     }
 
     auto CompoundAssignmentStmtSyntax::CollectChildren() const -> std::vector<const ISyntax*>

@@ -20,7 +20,6 @@ namespace Ace
     public:
         CompoundAssignmentStmtSyntax(
             const SrcLocation& srcLocation,
-            const std::shared_ptr<Scope>& scope,
             const std::shared_ptr<const IExprSyntax>& lhsExpr,
             const std::shared_ptr<const IExprSyntax>& rhsExpr,
             const SrcLocation& opSrcLocation,
@@ -36,7 +35,6 @@ namespace Ace
 
     private:
         SrcLocation m_SrcLocation{};
-        std::shared_ptr<Scope> m_Scope{};
         std::shared_ptr<const IExprSyntax> m_LHSExpr{};
         std::shared_ptr<const IExprSyntax> m_RHSExpr{};
         SrcLocation m_OpSrcLocation{};

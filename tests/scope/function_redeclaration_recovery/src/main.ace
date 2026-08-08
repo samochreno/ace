@@ -1,0 +1,11 @@
+duplicate(value: int): int {
+    ret value;
+}
+
+duplicate(value: int): int {
+    ret value;
+}
+
+main(): int {
+    ret 0;
+}
