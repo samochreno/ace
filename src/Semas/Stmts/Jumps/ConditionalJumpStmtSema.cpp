@@ -141,11 +141,11 @@ namespace Ace
         emitter.SetBlock(std::move(block));
     }
 
-    auto ConditionalJumpStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowNode>
+    auto ConditionalJumpStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
         return std::vector
         {
-            ControlFlowNode{ ControlFlowKind::ConditionalJump, m_LabelSymbol }
+            ControlFlowInstruction{ ControlFlowKind::ConditionalJump, m_LabelSymbol }
         };
     }
 }

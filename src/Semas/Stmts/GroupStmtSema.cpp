@@ -125,17 +125,17 @@ namespace Ace
         ACE_UNREACHABLE();
     }
 
-    auto GroupStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowNode>
+    auto GroupStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
-        std::vector<ControlFlowNode> nodes{};
+        std::vector<ControlFlowInstruction> instructions{};
         std::for_each(begin(m_Stmts), end(m_Stmts),
         [&](const std::shared_ptr<const IStmtSema>& stmt)
         {
-            const auto stmtNodes = stmt->CreateControlFlowNodes();
-            nodes.insert(end(nodes), begin(stmtNodes), end(stmtNodes));
+            const auto stmtInstructions = stmt->CreateControlFlowInstructions();
+            instructions.insert(end(instructions), begin(stmtInstructions), end(stmtInstructions));
         });
 
-        return nodes;
+        return instructions;
     }
     
     auto GroupStmtSema::CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const IStmtSema>>
