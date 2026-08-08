@@ -1,0 +1,7 @@
+Mapper[T]: trait {
+    map[T](): T;
+}
+
+main(): int {
+    ret 0;
+}

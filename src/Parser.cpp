@@ -1362,7 +1362,11 @@ namespace Ace
         std::for_each(begin(params), end(params),
         [&](const std::shared_ptr<const TypeParamSyntax>& param)
         {
-            unconstrainedParamMap[param->GetName().String] = param;
+            const auto& name = param->GetName().String;
+            if (!name.starts_with("?"))
+            {
+                unconstrainedParamMap[name] = param;
+            }
         });
 
         return unconstrainedParamMap;
