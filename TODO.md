@@ -22,7 +22,6 @@
 - Change `__deref_as[T](...)` to take any type convertible to `std::Ptr` and remove `std::Ref[T]::ptr(...)`
 - Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; possibly fixed by lifetime trait)
 - Lifetime trait: default, copy, drop
-- Fix that glue doesnt bind on private types
 - Dynamic casting (how to handle failed conversions?)
 - Strings
 
