@@ -6,6 +6,7 @@
 #include "Semas/Exprs/ExprSema.hpp"
 #include "Semas/Exprs/UserBinaryExprSema.hpp"
 #include "Semas/Exprs/BoxExprSema.hpp"
+#include "Semas/Exprs/CastExprSema.hpp"
 #include "Semas/Exprs/ConversionPlaceholderExprSema.hpp"
 #include "Semas/Exprs/DerefAsExprSema.hpp"
 #include "Semas/Exprs/DerefExprSema.hpp"

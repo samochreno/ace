@@ -6,11 +6,10 @@
 #include "SrcLocation.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
-#include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "TypeResolution.hpp"
 #include "Semas/Exprs/ExprSema.hpp"
+#include "Semas/Exprs/CastExprSema.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
-#include "TypeInfo.hpp"
 
 namespace Ace
 {
@@ -39,7 +38,7 @@ namespace Ace
         return SyntaxChildCollector{}.Collect(m_Expr).Build();
     }
 
-    auto CastExprSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto CastExprSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const CastExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -52,19 +51,15 @@ namespace Ace
             GetCompilation()->GetErrorSymbols().GetType()
         );
 
-        diagnostics.Collect(DiagnoseReferenceBinding(
-            exprSema,
-            TypeInfo{ typeSymbol, ValueKind::R }
-        ));
-
-        const auto convertedExprSema = diagnostics.Collect(
-            CreateExplicitlyConverted(
+        return Diagnosed
+        {
+            std::make_shared<const CastExprSema>(
+                GetSrcLocation(),
                 exprSema,
-                TypeInfo{ typeSymbol, ValueKind::R }
-            )
-        );
-
-        return Diagnosed{ convertedExprSema, std::move(diagnostics) };
+                typeSymbol
+            ),
+            std::move(diagnostics),
+        };
     }
 
     auto CastExprSyntax::CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>>
