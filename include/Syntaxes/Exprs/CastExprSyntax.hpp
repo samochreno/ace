@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Syntaxes/Exprs/ExprSyntax.hpp"
-#include "Semas/Exprs/Calls/StaticCallExprSema.hpp"
+#include "Semas/Exprs/CastExprSema.hpp"
 #include "SrcLocation.hpp"
 #include "Name.hpp"
 #include "Scope.hpp"
@@ -14,7 +14,7 @@ namespace Ace
 {
     class CastExprSyntax :
         public virtual IExprSyntax,
-        public virtual ISemaSyntax<IExprSema>
+        public virtual ISemaSyntax<CastExprSema>
     {
     public:
         CastExprSyntax(
@@ -27,7 +27,7 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const ISyntax*> final;
-        auto CreateSema() const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
+        auto CreateSema() const -> Diagnosed<std::shared_ptr<const CastExprSema>> final;
         auto CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
 
     private:

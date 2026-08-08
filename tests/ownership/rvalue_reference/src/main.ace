@@ -1,0 +1,4 @@
+main(): int {
+    ref: &int = 1;
+    ret 0;
+}
