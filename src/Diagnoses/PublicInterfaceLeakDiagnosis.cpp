@@ -266,6 +266,20 @@ namespace Ace
                 begin(paramTypes),
                 end(paramTypes)
             );
+
+            const auto* const constrained =
+                dynamic_cast<const IConstrainedSymbol*>(symbol);
+            const auto constraints = constrained->CollectConstraints();
+            std::for_each(begin(constraints), end(constraints),
+            [&](const ConstraintSymbol* const constraint)
+            {
+                const auto& traits = constraint->GetTraits();
+                interfaceTypes.insert(
+                    end(interfaceTypes),
+                    begin(traits),
+                    end(traits)
+                );
+            });
         }
         else if (const auto* const variable =
             dynamic_cast<const IVarSymbol*>(symbol))
@@ -277,6 +291,20 @@ namespace Ace
             {
                 interfaceTypes.push_back(variable->GetType());
             }
+        }
+        else if (const auto* const trait =
+            dynamic_cast<const TraitTypeSymbol*>(symbol))
+        {
+            const auto supertraits = trait->CollectSupertraits();
+            std::transform(
+                begin(supertraits),
+                end(supertraits),
+                std::back_inserter(interfaceTypes),
+                [](const SupertraitSymbol* const supertrait)
+                {
+                    return supertrait->GetTrait();
+                }
+            );
         }
 
         if (interfaceTypes.empty())

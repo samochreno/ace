@@ -1,0 +1,11 @@
+Hidden: trait {
+}
+
+pub ::
+expose[T](value: T): T where T: Hidden {
+    ret value;
+}
+
+main(): int {
+    ret 0;
+}

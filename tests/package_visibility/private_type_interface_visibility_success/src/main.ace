@@ -9,6 +9,12 @@ outer: mod {
         create(): Shared;
     }
 
+    Constraint: trait {
+    }
+
+    Base: trait {
+    }
+
     impl Hidden {
         pub ::
         create(): Shared {
@@ -17,6 +23,15 @@ outer: mod {
     }
 
     inner: mod {
+        pub ::
+        Derived: trait: Base {
+        }
+
+        pub ::
+        passthrough[T](value: T): T where T: Constraint {
+            ret value;
+        }
+
         pub ::
         create(): Shared {
             ret new Shared {};
