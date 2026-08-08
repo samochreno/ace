@@ -58,6 +58,28 @@ namespace Ace
         return group;
     }
 
+    auto CreateTypeParamRedeclarationError(
+        const SrcLocation& originalSrcLocation,
+        const SrcLocation& redeclaredSrcLocation
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            redeclaredSrcLocation,
+            "type parameter redeclaration"
+        );
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Note,
+            originalSrcLocation,
+            "previous declaration"
+        );
+
+        return group;
+    }
+
     auto CreateStructFieldCausesCycleError(
         FieldVarSymbol* const fieldSymbol
     ) -> DiagnosticGroup
@@ -172,6 +194,27 @@ namespace Ace
             DiagnosticSeverity::Error,
             srcLocation,
             "undeclared symbol reference"
+        );
+
+        return group;
+    }
+
+    auto CreateUndeclaredMemberRefError(
+        const SrcLocation& srcLocation,
+        ITypeSymbol* const selfType,
+        const std::string& memberName
+    ) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        const std::string message =
+            "`" + selfType->CreateSignature() +
+            "` has no member named `" + memberName + "`";
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            srcLocation,
+            message
         );
 
         return group;

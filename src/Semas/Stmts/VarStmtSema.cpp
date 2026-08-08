@@ -13,6 +13,7 @@
 #include "SemaLogger.hpp"
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
+#include "Diagnostics/TypeCheckingDiagnostics.hpp"
 #include "TypeInfo.hpp"
 #include "ValueKind.hpp"
 #include "Emitter.hpp"
@@ -58,10 +59,19 @@ namespace Ace
         std::optional<std::shared_ptr<const IExprSema>> checkedOptAssignedExpr{};
         if (m_OptAssignedExpr.has_value())
         {
+            const TypeInfo targetTypeInfo
+            {
+                m_Symbol->GetType(),
+                ValueKind::R,
+            };
+            diagnostics.Collect(DiagnoseReferenceBinding(
+                m_OptAssignedExpr.value(),
+                targetTypeInfo
+            ));
             checkedOptAssignedExpr = diagnostics.Collect(
                 CreateImplicitlyConvertedAndTypeChecked(
                     m_OptAssignedExpr.value(),
-                    TypeInfo{ m_Symbol->GetType(), ValueKind::R }
+                    targetTypeInfo
                 )
             );
         }

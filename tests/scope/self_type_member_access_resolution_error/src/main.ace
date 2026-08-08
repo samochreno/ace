@@ -1,0 +1,8 @@
+Wrapper[T]: struct {
+    value: T
+}
+
+main(): int {
+    wrapped: Wrapper[int] = new Wrapper[int] { value: 3 };
+    ret wrapped.missing;
+}

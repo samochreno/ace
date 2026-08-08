@@ -64,15 +64,21 @@ namespace Ace
 
     auto StructSyntax::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
+        auto diagnostics = DiagnosticBag::Create();
+
+        const auto typeArgs = diagnostics.Collect(
+            ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
+        );
+
         return Diagnosed<std::unique_ptr<ISymbol>>
         {
             std::make_unique<StructTypeSymbol>(
                 m_BodyScope,
                 m_AccessModifier,
                 m_Name,
-                ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
+                typeArgs
             ),
-            DiagnosticBag::Create(),
+            std::move(diagnostics),
         };
     }
 }

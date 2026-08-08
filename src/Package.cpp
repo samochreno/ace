@@ -486,6 +486,31 @@ namespace Ace
         return Diagnosed{ finalFilePaths, std::move(diagnostics) };
     }
 
+    static auto NormalizeAndDeduplicateFilePaths(
+        const std::vector<std::filesystem::path>& filePaths
+    ) -> std::vector<std::filesystem::path>
+    {
+        std::vector<std::filesystem::path> normalizedFilePaths{};
+        std::unordered_set<std::string> seenFilePaths{};
+
+        std::for_each(begin(filePaths), end(filePaths),
+        [&](const std::filesystem::path& filePath)
+        {
+            const auto normalizedFilePath = filePath.lexically_normal();
+            const auto filePathKey = normalizedFilePath.generic_string();
+
+            if (seenFilePaths.contains(filePathKey))
+            {
+                return;
+            }
+
+            seenFilePaths.insert(filePathKey);
+            normalizedFilePaths.push_back(normalizedFilePath);
+        });
+
+        return normalizedFilePaths;
+    }
+
     static auto ReadFilePath(
         std::vector<std::shared_ptr<const ISrcBuffer>>* const srcBuffers,
         const FileBuffer* const fileBuffer,
@@ -804,6 +829,8 @@ namespace Ace
             srcFiles,
             pathMacroMap
         ));
+        const auto deduplicatedSrcFilePaths =
+            NormalizeAndDeduplicateFilePaths(srcFilePaths);
 
         const auto depFilePaths = diagnostics.Collect(TransformFilePaths(
             fileBuffer,
@@ -811,11 +838,13 @@ namespace Ace
             depFiles,
             pathMacroMap
         ));
+        const auto deduplicatedDepFilePaths =
+            NormalizeAndDeduplicateFilePaths(depFilePaths);
 
         const auto srcFileBuffers = diagnostics.Collect(ReadFilePaths(
             srcBuffers,
             fileBuffer,
-            srcFilePaths
+            deduplicatedSrcFilePaths
         ));
 
         return Diagnosed
@@ -824,7 +853,7 @@ namespace Ace
             {
                 std::move(name),
                 std::move(srcFileBuffers),
-                std::move(depFilePaths),
+                std::move(deduplicatedDepFilePaths),
             },
             std::move(diagnostics),
         };

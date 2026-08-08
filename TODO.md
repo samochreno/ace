@@ -16,23 +16,17 @@
 
 - Add parent symbol reference to children (type param -> generic, param -> function)
 - Reformat `optSymbol... symbol = optSymbol.value_or` to `symbol = diagnostics.Collect(...).value_or`
-- Remove `m_Scope` from `CompoundAssignmentStmtSyntax` like in other binary syntaxes
 - Associated types
 - ❓ Make logical negation backed by trait
 - Remove redundant undeclared symbol error for unimplemented function: When resolving associated functions, check if the type implements a trait with a function of that name, then just 'trust' it is implemented
 - Change `__deref_as[T](...)` to take any type convertible to `std::Ptr` and remove `std::Ref[T]::ptr(...)`
 - Make copying into unintialized variables safe (When a unintialized variable's field is dropped, it could cause unwanted behaviour &rarr; possibly fixed by lifetime trait)
 - Lifetime trait: default, copy, drop
-- Fix that glue doesnt bind on private types
 - Dynamic casting (how to handle failed conversions?)
 - Strings
 
 ## 🟡 Medium Priority
 
-- Forbid taking reference of a r-value
-- Add self type signature to member access resolution error message
-- Diagnostics when redeclared type parameter
-- Forbid constructing of non-pub struct
 - Struct update constructor syntax
 - Add diagnosis for leaking private types in public interface
 - Add source location to unknown files like `.cpp`
@@ -40,7 +34,6 @@
   - `IEmittable` could hold `ControlFlowGraph`, so it could verify control flow
   - Possibly implement `ControlFlowNode`s for `LLVM IR` instructions (check `llvm/IR/Instruction.def`)
 - Check if there is any a better way than to depend on external executables like `llc` and `clang`
-- Remove duplicate module filepaths in package: `./dawg/../dawg/` is the same as `./dawg/`
 - Enums
 - Mutability/Immutability:
   - Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`

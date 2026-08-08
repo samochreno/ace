@@ -1,0 +1,12 @@
+Wrapper[T]: struct {
+    value: T
+}
+
+impl[T] Wrapper[T] {
+    map[T](): void {
+    }
+}
+
+main(): int {
+    ret 0;
+}

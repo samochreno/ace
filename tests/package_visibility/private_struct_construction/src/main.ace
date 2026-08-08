@@ -1,0 +1,9 @@
+lib: mod {
+    Secret: struct {
+    }
+}
+
+main(): int {
+    new lib::Secret {};
+    ret 0;
+}

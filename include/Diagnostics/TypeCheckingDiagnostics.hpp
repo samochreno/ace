@@ -11,6 +11,11 @@
 
 namespace Ace
 {
+    auto DiagnoseReferenceBinding(
+        const std::shared_ptr<const IExprSema>& expr,
+        const TypeInfo& targetTypeInfo
+    ) -> Diagnosed<void>;
+
     auto CreateExpectedLValueExprError(
         const std::shared_ptr<const IExprSema>& expr
     ) -> DiagnosticGroup;
