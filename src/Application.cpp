@@ -108,6 +108,11 @@ namespace Ace::Application
             auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
             ACE_ASSERT(functionSymbol);
 
+            if (functionSymbol->GetBodyScope() != functionSyntax->GetBodyScope())
+            {
+                return;
+            }
+
             functionBlockBindings.emplace_back(
                 functionSymbol,
                 functionSyntax->GetBlock()

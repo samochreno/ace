@@ -44,6 +44,7 @@ namespace Ace
         virtual ~FunctionSyntax() = default;
 
         auto GetSrcLocation() const -> const SrcLocation&;
+        auto GetBodyScope() const -> const std::shared_ptr<Scope>&;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const ISyntax*> final;
 

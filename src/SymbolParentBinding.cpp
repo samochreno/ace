@@ -16,6 +16,7 @@ namespace Ace
             [&](TypeParamTypeSymbol* const typeParam)
             {
                 typeParam->BindParent(typeParamOwner);
+                ACE_ASSERT(typeParam->GetParent() == typeParamOwner);
             });
         }
 
@@ -26,6 +27,7 @@ namespace Ace
             [&](IParamVarSymbol* const param)
             {
                 param->BindParent(callable);
+                ACE_ASSERT(param->GetParent() == callable);
             });
         }
     }
@@ -45,40 +47,9 @@ namespace Ace
         });
     }
 
-    static auto ValidateChildrenInScope(
-        const std::shared_ptr<Scope>& scope
-    ) -> void
-    {
-        const auto symbols = scope->CollectAllSymbols();
-        std::for_each(begin(symbols), end(symbols),
-        [&](ISymbol* const symbol)
-        {
-            if (auto* const typeParam =
-                dynamic_cast<TypeParamTypeSymbol*>(symbol))
-            {
-                ACE_ASSERT(
-                    typeParam->GetParent()->GetBodyScope() == scope
-                );
-            }
-
-            if (auto* const param = dynamic_cast<IParamVarSymbol*>(symbol))
-            {
-                ACE_ASSERT(param->GetParent()->GetBodyScope() == scope);
-            }
-        });
-
-        const auto childScopes = scope->CollectChildren();
-        std::for_each(begin(childScopes), end(childScopes),
-        [&](const std::shared_ptr<Scope>& childScope)
-        {
-            ValidateChildrenInScope(childScope);
-        });
-    }
-
     auto BindSymbolParents(const std::shared_ptr<Scope>& scope) -> void
     {
         BindChildrenInScope(scope);
-        ValidateChildrenInScope(scope);
     }
 
     auto BindSymbolParents(ISymbol* const parent) -> void
