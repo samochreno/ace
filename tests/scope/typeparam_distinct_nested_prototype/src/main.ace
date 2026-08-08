@@ -1,0 +1,8 @@
+Mapper[T]: trait {
+    map[U](value: U): U;
+}
+
+main(): int {
+    std::print_int(7);
+    ret 0;
+}
