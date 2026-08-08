@@ -39,7 +39,6 @@
   - `IEmittable` could hold `ControlFlowGraph`, so it could verify control flow
   - Possibly implement `ControlFlowNode`s for `LLVM IR` instructions (check `llvm/IR/Instruction.def`)
 - Check if there is any a better way than to depend on external executables like `llc` and `clang`
-- Remove duplicate module filepaths in package: `./dawg/../dawg/` is the same as `./dawg/`
 - Enums
 - Mutability/Immutability:
   - Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`
