@@ -12,8 +12,7 @@
 namespace Ace
 {
     auto CreateJsonError(
-        const FileBuffer* const fileBuffer,
-        const nlohmann::json::exception& jsonException
+        const FileBuffer* const fileBuffer, const nlohmann::json::exception& jsonException
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -21,11 +20,7 @@ namespace Ace
         std::string what = jsonException.what();
         MakeLowercase(what);
 
-        const auto closingBracketIt = std::find(
-            begin(what),
-            end  (what),
-            ']'
-        );
+        const auto closingBracketIt = std::find(begin(what), end(what), ']');
         ACE_ASSERT(closingBracketIt != end(what));
 
         auto [message, srcLocation] = [&]() -> std::tuple<std::string, std::optional<SrcLocation>>
@@ -33,8 +28,7 @@ namespace Ace
             const auto atLinePos = what.find("at line");
             if (atLinePos == std::string::npos)
             {
-                const std::string message
-                {
+                const std::string message{
                     closingBracketIt + 2,
                     end(what),
                 };
@@ -42,14 +36,9 @@ namespace Ace
                 return { message, fileBuffer->CreateFirstLocation() };
             }
 
-            const auto colonIt = std::find(
-                begin(what),
-                end  (what),
-                ':'
-            );
+            const auto colonIt = std::find(begin(what), end(what), ':');
 
-            const std::string message
-            {
+            const std::string message{
                 colonIt + 2,
                 end(what),
             };
@@ -72,22 +61,18 @@ namespace Ace
                 ++it;
             }
 
-            const auto lineIndex =
-                static_cast<size_t>(std::stoi(lineString) - 1);
+            const auto lineIndex = static_cast<size_t>(std::stoi(lineString) - 1);
 
-            const auto characterIndex =
-                static_cast<size_t>(std::stoi(columnString));
+            const auto characterIndex = static_cast<size_t>(std::stoi(columnString));
 
             const auto& line = fileBuffer->GetLines().at(lineIndex);
-            const SrcLocation srcLocation
-            {
+            const SrcLocation srcLocation{
                 fileBuffer,
                 begin(line) + characterIndex,
                 begin(line) + characterIndex + 1,
             };
 
-            return
-            {
+            return {
                 message,
                 srcLocation,
             };
@@ -96,12 +81,8 @@ namespace Ace
         message.at(0) = std::toupper(message.at(0));
         message = "json: " + message;
 
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            message
-        );
+        group.Diagnostics.emplace_back(DiagnosticSeverity::Error, srcLocation, message);
 
         return group;
-    }   
+    }
 }

@@ -5,8 +5,7 @@
 
 namespace Ace
 {
-    template<typename T>
-    class Lazy
+    template <typename T> class Lazy
     {
     public:
         Lazy(std::function<T()> initializer)

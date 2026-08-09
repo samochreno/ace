@@ -20,8 +20,7 @@ namespace Ace
         virtual auto CollectConstraints() const -> std::vector<ConstraintSymbol*> final;
 
         virtual auto DiagnoseUnsatisfiedConstraints(
-            const SrcLocation& srcLocation,
-            const std::vector<ITypeSymbol*>& typeArgs
+            const SrcLocation& srcLocation, const std::vector<ITypeSymbol*>& typeArgs
         ) const -> Diagnosed<void> final;
     };
 }

@@ -16,9 +16,10 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* const aliasedType
-    ) : m_Scope{ scope },
-        m_Name{ srcLocation, SpecialIdent::SelfType },
-        m_AliasedType{ aliasedType }
+    )
+        : m_Scope{ scope },
+          m_Name{ srcLocation, SpecialIdent::SelfType },
+          m_AliasedType{ aliasedType }
     {
     }
 
@@ -53,14 +54,11 @@ namespace Ace
     }
 
     auto ImplSelfAliasTypeSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<ImplSelfAliasTypeSymbol>(
-            GetName().SrcLocation,
-            scope,
-            CreateInstantiated<ITypeSymbol>(GetAliasedType(), context)
+            GetName().SrcLocation, scope, CreateInstantiated<ITypeSymbol>(GetAliasedType(), context)
         );
     }
 

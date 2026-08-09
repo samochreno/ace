@@ -13,16 +13,13 @@
 
 namespace Ace
 {
-    class LabelStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<LabelStmtSema>,
-        public virtual IDeclSyntax
+    class LabelStmtSyntax : public virtual IStmtSyntax,
+                            public virtual ISemaSyntax<LabelStmtSema>,
+                            public virtual IDeclSyntax
     {
     public:
         LabelStmtSyntax(
-            const SrcLocation& srcLocation,
-            const std::shared_ptr<Scope>& scope,
-            const Ident& name
+            const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope, const Ident& name
         );
         virtual ~LabelStmtSyntax() = default;
 

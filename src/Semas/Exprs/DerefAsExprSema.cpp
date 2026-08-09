@@ -19,19 +19,23 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprSema>& expr,
         ITypeSymbol* const typeSymbol
-    ) : m_SrcLocation{ srcLocation },
-        m_TypeSymbol{ typeSymbol },
-        m_Expr{ expr }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_TypeSymbol{ typeSymbol },
+          m_Expr{ expr }
     {
     }
 
     auto DerefAsExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("DerefAsExprSema", [&]()
-        {
-            logger.Log("m_Expr", m_Expr);
-            logger.Log("m_TypeSymbol", m_TypeSymbol);
-        });
+        logger.Log(
+            "DerefAsExprSema",
+            [&]()
+            {
+                logger.Log("m_Expr", m_Expr);
+                logger.Log("m_TypeSymbol", m_TypeSymbol);
+            }
+        );
     }
 
     auto DerefAsExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -44,53 +48,42 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto DerefAsExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const DerefAsExprSema>>
+    auto DerefAsExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const DerefAsExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        auto* const typeSymbol =
-            m_Expr->GetTypeInfo().Symbol->GetUnaliasedType();
+        auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol->GetUnaliasedType();
 
         const bool isRef = typeSymbol->IsRef();
-        const bool isPtr =
-            typeSymbol == GetCompilation()->GetNatives().Ptr.GetSymbol();
+        const bool isPtr = typeSymbol == GetCompilation()->GetNatives().Ptr.GetSymbol();
 
         if (!isRef && !isPtr)
         {
             diagnostics.Add(CreateExpectedDerefableExprError(GetSrcLocation()));
         }
 
-        const auto checkedExpr =
-            diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
+        const auto checkedExpr = diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
 
         if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
-            std::make_shared<const DerefAsExprSema>(
-                GetSrcLocation(),
-                checkedExpr,
-                m_TypeSymbol
-            ),
+        return Diagnosed{
+            std::make_shared<const DerefAsExprSema>(GetSrcLocation(), checkedExpr, m_TypeSymbol),
             std::move(diagnostics),
         };
     }
 
-    auto DerefAsExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto DerefAsExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto DerefAsExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const DerefAsExprSema>
+    auto DerefAsExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const DerefAsExprSema>
     {
         const auto loweredExpr = m_Expr->CreateLoweredExpr({});
 
@@ -99,16 +92,12 @@ namespace Ace
             return shared_from_this();
         }
 
-        return std::make_shared<const DerefAsExprSema>(
-            GetSrcLocation(),
-            loweredExpr,
-            m_TypeSymbol
-        )->CreateLowered({});
+        return std::make_shared<const DerefAsExprSema>(GetSrcLocation(), loweredExpr, m_TypeSymbol)
+            ->CreateLowered({});
     }
 
-    auto DerefAsExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto DerefAsExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }
@@ -123,16 +112,10 @@ namespace Ace
         std::vector<ExprDropInfo> tmps{};
 
         const auto exprEmitResult = m_Expr->Emit(emitter);
-        tmps.insert(
-            end(tmps),
-            begin(exprEmitResult.Tmps),
-            end  (exprEmitResult.Tmps)
-        );
+        tmps.insert(end(tmps), begin(exprEmitResult.Tmps), end(exprEmitResult.Tmps));
 
-        auto* const loadInst = emitter.GetBlock().Builder.CreateLoad(
-            emitter.GetPtrType(),
-            exprEmitResult.Value
-        );
+        auto* const loadInst =
+            emitter.GetBlock().Builder.CreateLoad(emitter.GetPtrType(), exprEmitResult.Value);
 
         return { loadInst, tmps };
     }

@@ -9,28 +9,29 @@
 
 namespace Ace
 {
-    template<typename TValue>
-    class [[nodiscard]] Diagnosed;
+    template <typename TValue> class [[nodiscard]] Diagnosed;
 
-    template<>
-    class [[nodiscard]] Diagnosed<void>
+    template <> class [[nodiscard]] Diagnosed<void>
     {
     public:
-        [[deprecated]]
-        auto _DiagnosedVoid() -> void {}
-
-        Diagnosed(const Diagnosed&) = delete;
-        Diagnosed(
-            DiagnosticBag diagnostics
-        ) : m_Diagnostics{ std::move(diagnostics) }
+        [[deprecated]] auto _DiagnosedVoid() -> void
         {
         }
+
+        Diagnosed(const Diagnosed&) = delete;
+
+        Diagnosed(DiagnosticBag diagnostics)
+            : m_Diagnostics{ std::move(diagnostics) }
+        {
+        }
+
         ~Diagnosed() = default;
 
         auto GetDiagnostics() const -> const DiagnosticBag&
         {
             return m_Diagnostics;
         }
+
         auto GetDiagnostics() -> DiagnosticBag&
         {
             return m_Diagnostics;
@@ -40,35 +41,32 @@ namespace Ace
         DiagnosticBag m_Diagnostics = DiagnosticBag::Create();
     };
 
-    template<typename TValue>
-    class [[nodiscard]] Diagnosed
+    template <typename TValue> class [[nodiscard]] Diagnosed
     {
     public:
-        [[deprecated]]
-        auto _DiagnosedNotVoid() -> void {}
+        [[deprecated]] auto _DiagnosedNotVoid() -> void
+        {
+        }
 
         Diagnosed(const Diagnosed&) = delete;
-        Diagnosed(
-            const TValue& value,
-            DiagnosticBag diagnostics
-        ) : m_Value{ value },
-            m_Diagnostics{ std::move(diagnostics) }
+
+        Diagnosed(const TValue& value, DiagnosticBag diagnostics)
+            : m_Value{ value },
+              m_Diagnostics{ std::move(diagnostics) }
         {
         }
-        Diagnosed(
-            TValue&& value,
-            DiagnosticBag diagnostics
-        ) : m_Value{ std::move(value) },
-            m_Diagnostics{ std::move(diagnostics) }
+
+        Diagnosed(TValue&& value, DiagnosticBag diagnostics)
+            : m_Value{ std::move(value) },
+              m_Diagnostics{ std::move(diagnostics) }
         {
         }
+
         ~Diagnosed() = default;
 
-        template<typename TNew>
-        operator Diagnosed<TNew>() &&
+        template <typename TNew> operator Diagnosed<TNew>() &&
         {
-            return Diagnosed<TNew>
-            {
+            return Diagnosed<TNew>{
                 std::move(m_Value),
                 std::move(m_Diagnostics),
             };
@@ -78,6 +76,7 @@ namespace Ace
         {
             return m_Value;
         }
+
         auto Unwrap() const -> const TValue&
         {
             return m_Value;
@@ -87,6 +86,7 @@ namespace Ace
         {
             return m_Diagnostics;
         }
+
         auto GetDiagnostics() -> DiagnosticBag&
         {
             return m_Diagnostics;

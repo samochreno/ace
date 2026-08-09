@@ -14,11 +14,10 @@
 
 namespace Ace
 {
-    class VarStmtSema :
-        public std::enable_shared_from_this<VarStmtSema>,
-        public virtual IStmtSema,
-        public virtual ITypeCheckableSema<VarStmtSema, StmtTypeCheckingContext>,
-        public virtual ILowerableSema<VarStmtSema>
+    class VarStmtSema : public std::enable_shared_from_this<VarStmtSema>,
+                        public virtual IStmtSema,
+                        public virtual ITypeCheckableSema<VarStmtSema, StmtTypeCheckingContext>,
+                        public virtual ILowerableSema<VarStmtSema>
     {
     public:
         VarStmtSema(
@@ -32,25 +31,21 @@ namespace Ace
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto CreateTypeChecked(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const VarStmtSema>> final;
-        auto CreateTypeCheckedStmt(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
-        auto CreateLowered(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const VarStmtSema> final;
-        auto CreateLoweredStmt(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const IStmtSema> final;
+        auto CreateTypeChecked(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const VarStmtSema>> final;
+        auto CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
+        auto CreateLowered(const LoweringContext& context) const
+            -> std::shared_ptr<const VarStmtSema> final;
+        auto CreateLoweredStmt(const LoweringContext& context) const
+            -> std::shared_ptr<const IStmtSema> final;
         auto CollectMonos() const -> MonoCollector final;
         auto Emit(Emitter& emitter) const -> void final;
 
         auto CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction> final;
 
         auto GetSymbol() const -> LocalVarSymbol*;
-        
+
     private:
         SrcLocation m_SrcLocation{};
         LocalVarSymbol* m_Symbol{};

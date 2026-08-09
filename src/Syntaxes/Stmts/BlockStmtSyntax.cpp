@@ -15,9 +15,10 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& bodyScope,
         const std::vector<std::shared_ptr<const IStmtSyntax>>& stmts
-    ) : m_SrcLocation{ srcLocation },
-        m_BodyScope{ bodyScope },
-        m_Stmts{ stmts }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_BodyScope{ bodyScope },
+          m_Stmts{ stmts }
     {
     }
 
@@ -41,19 +42,18 @@ namespace Ace
         auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const IStmtSema>> stmtSemas{};
-        std::transform(begin(m_Stmts), end(m_Stmts), back_inserter(stmtSemas),
-        [&](const std::shared_ptr<const IStmtSyntax>& stmt)
-        {
-            return diagnostics.Collect(stmt->CreateStmtSema());
-        });
+        std::transform(
+            begin(m_Stmts),
+            end(m_Stmts),
+            back_inserter(stmtSemas),
+            [&](const std::shared_ptr<const IStmtSyntax>& stmt)
+            {
+                return diagnostics.Collect(stmt->CreateStmtSema());
+            }
+        );
 
-        return Diagnosed
-        {
-            std::make_shared<const BlockStmtSema>(
-                GetSrcLocation(),
-                m_BodyScope,
-                stmtSemas
-            ),
+        return Diagnosed{
+            std::make_shared<const BlockStmtSema>(GetSrcLocation(), m_BodyScope, stmtSemas),
             std::move(diagnostics),
         };
     }

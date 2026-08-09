@@ -11,10 +11,10 @@
 namespace Ace
 {
     LogicalNegationExprSyntax::LogicalNegationExprSyntax(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<const IExprSyntax>& expr
-    ) : m_SrcLocation{ srcLocation },
-        m_Expr{ expr }
+        const SrcLocation& srcLocation, const std::shared_ptr<const IExprSyntax>& expr
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Expr{ expr }
     {
     }
 
@@ -33,23 +33,21 @@ namespace Ace
         return SyntaxChildCollector{}.Collect(m_Expr).Build();
     }
 
-    auto LogicalNegationExprSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const LogicalNegationExprSema>>
+    auto LogicalNegationExprSyntax::CreateSema() const
+        -> Diagnosed<std::shared_ptr<const LogicalNegationExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         const auto exprSema = diagnostics.Collect(m_Expr->CreateExprSema());
 
-        return Diagnosed
-        {
-            std::make_shared<const LogicalNegationExprSema>(
-                GetSrcLocation(),
-                exprSema
-            ),
+        return Diagnosed{
+            std::make_shared<const LogicalNegationExprSema>(GetSrcLocation(), exprSema),
             std::move(diagnostics),
         };
     }
 
-    auto LogicalNegationExprSyntax::CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto LogicalNegationExprSyntax::CreateExprSema() const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateSema();
     }

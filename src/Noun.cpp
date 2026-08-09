@@ -8,17 +8,17 @@ namespace Ace
     {
         switch (article)
         {
-        case Article::A:
-            return "a";
+            case Article::A:
+                return "a";
 
-        case Article::An:
-            return "an";
+            case Article::An:
+                return "an";
 
-        case Article::The:
-            return "the";
+            case Article::The:
+                return "the";
 
-        default:
-            return {};
+            default:
+                return {};
         }
     }
 

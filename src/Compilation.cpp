@@ -22,8 +22,7 @@
 
 namespace Ace
 {
-    static const CLIOptionDefinition OutputPathOptionDefinition
-    {
+    static const CLIOptionDefinition OutputPathOptionDefinition{
         std::string_view{ "o" },
         std::string_view{ "output" },
         CLIOptionKind::WithValue,
@@ -32,8 +31,7 @@ namespace Ace
 
     static auto GetOptionDefinitions() -> std::vector<const CLIOptionDefinition*>
     {
-        return
-        {
+        return {
             &OutputPathOptionDefinition,
         };
     }
@@ -47,24 +45,18 @@ namespace Ace
 
         auto self = std::make_unique<Compilation>();
 
-        const auto cliArgBuffer = std::make_shared<const Ace::CLIArgBuffer>(
-            self.get(),
-            args
-        );
+        const auto cliArgBuffer = std::make_shared<const Ace::CLIArgBuffer>(self.get(), args);
         self->m_CLIArgBuffer = cliArgBuffer.get();
         srcBuffers->push_back(std::move(cliArgBuffer));
 
-        const auto optCLIArgsParseResult = diagnostics.Collect(ParseCommandLineArgs(
-            self->m_CLIArgBuffer,
-            GetOptionDefinitions()
-        ));
+        const auto optCLIArgsParseResult =
+            diagnostics.Collect(ParseCommandLineArgs(self->m_CLIArgBuffer, GetOptionDefinitions()));
         if (!optCLIArgsParseResult.has_value())
         {
             return std::move(diagnostics);
         }
 
-        const auto& positionalArgs =
-            optCLIArgsParseResult.value().PositionalArgs;
+        const auto& positionalArgs = optCLIArgsParseResult.value().PositionalArgs;
         const auto& optionMap = optCLIArgsParseResult.value().OptionMap;
 
         if (positionalArgs.empty())
@@ -75,28 +67,25 @@ namespace Ace
 
         if (positionalArgs.size() > 1)
         {
-            std::for_each(begin(positionalArgs), end(positionalArgs),
-            [&](const std::string_view positionalArg)
-            {
-                const SrcLocation srcLocation
+            std::for_each(
+                begin(positionalArgs),
+                end(positionalArgs),
+                [&](const std::string_view positionalArg)
                 {
-                    self->m_CLIArgBuffer,
-                    begin(positionalArg),
-                    end  (positionalArg),
-                };
+                    const SrcLocation srcLocation{
+                        self->m_CLIArgBuffer,
+                        begin(positionalArg),
+                        end(positionalArg),
+                    };
 
-                diagnostics.Add(CreateMultiplePackagePathArgsError(
-                    srcLocation
-                ));
-            });
+                    diagnostics.Add(CreateMultiplePackagePathArgsError(srcLocation));
+                }
+            );
         }
 
         const auto packagePath = positionalArgs.front();
 
-        auto optPackageFileBuffer = diagnostics.Collect(FileBuffer::Read(
-            self.get(),
-            packagePath
-        ));
+        auto optPackageFileBuffer = diagnostics.Collect(FileBuffer::Read(self.get(), packagePath));
         if (!optPackageFileBuffer.has_value())
         {
             return std::move(diagnostics);
@@ -105,10 +94,8 @@ namespace Ace
         self->m_PackageFileBuffer = optPackageFileBuffer.value().get();
         srcBuffers->push_back(std::move(optPackageFileBuffer.value()));
 
-        auto optPackage = diagnostics.Collect(Package::Parse(
-            srcBuffers,
-            self->m_PackageFileBuffer
-        ));
+        auto optPackage =
+            diagnostics.Collect(Package::Parse(srcBuffers, self->m_PackageFileBuffer));
         if (!optPackage.has_value())
         {
             return std::move(diagnostics);
@@ -116,26 +103,19 @@ namespace Ace
 
         self->m_Package = std::move(optPackage.value());
 
-        self->m_OutputPath = optionMap.at(
-            &OutputPathOptionDefinition
-        ).OptValue.value();
+        self->m_OutputPath = optionMap.at(&OutputPathOptionDefinition).OptValue.value();
 
-        if (
-            !std::filesystem::exists(self->m_OutputPath) ||
-            !std::filesystem::is_directory(self->m_OutputPath)
-            )
+        if (!std::filesystem::exists(self->m_OutputPath) ||
+            !std::filesystem::is_directory(self->m_OutputPath))
         {
             std::filesystem::create_directories(self->m_OutputPath);
         }
 
         self->m_GlobalScope = { self.get() };
 
-        self->m_PackageBodyScope =
-            self->GetGlobalScope()->GetOrCreateChild(self->m_Package.Name);
+        self->m_PackageBodyScope = self->GetGlobalScope()->GetOrCreateChild(self->m_Package.Name);
 
-        auto ownedVoidTypeSymbol = std::make_unique<VoidTypeSymbol>(
-            self->GetGlobalScope()
-        );
+        auto ownedVoidTypeSymbol = std::make_unique<VoidTypeSymbol>(self->GetGlobalScope());
         self->m_VoidTypeSymbol = DiagnosticBag::CreateNoError().Collect(
             self->GetGlobalScope()->DeclareSymbol(std::move(ownedVoidTypeSymbol))
         );
@@ -148,8 +128,7 @@ namespace Ace
             return std::move(diagnostics);
         }
 
-        return
-        {
+        return {
             std::unique_ptr<Compilation>{ std::move(self) },
             std::move(diagnostics),
         };

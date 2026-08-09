@@ -17,19 +17,22 @@
 namespace Ace
 {
     AddressOfExprSema::AddressOfExprSema(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<const IExprSema>& expr
-    ) : m_SrcLocation{ srcLocation },
-        m_Expr{ expr }
+        const SrcLocation& srcLocation, const std::shared_ptr<const IExprSema>& expr
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Expr{ expr }
     {
     }
 
     auto AddressOfExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("AddressOfExprSema", [&]()
-        {
-            logger.Log("m_Expr", m_Expr);
-        });
+        logger.Log(
+            "AddressOfExprSema",
+            [&]()
+            {
+                logger.Log("m_Expr", m_Expr);
+            }
+        );
     }
 
     auto AddressOfExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -42,19 +45,15 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto AddressOfExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const AddressOfExprSema>>
+    auto AddressOfExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const AddressOfExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto checkedExpr =
-            diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
+        const auto checkedExpr = diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
 
-        if (
-            !checkedExpr->GetTypeInfo().Symbol->IsError() &&
-            (checkedExpr->GetTypeInfo().ValueKind == ValueKind::R)
-        )
+        if (!checkedExpr->GetTypeInfo().Symbol->IsError() &&
+            (checkedExpr->GetTypeInfo().ValueKind == ValueKind::R))
         {
             diagnostics.Add(CreateExpectedLValueExprError(checkedExpr));
         }
@@ -63,27 +62,21 @@ namespace Ace
         {
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
-         
-        return Diagnosed
-        {
-            std::make_shared<const AddressOfExprSema>(
-                GetSrcLocation(),
-                checkedExpr
-            ),
+
+        return Diagnosed{
+            std::make_shared<const AddressOfExprSema>(GetSrcLocation(), checkedExpr),
             std::move(diagnostics),
         };
     }
 
-    auto AddressOfExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto AddressOfExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto AddressOfExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const AddressOfExprSema>
+    auto AddressOfExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const AddressOfExprSema>
     {
         const auto loweredExpr = m_Expr->CreateLoweredExpr({});
 
@@ -92,15 +85,12 @@ namespace Ace
             return shared_from_this();
         }
 
-        return std::make_shared<const AddressOfExprSema>(
-            GetSrcLocation(),
-            loweredExpr
-        )->CreateLowered({});
+        return std::make_shared<const AddressOfExprSema>(GetSrcLocation(), loweredExpr)
+            ->CreateLowered({});
     }
 
-    auto AddressOfExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto AddressOfExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }
@@ -110,45 +100,26 @@ namespace Ace
         return MonoCollector{}.Collect(m_Expr);
     }
 
-    auto AddressOfExprSema::Emit(
-        Emitter& emitter
-    ) const -> ExprEmitResult
+    auto AddressOfExprSema::Emit(Emitter& emitter) const -> ExprEmitResult
     {
         std::vector<ExprDropInfo> tmps{};
 
         const auto exprEmitResult = m_Expr->Emit(emitter);
-        tmps.insert(
-            end(tmps),
-            begin(exprEmitResult.Tmps),
-            end  (exprEmitResult.Tmps)
-        );
+        tmps.insert(end(tmps), begin(exprEmitResult.Tmps), end(exprEmitResult.Tmps));
 
         auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol;
-        auto* const type = llvm::PointerType::get(
-            emitter.GetType(typeSymbol),
-            0
-        );
+        auto* const type = llvm::PointerType::get(emitter.GetType(typeSymbol), 0);
 
         auto* const allocaInst = emitter.GetBlock().Builder.CreateAlloca(type);
-        tmps.emplace_back(
-            allocaInst, 
-            GetCompilation()->GetNatives().Ptr.GetSymbol()
-        );
+        tmps.emplace_back(allocaInst, GetCompilation()->GetNatives().Ptr.GetSymbol());
 
-        emitter.GetBlock().Builder.CreateStore(
-            exprEmitResult.Value, 
-            allocaInst
-        );
+        emitter.GetBlock().Builder.CreateStore(exprEmitResult.Value, allocaInst);
 
         return { allocaInst, tmps };
     }
 
     auto AddressOfExprSema::GetTypeInfo() const -> TypeInfo
     {
-        return 
-        { 
-            GetCompilation()->GetNatives().Ptr.GetSymbol(), 
-            ValueKind::R
-        };
+        return { GetCompilation()->GetNatives().Ptr.GetSymbol(), ValueKind::R };
     }
 }

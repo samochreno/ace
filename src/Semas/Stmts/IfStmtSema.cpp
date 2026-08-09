@@ -28,19 +28,23 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         const std::vector<std::shared_ptr<const IExprSema>>& conditions,
         const std::vector<std::shared_ptr<const BlockStmtSema>>& blocks
-    ) : m_Scope{ scope },
-        m_Conditions{ conditions },
-        m_Blocks{ blocks }
+    )
+        : m_Scope{ scope },
+          m_Conditions{ conditions },
+          m_Blocks{ blocks }
     {
     }
 
     auto IfStmtSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("IfStmtSema", [&]()
-        {
-            logger.Log("m_Conditions", m_Conditions);
-            logger.Log("m_Blocks", m_Blocks);
-        });
+        logger.Log(
+            "IfStmtSema",
+            [&]()
+            {
+                logger.Log("m_Conditions", m_Conditions);
+                logger.Log("m_Blocks", m_Blocks);
+            }
+        );
     }
 
     auto IfStmtSema::GetSrcLocation() const -> const SrcLocation&
@@ -53,14 +57,12 @@ namespace Ace
         return m_Scope;
     }
 
-    auto IfStmtSema::CreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IfStmtSema>>
+    auto IfStmtSema::CreateTypeChecked(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IfStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const TypeInfo typeInfo
-        {
+        const TypeInfo typeInfo{
             GetCompilation()->GetNatives().Bool.GetSymbol(),
             ValueKind::R,
         };
@@ -68,7 +70,7 @@ namespace Ace
         std::vector<std::shared_ptr<const IExprSema>> checkedConditions{};
         std::transform(
             begin(m_Conditions),
-            end  (m_Conditions),
+            end(m_Conditions),
             back_inserter(checkedConditions),
             [&](const std::shared_ptr<const IExprSema>& condition)
             {
@@ -81,46 +83,37 @@ namespace Ace
         std::vector<std::shared_ptr<const BlockStmtSema>> checkedBlocks{};
         std::transform(
             begin(m_Blocks),
-            end  (m_Blocks),
+            end(m_Blocks),
             back_inserter(checkedBlocks),
             [&](const std::shared_ptr<const BlockStmtSema>& block)
             {
-                return diagnostics.Collect(block->CreateTypeChecked({
-                    context.ParentFunctionTypeSymbol
-                }));
+                return diagnostics.Collect(
+                    block->CreateTypeChecked({ context.ParentFunctionTypeSymbol })
+                );
             }
         );
 
-        if (
-            (checkedConditions == m_Conditions) &&
-            (checkedBlocks == m_Blocks)
-            )
+        if ((checkedConditions == m_Conditions) && (checkedBlocks == m_Blocks))
         {
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const IfStmtSema>(
-                GetSrcLocation(),
-                GetScope(),
-                checkedConditions,
-                checkedBlocks
+                GetSrcLocation(), GetScope(), checkedConditions, checkedBlocks
             ),
             std::move(diagnostics),
         };
     }
 
-    auto IfStmtSema::CreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IStmtSema>>
+    auto IfStmtSema::CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IStmtSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto IfStmtSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const GroupStmtSema>
+    auto IfStmtSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const GroupStmtSema>
     {
         // From:
         // if condition_0 {
@@ -130,31 +123,29 @@ namespace Ace
         // } else {
         //     block_2;
         // }
-        // 
-        // To: 
+        //
+        // To:
         // gotoif !condition_0 label_0;
         // block_0;
         // goto label_2;
-        // 
+        //
         // label_0:
         // gotoif !condition_1 label_1;
         // block_1;
         // goto label_2;
-        // 
+        //
         // label_1:
         // block_2;
-        // 
+        //
         // label_2:
-        
+
         const bool hasElse = m_Blocks.size() > m_Conditions.size();
 
         const auto lastBlock = m_Blocks.back();
 
         std::vector<LabelSymbol*> labelSymbols{};
 
-        const size_t labelCount = hasElse ?
-            (m_Conditions.size() + 1) :
-            (m_Conditions.size());
+        const size_t labelCount = hasElse ? (m_Conditions.size() + 1) : (m_Conditions.size());
 
         for (size_t i = 0; i < labelCount; i++)
         {
@@ -173,14 +164,12 @@ namespace Ace
                 return m_Conditions.at(i + 1)->GetSrcLocation();
             }();
             const Ident labelName{ labelSrcLocation, AnonymousIdent::Create() };
-            auto labelSymbolOwned = std::make_unique<LabelSymbol>(
-                GetScope(),
-                labelName
-            );
+            auto labelSymbolOwned = std::make_unique<LabelSymbol>(GetScope(), labelName);
 
-            auto* const labelSymbol = dynamic_cast<LabelSymbol*>(DiagnosticBag::CreateNoError().Collect(
-                GetScope()->DeclareSymbol(std::move(labelSymbolOwned))
-            ));
+            auto* const labelSymbol =
+                dynamic_cast<LabelSymbol*>(DiagnosticBag::CreateNoError().Collect(
+                    GetScope()->DeclareSymbol(std::move(labelSymbolOwned))
+                ));
 
             labelSymbols.push_back(labelSymbol);
         }
@@ -192,26 +181,22 @@ namespace Ace
         for (size_t i = 0; i < m_Conditions.size(); i++)
         {
             const bool isFirstBlock = i == 0;
-            const bool isLastBlock  = i == (m_Blocks.size() - 1);
+            const bool isLastBlock = i == (m_Blocks.size() - 1);
 
             if (!isFirstBlock)
             {
                 auto* const labelSymbol = labelSymbols.at(i - 1);
                 stmts.push_back(std::make_shared<const LabelStmtSema>(
-                    labelSymbol->GetName().SrcLocation,
-                    labelSymbol
+                    labelSymbol->GetName().SrcLocation, labelSymbol
                 ));
             }
 
             const auto condition = std::make_shared<const LogicalNegationExprSema>(
-                m_Conditions.at(i)->GetSrcLocation(),
-                m_Conditions.at(i)
+                m_Conditions.at(i)->GetSrcLocation(), m_Conditions.at(i)
             );
 
             stmts.push_back(std::make_shared<const ConditionalJumpStmtSema>(
-                condition->GetSrcLocation(),
-                condition,
-                labelSymbols.at(i)
+                condition->GetSrcLocation(), condition, labelSymbols.at(i)
             ));
 
             const auto block = m_Blocks.at(i);
@@ -220,9 +205,7 @@ namespace Ace
             if (!isLastBlock)
             {
                 stmts.push_back(std::make_shared<const NormalJumpStmtSema>(
-                    block->GetSrcLocation().CreateLast(),
-                    GetScope(),
-                    lastLabelSymbol
+                    block->GetSrcLocation().CreateLast(), GetScope(), lastLabelSymbol
                 ));
             }
         }
@@ -232,28 +215,22 @@ namespace Ace
             auto* const elseLabelSymbol = labelSymbols.rbegin()[1];
 
             stmts.push_back(std::make_shared<const LabelStmtSema>(
-                elseLabelSymbol->GetName().SrcLocation,
-                elseLabelSymbol
+                elseLabelSymbol->GetName().SrcLocation, elseLabelSymbol
             ));
 
             stmts.push_back(lastBlock);
         }
 
         stmts.push_back(std::make_shared<const LabelStmtSema>(
-            lastLabelSymbol->GetName().SrcLocation,
-            lastLabelSymbol
+            lastLabelSymbol->GetName().SrcLocation, lastLabelSymbol
         ));
 
-        return std::make_shared<const GroupStmtSema>(
-            GetSrcLocation(),
-            m_Scope,
-            stmts
-        )->CreateLowered({});
+        return std::make_shared<const GroupStmtSema>(GetSrcLocation(), m_Scope, stmts)
+            ->CreateLowered({});
     }
 
-    auto IfStmtSema::CreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IStmtSema>
+    auto IfStmtSema::CreateLoweredStmt(const LoweringContext& context) const
+        -> std::shared_ptr<const IStmtSema>
     {
         return CreateLowered(context);
     }

@@ -13,9 +13,7 @@
 
 namespace Ace
 {
-    class ImplSelfAliasTypeSymbol :
-        public virtual IAliasTypeSymbol,
-        public virtual ISizedTypeSymbol
+    class ImplSelfAliasTypeSymbol : public virtual IAliasTypeSymbol, public virtual ISizedTypeSymbol
     {
     public:
         ImplSelfAliasTypeSymbol(
@@ -33,8 +31,7 @@ namespace Ace
         auto GetName() const -> const Ident& final;
 
         auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> final;
 
         auto GetAliasedType() const -> ITypeSymbol* final;

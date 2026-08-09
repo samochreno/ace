@@ -14,9 +14,10 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprSyntax>& condition
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_Condition{ condition }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_Condition{ condition }
     {
     }
 
@@ -38,17 +39,11 @@ namespace Ace
     auto AssertStmtSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const AssertStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
-        
-        const auto conditionSema = diagnostics.Collect(
-            m_Condition->CreateExprSema()
-        );
 
-        return Diagnosed
-        {
-            std::make_shared<const AssertStmtSema>(
-                GetSrcLocation(),
-                conditionSema
-            ),
+        const auto conditionSema = diagnostics.Collect(m_Condition->CreateExprSema());
+
+        return Diagnosed{
+            std::make_shared<const AssertStmtSema>(GetSrcLocation(), conditionSema),
             std::move(diagnostics),
         };
     }

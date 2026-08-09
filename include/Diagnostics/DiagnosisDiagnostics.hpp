@@ -6,19 +6,14 @@
 
 namespace Ace
 {
-    auto CreateUnsizedTypeArgError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateUnsizedTypeArgError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateUnimplementedTraitFunctionError(
-        TraitImplSymbol* const impl,
-        ISymbol* const function
-    ) -> DiagnosticGroup;
+    auto CreateUnimplementedTraitFunctionError(TraitImplSymbol* const impl, ISymbol* const function)
+        -> DiagnosticGroup;
 
-    auto CreateUnimplementedSupertraitError(
-        SupertraitSymbol* const supertrait,
-        TraitImplSymbol* impl
-    ) -> DiagnosticGroup;
+    auto
+    CreateUnimplementedSupertraitError(SupertraitSymbol* const supertrait, TraitImplSymbol* impl)
+        -> DiagnosticGroup;
 
     auto CreateMismatchedTraitImplTypeError(
         ISymbol* const symbol,
@@ -27,48 +22,34 @@ namespace Ace
     ) -> DiagnosticGroup;
 
     auto CreateMismatchedTraitImplFunctionParamCountError(
-        PrototypeSymbol* const prototype,
-        FunctionSymbol* const function
+        PrototypeSymbol* const prototype, FunctionSymbol* const function
     ) -> DiagnosticGroup;
 
     auto CreateMismatchedTraitImplFunctionTypeParamCountError(
-        PrototypeSymbol* const prototype,
-        FunctionSymbol* const function
+        PrototypeSymbol* const prototype, FunctionSymbol* const function
     ) -> DiagnosticGroup;
 
     auto CreateInherentFunctionRedeclarationError(
-        FunctionSymbol* const originalFunction,
-        FunctionSymbol* const redeclaredFunction
+        FunctionSymbol* const originalFunction, FunctionSymbol* const redeclaredFunction
     ) -> DiagnosticGroup;
 
     auto CreateFunctionIsNotMemberOfTraitError(
-        FunctionSymbol* const function,
-        TraitTypeSymbol* const traitType
+        FunctionSymbol* const function, TraitTypeSymbol* const traitType
     ) -> DiagnosticGroup;
 
     auto CreateImplHasStricterConstraintsThanPrototypeError(
-        PrototypeSymbol* const prototype,
-        FunctionSymbol* const function
+        PrototypeSymbol* const prototype, FunctionSymbol* const function
     ) -> DiagnosticGroup;
 
     auto CreateOverlappingInherentImplSymbolError(
-        ISymbol* const overlappingSymbol,
-        ISymbol* const symbol
+        ISymbol* const overlappingSymbol, ISymbol* const symbol
     ) -> DiagnosticGroup;
 
-    auto CreateNotAllControlPathsRetError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateNotAllControlPathsRetError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateOrphanInherentImplError(
-        InherentImplSymbol* const impl
-    ) -> DiagnosticGroup;
+    auto CreateOrphanInherentImplError(InherentImplSymbol* const impl) -> DiagnosticGroup;
 
-    auto CreateOrphanTraitImplError(
-        TraitImplSymbol* const impl
-    ) -> DiagnosticGroup;
+    auto CreateOrphanTraitImplError(TraitImplSymbol* const impl) -> DiagnosticGroup;
 
-    auto CreateConcreteConstraintError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateConcreteConstraintError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 }

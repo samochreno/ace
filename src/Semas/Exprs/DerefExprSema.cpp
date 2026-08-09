@@ -16,19 +16,22 @@
 namespace Ace
 {
     DerefExprSema::DerefExprSema(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<const IExprSema>& expr
-    ) : m_SrcLocation{ srcLocation },
-        m_Expr{ expr }
+        const SrcLocation& srcLocation, const std::shared_ptr<const IExprSema>& expr
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Expr{ expr }
     {
     }
 
     auto DerefExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("DerefExprSema", [&]()
-        {
-            logger.Log("m_Expr", m_Expr);
-        });
+        logger.Log(
+            "DerefExprSema",
+            [&]()
+            {
+                logger.Log("m_Expr", m_Expr);
+            }
+        );
     }
 
     auto DerefExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -41,39 +44,32 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto DerefExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const DerefExprSema>>
+    auto DerefExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const DerefExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto checkedExpr =
-            diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
+        const auto checkedExpr = diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
 
         if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
-            std::make_shared<const DerefExprSema>(
-                GetSrcLocation(),
-                checkedExpr
-            ),
+        return Diagnosed{
+            std::make_shared<const DerefExprSema>(GetSrcLocation(), checkedExpr),
             std::move(diagnostics),
         };
     }
-    auto DerefExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
+
+    auto DerefExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto DerefExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const DerefExprSema>
+    auto DerefExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const DerefExprSema>
     {
         const auto loweredExpr = m_Expr->CreateLoweredExpr({});
 
@@ -82,15 +78,12 @@ namespace Ace
             return shared_from_this();
         }
 
-        return std::make_shared<const DerefExprSema>(
-            GetSrcLocation(),
-            loweredExpr
-        )->CreateLowered({});
+        return std::make_shared<const DerefExprSema>(GetSrcLocation(), loweredExpr)
+            ->CreateLowered({});
     }
 
-    auto DerefExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto DerefExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }
@@ -105,24 +98,14 @@ namespace Ace
         std::vector<ExprDropInfo> tmps{};
 
         const auto exprEmitResult = m_Expr->Emit(emitter);
-        tmps.insert(
-            end(tmps),
-            begin(exprEmitResult.Tmps),
-            end  (exprEmitResult.Tmps)
-        );
-            
+        tmps.insert(end(tmps), begin(exprEmitResult.Tmps), end(exprEmitResult.Tmps));
+
         auto* const typeSymbol = m_Expr->GetTypeInfo().Symbol;
         ACE_ASSERT(typeSymbol->IsRef());
 
-        auto* const type = llvm::PointerType::get(
-            emitter.GetType(typeSymbol), 
-            0
-        );
+        auto* const type = llvm::PointerType::get(emitter.GetType(typeSymbol), 0);
 
-        auto* const loadInst = emitter.GetBlock().Builder.CreateLoad(
-            type,
-            exprEmitResult.Value
-        );
+        auto* const loadInst = emitter.GetBlock().Builder.CreateLoad(type, exprEmitResult.Value);
         tmps.emplace_back(loadInst, typeSymbol->GetWithoutRef());
 
         return { loadInst, tmps };

@@ -12,12 +12,11 @@
 
 namespace Ace
 {
-    class BlockStmtSema : 
-        public std::enable_shared_from_this<BlockStmtSema>,
-        public virtual IStmtSema,
-        public virtual IExpandableStmtSema,
-        public virtual ITypeCheckableSema<BlockStmtSema, StmtTypeCheckingContext>,
-        public virtual ILowerableSema<BlockStmtSema>
+    class BlockStmtSema : public std::enable_shared_from_this<BlockStmtSema>,
+                          public virtual IStmtSema,
+                          public virtual IExpandableStmtSema,
+                          public virtual ITypeCheckableSema<BlockStmtSema, StmtTypeCheckingContext>,
+                          public virtual ILowerableSema<BlockStmtSema>
     {
     public:
         BlockStmtSema(
@@ -28,21 +27,17 @@ namespace Ace
         virtual ~BlockStmtSema() = default;
 
         auto Log(SemaLogger& logger) const -> void final;
-        
+
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto CreateTypeChecked(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const BlockStmtSema>> final;
-        auto CreateTypeCheckedStmt(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
-        auto CreateLowered(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const BlockStmtSema> final;
-        auto CreateLoweredStmt(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const IStmtSema> final;
+        auto CreateTypeChecked(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const BlockStmtSema>> final;
+        auto CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
+        auto CreateLowered(const LoweringContext& context) const
+            -> std::shared_ptr<const BlockStmtSema> final;
+        auto CreateLoweredStmt(const LoweringContext& context) const
+            -> std::shared_ptr<const IStmtSema> final;
         auto CollectMonos() const -> MonoCollector final;
         auto Emit(Emitter& emitter) const -> void final;
 

@@ -13,11 +13,11 @@
 
 namespace Ace
 {
-    class ConditionalJumpStmtSema :
-        public std::enable_shared_from_this<ConditionalJumpStmtSema>,
-        public virtual IStmtSema,
-        public virtual ITypeCheckableSema<ConditionalJumpStmtSema, StmtTypeCheckingContext>,
-        public virtual ILowerableSema<ConditionalJumpStmtSema>
+    class ConditionalJumpStmtSema
+        : public std::enable_shared_from_this<ConditionalJumpStmtSema>,
+          public virtual IStmtSema,
+          public virtual ITypeCheckableSema<ConditionalJumpStmtSema, StmtTypeCheckingContext>,
+          public virtual ILowerableSema<ConditionalJumpStmtSema>
     {
     public:
         ConditionalJumpStmtSema(
@@ -31,18 +31,14 @@ namespace Ace
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto CreateTypeChecked(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const ConditionalJumpStmtSema>> final;
-        auto CreateTypeCheckedStmt(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
-        auto CreateLowered(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const ConditionalJumpStmtSema> final;
-        auto CreateLoweredStmt(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const IStmtSema> final;
+        auto CreateTypeChecked(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const ConditionalJumpStmtSema>> final;
+        auto CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
+        auto CreateLowered(const LoweringContext& context) const
+            -> std::shared_ptr<const ConditionalJumpStmtSema> final;
+        auto CreateLoweredStmt(const LoweringContext& context) const
+            -> std::shared_ptr<const IStmtSema> final;
         auto CollectMonos() const -> MonoCollector final;
         auto Emit(Emitter& emitter) const -> void final;
 

@@ -17,9 +17,10 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const TypeName& typeName
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_TypeName{ typeName }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_TypeName{ typeName }
     {
     }
 
@@ -38,29 +39,24 @@ namespace Ace
         return SyntaxChildCollector{}.Build();
     }
 
-    auto TypeInfoPtrExprSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const TypeInfoPtrExprSema>>
+    auto TypeInfoPtrExprSyntax::CreateSema() const
+        -> Diagnosed<std::shared_ptr<const TypeInfoPtrExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetSizedType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetSizedType());
 
-        return Diagnosed
-        {
-            std::make_shared<const TypeInfoPtrExprSema>(
-                GetSrcLocation(),
-                GetScope(),
-                typeSymbol
-            ),
+        return Diagnosed{
+            std::make_shared<const TypeInfoPtrExprSema>(GetSrcLocation(), GetScope(), typeSymbol),
             std::move(diagnostics),
         };
     }
 
-    auto TypeInfoPtrExprSyntax::CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto TypeInfoPtrExprSyntax::CreateExprSema() const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateSema();
     }

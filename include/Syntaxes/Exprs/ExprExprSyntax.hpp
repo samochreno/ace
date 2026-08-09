@@ -11,14 +11,11 @@
 
 namespace Ace
 {
-    class ExprExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<ExprExprSema>
+    class ExprExprSyntax : public virtual IExprSyntax, public virtual ISemaSyntax<ExprExprSema>
     {
     public:
         ExprExprSyntax(
-            const SrcLocation& srcLocation,
-            const std::shared_ptr<const IExprSyntax>& expr
+            const SrcLocation& srcLocation, const std::shared_ptr<const IExprSyntax>& expr
         );
         virtual ~ExprExprSyntax() = default;
 

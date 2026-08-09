@@ -13,12 +13,11 @@
 namespace Ace
 {
     LocalVarSymbol::LocalVarSymbol(
-        const std::shared_ptr<Scope>& scope,
-        const Ident& name,
-        ISizedTypeSymbol* const type
-    ) : m_Scope{ scope },
-        m_Name{ name },
-        m_Type{ type }
+        const std::shared_ptr<Scope>& scope, const Ident& name, ISizedTypeSymbol* const type
+    )
+        : m_Scope{ scope },
+          m_Name{ name },
+          m_Type{ type }
     {
     }
 
@@ -48,14 +47,11 @@ namespace Ace
     }
 
     auto LocalVarSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<LocalVarSymbol>(
-            scope,
-            GetName(),
-            CreateInstantiated<ISizedTypeSymbol>(GetType(), context)
+            scope, GetName(), CreateInstantiated<ISizedTypeSymbol>(GetType(), context)
         );
     }
 

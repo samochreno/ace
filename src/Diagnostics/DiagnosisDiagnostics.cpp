@@ -9,10 +9,8 @@
 
 namespace Ace
 {
-    auto CreateUnimplementedTraitFunctionError(
-        TraitImplSymbol* const impl,
-        ISymbol* const function
-    ) -> DiagnosticGroup
+    auto CreateUnimplementedTraitFunctionError(TraitImplSymbol* const impl, ISymbol* const function)
+        -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
@@ -23,35 +21,27 @@ namespace Ace
         );
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Note,
-            function->GetName().SrcLocation,
-            "function declaration"
+            DiagnosticSeverity::Note, function->GetName().SrcLocation, "function declaration"
         );
 
         return group;
     }
 
-    auto CreateUnimplementedSupertraitError(
-        SupertraitSymbol* const supertrait,
-        TraitImplSymbol* impl
-    ) -> DiagnosticGroup
+    auto
+    CreateUnimplementedSupertraitError(SupertraitSymbol* const supertrait, TraitImplSymbol* impl)
+        -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         const std::string message =
-            "unimplemented supertrait `" +
-            supertrait->GetTrait()->CreateDisplayName() + "`";
+            "unimplemented supertrait `" + supertrait->GetTrait()->CreateDisplayName() + "`";
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            impl->GetName().SrcLocation,
-            message
+            DiagnosticSeverity::Error, impl->GetName().SrcLocation, message
         );
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Note,
-            supertrait->GetName().SrcLocation,
-            "supertrait declaration"
+            DiagnosticSeverity::Note, supertrait->GetName().SrcLocation, "supertrait declaration"
         );
 
         return group;
@@ -76,35 +66,29 @@ namespace Ace
             prototypeTypeSrcLocation,
             symbol->CreateTypeNoun().String + " declaration"
         );
-        
+
         return group;
     }
 
     auto CreateMismatchedTraitImplFunctionParamCountError(
-        PrototypeSymbol* const prototype,
-        FunctionSymbol* const function
+        PrototypeSymbol* const prototype, FunctionSymbol* const function
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            function->GetName().SrcLocation,
-            "mismatched parameter count"
+            DiagnosticSeverity::Error, function->GetName().SrcLocation, "mismatched parameter count"
         );
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Note,
-            prototype->GetName().SrcLocation,
-            "function declaration"
+            DiagnosticSeverity::Note, prototype->GetName().SrcLocation, "function declaration"
         );
 
         return group;
     }
 
     auto CreateMismatchedTraitImplFunctionTypeParamCountError(
-        PrototypeSymbol* const prototype,
-        FunctionSymbol* const function
+        PrototypeSymbol* const prototype, FunctionSymbol* const function
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -116,17 +100,14 @@ namespace Ace
         );
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Note,
-            prototype->GetName().SrcLocation,
-            "function declaration"
+            DiagnosticSeverity::Note, prototype->GetName().SrcLocation, "function declaration"
         );
 
         return group;
     }
 
     auto CreateInherentFunctionRedeclarationError(
-        FunctionSymbol* const originalFunction,
-        FunctionSymbol* const redeclaredFunction
+        FunctionSymbol* const originalFunction, FunctionSymbol* const redeclaredFunction
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -147,8 +128,7 @@ namespace Ace
     }
 
     auto CreateFunctionIsNotMemberOfTraitError(
-        FunctionSymbol* const function,
-        TraitTypeSymbol* const traitType
+        FunctionSymbol* const function, TraitTypeSymbol* const traitType
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -163,17 +143,15 @@ namespace Ace
     }
 
     auto CreateImplHasStricterConstraintsThanPrototypeError(
-        PrototypeSymbol* const prototype,
-        FunctionSymbol* const function
+        PrototypeSymbol* const prototype, FunctionSymbol* const function
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         const auto functionConstraints = function->CollectConstraints();
-        const SrcLocation functionSrcLocation
-        {
+        const SrcLocation functionSrcLocation{
             functionConstraints.front()->GetName().SrcLocation,
-            functionConstraints.back ()->GetName().SrcLocation,
+            functionConstraints.back()->GetName().SrcLocation,
         };
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
@@ -182,64 +160,49 @@ namespace Ace
         );
 
         const auto prototypeConstraints = prototype->CollectConstraints();
-        const SrcLocation prototypeSrcLocation
-        {
+        const SrcLocation prototypeSrcLocation{
             prototypeConstraints.front()->GetName().SrcLocation,
-            prototypeConstraints.back ()->GetName().SrcLocation,
+            prototypeConstraints.back()->GetName().SrcLocation,
         };
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Note,
-            prototypeSrcLocation,
-            "prototype declaration"
+            DiagnosticSeverity::Note, prototypeSrcLocation, "prototype declaration"
         );
 
         return group;
     }
 
     auto CreateOverlappingInherentImplSymbolError(
-        ISymbol* const overlappingSymbol,
-        ISymbol* const symbol
+        ISymbol* const overlappingSymbol, ISymbol* const symbol
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         const std::string message =
-            "overlapping " + overlappingSymbol->CreateTypeNoun().String +
-            " declaration";
+            "overlapping " + overlappingSymbol->CreateTypeNoun().String + " declaration";
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            overlappingSymbol->GetName().SrcLocation,
-            message
+            DiagnosticSeverity::Error, overlappingSymbol->GetName().SrcLocation, message
         );
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Note,
-            symbol->GetName().SrcLocation,
-            "previous declaration"
+            DiagnosticSeverity::Note, symbol->GetName().SrcLocation, "previous declaration"
         );
 
         return group;
     }
 
-    auto CreateNotAllControlPathsRetError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateNotAllControlPathsRetError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "not all control paths return a value"
+            DiagnosticSeverity::Error, srcLocation, "not all control paths return a value"
         );
 
         return group;
     }
 
-    auto CreateOrphanInherentImplError(
-        InherentImplSymbol* const impl
-    ) -> DiagnosticGroup
+    auto CreateOrphanInherentImplError(InherentImplSymbol* const impl) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
@@ -252,9 +215,7 @@ namespace Ace
         return group;
     }
 
-    auto CreateOrphanTraitImplError(
-        TraitImplSymbol* const impl
-    ) -> DiagnosticGroup
+    auto CreateOrphanTraitImplError(TraitImplSymbol* const impl) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
@@ -267,16 +228,12 @@ namespace Ace
         return group;
     }
 
-    auto CreateConcreteConstraintError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateConcreteConstraintError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "concrete constraint"
+            DiagnosticSeverity::Error, srcLocation, "concrete constraint"
         );
 
         return group;

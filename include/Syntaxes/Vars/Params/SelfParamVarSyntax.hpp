@@ -14,9 +14,7 @@
 
 namespace Ace
 {
-    class SelfParamVarSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class SelfParamVarSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         SelfParamVarSyntax(

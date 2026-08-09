@@ -16,20 +16,17 @@ namespace Ace
         ITypeSymbol* ParentFunctionTypeSymbol{};
     };
 
-    class IStmtSema :
-        public virtual ISema,
-        public virtual IEmittable<void>
+    class IStmtSema : public virtual ISema, public virtual IEmittable<void>
     {
     public:
         virtual ~IStmtSema() = default;
 
-        virtual auto CreateTypeCheckedStmt(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const IStmtSema>> = 0;
-        virtual auto CreateLoweredStmt(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const IStmtSema> = 0;
+        virtual auto CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const IStmtSema>> = 0;
+        virtual auto CreateLoweredStmt(const LoweringContext& context) const
+            -> std::shared_ptr<const IStmtSema> = 0;
 
-        virtual auto CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction> = 0;
+        virtual auto CreateControlFlowInstructions() const
+            -> std::vector<ControlFlowInstruction> = 0;
     };
 }

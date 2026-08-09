@@ -22,9 +22,7 @@
 
 namespace Ace
 {
-    class FunctionSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class FunctionSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         FunctionSyntax(
@@ -53,7 +51,7 @@ namespace Ace
         auto CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>> final;
 
         auto GetBlock() const -> const std::optional<std::shared_ptr<const BlockStmtSyntax>>&;
-        
+
     protected:
         SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_BodyScope{};

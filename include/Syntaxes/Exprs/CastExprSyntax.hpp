@@ -12,9 +12,7 @@
 
 namespace Ace
 {
-    class CastExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<CastExprSema>
+    class CastExprSyntax : public virtual IExprSyntax, public virtual ISemaSyntax<CastExprSema>
     {
     public:
         CastExprSyntax(

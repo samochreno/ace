@@ -9,53 +9,52 @@ namespace Ace
 {
     auto CreateKeywordToTokenKindMap() -> std::unordered_map<std::string_view, TokenKind>
     {
-        return
-        {
-            {    "__address_of", TokenKind::AddressOfKeyword   },
-            {       "__size_of", TokenKind::SizeOfKeyword      },
-            {      "__deref_as", TokenKind::DerefAsKeyword     },
-            {          "__copy", TokenKind::CopyKeyword        },
-            {          "__drop", TokenKind::DropKeyword        },
+        return {
+            { "__address_of", TokenKind::AddressOfKeyword },
+            { "__size_of", TokenKind::SizeOfKeyword },
+            { "__deref_as", TokenKind::DerefAsKeyword },
+            { "__copy", TokenKind::CopyKeyword },
+            { "__drop", TokenKind::DropKeyword },
             { "__type_info_ptr", TokenKind::TypeInfoPtrKeyword },
-            {      "__vtbl_ptr", TokenKind::VtblPtrKeyword     },
-            {              "if", TokenKind::IfKeyword          },
-            {            "else", TokenKind::ElseKeyword        },
-            {            "elif", TokenKind::ElifKeyword        },
-            {           "while", TokenKind::WhileKeyword       },
-            {            "self", TokenKind::SelfKeyword        },
-            {             "ret", TokenKind::RetKeyword         },
-            {             "mod", TokenKind::ModKeyword         },
-            {           "trait", TokenKind::TraitKeyword       },
-            {          "struct", TokenKind::StructKeyword      },
-            {              "op", TokenKind::OpKeyword          },
-            {             "pub", TokenKind::PubKeyword         },
-            {          "extern", TokenKind::ExternKeyword      },
-            {            "cast", TokenKind::CastKeyword        },
-            {            "exit", TokenKind::ExitKeyword        },
-            {          "assert", TokenKind::AssertKeyword      },
-            {            "impl", TokenKind::ImplKeyword        },
-            {             "for", TokenKind::ForKeyword         },
-            {            "lock", TokenKind::LockKeyword        },
-            {             "box", TokenKind::BoxKeyword         },
-            {           "unbox", TokenKind::UnboxKeyword       },
-            {             "use", TokenKind::UseKeyword         },
-            {           "where", TokenKind::WhereKeyword       },
-            {            "true", TokenKind::TrueKeyword        },
-            {           "false", TokenKind::FalseKeyword       },
-            {            "Self", TokenKind::SelfTypeKeyword    },
-            {             "int", TokenKind::IntKeyword         },
-            {              "i8", TokenKind::Int8Keyword        },
-            {             "i16", TokenKind::Int16Keyword       },
-            {             "i32", TokenKind::Int32Keyword       },
-            {             "i64", TokenKind::Int64Keyword       },
-            {              "u8", TokenKind::UInt8Keyword       },
-            {             "u16", TokenKind::UInt16Keyword      },
-            {             "u32", TokenKind::UInt32Keyword      },
-            {             "u64", TokenKind::UInt64Keyword      },
-            {             "f32", TokenKind::Float32Keyword     },
-            {             "f64", TokenKind::Float64Keyword     },
-            {            "bool", TokenKind::BoolKeyword        },
-            {            "void", TokenKind::VoidKeyword        },
+            { "__vtbl_ptr", TokenKind::VtblPtrKeyword },
+            { "if", TokenKind::IfKeyword },
+            { "else", TokenKind::ElseKeyword },
+            { "elif", TokenKind::ElifKeyword },
+            { "while", TokenKind::WhileKeyword },
+            { "self", TokenKind::SelfKeyword },
+            { "ret", TokenKind::RetKeyword },
+            { "mod", TokenKind::ModKeyword },
+            { "trait", TokenKind::TraitKeyword },
+            { "struct", TokenKind::StructKeyword },
+            { "op", TokenKind::OpKeyword },
+            { "pub", TokenKind::PubKeyword },
+            { "extern", TokenKind::ExternKeyword },
+            { "cast", TokenKind::CastKeyword },
+            { "exit", TokenKind::ExitKeyword },
+            { "assert", TokenKind::AssertKeyword },
+            { "impl", TokenKind::ImplKeyword },
+            { "for", TokenKind::ForKeyword },
+            { "lock", TokenKind::LockKeyword },
+            { "box", TokenKind::BoxKeyword },
+            { "unbox", TokenKind::UnboxKeyword },
+            { "use", TokenKind::UseKeyword },
+            { "where", TokenKind::WhereKeyword },
+            { "true", TokenKind::TrueKeyword },
+            { "false", TokenKind::FalseKeyword },
+            { "Self", TokenKind::SelfTypeKeyword },
+            { "int", TokenKind::IntKeyword },
+            { "i8", TokenKind::Int8Keyword },
+            { "i16", TokenKind::Int16Keyword },
+            { "i32", TokenKind::Int32Keyword },
+            { "i64", TokenKind::Int64Keyword },
+            { "u8", TokenKind::UInt8Keyword },
+            { "u16", TokenKind::UInt16Keyword },
+            { "u32", TokenKind::UInt32Keyword },
+            { "u64", TokenKind::UInt64Keyword },
+            { "f32", TokenKind::Float32Keyword },
+            { "f64", TokenKind::Float64Keyword },
+            { "bool", TokenKind::BoolKeyword },
+            { "void", TokenKind::VoidKeyword },
         };
     }
 
@@ -70,10 +69,8 @@ namespace Ace
         return map;
     }
 
-    auto GetTokenKindNativeTypeSymbol(
-        Compilation* const compilation,
-        const TokenKind tokenKind
-    ) -> ITypeSymbol*
+    auto GetTokenKindNativeTypeSymbol(Compilation* const compilation, const TokenKind tokenKind)
+        -> ITypeSymbol*
     {
         switch (tokenKind)
         {

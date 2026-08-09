@@ -36,17 +36,15 @@ namespace Ace
         virtual auto GetName() const -> const Ident& = 0;
 
         virtual auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> = 0;
 
         virtual auto GetUnaliased() const -> ISymbol* final;
 
         virtual auto CreateLocalSignature() const -> std::string final;
         virtual auto CreateSignature() const -> std::string final;
-        virtual auto CreateFullyQualifiedName(
-            const SrcLocation& srcLocation
-        ) const -> SymbolName final;
+        virtual auto CreateFullyQualifiedName(const SrcLocation& srcLocation) const
+            -> SymbolName final;
         virtual auto CreateLocalDisplayName() const -> std::string final;
         virtual auto CreateDisplayName() const -> std::string final;
 
@@ -56,20 +54,17 @@ namespace Ace
     };
 
     auto CreateUnaliasedInstantiatedSymbol(
-        const IGenericSymbol* const symbol,
-        const InstantiationContext& context
+        const IGenericSymbol* const symbol, const InstantiationContext& context
     ) -> IGenericSymbol*;
-    template<typename T>
-    auto CreateInstantiated(
-        const IGenericSymbol* const symbol,
-        const InstantiationContext& context
-    ) -> T*
+
+    template <typename T>
+    auto CreateInstantiated(const IGenericSymbol* const symbol, const InstantiationContext& context)
+        -> T*
     {
         static_assert(std::is_base_of_v<IGenericSymbol, T>);
 
-        auto* const instantiated = dynamic_cast<T*>(
-            CreateUnaliasedInstantiatedSymbol(symbol, context)
-        );
+        auto* const instantiated =
+            dynamic_cast<T*>(CreateUnaliasedInstantiatedSymbol(symbol, context));
         ACE_ASSERT(instantiated);
 
         return instantiated;

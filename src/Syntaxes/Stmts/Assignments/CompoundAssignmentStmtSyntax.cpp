@@ -18,11 +18,12 @@ namespace Ace
         const std::shared_ptr<const IExprSyntax>& rhsExpr,
         const SrcLocation& opSrcLocation,
         const Op op
-    ) : m_SrcLocation{ srcLocation },
-        m_LHSExpr{ lhsExpr },
-        m_RHSExpr{ rhsExpr },
-        m_OpSrcLocation{ opSrcLocation },
-        m_Op{ op }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_LHSExpr{ lhsExpr },
+          m_RHSExpr{ rhsExpr },
+          m_OpSrcLocation{ opSrcLocation },
+          m_Op{ op }
     {
     }
 
@@ -38,56 +39,43 @@ namespace Ace
 
     auto CompoundAssignmentStmtSyntax::CollectChildren() const -> std::vector<const ISyntax*>
     {
-        return SyntaxChildCollector{}
-            .Collect(m_LHSExpr)
-            .Collect(m_RHSExpr)
-            .Build();
+        return SyntaxChildCollector{}.Collect(m_LHSExpr).Collect(m_RHSExpr).Build();
     }
 
-    auto CompoundAssignmentStmtSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const CompoundAssignmentStmtSema>>
+    auto CompoundAssignmentStmtSyntax::CreateSema() const
+        -> Diagnosed<std::shared_ptr<const CompoundAssignmentStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto lhsExprSema = diagnostics.Collect(
-            m_LHSExpr->CreateExprSema()
-        );
-        const auto rhsExprSema = diagnostics.Collect(
-            m_RHSExpr->CreateExprSema()
-        );
+        const auto lhsExprSema = diagnostics.Collect(m_LHSExpr->CreateExprSema());
+        const auto rhsExprSema = diagnostics.Collect(m_RHSExpr->CreateExprSema());
 
         const auto lhsTypeInfo = [&]()
         {
             const auto typeInfo = lhsExprSema->GetTypeInfo();
-            return TypeInfo
-            {
+            return TypeInfo{
                 typeInfo.Symbol->GetWithoutRef(),
                 typeInfo.ValueKind,
             };
         }();
 
-        const auto opSymbol = diagnostics.Collect(ResolveBinaryOpSymbol(
-            m_OpSrcLocation,
-            GetScope(),
-            lhsTypeInfo,
-            rhsExprSema->GetTypeInfo(),
-            m_Op
-        )).value_or(
-            GetCompilation()->GetErrorSymbols().GetFunction()
-        );
+        const auto opSymbol =
+            diagnostics
+                .Collect(ResolveBinaryOpSymbol(
+                    m_OpSrcLocation, GetScope(), lhsTypeInfo, rhsExprSema->GetTypeInfo(), m_Op
+                ))
+                .value_or(GetCompilation()->GetErrorSymbols().GetFunction());
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const CompoundAssignmentStmtSema>(
-                GetSrcLocation(),
-                lhsExprSema,
-                rhsExprSema,
-                opSymbol
+                GetSrcLocation(), lhsExprSema, rhsExprSema, opSymbol
             ),
             std::move(diagnostics),
         };
     }
 
-    auto CompoundAssignmentStmtSyntax::CreateStmtSema() const -> Diagnosed<std::shared_ptr<const IStmtSema>>
+    auto CompoundAssignmentStmtSyntax::CreateStmtSema() const
+        -> Diagnosed<std::shared_ptr<const IStmtSema>>
     {
         return CreateSema();
     }

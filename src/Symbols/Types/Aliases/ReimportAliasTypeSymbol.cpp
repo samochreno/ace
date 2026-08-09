@@ -11,10 +11,10 @@
 namespace Ace
 {
     ReimportAliasTypeSymbol::ReimportAliasTypeSymbol(
-        const std::shared_ptr<Scope>& scope,
-        ITypeSymbol* const type
-    ) : m_Scope{ scope },
-        m_Type{ type }
+        const std::shared_ptr<Scope>& scope, ITypeSymbol* const type
+    )
+        : m_Scope{ scope },
+          m_Type{ type }
     {
     }
 
@@ -49,13 +49,11 @@ namespace Ace
     }
 
     auto ReimportAliasTypeSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<ReimportAliasTypeSymbol>(
-            scope,
-            CreateInstantiated<ITypeSymbol>(GetAliasedType(), context)
+            scope, CreateInstantiated<ITypeSymbol>(GetAliasedType(), context)
         );
     }
 

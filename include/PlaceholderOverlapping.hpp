@@ -4,8 +4,5 @@
 
 namespace Ace
 {
-    auto DoPlaceholdersOverlap(
-        ITypeSymbol* conversative,
-        ITypeSymbol* speculative
-    ) -> bool;
+    auto DoPlaceholdersOverlap(ITypeSymbol* conversative, ITypeSymbol* speculative) -> bool;
 }

@@ -7,61 +7,45 @@
 
 namespace Ace
 {
-    auto CreateMissingCLIOptionNameError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateMissingCLIOptionNameError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "missing option name"
+            DiagnosticSeverity::Error, srcLocation, "missing option name"
         );
 
         return group;
     }
 
-    auto CreateUnknownCLIOptionNameError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateUnknownCLIOptionNameError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "unknown option name"
+            DiagnosticSeverity::Error, srcLocation, "unknown option name"
         );
 
         return group;
     }
 
-    auto CreateMissingCLIOptionValueError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateMissingCLIOptionValueError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "missing option argument"
+            DiagnosticSeverity::Error, srcLocation, "missing option argument"
         );
 
         return group;
     }
 
-    auto CreateUnexpectedCLIOptionValueError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateUnexpectedCLIOptionValueError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "unexpected option argument"
+            DiagnosticSeverity::Error, srcLocation, "unexpected option argument"
         );
 
         return group;

@@ -13,13 +13,12 @@
 namespace Ace
 {
     TypeParamTypeSymbol::TypeParamTypeSymbol(
-        const std::shared_ptr<Scope>& scope,
-        const Ident& name,
-        const size_t index
-    ) : m_BodyScope{ scope->CreateChild() },
-        m_Name{ name },
-        m_Parent{},
-        m_Index{ index }
+        const std::shared_ptr<Scope>& scope, const Ident& name, const size_t index
+    )
+        : m_BodyScope{ scope->CreateChild() },
+          m_Name{ name },
+          m_Parent{},
+          m_Index{ index }
     {
     }
 
@@ -49,16 +48,13 @@ namespace Ace
     }
 
     auto TypeParamTypeSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         ACE_UNREACHABLE();
     }
 
-    auto TypeParamTypeSymbol::SetBodyScope(
-        const std::shared_ptr<Scope>& scope
-    ) -> void
+    auto TypeParamTypeSymbol::SetBodyScope(const std::shared_ptr<Scope>& scope) -> void
     {
         m_BodyScope = scope;
     }
@@ -69,9 +65,7 @@ namespace Ace
         return args;
     }
 
-    auto TypeParamTypeSymbol::BindParent(
-        ITypeParamOwnerSymbol* const parent
-    ) -> void
+    auto TypeParamTypeSymbol::BindParent(ITypeParamOwnerSymbol* const parent) -> void
     {
         ACE_ASSERT(parent);
         ACE_ASSERT(!m_Parent || m_Parent == parent);

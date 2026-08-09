@@ -21,9 +21,7 @@ namespace Ace
     public:
         LabelBlockMap(Emitter& emitter);
 
-        auto GetOrCreateAt(
-            const LabelSymbol* const labelSymbol
-        ) -> llvm::BasicBlock*;
+        auto GetOrCreateAt(const LabelSymbol* const labelSymbol) -> llvm::BasicBlock*;
         auto Clear() -> void;
 
     private:
@@ -33,23 +31,21 @@ namespace Ace
 
     struct EmittingBlock
     {
-        EmittingBlock(
-            llvm::LLVMContext& context,
-            llvm::Function* const function
-        ) : EmittingBlock{ llvm::BasicBlock::Create(context, "", function) }
+        EmittingBlock(llvm::LLVMContext& context, llvm::Function* const function)
+            : EmittingBlock{ llvm::BasicBlock::Create(context, "", function) }
         {
         }
-        EmittingBlock(
-            llvm::BasicBlock* block
-        ) : Block{ block },
-            Builder{ llvm::IRBuilder<>{ Block } }
+
+        EmittingBlock(llvm::BasicBlock* block)
+            : Block{ block },
+              Builder{ llvm::IRBuilder<>{ Block } }
         {
         }
 
         auto IsTerminated() const -> bool;
 
         llvm::BasicBlock* Block;
-        llvm::IRBuilder<>  Builder;
+        llvm::IRBuilder<> Builder;
     };
 
     class Emitter
@@ -60,13 +56,12 @@ namespace Ace
 
         auto Emit() -> Expected<void>;
 
-        template<typename T>
+        template <typename T>
         auto CreateInstantiated(const IGenericSymbol* const symbol) const -> T*
         {
             if (m_FunctionSymbol && m_FunctionSymbol->GetTypeArgs().empty())
             {
-                auto* const castedSymbol =
-                    dynamic_cast<T*>(const_cast<IGenericSymbol*>(symbol));
+                auto* const castedSymbol = dynamic_cast<T*>(const_cast<IGenericSymbol*>(symbol));
                 ACE_ASSERT(castedSymbol);
                 return castedSymbol;
             }
@@ -81,21 +76,13 @@ namespace Ace
             return Ace::CreateInstantiated<T>(symbol, context);
         }
 
-        auto EmitFunctionBlockStmts(
-            const std::vector<std::shared_ptr<const IStmtSema>>& stmts
-        ) -> void;
-        auto EmitCall(
-            ICallableSymbol* const callableSymbol,
-            const std::vector<llvm::Value*>& args
-        ) -> llvm::Value*;
-        auto EmitLoadArg(
-            const size_t index, 
-            llvm::Type* const type
-        ) -> llvm::Value*;
+        auto EmitFunctionBlockStmts(const std::vector<std::shared_ptr<const IStmtSema>>& stmts)
+            -> void;
+        auto EmitCall(ICallableSymbol* const callableSymbol, const std::vector<llvm::Value*>& args)
+            -> llvm::Value*;
+        auto EmitLoadArg(const size_t index, llvm::Type* const type) -> llvm::Value*;
         auto EmitCopy(
-            llvm::Value* const lhsValue, 
-            llvm::Value* const rhsValue, 
-            ITypeSymbol* const typeSymbol
+            llvm::Value* const lhsValue, llvm::Value* const rhsValue, ITypeSymbol* const typeSymbol
         ) -> void;
         auto EmitDrop(const ExprDropInfo& info) -> void;
         auto EmitDropTmps(const std::vector<ExprDropInfo>& tmps) -> void;
@@ -104,31 +91,24 @@ namespace Ace
         auto EmitString(const std::string_view string) -> llvm::Value*;
         auto EmitPrintf(llvm::Value* const message) -> void;
         auto EmitPrintf(const std::vector<llvm::Value*>& args) -> void;
-        auto EmitPrint    (const std::string_view string) -> void;
+        auto EmitPrint(const std::string_view string) -> void;
         auto EmitPrintLine(const std::string_view string) -> void;
 
         auto GetCompilation() const -> Compilation*;
         auto GetContext() const -> const llvm::LLVMContext&;
-        auto GetContext()       ->       llvm::LLVMContext&;
+        auto GetContext() -> llvm::LLVMContext&;
         auto GetModule() const -> const llvm::Module&;
-        auto GetModule()       ->       llvm::Module&;
+        auto GetModule() -> llvm::Module&;
         auto GetC() const -> const C&;
 
         auto GetType(const ITypeSymbol* const symbol) const -> llvm::Type*;
-        auto GetTypeInfo(
-            const ITypeSymbol* const symbol
-        ) const -> llvm::Constant*;
-        auto GetVtbl(
-            const ITypeSymbol* const traitSymbol,
-            const ITypeSymbol* const typeSymbol
-        ) const -> llvm::Constant*;
+        auto GetTypeInfo(const ITypeSymbol* const symbol) const -> llvm::Constant*;
+        auto
+        GetVtbl(const ITypeSymbol* const traitSymbol, const ITypeSymbol* const typeSymbol) const
+            -> llvm::Constant*;
 
-        auto GetGlobalVar(
-            const GlobalVarSymbol* const symbol
-        ) const -> llvm::Constant*;
-        auto GetFunction(
-            const FunctionSymbol* const symbol
-        ) const -> llvm::Function*;
+        auto GetGlobalVar(const GlobalVarSymbol* const symbol) const -> llvm::Constant*;
+        auto GetFunction(const FunctionSymbol* const symbol) const -> llvm::Function*;
 
         auto GetLocalVar(const IVarSymbol* const symbol) const -> llvm::Value*;
         auto GetLabelBlockMap() -> LabelBlockMap&;
@@ -179,48 +159,31 @@ namespace Ace
         ) -> llvm::GlobalVariable*;
         auto EmitTypeInfos(const std::vector<ITypeSymbol*>& symbols) -> void;
         auto EmitTypeInfoHeader(ITypeSymbol* const symbol) -> std::optional<TypeInfoHeader>;
-        auto EmitConcreteTypeInfoHeaderInfo(
-            IConcreteTypeSymbol* const symbol
-        ) -> TypeInfoHeaderInfo;
-        auto EmitTraitTypeInfoHeaderInfo(
-            TraitTypeSymbol* const symbol
-        ) -> TypeInfoHeaderInfo;
+        auto EmitConcreteTypeInfoHeaderInfo(IConcreteTypeSymbol* const symbol)
+            -> TypeInfoHeaderInfo;
+        auto EmitTraitTypeInfoHeaderInfo(TraitTypeSymbol* const symbol) -> TypeInfoHeaderInfo;
         auto EmitTypeInfoBody(const TypeInfoHeader& header) -> void;
-        auto EmitVtbls(
-            const std::vector<TraitImplSymbol*>& implSymbols
-        ) -> void;
+        auto EmitVtbls(const std::vector<TraitImplSymbol*>& implSymbols) -> void;
         auto EmitVtbl(TraitImplSymbol* const implSymbol) -> void;
         auto EmitNativeTypes() -> void;
-        auto EmitStructTypes(
-            const std::vector<StructTypeSymbol*>& symbols
-        ) -> void;
-        auto EmitGlobalVars(
-            const std::vector<GlobalVarSymbol*>& symbols
-        ) -> void;
-        auto EmitFunctions(
-            const std::vector<FunctionSymbol*>& symbols
-        ) -> void;
+        auto EmitStructTypes(const std::vector<StructTypeSymbol*>& symbols) -> void;
+        auto EmitGlobalVars(const std::vector<GlobalVarSymbol*>& symbols) -> void;
+        auto EmitFunctions(const std::vector<FunctionSymbol*>& symbols) -> void;
         auto EmitFunctionHeader(FunctionSymbol* const symbol) -> FunctionHeader;
         auto EmitFunctionBlock(const FunctionHeader& header) -> void;
-        auto EmitStaticCall(
-            FunctionSymbol* const functionSymbol,
-            const std::vector<llvm::Value*>& args
-        ) -> llvm::Value*;
-        auto EmitDynCall(
-            PrototypeSymbol* const prototypeSymbol,
-            const std::vector<llvm::Value*>& args
-        ) -> llvm::Value*;
+        auto
+        EmitStaticCall(FunctionSymbol* const functionSymbol, const std::vector<llvm::Value*>& args)
+            -> llvm::Value*;
+        auto
+        EmitDynCall(PrototypeSymbol* const prototypeSymbol, const std::vector<llvm::Value*>& args)
+            -> llvm::Value*;
 
         auto ClearFunctionData() -> void;
 
-        auto GetDropGluePtr(
-            ITypeSymbol* const typeSymbol
-        ) const -> llvm::Constant*;
+        auto GetDropGluePtr(ITypeSymbol* const typeSymbol) const -> llvm::Constant*;
 
-        auto CreateOutputFilePath(
-            const std::string_view name,
-            const std::string_view extension
-        ) -> std::filesystem::path;
+        auto CreateOutputFilePath(const std::string_view name, const std::string_view extension)
+            -> std::filesystem::path;
 
         Compilation* m_Compilation{};
 

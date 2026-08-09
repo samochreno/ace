@@ -11,10 +11,11 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         TraitTypeSymbol* const trait
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ std::move(scope) },
-        m_Name{ srcLocation, AnonymousIdent::Create("supertrait") },
-        m_Trait{ trait }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ std::move(scope) },
+          m_Name{ srcLocation, AnonymousIdent::Create("supertrait") },
+          m_Trait{ trait }
     {
     }
 
@@ -44,8 +45,7 @@ namespace Ace
     }
 
     auto SupertraitSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<SupertraitSymbol>(

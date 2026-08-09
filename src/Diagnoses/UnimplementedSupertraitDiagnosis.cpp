@@ -19,10 +19,7 @@ namespace Ace
 
         if (!Scope::HasImpl(supertrait->GetTrait(), impl->GetType()))
         {
-            diagnostics.Add(CreateUnimplementedSupertraitError(
-                supertrait,
-                impl
-            ));
+            diagnostics.Add(CreateUnimplementedSupertraitError(supertrait, impl));
         }
 
         return Diagnosed<void>{ std::move(diagnostics) };
@@ -36,15 +33,15 @@ namespace Ace
         auto diagnostics = DiagnosticBag::Create();
 
         const auto supertraits = impl->GetTrait()->CollectSupertraits();
-        std::for_each(begin(supertraits), end(supertraits),
-        [&](SupertraitSymbol* const supertrait)
-        {
-            diagnostics.Collect(DiagnoseUnimplementedSupertrait(
-                traitImplMap,
-                impl,
-                supertrait
-            ));
-        });
+        std::for_each(
+            begin(supertraits),
+            end(supertraits),
+            [&](SupertraitSymbol* const supertrait)
+            {
+                diagnostics.Collect(DiagnoseUnimplementedSupertrait(traitImplMap, impl, supertrait)
+                );
+            }
+        );
 
         return Diagnosed<void>{ std::move(diagnostics) };
     }
@@ -62,43 +59,40 @@ namespace Ace
         }
 
         const auto& impls = traitImplMap.at(trait);
-        std::for_each(begin(impls), end(impls),
-        [&](TraitImplSymbol* const impl)
-        {
-            diagnostics.Collect(DiagnoseUnimplementedSupertraits(
-                traitImplMap,
-                impl
-            ));
-        });
+        std::for_each(
+            begin(impls),
+            end(impls),
+            [&](TraitImplSymbol* const impl)
+            {
+                diagnostics.Collect(DiagnoseUnimplementedSupertraits(traitImplMap, impl));
+            }
+        );
 
         return Diagnosed<void>{ std::move(diagnostics) };
     }
 
-    static auto CollectTraitImplMap(
-        const std::shared_ptr<Scope>& scope
-    ) -> std::map<TraitTypeSymbol*, std::set<TraitImplSymbol*>>
+    static auto CollectTraitImplMap(const std::shared_ptr<Scope>& scope)
+        -> std::map<TraitTypeSymbol*, std::set<TraitImplSymbol*>>
     {
         std::map<TraitTypeSymbol*, std::set<TraitImplSymbol*>> map{};
 
         const auto impls = scope->CollectSymbolsRecursive<TraitImplSymbol>();
-        std::for_each(begin(impls), end(impls),
-        [&](TraitImplSymbol* const impl)
-        {
-            auto* const trait = dynamic_cast<TraitTypeSymbol*>(
-                impl->GetTrait()->GetUnaliased()
-            );
+        std::for_each(
+            begin(impls),
+            end(impls),
+            [&](TraitImplSymbol* const impl)
+            {
+                auto* const trait =
+                    dynamic_cast<TraitTypeSymbol*>(impl->GetTrait()->GetUnaliased());
 
-            map[trait].insert(dynamic_cast<TraitImplSymbol*>(
-                impl->GetUnaliased()
-            ));
-        });
+                map[trait].insert(dynamic_cast<TraitImplSymbol*>(impl->GetUnaliased()));
+            }
+        );
 
         return map;
     }
 
-    auto DiagnoseUnimplementedSupertraits(
-        Compilation* const compilation
-    ) -> Diagnosed<void>
+    auto DiagnoseUnimplementedSupertraits(Compilation* const compilation) -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -107,14 +101,14 @@ namespace Ace
         const auto traitImplMap = CollectTraitImplMap(scope);
 
         const auto traits = scope->CollectSymbolsRecursive<TraitTypeSymbol>();
-        std::for_each(begin(traits), end(traits),
-        [&](TraitTypeSymbol* const trait)
-        {
-            diagnostics.Collect(DiagnoseUnimplementedSupertraits(
-                traitImplMap,
-                trait
-            ));
-        });
+        std::for_each(
+            begin(traits),
+            end(traits),
+            [&](TraitTypeSymbol* const trait)
+            {
+                diagnostics.Collect(DiagnoseUnimplementedSupertraits(traitImplMap, trait));
+            }
+        );
 
         return Diagnosed<void>{ std::move(diagnostics) };
     }

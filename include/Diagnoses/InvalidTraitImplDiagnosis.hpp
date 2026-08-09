@@ -5,7 +5,5 @@
 
 namespace Ace
 {
-    auto DiagnoseInvalidTraitImpls(
-        Compilation* const compilation
-    ) -> Diagnosed<void>;
+    auto DiagnoseInvalidTraitImpls(Compilation* const compilation) -> Diagnosed<void>;
 }

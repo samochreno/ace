@@ -28,17 +28,18 @@ namespace Ace
         const std::vector<std::shared_ptr<const TypeParamSyntax>>& typeParams,
         const std::vector<std::shared_ptr<const TypeReimportSyntax>>& typeParamReimports,
         const std::vector<std::shared_ptr<const SupertraitSyntax>>& supertraits
-    ) : m_SrcLocation{ srcLocation },
-        m_BodyScope{ bodyScope },
-        m_PrototypeScope{ prototypeScope },
-        m_AccessModifier{ accessModifier },
-        m_Name{ name },
-        m_Attributes{ attributes },
-        m_Self{ self },
-        m_Prototypes{ prototypes },
-        m_TypeParams{ typeParams },
-        m_TypeParamReimports{ typeParamReimports },
-        m_Supertraits{ supertraits }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_BodyScope{ bodyScope },
+          m_PrototypeScope{ prototypeScope },
+          m_AccessModifier{ accessModifier },
+          m_Name{ name },
+          m_Attributes{ attributes },
+          m_Self{ self },
+          m_Prototypes{ prototypes },
+          m_TypeParams{ typeParams },
+          m_TypeParamReimports{ typeParamReimports },
+          m_Supertraits{ supertraits }
     {
     }
 
@@ -78,18 +79,12 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto typeArgs = diagnostics.Collect(
-            ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
-        );
+        const auto typeArgs =
+            diagnostics.Collect(ResolveTypeParamSymbols(m_BodyScope, m_TypeParams));
 
-        return Diagnosed<std::unique_ptr<ISymbol>>
-        {
+        return Diagnosed<std::unique_ptr<ISymbol>>{
             std::make_unique<TraitTypeSymbol>(
-                m_BodyScope,
-                m_PrototypeScope,
-                m_AccessModifier,
-                m_Name,
-                typeArgs
+                m_BodyScope, m_PrototypeScope, m_AccessModifier, m_Name, typeArgs
             ),
             std::move(diagnostics),
         };

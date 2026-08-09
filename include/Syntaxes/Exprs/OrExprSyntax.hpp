@@ -11,9 +11,7 @@
 
 namespace Ace
 {
-    class OrExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<OrExprSema>
+    class OrExprSyntax : public virtual IExprSyntax, public virtual ISemaSyntax<OrExprSema>
     {
     public:
         OrExprSyntax(

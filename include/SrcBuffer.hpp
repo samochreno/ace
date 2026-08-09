@@ -17,8 +17,6 @@ namespace Ace
         virtual auto GetCompilation() const -> Compilation* = 0;
         virtual auto GetBuffer() const -> const std::string& = 0;
 
-        virtual auto FormatLocation(
-            const SrcLocation& location
-        ) const -> std::string = 0;
+        virtual auto FormatLocation(const SrcLocation& location) const -> std::string = 0;
     };
 }

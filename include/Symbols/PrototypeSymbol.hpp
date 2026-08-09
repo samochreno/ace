@@ -20,13 +20,12 @@ namespace Ace
 {
     class TraitTypeSymbol;
 
-    class PrototypeSymbol :
-        public virtual ISymbol,
-        public virtual ITypedSymbol,
-        public virtual IBodyScopedSymbol,
-        public virtual IGenericSymbol,
-        public virtual IConstrainedSymbol,
-        public virtual ICallableSymbol
+    class PrototypeSymbol : public virtual ISymbol,
+                            public virtual ITypedSymbol,
+                            public virtual IBodyScopedSymbol,
+                            public virtual IGenericSymbol,
+                            public virtual IConstrainedSymbol,
+                            public virtual ICallableSymbol
     {
     public:
         PrototypeSymbol(
@@ -48,8 +47,7 @@ namespace Ace
         auto GetName() const -> const Ident& final;
 
         auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> final;
 
         auto GetType() const -> ITypeSymbol* final;

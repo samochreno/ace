@@ -17,35 +17,24 @@ namespace Ace
     ) -> DiagnosticGroup;
 
     auto CreateSymbolRedeclarationError(
-        const ISymbol* const originalSymbol,
-        const ISymbol* const redeclaredSymbol
+        const ISymbol* const originalSymbol, const ISymbol* const redeclaredSymbol
     ) -> DiagnosticGroup;
 
     auto CreateTypeParamRedeclarationError(
-        const SrcLocation& originalSrcLocation,
-        const SrcLocation& redeclaredSrcLocation
+        const SrcLocation& originalSrcLocation, const SrcLocation& redeclaredSrcLocation
     ) -> DiagnosticGroup;
 
-    auto CreateStructFieldCausesCycleError(
-        FieldVarSymbol* const fieldSymbol
-    ) -> DiagnosticGroup;
+    auto CreateStructFieldCausesCycleError(FieldVarSymbol* const fieldSymbol) -> DiagnosticGroup;
 
-    auto CreateSupertraitCausesCycleError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateSupertraitCausesCycleError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateUnableToDeduceTypeArgsError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateUnableToDeduceTypeArgsError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
     auto CreateUnableToDeduceTypeArgError(
-        const SrcLocation& srcLocation,
-        const TypeParamTypeSymbol* const typeParam
+        const SrcLocation& srcLocation, const TypeParamTypeSymbol* const typeParam
     ) -> DiagnosticGroup;
 
-    auto CreateTooManyTypeArgsError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateTooManyTypeArgsError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
     auto CreateTypeArgDeductionConflict(
         const SrcLocation& srcLocation,
@@ -54,34 +43,25 @@ namespace Ace
         const ITypeSymbol* const conflictingDeducedArg
     ) -> DiagnosticGroup;
 
-    auto CreateUndeclaredSymbolRefError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateUndeclaredSymbolRefError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
     auto CreateUndeclaredMemberRefError(
-        const SrcLocation& srcLocation,
-        ITypeSymbol* const selfType,
-        const std::string& memberName
+        const SrcLocation& srcLocation, ITypeSymbol* const selfType, const std::string& memberName
     ) -> DiagnosticGroup;
 
     auto CreateAmbiguousSymbolRefError(
-        const SrcLocation& srcLocation,
-        const std::vector<ISymbol*>& candidateSymbols
+        const SrcLocation& srcLocation, const std::vector<ISymbol*>& candidateSymbols
     ) -> DiagnosticGroup;
 
     auto CreateScopeAccessOfNonBodyScopedSymbolError(
-        const SrcLocation& srcLocation,
-        const ISymbol* const symbol
+        const SrcLocation& srcLocation, const ISymbol* const symbol
     ) -> DiagnosticGroup;
 
-    auto CreateInaccessibleSymbolError(
-        const SrcLocation& srcLocation,
-        ISymbol* const symbol
-    ) -> DiagnosticGroup;
+    auto CreateInaccessibleSymbolError(const SrcLocation& srcLocation, ISymbol* const symbol)
+        -> DiagnosticGroup;
 
     auto CreatePublicInterfaceLeaksPrivateTypeError(
-        const SrcLocation& srcLocation,
-        const ITypeSymbol* const leakedType
+        const SrcLocation& srcLocation, const ITypeSymbol* const leakedType
     ) -> DiagnosticGroup;
 
     auto CreateIncorrectSymbolCategoryError(
@@ -96,47 +76,31 @@ namespace Ace
         const std::vector<FieldVarSymbol*>& missingFieldSymbols
     ) -> DiagnosticGroup;
 
-    auto CreateStructHasNoFieldNamedError(
-        StructTypeSymbol* const structSymbol,
-        const Ident& fieldName
-    ) -> DiagnosticGroup;
+    auto
+    CreateStructHasNoFieldNamedError(StructTypeSymbol* const structSymbol, const Ident& fieldName)
+        -> DiagnosticGroup;
 
     auto CreateStructFieldInitializedMoreThanOnceError(
-        const SrcLocation& srcLocation,
-        const SrcLocation& previousSrcLocation
+        const SrcLocation& srcLocation, const SrcLocation& previousSrcLocation
     ) -> DiagnosticGroup;
 
-    auto CreateUndeclaredUnaryOpError(
-        const SrcLocation& srcLocation,
-        ITypeSymbol* const type
-    ) -> DiagnosticGroup;
+    auto CreateUndeclaredUnaryOpError(const SrcLocation& srcLocation, ITypeSymbol* const type)
+        -> DiagnosticGroup;
 
     auto CreateUndeclaredBinaryOpError(
-        const SrcLocation& srcLocation,
-        ITypeSymbol* const lhsType,
-        ITypeSymbol* const rhsType
+        const SrcLocation& srcLocation, ITypeSymbol* const lhsType, ITypeSymbol* const rhsType
     ) -> DiagnosticGroup;
 
     auto CreateAmbiguousBinaryOpRefError(
-        const SrcLocation& srcLocation,
-        ITypeSymbol* const lhsType,
-        ITypeSymbol* const rhsType
+        const SrcLocation& srcLocation, ITypeSymbol* const lhsType, ITypeSymbol* const rhsType
     ) -> DiagnosticGroup;
 
-    auto CreateExpectedFunctionError(
-        const SrcLocation& srcLocation,
-        ITypeSymbol* const type
-    ) -> DiagnosticGroup;
+    auto CreateExpectedFunctionError(const SrcLocation& srcLocation, ITypeSymbol* const type)
+        -> DiagnosticGroup;
 
-    auto CreateInherentImplOfForeignTypeError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateInherentImplOfForeignTypeError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateSelfReferenceInIncorrectContext(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateSelfReferenceInIncorrectContext(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateAmbiguousTraitImplError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateAmbiguousTraitImplError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 }

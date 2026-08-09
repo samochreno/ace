@@ -8,43 +8,49 @@ namespace Ace
 {
     static auto BindChildren(ISymbol* const parent) -> void
     {
-        if (auto* const typeParamOwner =
-            dynamic_cast<ITypeParamOwnerSymbol*>(parent))
+        if (auto* const typeParamOwner = dynamic_cast<ITypeParamOwnerSymbol*>(parent))
         {
             const auto typeParams = typeParamOwner->CollectOwnedTypeParams();
-            std::for_each(begin(typeParams), end(typeParams),
-            [&](TypeParamTypeSymbol* const typeParam)
-            {
-                typeParam->BindParent(typeParamOwner);
-                ACE_ASSERT(typeParam->GetParent() == typeParamOwner);
-            });
+            std::for_each(
+                begin(typeParams),
+                end(typeParams),
+                [&](TypeParamTypeSymbol* const typeParam)
+                {
+                    typeParam->BindParent(typeParamOwner);
+                    ACE_ASSERT(typeParam->GetParent() == typeParamOwner);
+                }
+            );
         }
 
         if (auto* const callable = dynamic_cast<ICallableSymbol*>(parent))
         {
             const auto params = callable->CollectAllParams();
-            std::for_each(begin(params), end(params),
-            [&](IParamVarSymbol* const param)
-            {
-                param->BindParent(callable);
-                ACE_ASSERT(param->GetParent() == callable);
-            });
+            std::for_each(
+                begin(params),
+                end(params),
+                [&](IParamVarSymbol* const param)
+                {
+                    param->BindParent(callable);
+                    ACE_ASSERT(param->GetParent() == callable);
+                }
+            );
         }
     }
 
-    static auto BindChildrenInScope(
-        const std::shared_ptr<Scope>& scope
-    ) -> void
+    static auto BindChildrenInScope(const std::shared_ptr<Scope>& scope) -> void
     {
         const auto symbols = scope->CollectAllSymbols();
         std::for_each(begin(symbols), end(symbols), BindChildren);
 
         const auto childScopes = scope->CollectChildren();
-        std::for_each(begin(childScopes), end(childScopes),
-        [&](const std::shared_ptr<Scope>& childScope)
-        {
-            BindChildrenInScope(childScope);
-        });
+        std::for_each(
+            begin(childScopes),
+            end(childScopes),
+            [&](const std::shared_ptr<Scope>& childScope)
+            {
+                BindChildrenInScope(childScope);
+            }
+        );
     }
 
     auto BindSymbolParents(const std::shared_ptr<Scope>& scope) -> void

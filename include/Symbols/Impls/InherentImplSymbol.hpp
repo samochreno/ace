@@ -17,11 +17,10 @@
 
 namespace Ace
 {
-    class InherentImplSymbol :
-        public virtual ISymbol,
-        public virtual IBodyScopedSymbol,
-        public virtual IConstrainedSymbol,
-        public virtual ITypeParamOwnerSymbol
+    class InherentImplSymbol : public virtual ISymbol,
+                               public virtual IBodyScopedSymbol,
+                               public virtual IConstrainedSymbol,
+                               public virtual ITypeParamOwnerSymbol
     {
     public:
         InherentImplSymbol(
@@ -38,8 +37,7 @@ namespace Ace
         auto GetName() const -> const Ident& final;
 
         auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> final;
 
         auto GetConstrainedScope() const -> std::shared_ptr<Scope> final;

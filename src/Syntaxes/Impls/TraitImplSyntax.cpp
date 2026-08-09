@@ -25,14 +25,15 @@ namespace Ace
         const std::vector<std::shared_ptr<const ConstraintSyntax>>& constraints,
         const std::shared_ptr<const ImplSelfSyntax>& self,
         const std::vector<std::shared_ptr<const FunctionSyntax>>& functions
-    ) : m_SrcLocation{ srcLocation },
-        m_BodyScope{ bodyScope },
-        m_TypeParams{ typeParams },
-        m_TraitName{ traitName },
-        m_TypeName{ typeName },
-        m_Constraints{ constraints },
-        m_Self{ self },
-        m_Functions{ functions }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_BodyScope{ bodyScope },
+          m_TypeParams{ typeParams },
+          m_TraitName{ traitName },
+          m_TypeName{ typeName },
+          m_Constraints{ constraints },
+          m_Self{ self },
+          m_Functions{ functions }
     {
     }
 
@@ -70,22 +71,17 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTraitSymbol = diagnostics.Collect(
-            m_BodyScope->ResolveStaticSymbol<TraitTypeSymbol>(m_TraitName)
-        );
-        auto* const traitSymbol = optTraitSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetTrait()
-        );
+        const auto optTraitSymbol =
+            diagnostics.Collect(m_BodyScope->ResolveStaticSymbol<TraitTypeSymbol>(m_TraitName));
+        auto* const traitSymbol =
+            optTraitSymbol.value_or(GetCompilation()->GetErrorSymbols().GetTrait());
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            m_BodyScope->ResolveStaticSymbol<ITypeSymbol>(m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(m_BodyScope->ResolveStaticSymbol<ITypeSymbol>(m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetType());
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_unique<TraitImplSymbol>(
                 SrcLocation{ GetSrcLocation(), m_TypeName.CreateSrcLocation() },
                 m_BodyScope,

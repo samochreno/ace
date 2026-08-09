@@ -24,13 +24,12 @@ namespace Ace
 {
     class BlockStmtSema;
 
-    class FunctionSymbol :
-        public virtual ISymbol,
-        public virtual ITypedSymbol,
-        public virtual IBodyScopedSymbol,
-        public virtual IGenericSymbol,
-        public virtual IConstrainedSymbol,
-        public virtual ICallableSymbol
+    class FunctionSymbol : public virtual ISymbol,
+                           public virtual ITypedSymbol,
+                           public virtual IBodyScopedSymbol,
+                           public virtual IGenericSymbol,
+                           public virtual IConstrainedSymbol,
+                           public virtual ICallableSymbol
     {
     public:
         FunctionSymbol(
@@ -50,8 +49,7 @@ namespace Ace
         auto GetName() const -> const Ident& final;
 
         auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> final;
 
         auto GetType() const -> ITypeSymbol* final;
@@ -61,15 +59,13 @@ namespace Ace
 
         auto GetConstrainedScope() const -> std::shared_ptr<Scope> final;
 
-        auto BindBlockSema(
-            const std::shared_ptr<const BlockStmtSema>& blockSema
-        ) -> void;
+        auto BindBlockSema(const std::shared_ptr<const BlockStmtSema>& blockSema) -> void;
         auto GetBlockSema() -> const std::optional<std::shared_ptr<const BlockStmtSema>>&;
 
-        auto BindEmittableBlock(
-            const std::shared_ptr<const IEmittable<void>>& emittableBlock
-        ) -> void;
-        auto GetEmittableBlock() const -> const std::optional<std::shared_ptr<const IEmittable<void>>>&;
+        auto BindEmittableBlock(const std::shared_ptr<const IEmittable<void>>& emittableBlock)
+            -> void;
+        auto GetEmittableBlock() const
+            -> const std::optional<std::shared_ptr<const IEmittable<void>>>&;
 
     private:
         std::shared_ptr<Scope> m_BodyScope{};

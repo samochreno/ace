@@ -30,13 +30,9 @@ namespace Ace
         MonoCollector() = default;
         ~MonoCollector() = default;
 
-        template<typename T>
-        auto Collect(T* const symbol) -> MonoCollector&
+        template <typename T> auto Collect(T* const symbol) -> MonoCollector&
         {
-            static_assert(
-                std::is_base_of_v<IGenericSymbol, T> ||
-                std::is_base_of_v<ITypedSymbol, T>
-            );
+            static_assert(std::is_base_of_v<IGenericSymbol, T> || std::is_base_of_v<ITypedSymbol, T>);
 
             if constexpr (std::is_base_of_v<IGenericSymbol, T>)
             {
@@ -56,23 +52,18 @@ namespace Ace
 
             return *this;
         }
-        template<typename T>
-        auto Collect(const std::shared_ptr<const T>& sema) -> MonoCollector&
+
+        template <typename T> auto Collect(const std::shared_ptr<const T>& sema) -> MonoCollector&
         {
             const auto collector = sema->CollectMonos();
             const auto& placeholders = collector.Get();
-            m_Placeholders.insert(
-                end(m_Placeholders),
-                begin(placeholders),
-                end  (placeholders)
-            );
+            m_Placeholders.insert(end(m_Placeholders), begin(placeholders), end(placeholders));
 
             return *this;
         }
-        template<typename T>
-        auto Collect(
-            const std::optional<std::shared_ptr<const T>>& optSema
-        ) -> MonoCollector&
+
+        template <typename T>
+        auto Collect(const std::optional<std::shared_ptr<const T>>& optSema) -> MonoCollector&
         {
             if (optSema.has_value())
             {
@@ -81,16 +72,18 @@ namespace Ace
 
             return *this;
         }
-        template<typename T>
-        auto Collect(
-            const std::vector<std::shared_ptr<const T>>& semas
-        ) -> MonoCollector&
+
+        template <typename T>
+        auto Collect(const std::vector<std::shared_ptr<const T>>& semas) -> MonoCollector&
         {
-            std::for_each(begin(semas), end(semas),
-            [&](const std::shared_ptr<const T>& sema)
-            {
-                Collect(sema);
-            });
+            std::for_each(
+                begin(semas),
+                end(semas),
+                [&](const std::shared_ptr<const T>& sema)
+                {
+                    Collect(sema);
+                }
+            );
 
             return *this;
         }
@@ -115,25 +108,22 @@ namespace Ace
         virtual auto CollectMonos() const -> MonoCollector = 0;
     };
 
-    template<typename T, typename TContext = TypeCheckingContext>
+    template <typename T, typename TContext = TypeCheckingContext>
     class ITypeCheckableSema : public virtual ISema
     {
     public:
         virtual ~ITypeCheckableSema() = default;
 
-        virtual auto CreateTypeChecked(
-            const TContext& context
-        ) const -> Diagnosed<std::shared_ptr<const T>> = 0;
+        virtual auto CreateTypeChecked(const TContext& context) const
+            -> Diagnosed<std::shared_ptr<const T>> = 0;
     };
 
-    template<typename T, typename TContext = LoweringContext>
+    template <typename T, typename TContext = LoweringContext>
     class ILowerableSema : public virtual ISema
     {
     public:
         virtual ~ILowerableSema() = default;
 
-        virtual auto CreateLowered(
-            const TContext& context
-        ) const -> std::shared_ptr<const T> = 0;
+        virtual auto CreateLowered(const TContext& context) const -> std::shared_ptr<const T> = 0;
     };
 }

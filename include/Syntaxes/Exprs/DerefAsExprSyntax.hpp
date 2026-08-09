@@ -12,14 +12,13 @@
 
 namespace Ace
 {
-    class DerefAsExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<DerefAsExprSema>
+    class DerefAsExprSyntax : public virtual IExprSyntax,
+                              public virtual ISemaSyntax<DerefAsExprSema>
     {
     public:
         DerefAsExprSyntax(
             const SrcLocation& srcLocation,
-            const TypeName& typeName, 
+            const TypeName& typeName,
             const std::shared_ptr<const IExprSyntax>& expr
         );
         virtual ~DerefAsExprSyntax() = default;
@@ -29,7 +28,7 @@ namespace Ace
         auto CollectChildren() const -> std::vector<const ISyntax*> final;
         auto CreateSema() const -> Diagnosed<std::shared_ptr<const DerefAsExprSema>> final;
         auto CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
-        
+
     private:
         SrcLocation m_SrcLocation{};
         TypeName m_TypeName{};

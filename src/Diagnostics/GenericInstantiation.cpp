@@ -19,40 +19,28 @@ namespace Ace
         DiagnosticGroup group{};
 
         auto* const constrainedType = CreateInstantiated<ITypeSymbol>(
-            constraint->GetType(),
-            InstantiationContext{ typeArgs, std::nullopt }
+            constraint->GetType(), InstantiationContext{ typeArgs, std::nullopt }
         );
 
-        const std::string message =
-            "type argument `" + constrainedType->CreateDisplayName() +
-            "` does not implement `" + trait->CreateDisplayName() + "`";
+        const std::string message = "type argument `" + constrainedType->CreateDisplayName() +
+                                    "` does not implement `" + trait->CreateDisplayName() + "`";
+
+        group.Diagnostics.emplace_back(DiagnosticSeverity::Error, srcLocation, message);
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            message
-        );
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Note,
-            constraint->GetName().SrcLocation,
-            "constraint declaration"
+            DiagnosticSeverity::Note, constraint->GetName().SrcLocation, "constraint declaration"
         );
 
         return group;
     }
 
-    auto CreateUnsizedTypeArgError(
-        const SrcLocation& srcLocation,
-        ITypeSymbol* const typeArg
-    ) -> DiagnosticGroup
+    auto CreateUnsizedTypeArgError(const SrcLocation& srcLocation, ITypeSymbol* const typeArg)
+        -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "unsized type argument"
+            DiagnosticSeverity::Error, srcLocation, "unsized type argument"
         );
 
         return group;

@@ -17,9 +17,7 @@
 
 namespace Ace
 {
-    class ModSyntax :
-        public virtual ISyntax,
-        public virtual IPartialDeclSyntax
+    class ModSyntax : public virtual ISyntax, public virtual IPartialDeclSyntax
     {
     public:
         ModSyntax(
@@ -46,9 +44,7 @@ namespace Ace
         auto GetDeclOrder() const -> DeclOrder final;
         auto GetDeclSuborder() const -> size_t final;
         auto CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>> final;
-        auto ContinueCreatingSymbol(
-            ISymbol* const symbol
-        ) const -> Diagnosed<void> final;
+        auto ContinueCreatingSymbol(ISymbol* const symbol) const -> Diagnosed<void> final;
         auto GetName() const -> const Ident& final;
 
     private:

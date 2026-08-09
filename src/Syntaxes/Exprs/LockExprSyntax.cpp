@@ -11,10 +11,10 @@
 namespace Ace
 {
     LockExprSyntax::LockExprSyntax(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<const IExprSyntax>& expr
-    ) : m_SrcLocation{ srcLocation },
-        m_Expr{ expr }
+        const SrcLocation& srcLocation, const std::shared_ptr<const IExprSyntax>& expr
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Expr{ expr }
     {
     }
 
@@ -39,8 +39,7 @@ namespace Ace
 
         const auto exprSema = diagnostics.Collect(m_Expr->CreateExprSema());
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const LockExprSema>(GetSrcLocation(), exprSema),
             std::move(diagnostics),
         };

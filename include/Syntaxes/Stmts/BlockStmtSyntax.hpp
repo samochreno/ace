@@ -11,9 +11,7 @@
 
 namespace Ace
 {
-    class BlockStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<BlockStmtSema>
+    class BlockStmtSyntax : public virtual IStmtSyntax, public virtual ISemaSyntax<BlockStmtSema>
     {
     public:
         BlockStmtSyntax(

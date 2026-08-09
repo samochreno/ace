@@ -25,19 +25,23 @@ namespace Ace
         const SrcLocation& srcLocation,
         LocalVarSymbol* const symbol,
         const std::optional<std::shared_ptr<const IExprSema>>& optAssignedExpr
-    ) : m_SrcLocation{ srcLocation },
-        m_Symbol{ symbol },
-        m_OptAssignedExpr{ optAssignedExpr }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Symbol{ symbol },
+          m_OptAssignedExpr{ optAssignedExpr }
     {
     }
 
     auto VarStmtSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("VarStmtSema", [&]()
-        {
-            logger.Log("m_Symbol", m_Symbol);
-            logger.Log("m_OptAssignedExpr", m_OptAssignedExpr);
-        });
+        logger.Log(
+            "VarStmtSema",
+            [&]()
+            {
+                logger.Log("m_Symbol", m_Symbol);
+                logger.Log("m_OptAssignedExpr", m_OptAssignedExpr);
+            }
+        );
     }
 
     auto VarStmtSema::GetSrcLocation() const -> const SrcLocation&
@@ -50,29 +54,22 @@ namespace Ace
         return m_Symbol->GetScope();
     }
 
-    auto VarStmtSema::CreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const VarStmtSema>>
+    auto VarStmtSema::CreateTypeChecked(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const VarStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         std::optional<std::shared_ptr<const IExprSema>> checkedOptAssignedExpr{};
         if (m_OptAssignedExpr.has_value())
         {
-            const TypeInfo targetTypeInfo
-            {
+            const TypeInfo targetTypeInfo{
                 m_Symbol->GetType(),
                 ValueKind::R,
             };
-            diagnostics.Collect(DiagnoseReferenceBinding(
-                m_OptAssignedExpr.value(),
-                targetTypeInfo
-            ));
+            diagnostics.Collect(DiagnoseReferenceBinding(m_OptAssignedExpr.value(), targetTypeInfo)
+            );
             checkedOptAssignedExpr = diagnostics.Collect(
-                CreateImplicitlyConvertedAndTypeChecked(
-                    m_OptAssignedExpr.value(),
-                    targetTypeInfo
-                )
+                CreateImplicitlyConvertedAndTypeChecked(m_OptAssignedExpr.value(), targetTypeInfo)
             );
         }
 
@@ -81,31 +78,25 @@ namespace Ace
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
-            std::make_shared<const VarStmtSema>(
-                GetSrcLocation(),
-                m_Symbol,
-                checkedOptAssignedExpr
-            ),
+        return Diagnosed{
+            std::make_shared<const VarStmtSema>(GetSrcLocation(), m_Symbol, checkedOptAssignedExpr),
             std::move(diagnostics),
         };
     }
 
-    auto VarStmtSema::CreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IStmtSema>>
+    auto VarStmtSema::CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IStmtSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto VarStmtSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const VarStmtSema>
+    auto VarStmtSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const VarStmtSema>
     {
-        const auto loweredOptAssignedExpr = m_OptAssignedExpr.has_value() ?
-            std::optional{ m_OptAssignedExpr.value()->CreateLoweredExpr({}) } :
-            std::nullopt;
+        const auto loweredOptAssignedExpr =
+            m_OptAssignedExpr.has_value()
+                ? std::optional{ m_OptAssignedExpr.value()->CreateLoweredExpr({}) }
+                : std::nullopt;
 
         if (loweredOptAssignedExpr == m_OptAssignedExpr)
         {
@@ -113,24 +104,20 @@ namespace Ace
         }
 
         return std::make_shared<const VarStmtSema>(
-            GetSrcLocation(),
-            m_Symbol,
-            loweredOptAssignedExpr
-        )->CreateLowered({});
+                   GetSrcLocation(), m_Symbol, loweredOptAssignedExpr
+        )
+            ->CreateLowered({});
     }
 
-    auto VarStmtSema::CreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IStmtSema>
+    auto VarStmtSema::CreateLoweredStmt(const LoweringContext& context) const
+        -> std::shared_ptr<const IStmtSema>
     {
         return CreateLowered(context);
     }
 
     auto VarStmtSema::CollectMonos() const -> MonoCollector
     {
-        return MonoCollector{}
-            .Collect(m_Symbol)
-            .Collect(m_OptAssignedExpr);
+        return MonoCollector{}.Collect(m_Symbol).Collect(m_OptAssignedExpr);
     }
 
     auto VarStmtSema::Emit(Emitter& emitter) const -> void
@@ -141,17 +128,13 @@ namespace Ace
         }
 
         const auto varRefExpr = std::make_shared<const StaticVarRefExprSema>(
-            m_Symbol->GetName().SrcLocation,
-            GetScope(),
-            m_Symbol
+            m_Symbol->GetName().SrcLocation, GetScope(), m_Symbol
         );
 
         // Without type checking and implicit conversions,
         // refs can be initialized too
         const auto assignmentStmt = std::make_shared<const SimpleAssignmentStmtSema>(
-            GetSrcLocation(),
-            varRefExpr,
-            m_OptAssignedExpr.value()
+            GetSrcLocation(), varRefExpr, m_OptAssignedExpr.value()
         );
 
         assignmentStmt->Emit(emitter);

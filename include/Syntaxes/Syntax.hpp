@@ -23,18 +23,16 @@ namespace Ace
         SyntaxChildCollector() = default;
         ~SyntaxChildCollector() = default;
 
-        template<typename T>
-        auto Collect(
-            const std::shared_ptr<const T>& syntax
-        ) -> SyntaxChildCollector&
+        template <typename T>
+        auto Collect(const std::shared_ptr<const T>& syntax) -> SyntaxChildCollector&
         {
             m_Children.push_back(syntax.get());
             return CollectChildren(syntax);
         }
-        template<typename T>
-        auto Collect(
-            const std::optional<std::shared_ptr<const T>>& optSema
-        ) -> SyntaxChildCollector&
+
+        template <typename T>
+        auto Collect(const std::optional<std::shared_ptr<const T>>& optSema)
+            -> SyntaxChildCollector&
         {
             if (optSema.has_value())
             {
@@ -43,23 +41,24 @@ namespace Ace
 
             return *this;
         }
-        template<typename T>
-        auto Collect(
-            const std::vector<std::shared_ptr<const T>>& syntaxes
-        ) -> SyntaxChildCollector&
+
+        template <typename T>
+        auto Collect(const std::vector<std::shared_ptr<const T>>& syntaxes) -> SyntaxChildCollector&
         {
-            std::for_each(begin(syntaxes), end(syntaxes),
-            [&](const std::shared_ptr<const T>& syntax)
-            {
-                Collect(syntax);
-            });
+            std::for_each(
+                begin(syntaxes),
+                end(syntaxes),
+                [&](const std::shared_ptr<const T>& syntax)
+                {
+                    Collect(syntax);
+                }
+            );
 
             return *this;
         }
-        template<typename T>
-        auto CollectChildren(
-            const std::shared_ptr<const T>& syntax
-        ) -> SyntaxChildCollector&
+
+        template <typename T>
+        auto CollectChildren(const std::shared_ptr<const T>& syntax) -> SyntaxChildCollector&
         {
             const auto children = syntax->CollectChildren();
             m_Children.insert(end(m_Children), begin(children), end(children));
@@ -83,8 +82,7 @@ namespace Ace
         virtual auto CollectChildren() const -> std::vector<const ISyntax*> = 0;
     };
 
-    template<typename T>
-    class ISemaSyntax : public virtual ISyntax
+    template <typename T> class ISemaSyntax : public virtual ISyntax
     {
     public:
         virtual ~ISemaSyntax() = default;
@@ -92,17 +90,13 @@ namespace Ace
         virtual auto CreateSema() const -> Diagnosed<std::shared_ptr<const T>> = 0;
     };
 
-    class IDeclSyntax :
-        public virtual ISyntax,
-        public virtual IDecl
+    class IDeclSyntax : public virtual ISyntax, public virtual IDecl
     {
     public:
         virtual ~IDeclSyntax() = default;
     };
 
-    class IPartialDeclSyntax :
-        public virtual IDeclSyntax,
-        public virtual IPartialDecl
+    class IPartialDeclSyntax : public virtual IDeclSyntax, public virtual IPartialDecl
     {
     public:
         virtual ~IPartialDeclSyntax() = default;

@@ -34,34 +34,32 @@ namespace Ace
         std::vector<ITypeSymbol*> symbols{};
         std::unordered_map<std::string, const TypeParamSyntax*> firstTypeParams{};
         std::unordered_map<std::string, ITypeSymbol*> firstTypeParamSymbols{};
-        std::for_each(begin(typeParams), end(typeParams),
-        [&](const std::shared_ptr<const TypeParamSyntax>& typeParam)
-        {
-            const auto& name = typeParam->GetName();
-
-            const auto [it, inserted] = firstTypeParams.emplace(
-                name.String,
-                typeParam.get()
-            );
-            if (!inserted)
+        std::for_each(
+            begin(typeParams),
+            end(typeParams),
+            [&](const std::shared_ptr<const TypeParamSyntax>& typeParam)
             {
-                diagnostics.Add(CreateTypeParamRedeclarationError(
-                    it->second->GetSrcLocation(),
-                    typeParam->GetSrcLocation()
-                ));
-                symbols.push_back(firstTypeParamSymbols.at(name.String));
-                return;
-            }
+                const auto& name = typeParam->GetName();
 
-            const auto optSymbol = diagnostics.Collect(
-                scope->ResolveStaticSymbol<TypeParamTypeSymbol>(name)
-            );
-            auto* const symbol = optSymbol.has_value() ?
-                static_cast<ITypeSymbol*>(optSymbol.value()) :
-                scope->GetCompilation()->GetErrorSymbols().GetType();
-            firstTypeParamSymbols[name.String] = symbol;
-            symbols.push_back(symbol);
-        });
+                const auto [it, inserted] = firstTypeParams.emplace(name.String, typeParam.get());
+                if (!inserted)
+                {
+                    diagnostics.Add(CreateTypeParamRedeclarationError(
+                        it->second->GetSrcLocation(), typeParam->GetSrcLocation()
+                    ));
+                    symbols.push_back(firstTypeParamSymbols.at(name.String));
+                    return;
+                }
+
+                const auto optSymbol =
+                    diagnostics.Collect(scope->ResolveStaticSymbol<TypeParamTypeSymbol>(name));
+                auto* const symbol = optSymbol.has_value()
+                                         ? static_cast<ITypeSymbol*>(optSymbol.value())
+                                         : scope->GetCompilation()->GetErrorSymbols().GetType();
+                firstTypeParamSymbols[name.String] = symbol;
+                symbols.push_back(symbol);
+            }
+        );
 
         return Diagnosed{ symbols, std::move(diagnostics) };
     }

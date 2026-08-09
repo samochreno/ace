@@ -18,18 +18,13 @@ namespace Ace
             const std::string_view::const_iterator characterBeginIt,
             const std::string_view::const_iterator characterEndIt
         );
-        SrcLocation(
-            const SrcLocation& first,
-            const SrcLocation& last
-        );
+        SrcLocation(const SrcLocation& first, const SrcLocation& last);
 
         auto CreateFirst() const -> SrcLocation;
-        auto CreateLast()  const -> SrcLocation;
+        auto CreateLast() const -> SrcLocation;
 
-        static auto CreateInterstice(
-            const SrcLocation& first,
-            const SrcLocation& last
-        ) -> SrcLocation;
+        static auto CreateInterstice(const SrcLocation& first, const SrcLocation& last)
+            -> SrcLocation;
 
         const ISrcBuffer* Buffer{};
         std::string_view::const_iterator CharacterBeginIterator{};

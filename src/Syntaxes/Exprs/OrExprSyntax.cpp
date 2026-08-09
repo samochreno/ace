@@ -14,9 +14,10 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprSyntax>& lhsExpr,
         const std::shared_ptr<const IExprSyntax>& rhsExpr
-    ) : m_SrcLocation{ srcLocation },
-        m_LHSExpr{ lhsExpr },
-        m_RHSExpr{ rhsExpr }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_LHSExpr{ lhsExpr },
+          m_RHSExpr{ rhsExpr }
     {
     }
 
@@ -32,30 +33,18 @@ namespace Ace
 
     auto OrExprSyntax::CollectChildren() const -> std::vector<const ISyntax*>
     {
-        return SyntaxChildCollector{}
-            .Collect(m_LHSExpr)
-            .Collect(m_RHSExpr)
-            .Build();
+        return SyntaxChildCollector{}.Collect(m_LHSExpr).Collect(m_RHSExpr).Build();
     }
 
     auto OrExprSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const OrExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto lhsExprSema = diagnostics.Collect(
-            m_LHSExpr->CreateExprSema()
-        );
-        const auto rhsExprSema = diagnostics.Collect(
-            m_RHSExpr->CreateExprSema()
-        );
+        const auto lhsExprSema = diagnostics.Collect(m_LHSExpr->CreateExprSema());
+        const auto rhsExprSema = diagnostics.Collect(m_RHSExpr->CreateExprSema());
 
-        return Diagnosed
-        {
-            std::make_shared<const OrExprSema>(
-                GetSrcLocation(),
-                lhsExprSema,
-                rhsExprSema
-            ),
+        return Diagnosed{
+            std::make_shared<const OrExprSema>(GetSrcLocation(), lhsExprSema, rhsExprSema),
             std::move(diagnostics),
         };
     }

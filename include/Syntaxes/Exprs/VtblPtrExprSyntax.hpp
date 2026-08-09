@@ -12,9 +12,8 @@
 
 namespace Ace
 {
-    class VtblPtrExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<VtblPtrExprSema>
+    class VtblPtrExprSyntax : public virtual IExprSyntax,
+                              public virtual ISemaSyntax<VtblPtrExprSema>
     {
     public:
         VtblPtrExprSyntax(
@@ -30,7 +29,7 @@ namespace Ace
         auto CollectChildren() const -> std::vector<const ISyntax*> final;
         auto CreateSema() const -> Diagnosed<std::shared_ptr<const VtblPtrExprSema>> final;
         auto CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
-        
+
     private:
         SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};

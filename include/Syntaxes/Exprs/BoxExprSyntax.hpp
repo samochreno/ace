@@ -11,14 +11,11 @@
 
 namespace Ace
 {
-    class BoxExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<BoxExprSema>
+    class BoxExprSyntax : public virtual IExprSyntax, public virtual ISemaSyntax<BoxExprSema>
     {
     public:
         BoxExprSyntax(
-            const SrcLocation& srcLocation,
-            const std::shared_ptr<const IExprSyntax>& expr
+            const SrcLocation& srcLocation, const std::shared_ptr<const IExprSyntax>& expr
         );
         virtual ~BoxExprSyntax() = default;
 
@@ -27,7 +24,7 @@ namespace Ace
         auto CollectChildren() const -> std::vector<const ISyntax*> final;
         auto CreateSema() const -> Diagnosed<std::shared_ptr<const BoxExprSema>> final;
         auto CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
-    
+
     private:
         SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprSyntax> m_Expr{};

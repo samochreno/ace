@@ -12,68 +12,46 @@
 namespace Ace
 {
     auto DiagnoseReferenceBinding(
-        const std::shared_ptr<const IExprSema>& expr,
-        const TypeInfo& targetTypeInfo
+        const std::shared_ptr<const IExprSema>& expr, const TypeInfo& targetTypeInfo
     ) -> Diagnosed<void>;
 
-    auto CreateExpectedLValueExprError(
-        const std::shared_ptr<const IExprSema>& expr
-    ) -> DiagnosticGroup;
+    auto CreateExpectedLValueExprError(const std::shared_ptr<const IExprSema>& expr)
+        -> DiagnosticGroup;
 
-    auto CreateExpectedSizedExprError(
-        const std::shared_ptr<const IExprSema>& expr
-    ) -> DiagnosticGroup;
+    auto CreateExpectedSizedExprError(const std::shared_ptr<const IExprSema>& expr)
+        -> DiagnosticGroup;
 
-    auto CreateExpectedSizedExprError(
-        const std::shared_ptr<const IExprSema>& expr
-    ) -> DiagnosticGroup;
+    auto CreateExpectedSizedExprError(const std::shared_ptr<const IExprSema>& expr)
+        -> DiagnosticGroup;
 
     auto CreateUnableToConvertExprError(
-        const std::shared_ptr<const IExprSema>& expr,
-        const TypeInfo& targetTypeInfo
+        const std::shared_ptr<const IExprSema>& expr, const TypeInfo& targetTypeInfo
     ) -> DiagnosticGroup;
 
-    auto CreateExpectedDerefableExprError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateExpectedDerefableExprError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateExpectedPtrError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateExpectedPtrError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateExpectedStrongPtrError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateExpectedStrongPtrError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateExpectedNonDynStrongPtrError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateExpectedNonDynStrongPtrError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-   auto CreateUnexpectedArgCountError(
+    auto CreateUnexpectedArgCountError(
         const SrcLocation& srcLocation,
         ICallableSymbol* const callableSymbol,
         const size_t expectedArgCount,
         const size_t unexpectedArgCount
     ) -> DiagnosticGroup;
 
-    auto CreateExprRetFromVoidFunctionError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateExprRetFromVoidFunctionError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateUnsizedRetExprError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateUnsizedRetExprError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateMissingRetExprError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateMissingRetExprError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
     auto CreateMismatchedSelfExprTypeError(
-        const SrcLocation& srcLocation,
-        const SelfParamVarSymbol* const selfParamSymbol
+        const SrcLocation& srcLocation, const SelfParamVarSymbol* const selfParamSymbol
     ) -> DiagnosticGroup;
 
-    auto CreateFunctionNotDynDispatchableError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateFunctionNotDynDispatchableError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 }

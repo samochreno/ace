@@ -5,7 +5,5 @@
 
 namespace Ace
 {
-    auto DiagnoseConcreteConstraints(
-        Compilation* const compilation
-    ) -> Diagnosed<void>;
+    auto DiagnoseConcreteConstraints(Compilation* const compilation) -> Diagnosed<void>;
 }

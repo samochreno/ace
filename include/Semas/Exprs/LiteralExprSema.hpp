@@ -13,11 +13,10 @@
 
 namespace Ace
 {
-    class LiteralExprSema :
-        public std::enable_shared_from_this<LiteralExprSema>,
-        public virtual IExprSema,
-        public virtual ITypeCheckableSema<LiteralExprSema>,
-        public virtual ILowerableSema<LiteralExprSema>
+    class LiteralExprSema : public std::enable_shared_from_this<LiteralExprSema>,
+                            public virtual IExprSema,
+                            public virtual ITypeCheckableSema<LiteralExprSema>,
+                            public virtual ILowerableSema<LiteralExprSema>
     {
     public:
         LiteralExprSema(
@@ -32,18 +31,14 @@ namespace Ace
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto CreateTypeChecked(
-            const TypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const LiteralExprSema>> final;
-        auto CreateTypeCheckedExpr(
-            const TypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
-        auto CreateLowered(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const LiteralExprSema> final;
-        auto CreateLoweredExpr(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const IExprSema> final;
+        auto CreateTypeChecked(const TypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const LiteralExprSema>> final;
+        auto CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const IExprSema>> final;
+        auto CreateLowered(const LoweringContext& context) const
+            -> std::shared_ptr<const LiteralExprSema> final;
+        auto CreateLoweredExpr(const LoweringContext& context) const
+            -> std::shared_ptr<const IExprSema> final;
         auto CollectMonos() const -> MonoCollector final;
         auto Emit(Emitter& emitter) const -> ExprEmitResult final;
 

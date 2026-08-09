@@ -21,12 +21,13 @@ namespace Ace
         const TypeName& typeName,
         const std::vector<std::shared_ptr<const AttributeSyntax>>& attributes,
         const size_t index
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_Name{ name },
-        m_TypeName{ typeName },
-        m_Attributes{ attributes },
-        m_Index{ index }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_Name{ name },
+          m_TypeName{ typeName },
+          m_Attributes{ attributes },
+          m_Index{ index }
     {
     }
 
@@ -59,21 +60,13 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetSizedType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetSizedType());
 
-        return Diagnosed<std::unique_ptr<ISymbol>>
-        {
-            std::make_unique<NormalParamVarSymbol>(
-                GetSymbolScope(),
-                m_Name,
-                typeSymbol,
-                m_Index
-            ),
+        return Diagnosed<std::unique_ptr<ISymbol>>{
+            std::make_unique<NormalParamVarSymbol>(GetSymbolScope(), m_Name, typeSymbol, m_Index),
             std::move(diagnostics),
         };
     }

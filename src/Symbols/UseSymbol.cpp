@@ -18,9 +18,10 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         TraitTypeSymbol* const rootTrait
-    ) : m_Scope{ scope },
-        m_Name{ srcLocation, AnonymousIdent::Create("use") },
-        m_RootTrait{ rootTrait }
+    )
+        : m_Scope{ scope },
+          m_Name{ srcLocation, AnonymousIdent::Create("use") },
+          m_RootTrait{ rootTrait }
     {
         ACE_ASSERT(rootTrait == rootTrait->GetRoot());
     }
@@ -51,8 +52,7 @@ namespace Ace
     }
 
     auto UseSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<UseSymbol>(

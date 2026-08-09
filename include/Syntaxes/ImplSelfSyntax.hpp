@@ -12,15 +12,10 @@
 
 namespace Ace
 {
-    class ImplSelfSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class ImplSelfSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
-        ImplSelfSyntax(
-            const std::shared_ptr<Scope>& scope,
-            const SymbolName& name
-        );
+        ImplSelfSyntax(const std::shared_ptr<Scope>& scope, const SymbolName& name);
         virtual ~ImplSelfSyntax() = default;
 
         auto GetSrcLocation() const -> const SrcLocation& final;
@@ -37,4 +32,3 @@ namespace Ace
         SymbolName m_Name{};
     };
 }
-

@@ -14,12 +14,11 @@
 namespace Ace
 {
     LabelStmtSyntax::LabelStmtSyntax(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<Scope>& scope,
-        const Ident& name
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_Name{ name }
+        const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope, const Ident& name
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_Name{ name }
     {
     }
 
@@ -40,12 +39,11 @@ namespace Ace
 
     auto LabelStmtSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const LabelStmtSema>>
     {
-        auto* const selfSymbol = DiagnosticBag::CreateNoError().Collect(
-            GetScope()->ResolveStaticSymbol<LabelSymbol>(m_Name)
-        ).value();
+        auto* const selfSymbol = DiagnosticBag::CreateNoError()
+                                     .Collect(GetScope()->ResolveStaticSymbol<LabelSymbol>(m_Name))
+                                     .value();
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const LabelStmtSema>(GetSrcLocation(), selfSymbol),
             DiagnosticBag::Create(),
         };
@@ -68,8 +66,7 @@ namespace Ace
 
     auto LabelStmtSyntax::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        return Diagnosed<std::unique_ptr<ISymbol>>
-        {
+        return Diagnosed<std::unique_ptr<ISymbol>>{
             std::make_unique<LabelSymbol>(m_Scope, m_Name),
             DiagnosticBag::Create(),
         };

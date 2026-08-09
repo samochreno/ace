@@ -12,9 +12,7 @@
 
 namespace Ace
 {
-    class AssertStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<AssertStmtSema>
+    class AssertStmtSyntax : public virtual IStmtSyntax, public virtual ISemaSyntax<AssertStmtSema>
     {
     public:
         AssertStmtSyntax(

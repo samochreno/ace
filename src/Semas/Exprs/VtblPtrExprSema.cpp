@@ -23,20 +23,24 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         ISizedTypeSymbol* const typeSymbol,
         ITypeSymbol* const traitSymbol
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_TypeSymbol{ typeSymbol },
-        m_TraitSymbol{ traitSymbol }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_TypeSymbol{ typeSymbol },
+          m_TraitSymbol{ traitSymbol }
     {
     }
 
     auto VtblPtrExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("VtblPtrExprSema", [&]()
-        {
-            logger.Log("m_TypeSymbol", m_TypeSymbol);
-            logger.Log("m_TraitSymbol", m_TraitSymbol);
-        });
+        logger.Log(
+            "VtblPtrExprSema",
+            [&]()
+            {
+                logger.Log("m_TypeSymbol", m_TypeSymbol);
+                logger.Log("m_TraitSymbol", m_TraitSymbol);
+            }
+        );
     }
 
     auto VtblPtrExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -49,72 +53,61 @@ namespace Ace
         return m_Scope;
     }
 
-    auto VtblPtrExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const VtblPtrExprSema>>
+    auto VtblPtrExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const VtblPtrExprSema>>
     {
         return Diagnosed{ shared_from_this(), DiagnosticBag::Create() };
     }
 
-    auto VtblPtrExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto VtblPtrExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto VtblPtrExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const VtblPtrExprSema>
+    auto VtblPtrExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const VtblPtrExprSema>
     {
         return shared_from_this();
     }
 
-    auto VtblPtrExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto VtblPtrExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }
 
     auto VtblPtrExprSema::CollectMonos() const -> MonoCollector
     {
-        return MonoCollector{}
-            .Collect(m_TypeSymbol)
-            .Collect(m_TraitSymbol);
+        return MonoCollector{}.Collect(m_TypeSymbol).Collect(m_TraitSymbol);
     }
 
     auto VtblPtrExprSema::Emit(Emitter& emitter) const -> ExprEmitResult
     {
         std::vector<ExprDropInfo> tmps{};
 
-        ACE_ASSERT([&]() -> bool
-        {
-            auto* const traitSymbol =
-                emitter.CreateInstantiated<TraitTypeSymbol>(m_TraitSymbol);
-
-            auto* const typeSymbol =
-                emitter.CreateInstantiated<ITypeSymbol>(m_TypeSymbol);
-
-            if (traitSymbol->IsError() || typeSymbol->IsError())
+        ACE_ASSERT(
+            [&]() -> bool
             {
-                return true;
-            }
+                auto* const traitSymbol =
+                    emitter.CreateInstantiated<TraitTypeSymbol>(m_TraitSymbol);
 
-            return Scope::HasImpl(traitSymbol, typeSymbol);
-        }());
+                auto* const typeSymbol = emitter.CreateInstantiated<ITypeSymbol>(m_TypeSymbol);
 
-        auto* const allocaInst = emitter.GetBlock().Builder.CreateAlloca(
-            emitter.GetPtrType()
+                if (traitSymbol->IsError() || typeSymbol->IsError())
+                {
+                    return true;
+                }
+
+                return Scope::HasImpl(traitSymbol, typeSymbol);
+            }()
         );
-        tmps.emplace_back(
-            allocaInst,
-            GetCompilation()->GetNatives().Ptr.GetSymbol()
-        );
+
+        auto* const allocaInst = emitter.GetBlock().Builder.CreateAlloca(emitter.GetPtrType());
+        tmps.emplace_back(allocaInst, GetCompilation()->GetNatives().Ptr.GetSymbol());
 
         emitter.GetBlock().Builder.CreateStore(
-            emitter.GetVtbl(m_TraitSymbol, m_TypeSymbol),
-            allocaInst
+            emitter.GetVtbl(m_TraitSymbol, m_TypeSymbol), allocaInst
         );
 
         return { allocaInst, tmps };

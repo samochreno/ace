@@ -18,19 +18,23 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprSema>& expr,
         FunctionSymbol* const opSymbol
-    ) : m_SrcLocation{ srcLocation },
-        m_Expr{ expr },
-        m_OpSymbol{ opSymbol }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Expr{ expr },
+          m_OpSymbol{ opSymbol }
     {
     }
 
     auto UserUnaryExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("UserUnaryExprSema", [&]()
-        {
-            logger.Log("m_Expr", m_Expr);
-            logger.Log("m_OpSymbol", m_OpSymbol);
-        });
+        logger.Log(
+            "UserUnaryExprSema",
+            [&]()
+            {
+                logger.Log("m_Expr", m_Expr);
+                logger.Log("m_OpSymbol", m_OpSymbol);
+            }
+        );
     }
 
     auto UserUnaryExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -43,9 +47,8 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto UserUnaryExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const UserUnaryExprSema>>
+    auto UserUnaryExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const UserUnaryExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -55,40 +58,31 @@ namespace Ace
             const auto argTypeInfos = m_OpSymbol->CollectAllArgTypeInfos();
             ACE_ASSERT(argTypeInfos.size() == 1);
 
-            convertedExpr = diagnostics.Collect(
-                CreateImplicitlyConverted(convertedExpr, argTypeInfos.front())
-            );
+            convertedExpr =
+                diagnostics.Collect(CreateImplicitlyConverted(convertedExpr, argTypeInfos.front()));
         }
 
-        const auto checkedExpr =
-            diagnostics.Collect(convertedExpr->CreateTypeCheckedExpr({}));
+        const auto checkedExpr = diagnostics.Collect(convertedExpr->CreateTypeCheckedExpr({}));
 
         if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
-            std::make_shared<const UserUnaryExprSema>(
-                GetSrcLocation(),
-                checkedExpr,
-                m_OpSymbol
-            ),
+        return Diagnosed{
+            std::make_shared<const UserUnaryExprSema>(GetSrcLocation(), checkedExpr, m_OpSymbol),
             std::move(diagnostics),
         };
     }
 
-    auto UserUnaryExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto UserUnaryExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto UserUnaryExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const StaticCallExprSema>
+    auto UserUnaryExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const StaticCallExprSema>
     {
         const auto loweredExpr = m_Expr->CreateLoweredExpr({});
 
@@ -99,16 +93,13 @@ namespace Ace
         }
 
         return std::make_shared<const StaticCallExprSema>(
-            GetSrcLocation(),
-            GetScope(),
-            m_OpSymbol,
-            args
-        )->CreateLowered({});
+                   GetSrcLocation(), GetScope(), m_OpSymbol, args
+        )
+            ->CreateLowered({});
     }
 
-    auto UserUnaryExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto UserUnaryExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }

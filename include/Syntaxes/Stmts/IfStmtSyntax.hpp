@@ -14,9 +14,7 @@
 
 namespace Ace
 {
-    class IfStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<IfStmtSema>
+    class IfStmtSyntax : public virtual IStmtSyntax, public virtual ISemaSyntax<IfStmtSema>
     {
     public:
         IfStmtSyntax(

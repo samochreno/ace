@@ -20,9 +20,8 @@ namespace Ace
         std::optional<std::shared_ptr<const IExprSyntax>> OptValue{};
     };
 
-    class StructConstructionExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<StructConstructionExprSema>
+    class StructConstructionExprSyntax : public virtual IExprSyntax,
+                                         public virtual ISemaSyntax<StructConstructionExprSema>
     {
     public:
         StructConstructionExprSyntax(
@@ -36,7 +35,8 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const ISyntax*> final;
-        auto CreateSema() const -> Diagnosed<std::shared_ptr<const StructConstructionExprSema>> final;
+        auto CreateSema() const
+            -> Diagnosed<std::shared_ptr<const StructConstructionExprSema>> final;
         auto CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
 
     private:

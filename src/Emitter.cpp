@@ -42,15 +42,12 @@ namespace Ace
         return !Block->empty() && Block->back().isTerminator();
     }
 
-    LabelBlockMap::LabelBlockMap(
-        Emitter& emitter
-    ) : m_Emitter{ emitter }
+    LabelBlockMap::LabelBlockMap(Emitter& emitter)
+        : m_Emitter{ emitter }
     {
     }
 
-    auto LabelBlockMap::GetOrCreateAt(
-        const LabelSymbol* const labelSymbol
-    ) -> llvm::BasicBlock*
+    auto LabelBlockMap::GetOrCreateAt(const LabelSymbol* const labelSymbol) -> llvm::BasicBlock*
     {
         const auto matchingBlockIt = m_Map.find(labelSymbol);
         if (matchingBlockIt != end(m_Map))
@@ -58,11 +55,7 @@ namespace Ace
             return matchingBlockIt->second;
         }
 
-        auto block = llvm::BasicBlock::Create(
-            m_Emitter.GetContext(),
-            "",
-            m_Emitter.GetFunction()
-        );
+        auto block = llvm::BasicBlock::Create(m_Emitter.GetContext(), "", m_Emitter.GetFunction());
 
         m_Map[labelSymbol] = block;
         return block;
@@ -73,21 +66,12 @@ namespace Ace
         m_Map.clear();
     }
 
-    Emitter::Emitter(
-        Compilation* const compilation
-    ) : m_Compilation{ compilation },
-        m_Module
-        {
-            std::make_unique<llvm::Module>(
-                "module",
-                m_Context
-            )
-        },
-        m_LabelBlockMap{ *this }
+    Emitter::Emitter(Compilation* const compilation)
+        : m_Compilation{ compilation },
+          m_Module{ std::make_unique<llvm::Module>("module", m_Context) },
+          m_LabelBlockMap{ *this }
     {
-        m_Module->setTargetTriple(
-            llvm::sys::getProcessTriple()
-        );
+        m_Module->setTargetTriple(llvm::sys::getProcessTriple());
     }
 
     Emitter::~Emitter()
@@ -122,10 +106,8 @@ namespace Ace
         moduleString.clear();
     }
 
-    static auto SaveSemasToFile(
-        Compilation* const compilation,
-        const std::filesystem::path& filePath
-    ) -> void
+    static auto
+    SaveSemasToFile(Compilation* const compilation, const std::filesystem::path& filePath) -> void
     {
         std::string semasString{};
 
@@ -134,7 +116,7 @@ namespace Ace
 
         std::for_each(
             begin(functionSymbols),
-            end  (functionSymbols),
+            end(functionSymbols),
             [&](FunctionSymbol* const functionSymbol)
             {
                 if (!functionSymbol->GetBlockSema().has_value())
@@ -144,8 +126,7 @@ namespace Ace
 
                 SemaLogger logger{};
                 logger.Log(
-                    functionSymbol->CreateSignature(),
-                    functionSymbol->GetBlockSema().value()
+                    functionSymbol->CreateSignature(), functionSymbol->GetBlockSema().value()
                 );
 
                 semasString += logger.CreateString();
@@ -183,30 +164,26 @@ namespace Ace
 
         const auto allSymbols = globalScope->CollectAllSymbolsRecursive();
         std::set<ISymbol*> symbolSet{};
-        std::for_each(begin(allSymbols), end(allSymbols),
-        [&](ISymbol* const symbol)
-        {
-            if (IsConcreteSymbol(symbol))
+        std::for_each(
+            begin(allSymbols),
+            end(allSymbols),
+            [&](ISymbol* const symbol)
             {
-                symbolSet.insert(symbol->GetUnaliased());
+                if (IsConcreteSymbol(symbol))
+                {
+                    symbolSet.insert(symbol->GetUnaliased());
+                }
             }
-        });
+        );
         const std::vector<ISymbol*> symbols{ begin(symbolSet), end(symbolSet) };
 
-        auto* const mainType = llvm::FunctionType::get(
-            llvm::Type::getInt32Ty(GetContext()),
-            false
-        );
-        auto* const mainFunction = llvm::Function::Create(
-            mainType,
-            llvm::Function::ExternalLinkage,
-            "main",
-            GetModule()
-        );
+        auto* const mainType = llvm::FunctionType::get(llvm::Type::getInt32Ty(GetContext()), false);
+        auto* const mainFunction =
+            llvm::Function::Create(mainType, llvm::Function::ExternalLinkage, "main", GetModule());
         SetBlock(std::make_unique<EmittingBlock>(
             llvm::BasicBlock::Create(GetContext(), "", mainFunction)
         ));
-       
+
         const auto typeSymbols = DynamicCastFilter<ITypeSymbol*>(symbols);
 
         EmitNativeTypes();
@@ -214,13 +191,12 @@ namespace Ace
 
         EmitGlobalVars(DynamicCastFilter<GlobalVarSymbol*>(symbols));
 
-        const auto allFunctionSymbols =
-            globalScope->CollectSymbolsRecursive<FunctionSymbol>();
+        const auto allFunctionSymbols = globalScope->CollectSymbolsRecursive<FunctionSymbol>();
 
         std::vector<FunctionSymbol*> functionSymbols{};
         std::copy_if(
             begin(allFunctionSymbols),
-            end  (allFunctionSymbols),
+            end(allFunctionSymbols),
             back_inserter(functionSymbols),
             IsConcreteSymbol
         );
@@ -228,7 +204,7 @@ namespace Ace
         std::vector<FunctionHeader> functionHeaders{};
         std::transform(
             begin(functionSymbols),
-            end  (functionSymbols),
+            end(functionSymbols),
             back_inserter(functionHeaders),
             [&](FunctionSymbol* const symbol)
             {
@@ -241,57 +217,58 @@ namespace Ace
 
         const auto mainFunctionSymbolIt = std::find_if(
             begin(functionSymbols),
-            end  (functionSymbols),
+            end(functionSymbols),
             [&](FunctionSymbol* const functionSymbol)
             {
-                const auto packageScope =
-                    globalScope->GetOrCreateChild(packageName);
+                const auto packageScope = globalScope->GetOrCreateChild(packageName);
 
-                return
-                    (functionSymbol->GetScope() == packageScope) &&
-                    (functionSymbol->GetName().String == SpecialIdent::Main);
+                return (functionSymbol->GetScope() == packageScope) &&
+                       (functionSymbol->GetName().String == SpecialIdent::Main);
             }
         );
         ACE_ASSERT(mainFunctionSymbolIt != end(functionSymbols));
         auto* const mainFunctionSymbol = *mainFunctionSymbolIt;
         ACE_ASSERT(
-            mainFunctionSymbol->GetType()->GetUnaliased() == 
+            mainFunctionSymbol->GetType()->GetUnaliased() ==
             GetCompilation()->GetNatives().Int.GetSymbol()
         );
         ACE_ASSERT(mainFunctionSymbol->GetCategory() == SymbolCategory::Static);
         ACE_ASSERT(mainFunctionSymbol->CollectAllParams().empty());
-        GetBlock().Builder.CreateRet(GetBlock().Builder.CreateCall(
-            GetFunction(mainFunctionSymbol)
-        ));
+        GetBlock().Builder.CreateRet(GetBlock().Builder.CreateCall(GetFunction(mainFunctionSymbol))
+        );
 
-        std::for_each(begin(functionHeaders), end(functionHeaders),
-        [&](const FunctionHeader& header)
-        {
-            EmitFunctionBlock(header);
-        });
-
-        std::for_each(begin(functionSymbols), end(functionSymbols),
-        [&](FunctionSymbol* const functionSymbol)
-        {
-            if (functionSymbol != functionSymbol->GetRoot())
+        std::for_each(
+            begin(functionHeaders),
+            end(functionHeaders),
+            [&](const FunctionHeader& header)
             {
-                return;
+                EmitFunctionBlock(header);
             }
+        );
 
-            if (!functionSymbol->GetEmittableBlock().has_value())
+        std::for_each(
+            begin(functionSymbols),
+            end(functionSymbols),
+            [&](FunctionSymbol* const functionSymbol)
             {
-                diagnostics.Add(CreateMissingFunctionBlockError(
-                    functionSymbol
-                ));
-            }
-        });
+                if (functionSymbol != functionSymbol->GetRoot())
+                {
+                    return;
+                }
 
-        const auto semaFilePath  = CreateOutputFilePath(packageName, "sema");
-        const auto bcFilePath    = CreateOutputFilePath(packageName, "bc");
-        const auto llFilePath    = CreateOutputFilePath(packageName, "ll");
+                if (!functionSymbol->GetEmittableBlock().has_value())
+                {
+                    diagnostics.Add(CreateMissingFunctionBlockError(functionSymbol));
+                }
+            }
+        );
+
+        const auto semaFilePath = CreateOutputFilePath(packageName, "sema");
+        const auto bcFilePath = CreateOutputFilePath(packageName, "bc");
+        const auto llFilePath = CreateOutputFilePath(packageName, "ll");
         const auto optLlFilePath = CreateOutputFilePath(packageName, "opt.ll");
-        const auto objFilePath   = CreateOutputFilePath(packageName, "obj");
-        const auto exeFilePath   = CreateOutputFilePath(packageName, "");
+        const auto objFilePath = CreateOutputFilePath(packageName, "obj");
+        const auto exeFilePath = CreateOutputFilePath(packageName, "");
 
         // TODO: Enable this in debug only
         SaveSemasToFile(GetCompilation(), semaFilePath);
@@ -317,9 +294,8 @@ namespace Ace
         pb.registerFunctionAnalyses(fam);
         pb.registerLoopAnalyses(lam);
         pb.crossRegisterProxies(lam, fam, cgam, mam);
-        
-        auto mpm =
-            pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
+
+        auto mpm = pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
 
         mpm.run(GetModule(), mam);
 
@@ -327,25 +303,20 @@ namespace Ace
         SaveModuleToFile(GetCompilation(), GetModule(), optLlFilePath);
 
         std::error_code errorCode{};
-        llvm::raw_fd_ostream bitcodeFileOStream
-        { 
+        llvm::raw_fd_ostream bitcodeFileOStream{
             bcFilePath.string(),
-            errorCode, 
+            errorCode,
             llvm::sys::fs::OF_None,
         };
         ACE_ASSERT(!errorCode);
         llvm::WriteBitcodeToFile(GetModule(), bitcodeFileOStream);
         bitcodeFileOStream.close();
 
-        system((
-            "llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj -o " +
-            objFilePath.string() + " " + bcFilePath.string()
-        ).c_str());
+        system(("llc -O3 -opaque-pointers -relocation-model=pic -filetype=obj -o " +
+                objFilePath.string() + " " + bcFilePath.string())
+                   .c_str());
 
-        system((
-            "clang -lc -lm -o " + exeFilePath.string() + " " +
-            objFilePath.string()
-        ).c_str());
+        system(("clang -lc -lm -o " + exeFilePath.string() + " " + objFilePath.string()).c_str());
 
         if (diagnostics.HasErrors())
         {
@@ -355,26 +326,21 @@ namespace Ace
         return Void{ std::move(diagnostics) };
     }
 
-    auto Emitter::EmitFunctionBlockStmts(
-        const std::vector<std::shared_ptr<const IStmtSema>>& stmts
-    ) -> void
+    auto Emitter::EmitFunctionBlockStmts(const std::vector<std::shared_ptr<const IStmtSema>>& stmts)
+        -> void
     {
-        auto* const rootFunctionSymbol =
-            dynamic_cast<FunctionSymbol*>(m_FunctionSymbol->GetRoot());
+        auto* const rootFunctionSymbol = dynamic_cast<FunctionSymbol*>(m_FunctionSymbol->GetRoot());
         ACE_ASSERT(rootFunctionSymbol);
 
         const auto paramSymbols = rootFunctionSymbol->CollectAllParams();
         for (size_t i = 0; i < paramSymbols.size(); i++)
         {
             auto* const paramSymbol = paramSymbols.at(i);
-            auto* const typeSymbol = CreateInstantiated<ISizedTypeSymbol>(
-                paramSymbol->GetSizedType()
-            );
+            auto* const typeSymbol =
+                CreateInstantiated<ISizedTypeSymbol>(paramSymbol->GetSizedType());
 
             auto* const allocaInst = GetBlock().Builder.CreateAlloca(
-                GetType(typeSymbol),
-                nullptr,
-                paramSymbol->GetName().String
+                GetType(typeSymbol), nullptr, paramSymbol->GetName().String
             );
 
             EmitCopy(allocaInst, m_Function->arg_begin() + i, typeSymbol);
@@ -386,9 +352,9 @@ namespace Ace
         {
             const auto* const stmt = stmts.at(i).get();
 
-            ACE_ASSERT(!m_StmtIndexMap.contains(stmt)); 
+            ACE_ASSERT(!m_StmtIndexMap.contains(stmt));
             m_StmtIndexMap[stmt] = i;
-        
+
             if (auto* const varStmt = dynamic_cast<const VarStmtSema*>(stmt))
             {
                 auto* const varSymbol = varStmt->GetSymbol();
@@ -399,18 +365,15 @@ namespace Ace
         }
 
         std::for_each(
-            begin(m_LocalVarSymbolStmtIndexPairs), 
-            end  (m_LocalVarSymbolStmtIndexPairs), 
+            begin(m_LocalVarSymbolStmtIndexPairs),
+            end(m_LocalVarSymbolStmtIndexPairs),
             [&](const LocalVarSymbolStmtIndexPair& symbolIndexPair)
             {
                 auto* const varSymbol = symbolIndexPair.LocalVarSymbol;
                 auto* const type = GetType(varSymbol->GetType());
                 ACE_ASSERT(!m_LocalVarMap.contains(varSymbol));
-                m_LocalVarMap[varSymbol] = GetBlock().Builder.CreateAlloca(
-                    type,
-                    nullptr,
-                    varSymbol->GetName().String
-                );
+                m_LocalVarMap[varSymbol] =
+                    GetBlock().Builder.CreateAlloca(type, nullptr, varSymbol->GetName().String);
             }
         );
 
@@ -426,8 +389,7 @@ namespace Ace
             for (size_t i = 0; i < stmts.size(); i++)
             {
                 auto* const stmt = stmts.at(i).get();
-                auto* const labelStmt =
-                    dynamic_cast<const LabelStmtSema*>(stmt);
+                auto* const labelStmt = dynamic_cast<const LabelStmtSema*>(stmt);
 
                 if (labelStmt)
                 {
@@ -443,111 +405,99 @@ namespace Ace
             const bool isLastBlock = i == (blockBeginIndices.size() - 1);
 
             const auto beginStmtIt = begin(stmts) + blockBeginIndices.at(i);
-            const auto endStmtIt   = isLastBlock ?
-                                          end  (stmts) :
-                                          begin(stmts) + blockBeginIndices.at(i + 1);
+            const auto endStmtIt =
+                isLastBlock ? end(stmts) : begin(stmts) + blockBeginIndices.at(i + 1);
 
-            std::for_each(beginStmtIt, endStmtIt,
-            [&](const std::shared_ptr<const IStmtSema>& stmt)
-            {
-                if (stmt.get() == beginStmtIt->get())
+            std::for_each(
+                beginStmtIt,
+                endStmtIt,
+                [&](const std::shared_ptr<const IStmtSema>& stmt)
                 {
-                    auto* const labelStmt =
-                        dynamic_cast<const LabelStmtSema*>(stmt.get());
-
-                    if (labelStmt)
+                    if (stmt.get() == beginStmtIt->get())
                     {
-                        auto* const labelSymbol = labelStmt->GetSymbol();
-                        auto block = std::make_unique<EmittingBlock>(
-                            GetLabelBlockMap().GetOrCreateAt(labelSymbol)
+                        auto* const labelStmt = dynamic_cast<const LabelStmtSema*>(stmt.get());
+
+                        if (labelStmt)
+                        {
+                            auto* const labelSymbol = labelStmt->GetSymbol();
+                            auto block = std::make_unique<EmittingBlock>(
+                                GetLabelBlockMap().GetOrCreateAt(labelSymbol)
+                            );
+
+                            if (!GetBlock().IsTerminated())
+                            {
+                                GetBlock().Builder.CreateBr(block->Block);
+                            }
+
+                            SetBlock(std::move(block));
+                        }
+                    }
+
+                    if (GetBlock().IsTerminated())
+                    {
+                        return;
+                    }
+
+                    stmt->Emit(*this);
+
+                    auto* const blockEndStmt = dynamic_cast<const BlockEndStmtSema*>(stmt.get());
+
+                    if (blockEndStmt)
+                    {
+                        const auto blockScope = blockEndStmt->GetBodyScope();
+                        auto blockVarSymbols = blockScope->CollectSymbols<LocalVarSymbol>();
+
+                        std::sort(
+                            begin(blockVarSymbols),
+                            end(blockVarSymbols),
+                            [&](const LocalVarSymbol* const lhs, const LocalVarSymbol* const rhs)
+                            {
+                                return m_LocalVarSymbolStmtIndexMap.at(lhs) >
+                                       m_LocalVarSymbolStmtIndexMap.at(rhs);
+                            }
                         );
 
-                        if (!GetBlock().IsTerminated())
-                        {
-                            GetBlock().Builder.CreateBr(block->Block);
-                        }
-
-                        SetBlock(std::move(block));
+                        std::for_each(
+                            begin(blockVarSymbols),
+                            end(blockVarSymbols),
+                            [&](LocalVarSymbol* const varSymbol)
+                            {
+                                EmitDrop({ m_LocalVarMap.at(varSymbol), varSymbol->GetType() });
+                            }
+                        );
                     }
                 }
-
-                if (GetBlock().IsTerminated())
-                {
-                    return;
-                }
-
-                stmt->Emit(*this);
-                
-                auto* const blockEndStmt = 
-                    dynamic_cast<const BlockEndStmtSema*>(stmt.get());
-
-                if (blockEndStmt)
-                {
-                    const auto blockScope = blockEndStmt->GetBodyScope();
-                    auto blockVarSymbols = 
-                        blockScope->CollectSymbols<LocalVarSymbol>();
-
-                    std::sort(begin(blockVarSymbols), end(blockVarSymbols),
-                    [&](
-                        const LocalVarSymbol* const lhs,
-                        const LocalVarSymbol* const rhs
-                        )
-                    {
-                        return
-                            m_LocalVarSymbolStmtIndexMap.at(lhs) >
-                            m_LocalVarSymbolStmtIndexMap.at(rhs);
-                    });
-
-                    std::for_each(begin(blockVarSymbols), end(blockVarSymbols),
-                    [&](LocalVarSymbol* const varSymbol)
-                    {
-                        EmitDrop({ 
-                            m_LocalVarMap.at(varSymbol), 
-                            varSymbol->GetType() 
-                        });
-                    });
-                }
-            });
+            );
         }
 
-        if (
-            m_Function->getReturnType()->isVoidTy() &&
-            !GetBlock().IsTerminated()
-            )
+        if (m_Function->getReturnType()->isVoidTy() && !GetBlock().IsTerminated())
         {
             EmitDropArgs();
             GetBlock().Builder.CreateRetVoid();
         }
     }
 
-    auto Emitter::EmitCall(
-        ICallableSymbol* callableSymbol,
-        const std::vector<llvm::Value*>& args
-    ) -> llvm::Value*
+    auto Emitter::EmitCall(ICallableSymbol* callableSymbol, const std::vector<llvm::Value*>& args)
+        -> llvm::Value*
     {
         callableSymbol = CreateInstantiated<ICallableSymbol>(callableSymbol);
 
-        auto* const functionSymbol =
-            dynamic_cast<FunctionSymbol*>(callableSymbol);
+        auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(callableSymbol);
         if (functionSymbol)
         {
             return EmitStaticCall(functionSymbol, args);
         }
 
-        auto* const prototypeSymbol =
-            dynamic_cast<PrototypeSymbol*>(callableSymbol);
+        auto* const prototypeSymbol = dynamic_cast<PrototypeSymbol*>(callableSymbol);
         ACE_ASSERT(prototypeSymbol);
 
-        const auto isDynType = dynamic_cast<TraitTypeSymbol*>(
-            prototypeSymbol->GetSelfType()->GetDerefed()
-        ) != nullptr;
+        const auto isDynType =
+            dynamic_cast<TraitTypeSymbol*>(prototypeSymbol->GetSelfType()->GetDerefed()) != nullptr;
 
         if (!isDynType)
         {
-            auto* const functionSymbol = Scope::CollectImplOfFor(
-                prototypeSymbol,
-                prototypeSymbol->GetSelfType()
-            ).value();
+            auto* const functionSymbol =
+                Scope::CollectImplOfFor(prototypeSymbol, prototypeSymbol->GetSelfType()).value();
 
             return EmitStaticCall(functionSymbol, args);
         }
@@ -555,57 +505,39 @@ namespace Ace
         return EmitDynCall(prototypeSymbol, args);
     }
 
-    auto Emitter::EmitLoadArg(
-        const size_t index, 
-        llvm::Type* const type
-    ) -> llvm::Value*
+    auto Emitter::EmitLoadArg(const size_t index, llvm::Type* const type) -> llvm::Value*
     {
-        return GetBlock().Builder.CreateLoad(
-            type,
-            m_Function->arg_begin() + index
-        );
+        return GetBlock().Builder.CreateLoad(type, m_Function->arg_begin() + index);
     }
 
     auto Emitter::EmitCopy(
-        llvm::Value* const lhsValue, 
-        llvm::Value* const rhsValue, 
-        ITypeSymbol* const typeSymbol
+        llvm::Value* const lhsValue, llvm::Value* const rhsValue, ITypeSymbol* const typeSymbol
     ) -> void
     {
-        auto* const concreteTypeSymbol = CreateInstantiated<IConcreteTypeSymbol>(
-            typeSymbol->GetUnaliasedType()
-        );
+        auto* const concreteTypeSymbol =
+            CreateInstantiated<IConcreteTypeSymbol>(typeSymbol->GetUnaliasedType());
         ACE_ASSERT(concreteTypeSymbol);
 
         auto* const type = GetType(concreteTypeSymbol);
 
         if (typeSymbol->IsRef())
         {
-            auto* const loadInst = GetBlock().Builder.CreateLoad(
-                type,
-                rhsValue
-            );
+            auto* const loadInst = GetBlock().Builder.CreateLoad(type, rhsValue);
 
             GetBlock().Builder.CreateStore(loadInst, lhsValue);
             return;
         }
 
-
         auto* const glueSymbol = concreteTypeSymbol->GetCopyGlue().value();
 
-        auto* const lhsAllocaInst = GetBlock().Builder.CreateAlloca(
-            GetPtrType()
-        );
+        auto* const lhsAllocaInst = GetBlock().Builder.CreateAlloca(GetPtrType());
         GetBlock().Builder.CreateStore(lhsValue, lhsAllocaInst);
 
-        auto* const rhsAllocaInst = GetBlock().Builder.CreateAlloca(
-            GetPtrType()
-        );
+        auto* const rhsAllocaInst = GetBlock().Builder.CreateAlloca(GetPtrType());
         GetBlock().Builder.CreateStore(rhsValue, rhsAllocaInst);
 
         GetBlock().Builder.CreateCall(
-            m_FunctionMap.at(glueSymbol),
-            { lhsAllocaInst, rhsAllocaInst }
+            m_FunctionMap.at(glueSymbol), { lhsAllocaInst, rhsAllocaInst }
         );
     }
 
@@ -616,44 +548,40 @@ namespace Ace
             return;
         }
 
-        auto* const typeSymbol = CreateInstantiated<IConcreteTypeSymbol>(
-            info.TypeSymbol->GetUnaliasedType()
-        );
+        auto* const typeSymbol =
+            CreateInstantiated<IConcreteTypeSymbol>(info.TypeSymbol->GetUnaliasedType());
 
         const auto glueSymbol = typeSymbol->GetDropGlue().value();
 
-        auto* const refTypeSymbol =
-            glueSymbol->CollectParams().front()->GetType();
+        auto* const refTypeSymbol = glueSymbol->CollectParams().front()->GetType();
         auto* const refType = GetType(refTypeSymbol);
 
         auto* const allocaInst = GetBlock().Builder.CreateAlloca(refType);
         GetBlock().Builder.CreateStore(info.Value, allocaInst);
 
-        GetBlock().Builder.CreateCall(
-            m_FunctionMap.at(glueSymbol),
-            { allocaInst }
-        );
+        GetBlock().Builder.CreateCall(m_FunctionMap.at(glueSymbol), { allocaInst });
     }
 
     auto Emitter::EmitDropTmps(const std::vector<ExprDropInfo>& tmps) -> void
     {
-        std::for_each(rbegin(tmps), rend(tmps),
-        [&](const ExprDropInfo& tmp)
-        {
-            EmitDrop(tmp);
-        });
+        std::for_each(
+            rbegin(tmps),
+            rend(tmps),
+            [&](const ExprDropInfo& tmp)
+            {
+                EmitDrop(tmp);
+            }
+        );
     }
 
-    auto Emitter::EmitDropLocalVarsBeforeStmt(
-        const IStmtSema* const stmt
-    ) -> void
+    auto Emitter::EmitDropLocalVarsBeforeStmt(const IStmtSema* const stmt) -> void
     {
         const auto stmtIndex = m_StmtIndexMap.at(stmt);
         auto scope = stmt->GetScope();
 
         std::for_each(
-            rbegin(m_LocalVarSymbolStmtIndexPairs), 
-            rend  (m_LocalVarSymbolStmtIndexPairs),
+            rbegin(m_LocalVarSymbolStmtIndexPairs),
+            rend(m_LocalVarSymbolStmtIndexPairs),
             [&](const LocalVarSymbolStmtIndexPair& symbolIndexPair)
             {
                 const auto varStmtIndex = symbolIndexPair.StmtIndex;
@@ -666,10 +594,7 @@ namespace Ace
 
                 if (varSymbol->GetScope() != scope)
                 {
-                    if (
-                        varSymbol->GetScope()->GetNestLevel() >=
-                        scope->GetNestLevel()
-                        )
+                    if (varSymbol->GetScope()->GetNestLevel() >= scope->GetNestLevel())
                     {
                         return;
                     }
@@ -686,19 +611,20 @@ namespace Ace
 
     auto Emitter::EmitDropArgs() -> void
     {
-        auto* const rootFunctionSymbol =
-            dynamic_cast<FunctionSymbol*>(m_FunctionSymbol->GetRoot());
+        auto* const rootFunctionSymbol = dynamic_cast<FunctionSymbol*>(m_FunctionSymbol->GetRoot());
         ACE_ASSERT(rootFunctionSymbol);
 
         const auto paramSymbols = rootFunctionSymbol->CollectAllParams();
-        std::for_each(rbegin(paramSymbols), rend(paramSymbols),
-        [&](IParamVarSymbol* const paramSymbol)
-        {
-            auto* const typeSymbol =
-                CreateInstantiated<ITypeSymbol>(paramSymbol->GetType());
+        std::for_each(
+            rbegin(paramSymbols),
+            rend(paramSymbols),
+            [&](IParamVarSymbol* const paramSymbol)
+            {
+                auto* const typeSymbol = CreateInstantiated<ITypeSymbol>(paramSymbol->GetType());
 
-            EmitDrop({ m_LocalVarMap.at(paramSymbol), typeSymbol });
-        });
+                EmitDrop({ m_LocalVarMap.at(paramSymbol), typeSymbol });
+            }
+        );
     }
 
     auto Emitter::EmitString(const std::string_view string) -> llvm::Value*
@@ -791,9 +717,7 @@ namespace Ace
         return m_TypeMap.at(symbol->GetUnaliasedType());
     }
 
-    auto Emitter::GetTypeInfo(
-        const ITypeSymbol* const symbol
-    ) const -> llvm::Constant*
+    auto Emitter::GetTypeInfo(const ITypeSymbol* const symbol) const -> llvm::Constant*
     {
         auto* const instantiatedSymbol =
             CreateInstantiated<ITypeSymbol>(symbol->GetUnaliasedType());
@@ -801,37 +725,27 @@ namespace Ace
         return m_TypeInfoMap.at(instantiatedSymbol);
     }
 
-    auto Emitter::GetVtbl(
-        const ITypeSymbol* const traitSymbol,
-        const ITypeSymbol* const typeSymbol
-    ) const -> llvm::Constant*
+    auto Emitter::GetVtbl(const ITypeSymbol* const traitSymbol, const ITypeSymbol* const typeSymbol)
+        const -> llvm::Constant*
     {
-        auto* const instantiatedTraitSymbol =
-            CreateInstantiated<TraitTypeSymbol>(traitSymbol);
+        auto* const instantiatedTraitSymbol = CreateInstantiated<TraitTypeSymbol>(traitSymbol);
 
-        auto* const instantiatedTypeSymbol =
-            CreateInstantiated<ITypeSymbol>(typeSymbol);
+        auto* const instantiatedTypeSymbol = CreateInstantiated<ITypeSymbol>(typeSymbol);
 
         return m_VtblMap.at(instantiatedTraitSymbol).at(instantiatedTypeSymbol);
     }
 
-    auto Emitter::GetGlobalVar(
-        const GlobalVarSymbol* const symbol
-    ) const -> llvm::Constant*
+    auto Emitter::GetGlobalVar(const GlobalVarSymbol* const symbol) const -> llvm::Constant*
     {
         return m_GlobalVarMap.at(symbol);
     }
 
-    auto Emitter::GetFunction(
-        const FunctionSymbol* const symbol
-    ) const -> llvm::Function*
+    auto Emitter::GetFunction(const FunctionSymbol* const symbol) const -> llvm::Function*
     {
         return m_FunctionMap.at(symbol);
     }
 
-    auto Emitter::GetLocalVar(
-        const IVarSymbol* const symbol
-    ) const -> llvm::Value*
+    auto Emitter::GetLocalVar(const IVarSymbol* const symbol) const -> llvm::Value*
     {
         return m_LocalVarMap.at(symbol);
     }
@@ -858,28 +772,25 @@ namespace Ace
 
     auto Emitter::GetPtrType() const -> llvm::PointerType*
     {
-        return llvm::PointerType::get(
-            const_cast<Emitter*>(this)->GetContext(),
-            0
-        );
+        return llvm::PointerType::get(const_cast<Emitter*>(this)->GetContext(), 0);
     }
 
     auto Emitter::GetTypeInfoType() -> llvm::StructType*
     {
-        return llvm::StructType::create(GetContext(), std::vector<llvm::Type*>
-        {
-            GetPtrType(),
-            GetType(GetCompilation()->GetNatives().Int.GetSymbol()),
-            llvm::ArrayType::get(GetPtrType(), 0),
-        });
+        return llvm::StructType::create(
+            GetContext(),
+            std::vector<llvm::Type*>{
+                GetPtrType(),
+                GetType(GetCompilation()->GetNatives().Int.GetSymbol()),
+                llvm::ArrayType::get(GetPtrType(), 0),
+            }
+        );
     }
 
     auto Emitter::GetDropGlueType() const -> llvm::FunctionType*
     {
         return llvm::FunctionType::get(
-            GetType(GetCompilation()->GetVoidTypeSymbol()),
-            { GetPtrType() },
-            false
+            GetType(GetCompilation()->GetVoidTypeSymbol()), { GetPtrType() }, false
         );
     }
 
@@ -904,30 +815,32 @@ namespace Ace
         return var;
     }
 
-    auto Emitter::EmitTypeInfos(
-        const std::vector<ITypeSymbol*>& symbols
-    ) -> void
+    auto Emitter::EmitTypeInfos(const std::vector<ITypeSymbol*>& symbols) -> void
     {
         std::vector<TypeInfoHeader> headers{};
-        std::for_each(begin(symbols), end(symbols),
-        [&](ITypeSymbol* const symbol)
-        {
-            if (const auto optHeader = EmitTypeInfoHeader(symbol))
+        std::for_each(
+            begin(symbols),
+            end(symbols),
+            [&](ITypeSymbol* const symbol)
             {
-                headers.push_back(optHeader.value());
+                if (const auto optHeader = EmitTypeInfoHeader(symbol))
+                {
+                    headers.push_back(optHeader.value());
+                }
             }
-        });
+        );
 
-        std::for_each(begin(headers), end(headers),
-        [&](const TypeInfoHeader& header)
-        {
-            EmitTypeInfoBody(header);
-        });
+        std::for_each(
+            begin(headers),
+            end(headers),
+            [&](const TypeInfoHeader& header)
+            {
+                EmitTypeInfoBody(header);
+            }
+        );
     }
 
-    auto Emitter::EmitTypeInfoHeader(
-        ITypeSymbol* const symbol
-    ) -> std::optional<TypeInfoHeader>
+    auto Emitter::EmitTypeInfoHeader(ITypeSymbol* const symbol) -> std::optional<TypeInfoHeader>
     {
         auto* const concreteSymbol = dynamic_cast<IConcreteTypeSymbol*>(symbol);
         auto* const traitSymbol = dynamic_cast<TraitTypeSymbol*>(symbol);
@@ -937,12 +850,10 @@ namespace Ace
             return std::nullopt;
         }
 
-        const auto info = concreteSymbol ?
-            EmitConcreteTypeInfoHeaderInfo(concreteSymbol) :
-            EmitTraitTypeInfoHeaderInfo(traitSymbol);
+        const auto info = concreteSymbol ? EmitConcreteTypeInfoHeaderInfo(concreteSymbol)
+                                         : EmitTraitTypeInfoHeaderInfo(traitSymbol);
 
-        std::vector<llvm::Type*> elements
-        {
+        std::vector<llvm::Type*> elements{
             GetPtrType(),
             GetType(GetCompilation()->GetNatives().Int.GetSymbol()),
         };
@@ -955,25 +866,17 @@ namespace Ace
         auto* const type = llvm::StructType::get(GetContext(), elements);
 
         auto* const var = EmitGlobalVar(
-            AnonymousIdent::Create("type_info", symbol->CreateSignature()),
-            type,
-            true
+            AnonymousIdent::Create("type_info", symbol->CreateSignature()), type, true
         );
         m_TypeInfoMap[symbol] = var;
 
-        return TypeInfoHeader
-        {
-            type,
-            var,
-            info.DropGluePtr,
-            info.TypeSymbols,
-            info.Vtbls,
+        return TypeInfoHeader{
+            type, var, info.DropGluePtr, info.TypeSymbols, info.Vtbls,
         };
     }
 
-    auto Emitter::EmitConcreteTypeInfoHeaderInfo(
-        IConcreteTypeSymbol* const symbol
-    ) -> TypeInfoHeaderInfo
+    auto Emitter::EmitConcreteTypeInfoHeaderInfo(IConcreteTypeSymbol* const symbol)
+        -> TypeInfoHeaderInfo
     {
         const auto allImpls =
             symbol->GetScope()->FindPackageMod()->GetBodyScope()->CollectSymbols<TraitImplSymbol>();
@@ -981,7 +884,7 @@ namespace Ace
         std::vector<TraitImplSymbol*> impls{};
         std::copy_if(
             begin(allImpls),
-            end  (allImpls),
+            end(allImpls),
             back_inserter(impls),
             [&](TraitImplSymbol* const impl)
             {
@@ -992,7 +895,7 @@ namespace Ace
         std::vector<ITypeSymbol*> typeSymbols{};
         std::transform(
             begin(impls),
-            end  (impls),
+            end(impls),
             back_inserter(typeSymbols),
             [&](TraitImplSymbol* const implSymbol)
             {
@@ -1003,7 +906,7 @@ namespace Ace
         std::vector<llvm::Constant*> vtbls{};
         std::transform(
             begin(impls),
-            end  (impls),
+            end(impls),
             back_inserter(vtbls),
             [&](TraitImplSymbol* const implSymbol)
             {
@@ -1011,17 +914,14 @@ namespace Ace
             }
         );
 
-        return TypeInfoHeaderInfo
-        {
+        return TypeInfoHeaderInfo{
             GetDropGluePtr(symbol),
             typeSymbols,
             vtbls,
         };
     }
 
-    auto Emitter::EmitTraitTypeInfoHeaderInfo(
-        TraitTypeSymbol* const symbol
-    ) -> TypeInfoHeaderInfo
+    auto Emitter::EmitTraitTypeInfoHeaderInfo(TraitTypeSymbol* const symbol) -> TypeInfoHeaderInfo
     {
         const auto allImplSymbols =
             symbol->GetScope()->FindPackageMod()->GetBodyScope()->CollectSymbols<TraitImplSymbol>();
@@ -1029,7 +929,7 @@ namespace Ace
         std::vector<TraitImplSymbol*> implSymbols{};
         std::copy_if(
             begin(allImplSymbols),
-            end  (allImplSymbols),
+            end(allImplSymbols),
             back_inserter(implSymbols),
             [&](TraitImplSymbol* const impl)
             {
@@ -1040,7 +940,7 @@ namespace Ace
         std::vector<ITypeSymbol*> typeSymbols{};
         std::transform(
             begin(implSymbols),
-            end  (implSymbols),
+            end(implSymbols),
             back_inserter(typeSymbols),
             [&](TraitImplSymbol* const implSymbol)
             {
@@ -1051,7 +951,7 @@ namespace Ace
         std::vector<llvm::Constant*> vtbls{};
         std::transform(
             begin(implSymbols),
-            end  (implSymbols),
+            end(implSymbols),
             back_inserter(vtbls),
             [&](TraitImplSymbol* const implSymbol)
             {
@@ -1059,22 +959,17 @@ namespace Ace
             }
         );
 
-        return TypeInfoHeaderInfo
-        {
-            llvm::ConstantPointerNull::get(GetPtrType()),
-            typeSymbols,
-            vtbls
-        };
+        return TypeInfoHeaderInfo{ llvm::ConstantPointerNull::get(GetPtrType()),
+                                   typeSymbols,
+                                   vtbls };
     }
 
     auto Emitter::EmitTypeInfoBody(const TypeInfoHeader& header) -> void
     {
-        std::vector<llvm::Constant*> values
-        {
+        std::vector<llvm::Constant*> values{
             header.DropGluePtr,
             llvm::ConstantInt::get(
-                GetType(GetCompilation()->GetNatives().Int.GetSymbol()),
-                header.TypeSymbols.size()
+                GetType(GetCompilation()->GetNatives().Int.GetSymbol()), header.TypeSymbols.size()
             ),
         };
 
@@ -1085,51 +980,54 @@ namespace Ace
             values.push_back(header.Vtbls.at(i));
         }
 
-        header.Var->setInitializer(
-            llvm::ConstantStruct::get(header.Type, values)
-        );
+        header.Var->setInitializer(llvm::ConstantStruct::get(header.Type, values));
     }
 
-    static auto CollectDynDispatchableTraitPrototypeSymbols(
-        TraitTypeSymbol* const traitSymbol
-    ) -> std::vector<PrototypeSymbol*>
+    static auto CollectDynDispatchableTraitPrototypeSymbols(TraitTypeSymbol* const traitSymbol)
+        -> std::vector<PrototypeSymbol*>
     {
         const auto allSymbols = traitSymbol->CollectPrototypes();
 
         std::vector<PrototypeSymbol*> symbols{};
-        std::copy_if(begin(allSymbols), end(allSymbols), back_inserter(symbols),
-        [](PrototypeSymbol* const prototypeSymbol)
-        {
-            return prototypeSymbol->IsDynDispatchable();
-        });
+        std::copy_if(
+            begin(allSymbols),
+            end(allSymbols),
+            back_inserter(symbols),
+            [](PrototypeSymbol* const prototypeSymbol)
+            {
+                return prototypeSymbol->IsDynDispatchable();
+            }
+        );
 
         const auto supertraitSymbols = traitSymbol->CollectSupertraits();
-        std::for_each(begin(supertraitSymbols), end(supertraitSymbols),
-        [&](SupertraitSymbol* const supertraitSymbol)
-        {
-            auto* const supertraitTraitSymbol = supertraitSymbol->GetTrait();
-            const auto supertraitPrototypeSymbols =
-                CollectDynDispatchableTraitPrototypeSymbols(supertraitTraitSymbol);
+        std::for_each(
+            begin(supertraitSymbols),
+            end(supertraitSymbols),
+            [&](SupertraitSymbol* const supertraitSymbol)
+            {
+                auto* const supertraitTraitSymbol = supertraitSymbol->GetTrait();
+                const auto supertraitPrototypeSymbols =
+                    CollectDynDispatchableTraitPrototypeSymbols(supertraitTraitSymbol);
 
-            symbols.insert(
-                end(symbols),
-                begin(supertraitPrototypeSymbols),
-                end  (supertraitPrototypeSymbols)
-            );
-        });
+                symbols.insert(
+                    end(symbols), begin(supertraitPrototypeSymbols), end(supertraitPrototypeSymbols)
+                );
+            }
+        );
 
         return symbols;
     }
 
-    auto Emitter::EmitVtbls(
-        const std::vector<TraitImplSymbol*>& implSymbols
-    ) -> void
+    auto Emitter::EmitVtbls(const std::vector<TraitImplSymbol*>& implSymbols) -> void
     {
-        std::for_each(begin(implSymbols), end(implSymbols),
-        [&](TraitImplSymbol* const implSymbol)
-        {
-            EmitVtbl(implSymbol);
-        });
+        std::for_each(
+            begin(implSymbols),
+            end(implSymbols),
+            [&](TraitImplSymbol* const implSymbol)
+            {
+                EmitVtbl(implSymbol);
+            }
+        );
     }
 
     auto Emitter::EmitVtbl(TraitImplSymbol* const implSymbol) -> void
@@ -1137,16 +1035,13 @@ namespace Ace
         const auto prototypeSymbols =
             CollectDynDispatchableTraitPrototypeSymbols(implSymbol->GetTrait());
 
-        auto* const type =
-            llvm::ArrayType::get(GetPtrType(), prototypeSymbols.size());
+        auto* const type = llvm::ArrayType::get(GetPtrType(), prototypeSymbols.size());
 
         std::vector<llvm::Constant*> elements{};
         for (size_t i = 0; i < prototypeSymbols.size(); i++)
         {
-            auto* const functionSymbol = Scope::CollectImplOfFor(
-                prototypeSymbols.at(i),
-                implSymbol->GetType()
-            ).value();
+            auto* const functionSymbol =
+                Scope::CollectImplOfFor(prototypeSymbols.at(i), implSymbol->GetType()).value();
 
             elements.push_back(GetFunction(functionSymbol));
         }
@@ -1161,8 +1056,7 @@ namespace Ace
 
     auto Emitter::EmitNativeTypes() -> void
     {
-        m_TypeMap[GetCompilation()->GetVoidTypeSymbol()] =
-            llvm::Type::getVoidTy(GetContext());
+        m_TypeMap[GetCompilation()->GetVoidTypeSymbol()] = llvm::Type::getVoidTy(GetContext());
 
         const auto nativeTypeMap =
             GetCompilation()->GetNatives().CollectIRTypeSymbolMap(GetContext());
@@ -1173,14 +1067,12 @@ namespace Ace
         }
     }
 
-    auto Emitter::EmitStructTypes(
-        const std::vector<StructTypeSymbol*>& symbols
-    ) -> void
+    auto Emitter::EmitStructTypes(const std::vector<StructTypeSymbol*>& symbols) -> void
     {
         std::vector<StructTypeSymbol*> nonPrimitiveSymbols{};
         std::copy_if(
             begin(symbols),
-            end  (symbols),
+            end(symbols),
             back_inserter(nonPrimitiveSymbols),
             [](StructTypeSymbol* const symbol)
             {
@@ -1188,66 +1080,70 @@ namespace Ace
             }
         );
 
-        std::for_each(begin(nonPrimitiveSymbols), end(nonPrimitiveSymbols),
-        [&](StructTypeSymbol* const symbol)
-        {
-            m_TypeMap[symbol] = llvm::StructType::create(
-                GetContext(),
-                symbol->CreateSignature()
-            );
-        });
-
-        std::for_each(begin(nonPrimitiveSymbols), end(nonPrimitiveSymbols),
-        [&](StructTypeSymbol* const symbol)
-        {
-            std::vector<llvm::Type*> elements{};
-
-            const auto fieldSymbols = symbol->CollectFields();
-            std::for_each(begin(fieldSymbols), end(fieldSymbols),
-            [&](FieldVarSymbol* const fieldSymbol)
+        std::for_each(
+            begin(nonPrimitiveSymbols),
+            end(nonPrimitiveSymbols),
+            [&](StructTypeSymbol* const symbol)
             {
-                auto* const type = GetType(fieldSymbol->GetType());
-                elements.push_back(type);
-            });
+                m_TypeMap[symbol] =
+                    llvm::StructType::create(GetContext(), symbol->CreateSignature());
+            }
+        );
 
-            auto* const type = m_TypeMap.at(symbol);
-            static_cast<llvm::StructType*>(type)->setBody(elements);
-        });
+        std::for_each(
+            begin(nonPrimitiveSymbols),
+            end(nonPrimitiveSymbols),
+            [&](StructTypeSymbol* const symbol)
+            {
+                std::vector<llvm::Type*> elements{};
+
+                const auto fieldSymbols = symbol->CollectFields();
+                std::for_each(
+                    begin(fieldSymbols),
+                    end(fieldSymbols),
+                    [&](FieldVarSymbol* const fieldSymbol)
+                    {
+                        auto* const type = GetType(fieldSymbol->GetType());
+                        elements.push_back(type);
+                    }
+                );
+
+                auto* const type = m_TypeMap.at(symbol);
+                static_cast<llvm::StructType*>(type)->setBody(elements);
+            }
+        );
     }
 
-    auto Emitter::EmitGlobalVars(
-        const std::vector<GlobalVarSymbol*>& symbols
-    ) -> void
+    auto Emitter::EmitGlobalVars(const std::vector<GlobalVarSymbol*>& symbols) -> void
     {
-        std::for_each(begin(symbols), end(symbols),
-        [&](GlobalVarSymbol* const symbol)
-        {
-            m_GlobalVarMap[symbol] = EmitGlobalVar(
-                symbol->CreateSignature(),
-                GetPtrType(),
-                true,
-                llvm::Constant::getNullValue(GetPtrType())
-            );
-        });
+        std::for_each(
+            begin(symbols),
+            end(symbols),
+            [&](GlobalVarSymbol* const symbol)
+            {
+                m_GlobalVarMap[symbol] = EmitGlobalVar(
+                    symbol->CreateSignature(),
+                    GetPtrType(),
+                    true,
+                    llvm::Constant::getNullValue(GetPtrType())
+                );
+            }
+        );
     }
 
-    auto Emitter::EmitFunctions(
-        const std::vector<FunctionSymbol*>& symbols
-    ) -> void
+    auto Emitter::EmitFunctions(const std::vector<FunctionSymbol*>& symbols) -> void
     {
         ClearFunctionData();
     }
 
-    auto Emitter::EmitFunctionHeader(
-        FunctionSymbol* const symbol
-    ) -> FunctionHeader
+    auto Emitter::EmitFunctionHeader(FunctionSymbol* const symbol) -> FunctionHeader
     {
         const auto paramSymbols = symbol->CollectAllParams();
 
         std::vector<llvm::Type*> paramTypes{};
         std::transform(
             begin(paramSymbols),
-            end  (paramSymbols),
+            end(paramSymbols),
             back_inserter(paramTypes),
             [&](IParamVarSymbol* const paramSymbol)
             {
@@ -1256,26 +1152,15 @@ namespace Ace
             }
         );
 
-        auto* const type = llvm::FunctionType::get(
-            GetType(symbol->GetType()),
-            paramTypes,
-            false
-        );
+        auto* const type = llvm::FunctionType::get(GetType(symbol->GetType()), paramTypes, false);
 
         auto* const function = llvm::Function::Create(
-            type,
-            llvm::Function::ExternalLinkage,
-            symbol->CreateSignature(),
-            GetModule()
+            type, llvm::Function::ExternalLinkage, symbol->CreateSignature(), GetModule()
         );
 
         m_FunctionMap[symbol] = function;
 
-        auto* const block = llvm::BasicBlock::Create(
-            GetContext(),
-            "",
-            function
-        );
+        auto* const block = llvm::BasicBlock::Create(GetContext(), "", function);
 
         return FunctionHeader{ function, symbol, block };
     }
@@ -1287,8 +1172,7 @@ namespace Ace
         m_Function = header.Function;
         m_FunctionSymbol = header.Symbol;
 
-        auto* const rootSymbol =
-            dynamic_cast<FunctionSymbol*>(m_FunctionSymbol->GetRoot());
+        auto* const rootSymbol = dynamic_cast<FunctionSymbol*>(m_FunctionSymbol->GetRoot());
         ACE_ASSERT(rootSymbol);
 
         const auto optBlock = rootSymbol->GetEmittableBlock();
@@ -1307,77 +1191,56 @@ namespace Ace
     }
 
     auto Emitter::EmitStaticCall(
-        FunctionSymbol* const functionSymbol,
-        const std::vector<llvm::Value*>& args
+        FunctionSymbol* const functionSymbol, const std::vector<llvm::Value*>& args
     ) -> llvm::Value*
     {
-        return GetBlock().Builder.CreateCall(
-            m_FunctionMap.at(functionSymbol),
-            args
-        );
+        return GetBlock().Builder.CreateCall(m_FunctionMap.at(functionSymbol), args);
     }
 
-    static auto CalculatePrototypeVtblIndex(
-        PrototypeSymbol* const symbol
-    ) -> size_t
+    static auto CalculatePrototypeVtblIndex(PrototypeSymbol* const symbol) -> size_t
     {
-        const auto symbols = CollectDynDispatchableTraitPrototypeSymbols(
-            symbol->GetParentTrait()
-        );
-        
-        const auto it = std::find(
-            begin(symbols),
-            end  (symbols),
-            symbol->GetRoot()
-        );
+        const auto symbols = CollectDynDispatchableTraitPrototypeSymbols(symbol->GetParentTrait());
+
+        const auto it = std::find(begin(symbols), end(symbols), symbol->GetRoot());
 
         return std::distance(begin(symbols), it);
     }
 
     auto Emitter::EmitDynCall(
-        PrototypeSymbol* const prototypeSymbol,
-        const std::vector<llvm::Value*>& args
+        PrototypeSymbol* const prototypeSymbol, const std::vector<llvm::Value*>& args
     ) -> llvm::Value*
     {
-        auto* const dataPtr = GetBlock().Builder.CreateLoad(
-            GetPtrType(),
-            args.front()
-        );
+        auto* const dataPtr = GetBlock().Builder.CreateLoad(GetPtrType(), args.front());
 
-        auto* const dataType = GetType(
-            GetCompilation()->GetNatives().DynStrongPtrData.GetSymbol()
-        );
+        auto* const dataType = GetType(GetCompilation()->GetNatives().DynStrongPtrData.GetSymbol());
 
         auto* const vtblPtr = GetBlock().Builder.CreateLoad(
-            GetPtrType(),
-            GetBlock().Builder.CreateStructGEP(dataType, dataPtr, 2)
+            GetPtrType(), GetBlock().Builder.CreateStructGEP(dataType, dataPtr, 2)
         );
 
         const auto index = CalculatePrototypeVtblIndex(prototypeSymbol);
-        const std::vector<llvm::Value*> indices
-        {
+        const std::vector<llvm::Value*> indices{
             GetBlock().Builder.getInt32(0),
             GetBlock().Builder.getInt32(index),
         };
         auto* const vtblType = llvm::ArrayType::get(GetPtrType(), 0);
         auto* const functionPtr = GetBlock().Builder.CreateLoad(
-            GetPtrType(),
-            GetBlock().Builder.CreateGEP(vtblType, vtblPtr, indices)
+            GetPtrType(), GetBlock().Builder.CreateGEP(vtblType, vtblPtr, indices)
         );
 
         std::vector<llvm::Type*> argTypes{};
         std::transform(
             begin(args),
-            end  (args),
+            end(args),
             back_inserter(argTypes),
-            [&](llvm::Value* const arg) { return arg->getType(); }
+            [&](llvm::Value* const arg)
+            {
+                return arg->getType();
+            }
         );
 
-        auto* const functionType = llvm::FunctionType::get(
-            GetType(prototypeSymbol->GetType()),
-            argTypes,
-            false
-        );
+        auto* const functionType =
+            llvm::FunctionType::get(GetType(prototypeSymbol->GetType()), argTypes, false);
 
         return GetBlock().Builder.CreateCall(functionType, functionPtr, args);
     }
@@ -1395,29 +1258,20 @@ namespace Ace
         m_LocalVarSymbolStmtIndexPairs.clear();
     }
 
-    auto Emitter::GetDropGluePtr(
-        ITypeSymbol* const typeSymbol
-    ) const -> llvm::Constant*
+    auto Emitter::GetDropGluePtr(ITypeSymbol* const typeSymbol) const -> llvm::Constant*
     {
-        auto* const concreteTypeSymbol =
-            dynamic_cast<IConcreteTypeSymbol*>(typeSymbol);
-        if (
-            !concreteTypeSymbol ||
-            !concreteTypeSymbol->GetDropGlue().has_value()
-            )
+        auto* const concreteTypeSymbol = dynamic_cast<IConcreteTypeSymbol*>(typeSymbol);
+        if (!concreteTypeSymbol || !concreteTypeSymbol->GetDropGlue().has_value())
         {
-            return llvm::ConstantPointerNull::get(
-                llvm::PointerType::get(GetDropGlueType(), 0)
-            );
+            return llvm::ConstantPointerNull::get(llvm::PointerType::get(GetDropGlueType(), 0));
         }
 
         return GetFunction(concreteTypeSymbol->GetDropGlue().value());
     }
 
-    auto Emitter::CreateOutputFilePath(
-        const std::string_view name,
-        const std::string_view extension
-    ) -> std::filesystem::path
+    auto
+    Emitter::CreateOutputFilePath(const std::string_view name, const std::string_view extension)
+        -> std::filesystem::path
     {
         std::string fileName{ name };
         if (!extension.empty())

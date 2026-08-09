@@ -12,9 +12,8 @@
 
 namespace Ace
 {
-    class TypeInfoPtrExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<TypeInfoPtrExprSema>
+    class TypeInfoPtrExprSyntax : public virtual IExprSyntax,
+                                  public virtual ISemaSyntax<TypeInfoPtrExprSema>
     {
     public:
         TypeInfoPtrExprSyntax(
@@ -29,7 +28,7 @@ namespace Ace
         auto CollectChildren() const -> std::vector<const ISyntax*> final;
         auto CreateSema() const -> Diagnosed<std::shared_ptr<const TypeInfoPtrExprSema>> final;
         auto CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
-        
+
     private:
         SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_Scope{};

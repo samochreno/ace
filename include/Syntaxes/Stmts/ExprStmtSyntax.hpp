@@ -12,14 +12,11 @@
 
 namespace Ace
 {
-    class ExprStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<ExprStmtSema>
+    class ExprStmtSyntax : public virtual IStmtSyntax, public virtual ISemaSyntax<ExprStmtSema>
     {
     public:
         ExprStmtSyntax(
-            const SrcLocation& srcLocation,
-            const std::shared_ptr<const IExprSyntax>& expr
+            const SrcLocation& srcLocation, const std::shared_ptr<const IExprSyntax>& expr
         );
         virtual ~ExprStmtSyntax() = default;
 

@@ -8,15 +8,12 @@
 
 namespace Ace
 {
-    static auto DiagnoseOrphanInherentImpl(
-        InherentImplSymbol* const impl
-    ) -> Diagnosed<void>
+    static auto DiagnoseOrphanInherentImpl(InherentImplSymbol* const impl) -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         auto* const implPackageMod = impl->GetScope()->FindPackageMod();
-        auto* const typePackageMod =
-            impl->GetType()->GetUnaliased()->GetScope()->FindPackageMod();
+        auto* const typePackageMod = impl->GetType()->GetUnaliased()->GetScope()->FindPackageMod();
 
         if (implPackageMod != typePackageMod)
         {
@@ -26,9 +23,7 @@ namespace Ace
         return Diagnosed<void>{ std::move(diagnostics) };
     }
 
-    static auto DiagnoseOrphanTraitImpl(
-        TraitImplSymbol* const impl
-    ) -> Diagnosed<void>
+    static auto DiagnoseOrphanTraitImpl(TraitImplSymbol* const impl) -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -38,10 +33,8 @@ namespace Ace
         auto* const typePackageModSymbol =
             impl->GetType()->GetUnaliased()->GetScope()->FindPackageMod();
 
-        if (
-            (implPackageModSymbol != typePackageModSymbol) &&
-            (implPackageModSymbol != traitPackageModSymbol)
-            )
+        if ((implPackageModSymbol != typePackageModSymbol) &&
+            (implPackageModSymbol != traitPackageModSymbol))
         {
             diagnostics.Add(CreateOrphanTraitImplError(impl));
         }
@@ -54,20 +47,26 @@ namespace Ace
         auto diagnostics = DiagnosticBag::Create();
 
         const auto& scope = compilation->GetPackageBodyScope();
-        
+
         const auto inherentImpls = scope->CollectSymbols<InherentImplSymbol>();
-        std::for_each(begin(inherentImpls), end(inherentImpls),
-        [&](InherentImplSymbol* const impl)
-        {
-            diagnostics.Collect(DiagnoseOrphanInherentImpl(impl));
-        });
+        std::for_each(
+            begin(inherentImpls),
+            end(inherentImpls),
+            [&](InherentImplSymbol* const impl)
+            {
+                diagnostics.Collect(DiagnoseOrphanInherentImpl(impl));
+            }
+        );
 
         const auto traitImpls = scope->CollectSymbols<TraitImplSymbol>();
-        std::for_each(begin(traitImpls), end(traitImpls),
-        [&](TraitImplSymbol* const impl)
-        {
-            diagnostics.Collect(DiagnoseOrphanTraitImpl(impl));
-        });
+        std::for_each(
+            begin(traitImpls),
+            end(traitImpls),
+            [&](TraitImplSymbol* const impl)
+            {
+                diagnostics.Collect(DiagnoseOrphanTraitImpl(impl));
+            }
+        );
 
         return Diagnosed<void>{ std::move(diagnostics) };
     }

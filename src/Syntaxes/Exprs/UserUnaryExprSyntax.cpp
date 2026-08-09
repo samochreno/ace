@@ -19,10 +19,11 @@ namespace Ace
         const std::shared_ptr<const IExprSyntax>& expr,
         const SrcLocation& opSrcLocation,
         const Op op
-    ) : m_SrcLocation{ srcLocation },
-        m_Expr{ expr },
-        m_OpSrcLocation{ opSrcLocation },
-        m_Op{ op }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Expr{ expr },
+          m_OpSrcLocation{ opSrcLocation },
+          m_Op{ op }
     {
     }
 
@@ -41,28 +42,22 @@ namespace Ace
         return SyntaxChildCollector{}.Collect(m_Expr).Build();
     }
 
-    auto UserUnaryExprSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const UserUnaryExprSema>>
+    auto UserUnaryExprSyntax::CreateSema() const
+        -> Diagnosed<std::shared_ptr<const UserUnaryExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         const auto exprSema = diagnostics.Collect(m_Expr->CreateExprSema());
 
-        auto* const opSymbol = diagnostics.Collect(ResolveUnaryOpSymbol(
-            m_OpSrcLocation,
-            GetScope(),
-            exprSema->GetTypeInfo().Symbol,
-            m_Op
-        )).value_or(
-            GetCompilation()->GetErrorSymbols().GetFunction()
-        );
+        auto* const opSymbol =
+            diagnostics
+                .Collect(ResolveUnaryOpSymbol(
+                    m_OpSrcLocation, GetScope(), exprSema->GetTypeInfo().Symbol, m_Op
+                ))
+                .value_or(GetCompilation()->GetErrorSymbols().GetFunction());
 
-        return Diagnosed
-        {
-            std::make_shared<const UserUnaryExprSema>(
-                GetSrcLocation(),
-                exprSema,
-                opSymbol
-            ),
+        return Diagnosed{
+            std::make_shared<const UserUnaryExprSema>(GetSrcLocation(), exprSema, opSymbol),
             std::move(diagnostics),
         };
     }

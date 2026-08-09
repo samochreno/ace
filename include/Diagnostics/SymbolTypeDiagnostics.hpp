@@ -9,10 +9,8 @@
 
 namespace Ace
 {
-    template<typename TSymbol>
-    auto CreateIncorrectSymbolTypeError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    template <typename TSymbol>
+    auto CreateIncorrectSymbolTypeError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 

@@ -18,13 +18,13 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& bodyScope,
         INominalTypeSymbol* const type
-    ) : m_BodyScope{ bodyScope },
-        m_Name
-        {
-            srcLocation,
-            AnonymousIdent::Create("impl", type->CreateSignature()),
-        },
-        m_Type{ type }
+    )
+        : m_BodyScope{ bodyScope },
+          m_Name{
+              srcLocation,
+              AnonymousIdent::Create("impl", type->CreateSignature()),
+          },
+          m_Type{ type }
     {
     }
 
@@ -54,8 +54,7 @@ namespace Ace
     }
 
     auto InherentImplSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<InherentImplSymbol>(

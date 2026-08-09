@@ -19,10 +19,11 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         const TypeName& typeName,
         const TypeName& traitName
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_TypeName{ typeName },
-        m_TraitName{ traitName }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_TypeName{ typeName },
+          m_TraitName{ traitName }
     {
     }
 
@@ -45,27 +46,19 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetSizedType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetSizedType());
 
-        const auto optTraitSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ITypeSymbol>(GetScope(), m_TraitName)
-        );
-        auto* const traitSymbol = optTraitSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetTrait()
-        );
+        const auto optTraitSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ITypeSymbol>(GetScope(), m_TraitName));
+        auto* const traitSymbol =
+            optTraitSymbol.value_or(GetCompilation()->GetErrorSymbols().GetTrait());
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const VtblPtrExprSema>(
-                GetSrcLocation(),
-                GetScope(),
-                typeSymbol,
-                traitSymbol
+                GetSrcLocation(), GetScope(), typeSymbol, traitSymbol
             ),
             std::move(diagnostics),
         };

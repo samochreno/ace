@@ -11,9 +11,7 @@
 
 namespace Ace
 {
-    class CallExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<IExprSema>
+    class CallExprSyntax : public virtual IExprSyntax, public virtual ISemaSyntax<IExprSema>
     {
     public:
         CallExprSyntax(

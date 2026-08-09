@@ -7,9 +7,7 @@
 
 namespace Ace
 {
-    auto IAliasTypeSymbol::SetBodyScope(
-        const std::shared_ptr<Scope>& scope
-    ) -> void
+    auto IAliasTypeSymbol::SetBodyScope(const std::shared_ptr<Scope>& scope) -> void
     {
         GetAliasedType()->SetBodyScope(scope);
     }

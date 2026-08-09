@@ -17,9 +17,7 @@ namespace Ace
     {
     public:
         TypeParamTypeSymbol(
-            const std::shared_ptr<Scope>& scope,
-            const Ident& name,
-            const size_t index
+            const std::shared_ptr<Scope>& scope, const Ident& name, const size_t index
         );
         virtual ~TypeParamTypeSymbol() = default;
 
@@ -30,8 +28,7 @@ namespace Ace
         auto GetName() const -> const Ident& final;
 
         auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> final;
 
         auto SetBodyScope(const std::shared_ptr<Scope>& scope) -> void final;

@@ -21,12 +21,13 @@ namespace Ace
         const SymbolName& typeName,
         const std::vector<std::shared_ptr<const ConstraintSyntax>>& constraints,
         const std::vector<std::shared_ptr<const FunctionSyntax>>& functions
-    ) : m_SrcLocation{ srcLocation },
-        m_BodyScope{ bodyScope },
-        m_TypeParams{ typeParams },
-        m_TypeName{ typeName },
-        m_Constraints{ constraints },
-        m_Functions{ functions }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_BodyScope{ bodyScope },
+          m_TypeParams{ typeParams },
+          m_TypeName{ typeName },
+          m_Constraints{ constraints },
+          m_Functions{ functions }
     {
     }
 
@@ -63,15 +64,12 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            m_BodyScope->ResolveStaticSymbol<INominalTypeSymbol>(m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetNominalType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(m_BodyScope->ResolveStaticSymbol<INominalTypeSymbol>(m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetNominalType());
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_unique<InherentImplSymbol>(
                 SrcLocation{ GetSrcLocation(), m_TypeName.CreateSrcLocation() },
                 m_BodyScope,

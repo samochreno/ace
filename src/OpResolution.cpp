@@ -12,13 +12,11 @@
 
 namespace Ace
 {
-    static auto GetOpTraitTypePrototypeNamePair(
-        Compilation* const compilation,
-        const Op& op
-    ) -> std::optional<std::pair<ITypeSymbol*, std::string_view>>
+    static auto GetOpTraitTypePrototypeNamePair(Compilation* const compilation, const Op& op)
+        -> std::optional<std::pair<ITypeSymbol*, std::string_view>>
     {
         const auto& natives = compilation->GetNatives();
-        
+
         switch (op)
         {
             case Op::UnaryNegation:
@@ -54,10 +52,8 @@ namespace Ace
         }
     }
 
-    static auto CollectOpPrototype(
-        Compilation* const compilation,
-        const Op& op
-    ) -> std::optional<PrototypeSymbol*>
+    static auto CollectOpPrototype(Compilation* const compilation, const Op& op)
+        -> std::optional<PrototypeSymbol*>
     {
         const auto optPair = GetOpTraitTypePrototypeNamePair(compilation, op);
         if (!optPair.has_value())
@@ -68,35 +64,31 @@ namespace Ace
         auto* const traitType = optPair.value().first;
         const auto& prototypeName = optPair.value().second;
 
-
         auto* const trait = dynamic_cast<TraitTypeSymbol*>(traitType);
         ACE_ASSERT(trait);
 
         const auto prototypes = trait->CollectPrototypes();
         const auto prototypeIt = std::find_if(
             begin(prototypes),
-            end  (prototypes),
+            end(prototypes),
             [&](PrototypeSymbol* const prototype)
             {
                 return prototype->GetName().String == prototypeName;
             }
         );
 
-
         ACE_ASSERT(prototypeIt != end(prototypes));
         return *prototypeIt;
     }
 
-    static auto ResolveNativeUnaryOpSymbol(
-        ITypeSymbol* const typeSymbol,
-        const Op op
-    ) -> std::optional<FunctionSymbol*>
+    static auto ResolveNativeUnaryOpSymbol(ITypeSymbol* const typeSymbol, const Op op)
+        -> std::optional<FunctionSymbol*>
     {
         auto* const compilation = typeSymbol->GetCompilation();
 
         const auto& opMap = compilation->GetNatives().GetUnaryOpMap();
 
-        const auto typeOpsMapIt = opMap.find(typeSymbol->GetUnaliasedType()); 
+        const auto typeOpsMapIt = opMap.find(typeSymbol->GetUnaliasedType());
         if (typeOpsMapIt == end(opMap))
         {
             return std::nullopt;
@@ -130,15 +122,11 @@ namespace Ace
         const auto optSymbol = ResolveNativeUnaryOpSymbol(typeSymbol, op);
         if (!optSymbol.has_value())
         {
-            diagnostics.Add(CreateUndeclaredUnaryOpError(
-                srcLocation,
-                typeSymbol
-            ));
+            diagnostics.Add(CreateUndeclaredUnaryOpError(srcLocation, typeSymbol));
         }
 
-        auto* const symbol = optSymbol.value_or(
-            scope->GetCompilation()->GetErrorSymbols().GetFunction()
-        );
+        auto* const symbol =
+            optSymbol.value_or(scope->GetCompilation()->GetErrorSymbols().GetFunction());
 
         return Expected{ symbol, std::move(diagnostics) };
     }
@@ -161,10 +149,7 @@ namespace Ace
             return std::nullopt;
         }
 
-        return Scope::CollectImplOfFor(
-            optPrototype.value(),
-            lhsTypeInfo.Symbol
-        );
+        return Scope::CollectImplOfFor(optPrototype.value(), lhsTypeInfo.Symbol);
     }
 
     static auto ResolveNativeBinaryOpSymbol(
@@ -181,9 +166,7 @@ namespace Ace
 
         const auto& opMap = compilation->GetNatives().GetBinaryOpMap();
 
-        const auto opSymbolsIt = opMap.find(
-            lhsTypeInfo.Symbol->GetUnaliasedType()
-        );
+        const auto opSymbolsIt = opMap.find(lhsTypeInfo.Symbol->GetUnaliasedType());
         if (opSymbolsIt == end(opMap))
         {
             return std::nullopt;
@@ -215,66 +198,42 @@ namespace Ace
             return std::move(diagnostics);
         }
 
-        const auto optNativeSymbol = ResolveNativeBinaryOpSymbol(
-            srcLocation,
-            scope,
-            lhsTypeInfo,
-            rhsTypeInfo,
-            op
-        );
-        const auto optUserSymbol = ResolveUserBinaryOpSymbol(
-            srcLocation,
-            scope,
-            lhsTypeInfo,
-            rhsTypeInfo,
-            op
-        );
+        const auto optNativeSymbol =
+            ResolveNativeBinaryOpSymbol(srcLocation, scope, lhsTypeInfo, rhsTypeInfo, op);
+        const auto optUserSymbol =
+            ResolveUserBinaryOpSymbol(srcLocation, scope, lhsTypeInfo, rhsTypeInfo, op);
 
         if (!optNativeSymbol.has_value() && !optUserSymbol.has_value())
         {
-            diagnostics.Add(CreateUndeclaredBinaryOpError(
-                srcLocation,
-                lhsTypeInfo.Symbol,
-                rhsTypeInfo.Symbol
-            ));
-
-            const auto optUserSymbol = ResolveUserBinaryOpSymbol(
-                srcLocation,
-                scope,
-                lhsTypeInfo,
-                rhsTypeInfo,
-                op
+            diagnostics.Add(
+                CreateUndeclaredBinaryOpError(srcLocation, lhsTypeInfo.Symbol, rhsTypeInfo.Symbol)
             );
+
+            const auto optUserSymbol =
+                ResolveUserBinaryOpSymbol(srcLocation, scope, lhsTypeInfo, rhsTypeInfo, op);
 
             return std::move(diagnostics);
         }
 
         if (optNativeSymbol.has_value() && optUserSymbol.has_value())
         {
-            diagnostics.Add(CreateAmbiguousBinaryOpRefError(
-                srcLocation,
-                lhsTypeInfo.Symbol,
-                rhsTypeInfo.Symbol
-            ));
+            diagnostics.Add(
+                CreateAmbiguousBinaryOpRefError(srcLocation, lhsTypeInfo.Symbol, rhsTypeInfo.Symbol)
+            );
             return std::move(diagnostics);
         }
 
-        auto* const symbol = optNativeSymbol.has_value()
-            ? optNativeSymbol.value()
-            : optUserSymbol.value();
+        auto* const symbol =
+            optNativeSymbol.has_value() ? optNativeSymbol.value() : optUserSymbol.value();
 
         const bool areArgsConvertible = AreTypesConvertible(
-            scope,
-            { lhsTypeInfo, rhsTypeInfo },
-            symbol->CollectAllArgTypeInfos()
+            scope, { lhsTypeInfo, rhsTypeInfo }, symbol->CollectAllArgTypeInfos()
         );
         if (!areArgsConvertible)
         {
-            diagnostics.Add(CreateUndeclaredBinaryOpError(
-                srcLocation,
-                lhsTypeInfo.Symbol,
-                rhsTypeInfo.Symbol
-            ));
+            diagnostics.Add(
+                CreateUndeclaredBinaryOpError(srcLocation, lhsTypeInfo.Symbol, rhsTypeInfo.Symbol)
+            );
             return std::move(diagnostics);
         }
 

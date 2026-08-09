@@ -20,9 +20,7 @@ namespace Ace
 
     static auto IsParam(const ISymbol* const symbol) -> bool
     {
-        return
-            dynamic_cast<const TypeParamTypeSymbol*>(symbol) !=
-            nullptr;
+        return dynamic_cast<const TypeParamTypeSymbol*>(symbol) != nullptr;
     }
 
     auto IGenericSymbol::IsPlaceholder() const -> bool
@@ -37,8 +35,11 @@ namespace Ace
 
         const auto placeholderArgIt = std::find_if(
             begin(self->GetTypeArgs()),
-            end  (self->GetTypeArgs()),
-            [](ITypeSymbol* const arg) { return arg->IsPlaceholder(); }
+            end(self->GetTypeArgs()),
+            [](ITypeSymbol* const arg)
+            {
+                return arg->IsPlaceholder();
+            }
         );
         if (placeholderArgIt != end(self->GetTypeArgs()))
         {

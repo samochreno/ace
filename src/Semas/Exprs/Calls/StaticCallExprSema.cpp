@@ -23,20 +23,24 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         ICallableSymbol* const callableSymbol,
         const std::vector<std::shared_ptr<const IExprSema>>& args
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_CallableSymbol{ callableSymbol },
-        m_Args{ args }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_CallableSymbol{ callableSymbol },
+          m_Args{ args }
     {
     }
 
     auto StaticCallExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("StaticCallExprSema", [&]()
-        {
-            logger.Log("m_CallableSymbol", m_CallableSymbol);
-            logger.Log("m_Args", m_Args);
-        });
+        logger.Log(
+            "StaticCallExprSema",
+            [&]()
+            {
+                logger.Log("m_CallableSymbol", m_CallableSymbol);
+                logger.Log("m_Args", m_Args);
+            }
+        );
     }
 
     auto StaticCallExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -49,9 +53,8 @@ namespace Ace
         return m_Scope;
     }
 
-    auto StaticCallExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const StaticCallExprSema>>
+    auto StaticCallExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const StaticCallExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -67,18 +70,14 @@ namespace Ace
                     const auto& arg = m_Args.at(i);
                     const auto& argTypeInfo = argTypeInfos.at(i);
 
-                    convertedArgs.at(i) = diagnostics.Collect(
-                        CreateImplicitlyConverted(arg, argTypeInfo)
-                    );
+                    convertedArgs.at(i) =
+                        diagnostics.Collect(CreateImplicitlyConverted(arg, argTypeInfo));
                 }
             }
             else
             {
                 diagnostics.Add(CreateUnexpectedArgCountError(
-                    GetSrcLocation(),
-                    m_CallableSymbol,
-                    m_Args.size(),
-                    argTypeInfos.size()
+                    GetSrcLocation(), m_CallableSymbol, m_Args.size(), argTypeInfos.size()
                 ));
             }
         }
@@ -86,7 +85,7 @@ namespace Ace
         std::vector<std::shared_ptr<const IExprSema>> checkedArgs{};
         std::transform(
             begin(convertedArgs),
-            end  (convertedArgs),
+            end(convertedArgs),
             back_inserter(checkedArgs),
             [&](const std::shared_ptr<const IExprSema>& arg)
             {
@@ -99,35 +98,29 @@ namespace Ace
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const StaticCallExprSema>(
-                GetSrcLocation(),
-                GetScope(),
-                m_CallableSymbol,
-                checkedArgs
+                GetSrcLocation(), GetScope(), m_CallableSymbol, checkedArgs
             ),
             std::move(diagnostics),
         };
     }
 
-    auto StaticCallExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto StaticCallExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto StaticCallExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const StaticCallExprSema>
+    auto StaticCallExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const StaticCallExprSema>
     {
         std::vector<std::shared_ptr<const IExprSema>> loweredArgs{};
         if (!m_CallableSymbol->IsError())
         {
             std::transform(
                 begin(m_Args),
-                end  (m_Args),
+                end(m_Args),
                 back_inserter(loweredArgs),
                 [&](const std::shared_ptr<const IExprSema>& arg)
                 {
@@ -142,46 +135,38 @@ namespace Ace
         }
 
         return std::make_shared<const StaticCallExprSema>(
-            GetSrcLocation(),
-            GetScope(),
-            m_CallableSymbol,
-            loweredArgs
-        )->CreateLowered({});
+                   GetSrcLocation(), GetScope(), m_CallableSymbol, loweredArgs
+        )
+            ->CreateLowered({});
     }
 
-    auto StaticCallExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto StaticCallExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }
 
-    auto StaticCallExprSema::CollectMonos() const -> MonoCollector 
+    auto StaticCallExprSema::CollectMonos() const -> MonoCollector
     {
-        return MonoCollector{}
-            .Collect(m_CallableSymbol)
-            .Collect(m_Args);
+        return MonoCollector{}.Collect(m_CallableSymbol).Collect(m_Args);
     }
 
-    auto StaticCallExprSema::Emit(
-        Emitter& emitter
-    ) const -> ExprEmitResult
+    auto StaticCallExprSema::Emit(Emitter& emitter) const -> ExprEmitResult
     {
         std::vector<ExprDropInfo> tmps{};
 
         std::vector<llvm::Value*> args{};
-        std::transform(begin(m_Args), end(m_Args), back_inserter(args),
-        [&](const std::shared_ptr<const IExprSema>& arg)
-        {
-            const auto argEmitResult = arg->Emit(emitter);
-            tmps.insert(
-                end(tmps),
-                begin(argEmitResult.Tmps),
-                end  (argEmitResult.Tmps)
-            );
-            return argEmitResult.Value;
-        });
-
+        std::transform(
+            begin(m_Args),
+            end(m_Args),
+            back_inserter(args),
+            [&](const std::shared_ptr<const IExprSema>& arg)
+            {
+                const auto argEmitResult = arg->Emit(emitter);
+                tmps.insert(end(tmps), begin(argEmitResult.Tmps), end(argEmitResult.Tmps));
+                return argEmitResult.Value;
+            }
+        );
 
         auto* const callInst = emitter.EmitCall(m_CallableSymbol, args);
 
@@ -190,19 +175,14 @@ namespace Ace
             return { nullptr, tmps };
         }
 
-        auto* const allocaInst = emitter.GetBlock().Builder.CreateAlloca(
-            callInst->getType()
-        );
+        auto* const allocaInst = emitter.GetBlock().Builder.CreateAlloca(callInst->getType());
         tmps.emplace_back(allocaInst, m_CallableSymbol->GetType());
 
-        emitter.GetBlock().Builder.CreateStore(
-            callInst,
-            allocaInst
-        );
+        emitter.GetBlock().Builder.CreateStore(callInst, allocaInst);
 
         return { allocaInst, tmps };
     }
-    
+
     auto StaticCallExprSema::GetTypeInfo() const -> TypeInfo
     {
         return { m_CallableSymbol->GetType(), ValueKind::R };

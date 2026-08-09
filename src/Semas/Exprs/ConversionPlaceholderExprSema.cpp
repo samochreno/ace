@@ -14,18 +14,22 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const TypeInfo& typeInfo
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_TypeInfo{ typeInfo }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_TypeInfo{ typeInfo }
     {
     }
 
     auto ConversionPlaceholderExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("ConversionPlaceholderExprSema", [&]()
-        {
-            logger.Log("m_TypeInfo", m_TypeInfo);
-        });
+        logger.Log(
+            "ConversionPlaceholderExprSema",
+            [&]()
+            {
+                logger.Log("m_TypeInfo", m_TypeInfo);
+            }
+        );
     }
 
     auto ConversionPlaceholderExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -38,30 +42,26 @@ namespace Ace
         return m_Scope;
     }
 
-    auto ConversionPlaceholderExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const ConversionPlaceholderExprSema>>
+    auto ConversionPlaceholderExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const ConversionPlaceholderExprSema>>
     {
         return Diagnosed{ shared_from_this(), DiagnosticBag::Create() };
     }
 
-    auto ConversionPlaceholderExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
+    auto ConversionPlaceholderExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto ConversionPlaceholderExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const ConversionPlaceholderExprSema>
+    auto ConversionPlaceholderExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const ConversionPlaceholderExprSema>
     {
         return shared_from_this();
     }
 
-    auto ConversionPlaceholderExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto ConversionPlaceholderExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }
@@ -71,9 +71,7 @@ namespace Ace
         return MonoCollector{};
     }
 
-    auto ConversionPlaceholderExprSema::Emit(
-        Emitter& emitter
-    ) const -> ExprEmitResult
+    auto ConversionPlaceholderExprSema::Emit(Emitter& emitter) const -> ExprEmitResult
     {
         ACE_UNREACHABLE();
     }

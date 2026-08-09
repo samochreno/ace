@@ -19,11 +19,12 @@ namespace Ace
         const Ident& name,
         ISizedTypeSymbol* const type,
         const size_t index
-    ) : m_Scope{ scope },
-        m_Name{ name },
-        m_Type{ type },
-        m_Parent{},
-        m_Index{ index }
+    )
+        : m_Scope{ scope },
+          m_Name{ name },
+          m_Type{ type },
+          m_Parent{},
+          m_Index{ index }
     {
     }
 
@@ -53,15 +54,11 @@ namespace Ace
     }
 
     auto NormalParamVarSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<NormalParamVarSymbol>(
-            scope,
-            GetName(),
-            CreateInstantiated<ISizedTypeSymbol>(GetType(), context),
-            GetIndex()
+            scope, GetName(), CreateInstantiated<ISizedTypeSymbol>(GetType(), context), GetIndex()
         );
     }
 
@@ -70,9 +67,7 @@ namespace Ace
         return m_Type;
     }
 
-    auto NormalParamVarSymbol::BindParent(
-        ICallableSymbol* const parent
-    ) -> void
+    auto NormalParamVarSymbol::BindParent(ICallableSymbol* const parent) -> void
     {
         ACE_ASSERT(parent);
         ACE_ASSERT(!m_Parent || m_Parent == parent);

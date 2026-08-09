@@ -14,11 +14,12 @@ namespace Ace
 {
     DropStmtSyntax::DropStmtSyntax(
         const SrcLocation& srcLocation,
-        const TypeName& typeName, 
+        const TypeName& typeName,
         const std::shared_ptr<const IExprSyntax>& expr
-    ) : m_SrcLocation{ srcLocation },
-        m_TypeName{ typeName },
-        m_Expr{ expr }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_TypeName{ typeName },
+          m_Expr{ expr }
     {
     }
 
@@ -34,9 +35,7 @@ namespace Ace
 
     auto DropStmtSyntax::CollectChildren() const -> std::vector<const ISyntax*>
     {
-        return SyntaxChildCollector{}
-            .Collect(m_Expr)
-            .Build();
+        return SyntaxChildCollector{}.Collect(m_Expr).Build();
     }
 
     auto DropStmtSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const DropStmtSema>>
@@ -45,20 +44,13 @@ namespace Ace
 
         const auto exprSema = diagnostics.Collect(m_Expr->CreateExprSema());
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetSizedType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetSizedType());
 
-        return Diagnosed
-        {
-            std::make_shared<const DropStmtSema>(
-                GetSrcLocation(),
-                typeSymbol,
-                exprSema
-            ),
+        return Diagnosed{
+            std::make_shared<const DropStmtSema>(GetSrcLocation(), typeSymbol, exprSema),
             std::move(diagnostics),
         };
     }

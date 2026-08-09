@@ -11,7 +11,6 @@ namespace Ace::Std
 {
     auto GetName() -> const std::string&;
 
-    auto CreateFileBuffers(
-        Compilation* const compilation
-    ) -> std::vector<std::shared_ptr<const FileBuffer>>;
+    auto CreateFileBuffers(Compilation* const compilation)
+        -> std::vector<std::shared_ptr<const FileBuffer>>;
 }

@@ -13,9 +13,7 @@
 
 namespace Ace
 {
-    class RetStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<RetStmtSema>
+    class RetStmtSyntax : public virtual IStmtSyntax, public virtual ISemaSyntax<RetStmtSema>
     {
     public:
         RetStmtSyntax(

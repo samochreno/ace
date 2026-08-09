@@ -11,15 +11,10 @@
 
 namespace Ace
 {
-    class ExitStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<ExitStmtSema>
+    class ExitStmtSyntax : public virtual IStmtSyntax, public virtual ISemaSyntax<ExitStmtSema>
     {
     public:
-        ExitStmtSyntax(
-            const SrcLocation& srcLocation,
-            const std::shared_ptr<Scope>& scope
-        );
+        ExitStmtSyntax(const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope);
         virtual ~ExitStmtSyntax() = default;
 
         auto GetSrcLocation() const -> const SrcLocation& final;

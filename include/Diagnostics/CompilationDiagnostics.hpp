@@ -12,18 +12,14 @@ namespace Ace
 {
     auto CreateMissingPackagePathArgError() -> DiagnosticGroup;
 
-    auto CreateMultiplePackagePathArgsError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateMultiplePackagePathArgsError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
     auto CreateUnexpectedPackagePropertyWarning(
-        const FileBuffer* const packageFileBuffer,
-        const std::string& propertyName
+        const FileBuffer* const packageFileBuffer, const std::string& propertyName
     ) -> DiagnosticGroup;
 
     auto CreateMissingPackagePropertyError(
-        const FileBuffer* const packageFileBuffer,
-        const std::string& propertyName
+        const FileBuffer* const packageFileBuffer, const std::string& propertyName
     ) -> DiagnosticGroup;
 
     auto CreateUnexpectedPackagePropertyTypeError(
@@ -34,12 +30,10 @@ namespace Ace
     ) -> DiagnosticGroup;
 
     auto CreateUndeclaredRefToPackagePathMacroError(
-        const FileBuffer* const packageFileBuffer,
-        const std::string& macro
+        const FileBuffer* const packageFileBuffer, const std::string& macro
     ) -> DiagnosticGroup;
 
     auto CreateTrailingPackagePathCharactersBeforeExtensionError(
-        const FileBuffer* const packageFileBuffer,
-        const std::string_view characters
+        const FileBuffer* const packageFileBuffer, const std::string_view characters
     ) -> DiagnosticGroup;
 }

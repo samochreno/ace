@@ -19,10 +19,11 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         ITypeSymbol* const type,
         const std::vector<TraitTypeSymbol*>& traits
-    ) : m_Scope{ scope },
-        m_Name{ srcLocation, AnonymousIdent::Create("constraint") },
-        m_Type{ type },
-        m_Traits{ traits }
+    )
+        : m_Scope{ scope },
+          m_Name{ srcLocation, AnonymousIdent::Create("constraint") },
+          m_Type{ type },
+          m_Traits{ traits }
     {
     }
 
@@ -50,10 +51,9 @@ namespace Ace
     {
         return m_Name;
     }
-    
+
     auto ConstraintSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         ACE_UNREACHABLE();

@@ -9,7 +9,5 @@
 
 namespace Ace
 {
-    auto LexTokens(
-        const FileBuffer* const fileBuffer
-    ) -> Diagnosed<std::vector<Token>>;
+    auto LexTokens(const FileBuffer* const fileBuffer) -> Diagnosed<std::vector<Token>>;
 }

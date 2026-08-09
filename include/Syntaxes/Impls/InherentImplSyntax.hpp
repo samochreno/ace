@@ -14,9 +14,7 @@
 
 namespace Ace
 {
-    class InherentImplSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class InherentImplSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         InherentImplSyntax(

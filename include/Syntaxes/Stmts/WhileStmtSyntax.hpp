@@ -12,9 +12,7 @@
 
 namespace Ace
 {
-    class WhileStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<WhileStmtSema>
+    class WhileStmtSyntax : public virtual IStmtSyntax, public virtual ISemaSyntax<WhileStmtSema>
     {
     public:
         WhileStmtSyntax(

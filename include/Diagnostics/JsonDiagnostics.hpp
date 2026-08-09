@@ -12,7 +12,6 @@
 namespace Ace
 {
     auto CreateJsonError(
-        const FileBuffer* const fileBuffer,
-        const nlohmann::json::exception& jsonException
+        const FileBuffer* const fileBuffer, const nlohmann::json::exception& jsonException
     ) -> DiagnosticGroup;
 }

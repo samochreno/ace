@@ -18,20 +18,22 @@ namespace Ace
 
         diagnosticBag.m_OptHandler = [](const DiagnosticGroup& diagnosticGroup)
         {
-            ACE_ASSERT(std::find_if(
-                begin(diagnosticGroup.Diagnostics),
-                end  (diagnosticGroup.Diagnostics),
-                [&](const Diagnostic& diagnostic)
-                {
-                    if (diagnostic.Severity == DiagnosticSeverity::Error)
+            ACE_ASSERT(
+                std::find_if(
+                    begin(diagnosticGroup.Diagnostics),
+                    end(diagnosticGroup.Diagnostics),
+                    [&](const Diagnostic& diagnostic)
                     {
-                        LogDiagnosticGroup(diagnosticGroup);
-                        return true;
-                    }
+                        if (diagnostic.Severity == DiagnosticSeverity::Error)
+                        {
+                            LogDiagnosticGroup(diagnosticGroup);
+                            return true;
+                        }
 
-                    return false;
-                }
-            ) == end(diagnosticGroup.Diagnostics));
+                        return false;
+                    }
+                ) == end(diagnosticGroup.Diagnostics)
+            );
         };
 
         return diagnosticBag;
@@ -53,7 +55,7 @@ namespace Ace
     {
         std::for_each(
             begin(diagnosticBag.m_DiagnosticGroups),
-            end  (diagnosticBag.m_DiagnosticGroups),
+            end(diagnosticBag.m_DiagnosticGroups),
             [&](DiagnosticGroup& diagnosticGroup)
             {
                 Add(std::move(diagnosticGroup));
@@ -67,7 +69,7 @@ namespace Ace
     {
         std::for_each(
             begin(diagnosticGroup.Diagnostics),
-            end  (diagnosticGroup.Diagnostics),
+            end(diagnosticGroup.Diagnostics),
             [&](const Diagnostic& diagnostic)
             {
                 AddSeverity(diagnostic.Severity);
@@ -120,10 +122,8 @@ namespace Ace
 
             case DiagnosticSeverity::Warning:
             {
-                if (
-                    (m_Severity == DiagnosticSeverity::Info) ||
-                    (m_Severity == DiagnosticSeverity::Note)
-                    )
+                if ((m_Severity == DiagnosticSeverity::Info) ||
+                    (m_Severity == DiagnosticSeverity::Note))
                 {
                     m_Severity = DiagnosticSeverity::Warning;
                 }

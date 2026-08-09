@@ -37,18 +37,19 @@ namespace Ace
         const std::optional<std::shared_ptr<const BlockStmtSyntax>>& optBlock,
         const std::vector<std::shared_ptr<const TypeParamSyntax>>& typeParams,
         const std::vector<std::shared_ptr<const ConstraintSyntax>>& constraints
-    ) : m_SrcLocation{ srcLocation },
-        m_BodyScope{ bodyScope },
-        m_AccessModifier{ accessModifier },
-        m_Name{ name },
-        m_TypeName{ typeName },
-        m_Attributes{ attributes },
-        m_OptSelf{ optSelf },
-        m_OptSelfParam{ optSelfParam },
-        m_Params{ params },
-        m_OptBlock{ optBlock },
-        m_TypeParams{ typeParams },
-        m_Constraints{ constraints }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_BodyScope{ bodyScope },
+          m_AccessModifier{ accessModifier },
+          m_Name{ name },
+          m_TypeName{ typeName },
+          m_Attributes{ attributes },
+          m_OptSelf{ optSelf },
+          m_OptSelfParam{ optSelfParam },
+          m_Params{ params },
+          m_OptBlock{ optBlock },
+          m_TypeParams{ typeParams },
+          m_Constraints{ constraints }
     {
     }
 
@@ -94,36 +95,27 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto symbolCategory = m_OptSelfParam.has_value() ?
-            SymbolCategory::Instance :
-            SymbolCategory::Static;
+        const auto symbolCategory =
+            m_OptSelfParam.has_value() ? SymbolCategory::Instance : SymbolCategory::Static;
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ITypeSymbol>(m_BodyScope, m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ITypeSymbol>(m_BodyScope, m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetType());
 
-        const auto typeArgs = diagnostics.Collect(
-            ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
-        );
+        const auto typeArgs =
+            diagnostics.Collect(ResolveTypeParamSymbols(m_BodyScope, m_TypeParams));
 
-        return Diagnosed<std::unique_ptr<ISymbol>>
-        {
+        return Diagnosed<std::unique_ptr<ISymbol>>{
             std::make_unique<FunctionSymbol>(
-                m_BodyScope,
-                symbolCategory,
-                m_AccessModifier,
-                m_Name,
-                typeSymbol,
-                typeArgs
+                m_BodyScope, symbolCategory, m_AccessModifier, m_Name, typeSymbol, typeArgs
             ),
             std::move(diagnostics),
         };
     }
 
-    auto FunctionSyntax::GetBlock() const -> const std::optional<std::shared_ptr<const BlockStmtSyntax>>&
+    auto FunctionSyntax::GetBlock() const
+        -> const std::optional<std::shared_ptr<const BlockStmtSyntax>>&
     {
         return m_OptBlock;
     }

@@ -7,9 +7,7 @@
 
 namespace Ace
 {
-    static auto DiagnoseLayoutCycle(
-        const ITypeSymbol* const typeSymbol
-    ) -> Diagnosed<void>
+    static auto DiagnoseLayoutCycle(const ITypeSymbol* const typeSymbol) -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -18,8 +16,7 @@ namespace Ace
             return Diagnosed<void>{ std::move(diagnostics) };
         }
 
-        auto* const genericSymbol =
-            dynamic_cast<const IGenericSymbol*>(typeSymbol);
+        auto* const genericSymbol = dynamic_cast<const IGenericSymbol*>(typeSymbol);
 
         if (genericSymbol && genericSymbol->IsPlaceholder())
         {
@@ -30,20 +27,21 @@ namespace Ace
         return Diagnosed<void>{ std::move(diagnostics) };
     }
 
-    auto DiagnoseLayoutCycles(
-        Compilation* const compilation
-    ) -> Diagnosed<void>
+    auto DiagnoseLayoutCycles(Compilation* const compilation) -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         const auto& scope = compilation->GetPackageBodyScope();
 
         const auto typeSymbols = scope->CollectSymbolsRecursive<ITypeSymbol>();
-        std::for_each(begin(typeSymbols), end(typeSymbols),
-        [&](ITypeSymbol* const typeSymbol)
-        {
-            diagnostics.Collect(DiagnoseLayoutCycle(typeSymbol));
-        });
+        std::for_each(
+            begin(typeSymbols),
+            end(typeSymbols),
+            [&](ITypeSymbol* const typeSymbol)
+            {
+                diagnostics.Collect(DiagnoseLayoutCycle(typeSymbol));
+            }
+        );
 
         return Diagnosed<void>{ std::move(diagnostics) };
     }

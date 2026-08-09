@@ -18,10 +18,11 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<const IExprSyntax>& condition,
         const std::shared_ptr<const BlockStmtSyntax>& block
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_Condition{ condition },
-        m_Block{ block }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_Condition{ condition },
+          m_Block{ block }
     {
     }
 
@@ -37,29 +38,20 @@ namespace Ace
 
     auto WhileStmtSyntax::CollectChildren() const -> std::vector<const ISyntax*>
     {
-        return SyntaxChildCollector{}
-            .Collect(m_Condition)
-            .Collect(m_Block)
-            .Build();
+        return SyntaxChildCollector{}.Collect(m_Condition).Collect(m_Block).Build();
     }
 
     auto WhileStmtSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const WhileStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto conditionSema = diagnostics.Collect(
-            m_Condition->CreateExprSema()
-        );
+        const auto conditionSema = diagnostics.Collect(m_Condition->CreateExprSema());
 
         const auto blockSema = diagnostics.Collect(m_Block->CreateSema());
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const WhileStmtSema>(
-                GetSrcLocation(),
-                GetScope(),
-                conditionSema,
-                blockSema
+                GetSrcLocation(), GetScope(), conditionSema, blockSema
             ),
             std::move(diagnostics),
         };

@@ -16,32 +16,25 @@ namespace Ace
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            std::nullopt,
-            "missing package path argument"
+            DiagnosticSeverity::Error, std::nullopt, "missing package path argument"
         );
 
         return group;
     }
 
-    auto CreateMultiplePackagePathArgsError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateMultiplePackagePathArgsError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "multiple package path arguments"
+            DiagnosticSeverity::Error, srcLocation, "multiple package path arguments"
         );
 
         return group;
     }
 
     auto CreateUnexpectedPackagePropertyWarning(
-        const FileBuffer* const packageFileBuffer,
-        const std::string& propertyName
+        const FileBuffer* const packageFileBuffer, const std::string& propertyName
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -56,8 +49,7 @@ namespace Ace
     }
 
     auto CreateMissingPackagePropertyError(
-        const FileBuffer* const packageFileBuffer,
-        const std::string& propertyName
+        const FileBuffer* const packageFileBuffer, const std::string& propertyName
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -80,23 +72,19 @@ namespace Ace
     {
         DiagnosticGroup group{};
 
-        const std::string message = std::string{} +
-            "unexpected `" + CreateJsonTypeString(type) + 
-            "` of property `" + propertyName +  "`, expected `" +
-            CreateJsonTypeStringWithArticle(expectedType) + "`";
+        const std::string message = std::string{} + "unexpected `" + CreateJsonTypeString(type) +
+                                    "` of property `" + propertyName + "`, expected `" +
+                                    CreateJsonTypeStringWithArticle(expectedType) + "`";
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            packageFileBuffer->CreateFirstLocation(),
-            message
+            DiagnosticSeverity::Error, packageFileBuffer->CreateFirstLocation(), message
         );
 
         return group;
     }
 
     auto CreateUndeclaredRefToPackagePathMacroError(
-        const FileBuffer* const packageFileBuffer,
-        const std::string& macro
+        const FileBuffer* const packageFileBuffer, const std::string& macro
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -111,20 +99,17 @@ namespace Ace
     }
 
     auto CreateTrailingPackagePathCharactersBeforeExtensionError(
-        const FileBuffer* const packageFileBuffer,
-        const std::string_view characters
+        const FileBuffer* const packageFileBuffer, const std::string_view characters
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         const std::string message = std::string{} +
-            "trailing characters in path before extension `" +
-            std::string{ characters } + "`";
+                                    "trailing characters in path before extension `" +
+                                    std::string{ characters } + "`";
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            packageFileBuffer->CreateFirstLocation(),
-            message
+            DiagnosticSeverity::Error, packageFileBuffer->CreateFirstLocation(), message
         );
 
         return group;

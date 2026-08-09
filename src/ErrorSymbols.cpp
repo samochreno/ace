@@ -8,9 +8,8 @@
 
 namespace Ace
 {
-    ErrorSymbols::ErrorSymbols(
-        Compilation* compilation
-    ) : m_Compilation{ compilation }
+    ErrorSymbols::ErrorSymbols(Compilation* compilation)
+        : m_Compilation{ compilation }
     {
         auto diagnostics = DiagnosticBag::CreateNoError();
 
@@ -25,9 +24,7 @@ namespace Ace
             Ident{ srcLocation, AnonymousIdent::Create("error_trait") },
             std::vector<ITypeSymbol*>{}
         );
-        m_Trait = diagnostics.Collect(
-            Scope::DeclareSymbol(std::move(ownedTrait))
-        );
+        m_Trait = diagnostics.Collect(Scope::DeclareSymbol(std::move(ownedTrait)));
 
         auto ownedStruct = std::make_unique<StructTypeSymbol>(
             scope->CreateChild(),
@@ -35,9 +32,7 @@ namespace Ace
             Ident{ srcLocation, AnonymousIdent::Create("error_struct") },
             std::vector<ITypeSymbol*>{}
         );
-        m_Struct = diagnostics.Collect(
-            Scope::DeclareSymbol(std::move(ownedStruct))
-        );
+        m_Struct = diagnostics.Collect(Scope::DeclareSymbol(std::move(ownedStruct)));
 
         auto ownedField = std::make_unique<FieldVarSymbol>(
             m_Struct,
@@ -46,9 +41,7 @@ namespace Ace
             GetSizedType(),
             0
         );
-        m_Field = diagnostics.Collect(
-            Scope::DeclareSymbol(std::move(ownedField))
-        );
+        m_Field = diagnostics.Collect(Scope::DeclareSymbol(std::move(ownedField)));
 
         auto ownedFunction = std::make_unique<FunctionSymbol>(
             scope->CreateChild(),
@@ -58,18 +51,13 @@ namespace Ace
             GetType(),
             std::vector<ITypeSymbol*>{}
         );
-        m_Function = diagnostics.Collect(
-            Scope::DeclareSymbol(std::move(ownedFunction))
-        );
+        m_Function = diagnostics.Collect(Scope::DeclareSymbol(std::move(ownedFunction)));
     }
 
     auto ErrorSymbols::Contains(const ISymbol* const symbol) const -> bool
     {
-        return 
-            (symbol == m_Trait) ||
-            (symbol == m_Struct) ||
-            (symbol == m_Field) ||
-            (symbol == m_Function);
+        return (symbol == m_Trait) || (symbol == m_Struct) || (symbol == m_Field) ||
+               (symbol == m_Function);
     }
 
     auto ErrorSymbols::GetType() const -> ITypeSymbol*

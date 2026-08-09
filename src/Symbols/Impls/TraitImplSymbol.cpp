@@ -19,18 +19,14 @@ namespace Ace
         const std::shared_ptr<Scope>& bodyScope,
         TraitTypeSymbol* const trait,
         ITypeSymbol* const type
-    ) : m_BodyScope{ bodyScope },
-        m_Name
-        {
-            srcLocation,
-            AnonymousIdent::Create(
-                "impl",
-                trait->CreateSignature(),
-                type->CreateSignature()
-            ),
-        },
-        m_Trait{ trait },
-        m_Type{ type }
+    )
+        : m_BodyScope{ bodyScope },
+          m_Name{
+              srcLocation,
+              AnonymousIdent::Create("impl", trait->CreateSignature(), type->CreateSignature()),
+          },
+          m_Trait{ trait },
+          m_Type{ type }
     {
     }
 
@@ -60,8 +56,7 @@ namespace Ace
     }
 
     auto TraitImplSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<TraitImplSymbol>(

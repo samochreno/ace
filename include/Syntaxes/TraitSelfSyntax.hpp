@@ -11,15 +11,10 @@
 
 namespace Ace
 {
-    class TraitSelfSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class TraitSelfSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
-        TraitSelfSyntax(
-            const SrcLocation& srcLocation,
-            const std::shared_ptr<Scope>& scope
-        );
+        TraitSelfSyntax(const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope);
         virtual ~TraitSelfSyntax() = default;
 
         auto GetSrcLocation() const -> const SrcLocation& final;
@@ -35,4 +30,3 @@ namespace Ace
         std::shared_ptr<Scope> m_Scope{};
     };
 }
-

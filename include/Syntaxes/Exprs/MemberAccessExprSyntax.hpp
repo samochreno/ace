@@ -12,9 +12,8 @@
 
 namespace Ace
 {
-    class MemberAccessExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<FieldVarRefExprSema>
+    class MemberAccessExprSyntax : public virtual IExprSyntax,
+                                   public virtual ISemaSyntax<FieldVarRefExprSema>
     {
     public:
         MemberAccessExprSyntax(

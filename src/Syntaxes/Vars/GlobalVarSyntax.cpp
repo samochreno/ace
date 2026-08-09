@@ -21,12 +21,13 @@ namespace Ace
         const TypeName& typeName,
         const std::vector<std::shared_ptr<const AttributeSyntax>>& attributes,
         const AccessModifier accessModifier
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_Name{ name },
-        m_TypeName{ typeName },
-        m_Attributes{ attributes },
-        m_AccessModifier{ accessModifier }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_Name{ name },
+          m_TypeName{ typeName },
+          m_Attributes{ attributes },
+          m_AccessModifier{ accessModifier }
     {
     }
 
@@ -59,20 +60,14 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetSizedType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetSizedType());
 
-        return Diagnosed<std::unique_ptr<ISymbol>>
-        {
+        return Diagnosed<std::unique_ptr<ISymbol>>{
             std::make_unique<GlobalVarSymbol>(
-                GetSymbolScope(),
-                m_AccessModifier,
-                m_Name,
-                typeSymbol
+                GetSymbolScope(), m_AccessModifier, m_Name, typeSymbol
             ),
             std::move(diagnostics),
         };

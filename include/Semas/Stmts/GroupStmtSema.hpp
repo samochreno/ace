@@ -12,12 +12,11 @@
 
 namespace Ace
 {
-    class GroupStmtSema : 
-        public std::enable_shared_from_this<GroupStmtSema>,
-        public virtual IStmtSema,
-        public virtual IExpandableStmtSema,
-        public virtual ITypeCheckableSema<GroupStmtSema, StmtTypeCheckingContext>,
-        public virtual ILowerableSema<GroupStmtSema>
+    class GroupStmtSema : public std::enable_shared_from_this<GroupStmtSema>,
+                          public virtual IStmtSema,
+                          public virtual IExpandableStmtSema,
+                          public virtual ITypeCheckableSema<GroupStmtSema, StmtTypeCheckingContext>,
+                          public virtual ILowerableSema<GroupStmtSema>
     {
     public:
         GroupStmtSema(
@@ -31,23 +30,19 @@ namespace Ace
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto CreateTypeChecked(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const GroupStmtSema>> final;
-        auto CreateTypeCheckedStmt(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
-        auto CreateLowered(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const GroupStmtSema> final;
-        auto CreateLoweredStmt(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const IStmtSema> final;
+        auto CreateTypeChecked(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const GroupStmtSema>> final;
+        auto CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
+        auto CreateLowered(const LoweringContext& context) const
+            -> std::shared_ptr<const GroupStmtSema> final;
+        auto CreateLoweredStmt(const LoweringContext& context) const
+            -> std::shared_ptr<const IStmtSema> final;
         auto CollectMonos() const -> MonoCollector final;
         auto Emit(Emitter& emitter) const -> void final;
 
         auto CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction> final;
-        
+
         auto CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const IStmtSema>> final;
 
     private:

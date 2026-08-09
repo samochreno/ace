@@ -7,19 +7,11 @@
 
 namespace Ace
 {
-    auto CreateMissingCLIOptionNameError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateMissingCLIOptionNameError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateUnknownCLIOptionNameError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateUnknownCLIOptionNameError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateMissingCLIOptionValueError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateMissingCLIOptionValueError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 
-    auto CreateUnexpectedCLIOptionValueError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup;
+    auto CreateUnexpectedCLIOptionValueError(const SrcLocation& srcLocation) -> DiagnosticGroup;
 }

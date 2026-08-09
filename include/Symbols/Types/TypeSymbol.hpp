@@ -11,16 +11,15 @@ namespace Ace
 {
     class TraitTypeSymbol;
 
-    class ITypeSymbol :
-        public virtual ISymbol,
-        public virtual IAccessibleBodyScopedSymbol,
-        public virtual IGenericSymbol
+    class ITypeSymbol : public virtual ISymbol,
+                        public virtual IAccessibleBodyScopedSymbol,
+                        public virtual IGenericSymbol
     {
     public:
         virtual ~ITypeSymbol() = default;
 
         virtual auto GetUnaliasedType() const -> const ITypeSymbol* final;
-        virtual auto GetUnaliasedType()       ->       ITypeSymbol* final;
+        virtual auto GetUnaliasedType() -> ITypeSymbol* final;
 
         virtual auto DiagnoseCycle() const -> Diagnosed<void>;
 

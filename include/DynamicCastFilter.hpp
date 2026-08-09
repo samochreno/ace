@@ -7,21 +7,24 @@
 
 namespace Ace
 {
-    template<typename TTarget, typename TOriginal>
+    template <typename TTarget, typename TOriginal>
     inline auto DynamicCastFilter(const std::vector<TOriginal>& inVec) -> std::vector<TTarget>
     {
         std::vector<TTarget> vec{};
 
-        std::for_each(begin(inVec), end(inVec),
-        [&](const TOriginal& element)
-        {
-            auto target = dynamic_cast<TTarget>(element);
-
-            if (target)
+        std::for_each(
+            begin(inVec),
+            end(inVec),
+            [&](const TOriginal& element)
             {
-                vec.push_back(target);
+                auto target = dynamic_cast<TTarget>(element);
+
+                if (target)
+                {
+                    vec.push_back(target);
+                }
             }
-        });
+        );
 
         return vec;
     }

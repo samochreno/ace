@@ -33,9 +33,8 @@ namespace Ace
 
         virtual auto GetCompilation() const -> Compilation* = 0;
 
-        virtual auto CreateFullyQualifiedName(
-            const SrcLocation& srcLocation
-        ) const -> SymbolName = 0;
+        virtual auto CreateFullyQualifiedName(const SrcLocation& srcLocation) const
+            -> SymbolName = 0;
 
         virtual auto GetGenericSymbol() const -> ISymbol* = 0;
     };
@@ -66,9 +65,7 @@ namespace Ace
 
         auto GetCompilation() const -> Compilation* final;
 
-        auto CreateFullyQualifiedName(
-            const SrcLocation& srcLocation
-        ) const -> SymbolName final;
+        auto CreateFullyQualifiedName(const SrcLocation& srcLocation) const -> SymbolName final;
 
         auto TryGetSymbol() const -> std::optional<ITypeSymbol*>;
         auto GetSymbol() const -> ITypeSymbol*;
@@ -76,14 +73,14 @@ namespace Ace
 
         auto HasIRType() const -> bool;
         auto GetIRType(llvm::LLVMContext& context) const -> llvm::Type*;
-        
+
     private:
         Compilation* m_Compilation{};
         std::vector<const char*> m_NameSectionStrings{};
         std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>> m_IRTypeGetter{};
         bool m_IsRoot{};
         bool m_IsTriviallyCopyable{};
-        
+
         mutable std::optional<ITypeSymbol*> m_OptSymbol{};
     };
 
@@ -100,14 +97,12 @@ namespace Ace
 
         auto GetCompilation() const -> Compilation* final;
 
-        auto CreateFullyQualifiedName(
-            const SrcLocation& srcLocation
-        ) const -> SymbolName final;
+        auto CreateFullyQualifiedName(const SrcLocation& srcLocation) const -> SymbolName final;
 
         auto TryGetSymbol() const -> std::optional<FunctionSymbol*>;
         auto GetSymbol() const -> FunctionSymbol*;
         auto GetGenericSymbol() const -> ISymbol* final;
-        
+
     private:
         Compilation* m_Compilation{};
         std::vector<std::string> m_NameSectionStrings{};
@@ -125,15 +120,18 @@ namespace Ace
 
         auto Verify() const -> void;
 
-        auto CollectIRTypeSymbolMap(
-            llvm::LLVMContext& context
-        ) const -> std::unordered_map<ITypeSymbol*, llvm::Type*>;
+        auto CollectIRTypeSymbolMap(llvm::LLVMContext& context) const
+            -> std::unordered_map<ITypeSymbol*, llvm::Type*>;
 
-        auto GetImplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
-        auto GetExplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
+        auto GetImplicitFromOpMap() const -> const
+            std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
+        auto GetExplicitFromOpMap() const -> const
+            std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&;
 
-        auto GetUnaryOpMap()  const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&;
-        auto GetBinaryOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&;
+        auto GetUnaryOpMap() const
+            -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&;
+        auto GetBinaryOpMap() const
+            -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&;
 
         auto GetCopyOpMap() const -> const std::unordered_map<ITypeSymbol*, FunctionSymbol*>&;
         auto GetDropOpMap() const -> const std::unordered_map<ITypeSymbol*, FunctionSymbol*>&;
@@ -144,14 +142,14 @@ namespace Ace
         NativeType Int16;
         NativeType Int32;
         NativeType Int64;
-    
+
         NativeType UInt8;
         NativeType UInt16;
         NativeType UInt32;
         NativeType UInt64;
 
         NativeType Int;
-    
+
         NativeType Float32;
         NativeType Float64;
 
@@ -525,11 +523,15 @@ namespace Ace
         Lazy<std::vector<NativeType*>> m_Types;
         Lazy<std::vector<NativeFunction*>> m_Functions;
 
-        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>> m_ImplicitFromOpMap;
-        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>> m_ExplicitFromOpMap;
+        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>>
+            m_ImplicitFromOpMap;
+        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>>
+            m_ExplicitFromOpMap;
 
-        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>> m_UnaryOpMap;
-        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>> m_BinaryOpMap;
+        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>>
+            m_UnaryOpMap;
+        Lazy<std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>>
+            m_BinaryOpMap;
 
         Lazy<std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_CopyOpMap;
         Lazy<std::unordered_map<ITypeSymbol*, FunctionSymbol*>> m_DropOpMap;

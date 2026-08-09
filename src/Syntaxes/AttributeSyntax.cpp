@@ -12,8 +12,9 @@ namespace Ace
     AttributeSyntax::AttributeSyntax(
         const SrcLocation& srcLocation,
         const std::shared_ptr<const StructConstructionExprSyntax>& structConstructionExpr
-    ) : m_SrcLocation{ srcLocation },
-        m_StructConstructionExpr{ structConstructionExpr }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_StructConstructionExpr{ structConstructionExpr }
     {
     }
 

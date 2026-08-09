@@ -5,7 +5,5 @@
 
 namespace Ace
 {
-    auto CreateMissingFunctionBlockError(
-        FunctionSymbol* const functionSymbol
-    ) -> DiagnosticGroup;
+    auto CreateMissingFunctionBlockError(FunctionSymbol* const functionSymbol) -> DiagnosticGroup;
 }

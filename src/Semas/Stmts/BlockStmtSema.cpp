@@ -29,46 +29,49 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& bodyScope,
         const std::vector<std::shared_ptr<const IStmtSema>>& stmts
-    ) : m_SrcLocation{ srcLocation },
-        m_BodyScope{ bodyScope },
-        m_Stmts{ stmts }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_BodyScope{ bodyScope },
+          m_Stmts{ stmts }
     {
     }
 
     auto BlockStmtSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("BlockStmtSema", [&]()
-        {
-            logger.Log("m_Stmts", m_Stmts);
-        });
+        logger.Log(
+            "BlockStmtSema",
+            [&]()
+            {
+                logger.Log("m_Stmts", m_Stmts);
+            }
+        );
     }
 
     auto BlockStmtSema::GetSrcLocation() const -> const SrcLocation&
     {
         return m_SrcLocation;
     }
-    
+
     auto BlockStmtSema::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_BodyScope->GetParent().value();
     }
 
-    auto BlockStmtSema::CreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const BlockStmtSema>>
+    auto BlockStmtSema::CreateTypeChecked(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const BlockStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const IStmtSema>> checkedStmts{};
         std::transform(
             begin(m_Stmts),
-            end  (m_Stmts),
+            end(m_Stmts),
             back_inserter(checkedStmts),
             [&](const std::shared_ptr<const IStmtSema>& stmt)
             {
-                return diagnostics.Collect(stmt->CreateTypeCheckedStmt({
-                    context.ParentFunctionTypeSymbol
-                }));
+                return diagnostics.Collect(
+                    stmt->CreateTypeCheckedStmt({ context.ParentFunctionTypeSymbol })
+                );
             }
         );
 
@@ -77,32 +80,25 @@ namespace Ace
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
-            std::make_shared<const BlockStmtSema>(
-                GetSrcLocation(),
-                m_BodyScope,
-                checkedStmts
-            ),
+        return Diagnosed{
+            std::make_shared<const BlockStmtSema>(GetSrcLocation(), m_BodyScope, checkedStmts),
             std::move(diagnostics),
         };
     }
 
-    auto BlockStmtSema::CreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IStmtSema>>
+    auto BlockStmtSema::CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IStmtSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto BlockStmtSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const BlockStmtSema>
+    auto BlockStmtSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const BlockStmtSema>
     {
         std::vector<std::shared_ptr<const IStmtSema>> loweredStmts{};
         std::transform(
             begin(m_Stmts),
-            end  (m_Stmts),
+            end(m_Stmts),
             back_inserter(loweredStmts),
             [&](const std::shared_ptr<const IStmtSema>& stmt)
             {
@@ -115,16 +111,12 @@ namespace Ace
             return shared_from_this();
         }
 
-        return std::make_shared<const BlockStmtSema>(
-            GetSrcLocation(),
-            m_BodyScope,
-            loweredStmts
-        )->CreateLowered({});
+        return std::make_shared<const BlockStmtSema>(GetSrcLocation(), m_BodyScope, loweredStmts)
+            ->CreateLowered({});
     }
 
-    auto BlockStmtSema::CreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IStmtSema>
+    auto BlockStmtSema::CreateLoweredStmt(const LoweringContext& context) const
+        -> std::shared_ptr<const IStmtSema>
     {
         return CreateLowered(context);
     }
@@ -145,25 +137,26 @@ namespace Ace
         std::vector<ControlFlowInstruction> instructions{};
         std::for_each(
             begin(m_Stmts),
-            end  (m_Stmts),
+            end(m_Stmts),
             [&](const std::shared_ptr<const IStmtSema>& stmt)
             {
                 const auto stmtInstructions = stmt->CreateControlFlowInstructions();
-                instructions.insert(end(instructions), begin(stmtInstructions), end(stmtInstructions));
+                instructions.insert(
+                    end(instructions), begin(stmtInstructions), end(stmtInstructions)
+                );
             }
         );
 
         return instructions;
     }
 
-    auto BlockStmtSema::CreatePartiallyExpanded() const -> std::vector<std::shared_ptr<const IStmtSema>>
+    auto BlockStmtSema::CreatePartiallyExpanded() const
+        -> std::vector<std::shared_ptr<const IStmtSema>>
     {
         auto stmts = m_Stmts;
 
-        const auto blockEnd = std::make_shared<const BlockEndStmtSema>(
-            GetSrcLocation().CreateLast(),
-            m_BodyScope
-        );
+        const auto blockEnd =
+            std::make_shared<const BlockEndStmtSema>(GetSrcLocation().CreateLast(), m_BodyScope);
         stmts.push_back(blockEnd);
 
         return stmts;

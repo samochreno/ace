@@ -11,14 +11,12 @@
 
 namespace Ace
 {
-    class LogicalNegationExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<LogicalNegationExprSema>
+    class LogicalNegationExprSyntax : public virtual IExprSyntax,
+                                      public virtual ISemaSyntax<LogicalNegationExprSema>
     {
     public:
         LogicalNegationExprSyntax(
-            const SrcLocation& srcLocation,
-            const std::shared_ptr<const IExprSyntax>& expr
+            const SrcLocation& srcLocation, const std::shared_ptr<const IExprSyntax>& expr
         );
         virtual ~LogicalNegationExprSyntax() = default;
 

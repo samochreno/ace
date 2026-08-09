@@ -10,11 +10,9 @@
 
 namespace Ace
 {
-    LabelSymbol::LabelSymbol(
-        const std::shared_ptr<Scope>& scope,
-        const Ident& name
-    ) : m_Scope{ scope },
-        m_Name{ name }
+    LabelSymbol::LabelSymbol(const std::shared_ptr<Scope>& scope, const Ident& name)
+        : m_Scope{ scope },
+          m_Name{ name }
     {
     }
 
@@ -44,8 +42,7 @@ namespace Ace
     }
 
     auto LabelSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<LabelSymbol>(scope, GetName());

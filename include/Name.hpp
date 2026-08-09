@@ -21,10 +21,7 @@ namespace Ace
     {
         SymbolNameSection();
         SymbolNameSection(const Ident& name);
-        SymbolNameSection(
-            const Ident& name,
-            const std::vector<SymbolName>& typeArgs
-        );
+        SymbolNameSection(const Ident& name, const std::vector<SymbolName>& typeArgs);
         ~SymbolNameSection();
 
         auto CreateSrcLocation() const -> SrcLocation;
@@ -43,8 +40,7 @@ namespace Ace
     {
         SymbolName();
         SymbolName(
-            const SymbolNameSection& section,
-            const SymbolNameResolutionScope& resolutionScope
+            const SymbolNameSection& section, const SymbolNameResolutionScope& resolutionScope
         );
         SymbolName(
             const std::vector<SymbolNameSection>& sections,
@@ -69,18 +65,14 @@ namespace Ace
     struct TypeName
     {
         TypeName();
-        TypeName(
-            const SymbolName& symbolName,
-            const std::vector<TypeNameModifier>& modifiers
-        );
+        TypeName(const SymbolName& symbolName, const std::vector<TypeNameModifier>& modifiers);
         ~TypeName();
 
         SymbolName SymbolName;
         std::vector<TypeNameModifier> Modifiers;
     };
 
-    auto ModifyTypeSymbol(
-        ITypeSymbol* const pureTypeSymbol,
-        std::vector<TypeNameModifier> modifiers
-    ) -> ISizedTypeSymbol*;
+    auto
+    ModifyTypeSymbol(ITypeSymbol* const pureTypeSymbol, std::vector<TypeNameModifier> modifiers)
+        -> ISizedTypeSymbol*;
 }

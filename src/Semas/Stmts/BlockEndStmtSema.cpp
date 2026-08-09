@@ -12,16 +12,21 @@
 namespace Ace
 {
     BlockEndStmtSema::BlockEndStmtSema(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<Scope>& bodyScope
-    ) : m_SrcLocation{ srcLocation },
-        m_BodyScope{ bodyScope }
+        const SrcLocation& srcLocation, const std::shared_ptr<Scope>& bodyScope
+    )
+        : m_SrcLocation{ srcLocation },
+          m_BodyScope{ bodyScope }
     {
     }
 
     auto BlockEndStmtSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("BlockEndStmtSema", [&]() {});
+        logger.Log(
+            "BlockEndStmtSema",
+            [&]()
+            {
+            }
+        );
     }
 
     auto BlockEndStmtSema::GetSrcLocation() const -> const SrcLocation&
@@ -39,30 +44,26 @@ namespace Ace
         return m_BodyScope;
     }
 
-    auto BlockEndStmtSema::CreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const BlockEndStmtSema>>
+    auto BlockEndStmtSema::CreateTypeChecked(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const BlockEndStmtSema>>
     {
         return Diagnosed{ shared_from_this(), DiagnosticBag::Create() };
     }
 
-    auto BlockEndStmtSema::CreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IStmtSema>>
+    auto BlockEndStmtSema::CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IStmtSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto BlockEndStmtSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const BlockEndStmtSema>
+    auto BlockEndStmtSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const BlockEndStmtSema>
     {
         return shared_from_this();
     }
 
-    auto BlockEndStmtSema::CreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IStmtSema>
+    auto BlockEndStmtSema::CreateLoweredStmt(const LoweringContext& context) const
+        -> std::shared_ptr<const IStmtSema>
     {
         return CreateLowered(context);
     }
@@ -76,7 +77,8 @@ namespace Ace
     {
     }
 
-    auto BlockEndStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
+    auto BlockEndStmtSema::CreateControlFlowInstructions() const
+        -> std::vector<ControlFlowInstruction>
     {
         return {};
     }

@@ -12,8 +12,7 @@
 namespace Ace
 {
     auto CreateFileSystemError(
-        const std::filesystem::path& path,
-        const std::filesystem::filesystem_error& error
+        const std::filesystem::path& path, const std::filesystem::filesystem_error& error
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -22,47 +21,35 @@ namespace Ace
         MakeLowercase(what);
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            std::nullopt,
-            "file system: " + what + ": " + path.string()
+            DiagnosticSeverity::Error, std::nullopt, "file system: " + what + ": " + path.string()
         );
 
         return group;
     }
 
-    auto CreateFileNotFoundError(
-        const std::filesystem::path& path
-    ) -> DiagnosticGroup
+    auto CreateFileNotFoundError(const std::filesystem::path& path) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            std::nullopt,
-            "file not found: " + path.string()
+            DiagnosticSeverity::Error, std::nullopt, "file not found: " + path.string()
         );
 
         return group;
     }
 
-    auto CreateFileOpenError(
-        const std::filesystem::path& path
-    ) -> DiagnosticGroup
+    auto CreateFileOpenError(const std::filesystem::path& path) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            std::nullopt,
-            "unable to open file: " + path.string()
+            DiagnosticSeverity::Error, std::nullopt, "unable to open file: " + path.string()
         );
 
         return group;
     }
 
-    auto CreateFilePathEndsWithSeparatorError(
-        const std::filesystem::path& path
-    ) -> DiagnosticGroup
+    auto CreateFilePathEndsWithSeparatorError(const std::filesystem::path& path) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
@@ -73,5 +60,5 @@ namespace Ace
         );
 
         return group;
-    }   
+    }
 }

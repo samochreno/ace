@@ -100,7 +100,7 @@ namespace Ace
             {
                 return "`i64` literal";
             }
-        
+
             case TokenKind::UInt8:
             {
                 return "`u8` literal";
@@ -117,7 +117,7 @@ namespace Ace
             {
                 return "`u64` literal";
             }
-        
+
             case TokenKind::Int:
             {
                 return "`int` literal";
@@ -261,18 +261,14 @@ namespace Ace
 
             default:
             {
-                const auto keywordTokenKindIt = TokenKindToKeywordMap.find(
-                    tokenKind
-                );
+                const auto keywordTokenKindIt = TokenKindToKeywordMap.find(tokenKind);
                 ACE_ASSERT(keywordTokenKindIt != end(TokenKindToKeywordMap));
                 return "`" + std::string{ keywordTokenKindIt->second } + "`";
             }
         }
     }
 
-    auto CreateTokenKindStringWithArticle(
-        const TokenKind tokenKind
-    ) -> std::string
+    auto CreateTokenKindStringWithArticle(const TokenKind tokenKind) -> std::string
     {
         switch (tokenKind)
         {
@@ -310,9 +306,7 @@ namespace Ace
         }
     }
 
-    auto CreateAccessModifierString(
-        const AccessModifier accessModifier
-    ) -> std::string
+    auto CreateAccessModifierString(const AccessModifier accessModifier) -> std::string
     {
         switch (accessModifier)
         {
@@ -328,9 +322,7 @@ namespace Ace
         }
     }
 
-    auto CreateJsonTypeString(
-        const nlohmann::json::value_t type
-    ) -> std::string
+    auto CreateJsonTypeString(const nlohmann::json::value_t type) -> std::string
     {
         switch (type)
         {
@@ -386,9 +378,7 @@ namespace Ace
         }
     }
 
-    auto CreateJsonTypeStringWithArticle(
-        const nlohmann::json::value_t type
-    ) -> std::string
+    auto CreateJsonTypeStringWithArticle(const nlohmann::json::value_t type) -> std::string
     {
         switch (type)
         {
@@ -416,9 +406,7 @@ namespace Ace
         }
     }
 
-    auto CreateSymbolCategoryStringWithArticle(
-        const SymbolCategory symbolCategory
-    ) -> std::string
+    auto CreateSymbolCategoryStringWithArticle(const SymbolCategory symbolCategory) -> std::string
     {
         switch (symbolCategory)
         {

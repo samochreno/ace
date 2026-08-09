@@ -22,10 +22,11 @@ namespace Ace
         const AccessModifier accessModifier,
         const Ident& name,
         const std::vector<ITypeSymbol*>& typeArgs
-    ) : m_BodyScope{ bodyScope },
-        m_AccessModifier{ accessModifier },
-        m_Name{ name },
-        m_TypeArgs{ typeArgs }
+    )
+        : m_BodyScope{ bodyScope },
+          m_AccessModifier{ accessModifier },
+          m_Name{ name },
+          m_TypeArgs{ typeArgs }
     {
     }
 
@@ -55,15 +56,11 @@ namespace Ace
     }
 
     auto StructTypeSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<StructTypeSymbol>(
-            scope->CreateChild(),
-            GetAccessModifier(),
-            GetName(),
-            context.TypeArgs
+            scope->CreateChild(), GetAccessModifier(), GetName(), context.TypeArgs
         );
     }
 
@@ -85,19 +82,20 @@ namespace Ace
 
             if (m_ResolvingField.has_value())
             {
-                diagnostics.Add(CreateStructFieldCausesCycleError(
-                    m_ResolvingField.value()
-                ));
+                diagnostics.Add(CreateStructFieldCausesCycleError(m_ResolvingField.value()));
                 return std::move(diagnostics);
             }
 
             const auto fields = CollectFields();
-            std::for_each(begin(fields), end(fields),
-            [&](FieldVarSymbol* const field)
-            {
-                m_ResolvingField = field;
-                (void)field->GetType()->DiagnoseCycle();
-            });
+            std::for_each(
+                begin(fields),
+                end(fields),
+                [&](FieldVarSymbol* const field)
+                {
+                    m_ResolvingField = field;
+                    (void)field->GetType()->DiagnoseCycle();
+                }
+            );
 
             m_ResolvingField = std::nullopt;
             return std::move(diagnostics);
@@ -107,9 +105,7 @@ namespace Ace
         return Diagnosed<void>{ diagnostics };
     }
 
-    auto StructTypeSymbol::SetBodyScope(
-        const std::shared_ptr<Scope>& scope
-    ) -> void
+    auto StructTypeSymbol::SetBodyScope(const std::shared_ptr<Scope>& scope) -> void
     {
         m_BodyScope = scope;
     }
@@ -149,26 +145,16 @@ namespace Ace
         return m_IsTriviallyDroppable;
     }
 
-    auto StructTypeSymbol::CreateCopyGlueBlock(
-        FunctionSymbol* const glueSymbol
-    ) -> std::shared_ptr<const IEmittable<void>> 
+    auto StructTypeSymbol::CreateCopyGlueBlock(FunctionSymbol* const glueSymbol)
+        -> std::shared_ptr<const IEmittable<void>>
     {
-        return GlueGeneration::CreateCopyGlueBlock(
-            GetCompilation(),
-            glueSymbol,
-            this
-        );
+        return GlueGeneration::CreateCopyGlueBlock(GetCompilation(), glueSymbol, this);
     }
 
-    auto StructTypeSymbol::CreateDropGlueBlock(
-        FunctionSymbol* const glueSymbol
-    ) -> std::shared_ptr<const IEmittable<void>>
+    auto StructTypeSymbol::CreateDropGlueBlock(FunctionSymbol* const glueSymbol)
+        -> std::shared_ptr<const IEmittable<void>>
     {
-        return GlueGeneration::CreateDropGlueBlock(
-            GetCompilation(),
-            glueSymbol,
-            this
-        );
+        return GlueGeneration::CreateDropGlueBlock(GetCompilation(), glueSymbol, this);
     }
 
     auto StructTypeSymbol::BindCopyGlue(FunctionSymbol* const symbol) -> void
@@ -196,11 +182,14 @@ namespace Ace
     auto StructTypeSymbol::CollectFields() const -> std::vector<FieldVarSymbol*>
     {
         auto fields = m_BodyScope->CollectSymbols<FieldVarSymbol>();
-        std::sort(begin(fields), end(fields),
-        [](FieldVarSymbol* const lhs, FieldVarSymbol* const rhs)
-        {
-            return lhs->GetIndex() < rhs->GetIndex();
-        });
+        std::sort(
+            begin(fields),
+            end(fields),
+            [](FieldVarSymbol* const lhs, FieldVarSymbol* const rhs)
+            {
+                return lhs->GetIndex() < rhs->GetIndex();
+            }
+        );
 
         return fields;
     }

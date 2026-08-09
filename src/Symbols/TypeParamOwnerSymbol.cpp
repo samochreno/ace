@@ -5,8 +5,7 @@
 
 namespace Ace
 {
-    auto ITypeParamOwnerSymbol::CollectOwnedTypeParams() const
-        -> std::vector<TypeParamTypeSymbol*>
+    auto ITypeParamOwnerSymbol::CollectOwnedTypeParams() const -> std::vector<TypeParamTypeSymbol*>
     {
         return GetBodyScope()->CollectTypeParams();
     }

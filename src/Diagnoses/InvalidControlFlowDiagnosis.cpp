@@ -15,27 +15,30 @@ namespace Ace
         const std::vector<std::vector<ControlFlowInstruction>::const_iterator>& ends
     ) -> bool
     {
-        const auto matchingEndIt = std::find_if(begin(ends), end(ends),
-        [&](const std::vector<ControlFlowInstruction>::const_iterator end)
-        {
-            return instructionIt == end;
-        });
+        const auto matchingEndIt = std::find_if(
+            begin(ends),
+            end(ends),
+            [&](const std::vector<ControlFlowInstruction>::const_iterator end)
+            {
+                return instructionIt == end;
+            }
+        );
 
         return matchingEndIt != end(ends);
     }
 
-    static auto FindLabelInstruction(
-        const ControlFlowGraph& graph,
-        LabelSymbol* const labelSymbol
-    ) -> std::vector<ControlFlowInstruction>::const_iterator
+    static auto FindLabelInstruction(const ControlFlowGraph& graph, LabelSymbol* const labelSymbol)
+        -> std::vector<ControlFlowInstruction>::const_iterator
     {
-        return std::find_if(begin(graph.Instructions), end(graph.Instructions),
-        [&](const ControlFlowInstruction& instruction)
-        {
-            return 
-                (instruction.Kind == ControlFlowKind::Label) &&
-                (instruction.LabelSymbol == labelSymbol);
-        });
+        return std::find_if(
+            begin(graph.Instructions),
+            end(graph.Instructions),
+            [&](const ControlFlowInstruction& instruction)
+            {
+                return (instruction.Kind == ControlFlowKind::Label) &&
+                       (instruction.LabelSymbol == labelSymbol);
+            }
+        );
     }
 
     static auto IsEndReachableWithoutRet(
@@ -69,11 +72,7 @@ namespace Ace
                     auto newEnds = ends;
                     newEnds.push_back(instructionIt);
 
-                    return IsEndReachableWithoutRet(
-                        graph,
-                        labelInstructionIt,
-                        newEnds
-                    );
+                    return IsEndReachableWithoutRet(graph, labelInstructionIt, newEnds);
                 }
 
                 case ControlFlowKind::ConditionalJump:
@@ -85,17 +84,10 @@ namespace Ace
                     auto whenTrueEnds = ends;
                     whenTrueEnds.push_back(instructionIt);
 
-                    const bool whenTrue = IsEndReachableWithoutRet(
-                        graph,
-                        labelInstructionIt,
-                        whenTrueEnds
-                    );
+                    const bool whenTrue =
+                        IsEndReachableWithoutRet(graph, labelInstructionIt, whenTrueEnds);
 
-                    const bool whenFalse = IsEndReachableWithoutRet(
-                        graph,
-                        instructionIt + 1,
-                        ends
-                    );
+                    const bool whenFalse = IsEndReachableWithoutRet(graph, instructionIt + 1, ends);
 
                     return whenTrue || whenFalse;
                 }
@@ -111,10 +103,8 @@ namespace Ace
         return true;
     }
 
-    auto DiagnoseInvalidControlFlow(
-        const SrcLocation& srcLocation,
-        const ControlFlowGraph& graph
-    ) -> Diagnosed<void>
+    auto DiagnoseInvalidControlFlow(const SrcLocation& srcLocation, const ControlFlowGraph& graph)
+        -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 

@@ -12,9 +12,7 @@
 
 namespace Ace
 {
-    class SizeOfExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<SizeOfExprSema>
+    class SizeOfExprSyntax : public virtual IExprSyntax, public virtual ISemaSyntax<SizeOfExprSema>
     {
     public:
         SizeOfExprSyntax(

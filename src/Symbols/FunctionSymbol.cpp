@@ -27,12 +27,13 @@ namespace Ace
         const Ident& name,
         ITypeSymbol* const type,
         const std::vector<ITypeSymbol*>& typeArgs
-    ) : m_BodyScope{ bodyScope },
-        m_Category{ category },
-        m_AccessModifier{ accessModifier },
-        m_Name{ name },
-        m_Type{ type },
-        m_TypeArgs{ typeArgs }
+    )
+        : m_BodyScope{ bodyScope },
+          m_Category{ category },
+          m_AccessModifier{ accessModifier },
+          m_Name{ name },
+          m_Type{ type },
+          m_TypeArgs{ typeArgs }
     {
     }
 
@@ -62,8 +63,7 @@ namespace Ace
     }
 
     auto FunctionSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<FunctionSymbol>(
@@ -81,9 +81,7 @@ namespace Ace
         return m_Type;
     }
 
-    auto FunctionSymbol::SetBodyScope(
-        const std::shared_ptr<Scope>& scope
-    ) -> void
+    auto FunctionSymbol::SetBodyScope(const std::shared_ptr<Scope>& scope) -> void
     {
         m_BodyScope = scope;
     }
@@ -98,29 +96,30 @@ namespace Ace
         return m_BodyScope;
     }
 
-    auto FunctionSymbol::BindBlockSema(
-        const std::shared_ptr<const BlockStmtSema>& blockSema
-    ) -> void
+    auto FunctionSymbol::BindBlockSema(const std::shared_ptr<const BlockStmtSema>& blockSema)
+        -> void
     {
         ACE_ASSERT(!m_OptBlockSema.has_value());
         m_OptBlockSema = blockSema;
         m_OptEmittableBlock = blockSema;
     }
 
-    auto FunctionSymbol::GetBlockSema() -> const std::optional<std::shared_ptr<const BlockStmtSema>>&
+    auto FunctionSymbol::GetBlockSema()
+        -> const std::optional<std::shared_ptr<const BlockStmtSema>>&
     {
         return m_OptBlockSema;
     }
 
-    auto FunctionSymbol::BindEmittableBlock(
-        const std::shared_ptr<const IEmittable<void>>& emittableBlock
+    auto
+    FunctionSymbol::BindEmittableBlock(const std::shared_ptr<const IEmittable<void>>& emittableBlock
     ) -> void
     {
         ACE_ASSERT(!m_OptEmittableBlock.has_value());
         m_OptEmittableBlock = emittableBlock;
     }
 
-    auto FunctionSymbol::GetEmittableBlock() const -> const std::optional<std::shared_ptr<const IEmittable<void>>>&
+    auto FunctionSymbol::GetEmittableBlock() const
+        -> const std::optional<std::shared_ptr<const IEmittable<void>>>&
     {
         return m_OptEmittableBlock;
     }

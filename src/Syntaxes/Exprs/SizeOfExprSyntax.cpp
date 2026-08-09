@@ -15,9 +15,10 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const TypeName& typeName
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope}, 
-        m_TypeName{ typeName }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_TypeName{ typeName }
     {
     }
 
@@ -40,20 +41,13 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ITypeSymbol>(GetScope(), m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ITypeSymbol>(GetScope(), m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetType());
 
-        return Diagnosed
-        {
-            std::make_shared<const SizeOfExprSema>(
-                GetSrcLocation(),
-                GetScope(),
-                typeSymbol
-            ),
+        return Diagnosed{
+            std::make_shared<const SizeOfExprSema>(GetSrcLocation(), GetScope(), typeSymbol),
             std::move(diagnostics),
         };
     }

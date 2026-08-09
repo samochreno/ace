@@ -18,10 +18,11 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         const std::vector<std::shared_ptr<const IExprSyntax>>& conditions,
         const std::vector<std::shared_ptr<const BlockStmtSyntax>>& blocks
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_Conditions{ conditions },
-        m_Blocks{ blocks }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_Conditions{ conditions },
+          m_Blocks{ blocks }
 
     {
     }
@@ -38,10 +39,7 @@ namespace Ace
 
     auto IfStmtSyntax::CollectChildren() const -> std::vector<const ISyntax*>
     {
-        return SyntaxChildCollector{}
-            .Collect(m_Conditions)
-            .Collect(m_Blocks)
-            .Build();
+        return SyntaxChildCollector{}.Collect(m_Conditions).Collect(m_Blocks).Build();
     }
 
     auto IfStmtSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const IfStmtSema>>
@@ -51,7 +49,7 @@ namespace Ace
         std::vector<std::shared_ptr<const IExprSema>> conditionSemas{};
         std::transform(
             begin(m_Conditions),
-            end  (m_Conditions),
+            end(m_Conditions),
             back_inserter(conditionSemas),
             [&](const std::shared_ptr<const IExprSyntax>& condition)
             {
@@ -62,7 +60,7 @@ namespace Ace
         std::vector<std::shared_ptr<const BlockStmtSema>> blockSemas{};
         std::transform(
             begin(m_Blocks),
-            end  (m_Blocks),
+            end(m_Blocks),
             back_inserter(blockSemas),
             [&](const std::shared_ptr<const BlockStmtSyntax>& block)
             {
@@ -70,13 +68,9 @@ namespace Ace
             }
         );
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const IfStmtSema>(
-                GetSrcLocation(),
-                GetScope(),
-                conditionSemas,
-                blockSemas
+                GetSrcLocation(), GetScope(), conditionSemas, blockSemas
             ),
             std::move(diagnostics),
         };

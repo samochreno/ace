@@ -13,12 +13,10 @@
 
 namespace Ace
 {
-    ImplSelfSyntax::ImplSelfSyntax(
-        const std::shared_ptr<Scope>& scope,
-        const SymbolName& name
-    ) : m_SrcLocation{ name.CreateSrcLocation() },
-        m_Scope{ scope },
-        m_Name{ name }
+    ImplSelfSyntax::ImplSelfSyntax(const std::shared_ptr<Scope>& scope, const SymbolName& name)
+        : m_SrcLocation{ name.CreateSrcLocation() },
+          m_Scope{ scope },
+          m_Name{ name }
     {
     }
 
@@ -51,19 +49,14 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            GetScope()->ResolveStaticSymbol<ISizedTypeSymbol>(m_Name)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetSizedType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(GetScope()->ResolveStaticSymbol<ISizedTypeSymbol>(m_Name));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetSizedType());
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_unique<ImplSelfAliasTypeSymbol>(
-                GetSrcLocation(),
-                GetSymbolScope(),
-                typeSymbol
+                GetSrcLocation(), GetSymbolScope(), typeSymbol
             ),
             std::move(diagnostics),
         };

@@ -42,109 +42,100 @@ namespace Ace::Application
         return std::string(IndentLevel, ' ');
     }
 
-    auto CollectSyntaxes(
-        const std::shared_ptr<const ISyntax>& ast
-    ) -> std::vector<const ISyntax*>
+    auto CollectSyntaxes(const std::shared_ptr<const ISyntax>& ast) -> std::vector<const ISyntax*>
     {
         auto syntaxes = ast->CollectChildren();
         syntaxes.push_back(ast.get());
         return syntaxes;
     }
 
-    auto CreateAndDeclareSymbols(
-        const std::vector<const ISyntax*>& syntaxes
-    ) -> Diagnosed<std::vector<FunctionBlockBinding>>
+    auto CreateAndDeclareSymbols(const std::vector<const ISyntax*>& syntaxes)
+        -> Diagnosed<std::vector<FunctionBlockBinding>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         auto declSyntaxes = DynamicCastFilter<const IDeclSyntax*>(syntaxes);
 
-        std::sort(begin(declSyntaxes), end(declSyntaxes),
-        [](const IDeclSyntax* const lhs, const IDeclSyntax* const rhs)
-        {
-            const auto lhsOrder = lhs->GetDeclOrder();
-            const auto rhsOrder = rhs->GetDeclOrder();
-
-            if (lhsOrder < rhsOrder)
+        std::sort(
+            begin(declSyntaxes),
+            end(declSyntaxes),
+            [](const IDeclSyntax* const lhs, const IDeclSyntax* const rhs)
             {
-                return true;
-            }
+                const auto lhsOrder = lhs->GetDeclOrder();
+                const auto rhsOrder = rhs->GetDeclOrder();
 
-            if (lhsOrder > rhsOrder)
-            {
+                if (lhsOrder < rhsOrder)
+                {
+                    return true;
+                }
+
+                if (lhsOrder > rhsOrder)
+                {
+                    return false;
+                }
+
+                const auto lhsSuborder = lhs->GetDeclSuborder();
+                const auto rhsSuborder = rhs->GetDeclSuborder();
+
+                if (lhsSuborder < rhsSuborder)
+                {
+                    return true;
+                }
+
+                if (lhsSuborder > rhsSuborder)
+                {
+                    return false;
+                }
+
                 return false;
             }
-
-            const auto lhsSuborder = lhs->GetDeclSuborder();
-            const auto rhsSuborder = rhs->GetDeclSuborder();
-
-            if (lhsSuborder < rhsSuborder)
-            {
-                return true;
-            }
-
-            if (lhsSuborder > rhsSuborder)
-            {
-                return false;
-            }
-
-            return false;
-        });
+        );
 
         std::vector<FunctionBlockBinding> functionBlockBindings{};
-        std::for_each(begin(declSyntaxes), end(declSyntaxes),
-        [&](const IDeclSyntax* const declSyntax)
-        {
-            auto* const symbol = diagnostics.Collect(
-                Scope::DeclareSymbol(declSyntax)
-            );
-
-            auto* const functionSyntax =
-                dynamic_cast<const FunctionSyntax*>(declSyntax);
-            if (!functionSyntax)
+        std::for_each(
+            begin(declSyntaxes),
+            end(declSyntaxes),
+            [&](const IDeclSyntax* const declSyntax)
             {
-                return;
+                auto* const symbol = diagnostics.Collect(Scope::DeclareSymbol(declSyntax));
+
+                auto* const functionSyntax = dynamic_cast<const FunctionSyntax*>(declSyntax);
+                if (!functionSyntax)
+                {
+                    return;
+                }
+
+                auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
+                ACE_ASSERT(functionSymbol);
+
+                if (functionSymbol->GetBodyScope() != functionSyntax->GetBodyScope())
+                {
+                    return;
+                }
+
+                functionBlockBindings.emplace_back(functionSymbol, functionSyntax->GetBlock());
             }
+        );
 
-            auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
-            ACE_ASSERT(functionSymbol);
-
-            if (functionSymbol->GetBodyScope() != functionSyntax->GetBodyScope())
-            {
-                return;
-            }
-
-            functionBlockBindings.emplace_back(
-                functionSymbol,
-                functionSyntax->GetBlock()
-            );
-        });
-
-        return Diagnosed
-        {
+        return Diagnosed{
             std::move(functionBlockBindings),
             std::move(diagnostics),
         };
     }
 
     auto CreateVerifiedFunctionBlock(
-        std::shared_ptr<const BlockStmtSema> block,
-        ITypeSymbol* const functionTypeSymbol
+        std::shared_ptr<const BlockStmtSema> block, ITypeSymbol* const functionTypeSymbol
     ) -> Diagnosed<std::shared_ptr<const BlockStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        block = diagnostics.Collect(
-            block->CreateTypeChecked({ functionTypeSymbol })
-        );
+        block = diagnostics.Collect(block->CreateTypeChecked({ functionTypeSymbol }));
         block = block->CreateLowered({});
 
         return Diagnosed{ std::move(block), std::move(diagnostics) };
     }
 
-    static auto CreateAndBindFunctionBlock(
-        FunctionBlockBinding binding
-    ) -> Diagnosed<void>
+    static auto CreateAndBindFunctionBlock(FunctionBlockBinding binding) -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -162,17 +153,14 @@ namespace Ace::Application
         const auto& blockSyntax = binding.OptBlockSyntax.value();
 
         const auto block = diagnostics.Collect(CreateVerifiedFunctionBlock(
-            diagnostics.Collect(blockSyntax->CreateSema()),
-            symbol->GetType()
+            diagnostics.Collect(blockSyntax->CreateSema()), symbol->GetType()
         ));
 
         symbol->BindBlockSema(block);
 
         auto* const compilation = symbol->GetCompilation();
 
-        const bool isVoid =
-            symbol->GetType()->GetUnaliased() ==
-            compilation->GetVoidTypeSymbol();
+        const bool isVoid = symbol->GetType()->GetUnaliased() == compilation->GetVoidTypeSymbol();
 
         if (!isVoid)
         {
@@ -185,24 +173,24 @@ namespace Ace::Application
         return Diagnosed<void>{ std::move(diagnostics) };
     }
 
-    auto CreateAndBindFunctionBodies(
-        const std::vector<FunctionBlockBinding>& bindings
-    ) -> Diagnosed<void>
+    auto CreateAndBindFunctionBodies(const std::vector<FunctionBlockBinding>& bindings)
+        -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        std::for_each(begin(bindings), end(bindings),
-        [&](const FunctionBlockBinding& binding)
-        {
-            diagnostics.Collect(CreateAndBindFunctionBlock(binding));
-        });
+        std::for_each(
+            begin(bindings),
+            end(bindings),
+            [&](const FunctionBlockBinding& binding)
+            {
+                diagnostics.Collect(CreateAndBindFunctionBlock(binding));
+            }
+        );
 
         return Diagnosed<void>{ std::move(diagnostics) };
     }
 
-    static auto CompileCompilation(
-        Compilation* const compilation
-    ) -> Expected<void>
+    static auto CompileCompilation(Compilation* const compilation) -> Expected<void>
     {
         auto diagnostics = DiagnosticBag::CreateGlobal();
 
@@ -211,28 +199,28 @@ namespace Ace::Application
         std::vector<std::shared_ptr<const ModSyntax>> asts{};
 
         const auto stdFileBuffers = Std::CreateFileBuffers(compilation);
-        std::for_each(begin(stdFileBuffers), end(stdFileBuffers),
-        [&](const std::shared_ptr<const FileBuffer>& fileBuffer)
-        {
-            const auto optAST = diagnostics.Collect(
-                ParseAST(Std::GetName(), fileBuffer.get())
-            );
-            if (!optAST.has_value())
+        std::for_each(
+            begin(stdFileBuffers),
+            end(stdFileBuffers),
+            [&](const std::shared_ptr<const FileBuffer>& fileBuffer)
             {
-                return;
-            }
+                const auto optAST = diagnostics.Collect(ParseAST(Std::GetName(), fileBuffer.get()));
+                if (!optAST.has_value())
+                {
+                    return;
+                }
 
-            asts.push_back(optAST.value());
-        });
+                asts.push_back(optAST.value());
+            }
+        );
 
         std::for_each(
             begin(compilation->GetPackage().SrcFileBuffers),
-            end  (compilation->GetPackage().SrcFileBuffers),
+            end(compilation->GetPackage().SrcFileBuffers),
             [&](const FileBuffer* const fileBuffer)
             {
-                const auto optAST = diagnostics.Collect(
-                    ParseAST(compilation->GetPackage().Name, fileBuffer)
-                );
+                const auto optAST =
+                    diagnostics.Collect(ParseAST(compilation->GetPackage().Name, fileBuffer));
                 if (!optAST.has_value())
                 {
                     return;
@@ -243,21 +231,22 @@ namespace Ace::Application
         );
 
         std::vector<const ISyntax*> syntaxes{};
-        std::for_each(begin(asts), end(asts),
-        [&](const std::shared_ptr<const ModSyntax>& ast)
-        {
-            const auto children = CollectSyntaxes(ast);
-            syntaxes.insert(end(syntaxes), begin(children), end(children));
-        });
-
-        const auto functionBlockBindings = diagnostics.Collect(
-            CreateAndDeclareSymbols(syntaxes)
+        std::for_each(
+            begin(asts),
+            end(asts),
+            [&](const std::shared_ptr<const ModSyntax>& ast)
+            {
+                const auto children = CollectSyntaxes(ast);
+                syntaxes.insert(end(syntaxes), begin(children), end(children));
+            }
         );
+
+        const auto functionBlockBindings = diagnostics.Collect(CreateAndDeclareSymbols(syntaxes));
         BindSymbolParents(globalScope);
         diagnostics.Collect(DiagnosePublicInterfaceLeaks(compilation));
-        diagnostics.Collect(globalScope->GetGenericInstantiator().InstantiateBodies(
-            functionBlockBindings
-        ));
+        diagnostics.Collect(
+            globalScope->GetGenericInstantiator().InstantiateBodies(functionBlockBindings)
+        );
 
         compilation->GetNatives().Verify();
         diagnostics.Collect(CreateAndBindFunctionBodies(functionBlockBindings));
@@ -288,18 +277,15 @@ namespace Ace::Application
         return Void{ std::move(diagnostics) };
     }
 
-    static auto Compile(
-        const std::vector<std::string_view>& args
-    ) -> Expected<void>
+    static auto Compile(const std::vector<std::string_view>& args) -> Expected<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         std::vector<std::shared_ptr<const ISrcBuffer>> srcBuffers{};
 
         auto compilationDiagnostics = DiagnosticBag::CreateGlobal();
-        const auto optCompilation = compilationDiagnostics.Collect(
-            Compilation::Parse(&srcBuffers, args)
-        );
+        const auto optCompilation =
+            compilationDiagnostics.Collect(Compilation::Parse(&srcBuffers, args));
         diagnostics.Add(std::move(compilationDiagnostics));
         if (!optCompilation.has_value())
         {
@@ -311,9 +297,8 @@ namespace Ace::Application
         Out << optCompilation.value()->GetPackage().Name << "\n";
         IndentLevel++;
 
-        const auto didCompile = diagnostics.Collect(
-            CompileCompilation(optCompilation.value().get())
-        );
+        const auto didCompile =
+            diagnostics.Collect(CompileCompilation(optCompilation.value().get()));
         if (!didCompile || diagnostics.HasErrors())
         {
             Out << CreateIndent() << termcolor::bright_red << "Failed";

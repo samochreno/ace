@@ -5,12 +5,14 @@
 namespace Ace::AnonymousIdent
 {
     auto Concat() -> std::string;
-    template<typename... Args>
+
+    template <typename... Args>
     auto Concat(const std::string& first, const Args&... rest) -> std::string
     {
         std::string value = first;
 
-        if constexpr (sizeof...(rest) > 0) {
+        if constexpr (sizeof...(rest) > 0)
+        {
             value += "_";
         }
 
@@ -19,7 +21,8 @@ namespace Ace::AnonymousIdent
     }
 
     auto Create() -> std::string;
-    template<typename... Args>
+
+    template <typename... Args>
     auto Create(const std::string& first, const Args&... rest) -> std::string
     {
         return Create() + "_" + Concat(first, rest...);

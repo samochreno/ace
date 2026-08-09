@@ -22,6 +22,12 @@ Behavior tests invoke Ninja themselves, so run the full CTest suite serially
 (`ctest --test-dir build --output-on-failure -j1`) to avoid concurrent Ninja
 dependency-log failures.
 
+## Formatting
+
+C++ sources are formatted with the `clang-format` binary from the configured
+LLVM toolchain. Run `cmake --build build --target format` to apply formatting
+and `cmake --build build --target check-format` to verify it.
+
 ## Pass Responsibilities
 
 ### Parsing

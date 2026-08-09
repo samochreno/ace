@@ -13,8 +13,8 @@ namespace Ace
     static class NullStream : public std::ostream
     {
     public:
-        NullStream(
-        ) : std::ostream{ &m_Buffer }
+        NullStream()
+            : std::ostream{ &m_Buffer }
         {
         }
 
@@ -24,25 +24,21 @@ namespace Ace
         public:
             auto overflow(int c) -> int
             {
-               return c;
+                return c;
             }
         } m_Buffer;
-    
+
     } NullStream{};
 
     Logger Out{ LoggerConfiguration{ std::cout } };
-    Logger DebugOut
-    {
-        LoggerConfiguration
-        {
-            []() -> std::ostream&
-            {
-                switch (LogLevel)
-                {
-                    case LogLevelKind::Normal: return NullStream;
-                    case LogLevelKind::Debug:  return std::cout;
-                }
-            }()
-        }
-    };
+    Logger DebugOut{ LoggerConfiguration{ []() -> std::ostream&
+                                          {
+                                              switch (LogLevel)
+                                              {
+                                                  case LogLevelKind::Normal:
+                                                      return NullStream;
+                                                  case LogLevelKind::Debug:
+                                                      return std::cout;
+                                              }
+                                          }() } };
 }

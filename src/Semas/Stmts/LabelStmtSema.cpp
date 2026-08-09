@@ -13,20 +13,21 @@
 
 namespace Ace
 {
-    LabelStmtSema::LabelStmtSema(
-        const SrcLocation& srcLocation,
-        LabelSymbol* const symbol
-    ) : m_SrcLocation{ srcLocation },
-        m_Symbol{ symbol }
+    LabelStmtSema::LabelStmtSema(const SrcLocation& srcLocation, LabelSymbol* const symbol)
+        : m_SrcLocation{ srcLocation },
+          m_Symbol{ symbol }
     {
     }
 
     auto LabelStmtSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("LabelStmtSema", [&]()
-        {
-            logger.Log("m_Symbol", m_Symbol);
-        });
+        logger.Log(
+            "LabelStmtSema",
+            [&]()
+            {
+                logger.Log("m_Symbol", m_Symbol);
+            }
+        );
     }
 
     auto LabelStmtSema::GetSrcLocation() const -> const SrcLocation&
@@ -39,30 +40,26 @@ namespace Ace
         return m_Symbol->GetScope();
     }
 
-    auto LabelStmtSema::CreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const LabelStmtSema>>
+    auto LabelStmtSema::CreateTypeChecked(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const LabelStmtSema>>
     {
         return Diagnosed{ shared_from_this(), DiagnosticBag::Create() };
     }
 
-    auto LabelStmtSema::CreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IStmtSema>>
+    auto LabelStmtSema::CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IStmtSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto LabelStmtSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const LabelStmtSema>
+    auto LabelStmtSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const LabelStmtSema>
     {
         return shared_from_this();
     }
 
-    auto LabelStmtSema::CreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IStmtSema>
+    auto LabelStmtSema::CreateLoweredStmt(const LoweringContext& context) const
+        -> std::shared_ptr<const IStmtSema>
     {
         return CreateLowered(context);
     }
@@ -78,10 +75,7 @@ namespace Ace
 
     auto LabelStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
-        return std::vector
-        {
-            ControlFlowInstruction{ ControlFlowKind::Label, m_Symbol }
-        };
+        return std::vector{ ControlFlowInstruction{ ControlFlowKind::Label, m_Symbol } };
     }
 
     auto LabelStmtSema::GetSymbol() const -> LabelSymbol*

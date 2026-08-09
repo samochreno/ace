@@ -14,11 +14,12 @@ namespace Ace
 {
     DerefAsExprSyntax::DerefAsExprSyntax(
         const SrcLocation& srcLocation,
-        const TypeName& typeName, 
+        const TypeName& typeName,
         const std::shared_ptr<const IExprSyntax>& expr
-    ) : m_SrcLocation{ srcLocation },
-        m_TypeName{ typeName },
-        m_Expr{ expr }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_TypeName{ typeName },
+          m_Expr{ expr }
     {
     }
 
@@ -43,20 +44,13 @@ namespace Ace
 
         const auto exprSema = diagnostics.Collect(m_Expr->CreateExprSema());
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ITypeSymbol>(GetScope(), m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ITypeSymbol>(GetScope(), m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetType());
 
-        return Diagnosed
-        {
-            std::make_shared<const DerefAsExprSema>(
-                GetSrcLocation(),
-                exprSema,
-                typeSymbol
-            ),
+        return Diagnosed{
+            std::make_shared<const DerefAsExprSema>(GetSrcLocation(), exprSema, typeSymbol),
             std::move(diagnostics),
         };
     }

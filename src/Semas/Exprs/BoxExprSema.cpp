@@ -17,19 +17,22 @@
 namespace Ace
 {
     BoxExprSema::BoxExprSema(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<const IExprSema>& expr
-    ) : m_SrcLocation{ srcLocation },
-        m_Expr{ expr }
+        const SrcLocation& srcLocation, const std::shared_ptr<const IExprSema>& expr
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Expr{ expr }
     {
     }
 
     auto BoxExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("BoxExprSema", [&]()
-        {
-            logger.Log("m_Expr", m_Expr);
-        });
+        logger.Log(
+            "BoxExprSema",
+            [&]()
+            {
+                logger.Log("m_Expr", m_Expr);
+            }
+        );
     }
 
     auto BoxExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -42,9 +45,8 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto BoxExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const BoxExprSema>>
+    auto BoxExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const BoxExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -54,49 +56,42 @@ namespace Ace
         if (dynamic_cast<ISizedTypeSymbol*>(rawExprType->GetUnaliased()))
         {
             auto* const symbol = Scope::ForceCollectGenericInstance(
-                GetCompilation()->GetNatives().strong_ptr_new.GetSymbol(),
-                { rawExprType }
+                GetCompilation()->GetNatives().strong_ptr_new.GetSymbol(), { rawExprType }
             );
             auto* const functionSymbol = dynamic_cast<FunctionSymbol*>(symbol);
             ACE_ASSERT(functionSymbol);
 
-            const TypeInfo typeInfo
-            {
+            const TypeInfo typeInfo{
                 functionSymbol->CollectParams().front()->GetType(),
                 ValueKind::R,
             };
-            checkedExpr = diagnostics.Collect(
-                CreateImplicitlyConvertedAndTypeChecked(m_Expr, typeInfo)
-            );
+            checkedExpr =
+                diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(m_Expr, typeInfo));
         }
         else
         {
             diagnostics.Add(CreateExpectedSizedExprError(m_Expr));
         }
 
-
         if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const BoxExprSema>(GetSrcLocation(), checkedExpr),
             std::move(diagnostics),
         };
     }
-    
-    auto BoxExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
+
+    auto BoxExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto BoxExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const StaticCallExprSema>
+    auto BoxExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const StaticCallExprSema>
     {
         const auto loweredExpr = m_Expr->CreateLoweredExpr({});
 
@@ -108,16 +103,13 @@ namespace Ace
         ACE_ASSERT(functionSymbol);
 
         return std::make_shared<const StaticCallExprSema>(
-            GetSrcLocation(),
-            GetScope(),
-            functionSymbol,
-            std::vector{ loweredExpr }
-        )->CreateLowered({});
+                   GetSrcLocation(), GetScope(), functionSymbol, std::vector{ loweredExpr }
+        )
+            ->CreateLowered({});
     }
 
-    auto BoxExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto BoxExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }
@@ -134,10 +126,6 @@ namespace Ace
 
     auto BoxExprSema::GetTypeInfo() const -> TypeInfo
     {
-        return
-        { 
-            m_Expr->GetTypeInfo().Symbol->GetWithoutRef()->GetWithStrongPtr(),
-            ValueKind::R
-        };
+        return { m_Expr->GetTypeInfo().Symbol->GetWithoutRef()->GetWithStrongPtr(), ValueKind::R };
     }
 }

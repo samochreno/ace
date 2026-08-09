@@ -38,8 +38,6 @@ namespace Ace
         virtual ~IPartialDecl() = default;
 
         virtual auto GetName() const -> const Ident& = 0;
-        virtual auto ContinueCreatingSymbol(
-            ISymbol* const symbol
-        ) const -> Diagnosed<void> = 0;
+        virtual auto ContinueCreatingSymbol(ISymbol* const symbol) const -> Diagnosed<void> = 0;
     };
 }

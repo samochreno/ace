@@ -11,8 +11,9 @@ namespace Ace
     FunctionBlockBinding::FunctionBlockBinding(
         FunctionSymbol* const symbol,
         const std::optional<std::shared_ptr<const BlockStmtSyntax>>& optBlockSyntax
-    ) : Symbol{ symbol },
-        OptBlockSyntax{ optBlockSyntax }
+    )
+        : Symbol{ symbol },
+          OptBlockSyntax{ optBlockSyntax }
     {
     }
 }

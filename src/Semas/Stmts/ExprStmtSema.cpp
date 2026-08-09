@@ -12,18 +12,21 @@
 namespace Ace
 {
     ExprStmtSema::ExprStmtSema(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<const IExprSema>& expr
-    ) : m_Expr{ expr }
+        const SrcLocation& srcLocation, const std::shared_ptr<const IExprSema>& expr
+    )
+        : m_Expr{ expr }
     {
     }
 
-    auto ExprStmtSema::Log(SemaLogger &logger) const -> void
+    auto ExprStmtSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("ExprStmtSema", [&]()
-        {
-            logger.Log("m_Expr", m_Expr);
-        });
+        logger.Log(
+            "ExprStmtSema",
+            [&]()
+            {
+                logger.Log("m_Expr", m_Expr);
+            }
+        );
     }
 
     auto ExprStmtSema::GetSrcLocation() const -> const SrcLocation&
@@ -36,40 +39,32 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto ExprStmtSema::CreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const ExprStmtSema>>
+    auto ExprStmtSema::CreateTypeChecked(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const ExprStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto checkedExpr =
-            diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
+        const auto checkedExpr = diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
 
         if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
-            std::make_shared<const ExprStmtSema>(
-                GetSrcLocation(),
-                checkedExpr
-            ),
+        return Diagnosed{
+            std::make_shared<const ExprStmtSema>(GetSrcLocation(), checkedExpr),
             std::move(diagnostics),
         };
     }
 
-    auto ExprStmtSema::CreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IStmtSema>>
+    auto ExprStmtSema::CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IStmtSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto ExprStmtSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const ExprStmtSema>
+    auto ExprStmtSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const ExprStmtSema>
     {
         const auto loweredExpr = m_Expr->CreateLoweredExpr({});
 
@@ -78,15 +73,12 @@ namespace Ace
             return shared_from_this();
         }
 
-        return std::make_shared<const ExprStmtSema>(
-            GetSrcLocation(),
-            loweredExpr
-        )->CreateLowered({});
+        return std::make_shared<const ExprStmtSema>(GetSrcLocation(), loweredExpr)
+            ->CreateLowered({});
     }
 
-    auto ExprStmtSema::CreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IStmtSema>
+    auto ExprStmtSema::CreateLoweredStmt(const LoweringContext& context) const
+        -> std::shared_ptr<const IStmtSema>
     {
         return CreateLowered(context);
     }

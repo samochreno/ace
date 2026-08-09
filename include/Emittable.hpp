@@ -7,8 +7,7 @@ namespace Ace
 
 namespace Ace
 {
-    template<typename T>
-    class IEmittable
+    template <typename T> class IEmittable
     {
     public:
         virtual ~IEmittable() = default;

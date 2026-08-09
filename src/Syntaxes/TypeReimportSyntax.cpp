@@ -13,9 +13,10 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         const std::shared_ptr<Scope>& reimportScope,
         const Ident& name
-    ) : m_Scope{ scope },
-        m_ReimportScope{ reimportScope },
-        m_Name{ name }
+    )
+        : m_Scope{ scope },
+          m_ReimportScope{ reimportScope },
+          m_Name{ name }
     {
     }
 
@@ -48,20 +49,13 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optSymbol = diagnostics.Collect(
-            m_ReimportScope->ResolveStaticSymbol<ITypeSymbol>(m_Name)
-        );
+        const auto optSymbol =
+            diagnostics.Collect(m_ReimportScope->ResolveStaticSymbol<ITypeSymbol>(m_Name));
 
-        auto* const symbol = optSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetType()
-        );
+        auto* const symbol = optSymbol.value_or(GetCompilation()->GetErrorSymbols().GetType());
 
-        return Diagnosed
-        {
-            std::make_unique<ReimportAliasTypeSymbol>(
-                GetSymbolScope(),
-                symbol
-            ),
+        return Diagnosed{
+            std::make_unique<ReimportAliasTypeSymbol>(GetSymbolScope(), symbol),
             std::move(diagnostics),
         };
     }

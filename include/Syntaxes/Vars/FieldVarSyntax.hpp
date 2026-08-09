@@ -15,9 +15,7 @@
 
 namespace Ace
 {
-    class FieldVarSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class FieldVarSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         FieldVarSyntax(

@@ -13,9 +13,7 @@
 
 namespace Ace
 {
-    class NormalParamVarSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class NormalParamVarSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         NormalParamVarSyntax(

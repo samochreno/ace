@@ -17,8 +17,6 @@ namespace Ace
         const std::vector<ITypeSymbol*>& typeArgs
     ) -> DiagnosticGroup;
 
-    auto CreateUnsizedTypeArgError(
-        const SrcLocation& srcLocation,
-        ITypeSymbol* const typeArg
-    ) -> DiagnosticGroup;
+    auto CreateUnsizedTypeArgError(const SrcLocation& srcLocation, ITypeSymbol* const typeArg)
+        -> DiagnosticGroup;
 }

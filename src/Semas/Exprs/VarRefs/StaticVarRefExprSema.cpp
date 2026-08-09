@@ -25,18 +25,22 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         IVarSymbol* const varSymbol
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_VarSymbol{ varSymbol }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_VarSymbol{ varSymbol }
     {
     }
 
     auto StaticVarRefExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("StaticVarRefExprSema", [&]()
-        {
-            logger.Log("m_VarSymbol", m_VarSymbol);
-        });
+        logger.Log(
+            "StaticVarRefExprSema",
+            [&]()
+            {
+                logger.Log("m_VarSymbol", m_VarSymbol);
+            }
+        );
     }
 
     auto StaticVarRefExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -49,30 +53,26 @@ namespace Ace
         return m_Scope;
     }
 
-    auto StaticVarRefExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const StaticVarRefExprSema>>
+    auto StaticVarRefExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const StaticVarRefExprSema>>
     {
         return Diagnosed{ shared_from_this(), DiagnosticBag::Create() };
     }
 
-    auto StaticVarRefExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto StaticVarRefExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto StaticVarRefExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const StaticVarRefExprSema>
+    auto StaticVarRefExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const StaticVarRefExprSema>
     {
         return shared_from_this();
     }
 
-    auto StaticVarRefExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto StaticVarRefExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }
@@ -82,12 +82,9 @@ namespace Ace
         return MonoCollector{}.Collect(m_VarSymbol);
     }
 
-    auto StaticVarRefExprSema::Emit(
-        Emitter& emitter
-    ) const -> ExprEmitResult
+    auto StaticVarRefExprSema::Emit(Emitter& emitter) const -> ExprEmitResult
     {
-        auto* const globalVarSymbol =
-            dynamic_cast<GlobalVarSymbol*>(m_VarSymbol);
+        auto* const globalVarSymbol = dynamic_cast<GlobalVarSymbol*>(m_VarSymbol);
         if (globalVarSymbol)
         {
             return { emitter.GetGlobalVar(globalVarSymbol), {} };

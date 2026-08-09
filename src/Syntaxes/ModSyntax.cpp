@@ -33,18 +33,19 @@ namespace Ace
         const std::vector<std::shared_ptr<const FunctionSyntax>>& functions,
         const std::vector<std::shared_ptr<const GlobalVarSyntax>>& globalVars,
         const std::vector<std::shared_ptr<const UseSyntax>>& uses
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_BodyScope{ bodyScope },
-        m_Name{ name },
-        m_AccessModifier{ accessModifier },
-        m_Mods{ mods },
-        m_Types{ types },
-        m_InherentImpls{ inherentImpls },
-        m_TraitImpls{ traitImpls },
-        m_Functions{ functions },
-        m_GlobalVars{ globalVars },
-        m_Uses{ uses }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_BodyScope{ bodyScope },
+          m_Name{ name },
+          m_AccessModifier{ accessModifier },
+          m_Mods{ mods },
+          m_Types{ types },
+          m_InherentImpls{ inherentImpls },
+          m_TraitImpls{ traitImpls },
+          m_Functions{ functions },
+          m_GlobalVars{ globalVars },
+          m_Uses{ uses }
     {
     }
 
@@ -58,7 +59,7 @@ namespace Ace
         return m_Scope;
     }
 
-    auto ModSyntax::CollectChildren() const -> std::vector<const ISyntax*> 
+    auto ModSyntax::CollectChildren() const -> std::vector<const ISyntax*>
     {
         return SyntaxChildCollector{}
             .Collect(m_Mods)
@@ -88,20 +89,13 @@ namespace Ace
 
     auto ModSyntax::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        return Diagnosed<std::unique_ptr<ISymbol>>
-        {
-            std::make_unique<ModSymbol>(
-                m_BodyScope,
-                m_AccessModifier,
-                GetName()
-            ),
+        return Diagnosed<std::unique_ptr<ISymbol>>{
+            std::make_unique<ModSymbol>(m_BodyScope, m_AccessModifier, GetName()),
             DiagnosticBag::Create(),
         };
     }
 
-    auto ModSyntax::ContinueCreatingSymbol(
-        ISymbol* const symbol
-    ) const -> Diagnosed<void>
+    auto ModSyntax::ContinueCreatingSymbol(ISymbol* const symbol) const -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -110,17 +104,14 @@ namespace Ace
 
         if (modSymbol->GetAccessModifier() != m_AccessModifier)
         {
-            const SrcLocation nameSrcLocation
-            {
+            const SrcLocation nameSrcLocation{
                 m_Name.front().SrcLocation,
                 m_Name.back().SrcLocation,
             };
 
-            diagnostics.Add(CreateMismatchedAccessModifierError(
-                modSymbol,
-                nameSrcLocation,
-                m_AccessModifier
-            ));
+            diagnostics.Add(
+                CreateMismatchedAccessModifierError(modSymbol, nameSrcLocation, m_AccessModifier)
+            );
         }
 
         return Diagnosed<void>{ std::move(diagnostics) };

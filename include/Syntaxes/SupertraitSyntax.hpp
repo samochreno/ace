@@ -12,15 +12,11 @@
 
 namespace Ace
 {
-    class SupertraitSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class SupertraitSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         SupertraitSyntax(
-            const SymbolName& name,
-            const Ident& parentName,
-            const std::shared_ptr<Scope>& scope
+            const SymbolName& name, const Ident& parentName, const std::shared_ptr<Scope>& scope
         );
         virtual ~SupertraitSyntax() = default;
 
@@ -39,4 +35,3 @@ namespace Ace
         std::shared_ptr<Scope> m_Scope{};
     };
 }
-

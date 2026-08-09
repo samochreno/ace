@@ -11,9 +11,7 @@
 
 namespace Ace
 {
-    class ConstraintSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class ConstraintSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         ConstraintSyntax(

@@ -11,9 +11,7 @@
 
 namespace Ace
 {
-    class UseSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class UseSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         UseSyntax(

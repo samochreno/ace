@@ -12,10 +12,10 @@
 namespace Ace
 {
     TraitSelfSyntax::TraitSelfSyntax(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<Scope>& scope
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope }
+        const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope }
     {
     }
 
@@ -46,12 +46,8 @@ namespace Ace
 
     auto TraitSelfSyntax::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        return Diagnosed
-        {
-            std::make_unique<TraitSelfTypeSymbol>(
-                GetSrcLocation(),
-                GetSymbolScope()
-            ),
+        return Diagnosed{
+            std::make_unique<TraitSelfTypeSymbol>(GetSrcLocation(), GetSymbolScope()),
             DiagnosticBag::Create(),
         };
     }

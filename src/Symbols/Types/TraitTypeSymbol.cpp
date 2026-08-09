@@ -19,11 +19,12 @@ namespace Ace
         const AccessModifier accessModifier,
         const Ident& name,
         const std::vector<ITypeSymbol*>& typeArgs
-    ) : m_BodyScope{ bodyScope },
-        m_PrototypeScope{ prototypeScope },
-        m_AccessModifier{ accessModifier },
-        m_Name{ name },
-        m_TypeArgs{ typeArgs }
+    )
+        : m_BodyScope{ bodyScope },
+          m_PrototypeScope{ prototypeScope },
+          m_AccessModifier{ accessModifier },
+          m_Name{ name },
+          m_TypeArgs{ typeArgs }
     {
     }
 
@@ -53,8 +54,7 @@ namespace Ace
     }
 
     auto TraitTypeSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<TraitTypeSymbol>(
@@ -66,9 +66,7 @@ namespace Ace
         );
     }
 
-    auto TraitTypeSymbol::SetBodyScope(
-        const std::shared_ptr<Scope>& scope
-    ) -> void
+    auto TraitTypeSymbol::SetBodyScope(const std::shared_ptr<Scope>& scope) -> void
     {
         m_BodyScope = scope;
     }
@@ -85,32 +83,28 @@ namespace Ace
 
     auto TraitTypeSymbol::CollectPrototypes() const -> std::vector<PrototypeSymbol*>
     {
-        auto prototypes =
-            GetPrototypeScope()->CollectSymbols<PrototypeSymbol>();
+        auto prototypes = GetPrototypeScope()->CollectSymbols<PrototypeSymbol>();
 
         std::set<PrototypeSymbol*> prototypeSet{};
-        std::for_each(begin(prototypes), end(prototypes),
-        [&](PrototypeSymbol* const prototype)
-        {
-            prototypeSet.insert(
-                dynamic_cast<PrototypeSymbol*>(prototype->GetRoot())
-            );
-        });
+        std::for_each(
+            begin(prototypes),
+            end(prototypes),
+            [&](PrototypeSymbol* const prototype)
+            {
+                prototypeSet.insert(dynamic_cast<PrototypeSymbol*>(prototype->GetRoot()));
+            }
+        );
 
-        prototypes = std::vector<PrototypeSymbol*>{
-            begin(prototypeSet),
-            end  (prototypeSet)
-        };
+        prototypes = std::vector<PrototypeSymbol*>{ begin(prototypeSet), end(prototypeSet) };
 
-        std::sort(begin(prototypes), end(prototypes),
-        [](
-            PrototypeSymbol* const lhsPrototype,
-            PrototypeSymbol* const rhsPrototype
-            )
-        {
-            return lhsPrototype->GetIndex() < rhsPrototype->GetIndex();
-        });
-
+        std::sort(
+            begin(prototypes),
+            end(prototypes),
+            [](PrototypeSymbol* const lhsPrototype, PrototypeSymbol* const rhsPrototype)
+            {
+                return lhsPrototype->GetIndex() < rhsPrototype->GetIndex();
+            }
+        );
 
         return prototypes;
     }
@@ -122,13 +116,12 @@ namespace Ace
 
     auto TraitTypeSymbol::CollectSupertraits() const -> std::vector<SupertraitSymbol*>
     {
-        const auto allSupertraits =
-            GetBodyScope()->CollectSymbols<SupertraitSymbol>();
+        const auto allSupertraits = GetBodyScope()->CollectSymbols<SupertraitSymbol>();
 
         std::vector<SupertraitSymbol*> supertraits{};
         std::copy_if(
             begin(allSupertraits),
-            end  (allSupertraits),
+            end(allSupertraits),
             back_inserter(supertraits),
             [](SupertraitSymbol* const supertrait)
             {

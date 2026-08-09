@@ -11,14 +11,12 @@
 
 namespace Ace
 {
-    VoidTypeSymbol::VoidTypeSymbol(
-        const std::shared_ptr<Scope>& scope
-    ) : m_BodyScope{ scope->CreateChild() },
-        m_Name
-        {
-            SrcLocation{ GetCompilation() },
-            std::string{ TokenKindToKeywordMap.at(TokenKind::VoidKeyword) },
-        }
+    VoidTypeSymbol::VoidTypeSymbol(const std::shared_ptr<Scope>& scope)
+        : m_BodyScope{ scope->CreateChild() },
+          m_Name{
+              SrcLocation{ GetCompilation() },
+              std::string{ TokenKindToKeywordMap.at(TokenKind::VoidKeyword) },
+          }
     {
     }
 
@@ -48,16 +46,13 @@ namespace Ace
     }
 
     auto VoidTypeSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         ACE_UNREACHABLE();
     }
 
-    auto VoidTypeSymbol::SetBodyScope(
-        const std::shared_ptr<Scope>& scope
-    ) -> void
+    auto VoidTypeSymbol::SetBodyScope(const std::shared_ptr<Scope>& scope) -> void
     {
         ACE_UNREACHABLE();
     }

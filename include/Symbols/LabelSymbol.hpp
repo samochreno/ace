@@ -14,10 +14,7 @@ namespace Ace
     class LabelSymbol : public virtual ISymbol
     {
     public:
-        LabelSymbol(
-            const std::shared_ptr<Scope>& scope,
-            const Ident& name
-        );
+        LabelSymbol(const std::shared_ptr<Scope>& scope, const Ident& name);
         virtual ~LabelSymbol() = default;
 
         auto CreateTypeNoun() const -> Noun final;
@@ -27,8 +24,7 @@ namespace Ace
         auto GetName() const -> const Ident& final;
 
         auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> final;
 
     private:

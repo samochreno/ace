@@ -20,10 +20,9 @@
 
 namespace Ace
 {
-    static auto IsSymbolAccessibleFromScope(
-        ISymbol* const symbol,
-        const std::shared_ptr<const Scope>& scope
-    ) -> bool
+    static auto
+    IsSymbolAccessibleFromScope(ISymbol* const symbol, const std::shared_ptr<const Scope>& scope)
+        -> bool
     {
         switch (symbol->GetAccessModifier())
         {
@@ -32,7 +31,7 @@ namespace Ace
                 const auto optSymbolMod = symbol->GetScope()->FindMod();
                 if (!optSymbolMod.has_value())
                 {
-                    return true; 
+                    return true;
                 }
 
                 auto* const symbolMod = optSymbolMod.value();
@@ -99,34 +98,25 @@ namespace Ace
 
         if (symbol->GetCategory() != symbolCategory)
         {
-            diagnostics.Add(CreateIncorrectSymbolCategoryError(
-                srcLocation,
-                symbol,
-                symbolCategory
-            ));
+            diagnostics.Add(CreateIncorrectSymbolCategoryError(srcLocation, symbol, symbolCategory)
+            );
             return std::move(diagnostics);
         }
 
         return Void{ std::move(diagnostics) };
     }
 
-    auto CastToGeneric(
-        const ISymbol* const symbol
-    ) -> const IGenericSymbol*
+    auto CastToGeneric(const ISymbol* const symbol) -> const IGenericSymbol*
     {
         return dynamic_cast<const IGenericSymbol*>(symbol);
     }
 
-    auto CastToGeneric(
-        const ITypeSymbol* const symbol
-    ) -> const IGenericSymbol*
+    auto CastToGeneric(const ITypeSymbol* const symbol) -> const IGenericSymbol*
     {
         return dynamic_cast<const IGenericSymbol*>(symbol);
     }
 
-    auto GetTypeArgs(
-        const IGenericSymbol* const generic
-    ) -> const std::vector<ITypeSymbol*>&
+    auto GetTypeArgs(const IGenericSymbol* const generic) -> const std::vector<ITypeSymbol*>&
     {
         return generic->GetTypeArgs();
     }
@@ -136,12 +126,9 @@ namespace Ace
         return type->GetDerefed();
     }
 
-    auto GetPrototypeSelfType(
-        const ISymbol* const symbol
-    ) -> std::optional<ITypeSymbol*>
+    auto GetPrototypeSelfType(const ISymbol* const symbol) -> std::optional<ITypeSymbol*>
     {
-        auto* const prototype =
-            dynamic_cast<const PrototypeSymbol*>(symbol->GetUnaliased());
+        auto* const prototype = dynamic_cast<const PrototypeSymbol*>(symbol->GetUnaliased());
         if (!prototype)
         {
             return std::nullopt;
@@ -164,9 +151,8 @@ namespace Ace
     {
     }
 
-    GlobalScope::GlobalScope(
-        Compilation* const compilation
-    ) : m_Scope{ new Scope(compilation) }
+    GlobalScope::GlobalScope(Compilation* const compilation)
+        : m_Scope{ new Scope(compilation) }
     {
     }
 
@@ -184,16 +170,18 @@ namespace Ace
     {
         return m_Scope;
     }
-    
-    static auto FindExpiredChild(
-        const std::vector<std::weak_ptr<Scope>>& children
-    ) -> std::vector<std::weak_ptr<Scope>>::const_iterator
+
+    static auto FindExpiredChild(const std::vector<std::weak_ptr<Scope>>& children)
+        -> std::vector<std::weak_ptr<Scope>>::const_iterator
     {
-        return std::find_if(begin(children), end(children),
-        [&](const std::weak_ptr<Scope>& child)
-        {
-            return child.expired();
-        });
+        return std::find_if(
+            begin(children),
+            end(children),
+            [&](const std::weak_ptr<Scope>& child)
+            {
+                return child.expired();
+            }
+        );
     }
 
     Scope::~Scope()
@@ -249,7 +237,7 @@ namespace Ace
 
         const auto moveUp = [&]() -> void
         {
-            child = optParent.value(); 
+            child = optParent.value();
             optParent = optParent.value()->GetParent();
         };
 
@@ -262,8 +250,7 @@ namespace Ace
                 continue;
             }
 
-            const auto matchingNameSymbolsIt =
-                parent->m_SymbolMap.find(child->GetName().value());
+            const auto matchingNameSymbolsIt = parent->m_SymbolMap.find(child->GetName().value());
 
             if (matchingNameSymbolsIt == end(parent->m_SymbolMap))
             {
@@ -277,8 +264,7 @@ namespace Ace
                 continue;
             }
 
-            auto* const modSymbol =
-                dynamic_cast<ModSymbol*>(matchingNameSymbols.front().get());
+            auto* const modSymbol = dynamic_cast<ModSymbol*>(matchingNameSymbols.front().get());
             if (!modSymbol)
             {
                 continue;
@@ -306,13 +292,11 @@ namespace Ace
         return AddChild(std::nullopt);
     }
 
-    auto Scope::GetOrCreateChild(
-        const std::string& name
-    ) -> std::shared_ptr<Scope>
+    auto Scope::GetOrCreateChild(const std::string& name) -> std::shared_ptr<Scope>
     {
         const auto matchingNameChildIt = std::find_if(
             begin(m_Children),
-            end  (m_Children),
+            end(m_Children),
             [&](const std::weak_ptr<Scope>& child)
             {
                 return child.lock()->m_OptName == name;
@@ -326,13 +310,11 @@ namespace Ace
         return AddChild(name);
     }
 
-    auto Scope::HasChild(
-        const std::shared_ptr<const Scope>& scope
-    ) const -> bool
+    auto Scope::HasChild(const std::shared_ptr<const Scope>& scope) const -> bool
     {
         const auto childOrChildsParentIt = std::find_if(
             begin(m_Children),
-            end  (m_Children),
+            end(m_Children),
             [&](const std::weak_ptr<Scope>& ownedChild)
             {
                 const auto child = ownedChild.lock();
@@ -362,28 +344,21 @@ namespace Ace
 
         if (auto* const partialDecl = dynamic_cast<const IPartialDecl*>(decl))
         {
-            const auto optDeclaredSymbol = scope->GetDeclaredSymbol(
-                partialDecl->GetName().String,
-                {},
-                std::nullopt
-            );
+            const auto optDeclaredSymbol =
+                scope->GetDeclaredSymbol(partialDecl->GetName().String, {}, std::nullopt);
 
             if (optDeclaredSymbol.has_value())
             {
-                diagnostics.Collect(partialDecl->ContinueCreatingSymbol(
-                    optDeclaredSymbol.value()
-                ));
-                return Diagnosed
-                {
+                diagnostics.Collect(partialDecl->ContinueCreatingSymbol(optDeclaredSymbol.value()));
+                return Diagnosed{
                     optDeclaredSymbol.value(),
                     std::move(diagnostics),
                 };
             }
         }
 
-        auto* const symbol = diagnostics.Collect(
-            DeclareSymbol(diagnostics.Collect(decl->CreateSymbol()))
-        );
+        auto* const symbol =
+            diagnostics.Collect(DeclareSymbol(diagnostics.Collect(decl->CreateSymbol())));
 
         return Diagnosed{ symbol, std::move(diagnostics) };
     }
@@ -393,9 +368,12 @@ namespace Ace
         std::vector<std::shared_ptr<Scope>> children;
         std::transform(
             begin(m_Children),
-            end  (m_Children),
+            end(m_Children),
             back_inserter(children),
-            [](const std::weak_ptr<Scope>& child) { return child.lock(); }
+            [](const std::weak_ptr<Scope>& child)
+            {
+                return child.lock();
+            }
         );
 
         return children;
@@ -411,19 +389,21 @@ namespace Ace
         const auto scope = symbol->GetScope();
         auto& symbols = scope->m_SymbolMap.at(symbol->GetName().String);
 
-        const auto matchingSymbolIt = std::find_if(begin(symbols), end(symbols),
-        [&](const std::unique_ptr<ISymbol>& ownedSymbol)
-        {
-            return ownedSymbol.get() == symbol;
-        });
+        const auto matchingSymbolIt = std::find_if(
+            begin(symbols),
+            end(symbols),
+            [&](const std::unique_ptr<ISymbol>& ownedSymbol)
+            {
+                return ownedSymbol.get() == symbol;
+            }
+        );
         ACE_ASSERT(matchingSymbolIt != end(symbols));
 
         symbols.erase(matchingSymbolIt);
     }
 
-    auto Scope::CreateArgTypes(
-        const std::vector<ITypeSymbol*>& argTypes
-    ) -> std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>
+    auto Scope::CreateArgTypes(const std::vector<ITypeSymbol*>& argTypes)
+        -> std::optional<std::reference_wrapper<const std::vector<ITypeSymbol*>>>
     {
         return { argTypes };
     }
@@ -432,19 +412,23 @@ namespace Ace
     {
         std::vector<ISymbol*> symbols{};
 
-        std::for_each(begin(m_SymbolMap), end(m_SymbolMap),
-        [&](const std::pair<const std::string&, const std::vector<std::unique_ptr<ISymbol>>&>& pair)
-        {
-            std::transform(
-                begin(pair.second),
-                end  (pair.second),
-                back_inserter(symbols),
-                [](const std::unique_ptr<ISymbol>& symbol)
-                {
-                    return symbol.get();
-                }
-            );
-        });
+        std::for_each(
+            begin(m_SymbolMap),
+            end(m_SymbolMap),
+            [&](const std::pair<const std::string&, const std::vector<std::unique_ptr<ISymbol>>&>&
+                    pair)
+            {
+                std::transform(
+                    begin(pair.second),
+                    end(pair.second),
+                    back_inserter(symbols),
+                    [](const std::unique_ptr<ISymbol>& symbol)
+                    {
+                        return symbol.get();
+                    }
+                );
+            }
+        );
 
         return symbols;
     }
@@ -453,18 +437,16 @@ namespace Ace
     {
         auto symbols = CollectAllSymbols();
 
-        std::for_each(begin(m_Children), end(m_Children),
-        [&](const std::weak_ptr<Scope>& child)
-        {
-            const auto childSymbols =
-                child.lock()->CollectAllSymbolsRecursive();
+        std::for_each(
+            begin(m_Children),
+            end(m_Children),
+            [&](const std::weak_ptr<Scope>& child)
+            {
+                const auto childSymbols = child.lock()->CollectAllSymbolsRecursive();
 
-            symbols.insert(
-                end(symbols),
-                begin(childSymbols),
-                end  (childSymbols)
-            );
-        });
+                symbols.insert(end(symbols), begin(childSymbols), end(childSymbols));
+            }
+        );
 
         return symbols;
     }
@@ -475,12 +457,10 @@ namespace Ace
         ITypeSymbol* Arg{};
     };
 
-    static auto DeduceTypeArg(
-        ITypeSymbol* argType,
-        ITypeSymbol* paramType
-    ) -> std::vector<TypeArgDeductionResult>
+    static auto DeduceTypeArg(ITypeSymbol* argType, ITypeSymbol* paramType)
+        -> std::vector<TypeArgDeductionResult>
     {
-          argType =   argType->GetWithoutRef()->GetUnaliasedType();
+        argType = argType->GetWithoutRef()->GetUnaliasedType();
         paramType = paramType->GetWithoutRef()->GetUnaliasedType();
 
         auto* const typeParam = dynamic_cast<TypeParamTypeSymbol*>(paramType);
@@ -489,7 +469,7 @@ namespace Ace
             return std::vector{ TypeArgDeductionResult{ typeParam, argType } };
         }
 
-        const auto& argTypeArgs   =   argType->GetTypeArgs();
+        const auto& argTypeArgs = argType->GetTypeArgs();
         const auto& paramTypeArgs = paramType->GetTypeArgs();
 
         if (argTypeArgs.size() != paramTypeArgs.size())
@@ -500,13 +480,10 @@ namespace Ace
         std::vector<TypeArgDeductionResult> finalDeductionResults{};
         for (size_t i = 0; i < argTypeArgs.size(); i++)
         {
-            const auto deductionResults =
-                DeduceTypeArg(argTypeArgs.at(i), paramTypeArgs.at(i));
-            
+            const auto deductionResults = DeduceTypeArg(argTypeArgs.at(i), paramTypeArgs.at(i));
+
             finalDeductionResults.insert(
-                end(finalDeductionResults),
-                begin(deductionResults),
-                end  (deductionResults)
+                end(finalDeductionResults), begin(deductionResults), end(deductionResults)
             );
         }
 
@@ -514,7 +491,7 @@ namespace Ace
     }
 
     static auto CollectTypeArgsFromMap(
-        const SrcLocation& srcLocation, 
+        const SrcLocation& srcLocation,
         const std::map<TypeParamTypeSymbol*, ITypeSymbol*>& paramToArgMap,
         const std::vector<TypeParamTypeSymbol*>& params
     ) -> Expected<std::vector<ITypeSymbol*>>
@@ -522,28 +499,27 @@ namespace Ace
         auto diagnostics = DiagnosticBag::Create();
 
         std::vector<ITypeSymbol*> args{};
-        std::for_each(begin(params), end(params),
-        [&](TypeParamTypeSymbol* const param)
-        {
-            const auto matchingArgIt = paramToArgMap.find(param);
-            const bool hasMatchingArg = matchingArgIt != end(paramToArgMap);
-
-            if (!hasMatchingArg)
+        std::for_each(
+            begin(params),
+            end(params),
+            [&](TypeParamTypeSymbol* const param)
             {
-                diagnostics.Add(CreateUnableToDeduceTypeArgError(
-                    srcLocation,
-                    param
-                ));
+                const auto matchingArgIt = paramToArgMap.find(param);
+                const bool hasMatchingArg = matchingArgIt != end(paramToArgMap);
+
+                if (!hasMatchingArg)
+                {
+                    diagnostics.Add(CreateUnableToDeduceTypeArgError(srcLocation, param));
+                }
+
+                auto* const compilation = srcLocation.Buffer->GetCompilation();
+
+                auto* const arg = hasMatchingArg ? matchingArgIt->second
+                                                 : compilation->GetErrorSymbols().GetType();
+
+                args.push_back(arg);
             }
-
-            auto* const compilation = srcLocation.Buffer->GetCompilation();
-
-            auto* const arg = hasMatchingArg ?
-                matchingArgIt->second :
-                compilation->GetErrorSymbols().GetType();
-
-            args.push_back(arg);
-        });
+        );
 
         if (diagnostics.HasErrors())
         {
@@ -570,10 +546,7 @@ namespace Ace
             if (alreadyDeducedArg != deductionResult.Arg)
             {
                 diagnostics.Add(CreateTypeArgDeductionConflict(
-                    srcLocation,
-                    deductionResult.Param,
-                    alreadyDeducedArg,
-                    deductionResult.Arg
+                    srcLocation, deductionResult.Param, alreadyDeducedArg, deductionResult.Arg
                 ));
                 return std::move(diagnostics);
             }
@@ -583,8 +556,7 @@ namespace Ace
     }
 
     static auto CreateKnownTypeParamToArgMap(
-        const std::vector<TypeParamTypeSymbol*>& params,
-        const std::vector<ITypeSymbol*>& knownArgs
+        const std::vector<TypeParamTypeSymbol*>& params, const std::vector<ITypeSymbol*>& knownArgs
     ) -> std::map<TypeParamTypeSymbol*, ITypeSymbol*>
     {
         std::map<TypeParamTypeSymbol*, ITypeSymbol*> map{};
@@ -618,35 +590,32 @@ namespace Ace
         std::vector<TypeArgDeductionResult> deductionResults{};
         for (size_t i = 0; i < argTypes.size(); i++)
         {
-            const auto currentDeductionResults =
-                DeduceTypeArg(argTypes.at(i), paramTypes.at(i));
+            const auto currentDeductionResults = DeduceTypeArg(argTypes.at(i), paramTypes.at(i));
 
             deductionResults.insert(
-                end(deductionResults),
-                begin(currentDeductionResults),
-                end  (currentDeductionResults)
+                end(deductionResults), begin(currentDeductionResults), end(currentDeductionResults)
             );
         }
 
-        std::for_each(begin(deductionResults), end(deductionResults),
-        [&](const TypeArgDeductionResult& deductionResult)
-        {
-            const auto didVerifyDeductionResult = diagnostics.Collect(VerifyTypeArgDeductionResult(
-                srcLocation,
-                deductionResult,
-                paramToArgMap
-            ));
-            if (!didVerifyDeductionResult)
+        std::for_each(
+            begin(deductionResults),
+            end(deductionResults),
+            [&](const TypeArgDeductionResult& deductionResult)
             {
-                return;
+                const auto didVerifyDeductionResult = diagnostics.Collect(
+                    VerifyTypeArgDeductionResult(srcLocation, deductionResult, paramToArgMap)
+                );
+                if (!didVerifyDeductionResult)
+                {
+                    return;
+                }
+
+                paramToArgMap[deductionResult.Param] = deductionResult.Arg;
             }
-
-            paramToArgMap[deductionResult.Param] = deductionResult.Arg;
-        });
-
-        const auto optArgs = diagnostics.Collect(
-            CollectTypeArgsFromMap(srcLocation, paramToArgMap, params)
         );
+
+        const auto optArgs =
+            diagnostics.Collect(CollectTypeArgsFromMap(srcLocation, paramToArgMap, params));
         if (!optArgs.has_value())
         {
             return std::move(diagnostics);
@@ -691,11 +660,7 @@ namespace Ace
         }
 
         const auto optArg = diagnostics.Collect(TypeArgDeductionAlgorithm(
-            srcLocation,
-            knownArgs,
-            params,
-            optArgTypes.value(),
-            paramTypes
+            srcLocation, knownArgs, params, optArgTypes.value(), paramTypes
         ));
         if (!optArg.has_value())
         {
@@ -704,7 +669,7 @@ namespace Ace
 
         return Expected{ optArg.value(), std::move(diagnostics) };
     }
-    
+
     auto Scope::CollectGenericInstance(
         const SrcLocation& srcLocation,
         IGenericSymbol* const root,
@@ -719,9 +684,8 @@ namespace Ace
 
         if (!root->GetTypeArgs().empty())
         {
-            const auto optArgs = diagnostics.Collect(
-                DeduceTypeArgs(srcLocation, root, knownArgs, optArgTypes)
-            );
+            const auto optArgs =
+                diagnostics.Collect(DeduceTypeArgs(srcLocation, root, knownArgs, optArgTypes));
             if (!optArgs.has_value())
             {
                 return std::move(diagnostics);
@@ -730,12 +694,10 @@ namespace Ace
             args = optArgs.value();
         }
 
-        const auto optResolvedInstance =
-            ResolveGenericInstance(root, args, optSelfType);
+        const auto optResolvedInstance = ResolveGenericInstance(root, args, optSelfType);
         if (optResolvedInstance.has_value())
         {
-            return Expected
-            {
+            return Expected{
                 optResolvedInstance.value(),
                 std::move(diagnostics),
             };
@@ -743,13 +705,9 @@ namespace Ace
 
         auto* const compilation = root->GetCompilation();
 
-        const auto optSymbol = diagnostics.Collect(
-            GenericInstantiator::Instantiate(
-                srcLocation,
-                root,
-                InstantiationContext{ args, optSelfType }
-            )
-        );
+        const auto optSymbol = diagnostics.Collect(GenericInstantiator::Instantiate(
+            srcLocation, root, InstantiationContext{ args, optSelfType }
+        ));
         if (!optSymbol.has_value())
         {
             return std::move(diagnostics);
@@ -765,31 +723,29 @@ namespace Ace
         const std::optional<ITypeSymbol*>& optSelfType
     ) -> ISymbol*
     {
-        return DiagnosticBag::CreateNoError().Collect(CollectGenericInstance(
-            SrcLocation{ root->GetCompilation() },
-            root,
-            knownArgs,
-            optArgTypes,
-            optSelfType
-        )).value();
+        return DiagnosticBag::CreateNoError()
+            .Collect(CollectGenericInstance(
+                SrcLocation{ root->GetCompilation() }, root, knownArgs, optArgTypes, optSelfType
+            ))
+            .value();
     }
 
     auto Scope::CollectTypeParams() const -> std::vector<TypeParamTypeSymbol*>
     {
         auto params = CollectSymbols<TypeParamTypeSymbol>();
-        std::sort(begin(params), end(params),
-        [](TypeParamTypeSymbol* const lhs, TypeParamTypeSymbol* const rhs)
-        {
-            return lhs->GetIndex() < rhs->GetIndex();
-        });
+        std::sort(
+            begin(params),
+            end(params),
+            [](TypeParamTypeSymbol* const lhs, TypeParamTypeSymbol* const rhs)
+            {
+                return lhs->GetIndex() < rhs->GetIndex();
+            }
+        );
 
         return params;
     }
 
-    auto Scope::HasImpl(
-        TraitTypeSymbol* const trait,
-        ITypeSymbol* const type
-    ) -> bool
+    auto Scope::HasImpl(TraitTypeSymbol* const trait, ITypeSymbol* const type) -> bool
     {
         if (dynamic_cast<TypeParamTypeSymbol*>(type->GetUnaliasedType()))
         {
@@ -797,7 +753,7 @@ namespace Ace
         }
 
         std::vector scopes{ trait->GetUnaliased()->GetScope() };
-        
+
         const auto typeScope = type->GetUnaliased()->GetScope();
         if (typeScope != scopes.front())
         {
@@ -805,34 +761,35 @@ namespace Ace
         }
 
         std::set<TraitImplSymbol*> impls{};
-        std::for_each(begin(scopes), end(scopes),
-        [&](const std::shared_ptr<Scope>& scope)
-        {
-            const auto allImpls = scope->CollectSymbols<TraitImplSymbol>();
-
-            std::for_each(begin(allImpls), end(allImpls),
-            [&](TraitImplSymbol* const impl)
+        std::for_each(
+            begin(scopes),
+            end(scopes),
+            [&](const std::shared_ptr<Scope>& scope)
             {
-                const bool doesOverlap =
-                    DoPlaceholdersOverlap(trait, impl->GetTrait()) &&
-                    DoPlaceholdersOverlap(type,  impl->GetType());
-                if (doesOverlap)
-                {
-                    impls.insert(dynamic_cast<TraitImplSymbol*>(
-                        impl->GetUnaliased()
-                    ));
-                }
-            });
-        });
+                const auto allImpls = scope->CollectSymbols<TraitImplSymbol>();
+
+                std::for_each(
+                    begin(allImpls),
+                    end(allImpls),
+                    [&](TraitImplSymbol* const impl)
+                    {
+                        const bool doesOverlap = DoPlaceholdersOverlap(trait, impl->GetTrait()) &&
+                                                 DoPlaceholdersOverlap(type, impl->GetType());
+                        if (doesOverlap)
+                        {
+                            impls.insert(dynamic_cast<TraitImplSymbol*>(impl->GetUnaliased()));
+                        }
+                    }
+                );
+            }
+        );
 
         ACE_ASSERT(impls.empty() || impls.size() == 1);
         return !impls.empty();
     }
 
-    auto Scope::CollectImplOfFor(
-        TraitTypeSymbol* const trait,
-        ITypeSymbol* const type
-    ) -> std::optional<TraitImplSymbol*>
+    auto Scope::CollectImplOfFor(TraitTypeSymbol* const trait, ITypeSymbol* const type)
+        -> std::optional<TraitImplSymbol*>
     {
         if (dynamic_cast<TypeParamTypeSymbol*>(type->GetUnaliasedType()))
         {
@@ -840,7 +797,7 @@ namespace Ace
         }
 
         std::vector scopes{ trait->GetUnaliased()->GetScope() };
-        
+
         const auto typeScope = type->GetUnaliased()->GetScope();
         if (typeScope != scopes.front())
         {
@@ -848,41 +805,39 @@ namespace Ace
         }
 
         std::set<TraitImplSymbol*> impls{};
-        std::for_each(begin(scopes), end(scopes),
-        [&](const std::shared_ptr<Scope>& scope)
-        {
-            const auto allImpls = scope->CollectSymbols<TraitImplSymbol>();
-
-            std::for_each(begin(allImpls), end(allImpls),
-            [&](TraitImplSymbol* const impl)
+        std::for_each(
+            begin(scopes),
+            end(scopes),
+            [&](const std::shared_ptr<Scope>& scope)
             {
-                const bool doesOverlap =
-                    DoPlaceholdersOverlap(trait, impl->GetTrait()) &&
-                    DoPlaceholdersOverlap(type,  impl->GetType());
-                if (doesOverlap)
-                {
-                    impls.insert(dynamic_cast<TraitImplSymbol*>(
-                        impl->GetUnaliased()
-                    ));
-                }
-            });
-        });
+                const auto allImpls = scope->CollectSymbols<TraitImplSymbol>();
+
+                std::for_each(
+                    begin(allImpls),
+                    end(allImpls),
+                    [&](TraitImplSymbol* const impl)
+                    {
+                        const bool doesOverlap = DoPlaceholdersOverlap(trait, impl->GetTrait()) &&
+                                                 DoPlaceholdersOverlap(type, impl->GetType());
+                        if (doesOverlap)
+                        {
+                            impls.insert(dynamic_cast<TraitImplSymbol*>(impl->GetUnaliased()));
+                        }
+                    }
+                );
+            }
+        );
 
         ACE_ASSERT(impls.empty() || impls.size() == 1);
         return impls.empty() ? std::nullopt : std::optional{ *begin(impls) };
     }
 
-    auto Scope::CollectImplOfFor(
-        PrototypeSymbol* const prototype,
-        ITypeSymbol* const type
-    ) -> std::optional<FunctionSymbol*>
+    auto Scope::CollectImplOfFor(PrototypeSymbol* const prototype, ITypeSymbol* const type)
+        -> std::optional<FunctionSymbol*>
     {
         // TODO: Remove
 
-        const auto optImpl = CollectImplOfFor(
-            prototype->GetParentTrait(),
-            type
-        );
+        const auto optImpl = CollectImplOfFor(prototype->GetParentTrait(), type);
         if (!optImpl.has_value())
         {
             return std::nullopt;
@@ -896,77 +851,67 @@ namespace Ace
             return std::nullopt;
         }
 
-        auto* const firstFunction = 
-            dynamic_cast<FunctionSymbol*>(it->second.front().get());
+        auto* const firstFunction = dynamic_cast<FunctionSymbol*>(it->second.front().get());
         ACE_ASSERT(firstFunction);
         ACE_ASSERT(it->second.size() == 1);
 
-        auto* const functionRoot = firstFunction->IsInstance() ?
-            dynamic_cast<FunctionSymbol*>(firstFunction->GetGenericRoot()) :
-            firstFunction;
+        auto* const functionRoot =
+            firstFunction->IsInstance()
+                ? dynamic_cast<FunctionSymbol*>(firstFunction->GetGenericRoot())
+                : firstFunction;
         ACE_ASSERT(functionRoot);
 
-        const auto optFunction = DiagnosticBag::Create().Collect(
-            Scope::CollectGenericInstance(
-                SrcLocation{ prototype->GetCompilation() },
-                functionRoot,
-                optImpl.value()->GetTrait()->GetTypeArgs(),
-                std::nullopt,
-                optImpl.value()->GetType()
-            )
-        );
+        const auto optFunction = DiagnosticBag::Create().Collect(Scope::CollectGenericInstance(
+            SrcLocation{ prototype->GetCompilation() },
+            functionRoot,
+            optImpl.value()->GetTrait()->GetTypeArgs(),
+            std::nullopt,
+            optImpl.value()->GetType()
+        ));
         if (!optFunction.has_value())
         {
-            return firstFunction->IsPlaceholder() ?
-                std::nullopt :
-                std::optional{ firstFunction };
+            return firstFunction->IsPlaceholder() ? std::nullopt : std::optional{ firstFunction };
         }
 
-        auto* const castedFunction =
-            dynamic_cast<FunctionSymbol*>(optFunction.value());
+        auto* const castedFunction = dynamic_cast<FunctionSymbol*>(optFunction.value());
         ACE_ASSERT(castedFunction);
         return castedFunction;
     }
 
-    static auto CollectConstrainedTraits(
-        const std::shared_ptr<const Scope>& scope,
-        ITypeSymbol* const type
-    ) -> std::vector<TraitTypeSymbol*>
+    static auto
+    CollectConstrainedTraits(const std::shared_ptr<const Scope>& scope, ITypeSymbol* const type)
+        -> std::vector<TraitTypeSymbol*>
     {
         std::vector<TraitTypeSymbol*> traits{};
 
         const auto constraints = scope->CollectSymbols<ConstraintSymbol>();
 
-        std::for_each(begin(constraints), end(constraints),
-        [&](ConstraintSymbol* const constraint)
-        {
-            if (type->GetUnaliased() == constraint->GetType()->GetUnaliased())
+        std::for_each(
+            begin(constraints),
+            end(constraints),
+            [&](ConstraintSymbol* const constraint)
             {
-                traits.insert(
-                    end(traits),
-                    begin(constraint->GetTraits()),
-                    end  (constraint->GetTraits())
-                );
+                if (type->GetUnaliased() == constraint->GetType()->GetUnaliased())
+                {
+                    traits.insert(
+                        end(traits), begin(constraint->GetTraits()), end(constraint->GetTraits())
+                    );
+                }
             }
-        });
+        );
 
         return traits;
     }
 
-    auto Scope::CollectConstrainedTraits(
-        ITypeSymbol* const type
-    ) const -> std::vector<TraitTypeSymbol*>
+    auto Scope::CollectConstrainedTraits(ITypeSymbol* const type) const
+        -> std::vector<TraitTypeSymbol*>
     {
         std::vector<TraitTypeSymbol*> traits{};
 
-        for (
-            auto optScope = std::optional{ shared_from_this() };
-            optScope.has_value(); 
-            optScope = optScope.value()->GetParent()
-            )
+        for (auto optScope = std::optional{ shared_from_this() }; optScope.has_value();
+             optScope = optScope.value()->GetParent())
         {
-            const auto scopeTraits =
-                Ace::CollectConstrainedTraits(optScope.value(), type);
+            const auto scopeTraits = Ace::CollectConstrainedTraits(optScope.value(), type);
 
             traits.insert(end(traits), begin(scopeTraits), end(scopeTraits));
         }
@@ -974,35 +919,33 @@ namespace Ace
         return traits;
     }
 
-    auto Scope::ResolveSelfType(
-        const SrcLocation& srcLocation
-    ) const -> Expected<ITypeSymbol*>
+    auto Scope::ResolveSelfType(const SrcLocation& srcLocation) const -> Expected<ITypeSymbol*>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        for (
-            auto optScope = std::optional{ shared_from_this() };
-            optScope.has_value(); 
-            optScope = optScope.value()->GetParent()
-            )
+        for (auto optScope = std::optional{ shared_from_this() }; optScope.has_value();
+             optScope = optScope.value()->GetParent())
         {
             const auto symbols = optScope.value()->CollectAllSymbols();
 
-            const auto selfTypeIt = std::find_if(begin(symbols), end(symbols),
-            [](ISymbol* const symbol)
-            {
-                if (dynamic_cast<ImplSelfAliasTypeSymbol*>(symbol))
+            const auto selfTypeIt = std::find_if(
+                begin(symbols),
+                end(symbols),
+                [](ISymbol* const symbol)
                 {
-                    return true;
-                }
+                    if (dynamic_cast<ImplSelfAliasTypeSymbol*>(symbol))
+                    {
+                        return true;
+                    }
 
-                if (dynamic_cast<TraitSelfTypeSymbol*>(symbol))
-                {
-                    return true;
-                }
+                    if (dynamic_cast<TraitSelfTypeSymbol*>(symbol))
+                    {
+                        return true;
+                    }
 
-                return false;
-            });
+                    return false;
+                }
+            );
             if (selfTypeIt != end(symbols))
             {
                 auto* const selfType = dynamic_cast<ITypeSymbol*>(*selfTypeIt);
@@ -1017,29 +960,28 @@ namespace Ace
 
     auto Scope::ReimportType(ITypeSymbol* const type) -> Diagnosed<ITypeSymbol*>
     {
-        return DeclareSymbol(
-            std::make_unique<ReimportAliasTypeSymbol>(shared_from_this(), type)
-        );
+        return DeclareSymbol(std::make_unique<ReimportAliasTypeSymbol>(shared_from_this(), type));
     }
 
-    Scope::Scope(
-        Compilation* const compilation
-    ) : Scope
-        {
-            compilation,
-            std::string{ AnonymousIdent::Create("global") },
-            std::nullopt,
-        }
+    Scope::Scope(Compilation* const compilation)
+        : Scope{
+              compilation,
+              std::string{ AnonymousIdent::Create("global") },
+              std::nullopt,
+          }
     {
     }
 
     auto Scope::Clear() -> void
     {
-        std::for_each(begin(m_Children), end(m_Children),
-        [](const std::weak_ptr<Scope>& child)
-        {
-            child.lock()->Clear();
-        });
+        std::for_each(
+            begin(m_Children),
+            end(m_Children),
+            [](const std::weak_ptr<Scope>& child)
+            {
+                child.lock()->Clear();
+            }
+        );
 
         m_SymbolMap.clear();
         m_OptParent = std::nullopt;
@@ -1049,32 +991,23 @@ namespace Ace
         Compilation* const compilation,
         const std::optional<std::string>& optName,
         const std::optional<std::shared_ptr<Scope>>& optParent
-    ) : m_Compilation{ compilation },
-        m_OptName{ optName },
-        m_OptAnonymousName
-        {
-            optName.has_value() ?
-                std::nullopt :
-                std::optional{ std::string{ AnonymousIdent::Create() } }
-        },
-        m_OptParent{ optParent },
-        m_SymbolMap{},
-        m_Children{},
-        m_GenericInstantiator{ this }
+    )
+        : m_Compilation{ compilation },
+          m_OptName{ optName },
+          m_OptAnonymousName{ optName.has_value()
+                                  ? std::nullopt
+                                  : std::optional{ std::string{ AnonymousIdent::Create() } } },
+          m_OptParent{ optParent },
+          m_SymbolMap{},
+          m_Children{},
+          m_GenericInstantiator{ this }
     {
-        m_NestLevel = optParent.has_value() ?
-            (optParent.value()->GetNestLevel() + 1) :
-            0;
+        m_NestLevel = optParent.has_value() ? (optParent.value()->GetNestLevel() + 1) : 0;
     }
 
-    auto Scope::AddChild(
-        const std::optional<std::string>& optName
-    ) -> std::shared_ptr<Scope>
+    auto Scope::AddChild(const std::optional<std::string>& optName) -> std::shared_ptr<Scope>
     {
-        std::shared_ptr<Scope> child
-        {
-            new Scope(m_Compilation, optName, shared_from_this())
-        };
+        std::shared_ptr<Scope> child{ new Scope(m_Compilation, optName, shared_from_this()) };
 
         m_Children.push_back(child);
         return child;
@@ -1105,11 +1038,7 @@ namespace Ace
             return firstSymbol;
         }
 
-        return ResolveGenericInstance(
-            generic->GetGenericRoot(),
-            typeArgs,
-            optSelfType
-        );
+        return ResolveGenericInstance(generic->GetGenericRoot(), typeArgs, optSelfType);
     }
 
     auto Scope::OnSymbolDeclared(ISymbol* const symbol) -> void
@@ -1117,31 +1046,37 @@ namespace Ace
         GenericInstantiator::OnSymbolDeclared(symbol);
     }
 
-    static auto ResolveTypeArgs(
-        const SymbolResolutionContext& context
-    ) -> Expected<std::vector<ITypeSymbol*>>
+    static auto ResolveTypeArgs(const SymbolResolutionContext& context)
+        -> Expected<std::vector<ITypeSymbol*>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         std::vector<ITypeSymbol*> args{};
         std::transform(
             begin(context.TypeArgs),
-            end  (context.TypeArgs),
+            end(context.TypeArgs),
             back_inserter(args),
-            [](ITypeSymbol* const arg) { return arg; }
+            [](ITypeSymbol* const arg)
+            {
+                return arg;
+            }
         );
 
         auto* const compilation = context.BeginScope->GetCompilation();
 
         const auto& argNames = context.NameSection->TypeArgs;
-        std::transform(begin(argNames), end(argNames), back_inserter(args),
-        [&](const SymbolName& argName)
-        {
-            const auto optArg = diagnostics.Collect(
-                context.BeginScope->ResolveStaticSymbol<ITypeSymbol>(argName)
-            );
-            return optArg.value_or(compilation->GetErrorSymbols().GetType());
-        });
+        std::transform(
+            begin(argNames),
+            end(argNames),
+            back_inserter(args),
+            [&](const SymbolName& argName)
+            {
+                const auto optArg =
+                    diagnostics.Collect(context.BeginScope->ResolveStaticSymbol<ITypeSymbol>(argName
+                    ));
+                return optArg.value_or(compilation->GetErrorSymbols().GetType());
+            }
+        );
 
         if (diagnostics.HasErrors())
         {
@@ -1151,24 +1086,18 @@ namespace Ace
         return Expected{ args, std::move(diagnostics) };
     }
 
-    static auto HasSrcLocation(
-        const SymbolResolutionContext& context 
-    ) -> bool
+    static auto HasSrcLocation(const SymbolResolutionContext& context) -> bool
     {
         return context.SrcLocation.Buffer != nullptr;
     }
 
-    auto Scope::ResolveSymbolInScopes(
-        SymbolResolutionContext context 
-    ) -> Expected<ISymbol*>
+    auto Scope::ResolveSymbolInScopes(SymbolResolutionContext context) -> Expected<ISymbol*>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         if (context.TypeArgs.size() < context.SuppliedTypeArgCount)
         {
-            const auto optTypeArgs = diagnostics.Collect(
-                ResolveTypeArgs(context)
-            );
+            const auto optTypeArgs = diagnostics.Collect(ResolveTypeArgs(context));
             if (!optTypeArgs.has_value())
             {
                 return std::move(diagnostics);
@@ -1177,17 +1106,17 @@ namespace Ace
             context.TypeArgs = optTypeArgs.value();
         }
 
-        const auto optMatchingSymbols = diagnostics.Collect(
-            CollectMatchingSymbolsInScopes(context)
-        );
+        const auto optMatchingSymbols =
+            diagnostics.Collect(CollectMatchingSymbolsInScopes(context));
         if (!optMatchingSymbols.has_value())
         {
             return std::move(diagnostics);
         }
 
-        const auto optSymbol = diagnostics.Collect(context.IsLastNameSection() ? 
-            ResolveLastNameSectionSymbol(context, optMatchingSymbols.value()) :
-            ResolveNameSectionSymbol    (context, optMatchingSymbols.value())
+        const auto optSymbol = diagnostics.Collect(
+            context.IsLastNameSection()
+                ? ResolveLastNameSectionSymbol(context, optMatchingSymbols.value())
+                : ResolveNameSectionSymbol(context, optMatchingSymbols.value())
         );
         if (!optSymbol.has_value())
         {
@@ -1202,32 +1131,33 @@ namespace Ace
         return Expected{ optSymbol.value(), std::move(diagnostics) };
     }
 
-    auto Scope::CollectMatchingSymbolsInScopes(
-        const SymbolResolutionContext& context 
-    ) -> Expected<std::vector<ISymbol*>>
+    auto Scope::CollectMatchingSymbolsInScopes(const SymbolResolutionContext& context)
+        -> Expected<std::vector<ISymbol*>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         std::vector<ISymbol*> matchingSymbols{};
-        std::for_each(begin(context.Scopes), end(context.Scopes),
-        [&](const std::shared_ptr<const Scope>& scope)
-        {
-            const auto optOptMatchingSymbol = diagnostics.Collect(
-                scope->CollectMatchingSymbol(context)
-            );
-            if (!optOptMatchingSymbol.has_value())
+        std::for_each(
+            begin(context.Scopes),
+            end(context.Scopes),
+            [&](const std::shared_ptr<const Scope>& scope)
             {
-                return;
-            }
+                const auto optOptMatchingSymbol =
+                    diagnostics.Collect(scope->CollectMatchingSymbol(context));
+                if (!optOptMatchingSymbol.has_value())
+                {
+                    return;
+                }
 
-            const auto& optMatchingSymbol = optOptMatchingSymbol.value();
-            if (!optMatchingSymbol.has_value())
-            {
-                return;
-            }
+                const auto& optMatchingSymbol = optOptMatchingSymbol.value();
+                if (!optMatchingSymbol.has_value())
+                {
+                    return;
+                }
 
-            matchingSymbols.push_back(optMatchingSymbol.value());
-        });
+                matchingSymbols.push_back(optMatchingSymbol.value());
+            }
+        );
 
         if (matchingSymbols.empty() && diagnostics.HasErrors())
         {
@@ -1237,17 +1167,15 @@ namespace Ace
         return Expected{ matchingSymbols, std::move(diagnostics) };
     }
 
-    auto Scope::CollectMatchingSymbol(
-        const SymbolResolutionContext& context 
-    ) const -> Expected<std::optional<ISymbol*>>
+    auto Scope::CollectMatchingSymbol(const SymbolResolutionContext& context) const
+        -> Expected<std::optional<ISymbol*>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         const auto symbolsIt = m_SymbolMap.find(context.GetName());
         if (symbolsIt == end(m_SymbolMap))
         {
-            return Expected
-            {
+            return Expected{
                 std::optional<ISymbol*>{},
                 std::move(diagnostics),
             };
@@ -1267,22 +1195,19 @@ namespace Ace
 
         if (context.IsRoot)
         {
-            return Expected
-            {
+            return Expected{
                 std::optional<ISymbol*>{ generic->GetGenericRoot() },
                 std::move(diagnostics),
             };
         }
 
-        const auto optGenericInstance = diagnostics.Collect(
-            CollectGenericInstance(
-                context.SrcLocation,
-                generic->GetGenericRoot(),
-                context.TypeArgs,
-                context.OptArgTypes,
-                context.OptSelfType
-            )
-        );
+        const auto optGenericInstance = diagnostics.Collect(CollectGenericInstance(
+            context.SrcLocation,
+            generic->GetGenericRoot(),
+            context.TypeArgs,
+            context.OptArgTypes,
+            context.OptSelfType
+        ));
         if (!optGenericInstance.has_value())
         {
             return std::move(diagnostics);
@@ -1291,10 +1216,9 @@ namespace Ace
         return Expected{ optGenericInstance.value(), std::move(diagnostics) };
     }
 
-    static auto DoTypeArgsMatch(
-        ISymbol* const genericInstance,
-        const std::vector<ITypeSymbol*>& typeArgs
-    ) -> bool
+    static auto
+    DoTypeArgsMatch(ISymbol* const genericInstance, const std::vector<ITypeSymbol*>& typeArgs)
+        -> bool
     {
         auto* const generic = dynamic_cast<IGenericSymbol*>(genericInstance);
         ACE_ASSERT(generic);
@@ -1319,12 +1243,10 @@ namespace Ace
     }
 
     static auto DoesPrototypeSelfTypeMatch(
-        ISymbol* const genericInstance,
-        const std::optional<ITypeSymbol*>& optSelfType
+        ISymbol* const genericInstance, const std::optional<ITypeSymbol*>& optSelfType
     ) -> bool
     {
-        auto* const prototype =
-            dynamic_cast<PrototypeSymbol*>(genericInstance->GetUnaliased());
+        auto* const prototype = dynamic_cast<PrototypeSymbol*>(genericInstance->GetUnaliased());
         if (!prototype)
         {
             return true;
@@ -1335,9 +1257,7 @@ namespace Ace
             return false;
         }
 
-        return
-            prototype->GetSelfType()->GetUnaliased() ==
-            optSelfType.value()->GetUnaliased();
+        return prototype->GetSelfType()->GetUnaliased() == optSelfType.value()->GetUnaliased();
     }
 
     auto Scope::ResolveGenericInstance(
@@ -1346,31 +1266,28 @@ namespace Ace
         const std::optional<ITypeSymbol*>& optSelfType
     ) -> std::optional<ISymbol*>
     {
-        const auto& instances =
-            root->GetScope()->m_SymbolMap.at(root->GetName().String);
+        const auto& instances = root->GetScope()->m_SymbolMap.at(root->GetName().String);
 
         if (root->GetTypeArgs().empty())
         {
             typeArgs.clear();
         }
 
-        const auto instanceIt = std::find_if(begin(instances), end(instances),
-        [&](const std::unique_ptr<ISymbol>& instance)
-        {
-            return
-                DoTypeArgsMatch(instance.get(), typeArgs) &&
-                DoesPrototypeSelfTypeMatch(instance.get(), optSelfType);
-        });
+        const auto instanceIt = std::find_if(
+            begin(instances),
+            end(instances),
+            [&](const std::unique_ptr<ISymbol>& instance)
+            {
+                return DoTypeArgsMatch(instance.get(), typeArgs) &&
+                       DoesPrototypeSelfTypeMatch(instance.get(), optSelfType);
+            }
+        );
 
-        return (instanceIt == end(instances)) ?
-            std::nullopt :
-            std::optional{ instanceIt->get() };
+        return (instanceIt == end(instances)) ? std::nullopt : std::optional{ instanceIt->get() };
     }
 
-    auto Scope::FindStaticBeginScope(
-        const SrcLocation& srcLocation,
-        const SymbolName& name
-    ) const -> Expected<std::shared_ptr<const Scope>>
+    auto Scope::FindStaticBeginScope(const SrcLocation& srcLocation, const SymbolName& name) const
+        -> Expected<std::shared_ptr<const Scope>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -1379,19 +1296,15 @@ namespace Ace
         const auto& nameString = name.Sections.front().Name.String;
 
         const bool isNativeType = KeywordToTokenKindMap.contains(nameString);
-        const bool isGlobal =
-            name.IsGlobal && globalScope->m_SymbolMap.contains(nameString);
+        const bool isGlobal = name.IsGlobal && globalScope->m_SymbolMap.contains(nameString);
 
         if (isNativeType || isGlobal)
         {
             return Expected{ globalScope, std::move(diagnostics) };
         }
 
-        for (
-            auto optScope = std::optional{ shared_from_this() }; 
-            optScope.has_value(); 
-            optScope = optScope.value()->GetParent()
-            )
+        for (auto optScope = std::optional{ shared_from_this() }; optScope.has_value();
+             optScope = optScope.value()->GetParent())
         {
             const auto& scope = optScope.value();
 
@@ -1406,8 +1319,7 @@ namespace Ace
     }
 
     static auto GetNameSectionTypeArgs(
-        const SymbolResolutionContext& context,
-        IAccessibleBodyScopedSymbol* const bodyScoped
+        const SymbolResolutionContext& context, IAccessibleBodyScopedSymbol* const bodyScoped
     ) -> const std::vector<ITypeSymbol*>&
     {
         auto* const generic = dynamic_cast<IGenericSymbol*>(bodyScoped);
@@ -1418,14 +1330,11 @@ namespace Ace
 
         const auto& args = generic->GetTypeArgs();
 
-        return (context.TypeArgs.size() > args.size()) ?
-            context.TypeArgs :
-            args;
+        return (context.TypeArgs.size() > args.size()) ? context.TypeArgs : args;
     }
 
     auto Scope::ResolveNameSectionSymbol(
-        const SymbolResolutionContext& context,
-        const std::vector<ISymbol*>& matchingSymbols
+        const SymbolResolutionContext& context, const std::vector<ISymbol*>& matchingSymbols
     ) -> Expected<ISymbol*>
     {
         auto optSpecialSymbol = ResolveSpecialSymbol(context);
@@ -1441,45 +1350,34 @@ namespace Ace
             if (context.OptSelfType.has_value())
             {
                 diagnostics.Add(CreateUndeclaredMemberRefError(
-                    context.SrcLocation,
-                    context.OptSelfType.value(),
-                    context.GetName()
+                    context.SrcLocation, context.OptSelfType.value(), context.GetName()
                 ));
             }
             else
             {
-                diagnostics.Add(CreateUndeclaredSymbolRefError(
-                    context.SrcLocation
-                ));
+                diagnostics.Add(CreateUndeclaredSymbolRefError(context.SrcLocation));
             }
             return std::move(diagnostics);
         }
 
         if (matchingSymbols.size() > 1)
         {
-            diagnostics.Add(CreateAmbiguousSymbolRefError(
-                context.SrcLocation,
-                matchingSymbols
-            ));
+            diagnostics.Add(CreateAmbiguousSymbolRefError(context.SrcLocation, matchingSymbols));
         }
 
         auto* const symbol = matchingSymbols.front();
 
-        auto* const bodyScoped =
-            dynamic_cast<IAccessibleBodyScopedSymbol*>(symbol->GetUnaliased());
+        auto* const bodyScoped = dynamic_cast<IAccessibleBodyScopedSymbol*>(symbol->GetUnaliased());
 
         if (!bodyScoped)
         {
-            diagnostics.Add(CreateScopeAccessOfNonBodyScopedSymbolError(
-                context.SrcLocation,
-                symbol
-            ));
+            diagnostics.Add(CreateScopeAccessOfNonBodyScopedSymbolError(context.SrcLocation, symbol)
+            );
             return std::move(diagnostics);
         }
 
         const size_t suppliedTypeArgCount =
-            context.SuppliedTypeArgCount +
-            (context.NameSection + 1)->TypeArgs.size();
+            context.SuppliedTypeArgCount + (context.NameSection + 1)->TypeArgs.size();
 
         const auto& typeArgs = GetNameSectionTypeArgs(context, bodyScoped);
 
@@ -1489,8 +1387,7 @@ namespace Ace
 
         if (!type)
         {
-            const std::shared_ptr<const Scope> bodyScope =
-                bodyScoped->GetBodyScope();
+            const std::shared_ptr<const Scope> bodyScope = bodyScoped->GetBodyScope();
 
             const auto optSymbol = diagnostics.Collect(ResolveSymbolInScopes({
                 nextNameSection->CreateSrcLocation(),
@@ -1516,25 +1413,24 @@ namespace Ace
 
         std::optional<ISymbol*> optSymbol{};
 
-        const auto inherentScopes =
-            CollectInherentScopes(nextNameSection->Name.String, type);
+        const auto inherentScopes = CollectInherentScopes(nextNameSection->Name.String, type);
 
         auto inherentDiagnostics = DiagnosticBag::Create();
-        optSymbol = inherentDiagnostics.Collect(ResolveSymbolInScopes({
-            nextNameSection->CreateSrcLocation(),
-            context.BeginScope,
-            context.NameSectionsBegin,
-            context.NameSectionsEnd,
-            nextNameSection,
-            context.OptArgTypes,
-            context.IsCorrectSymbolType,
-            inherentScopes,
-            suppliedTypeArgCount,
-            typeArgs,
-            context.IsRoot,
-            type
-        }));   
-        
+        optSymbol = inherentDiagnostics.Collect(
+            ResolveSymbolInScopes({ nextNameSection->CreateSrcLocation(),
+                                    context.BeginScope,
+                                    context.NameSectionsBegin,
+                                    context.NameSectionsEnd,
+                                    nextNameSection,
+                                    context.OptArgTypes,
+                                    context.IsCorrectSymbolType,
+                                    inherentScopes,
+                                    suppliedTypeArgCount,
+                                    typeArgs,
+                                    context.IsRoot,
+                                    type })
+        );
+
         if (optSymbol.has_value())
         {
             diagnostics.Add(std::move(inherentDiagnostics));
@@ -1542,10 +1438,7 @@ namespace Ace
         else
         {
             const auto optTraitScopes = diagnostics.Collect(
-                context.BeginScope->CollectTraitResolutionScopes(
-                    nextNameSection->Name,
-                    type
-                )
+                context.BeginScope->CollectTraitResolutionScopes(nextNameSection->Name, type)
             );
             if (!optTraitScopes.has_value())
             {
@@ -1553,20 +1446,20 @@ namespace Ace
             }
 
             auto traitDiagnostics = DiagnosticBag::Create();
-            optSymbol = traitDiagnostics.Collect(ResolveSymbolInScopes({
-                nextNameSection->CreateSrcLocation(),
-                context.BeginScope,
-                context.NameSectionsBegin,
-                context.NameSectionsEnd,
-                nextNameSection,
-                context.OptArgTypes,
-                context.IsCorrectSymbolType,
-                optTraitScopes.value(),
-                suppliedTypeArgCount,
-                typeArgs,
-                context.IsRoot,
-                type
-            }));
+            optSymbol = traitDiagnostics.Collect(
+                ResolveSymbolInScopes({ nextNameSection->CreateSrcLocation(),
+                                        context.BeginScope,
+                                        context.NameSectionsBegin,
+                                        context.NameSectionsEnd,
+                                        nextNameSection,
+                                        context.OptArgTypes,
+                                        context.IsCorrectSymbolType,
+                                        optTraitScopes.value(),
+                                        suppliedTypeArgCount,
+                                        typeArgs,
+                                        context.IsRoot,
+                                        type })
+            );
             if (!optSymbol.has_value())
             {
                 diagnostics.Add(std::move(traitDiagnostics));
@@ -1580,8 +1473,7 @@ namespace Ace
     }
 
     auto Scope::ResolveLastNameSectionSymbol(
-        const SymbolResolutionContext& context,
-        const std::vector<ISymbol*>& matchingSymbols
+        const SymbolResolutionContext& context, const std::vector<ISymbol*>& matchingSymbols
     ) -> Expected<ISymbol*>
     {
         auto diagnostics = DiagnosticBag::Create();
@@ -1589,19 +1481,15 @@ namespace Ace
         auto optExpectedSpecialSymbol = ResolveSpecialSymbol(context);
         if (optExpectedSpecialSymbol.has_value())
         {
-            const auto optSpecialSymbol = diagnostics.Collect(
-                std::move(optExpectedSpecialSymbol.value())
-            );
+            const auto optSpecialSymbol =
+                diagnostics.Collect(std::move(optExpectedSpecialSymbol.value()));
             if (!optSpecialSymbol.has_value())
             {
                 return std::move(diagnostics);
             }
 
             const bool isCorrectSymbolType = diagnostics.Collect(
-                context.IsCorrectSymbolType(
-                    context.SrcLocation,
-                    optSpecialSymbol.value()
-                )
+                context.IsCorrectSymbolType(context.SrcLocation, optSpecialSymbol.value())
             );
             if (!isCorrectSymbolType)
             {
@@ -1616,41 +1504,31 @@ namespace Ace
             if (context.OptSelfType.has_value())
             {
                 diagnostics.Add(CreateUndeclaredMemberRefError(
-                    context.SrcLocation,
-                    context.OptSelfType.value(),
-                    context.GetName()
+                    context.SrcLocation, context.OptSelfType.value(), context.GetName()
                 ));
             }
             else
             {
-                diagnostics.Add(CreateUndeclaredSymbolRefError(
-                    context.SrcLocation
-                ));
+                diagnostics.Add(CreateUndeclaredSymbolRefError(context.SrcLocation));
             }
             return std::move(diagnostics);
         }
 
         std::vector<ISymbol*> symbols{};
         std::copy_if(
-            begin(matchingSymbols), 
-            end  (matchingSymbols), 
-            back_inserter(symbols), 
+            begin(matchingSymbols),
+            end(matchingSymbols),
+            back_inserter(symbols),
             [&](ISymbol* const matchingSymbol) -> bool
             {
-                return context.IsCorrectSymbolType(
-                    context.SrcLocation,
-                    matchingSymbol
-                );
+                return context.IsCorrectSymbolType(context.SrcLocation, matchingSymbol);
             }
         );
 
         if (symbols.empty())
         {
             const bool isCorrectSymbolType = diagnostics.Collect(
-                context.IsCorrectSymbolType(
-                    context.SrcLocation,
-                    matchingSymbols.front()
-                )
+                context.IsCorrectSymbolType(context.SrcLocation, matchingSymbols.front())
             );
             if (!isCorrectSymbolType)
             {
@@ -1660,10 +1538,7 @@ namespace Ace
 
         if (symbols.size() > 1)
         {
-            diagnostics.Add(CreateAmbiguousSymbolRefError(
-                context.SrcLocation,
-                symbols
-            ));
+            diagnostics.Add(CreateAmbiguousSymbolRefError(context.SrcLocation, symbols));
         }
 
         auto* const symbol = symbols.front();
@@ -1672,41 +1547,35 @@ namespace Ace
         {
             if (!prototype->IsDynDispatchable())
             {
-                const auto optInstantiatedPrototype = diagnostics.Collect(
-                    Scope::CollectGenericInstance(
+                const auto optInstantiatedPrototype =
+                    diagnostics.Collect(Scope::CollectGenericInstance(
                         context.SrcLocation,
                         prototype,
                         std::vector<ITypeSymbol*>{},
                         std::nullopt,
                         context.OptSelfType
-                    )
-                );
+                    ));
                 if (!optInstantiatedPrototype.has_value())
                 {
                     return std::move(diagnostics);
                 }
 
-                return Expected
-                {
+                return Expected{
                     optInstantiatedPrototype.value(),
                     std::move(diagnostics),
                 };
             }
         }
 
-        diagnostics.Collect(DiagnoseInaccessibleSymbol(
-            context.SrcLocation,
-            symbol,
-            context.BeginScope
-        ));
+        diagnostics.Collect(
+            DiagnoseInaccessibleSymbol(context.SrcLocation, symbol, context.BeginScope)
+        );
 
         return Expected{ symbol, std::move(diagnostics) };
     }
 
-    auto Scope::CollectInherentImplFor(
-        const std::string& name,
-        ITypeSymbol* type
-    ) -> std::optional<InherentImplSymbol*>
+    auto Scope::CollectInherentImplFor(const std::string& name, ITypeSymbol* type)
+        -> std::optional<InherentImplSymbol*>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -1715,32 +1584,29 @@ namespace Ace
         auto* const packageMod = type->GetScope()->FindPackageMod();
         const auto packageBodyScope = packageMod->GetBodyScope();
 
-        const auto allImpls =
-            packageBodyScope->CollectSymbolsRecursive<InherentImplSymbol>();
+        const auto allImpls = packageBodyScope->CollectSymbolsRecursive<InherentImplSymbol>();
 
-        const auto implIt = std::find_if(begin(allImpls), end(allImpls),
-        [&](InherentImplSymbol* const impl)
-        {
-            return
-                DoPlaceholdersOverlap(type, impl->GetType()) &&
-                impl->GetBodyScope()->HasSymbolWithName(name);
-        });
+        const auto implIt = std::find_if(
+            begin(allImpls),
+            end(allImpls),
+            [&](InherentImplSymbol* const impl)
+            {
+                return DoPlaceholdersOverlap(type, impl->GetType()) &&
+                       impl->GetBodyScope()->HasSymbolWithName(name);
+            }
+        );
 
-        return (implIt == end(allImpls)) ?
-            std::nullopt :
-            std::optional{ *implIt };
+        return (implIt == end(allImpls)) ? std::nullopt : std::optional{ *implIt };
     }
-    
-    static auto CollectMatchingNameImplSymbol(
-        const std::string& name,
-        TraitImplSymbol* const impl
-    ) -> ISymbol*
+
+    static auto CollectMatchingNameImplSymbol(const std::string& name, TraitImplSymbol* const impl)
+        -> ISymbol*
     {
         const auto implSymbols = impl->GetBodyScope()->CollectAllSymbols();
 
         const auto matchingNameSymbolIt = std::find_if(
             begin(implSymbols),
-            end  (implSymbols),
+            end(implSymbols),
             [&](ISymbol* const symbol)
             {
                 return symbol->GetName().String == name;
@@ -1751,24 +1617,25 @@ namespace Ace
     }
 
     static auto CollectMatchingNameImplSymbols(
-        const std::string& name,
-        const std::vector<TraitImplSymbol*>& impls
+        const std::string& name, const std::vector<TraitImplSymbol*>& impls
     ) -> std::vector<ISymbol*>
     {
         std::vector<ISymbol*> symbols{};
-        std::transform(begin(impls), end(impls), back_inserter(symbols),
-        [&](TraitImplSymbol* const impl)
-        {
-            return CollectMatchingNameImplSymbol(name, impl);
-        });
+        std::transform(
+            begin(impls),
+            end(impls),
+            back_inserter(symbols),
+            [&](TraitImplSymbol* const impl)
+            {
+                return CollectMatchingNameImplSymbol(name, impl);
+            }
+        );
 
         return symbols;
     }
 
-    auto Scope::CollectTraitImplFor(
-        const SymbolNameSection& name,
-        ITypeSymbol* type
-    ) const -> Expected<std::optional<TraitImplSymbol*>>
+    auto Scope::CollectTraitImplFor(const SymbolNameSection& name, ITypeSymbol* type) const
+        -> Expected<std::optional<TraitImplSymbol*>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -1776,39 +1643,48 @@ namespace Ace
 
         const auto modBodyScope = FindMod().value()->GetBodyScope();
 
-        const auto uses   = modBodyScope->CollectSymbols<UseSymbol>();
+        const auto uses = modBodyScope->CollectSymbols<UseSymbol>();
         const auto traits = modBodyScope->CollectSymbols<TraitTypeSymbol>();
 
         auto rootTraits = traits;
         std::transform(
             begin(uses),
-            end  (uses),
+            end(uses),
             back_inserter(rootTraits),
-            [&](UseSymbol* const use) { return use->GetRootTrait(); }
+            [&](UseSymbol* const use)
+            {
+                return use->GetRootTrait();
+            }
         );
 
         std::set<TraitImplSymbol*> implSet{};
-        std::for_each(begin(rootTraits), end(rootTraits),
-        [&](TraitTypeSymbol* const trait)
-        {
-            // TODO: Remove
-            if (const auto optImpl = CollectImplOfFor(trait, type))
+        std::for_each(
+            begin(rootTraits),
+            end(rootTraits),
+            [&](TraitTypeSymbol* const trait)
             {
-                implSet.insert(optImpl.value());
+                // TODO: Remove
+                if (const auto optImpl = CollectImplOfFor(trait, type))
+                {
+                    implSet.insert(optImpl.value());
+                }
             }
-        });
+        );
 
         std::vector<TraitImplSymbol*> impls{};
-        std::copy_if(begin(implSet), end(implSet), back_inserter(impls),
-        [&](TraitImplSymbol* const impl)
-        {
-            return impl->GetBodyScope()->HasSymbolWithName(name.Name.String);
-        });
+        std::copy_if(
+            begin(implSet),
+            end(implSet),
+            back_inserter(impls),
+            [&](TraitImplSymbol* const impl)
+            {
+                return impl->GetBodyScope()->HasSymbolWithName(name.Name.String);
+            }
+        );
 
         if (impls.empty())
         {
-            return Expected
-            {
+            return Expected{
                 std::optional<TraitImplSymbol*>{},
                 std::move(diagnostics),
             };
@@ -1817,8 +1693,7 @@ namespace Ace
         if (impls.size() > 1)
         {
             diagnostics.Add(CreateAmbiguousSymbolRefError(
-                name.CreateSrcLocation(),
-                CollectMatchingNameImplSymbols(name.Name.String, impls)
+                name.CreateSrcLocation(), CollectMatchingNameImplSymbols(name.Name.String, impls)
             ));
             return std::move(diagnostics);
         }
@@ -1826,10 +1701,8 @@ namespace Ace
         return Expected{ impls.front(), std::move(diagnostics) };
     }
 
-    auto Scope::CollectTraitResolutionScopes(
-        const SymbolNameSection& name,
-        ITypeSymbol* type
-    ) const -> Expected<std::vector<std::shared_ptr<const Scope>>>
+    auto Scope::CollectTraitResolutionScopes(const SymbolNameSection& name, ITypeSymbol* type) const
+        -> Expected<std::vector<std::shared_ptr<const Scope>>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -1837,19 +1710,13 @@ namespace Ace
 
         if (auto* const trait = dynamic_cast<TraitTypeSymbol*>(type))
         {
-            return Expected
-            {
-                std::vector<std::shared_ptr<const Scope>>
-                {
-                    trait->GetPrototypeScope()
-                },
+            return Expected{
+                std::vector<std::shared_ptr<const Scope>>{ trait->GetPrototypeScope() },
                 std::move(diagnostics),
             };
         }
 
-        const auto optOptImpl = diagnostics.Collect(
-            CollectTraitImplFor(name, type)
-        );
+        const auto optOptImpl = diagnostics.Collect(CollectTraitImplFor(name, type));
         if (!optOptImpl.has_value())
         {
             return std::move(diagnostics);
@@ -1857,12 +1724,9 @@ namespace Ace
 
         if (optOptImpl.value().has_value())
         {
-            return Expected
-            {
-                std::vector<std::shared_ptr<const Scope>>
-                {
-                    optOptImpl.value().value()->GetBodyScope()
-                },
+            return Expected{
+                std::vector<std::shared_ptr<const Scope>>{
+                    optOptImpl.value().value()->GetBodyScope() },
                 std::move(diagnostics),
             };
         }
@@ -1870,22 +1734,23 @@ namespace Ace
         const auto traits = CollectConstrainedTraits(type);
 
         std::vector<std::shared_ptr<const Scope>> scopes{};
-        std::for_each(begin(traits), end(traits),
-        [&](TraitTypeSymbol* const trait)
-        {
-            if (trait->GetPrototypeScope()->HasSymbolWithName(name.Name.String))
+        std::for_each(
+            begin(traits),
+            end(traits),
+            [&](TraitTypeSymbol* const trait)
             {
-                scopes.push_back(trait->GetPrototypeScope());
+                if (trait->GetPrototypeScope()->HasSymbolWithName(name.Name.String))
+                {
+                    scopes.push_back(trait->GetPrototypeScope());
+                }
             }
-        });
+        );
 
         return Expected{ scopes, std::move(diagnostics) };
     }
 
-    auto Scope::CollectInherentScopes(
-        const std::string& name,
-        ITypeSymbol* const type
-    ) -> std::vector<std::shared_ptr<const Scope>>
+    auto Scope::CollectInherentScopes(const std::string& name, ITypeSymbol* const type)
+        -> std::vector<std::shared_ptr<const Scope>>
     {
         std::vector<std::shared_ptr<const Scope>> scopes{};
         scopes.push_back(type->GetBodyScope());
@@ -1899,9 +1764,8 @@ namespace Ace
         return scopes;
     }
 
-    auto Scope::ResolveSpecialSymbol(
-        const SymbolResolutionContext& context 
-    ) -> std::optional<Expected<ISymbol*>>
+    auto Scope::ResolveSpecialSymbol(const SymbolResolutionContext& context)
+        -> std::optional<Expected<ISymbol*>>
     {
         const auto tokenKindIt = KeywordToTokenKindMap.find(context.GetName());
         if (tokenKindIt == end(KeywordToTokenKindMap))
@@ -1920,8 +1784,7 @@ namespace Ace
             default:
             {
                 auto* const nativeTypeSymbol = GetTokenKindNativeTypeSymbol(
-                    context.BeginScope->GetCompilation(),
-                    tokenKindIt->second
+                    context.BeginScope->GetCompilation(), tokenKindIt->second
                 );
                 return Expected{ nativeTypeSymbol, DiagnosticBag::Create() };
             }

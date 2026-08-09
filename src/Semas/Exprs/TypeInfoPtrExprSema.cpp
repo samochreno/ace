@@ -21,18 +21,22 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ISizedTypeSymbol* const typeSymbol
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_TypeSymbol{ typeSymbol }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_TypeSymbol{ typeSymbol }
     {
     }
 
     auto TypeInfoPtrExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("TypeInfoPtrExprSema", [&]()
-        {
-            logger.Log("m_TypeSymbol", m_TypeSymbol);
-        });
+        logger.Log(
+            "TypeInfoPtrExprSema",
+            [&]()
+            {
+                logger.Log("m_TypeSymbol", m_TypeSymbol);
+            }
+        );
     }
 
     auto TypeInfoPtrExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -45,30 +49,26 @@ namespace Ace
         return m_Scope;
     }
 
-    auto TypeInfoPtrExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const TypeInfoPtrExprSema>>
+    auto TypeInfoPtrExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const TypeInfoPtrExprSema>>
     {
         return Diagnosed{ shared_from_this(), DiagnosticBag::Create() };
     }
 
-    auto TypeInfoPtrExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto TypeInfoPtrExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto TypeInfoPtrExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const TypeInfoPtrExprSema>
+    auto TypeInfoPtrExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const TypeInfoPtrExprSema>
     {
         return shared_from_this();
     }
 
-    auto TypeInfoPtrExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto TypeInfoPtrExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }
@@ -84,13 +84,8 @@ namespace Ace
 
         auto* const value = emitter.GetTypeInfo(m_TypeSymbol);
 
-        auto* const allocaInst = emitter.GetBlock().Builder.CreateAlloca(
-            emitter.GetPtrType()
-        );
-        tmps.emplace_back(
-            allocaInst,
-            GetCompilation()->GetNatives().Ptr.GetSymbol()
-        );
+        auto* const allocaInst = emitter.GetBlock().Builder.CreateAlloca(emitter.GetPtrType());
+        tmps.emplace_back(allocaInst, GetCompilation()->GetNatives().Ptr.GetSymbol());
         emitter.GetBlock().Builder.CreateStore(value, allocaInst);
 
         return { allocaInst, tmps };

@@ -9,6 +9,33 @@ find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
+find_program(ACE_CLANG_FORMAT
+    NAMES clang-format
+    HINTS "${LLVM_TOOLS_BINARY_DIR}"
+    NO_DEFAULT_PATH
+)
+
+if(ACE_CLANG_FORMAT)
+    file(GLOB_RECURSE ACE_FORMAT_FILES CONFIGURE_DEPENDS
+        "${CMAKE_SOURCE_DIR}/include/*.hpp"
+        "${CMAKE_SOURCE_DIR}/src/*.cpp"
+        "${CMAKE_SOURCE_DIR}/tests/unit/*.cpp"
+    )
+
+    add_custom_target(format
+        COMMAND "${ACE_CLANG_FORMAT}" -i ${ACE_FORMAT_FILES}
+        COMMENT "Formatting C++ sources"
+        VERBATIM
+    )
+    add_custom_target(check-format
+        COMMAND "${ACE_CLANG_FORMAT}" --dry-run --Werror ${ACE_FORMAT_FILES}
+        COMMENT "Checking C++ source formatting"
+        VERBATIM
+    )
+else()
+    message(STATUS "clang-format not found; format targets are unavailable")
+endif()
+
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 

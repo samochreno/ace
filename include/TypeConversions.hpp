@@ -11,20 +11,13 @@ namespace Ace
 {
     class IExprSema;
 
-    typedef std::optional<FunctionSymbol*>(*ConversionOpGetterFunction)(
-        const std::shared_ptr<Scope>&,
-        ITypeSymbol*,
-        ITypeSymbol*
-    );
+    typedef std::optional<
+        FunctionSymbol*> (*ConversionOpGetterFunction)(const std::shared_ptr<Scope>&, ITypeSymbol*, ITypeSymbol*);
     auto GetImplicitConversionOp(
-        const std::shared_ptr<Scope>& scope,
-        ITypeSymbol* fromType,
-        ITypeSymbol* targetType
+        const std::shared_ptr<Scope>& scope, ITypeSymbol* fromType, ITypeSymbol* targetType
     ) -> std::optional<FunctionSymbol*>;
     auto GetExplicitConversionOp(
-        const std::shared_ptr<Scope>& scope,
-        ITypeSymbol* fromType,
-        ITypeSymbol* targetType
+        const std::shared_ptr<Scope>& scope, ITypeSymbol* fromType, ITypeSymbol* targetType
     ) -> std::optional<FunctionSymbol*>;
 
     auto AreTypesConvertible(
@@ -39,16 +32,13 @@ namespace Ace
         const ConversionOpGetterFunction func
     ) -> Diagnosed<std::shared_ptr<const IExprSema>>;
     auto CreateImplicitlyConverted(
-        const std::shared_ptr<const IExprSema>& expr,
-        const TypeInfo& targetTypeInfo
+        const std::shared_ptr<const IExprSema>& expr, const TypeInfo& targetTypeInfo
     ) -> Diagnosed<std::shared_ptr<const IExprSema>>;
     auto CreateExplicitlyConverted(
-        const std::shared_ptr<const IExprSema>& expr,
-        const TypeInfo& targetTypeInfo
+        const std::shared_ptr<const IExprSema>& expr, const TypeInfo& targetTypeInfo
     ) -> Diagnosed<std::shared_ptr<const IExprSema>>;
 
     auto CreateImplicitlyConvertedAndTypeChecked(
-        const std::shared_ptr<const IExprSema>& expr,
-        const TypeInfo& targetTypeInfo
+        const std::shared_ptr<const IExprSema>& expr, const TypeInfo& targetTypeInfo
     ) -> Diagnosed<std::shared_ptr<const IExprSema>>;
 }

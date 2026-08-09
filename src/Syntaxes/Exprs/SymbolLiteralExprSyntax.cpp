@@ -12,12 +12,11 @@
 namespace Ace
 {
     SymbolLiteralExprSyntax::SymbolLiteralExprSyntax(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<Scope>& scope,
-        const SymbolName& name
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_Name{ name }
+        const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope, const SymbolName& name
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_Name{ name }
     {
     }
 
@@ -36,29 +35,23 @@ namespace Ace
         return SyntaxChildCollector{}.Build();
     }
 
-    auto SymbolLiteralExprSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const StaticVarRefExprSema>>
+    auto SymbolLiteralExprSyntax::CreateSema() const
+        -> Diagnosed<std::shared_ptr<const StaticVarRefExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optVarSymbol = diagnostics.Collect(
-            GetScope()->ResolveStaticSymbol<IVarSymbol>(m_Name)
-        );
-        auto* const varSymbol = optVarSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetVar()
-        );
+        const auto optVarSymbol =
+            diagnostics.Collect(GetScope()->ResolveStaticSymbol<IVarSymbol>(m_Name));
+        auto* const varSymbol = optVarSymbol.value_or(GetCompilation()->GetErrorSymbols().GetVar());
 
-        return Diagnosed
-        {
-            std::make_shared<const StaticVarRefExprSema>(
-                GetSrcLocation(),
-                GetScope(),
-                varSymbol
-            ),
+        return Diagnosed{
+            std::make_shared<const StaticVarRefExprSema>(GetSrcLocation(), GetScope(), varSymbol),
             std::move(diagnostics),
         };
     }
 
-    auto SymbolLiteralExprSyntax::CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto SymbolLiteralExprSyntax::CreateExprSema() const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateSema();
     }

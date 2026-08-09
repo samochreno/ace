@@ -15,10 +15,7 @@ namespace Ace
     class TraitSelfTypeSymbol : public virtual ITypeSymbol
     {
     public:
-        TraitSelfTypeSymbol(
-            const SrcLocation& srcLocation,
-            const std::shared_ptr<Scope>& scope
-        );
+        TraitSelfTypeSymbol(const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope);
         virtual ~TraitSelfTypeSymbol() = default;
 
         auto CreateTypeNoun() const -> Noun final;
@@ -28,8 +25,7 @@ namespace Ace
         auto GetName() const -> const Ident& final;
 
         auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> final;
 
         auto SetBodyScope(const std::shared_ptr<Scope>& scope) -> void final;

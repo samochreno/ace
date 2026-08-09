@@ -21,39 +21,35 @@ namespace Ace
     class FunctionEmittableBlock : public IEmittable<void>
     {
     public:
-        FunctionEmittableBlock(
-            const FunctionBlockEmitter& blockEmitter
-        ) : m_BlockEmitter{ blockEmitter }
+        FunctionEmittableBlock(const FunctionBlockEmitter& blockEmitter)
+            : m_BlockEmitter{ blockEmitter }
         {
         }
+
         virtual ~FunctionEmittableBlock() = default;
 
         auto Emit(Emitter& emitter) const -> void final
         {
             m_BlockEmitter(emitter);
         }
-        
-   private:
+
+    private:
         FunctionBlockEmitter m_BlockEmitter;
     };
 
-    template<typename T>
-    static auto CreateSymbolName(
-        const SrcLocation& srcLocation,
-        const std::vector<T>& nameSectionStrings
-    ) -> SymbolName
+    template <typename T>
+    static auto
+    CreateSymbolName(const SrcLocation& srcLocation, const std::vector<T>& nameSectionStrings)
+        -> SymbolName
     {
         std::vector<SymbolNameSection> sections{};
         std::transform(
             begin(nameSectionStrings),
-            end  (nameSectionStrings),
+            end(nameSectionStrings),
             back_inserter(sections),
             [&](const std::string_view nameSectionString)
             {
-                return SymbolNameSection
-                {
-                    Ident{ srcLocation, std::string{ nameSectionString } }
-                };
+                return SymbolNameSection{ Ident{ srcLocation, std::string{ nameSectionString } } };
             }
         );
 
@@ -66,14 +62,12 @@ namespace Ace
         const NativeSymbolKind kind,
         const NativeCopyabilityKind copyabilityKind,
         std::optional<std::function<llvm::Type*(llvm::LLVMContext&)>> irTypeGetter
-    ) : m_Compilation{ compilation },
-        m_NameSectionStrings{ std::move(nameSectionStrings) },
-        m_IRTypeGetter{ std::move(irTypeGetter) },
-        m_IsRoot{ kind == NativeSymbolKind::Root },
-        m_IsTriviallyCopyable
-        {
-            copyabilityKind == NativeCopyabilityKind::Trivial
-        }
+    )
+        : m_Compilation{ compilation },
+          m_NameSectionStrings{ std::move(nameSectionStrings) },
+          m_IRTypeGetter{ std::move(irTypeGetter) },
+          m_IsRoot{ kind == NativeSymbolKind::Root },
+          m_IsTriviallyCopyable{ copyabilityKind == NativeCopyabilityKind::Trivial }
     {
         ACE_ASSERT(
             (copyabilityKind == NativeCopyabilityKind::Trivial) ||
@@ -86,9 +80,7 @@ namespace Ace
         return m_Compilation;
     }
 
-    auto NativeType::CreateFullyQualifiedName(
-        const SrcLocation& srcLocation
-    ) const -> SymbolName
+    auto NativeType::CreateFullyQualifiedName(const SrcLocation& srcLocation) const -> SymbolName
     {
         return CreateSymbolName(srcLocation, m_NameSectionStrings);
     }
@@ -101,29 +93,25 @@ namespace Ace
         }
 
         const auto globalScope = GetCompilation()->GetGlobalScope();
-        const auto name =
-            CreateFullyQualifiedName(SrcLocation{ GetCompilation() });
+        const auto name = CreateFullyQualifiedName(SrcLocation{ GetCompilation() });
 
-        m_OptSymbol = DiagnosticBag::Create().Collect(m_IsRoot ?
-            globalScope->ResolveRoot        <ITypeSymbol>(name) :
-            globalScope->ResolveStaticSymbol<ITypeSymbol>(name)
+        m_OptSymbol = DiagnosticBag::Create().Collect(
+            m_IsRoot ? globalScope->ResolveRoot<ITypeSymbol>(name)
+                     : globalScope->ResolveStaticSymbol<ITypeSymbol>(name)
         );
 
         if (m_OptSymbol.has_value())
         {
             if (m_IRTypeGetter.has_value())
             {
-                dynamic_cast<IConcreteTypeSymbol*>(
-                    m_OptSymbol.value()
-                )->SetAsPrimitivelyEmittable();
+                dynamic_cast<IConcreteTypeSymbol*>(m_OptSymbol.value())
+                    ->SetAsPrimitivelyEmittable();
             }
 
             if (m_IsTriviallyCopyable)
             {
-                dynamic_cast<IConcreteTypeSymbol*>(
-                    m_OptSymbol.value()
-                )->SetAsTriviallyCopyable();
-            }        
+                dynamic_cast<IConcreteTypeSymbol*>(m_OptSymbol.value())->SetAsTriviallyCopyable();
+            }
         }
 
         return m_OptSymbol;
@@ -155,10 +143,11 @@ namespace Ace
         std::vector<std::string> nameSectionStrings,
         const NativeSymbolKind kind,
         std::optional<FunctionBlockEmitter> optBlockEmitter
-    ) : m_Compilation{ compilation },
-        m_NameSectionStrings{ std::move(nameSectionStrings) },
-        m_IsRoot{ kind == NativeSymbolKind::Root },
-        m_OptBlockEmitter{ std::move(optBlockEmitter) }
+    )
+        : m_Compilation{ compilation },
+          m_NameSectionStrings{ std::move(nameSectionStrings) },
+          m_IsRoot{ kind == NativeSymbolKind::Root },
+          m_OptBlockEmitter{ std::move(optBlockEmitter) }
     {
     }
 
@@ -167,9 +156,8 @@ namespace Ace
         return m_Compilation;
     }
 
-    auto NativeFunction::CreateFullyQualifiedName(
-        const SrcLocation& srcLocation
-    ) const -> SymbolName
+    auto NativeFunction::CreateFullyQualifiedName(const SrcLocation& srcLocation) const
+        -> SymbolName
     {
         return CreateSymbolName(srcLocation, m_NameSectionStrings);
     }
@@ -182,14 +170,12 @@ namespace Ace
         }
 
         const auto globalScope = GetCompilation()->GetGlobalScope();
-        const auto name =
-            CreateFullyQualifiedName(SrcLocation{ GetCompilation() });
+        const auto name = CreateFullyQualifiedName(SrcLocation{ GetCompilation() });
 
         if (m_IsRoot)
         {
-            m_OptSymbol = DiagnosticBag::Create().Collect(
-                globalScope->ResolveRoot<FunctionSymbol>(name)
-            );
+            m_OptSymbol =
+                DiagnosticBag::Create().Collect(globalScope->ResolveRoot<FunctionSymbol>(name));
 
             ACE_ASSERT(!m_OptBlockEmitter.has_value());
         }
@@ -202,9 +188,7 @@ namespace Ace
             if (m_OptSymbol.has_value() && m_OptBlockEmitter.has_value())
             {
                 m_OptSymbol.value()->BindEmittableBlock(
-                    std::make_shared<FunctionEmittableBlock>(
-                        m_OptBlockEmitter.value()
-                    )
+                    std::make_shared<FunctionEmittableBlock>(m_OptBlockEmitter.value())
                 );
             }
         }
@@ -222,10 +206,8 @@ namespace Ace
         return GetSymbol();
     }
 
-    static auto CreateTypeAliasNameString(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::string
+    static auto CreateTypeAliasNameString(const Natives& natives, const NativeType& type)
+        -> std::string
     {
         if (&type == &natives.Int8)
         {
@@ -280,225 +262,150 @@ namespace Ace
         return { Std::GetName(), mainName };
     }
 
-    static auto CreateFromName(
-        const Natives& natives,
-        const NativeType& targetType,
-        const NativeType& fromType
-    ) -> std::vector<std::string>
+    static auto
+    CreateFromName(const Natives& natives, const NativeType& targetType, const NativeType& fromType)
+        -> std::vector<std::string>
     {
         return CreateName(
-            CreateTypeAliasNameString(natives, targetType) +
-            "_from_" +
+            CreateTypeAliasNameString(natives, targetType) + "_from_" +
             CreateTypeAliasNameString(natives, fromType)
         );
     }
 
-    static auto CreateUnaryNegationName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateUnaryNegationName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_unary_negation"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_unary_negation");
     }
 
-    static auto CreateNOTName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateNOTName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_NOT"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_NOT");
     }
 
-    static auto CreateMultiplicationName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateMultiplicationName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_multiplication"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_multiplication");
     }
 
-    static auto CreateDivisionName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateDivisionName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_division"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_division");
     }
 
-    static auto CreateRemainderName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateRemainderName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_remainder"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_remainder");
     }
 
-    static auto CreateAdditionName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateAdditionName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_addition"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_addition");
     }
 
-    static auto CreateSubtractionName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateSubtractionName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_subtraction"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_subtraction");
     }
 
-    static auto CreateRightShiftName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateRightShiftName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_right_shift"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_right_shift");
     }
 
-    static auto CreateLeftShiftName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateLeftShiftName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_left_shift"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_left_shift");
     }
 
-    static auto CreateLessThanName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateLessThanName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_less_than"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_less_than");
     }
 
-    static auto CreateGreaterThanName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateGreaterThanName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_greater_than"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_greater_than");
     }
 
-    static auto CreateLessThanEqualsName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateLessThanEqualsName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_less_than_equals"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_less_than_equals");
     }
 
-    static auto CreateGreaterThanEqualsName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateGreaterThanEqualsName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_greater_than_equals"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_greater_than_equals");
     }
 
-    static auto CreateEqualsName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateEqualsName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
         return CreateName(CreateTypeAliasNameString(natives, type) + "_equals");
     }
 
-    static auto CreateNotEqualsName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateNotEqualsName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
-        return CreateName(
-            CreateTypeAliasNameString(natives, type) + "_not_equals"
-        );
+        return CreateName(CreateTypeAliasNameString(natives, type) + "_not_equals");
     }
 
-    static auto CreateANDName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateANDName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
         return CreateName(CreateTypeAliasNameString(natives, type) + "_AND");
     }
 
-    static auto CreateXORName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateXORName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
         return CreateName(CreateTypeAliasNameString(natives, type) + "_XOR");
     }
 
-    static auto CreateORName(
-        const Natives& natives,
-        const NativeType& type
-    ) -> std::vector<std::string>
+    static auto CreateORName(const Natives& natives, const NativeType& type)
+        -> std::vector<std::string>
     {
         return CreateName(CreateTypeAliasNameString(natives, type) + "_OR");
     }
 
     namespace I
     {
-        static auto FromInt(
-            const Natives& natives,
-            const NativeType& targetType,
-            const NativeType& fromType
-        ) -> NativeFunction
+        static auto
+        FromInt(const Natives& natives, const NativeType& targetType, const NativeType& fromType)
+            -> NativeFunction
         {
             auto* const compilation = fromType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const fromIRType =
-                    fromType.GetIRType(emitter.GetContext());
-                auto* const toIRType =
-                    targetType.GetIRType(emitter.GetContext());
+                auto* const fromIRType = fromType.GetIRType(emitter.GetContext());
+                auto* const toIRType = targetType.GetIRType(emitter.GetContext());
 
                 const bool isSigned = natives.IsIntTypeSigned(fromType);
 
-                auto* const value = isSigned ?
-                    emitter.GetBlock().Builder.CreateSExtOrTrunc(
-                        emitter.EmitLoadArg(0, fromIRType),
-                        toIRType
-                    ) :
-                    emitter.GetBlock().Builder.CreateZExtOrTrunc(
-                        emitter.EmitLoadArg(0, fromIRType),
-                        toIRType
-                    );
+                auto* const value = isSigned ? emitter.GetBlock().Builder.CreateSExtOrTrunc(
+                                                   emitter.EmitLoadArg(0, fromIRType), toIRType
+                                               )
+                                             : emitter.GetBlock().Builder.CreateZExtOrTrunc(
+                                                   emitter.EmitLoadArg(0, fromIRType), toIRType
+                                               );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateFromName(natives, targetType, fromType),
                 NativeSymbolKind::Concrete,
@@ -506,38 +413,30 @@ namespace Ace
             };
         }
 
-        static auto FromFloat(
-            const Natives& natives,
-            const NativeType& targetType,
-            const NativeType& fromType
-        ) -> NativeFunction
+        static auto
+        FromFloat(const Natives& natives, const NativeType& targetType, const NativeType& fromType)
+            -> NativeFunction
         {
             auto* const compilation = fromType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const fromIRType =
-                    fromType.GetIRType(emitter.GetContext());
-                auto* const toIRType =
-                    targetType.GetIRType(emitter.GetContext());
+                auto* const fromIRType = fromType.GetIRType(emitter.GetContext());
+                auto* const toIRType = targetType.GetIRType(emitter.GetContext());
 
                 const bool isSigned = natives.IsIntTypeSigned(targetType);
 
-                auto* const value = isSigned ?
-                    emitter.GetBlock().Builder.CreateFPToSI(
-                        emitter.EmitLoadArg(0, fromIRType),
-                        toIRType
-                    ) :
-                    emitter.GetBlock().Builder.CreateFPToUI(
-                        emitter.EmitLoadArg(0, fromIRType),
-                        toIRType
-                    );
+                auto* const value = isSigned ? emitter.GetBlock().Builder.CreateFPToSI(
+                                                   emitter.EmitLoadArg(0, fromIRType), toIRType
+                                               )
+                                             : emitter.GetBlock().Builder.CreateFPToUI(
+                                                   emitter.EmitLoadArg(0, fromIRType), toIRType
+                                               );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateFromName(natives, targetType, fromType),
                 NativeSymbolKind::Concrete,
@@ -545,28 +444,23 @@ namespace Ace
             };
         }
 
-        static auto UnaryNegation(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto UnaryNegation(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateMul(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    llvm::ConstantInt::get(selfIRType, -1)
+                    emitter.EmitLoadArg(0, selfIRType), llvm::ConstantInt::get(selfIRType, -1)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateUnaryNegationName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -574,28 +468,22 @@ namespace Ace
             };
         }
 
-        static auto NOT(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto NOT(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateXor(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    llvm::ConstantInt::get(selfIRType, -1)
+                    emitter.EmitLoadArg(0, selfIRType), llvm::ConstantInt::get(selfIRType, -1)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateNOTName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -603,28 +491,23 @@ namespace Ace
             };
         }
 
-        static auto Multiplication(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Multiplication(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateMul(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateMultiplicationName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -632,35 +515,29 @@ namespace Ace
             };
         }
 
-        static auto Division(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Division(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
-                
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
+
                 const bool isSigned = natives.IsIntTypeSigned(selfType);
 
-                auto* const value = isSigned ?
-                    emitter.GetBlock().Builder.CreateSDiv(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    ) :
-                    emitter.GetBlock().Builder.CreateUDiv(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value =
+                    isSigned
+                        ? emitter.GetBlock().Builder.CreateSDiv(
+                              emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
+                          )
+                        : emitter.GetBlock().Builder.CreateUDiv(
+                              emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
+                          );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateDivisionName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -668,35 +545,29 @@ namespace Ace
             };
         }
 
-        static auto Remainder(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Remainder(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 const bool isSigned = natives.IsIntTypeSigned(selfType);
 
-                auto* const value = isSigned ?
-                    emitter.GetBlock().Builder.CreateSRem(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    ) :
-                    emitter.GetBlock().Builder.CreateURem(
-                        emitter.EmitLoadArg(0, selfIRType),
-                        emitter.EmitLoadArg(1, selfIRType)
-                    );
+                auto* const value =
+                    isSigned
+                        ? emitter.GetBlock().Builder.CreateSRem(
+                              emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
+                          )
+                        : emitter.GetBlock().Builder.CreateURem(
+                              emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
+                          );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateRemainderName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -704,28 +575,22 @@ namespace Ace
             };
         }
 
-        static auto Addition(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Addition(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateAdd(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateAdditionName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -733,28 +598,23 @@ namespace Ace
             };
         }
 
-        static auto Subtraction(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Subtraction(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateSub(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateSubtractionName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -762,28 +622,22 @@ namespace Ace
             };
         }
 
-        static auto RightShift(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto RightShift(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateAShr(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateRightShiftName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -791,28 +645,22 @@ namespace Ace
             };
         };
 
-        static auto LeftShift(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto LeftShift(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateShl(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateLeftShiftName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -820,17 +668,13 @@ namespace Ace
             };
         }
 
-        static auto LessThan(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto LessThan(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateCmp(
                     llvm::CmpInst::Predicate::ICMP_SLT,
@@ -841,8 +685,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateLessThanName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -850,17 +693,14 @@ namespace Ace
             };
         }
 
-        static auto GreaterThan(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto GreaterThan(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateCmp(
                     llvm::CmpInst::Predicate::ICMP_SGT,
@@ -871,8 +711,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateGreaterThanName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -880,17 +719,14 @@ namespace Ace
             };
         }
 
-        static auto LessThanEquals(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto LessThanEquals(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateCmp(
                     llvm::CmpInst::Predicate::ICMP_SLE,
@@ -901,8 +737,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateLessThanEqualsName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -910,17 +745,14 @@ namespace Ace
             };
         }
 
-        static auto GreaterThanEquals(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto GreaterThanEquals(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateCmp(
                     llvm::CmpInst::Predicate::ICMP_SGE,
@@ -931,8 +763,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateGreaterThanEqualsName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -940,17 +771,13 @@ namespace Ace
             };
         }
 
-        static auto Equals(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Equals(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateCmp(
                     llvm::CmpInst::Predicate::ICMP_EQ,
@@ -961,8 +788,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateEqualsName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -970,17 +796,13 @@ namespace Ace
             };
         }
 
-        static auto NotEquals(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto NotEquals(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateCmp(
                     llvm::CmpInst::Predicate::ICMP_NE,
@@ -991,8 +813,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateNotEqualsName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1000,28 +821,22 @@ namespace Ace
             };
         }
 
-        static auto AND(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto AND(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateAnd(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateANDName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1029,28 +844,22 @@ namespace Ace
             };
         }
 
-        static auto XOR(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto XOR(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateXor(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateXORName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1058,28 +867,22 @@ namespace Ace
             };
         }
 
-        static auto OR(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto OR(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateOr(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateORName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1090,38 +893,30 @@ namespace Ace
 
     namespace F
     {
-        static auto FromInt(
-            const Natives& natives,
-            const NativeType& targetType,
-            const NativeType& fromType
-        ) -> NativeFunction
+        static auto
+        FromInt(const Natives& natives, const NativeType& targetType, const NativeType& fromType)
+            -> NativeFunction
         {
             auto* const compilation = fromType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const fromIRType =
-                    fromType.GetIRType(emitter.GetContext());
-                auto* const toIRType =
-                    targetType.GetIRType(emitter.GetContext());
+                auto* const fromIRType = fromType.GetIRType(emitter.GetContext());
+                auto* const toIRType = targetType.GetIRType(emitter.GetContext());
 
                 const bool isSigned = natives.IsIntTypeSigned(fromType);
 
-                auto* const value = isSigned ? 
-                    emitter.GetBlock().Builder.CreateSIToFP(
-                        emitter.EmitLoadArg(0, fromIRType),
-                        toIRType
-                    ) :
-                    emitter.GetBlock().Builder.CreateUIToFP(
-                        emitter.EmitLoadArg(0, fromIRType),
-                        toIRType
-                    );
+                auto* const value = isSigned ? emitter.GetBlock().Builder.CreateSIToFP(
+                                                   emitter.EmitLoadArg(0, fromIRType), toIRType
+                                               )
+                                             : emitter.GetBlock().Builder.CreateUIToFP(
+                                                   emitter.EmitLoadArg(0, fromIRType), toIRType
+                                               );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return
-            {
+            return {
                 compilation,
                 CreateFromName(natives, targetType, fromType),
                 NativeSymbolKind::Concrete,
@@ -1129,28 +924,23 @@ namespace Ace
             };
         }
 
-        static auto UnaryNegation(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto UnaryNegation(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFMul(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    llvm::ConstantFP::get(selfIRType, -1)
+                    emitter.EmitLoadArg(0, selfIRType), llvm::ConstantFP::get(selfIRType, -1)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateUnaryNegationName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1158,28 +948,23 @@ namespace Ace
             };
         }
 
-        static auto Multiplication(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Multiplication(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFMul(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateMultiplicationName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1187,28 +972,22 @@ namespace Ace
             };
         }
 
-        static auto Division(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Division(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFDiv(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
-        
+
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateDivisionName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1216,28 +995,22 @@ namespace Ace
             };
         }
 
-        static auto Remainder(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Remainder(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFRem(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateRemainderName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1245,28 +1018,22 @@ namespace Ace
             };
         }
 
-        static auto Addition(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Addition(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFAdd(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateAdditionName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1274,28 +1041,23 @@ namespace Ace
             };
         }
 
-        static auto Subtraction(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Subtraction(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFSub(
-                    emitter.EmitLoadArg(0, selfIRType),
-                    emitter.EmitLoadArg(1, selfIRType)
+                    emitter.EmitLoadArg(0, selfIRType), emitter.EmitLoadArg(1, selfIRType)
                 );
 
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateSubtractionName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1303,17 +1065,13 @@ namespace Ace
             };
         }
 
-        static auto LessThan(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto LessThan(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFCmp(
                     llvm::CmpInst::Predicate::FCMP_OLT,
@@ -1324,8 +1082,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateLessThanName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1333,17 +1090,14 @@ namespace Ace
             };
         }
 
-        static auto GreaterThan(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto GreaterThan(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFCmp(
                     llvm::CmpInst::Predicate::FCMP_OGT,
@@ -1354,8 +1108,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateGreaterThanName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1363,17 +1116,14 @@ namespace Ace
             };
         }
 
-        static auto LessThanEquals(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto LessThanEquals(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFCmp(
                     llvm::CmpInst::Predicate::FCMP_OLE,
@@ -1384,8 +1134,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateLessThanEqualsName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1393,17 +1142,14 @@ namespace Ace
             };
         }
 
-        static auto GreaterThanEquals(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto GreaterThanEquals(const Natives& natives, const NativeType& selfType)
+            -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFCmp(
                     llvm::CmpInst::Predicate::FCMP_OGE,
@@ -1414,8 +1160,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateGreaterThanEqualsName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1423,17 +1168,13 @@ namespace Ace
             };
         }
 
-        static auto Equals(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto Equals(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFCmp(
                     llvm::CmpInst::Predicate::FCMP_OEQ,
@@ -1444,8 +1185,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateEqualsName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -1453,17 +1193,13 @@ namespace Ace
             };
         }
 
-        static auto NotEquals(
-            const Natives& natives,
-            const NativeType& selfType
-        ) -> NativeFunction
+        static auto NotEquals(const Natives& natives, const NativeType& selfType) -> NativeFunction
         {
             auto* const compilation = selfType.GetCompilation();
 
             auto blockEmitter = [&](Emitter& emitter)
             {
-                auto* const selfIRType =
-                    selfType.GetIRType(emitter.GetContext());
+                auto* const selfIRType = selfType.GetIRType(emitter.GetContext());
 
                 auto* const value = emitter.GetBlock().Builder.CreateFCmp(
                     llvm::CmpInst::Predicate::FCMP_ONE,
@@ -1474,8 +1210,7 @@ namespace Ace
                 emitter.GetBlock().Builder.CreateRet(value);
             };
 
-            return NativeFunction
-            {
+            return NativeFunction{
                 compilation,
                 CreateNotEqualsName(natives, selfType),
                 NativeSymbolKind::Concrete,
@@ -3453,49 +3188,58 @@ namespace Ace
 
     auto Natives::Verify() const -> void
     {
-        std::for_each(begin(m_Natives.Get()), end(m_Natives.Get()),
-        [](INative* const native)
-        {
-            (void)native->GetGenericSymbol();
-        });
+        std::for_each(
+            begin(m_Natives.Get()),
+            end(m_Natives.Get()),
+            [](INative* const native)
+            {
+                (void)native->GetGenericSymbol();
+            }
+        );
     }
 
-    auto Natives::CollectIRTypeSymbolMap(
-        llvm::LLVMContext& context
-    ) const -> std::unordered_map<ITypeSymbol*, llvm::Type*>
+    auto Natives::CollectIRTypeSymbolMap(llvm::LLVMContext& context) const
+        -> std::unordered_map<ITypeSymbol*, llvm::Type*>
     {
         std::unordered_map<ITypeSymbol*, llvm::Type*> map{};
 
-        std::for_each(begin(m_Types.Get()), end(m_Types.Get()),
-        [&](const NativeType* const type)
-        {
-            if (!type->HasIRType())
+        std::for_each(
+            begin(m_Types.Get()),
+            end(m_Types.Get()),
+            [&](const NativeType* const type)
             {
-                return;
-            }
+                if (!type->HasIRType())
+                {
+                    return;
+                }
 
-            map[type->GetSymbol()] = type->GetIRType(context);
-        });
+                map[type->GetSymbol()] = type->GetIRType(context);
+            }
+        );
 
         return map;
     }
 
-    auto Natives::GetImplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
+    auto Natives::GetImplicitFromOpMap() const -> const
+        std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
     {
         return m_ImplicitFromOpMap.Get();
     }
 
-    auto Natives::GetExplicitFromOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
+    auto Natives::GetExplicitFromOpMap() const -> const
+        std::unordered_map<ITypeSymbol*, std::unordered_map<ITypeSymbol*, FunctionSymbol*>>&
     {
         return m_ExplicitFromOpMap.Get();
     }
 
-    auto Natives::GetUnaryOpMap()  const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&
+    auto Natives::GetUnaryOpMap() const
+        -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&
     {
         return m_UnaryOpMap.Get();
     }
 
-    auto Natives::GetBinaryOpMap() const -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&
+    auto Natives::GetBinaryOpMap() const
+        -> const std::unordered_map<ITypeSymbol*, std::unordered_map<Op, FunctionSymbol*>>&
     {
         return m_BinaryOpMap.Get();
     }

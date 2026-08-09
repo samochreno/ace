@@ -17,9 +17,10 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         const SymbolName& rootTraitName
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_RootTraitName{ rootTraitName }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_RootTraitName{ rootTraitName }
     {
     }
 
@@ -55,9 +56,8 @@ namespace Ace
     ) -> Expected<TraitTypeSymbol*>
     {
         auto typeDiagnostics = DiagnosticBag::Create();
-        const auto optSymbol = typeDiagnostics.Collect(
-            scope->ResolveStaticSymbol<TraitTypeSymbol>(rootTraitName)
-        );
+        const auto optSymbol =
+            typeDiagnostics.Collect(scope->ResolveStaticSymbol<TraitTypeSymbol>(rootTraitName));
         if (optSymbol.has_value())
         {
             auto* const symbol = optSymbol.value();
@@ -67,16 +67,14 @@ namespace Ace
 
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optRootSymbol = diagnostics.Collect(
-            scope->ResolveRoot<TraitTypeSymbol>(rootTraitName)
-        );
+        const auto optRootSymbol =
+            diagnostics.Collect(scope->ResolveRoot<TraitTypeSymbol>(rootTraitName));
         if (!optRootSymbol.has_value())
         {
             return std::move(typeDiagnostics);
         }
 
-        return Expected
-        {
+        return Expected{
             optRootSymbol.value(),
             std::move(diagnostics),
         };
@@ -87,23 +85,13 @@ namespace Ace
         auto diagnostics = DiagnosticBag::Create();
 
         const auto optRootTraitSymbol = diagnostics.Collect(
-            ResolveRootTraitSymbol(
-                GetSrcLocation(),
-                GetScope(),
-                m_RootTraitName
-            )
+            ResolveRootTraitSymbol(GetSrcLocation(), GetScope(), m_RootTraitName)
         );
-        auto* const rootTraitSymbol = optRootTraitSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetTrait()
-        );
+        auto* const rootTraitSymbol =
+            optRootTraitSymbol.value_or(GetCompilation()->GetErrorSymbols().GetTrait());
 
-        return Diagnosed
-        {
-            std::make_unique<UseSymbol>(
-                GetSrcLocation(),
-                GetSymbolScope(),
-                rootTraitSymbol
-            ),
+        return Diagnosed{
+            std::make_unique<UseSymbol>(GetSrcLocation(), GetSymbolScope(), rootTraitSymbol),
             std::move(diagnostics),
         };
     }

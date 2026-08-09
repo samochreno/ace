@@ -45,28 +45,34 @@ namespace Ace
 
     auto MakeLowercase(std::string& value) -> std::string&
     {
-        std::for_each(begin(value), end(value),
-        [](char& value)
-        {
-            if (IsUppercase(value))
+        std::for_each(
+            begin(value),
+            end(value),
+            [](char& value)
             {
-                value = tolower(value);
+                if (IsUppercase(value))
+                {
+                    value = tolower(value);
+                }
             }
-        });
+        );
 
         return value;
     }
 
     auto MakeUppercase(std::string& value) -> std::string&
     {
-        std::for_each(begin(value), end(value),
-        [](char& value)
-        {
-            if (IsLowercase(value))
+        std::for_each(
+            begin(value),
+            end(value),
+            [](char& value)
             {
-                value = toupper(value);
+                if (IsLowercase(value))
+                {
+                    value = toupper(value);
+                }
             }
-        });
+        );
 
         return value;
     }

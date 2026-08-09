@@ -22,11 +22,11 @@ namespace Ace
         std::shared_ptr<const IExprSema> Value{};
     };
 
-    class StructConstructionExprSema :
-        public std::enable_shared_from_this<StructConstructionExprSema>,
-        public virtual IExprSema,
-        public virtual ITypeCheckableSema<StructConstructionExprSema>,
-        public virtual ILowerableSema<StructConstructionExprSema>
+    class StructConstructionExprSema
+        : public std::enable_shared_from_this<StructConstructionExprSema>,
+          public virtual IExprSema,
+          public virtual ITypeCheckableSema<StructConstructionExprSema>,
+          public virtual ILowerableSema<StructConstructionExprSema>
     {
     public:
         StructConstructionExprSema(
@@ -41,18 +41,14 @@ namespace Ace
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto CreateTypeChecked(
-            const TypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const StructConstructionExprSema>> final;
-        auto CreateTypeCheckedExpr(
-            const TypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
-        auto CreateLowered(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const StructConstructionExprSema> final;
-        auto CreateLoweredExpr(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const IExprSema> final;
+        auto CreateTypeChecked(const TypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const StructConstructionExprSema>> final;
+        auto CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const IExprSema>> final;
+        auto CreateLowered(const LoweringContext& context) const
+            -> std::shared_ptr<const StructConstructionExprSema> final;
+        auto CreateLoweredExpr(const LoweringContext& context) const
+            -> std::shared_ptr<const IExprSema> final;
         auto CollectMonos() const -> MonoCollector final;
         auto Emit(Emitter& emitter) const -> ExprEmitResult final;
 

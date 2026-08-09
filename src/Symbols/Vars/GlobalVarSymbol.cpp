@@ -17,10 +17,11 @@ namespace Ace
         const AccessModifier accessModifier,
         const Ident& name,
         ISizedTypeSymbol* const type
-    ) : m_Scope{ scope },
-        m_Name{ name },
-        m_AccessModifier{ accessModifier },
-        m_Type{ type }
+    )
+        : m_Scope{ scope },
+          m_Name{ name },
+          m_AccessModifier{ accessModifier },
+          m_Type{ type }
     {
     }
 
@@ -50,8 +51,7 @@ namespace Ace
     }
 
     auto GlobalVarSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<GlobalVarSymbol>(

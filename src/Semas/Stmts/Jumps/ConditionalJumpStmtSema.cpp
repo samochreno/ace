@@ -20,19 +20,23 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprSema>& condition,
         LabelSymbol* const labelSymbol
-    ) : m_SrcLocation{ srcLocation },
-        m_Condition{ condition },
-        m_LabelSymbol{ labelSymbol }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Condition{ condition },
+          m_LabelSymbol{ labelSymbol }
     {
     }
 
     auto ConditionalJumpStmtSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("ConditionalJumpStmtSema", [&]()
-        {
-            logger.Log("m_Condition", m_Condition);
-            logger.Log("m_LabelSymbol", m_LabelSymbol);
-        });
+        logger.Log(
+            "ConditionalJumpStmtSema",
+            [&]()
+            {
+                logger.Log("m_Condition", m_Condition);
+                logger.Log("m_LabelSymbol", m_LabelSymbol);
+            }
+        );
     }
 
     auto ConditionalJumpStmtSema::GetSrcLocation() const -> const SrcLocation&
@@ -45,47 +49,39 @@ namespace Ace
         return m_Condition->GetScope();
     }
 
-    auto ConditionalJumpStmtSema::CreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const ConditionalJumpStmtSema>>
+    auto ConditionalJumpStmtSema::CreateTypeChecked(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const ConditionalJumpStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const TypeInfo typeInfo
-        {
+        const TypeInfo typeInfo{
             GetCompilation()->GetNatives().Bool.GetSymbol(),
             ValueKind::R,
         };
-        const auto checkedCondition = diagnostics.Collect(
-            CreateImplicitlyConvertedAndTypeChecked(m_Condition, typeInfo)
-        );
+        const auto checkedCondition =
+            diagnostics.Collect(CreateImplicitlyConvertedAndTypeChecked(m_Condition, typeInfo));
 
         if (checkedCondition == m_Condition)
         {
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const ConditionalJumpStmtSema>(
-                GetSrcLocation(),
-                checkedCondition,
-                m_LabelSymbol
+                GetSrcLocation(), checkedCondition, m_LabelSymbol
             ),
             std::move(diagnostics),
         };
     }
 
-    auto ConditionalJumpStmtSema::CreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
+    auto ConditionalJumpStmtSema::CreateTypeCheckedStmt(const StmtTypeCheckingContext& context
     ) const -> Diagnosed<std::shared_ptr<const IStmtSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto ConditionalJumpStmtSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const ConditionalJumpStmtSema>
+    auto ConditionalJumpStmtSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const ConditionalJumpStmtSema>
     {
         const auto loweredCondition = m_Condition->CreateLoweredExpr({});
 
@@ -95,15 +91,13 @@ namespace Ace
         }
 
         return std::make_shared<const ConditionalJumpStmtSema>(
-            GetSrcLocation(),
-            loweredCondition,
-            m_LabelSymbol
-        )->CreateLowered({});
+                   GetSrcLocation(), loweredCondition, m_LabelSymbol
+        )
+            ->CreateLowered({});
     }
 
-    auto ConditionalJumpStmtSema::CreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IStmtSema>
+    auto ConditionalJumpStmtSema::CreateLoweredStmt(const LoweringContext& context) const
+        -> std::shared_ptr<const IStmtSema>
     {
         return CreateLowered(context);
     }
@@ -115,37 +109,28 @@ namespace Ace
 
     auto ConditionalJumpStmtSema::Emit(Emitter& emitter) const -> void
     {
-        auto block = std::make_unique<EmittingBlock>(
-            emitter.GetContext(),
-            emitter.GetFunction()
-        );
+        auto block = std::make_unique<EmittingBlock>(emitter.GetContext(), emitter.GetFunction());
 
         const auto conditionEmitResult = m_Condition->Emit(emitter);
 
-        auto* const boolType =
-            emitter.GetType(GetCompilation()->GetNatives().Bool.GetSymbol());
+        auto* const boolType = emitter.GetType(GetCompilation()->GetNatives().Bool.GetSymbol());
 
-        auto* const loadInst = emitter.GetBlock().Builder.CreateLoad(
-            boolType,
-            conditionEmitResult.Value
-        );
+        auto* const loadInst =
+            emitter.GetBlock().Builder.CreateLoad(boolType, conditionEmitResult.Value);
 
         emitter.EmitDropTmps(conditionEmitResult.Tmps);
 
         emitter.GetBlock().Builder.CreateCondBr(
-            loadInst,
-            emitter.GetLabelBlockMap().GetOrCreateAt(m_LabelSymbol),
-            block->Block
+            loadInst, emitter.GetLabelBlockMap().GetOrCreateAt(m_LabelSymbol), block->Block
         );
 
         emitter.SetBlock(std::move(block));
     }
 
-    auto ConditionalJumpStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
+    auto ConditionalJumpStmtSema::CreateControlFlowInstructions() const
+        -> std::vector<ControlFlowInstruction>
     {
-        return std::vector
-        {
-            ControlFlowInstruction{ ControlFlowKind::ConditionalJump, m_LabelSymbol }
-        };
+        return std::vector{ ControlFlowInstruction{ ControlFlowKind::ConditionalJump,
+                                                    m_LabelSymbol } };
     }
 }

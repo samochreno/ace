@@ -19,9 +19,7 @@
 
 namespace Ace
 {
-    class PrototypeSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class PrototypeSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         PrototypeSyntax(

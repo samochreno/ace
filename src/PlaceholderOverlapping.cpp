@@ -9,10 +9,7 @@
 
 namespace Ace
 {
-    auto DoPlaceholdersOverlap(
-        ITypeSymbol* conversative,
-        ITypeSymbol* speculative
-    ) -> bool
+    auto DoPlaceholdersOverlap(ITypeSymbol* conversative, ITypeSymbol* speculative) -> bool
     {
         conversative = conversative->GetUnaliasedType();
         speculative = speculative->GetUnaliasedType();
@@ -22,10 +19,8 @@ namespace Ace
             return true;
         }
 
-        auto* const conversativeParam =
-            dynamic_cast<TypeParamTypeSymbol*>(conversative);
-        auto* const speculativeParam =
-            dynamic_cast<TypeParamTypeSymbol*>(speculative);
+        auto* const conversativeParam = dynamic_cast<TypeParamTypeSymbol*>(conversative);
+        auto* const speculativeParam = dynamic_cast<TypeParamTypeSymbol*>(speculative);
 
         if (conversativeParam && speculativeParam)
         {
@@ -35,18 +30,14 @@ namespace Ace
         if (speculativeParam)
         {
             const auto scope = speculativeParam->GetScope();
-            const auto traits =
-                scope->CollectConstrainedTraits(speculativeParam);
+            const auto traits = scope->CollectConstrainedTraits(speculativeParam);
 
             const auto unimplementedTrait = std::find_if_not(
                 begin(traits),
-                end  (traits),
+                end(traits),
                 [&](TraitTypeSymbol* const trait)
                 {
-                    return Scope::CollectImplOfFor(
-                        trait,
-                        conversative
-                    ).has_value();
+                    return Scope::CollectImplOfFor(trait, conversative).has_value();
                 }
             );
             return unimplementedTrait == end(traits);
@@ -55,18 +46,14 @@ namespace Ace
         if (conversativeParam)
         {
             const auto scope = conversativeParam->GetScope();
-            const auto traits =
-                scope->CollectConstrainedTraits(conversativeParam);
+            const auto traits = scope->CollectConstrainedTraits(conversativeParam);
 
             const auto unimplementedTrait = std::find_if_not(
                 begin(traits),
-                end  (traits),
+                end(traits),
                 [&](TraitTypeSymbol* const trait)
                 {
-                    return Scope::CollectImplOfFor(
-                        trait,
-                        speculative
-                    ).has_value();
+                    return Scope::CollectImplOfFor(trait, speculative).has_value();
                 }
             );
             return unimplementedTrait == end(traits);
@@ -78,15 +65,13 @@ namespace Ace
         }
 
         const auto& conversativeArgs = conversative->GetTypeArgs();
-        const auto&  speculativeArgs =  speculative->GetTypeArgs();
+        const auto& speculativeArgs = speculative->GetTypeArgs();
         ACE_ASSERT(conversativeArgs.size() == speculativeArgs.size());
 
         for (size_t i = 0; i < conversativeArgs.size(); i++)
         {
-            const auto doOverlap = DoPlaceholdersOverlap(
-                conversativeArgs.at(i),
-                speculativeArgs.at(i)
-            );
+            const auto doOverlap =
+                DoPlaceholdersOverlap(conversativeArgs.at(i), speculativeArgs.at(i));
             if (!doOverlap)
             {
                 return false;

@@ -23,49 +23,47 @@ namespace Ace
     ) -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
-        
+
         const auto& traits = constraint->GetTraits();
-        std::for_each(begin(traits), end(traits),
-        [&](TraitTypeSymbol* const trait)
-        {
-            auto* const constrainedType = CreateInstantiated<ITypeSymbol>(
-                constraint->GetType(),
-                InstantiationContext{ typeArgs, std::nullopt }
-            );
-
-            if (Scope::HasImpl(trait, constrainedType))
+        std::for_each(
+            begin(traits),
+            end(traits),
+            [&](TraitTypeSymbol* const trait)
             {
-                return;
-            }
+                auto* const constrainedType = CreateInstantiated<ITypeSymbol>(
+                    constraint->GetType(), InstantiationContext{ typeArgs, std::nullopt }
+                );
 
-            diagnostics.Add(CreateUnsatisfiedConstraintError(
-                srcLocation,
-                constraint,
-                trait,
-                typeArgs
-            ));
-        });
+                if (Scope::HasImpl(trait, constrainedType))
+                {
+                    return;
+                }
+
+                diagnostics.Add(
+                    CreateUnsatisfiedConstraintError(srcLocation, constraint, trait, typeArgs)
+                );
+            }
+        );
 
         return Diagnosed<void>{ std::move(diagnostics) };
     }
 
     auto IConstrainedSymbol::DiagnoseUnsatisfiedConstraints(
-        const SrcLocation& srcLocation,
-        const std::vector<ITypeSymbol*>& typeArgs
+        const SrcLocation& srcLocation, const std::vector<ITypeSymbol*>& typeArgs
     ) const -> Diagnosed<void>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         const auto constraints = CollectConstraints();
-        std::for_each(begin(constraints), end(constraints),
-        [&](ConstraintSymbol* const constraint)
-        {
-            diagnostics.Collect(DiagnoseUnsatisfiedConstraint(
-                srcLocation,
-                constraint,
-                typeArgs
-            ));  
-        });
+        std::for_each(
+            begin(constraints),
+            end(constraints),
+            [&](ConstraintSymbol* const constraint)
+            {
+                diagnostics.Collect(DiagnoseUnsatisfiedConstraint(srcLocation, constraint, typeArgs)
+                );
+            }
+        );
 
         return Diagnosed<void>{ std::move(diagnostics) };
     }

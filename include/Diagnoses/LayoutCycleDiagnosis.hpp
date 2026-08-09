@@ -5,7 +5,5 @@
 
 namespace Ace
 {
-    auto DiagnoseLayoutCycles(
-        Compilation* const compilation
-    ) -> Diagnosed<void>;
+    auto DiagnoseLayoutCycles(Compilation* const compilation) -> Diagnosed<void>;
 }

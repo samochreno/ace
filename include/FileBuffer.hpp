@@ -22,10 +22,8 @@ namespace Ace
         auto operator=(const FileBuffer&) -> FileBuffer& = delete;
         auto operator=(FileBuffer&&) -> FileBuffer& = default;
 
-        static auto Read(
-            Compilation* const compilation,
-            const std::filesystem::path& path
-        ) -> Expected<std::shared_ptr<const FileBuffer>>;
+        static auto Read(Compilation* const compilation, const std::filesystem::path& path)
+            -> Expected<std::shared_ptr<const FileBuffer>>;
         static auto Create(
             Compilation* const compilation,
             const std::filesystem::path& path,
@@ -35,9 +33,7 @@ namespace Ace
         auto GetCompilation() const -> Compilation* final;
         auto GetBuffer() const -> const std::string& final;
 
-        auto FormatLocation(
-            const SrcLocation& location
-        ) const -> std::string final;
+        auto FormatLocation(const SrcLocation& location) const -> std::string final;
 
         auto GetPath() const -> const std::filesystem::path&;
         auto GetLines() const -> const std::vector<std::string_view>&;
@@ -52,12 +48,9 @@ namespace Ace
             std::vector<std::string_view>&& lines
         );
 
-        auto FindLineIndex(
-            const std::string_view::const_iterator characterIt
-        ) const -> size_t;
+        auto FindLineIndex(const std::string_view::const_iterator characterIt) const -> size_t;
         auto FindCharacterIndex(
-            const size_t lineIndex,
-            const std::string_view::const_iterator characterIt
+            const size_t lineIndex, const std::string_view::const_iterator characterIt
         ) const -> size_t;
 
         Compilation* m_Compilation{};

@@ -14,9 +14,10 @@ namespace Ace
         const std::shared_ptr<Scope>& bodyScope,
         const AccessModifier accessModifier,
         const Ident& name
-    ) : m_BodyScope{ bodyScope },
-        m_AccessModifier{ accessModifier },
-        m_Name{ name }
+    )
+        : m_BodyScope{ bodyScope },
+          m_AccessModifier{ accessModifier },
+          m_Name{ name }
     {
     }
 
@@ -46,14 +47,9 @@ namespace Ace
     }
 
     auto ModSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
-        return std::make_unique<ModSymbol>(
-            scope->CreateChild(),
-            GetAccessModifier(),
-            GetName()
-        );
+        return std::make_unique<ModSymbol>(scope->CreateChild(), GetAccessModifier(), GetName());
     }
 }

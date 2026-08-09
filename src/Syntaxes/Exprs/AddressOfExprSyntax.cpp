@@ -11,9 +11,9 @@
 namespace Ace
 {
     AddressOfExprSyntax::AddressOfExprSyntax(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<const IExprSyntax>& expr
-    ) : m_Expr{ expr }
+        const SrcLocation& srcLocation, const std::shared_ptr<const IExprSyntax>& expr
+    )
+        : m_Expr{ expr }
     {
     }
 
@@ -32,18 +32,15 @@ namespace Ace
         return SyntaxChildCollector{}.Collect(m_Expr).Build();
     }
 
-    auto AddressOfExprSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const AddressOfExprSema>>
+    auto AddressOfExprSyntax::CreateSema() const
+        -> Diagnosed<std::shared_ptr<const AddressOfExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         const auto exprSema = diagnostics.Collect(m_Expr->CreateExprSema());
 
-        return Diagnosed
-        {
-            std::make_shared<const AddressOfExprSema>(
-                GetSrcLocation(),
-                exprSema
-            ),
+        return Diagnosed{
+            std::make_shared<const AddressOfExprSema>(GetSrcLocation(), exprSema),
             std::move(diagnostics),
         };
     }

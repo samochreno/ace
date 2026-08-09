@@ -5,16 +5,12 @@
 
 namespace Ace
 {
-    auto CreateMissingFunctionBlockError(
-        FunctionSymbol* const function
-    ) -> DiagnosticGroup
+    auto CreateMissingFunctionBlockError(FunctionSymbol* const function) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            function->GetName().SrcLocation,
-            "missing function body"
+            DiagnosticSeverity::Error, function->GetName().SrcLocation, "missing function body"
         );
 
         return group;

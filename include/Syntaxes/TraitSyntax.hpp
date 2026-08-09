@@ -19,9 +19,7 @@
 
 namespace Ace
 {
-    class TraitSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class TraitSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         TraitSyntax(
@@ -46,7 +44,7 @@ namespace Ace
         auto GetSymbolScope() const -> std::shared_ptr<Scope> final;
         auto GetDeclOrder() const -> DeclOrder final;
         auto CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>> final;
-        
+
     private:
         SrcLocation m_SrcLocation{};
         std::shared_ptr<Scope> m_BodyScope{};

@@ -13,7 +13,7 @@ namespace Ace
     {
     public:
         virtual ~IExprSyntax() = default;
-        
+
         virtual auto CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>> = 0;
     };
 }

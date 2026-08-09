@@ -5,7 +5,5 @@
 
 namespace Ace
 {
-    auto DiagnoseUnimplementedSupertraits(
-        Compilation* const compilation
-    ) -> Diagnosed<void>;
+    auto DiagnoseUnimplementedSupertraits(Compilation* const compilation) -> Diagnosed<void>;
 }

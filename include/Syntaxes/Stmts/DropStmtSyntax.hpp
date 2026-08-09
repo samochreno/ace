@@ -13,14 +13,12 @@
 
 namespace Ace
 {
-    class DropStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<DropStmtSema>
+    class DropStmtSyntax : public virtual IStmtSyntax, public virtual ISemaSyntax<DropStmtSema>
     {
     public:
         DropStmtSyntax(
             const SrcLocation& srcLocation,
-            const TypeName& typeName, 
+            const TypeName& typeName,
             const std::shared_ptr<const IExprSyntax>& expr
         );
         virtual ~DropStmtSyntax() = default;

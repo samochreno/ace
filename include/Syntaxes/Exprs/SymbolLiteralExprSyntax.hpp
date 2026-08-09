@@ -12,9 +12,8 @@
 
 namespace Ace
 {
-    class SymbolLiteralExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<StaticVarRefExprSema>
+    class SymbolLiteralExprSyntax : public virtual IExprSyntax,
+                                    public virtual ISemaSyntax<StaticVarRefExprSema>
     {
     public:
         SymbolLiteralExprSyntax(

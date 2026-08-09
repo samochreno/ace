@@ -1,4 +1,4 @@
- #pragma once
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -11,9 +11,7 @@
 
 namespace Ace
 {
-    class AndExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<AndExprSema>
+    class AndExprSyntax : public virtual IExprSyntax, public virtual ISemaSyntax<AndExprSema>
     {
     public:
         AndExprSyntax(
@@ -22,7 +20,7 @@ namespace Ace
             const std::shared_ptr<const IExprSyntax>& rhsExpr
         );
         virtual ~AndExprSyntax() = default;
-    
+
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const ISyntax*> final;

@@ -5,7 +5,5 @@
 
 namespace Ace
 {
-    auto DiagnoseOverlappingInherentImpls(
-        Compilation* const compilation
-    ) -> Diagnosed<void>;
+    auto DiagnoseOverlappingInherentImpls(Compilation* const compilation) -> Diagnosed<void>;
 }

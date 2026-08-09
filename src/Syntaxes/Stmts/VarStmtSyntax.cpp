@@ -22,12 +22,13 @@ namespace Ace
         const TypeName& typeName,
         const std::vector<std::shared_ptr<const AttributeSyntax>>& attributes,
         const std::optional<std::shared_ptr<const IExprSyntax>>& optAssignedExpr
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_Name{ name },
-        m_TypeName{ typeName },
-        m_Attributes{ attributes },
-        m_OptAssignedExpr{ optAssignedExpr }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_Name{ name },
+          m_TypeName{ typeName },
+          m_Attributes{ attributes },
+          m_OptAssignedExpr{ optAssignedExpr }
     {
     }
 
@@ -43,35 +44,26 @@ namespace Ace
 
     auto VarStmtSyntax::CollectChildren() const -> std::vector<const ISyntax*>
     {
-        return SyntaxChildCollector{}
-            .Collect(m_Attributes)
-            .Collect(m_OptAssignedExpr)
-            .Build();
+        return SyntaxChildCollector{}.Collect(m_Attributes).Collect(m_OptAssignedExpr).Build();
     }
 
     auto VarStmtSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const VarStmtSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        auto* const selfSymbol = DiagnosticBag::CreateNoError().Collect(
-            GetScope()->ResolveStaticSymbol<LocalVarSymbol>(m_Name)
-        ).value();
+        auto* const selfSymbol =
+            DiagnosticBag::CreateNoError()
+                .Collect(GetScope()->ResolveStaticSymbol<LocalVarSymbol>(m_Name))
+                .value();
 
         std::optional<std::shared_ptr<const IExprSema>> optAssignedExprSema{};
         if (m_OptAssignedExpr.has_value())
         {
-            optAssignedExprSema = diagnostics.Collect(
-                m_OptAssignedExpr.value()->CreateExprSema()
-            );
+            optAssignedExprSema = diagnostics.Collect(m_OptAssignedExpr.value()->CreateExprSema());
         }
 
-        return Diagnosed
-        {
-            std::make_shared<const VarStmtSema>(
-                GetSrcLocation(),
-                selfSymbol,
-                optAssignedExprSema
-            ),
+        return Diagnosed{
+            std::make_shared<const VarStmtSema>(GetSrcLocation(), selfSymbol, optAssignedExprSema),
             std::move(diagnostics),
         };
     }
@@ -95,20 +87,13 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetSizedType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ISizedTypeSymbol>(GetScope(), m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetSizedType());
 
-        return Diagnosed<std::unique_ptr<ISymbol>>
-        {
-            std::make_unique<LocalVarSymbol>(
-                GetSymbolScope(),
-                m_Name,
-                typeSymbol
-            ),
+        return Diagnosed<std::unique_ptr<ISymbol>>{
+            std::make_unique<LocalVarSymbol>(GetSymbolScope(), m_Name, typeSymbol),
             std::move(diagnostics),
         };
     }

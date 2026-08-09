@@ -17,18 +17,22 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         LabelSymbol* const labelSymbol
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_LabelSymbol{ labelSymbol }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_LabelSymbol{ labelSymbol }
     {
     }
 
     auto NormalJumpStmtSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("NormalJumpStmtSema", [&]()
-        {
-            logger.Log("m_LabelSymbol", m_LabelSymbol);
-        });
+        logger.Log(
+            "NormalJumpStmtSema",
+            [&]()
+            {
+                logger.Log("m_LabelSymbol", m_LabelSymbol);
+            }
+        );
     }
 
     auto NormalJumpStmtSema::GetSrcLocation() const -> const SrcLocation&
@@ -41,30 +45,26 @@ namespace Ace
         return m_Scope;
     }
 
-    auto NormalJumpStmtSema::CreateTypeChecked(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const NormalJumpStmtSema>>
+    auto NormalJumpStmtSema::CreateTypeChecked(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const NormalJumpStmtSema>>
     {
         return Diagnosed{ shared_from_this(), DiagnosticBag::Create() };
     }
 
-    auto NormalJumpStmtSema::CreateTypeCheckedStmt(
-        const StmtTypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IStmtSema>>
+    auto NormalJumpStmtSema::CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IStmtSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto NormalJumpStmtSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const NormalJumpStmtSema>
+    auto NormalJumpStmtSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const NormalJumpStmtSema>
     {
         return shared_from_this();
     }
 
-    auto NormalJumpStmtSema::CreateLoweredStmt(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IStmtSema>
+    auto NormalJumpStmtSema::CreateLoweredStmt(const LoweringContext& context) const
+        -> std::shared_ptr<const IStmtSema>
     {
         return CreateLowered(context);
     }
@@ -76,16 +76,13 @@ namespace Ace
 
     auto NormalJumpStmtSema::Emit(Emitter& emitter) const -> void
     {
-        emitter.GetBlock().Builder.CreateBr(
-            emitter.GetLabelBlockMap().GetOrCreateAt(m_LabelSymbol)
+        emitter.GetBlock().Builder.CreateBr(emitter.GetLabelBlockMap().GetOrCreateAt(m_LabelSymbol)
         );
     }
 
-    auto NormalJumpStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
+    auto NormalJumpStmtSema::CreateControlFlowInstructions() const
+        -> std::vector<ControlFlowInstruction>
     {
-        return std::vector
-        {
-            ControlFlowInstruction{ ControlFlowKind::Jump, m_LabelSymbol }
-        };
+        return std::vector{ ControlFlowInstruction{ ControlFlowKind::Jump, m_LabelSymbol } };
     }
 }

@@ -17,9 +17,10 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprSyntax>& expr,
         const SymbolNameSection& name
-    ) : m_SrcLocation{ srcLocation },
-        m_Expr{ expr },
-        m_Name{ name }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Expr{ expr },
+          m_Name{ name }
     {
     }
 
@@ -38,42 +39,34 @@ namespace Ace
         return SyntaxChildCollector{}.Collect(m_Expr).Build();
     }
 
-    auto MemberAccessExprSyntax::CreateSema() const -> Diagnosed<std::shared_ptr<const FieldVarRefExprSema>>
+    auto MemberAccessExprSyntax::CreateSema() const
+        -> Diagnosed<std::shared_ptr<const FieldVarRefExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
         const auto exprSema = diagnostics.Collect(m_Expr->CreateExprSema());
 
-        auto* const selfTypeSymbol =
-            exprSema->GetTypeInfo().Symbol->GetWithoutRef();
+        auto* const selfTypeSymbol = exprSema->GetTypeInfo().Symbol->GetWithoutRef();
 
         std::optional<FieldVarSymbol*> optFieldSymbol{};
         if (!selfTypeSymbol->IsError())
         {
             optFieldSymbol = diagnostics.Collect(
-                GetScope()->ResolveInstanceSymbol<FieldVarSymbol>(
-                    selfTypeSymbol,
-                    m_Name
-                )
+                GetScope()->ResolveInstanceSymbol<FieldVarSymbol>(selfTypeSymbol, m_Name)
             );
         }
 
-        auto* const fieldSymbol = optFieldSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetField()
-        );
+        auto* const fieldSymbol =
+            optFieldSymbol.value_or(GetCompilation()->GetErrorSymbols().GetField());
 
-        return Diagnosed
-        {
-            std::make_shared<const FieldVarRefExprSema>(
-                GetSrcLocation(),
-                exprSema,
-                fieldSymbol
-            ),
+        return Diagnosed{
+            std::make_shared<const FieldVarRefExprSema>(GetSrcLocation(), exprSema, fieldSymbol),
             std::move(diagnostics),
         };
     }
 
-    auto MemberAccessExprSyntax::CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto MemberAccessExprSyntax::CreateExprSema() const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateSema();
     }

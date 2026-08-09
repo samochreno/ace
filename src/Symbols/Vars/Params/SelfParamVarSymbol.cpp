@@ -20,10 +20,11 @@ namespace Ace
         const SrcLocation& srcLocation,
         const std::shared_ptr<Scope>& scope,
         ISizedTypeSymbol* const type
-    ) : m_Scope{ scope },
-        m_Type{ type },
-        m_Parent{},
-        m_Name{ srcLocation, SpecialIdent::Self }
+    )
+        : m_Scope{ scope },
+          m_Type{ type },
+          m_Parent{},
+          m_Name{ srcLocation, SpecialIdent::Self }
     {
     }
 
@@ -53,14 +54,11 @@ namespace Ace
     }
 
     auto SelfParamVarSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<SelfParamVarSymbol>(
-            GetName().SrcLocation,
-            scope,
-            CreateInstantiated<ISizedTypeSymbol>(GetType(), context)
+            GetName().SrcLocation, scope, CreateInstantiated<ISizedTypeSymbol>(GetType(), context)
         );
     }
 
@@ -69,9 +67,7 @@ namespace Ace
         return m_Type;
     }
 
-    auto SelfParamVarSymbol::BindParent(
-        ICallableSymbol* const parent
-    ) -> void
+    auto SelfParamVarSymbol::BindParent(ICallableSymbol* const parent) -> void
     {
         ACE_ASSERT(parent);
         ACE_ASSERT(!m_Parent || m_Parent == parent);

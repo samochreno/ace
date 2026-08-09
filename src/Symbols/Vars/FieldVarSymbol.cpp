@@ -19,11 +19,12 @@ namespace Ace
         const Ident& name,
         ISizedTypeSymbol* const type,
         const size_t index
-    ) : m_ParentStruct{ parentStruct },
-        m_AccessModifier{ accessModifier },
-        m_Name{ name },
-        m_Type{ type },
-        m_Index{ index }
+    )
+        : m_ParentStruct{ parentStruct },
+          m_AccessModifier{ accessModifier },
+          m_Name{ name },
+          m_Type{ type },
+          m_Index{ index }
     {
     }
 
@@ -53,8 +54,7 @@ namespace Ace
     }
 
     auto FieldVarSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<FieldVarSymbol>(

@@ -15,9 +15,7 @@
 
 namespace Ace
 {
-    class GlobalVarSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class GlobalVarSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         GlobalVarSyntax(

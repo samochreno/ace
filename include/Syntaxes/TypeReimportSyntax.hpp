@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include <memory>
 
@@ -9,9 +9,7 @@
 
 namespace Ace
 {
-    class TypeReimportSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class TypeReimportSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         TypeReimportSyntax(

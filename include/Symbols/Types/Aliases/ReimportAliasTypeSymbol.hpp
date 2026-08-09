@@ -12,15 +12,10 @@
 
 namespace Ace
 {
-    class ReimportAliasTypeSymbol :
-        public virtual IAliasTypeSymbol,
-        public virtual ISizedTypeSymbol
+    class ReimportAliasTypeSymbol : public virtual IAliasTypeSymbol, public virtual ISizedTypeSymbol
     {
     public:
-        ReimportAliasTypeSymbol(
-            const std::shared_ptr<Scope>& scope,
-            ITypeSymbol* const type
-        );
+        ReimportAliasTypeSymbol(const std::shared_ptr<Scope>& scope, ITypeSymbol* const type);
         virtual ~ReimportAliasTypeSymbol() = default;
 
         auto CreateTypeNoun() const -> Noun final;
@@ -31,8 +26,7 @@ namespace Ace
         auto GetName() const -> const Ident& final;
 
         auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> final;
 
         auto GetAliasedType() const -> ITypeSymbol* final;

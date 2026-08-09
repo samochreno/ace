@@ -13,11 +13,10 @@
 
 namespace Ace
 {
-    class UserBinaryExprSema :
-        public std::enable_shared_from_this<UserBinaryExprSema>,
-        public virtual IExprSema,
-        public virtual ITypeCheckableSema<UserBinaryExprSema>,
-        public virtual ILowerableSema<StaticCallExprSema>
+    class UserBinaryExprSema : public std::enable_shared_from_this<UserBinaryExprSema>,
+                               public virtual IExprSema,
+                               public virtual ITypeCheckableSema<UserBinaryExprSema>,
+                               public virtual ILowerableSema<StaticCallExprSema>
     {
     public:
         UserBinaryExprSema(
@@ -32,18 +31,14 @@ namespace Ace
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto CreateTypeChecked(
-            const TypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const UserBinaryExprSema>> final;
-        auto CreateTypeCheckedExpr(
-            const TypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
-        auto CreateLowered(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const StaticCallExprSema> final;
-        auto CreateLoweredExpr(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const IExprSema> final;
+        auto CreateTypeChecked(const TypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const UserBinaryExprSema>> final;
+        auto CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const IExprSema>> final;
+        auto CreateLowered(const LoweringContext& context) const
+            -> std::shared_ptr<const StaticCallExprSema> final;
+        auto CreateLoweredExpr(const LoweringContext& context) const
+            -> std::shared_ptr<const IExprSema> final;
         auto CollectMonos() const -> MonoCollector final;
         auto Emit(Emitter& emitter) const -> ExprEmitResult final;
 

@@ -13,14 +13,12 @@
 
 namespace Ace
 {
-    class CopyStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<CopyStmtSema>
+    class CopyStmtSyntax : public virtual IStmtSyntax, public virtual ISemaSyntax<CopyStmtSema>
     {
     public:
         CopyStmtSyntax(
             const SrcLocation& srcLocation,
-            const TypeName& typeName, 
+            const TypeName& typeName,
             const std::shared_ptr<const IExprSyntax>& srcExpr,
             const std::shared_ptr<const IExprSyntax>& dstExpr
         );

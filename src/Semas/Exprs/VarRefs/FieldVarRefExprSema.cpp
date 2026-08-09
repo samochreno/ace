@@ -20,20 +20,24 @@ namespace Ace
     FieldVarRefExprSema::FieldVarRefExprSema(
         const SrcLocation& srcLocation,
         const std::shared_ptr<const IExprSema>& expr,
-        FieldVarSymbol* const fieldSymbol 
-    ) : m_SrcLocation{ srcLocation },
-        m_Expr{ expr },
-        m_FieldSymbol{ fieldSymbol }
+        FieldVarSymbol* const fieldSymbol
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Expr{ expr },
+          m_FieldSymbol{ fieldSymbol }
     {
     }
 
     auto FieldVarRefExprSema::Log(SemaLogger& logger) const -> void
     {
-        logger.Log("FieldVarRefExprSema", [&]()
-        {
-            logger.Log("m_Expr", m_Expr);
-            logger.Log("m_FieldSymbol", m_FieldSymbol);
-        });
+        logger.Log(
+            "FieldVarRefExprSema",
+            [&]()
+            {
+                logger.Log("m_Expr", m_Expr);
+                logger.Log("m_FieldSymbol", m_FieldSymbol);
+            }
+        );
     }
 
     auto FieldVarRefExprSema::GetSrcLocation() const -> const SrcLocation&
@@ -46,42 +50,34 @@ namespace Ace
         return m_Expr->GetScope();
     }
 
-    auto FieldVarRefExprSema::CreateTypeChecked(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const FieldVarRefExprSema>>
+    auto FieldVarRefExprSema::CreateTypeChecked(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const FieldVarRefExprSema>>
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto checkedExpr = diagnostics.Collect(
-            m_Expr->CreateTypeCheckedExpr({})
-        );
+        const auto checkedExpr = diagnostics.Collect(m_Expr->CreateTypeCheckedExpr({}));
 
         if (checkedExpr == m_Expr)
         {
             return Diagnosed{ shared_from_this(), std::move(diagnostics) };
         }
 
-        return Diagnosed
-        {
+        return Diagnosed{
             std::make_shared<const FieldVarRefExprSema>(
-                GetSrcLocation(),
-                checkedExpr,
-                m_FieldSymbol
+                GetSrcLocation(), checkedExpr, m_FieldSymbol
             ),
             std::move(diagnostics),
         };
     }
 
-    auto FieldVarRefExprSema::CreateTypeCheckedExpr(
-        const TypeCheckingContext& context
-    ) const -> Diagnosed<std::shared_ptr<const IExprSema>>
+    auto FieldVarRefExprSema::CreateTypeCheckedExpr(const TypeCheckingContext& context) const
+        -> Diagnosed<std::shared_ptr<const IExprSema>>
     {
         return CreateTypeChecked(context);
     }
 
-    auto FieldVarRefExprSema::CreateLowered(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const FieldVarRefExprSema>
+    auto FieldVarRefExprSema::CreateLowered(const LoweringContext& context) const
+        -> std::shared_ptr<const FieldVarRefExprSema>
     {
         const auto loweredExpr = m_Expr->CreateLoweredExpr({});
 
@@ -91,23 +87,20 @@ namespace Ace
         }
 
         return std::make_shared<const FieldVarRefExprSema>(
-            GetSrcLocation(),
-            loweredExpr,
-            m_FieldSymbol
-        )->CreateLowered({});
+                   GetSrcLocation(), loweredExpr, m_FieldSymbol
+        )
+            ->CreateLowered({});
     }
 
-    auto FieldVarRefExprSema::CreateLoweredExpr(
-        const LoweringContext& context
-    ) const -> std::shared_ptr<const IExprSema>
+    auto FieldVarRefExprSema::CreateLoweredExpr(const LoweringContext& context) const
+        -> std::shared_ptr<const IExprSema>
     {
         return CreateLowered(context);
     }
 
-    static auto CreateDerefed(
-        std::shared_ptr<const IExprSema> expr,
-        FieldVarSymbol* const fieldSymbol
-    ) -> std::shared_ptr<const IExprSema>
+    static auto
+    CreateDerefed(std::shared_ptr<const IExprSema> expr, FieldVarSymbol* const fieldSymbol)
+        -> std::shared_ptr<const IExprSema>
     {
         while (true)
         {
@@ -120,17 +113,13 @@ namespace Ace
             if (typeSymbol->IsRef())
             {
                 expr = std::make_shared<const DerefAsExprSema>(
-                    expr->GetSrcLocation(),
-                    expr,
-                    typeSymbol->GetWithoutRef()
+                    expr->GetSrcLocation(), expr, typeSymbol->GetWithoutRef()
                 );
             }
             else if (typeSymbol->IsAnyStrongPtr())
             {
                 expr = std::make_shared<const DerefAsExprSema>(
-                    expr->GetSrcLocation(),
-                    expr,
-                    typeSymbol->GetWithoutStrongPtr()
+                    expr->GetSrcLocation(), expr, typeSymbol->GetWithoutStrongPtr()
                 );
             }
             else
@@ -142,11 +131,9 @@ namespace Ace
         return expr;
     }
 
-    auto FieldVarRefExprSema::CollectMonos() const -> MonoCollector 
+    auto FieldVarRefExprSema::CollectMonos() const -> MonoCollector
     {
-        return MonoCollector{}
-            .Collect(m_Expr)
-            .Collect(m_FieldSymbol);
+        return MonoCollector{}.Collect(m_Expr).Collect(m_FieldSymbol);
     }
 
     auto FieldVarRefExprSema::Emit(Emitter& emitter) const -> ExprEmitResult
@@ -158,11 +145,7 @@ namespace Ace
 
         const auto expr = CreateDerefed(m_Expr, m_FieldSymbol);
         const auto exprEmitResult = expr->Emit(emitter);
-        tmps.insert(
-            end  (tmps), 
-            begin(exprEmitResult.Tmps), 
-            end  (exprEmitResult.Tmps)
-        );
+        tmps.insert(end(tmps), begin(exprEmitResult.Tmps), end(exprEmitResult.Tmps));
 
         auto* const exprTypeSymbol = expr->GetTypeInfo().Symbol;
         auto* const exprType = emitter.GetType(exprTypeSymbol);
@@ -171,11 +154,8 @@ namespace Ace
 
         auto* const int32Type = llvm::Type::getInt32Ty(emitter.GetContext());
 
-        auto* const gepInst = emitter.GetBlock().Builder.CreateStructGEP(
-            exprType,
-            exprEmitResult.Value,
-            index
-        );
+        auto* const gepInst =
+            emitter.GetBlock().Builder.CreateStructGEP(exprType, exprEmitResult.Value, index);
 
         return { gepInst, tmps };
     }

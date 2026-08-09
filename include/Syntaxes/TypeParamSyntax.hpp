@@ -12,9 +12,7 @@
 
 namespace Ace
 {
-    class TypeParamSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class TypeParamSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         TypeParamSyntax(

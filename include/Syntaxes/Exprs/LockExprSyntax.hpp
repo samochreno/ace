@@ -11,14 +11,11 @@
 
 namespace Ace
 {
-    class LockExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<LockExprSema>
+    class LockExprSyntax : public virtual IExprSyntax, public virtual ISemaSyntax<LockExprSema>
     {
     public:
         LockExprSyntax(
-            const SrcLocation& srcLocation,
-            const std::shared_ptr<const IExprSyntax>& expr
+            const SrcLocation& srcLocation, const std::shared_ptr<const IExprSyntax>& expr
         );
         virtual ~LockExprSyntax() = default;
 
@@ -27,7 +24,7 @@ namespace Ace
         auto CollectChildren() const -> std::vector<const ISyntax*> final;
         auto CreateSema() const -> Diagnosed<std::shared_ptr<const LockExprSema>> final;
         auto CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
-    
+
     private:
         SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprSyntax> m_Expr{};

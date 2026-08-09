@@ -34,17 +34,18 @@ namespace Ace
         const std::vector<std::shared_ptr<const NormalParamVarSyntax>>& params,
         const std::vector<std::shared_ptr<const TypeParamSyntax>>& typeParams,
         const std::vector<std::shared_ptr<const ConstraintSyntax>>& constraints
-    ) : m_SrcLocation{ srcLocation },
-        m_BodyScope{ bodyScope },
-        m_ParentTraitName{ parentTraitName },
-        m_Name{ name },
-        m_TypeName{ typeName },
-        m_Attributes{ attributes },
-        m_Index{ index },
-        m_OptSelfParam{ optSelfParam },
-        m_Params{ params },
-        m_TypeParams{ typeParams },
-        m_Constraints{ constraints }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_BodyScope{ bodyScope },
+          m_ParentTraitName{ parentTraitName },
+          m_Name{ name },
+          m_TypeName{ typeName },
+          m_Attributes{ attributes },
+          m_Index{ index },
+          m_OptSelfParam{ optSelfParam },
+          m_Params{ params },
+          m_TypeParams{ typeParams },
+          m_Constraints{ constraints }
     {
     }
 
@@ -83,31 +84,28 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto symbolCategory = m_OptSelfParam.has_value() ?
-            SymbolCategory::Instance :
-            SymbolCategory::Static;
+        const auto symbolCategory =
+            m_OptSelfParam.has_value() ? SymbolCategory::Instance : SymbolCategory::Static;
 
-        auto* const parentTraitSymbol = DiagnosticBag::CreateNoError().Collect(
-            m_BodyScope->ResolveStaticSymbol<TraitTypeSymbol>(m_ParentTraitName)
-        ).value();
+        auto* const parentTraitSymbol =
+            DiagnosticBag::CreateNoError()
+                .Collect(m_BodyScope->ResolveStaticSymbol<TraitTypeSymbol>(m_ParentTraitName))
+                .value();
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            ResolveTypeSymbol<ITypeSymbol>(m_BodyScope, m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(ResolveTypeSymbol<ITypeSymbol>(m_BodyScope, m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetType());
 
-        auto* const selfTypeSymbol = DiagnosticBag::CreateNoError().Collect(
-            m_BodyScope->ResolveSelfType(SrcLocation{ GetCompilation() })
-        ).value();
+        auto* const selfTypeSymbol =
+            DiagnosticBag::CreateNoError()
+                .Collect(m_BodyScope->ResolveSelfType(SrcLocation{ GetCompilation() }))
+                .value();
 
-        const auto typeArgs = diagnostics.Collect(
-            ResolveTypeParamSymbols(m_BodyScope, m_TypeParams)
-        );
+        const auto typeArgs =
+            diagnostics.Collect(ResolveTypeParamSymbols(m_BodyScope, m_TypeParams));
 
-        return Diagnosed<std::unique_ptr<ISymbol>>
-        {
+        return Diagnosed<std::unique_ptr<ISymbol>>{
             std::make_unique<PrototypeSymbol>(
                 m_BodyScope,
                 symbolCategory,

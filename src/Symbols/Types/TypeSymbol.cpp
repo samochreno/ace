@@ -12,10 +12,7 @@
 
 namespace Ace
 {
-    static auto IsInstanceOf(
-        const ISymbol* const symbol,
-        IGenericSymbol* const root
-    ) -> bool
+    static auto IsInstanceOf(const ISymbol* const symbol, IGenericSymbol* const root) -> bool
     {
         return symbol->GetRoot() == root;
     }
@@ -37,10 +34,7 @@ namespace Ace
 
     auto ITypeSymbol::IsRef() const -> bool
     {
-        return IsInstanceOf(
-            GetUnaliased(),
-            GetCompilation()->GetNatives().Ref.GetSymbol()
-        );
+        return IsInstanceOf(GetUnaliased(), GetCompilation()->GetNatives().Ref.GetSymbol());
     }
 
     auto ITypeSymbol::GetWithoutRef() -> ITypeSymbol*
@@ -68,8 +62,7 @@ namespace Ace
         ACE_ASSERT(!IsRef());
 
         auto* const symbol = Scope::ForceCollectGenericInstance(
-            GetCompilation()->GetNatives().Ref.GetSymbol(),
-            { this }
+            GetCompilation()->GetNatives().Ref.GetSymbol(), { this }
         );
 
         auto* const type = dynamic_cast<ITypeSymbol*>(symbol);
@@ -79,17 +72,13 @@ namespace Ace
 
     auto ITypeSymbol::IsStrongPtr() const -> bool
     {
-        return IsInstanceOf(
-            GetUnaliased(),
-            GetCompilation()->GetNatives().StrongPtr.GetSymbol()
-        );
+        return IsInstanceOf(GetUnaliased(), GetCompilation()->GetNatives().StrongPtr.GetSymbol());
     }
 
     auto ITypeSymbol::IsDynStrongPtr() const -> bool
     {
         return IsInstanceOf(
-            GetUnaliased(),
-            GetCompilation()->GetNatives().DynStrongPtr.GetSymbol()
+            GetUnaliased(), GetCompilation()->GetNatives().DynStrongPtr.GetSymbol()
         );
     }
 
@@ -123,8 +112,7 @@ namespace Ace
         auto diagnostics = DiagnosticBag::CreateNoError();
 
         auto* const symbol = Scope::ForceCollectGenericInstance(
-            GetCompilation()->GetNatives().StrongPtr.GetSymbol(),
-            { this }
+            GetCompilation()->GetNatives().StrongPtr.GetSymbol(), { this }
         );
 
         auto* const type = dynamic_cast<ITypeSymbol*>(symbol);
@@ -137,8 +125,7 @@ namespace Ace
         auto diagnostics = DiagnosticBag::CreateNoError();
 
         auto* const symbol = Scope::ForceCollectGenericInstance(
-            GetCompilation()->GetNatives().DynStrongPtr.GetSymbol(),
-            { this }
+            GetCompilation()->GetNatives().DynStrongPtr.GetSymbol(), { this }
         );
 
         auto* const type = dynamic_cast<ITypeSymbol*>(symbol);
@@ -152,12 +139,10 @@ namespace Ace
 
         auto* const sizedSelf = dynamic_cast<ISizedTypeSymbol*>(GetUnaliased());
 
-        auto* const strongPtr = sizedSelf ?
-            GetCompilation()->GetNatives().StrongPtr.GetSymbol() :
-            GetCompilation()->GetNatives().DynStrongPtr.GetSymbol();
+        auto* const strongPtr = sizedSelf ? GetCompilation()->GetNatives().StrongPtr.GetSymbol()
+                                          : GetCompilation()->GetNatives().DynStrongPtr.GetSymbol();
 
-        auto* const symbol =
-            Scope::ForceCollectGenericInstance(strongPtr, { this });
+        auto* const symbol = Scope::ForceCollectGenericInstance(strongPtr, { this });
 
         auto* const type = dynamic_cast<ITypeSymbol*>(symbol);
         ACE_ASSERT(type);
@@ -166,10 +151,7 @@ namespace Ace
 
     auto ITypeSymbol::IsWeakPtr() const -> bool
     {
-        return IsInstanceOf(
-            GetUnaliased(),
-            GetCompilation()->GetNatives().WeakPtr.GetSymbol()
-        );
+        return IsInstanceOf(GetUnaliased(), GetCompilation()->GetNatives().WeakPtr.GetSymbol());
     }
 
     auto ITypeSymbol::GetWithoutWeakPtr() -> ITypeSymbol*
@@ -185,8 +167,7 @@ namespace Ace
     auto ITypeSymbol::GetWithWeakPtr() -> ITypeSymbol*
     {
         auto* const symbol = Scope::ForceCollectGenericInstance(
-            GetCompilation()->GetNatives().WeakPtr.GetSymbol(),
-            { this }
+            GetCompilation()->GetNatives().WeakPtr.GetSymbol(), { this }
         );
 
         auto* const type = dynamic_cast<ITypeSymbol*>(symbol);

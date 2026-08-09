@@ -16,9 +16,7 @@ namespace Ace
 {
     class TraitTypeSymbol;
 
-    class ConstraintSymbol :
-        public virtual ISymbol,
-        public virtual ITypedSymbol
+    class ConstraintSymbol : public virtual ISymbol, public virtual ITypedSymbol
     {
     public:
         ConstraintSymbol(
@@ -36,8 +34,7 @@ namespace Ace
         auto GetName() const -> const Ident& final;
 
         auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> final;
 
         auto GetType() const -> ITypeSymbol* final;

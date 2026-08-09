@@ -28,8 +28,7 @@ namespace Ace
 
     auto ISymbol::GetUnaliased() const -> ISymbol*
     {
-        auto* aliasType =
-            dynamic_cast<IAliasTypeSymbol*>(const_cast<ISymbol*>(this));
+        auto* aliasType = dynamic_cast<IAliasTypeSymbol*>(const_cast<ISymbol*>(this));
         if (!aliasType)
         {
             return const_cast<ISymbol*>(this);
@@ -44,9 +43,7 @@ namespace Ace
         return type;
     }
 
-    static auto CreateTypeArgsSignature(
-        const IGenericSymbol* const generic
-    ) -> std::string
+    static auto CreateTypeArgsSignature(const IGenericSymbol* const generic) -> std::string
     {
         const auto& args = generic->GetTypeArgs();
 
@@ -59,22 +56,24 @@ namespace Ace
 
         signature += "[";
 
-
         bool isFirstArg = true;
-        std::for_each(begin(args), end(args),
-        [&](ITypeSymbol* const arg)
-        {
-            if (isFirstArg)
+        std::for_each(
+            begin(args),
+            end(args),
+            [&](ITypeSymbol* const arg)
             {
-                isFirstArg = false;
-            }
-            else
-            {
-                signature += ", ";
-            }
+                if (isFirstArg)
+                {
+                    isFirstArg = false;
+                }
+                else
+                {
+                    signature += ", ";
+                }
 
-            signature += arg->CreateSignature();
-        });
+                signature += arg->CreateSignature();
+            }
+        );
 
         signature += "]";
 
@@ -104,13 +103,10 @@ namespace Ace
         return signature;
     }
 
-    static auto CreateScopeName(
-        const std::shared_ptr<Scope>& scope
-    ) -> std::string
+    static auto CreateScopeName(const std::shared_ptr<Scope>& scope) -> std::string
     {
-        return scope->GetName().has_value() ?
-            scope->GetName().value() :
-            scope->GetAnonymousName().value();
+        return scope->GetName().has_value() ? scope->GetName().value()
+                                            : scope->GetAnonymousName().value();
     }
 
     auto ISymbol::CreateSignature() const -> std::string
@@ -122,39 +118,36 @@ namespace Ace
         }
 
         std::vector<std::shared_ptr<Scope>> scopes{};
-        for (
-            auto optScope = std::optional{ GetScope() };
-            optScope.has_value();
-            optScope = optScope.value()->GetParent()
-            )
+        for (auto optScope = std::optional{ GetScope() }; optScope.has_value();
+             optScope = optScope.value()->GetParent())
         {
             scopes.push_back(optScope.value());
         }
 
         std::string signature{};
         bool isFirstScope = true;
-        std::for_each(rbegin(scopes) + 1, rend(scopes),
-        [&](const std::shared_ptr<Scope>& scope)
-        {
-            if (isFirstScope)
+        std::for_each(
+            rbegin(scopes) + 1,
+            rend(scopes),
+            [&](const std::shared_ptr<Scope>& scope)
             {
-                signature = CreateScopeName(scope);
-                isFirstScope = false;
+                if (isFirstScope)
+                {
+                    signature = CreateScopeName(scope);
+                    isFirstScope = false;
+                }
+                else
+                {
+                    signature = signature + "::" + CreateScopeName(scope);
+                }
             }
-            else
-            {
-                signature = signature + "::" + CreateScopeName(scope);
-            }
-        });
+        );
 
-        return signature.empty() ?
-            CreateLocalSignature() :
-            signature + "::" + CreateLocalSignature();
+        return signature.empty() ? CreateLocalSignature()
+                                 : signature + "::" + CreateLocalSignature();
     }
 
-    auto ISymbol::CreateFullyQualifiedName(
-        const SrcLocation& srcLocation
-    ) const -> SymbolName
+    auto ISymbol::CreateFullyQualifiedName(const SrcLocation& srcLocation) const -> SymbolName
     {
         auto* const symbol = GetUnaliased();
         if (symbol != this)
@@ -165,25 +158,19 @@ namespace Ace
         std::vector<SymbolNameSection> nameSections{};
 
         std::vector<std::shared_ptr<Scope>> scopes{};
-        for (
-            auto optScope = std::optional{ GetScope() };
-            optScope.has_value();
-            optScope = optScope.value()->GetParent()
-            )
+        for (auto optScope = std::optional{ GetScope() }; optScope.has_value();
+             optScope = optScope.value()->GetParent())
         {
             scopes.push_back(optScope.value());
         }
 
         std::transform(
-            rbegin(scopes) + 1, 
-            rend  (scopes), 
+            rbegin(scopes) + 1,
+            rend(scopes),
             back_inserter(nameSections),
             [&](const std::shared_ptr<Scope>& scope)
             {
-                return SymbolNameSection
-                {
-                    Ident{ srcLocation, CreateScopeName(scope) }
-                };
+                return SymbolNameSection{ Ident{ srcLocation, CreateScopeName(scope) } };
             }
         );
 
@@ -198,19 +185,21 @@ namespace Ace
             auto& lastArgNames = nameSections.back().TypeArgs;
             lastArgNames.clear();
 
-            std::transform(begin(args), end(args), back_inserter(lastArgNames),
-            [&](ITypeSymbol* const arg)
-            {
-                return arg->CreateFullyQualifiedName(srcLocation);
-            });
+            std::transform(
+                begin(args),
+                end(args),
+                back_inserter(lastArgNames),
+                [&](ITypeSymbol* const arg)
+                {
+                    return arg->CreateFullyQualifiedName(srcLocation);
+                }
+            );
         }
 
         return SymbolName{ nameSections, SymbolNameResolutionScope::Global };
     }
 
-    static auto CreateScopeDisplayName(
-        const std::shared_ptr<Scope>& scope
-    ) -> std::string
+    static auto CreateScopeDisplayName(const std::shared_ptr<Scope>& scope) -> std::string
     {
         return scope->GetName().has_value() ? scope->GetName().value() : "...";
     }
@@ -221,8 +210,7 @@ namespace Ace
 
         signature += GetName().String;
 
-        const auto* const genericSymbol =
-            dynamic_cast<const IGenericSymbol*>(this);
+        const auto* const genericSymbol = dynamic_cast<const IGenericSymbol*>(this);
 
         const auto typeArgs = genericSymbol->GetTypeArgs();
         if (!typeArgs.empty())
@@ -230,20 +218,23 @@ namespace Ace
             signature += "[";
 
             bool isFirstTypeArg = true;
-            std::for_each(begin(typeArgs), end(typeArgs),
-            [&](ITypeSymbol* const arg)
-            {
-                if (isFirstTypeArg)
+            std::for_each(
+                begin(typeArgs),
+                end(typeArgs),
+                [&](ITypeSymbol* const arg)
                 {
-                    isFirstTypeArg = false;
-                }
-                else
-                {
-                    signature += ", ";
-                }
+                    if (isFirstTypeArg)
+                    {
+                        isFirstTypeArg = false;
+                    }
+                    else
+                    {
+                        signature += ", ";
+                    }
 
-                signature += arg->CreateDisplayName();
-            });
+                    signature += arg->CreateDisplayName();
+                }
+            );
 
             signature += "]";
         }
@@ -253,15 +244,13 @@ namespace Ace
 
     auto ISymbol::CreateDisplayName() const -> std::string
     {
-        auto* const implSelfAliasTypeSymbol =
-            dynamic_cast<const ImplSelfAliasTypeSymbol*>(this);
+        auto* const implSelfAliasTypeSymbol = dynamic_cast<const ImplSelfAliasTypeSymbol*>(this);
         if (implSelfAliasTypeSymbol)
         {
             return implSelfAliasTypeSymbol->GetUnaliased()->CreateDisplayName();
         }
 
-        auto* const typeSymbol =
-            dynamic_cast<ITypeSymbol*>(const_cast<ISymbol*>(this));
+        auto* const typeSymbol = dynamic_cast<ITypeSymbol*>(const_cast<ISymbol*>(this));
         if (typeSymbol)
         {
             if (typeSymbol->IsRef())
@@ -351,50 +340,46 @@ namespace Ace
 
             return TokenKind::Ident;
         }();
-        
+
         if (tokenKind != TokenKind::Ident)
         {
             return std::string{ TokenKindToKeywordMap.at(tokenKind) };
         }
 
         std::vector<std::shared_ptr<Scope>> scopes{};
-        for (
-            auto optScope = std::optional{ GetScope() };
-            optScope.has_value();
-            optScope = optScope.value()->GetParent()
-            )
+        for (auto optScope = std::optional{ GetScope() }; optScope.has_value();
+             optScope = optScope.value()->GetParent())
         {
             scopes.push_back(optScope.value());
         }
 
         size_t startScopeIndex = 1;
-        if (
-            (rbegin(scopes) + 1)->get() ==
-            GetCompilation()->GetPackageBodyScope().get()
-            )
+        if ((rbegin(scopes) + 1)->get() == GetCompilation()->GetPackageBodyScope().get())
         {
             startScopeIndex++;
         }
 
         std::string signature{};
         bool isFirstScope = true;
-        std::for_each(rbegin(scopes) + startScopeIndex, rend(scopes),
-        [&](const std::shared_ptr<Scope>& scope)
-        {
-            if (isFirstScope)
+        std::for_each(
+            rbegin(scopes) + startScopeIndex,
+            rend(scopes),
+            [&](const std::shared_ptr<Scope>& scope)
             {
-                signature = CreateScopeDisplayName(scope);
-                isFirstScope = false;
+                if (isFirstScope)
+                {
+                    signature = CreateScopeDisplayName(scope);
+                    isFirstScope = false;
+                }
+                else
+                {
+                    signature = signature + "::" + CreateScopeDisplayName(scope);
+                }
             }
-            else
-            {
-                signature = signature + "::" + CreateScopeDisplayName(scope);
-            }
-        });
+        );
 
-        return signature.empty() ?
-            CreateLocalDisplayName() :
-            signature + "::" + CreateLocalDisplayName();
+        return signature.empty() ? CreateLocalDisplayName()
+                                 : signature + "::" + CreateLocalDisplayName();
     }
 
     static auto IsTypeError(const ITypeSymbol* const type) -> bool
@@ -406,11 +391,8 @@ namespace Ace
             return true;
         }
 
-        const auto errorTypeArgIt = std::find_if(
-            begin(type->GetTypeArgs()),
-            end  (type->GetTypeArgs()),
-            IsTypeError
-        );
+        const auto errorTypeArgIt =
+            std::find_if(begin(type->GetTypeArgs()), end(type->GetTypeArgs()), IsTypeError);
         if (errorTypeArgIt != end(type->GetTypeArgs()))
         {
             return true;
@@ -442,8 +424,7 @@ namespace Ace
 
     auto ISymbol::GetRoot() const -> ISymbol*
     {
-        auto* const generic =
-            dynamic_cast<const IGenericSymbol*>(GetUnaliased());
+        auto* const generic = dynamic_cast<const IGenericSymbol*>(GetUnaliased());
 
         if (generic && generic->IsInstance())
         {
@@ -454,19 +435,16 @@ namespace Ace
     }
 
     static auto CreateInstantiatedSymbol(
-        const IGenericSymbol* const symbol,
-        const InstantiationContext& context
+        const IGenericSymbol* const symbol, const InstantiationContext& context
     ) -> IGenericSymbol*
     {
         auto diagnostics = DiagnosticBag::CreateNoError();
 
-        auto* const mutSymbol = dynamic_cast<IGenericSymbol*>(
-            const_cast<IGenericSymbol*>(symbol)->GetUnaliased()
-        );
+        auto* const mutSymbol =
+            dynamic_cast<IGenericSymbol*>(const_cast<IGenericSymbol*>(symbol)->GetUnaliased());
         ACE_ASSERT(mutSymbol);
 
-        auto* const traitSelfType =
-            dynamic_cast<TraitSelfTypeSymbol*>(mutSymbol);
+        auto* const traitSelfType = dynamic_cast<TraitSelfTypeSymbol*>(mutSymbol);
         if (traitSelfType)
         {
             return context.OptSelfType.value_or(traitSelfType);
@@ -486,7 +464,7 @@ namespace Ace
         std::vector<ITypeSymbol*> instantiatedTypeArgs{};
         std::transform(
             begin(symbol->GetTypeArgs()),
-            end  (symbol->GetTypeArgs()),
+            end(symbol->GetTypeArgs()),
             back_inserter(instantiatedTypeArgs),
             [&](ITypeSymbol* const arg)
             {
@@ -497,31 +475,23 @@ namespace Ace
         std::optional<ITypeSymbol*> optSelfType{};
         if (auto* const prototype = dynamic_cast<PrototypeSymbol*>(mutSymbol))
         {
-            optSelfType = CreateInstantiated<ITypeSymbol>(
-                prototype->GetSelfType(),
-                context
-            );
+            optSelfType = CreateInstantiated<ITypeSymbol>(prototype->GetSelfType(), context);
         }
 
         auto* const instantiated = Scope::ForceCollectGenericInstance(
-            symbol->GetGenericRoot(),
-            instantiatedTypeArgs,
-            std::nullopt,
-            optSelfType
+            symbol->GetGenericRoot(), instantiatedTypeArgs, std::nullopt, optSelfType
         );
-        auto* const castedInstantiated =
-            dynamic_cast<IGenericSymbol*>(instantiated);
+        auto* const castedInstantiated = dynamic_cast<IGenericSymbol*>(instantiated);
         ACE_ASSERT(castedInstantiated);
         return castedInstantiated;
     }
 
     auto CreateUnaliasedInstantiatedSymbol(
-        const IGenericSymbol* const symbol,
-        const InstantiationContext& context
+        const IGenericSymbol* const symbol, const InstantiationContext& context
     ) -> IGenericSymbol*
     {
         auto* const instantiated = CreateInstantiatedSymbol(symbol, context);
-        
+
         auto* const castedInstantiated =
             dynamic_cast<IGenericSymbol*>(instantiated->GetUnaliased());
         ACE_ASSERT(castedInstantiated);

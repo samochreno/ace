@@ -13,11 +13,10 @@
 
 namespace Ace
 {
-    class RetStmtSema :
-        public std::enable_shared_from_this<RetStmtSema>,
-        public virtual IStmtSema,
-        public virtual ITypeCheckableSema<RetStmtSema, StmtTypeCheckingContext>,
-        public virtual ILowerableSema<RetStmtSema>
+    class RetStmtSema : public std::enable_shared_from_this<RetStmtSema>,
+                        public virtual IStmtSema,
+                        public virtual ITypeCheckableSema<RetStmtSema, StmtTypeCheckingContext>,
+                        public virtual ILowerableSema<RetStmtSema>
     {
     public:
         RetStmtSema(
@@ -31,18 +30,14 @@ namespace Ace
 
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
-        auto CreateTypeChecked(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const RetStmtSema>> final;
-        auto CreateTypeCheckedStmt(
-            const StmtTypeCheckingContext& context
-        ) const -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
-        auto CreateLowered(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const RetStmtSema> final;
-        auto CreateLoweredStmt(
-            const LoweringContext& context
-        ) const -> std::shared_ptr<const IStmtSema> final;
+        auto CreateTypeChecked(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const RetStmtSema>> final;
+        auto CreateTypeCheckedStmt(const StmtTypeCheckingContext& context) const
+            -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
+        auto CreateLowered(const LoweringContext& context) const
+            -> std::shared_ptr<const RetStmtSema> final;
+        auto CreateLoweredStmt(const LoweringContext& context) const
+            -> std::shared_ptr<const IStmtSema> final;
         auto CollectMonos() const -> MonoCollector final;
         auto Emit(Emitter& emitter) const -> void final;
 

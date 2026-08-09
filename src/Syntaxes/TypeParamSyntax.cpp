@@ -17,10 +17,11 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         const Ident& name,
         const size_t index
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_Name{ name },
-        m_Index{ index }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_Name{ name },
+          m_Index{ index }
     {
     }
 
@@ -51,13 +52,8 @@ namespace Ace
 
     auto TypeParamSyntax::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
-        return Diagnosed<std::unique_ptr<ISymbol>>
-        {
-            std::make_unique<TypeParamTypeSymbol>(
-                GetSymbolScope(),
-                GetName(),
-                GetIndex()
-            ),
+        return Diagnosed<std::unique_ptr<ISymbol>>{
+            std::make_unique<TypeParamTypeSymbol>(GetSymbolScope(), GetName(), GetIndex()),
             DiagnosticBag::Create(),
         };
     }

@@ -12,9 +12,8 @@
 
 namespace Ace
 {
-    class UserBinaryExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<UserBinaryExprSema>
+    class UserBinaryExprSyntax : public virtual IExprSyntax,
+                                 public virtual ISemaSyntax<UserBinaryExprSema>
     {
     public:
         UserBinaryExprSyntax(

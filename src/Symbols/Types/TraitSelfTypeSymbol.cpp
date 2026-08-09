@@ -13,10 +13,10 @@
 namespace Ace
 {
     TraitSelfTypeSymbol::TraitSelfTypeSymbol(
-        const SrcLocation& srcLocation,
-        const std::shared_ptr<Scope>& scope
-    ) : m_BodyScope{ scope->CreateChild() },
-        m_Name{ srcLocation, SpecialIdent::SelfType }
+        const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope
+    )
+        : m_BodyScope{ scope->CreateChild() },
+          m_Name{ srcLocation, SpecialIdent::SelfType }
     {
     }
 
@@ -46,19 +46,13 @@ namespace Ace
     }
 
     auto TraitSelfTypeSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
-        return std::make_unique<TraitSelfTypeSymbol>(
-            GetName().SrcLocation,
-            scope
-        );
+        return std::make_unique<TraitSelfTypeSymbol>(GetName().SrcLocation, scope);
     }
 
-    auto TraitSelfTypeSymbol::SetBodyScope(
-        const std::shared_ptr<Scope>& scope
-    ) -> void
+    auto TraitSelfTypeSymbol::SetBodyScope(const std::shared_ptr<Scope>& scope) -> void
     {
         m_BodyScope = scope;
     }

@@ -5,8 +5,6 @@
 
 namespace Ace
 {
-    auto DiagnoseInvalidControlFlow(
-        const SrcLocation& srcLocation,
-        const ControlFlowGraph& graph
-    ) -> Diagnosed<void>;
+    auto DiagnoseInvalidControlFlow(const SrcLocation& srcLocation, const ControlFlowGraph& graph)
+        -> Diagnosed<void>;
 }

@@ -17,9 +17,7 @@
 
 namespace Ace
 {
-    class StructTypeSymbol :
-        public virtual IConcreteTypeSymbol,
-        public virtual INominalTypeSymbol
+    class StructTypeSymbol : public virtual IConcreteTypeSymbol, public virtual INominalTypeSymbol
     {
     public:
         StructTypeSymbol(
@@ -37,8 +35,7 @@ namespace Ace
         auto GetName() const -> const Ident& final;
 
         auto CreateInstantiated(
-            const std::shared_ptr<Scope>& scope,
-            const InstantiationContext& context
+            const std::shared_ptr<Scope>& scope, const InstantiationContext& context
         ) const -> std::unique_ptr<ISymbol> final;
 
         auto DiagnoseCycle() const -> Diagnosed<void> final;
@@ -54,12 +51,10 @@ namespace Ace
         auto SetAsTriviallyDroppable() -> void final;
         auto IsTriviallyDroppable() const -> bool final;
 
-        auto CreateCopyGlueBlock(
-            FunctionSymbol* const glueSymbol
-        ) -> std::shared_ptr<const IEmittable<void>> final;
-        auto CreateDropGlueBlock(
-            FunctionSymbol* const glueSymbol
-        ) -> std::shared_ptr<const IEmittable<void>> final;
+        auto CreateCopyGlueBlock(FunctionSymbol* const glueSymbol)
+            -> std::shared_ptr<const IEmittable<void>> final;
+        auto CreateDropGlueBlock(FunctionSymbol* const glueSymbol)
+            -> std::shared_ptr<const IEmittable<void>> final;
 
         auto BindCopyGlue(FunctionSymbol* const glue) -> void final;
         auto GetCopyGlue() const -> std::optional<FunctionSymbol*> final;
@@ -77,7 +72,7 @@ namespace Ace
         mutable std::optional<FieldVarSymbol*> m_ResolvingField{};
         mutable std::optional<DiagnosticBag> m_OptCycleDiagnosticsCache{};
         bool m_IsPrimitivelyEmittable{};
-        
+
         bool m_IsTriviallyCopyable{};
         bool m_IsTriviallyDroppable{};
 

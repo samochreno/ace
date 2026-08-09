@@ -7,9 +7,7 @@
 
 namespace Ace
 {
-    class IVarSymbol :
-        public virtual ISymbol,
-        public virtual ITypedSymbol
+    class IVarSymbol : public virtual ISymbol, public virtual ITypedSymbol
     {
     public:
         virtual ~IVarSymbol() = default;

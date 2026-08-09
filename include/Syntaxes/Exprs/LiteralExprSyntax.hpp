@@ -13,9 +13,8 @@
 
 namespace Ace
 {
-    class LiteralExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<LiteralExprSema>
+    class LiteralExprSyntax : public virtual IExprSyntax,
+                              public virtual ISemaSyntax<LiteralExprSema>
     {
     public:
         LiteralExprSyntax(

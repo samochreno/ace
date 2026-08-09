@@ -16,10 +16,9 @@
 
 namespace Ace
 {
-    class VarStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<VarStmtSema>,
-        public virtual IDeclSyntax
+    class VarStmtSyntax : public virtual IStmtSyntax,
+                          public virtual ISemaSyntax<VarStmtSema>,
+                          public virtual IDeclSyntax
     {
     public:
         VarStmtSyntax(

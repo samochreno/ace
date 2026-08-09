@@ -11,215 +11,160 @@
 
 namespace Ace
 {
-    auto CreateUnexpectedTokenError(
-        const Token& unexpectedToken
-    ) -> DiagnosticGroup
+    auto CreateUnexpectedTokenError(const Token& unexpectedToken) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        const std::string message = "unexpected " + CreateTokenKindString(unexpectedToken.Kind);
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error, unexpectedToken.SrcLocation, message
+        );
+
+        return group;
+    }
+
+    auto CreateUnexpectedTokenError(const Token& unexpectedToken, const TokenKind expectedTokenKind)
+        -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        const std::string message = "unexpected " + CreateTokenKindString(unexpectedToken.Kind) +
+                                    ", expected " +
+                                    CreateTokenKindStringWithArticle(expectedTokenKind);
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error, unexpectedToken.SrcLocation, message
+        );
+
+        return group;
+    }
+
+    auto CreateUnexpectedTokenExpectedLiteralError(const Token& unexpectedToken) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         const std::string message =
-            "unexpected " + CreateTokenKindString(unexpectedToken.Kind);
+            "unexpected " + CreateTokenKindString(unexpectedToken.Kind) + ", expected a literal";
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            unexpectedToken.SrcLocation,
-            message
+            DiagnosticSeverity::Error, unexpectedToken.SrcLocation, message
         );
 
         return group;
     }
 
-    auto CreateUnexpectedTokenError(
-        const Token& unexpectedToken,
-        const TokenKind expectedTokenKind
-    ) -> DiagnosticGroup
+    auto CreateUnexpectedTokenExpectedNewError(const Token& unexpectedToken) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
-        const std::string message =
-            "unexpected " + CreateTokenKindString(unexpectedToken.Kind) +
-            ", expected " + CreateTokenKindStringWithArticle(expectedTokenKind);
+        const std::string message = "unexpected " + CreateTokenKindString(unexpectedToken.Kind) +
+                                    ", expected `" + SpecialIdent::New + "`";
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            unexpectedToken.SrcLocation,
-            message
+            DiagnosticSeverity::Error, unexpectedToken.SrcLocation, message
         );
 
         return group;
     }
 
-    auto CreateUnexpectedTokenExpectedLiteralError(
-        const Token& unexpectedToken
-    ) -> DiagnosticGroup
+    auto CreateUnexpectedTokenExpectedCompoundAssignmentOpError(const Token& unexpectedToken)
+        -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
-        const std::string message =
-            "unexpected " + CreateTokenKindString(unexpectedToken.Kind) +
-            ", expected a literal";
+        const std::string message = "unexpected " + CreateTokenKindString(unexpectedToken.Kind) +
+                                    ", expected a compound assignment operator";
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            unexpectedToken.SrcLocation,
-            message
+            DiagnosticSeverity::Error, unexpectedToken.SrcLocation, message
         );
 
         return group;
     }
 
-    auto CreateUnexpectedTokenExpectedNewError(
-        const Token& unexpectedToken
-    ) -> DiagnosticGroup
+    auto CreateExpectedTraitError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
-        const std::string message =
-            "unexpected " + CreateTokenKindString(unexpectedToken.Kind) +
-            ", expected `" + SpecialIdent::New + "`";
+        group.Diagnostics.emplace_back(DiagnosticSeverity::Error, srcLocation, "expected a trait");
+
+        return group;
+    }
+
+    auto CreateEmptyTypeParamsError(const SrcLocation& srcLocation) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            unexpectedToken.SrcLocation,
-            message
+            DiagnosticSeverity::Error, srcLocation, "empty type parameters"
         );
 
         return group;
     }
 
-    auto CreateUnexpectedTokenExpectedCompoundAssignmentOpError(
-        const Token& unexpectedToken
-    ) -> DiagnosticGroup
+    auto CreateEmptyTypeArgsError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
-        const std::string message =
-            "unexpected " + CreateTokenKindString(unexpectedToken.Kind) +
-            ", expected a compound assignment operator";
-
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            unexpectedToken.SrcLocation,
-            message
+            DiagnosticSeverity::Error, srcLocation, "empty type arguments"
         );
 
         return group;
     }
 
-    auto CreateExpectedTraitError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateExternInstanceFunctionError(const Token& externKeywordToken) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "expected a trait"
+            DiagnosticSeverity::Error, externKeywordToken.SrcLocation, "extern instance function"
         );
 
         return group;
     }
 
-    auto CreateEmptyTypeParamsError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateUnknownModifierError(const Token& modifierToken) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "empty type parameters"
+            DiagnosticSeverity::Error, modifierToken.SrcLocation, "unknown modifier"
         );
 
         return group;
     }
 
-    auto CreateEmptyTypeArgsError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateForbiddenModifierError(const Token& modifierToken) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "empty type arguments"
+            DiagnosticSeverity::Error, modifierToken.SrcLocation, "forbidden modifier"
         );
 
         return group;
     }
 
-    auto CreateExternInstanceFunctionError(
-        const Token& externKeywordToken
-    ) -> DiagnosticGroup
+    auto CreateEmptyModifiersError(const Token& colonColonToken) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            externKeywordToken.SrcLocation,
-            "extern instance function"
-        );
-
-        return group;
-    }
-
-    auto CreateUnknownModifierError(
-        const Token& modifierToken
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            modifierToken.SrcLocation,
-            "unknown modifier"
-        );
-
-        return group;
-    }
-
-    auto CreateForbiddenModifierError(
-        const Token& modifierToken
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            modifierToken.SrcLocation,
-            "forbidden modifier"
-        );
-
-        return group;
-    }
-
-    auto CreateEmptyModifiersError(
-        const Token& colonColonToken
-    ) -> DiagnosticGroup
-    {
-        DiagnosticGroup group{};
-
-        group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            colonColonToken.SrcLocation,
-            "empty modifier list"
+            DiagnosticSeverity::Error, colonColonToken.SrcLocation, "empty modifier list"
         );
 
         return group;
     }
 
     auto CreateMissingTokenError(
-        const SrcLocation& lastTokenSrcLocation,
-        const TokenKind expectedTokenKind
+        const SrcLocation& lastTokenSrcLocation, const TokenKind expectedTokenKind
     ) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
-        const SrcLocation srcLocation
-        {
+        const SrcLocation srcLocation{
             lastTokenSrcLocation.Buffer,
             lastTokenSrcLocation.CharacterEndIterator - 1,
             lastTokenSrcLocation.CharacterEndIterator,
@@ -234,66 +179,50 @@ namespace Ace
         return group;
     }
 
-    auto CreateMissingSelfModifierAfterStrongPtrError(
-        const Token& strongPtrModifierToken
-    ) -> DiagnosticGroup
+    auto CreateMissingSelfModifierAfterStrongPtrError(const Token& strongPtrModifierToken)
+        -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         const std::string message =
-            "missing `" +
-            std::string{ TokenKindToKeywordMap.at(TokenKind::SelfKeyword) } +
+            "missing `" + std::string{ TokenKindToKeywordMap.at(TokenKind::SelfKeyword) } +
             "` modifier after " + CreateTokenKindString(TokenKind::Asterisk);
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            strongPtrModifierToken.SrcLocation.CreateLast(),
-            message
+            DiagnosticSeverity::Error, strongPtrModifierToken.SrcLocation.CreateLast(), message
         );
 
         return group;
     }
 
-    auto CreateUnconstrainedTypeParamError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateUnconstrainedTypeParamError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "unconstrained type parameter"
+            DiagnosticSeverity::Error, srcLocation, "unconstrained type parameter"
         );
 
         return group;
     }
 
-    auto CreateConstrainedNonGenericSymbolError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateConstrainedNonGenericSymbolError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "constrained non-generic symbol"
+            DiagnosticSeverity::Error, srcLocation, "constrained non-generic symbol"
         );
 
         return group;
     }
 
-    auto CreateEmptyConstraintsError(
-        const SrcLocation& srcLocation
-    ) -> DiagnosticGroup
+    auto CreateEmptyConstraintsError(const SrcLocation& srcLocation) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
 
         group.Diagnostics.emplace_back(
-            DiagnosticSeverity::Error,
-            srcLocation,
-            "empty constraint list"
+            DiagnosticSeverity::Error, srcLocation, "empty constraint list"
         );
 
         return group;

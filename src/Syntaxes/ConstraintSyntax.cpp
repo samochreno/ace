@@ -19,10 +19,11 @@ namespace Ace
         const std::shared_ptr<Scope>& scope,
         const SymbolName& typeName,
         const std::vector<SymbolName>& traitNames
-    ) : m_SrcLocation{ srcLocation },
-        m_Scope{ scope },
-        m_TypeName{ typeName },
-        m_TraitNames{ traitNames }
+    )
+        : m_SrcLocation{ srcLocation },
+          m_Scope{ scope },
+          m_TypeName{ typeName },
+          m_TraitNames{ traitNames }
     {
     }
 
@@ -55,33 +56,30 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optTypeSymbol = diagnostics.Collect(
-            GetScope()->ResolveStaticSymbol<ITypeSymbol>(m_TypeName)
-        );
-        auto* const typeSymbol = optTypeSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetType()
-        );
+        const auto optTypeSymbol =
+            diagnostics.Collect(GetScope()->ResolveStaticSymbol<ITypeSymbol>(m_TypeName));
+        auto* const typeSymbol =
+            optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetType());
 
         std::vector<TraitTypeSymbol*> traitSymbols{};
-        std::for_each(begin(m_TraitNames), end(m_TraitNames),
-        [&](const SymbolName& traitName)
-        {
-            const auto optTraitSymbol = diagnostics.Collect(
-                GetScope()->ResolveStaticSymbol<TraitTypeSymbol>(traitName)
-            );
-            if (optTraitSymbol.has_value())
+        std::for_each(
+            begin(m_TraitNames),
+            end(m_TraitNames),
+            [&](const SymbolName& traitName)
             {
-                traitSymbols.push_back(optTraitSymbol.value());
+                const auto optTraitSymbol =
+                    diagnostics.Collect(GetScope()->ResolveStaticSymbol<TraitTypeSymbol>(traitName)
+                    );
+                if (optTraitSymbol.has_value())
+                {
+                    traitSymbols.push_back(optTraitSymbol.value());
+                }
             }
-        });
+        );
 
-        return Diagnosed<std::unique_ptr<ISymbol>>
-        {
+        return Diagnosed<std::unique_ptr<ISymbol>>{
             std::make_unique<ConstraintSymbol>(
-                GetSrcLocation(),
-                GetSymbolScope(),
-                typeSymbol,
-                traitSymbols
+                GetSrcLocation(), GetSymbolScope(), typeSymbol, traitSymbols
             ),
             std::move(diagnostics),
         };

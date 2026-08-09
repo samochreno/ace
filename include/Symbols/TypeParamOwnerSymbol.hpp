@@ -8,13 +8,11 @@ namespace Ace
 {
     class TypeParamTypeSymbol;
 
-    class ITypeParamOwnerSymbol :
-        public virtual IBodyScopedSymbol
+    class ITypeParamOwnerSymbol : public virtual IBodyScopedSymbol
     {
     public:
         virtual ~ITypeParamOwnerSymbol() = default;
 
-        virtual auto CollectOwnedTypeParams() const
-            -> std::vector<TypeParamTypeSymbol*> final;
+        virtual auto CollectOwnedTypeParams() const -> std::vector<TypeParamTypeSymbol*> final;
     };
 }

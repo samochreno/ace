@@ -12,16 +12,12 @@ namespace Ace
     class ITypeSymbol;
     class TypeParamTypeSymbol;
 
-    class IGenericSymbol :
-        public virtual ISymbol,
-        public virtual ITypeParamOwnerSymbol
+    class IGenericSymbol : public virtual ISymbol, public virtual ITypeParamOwnerSymbol
     {
     public:
         virtual ~IGenericSymbol() = default;
 
-        virtual auto SetBodyScope(
-            const std::shared_ptr<Scope>& scope
-        ) -> void = 0;
+        virtual auto SetBodyScope(const std::shared_ptr<Scope>& scope) -> void = 0;
 
         virtual auto GetTypeArgs() const -> const std::vector<ITypeSymbol*>& = 0;
         virtual auto CollectTypeParams() const -> std::vector<TypeParamTypeSymbol*> final;

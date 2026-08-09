@@ -14,9 +14,7 @@
 
 namespace Ace
 {
-    class TraitImplSyntax :
-        public virtual ISyntax,
-        public virtual IDeclSyntax
+    class TraitImplSyntax : public virtual ISyntax, public virtual IDeclSyntax
     {
     public:
         TraitImplSyntax(

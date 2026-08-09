@@ -25,20 +25,19 @@ namespace Ace
         ITypeSymbol* const type,
         ITypeSymbol* const selfType,
         const std::vector<ITypeSymbol*>& typeArgs
-    ) : m_BodyScope{ bodyScope },
-        m_Category{ category },
-        m_Name{ name },
-        m_Index{ index },
-        m_ParentTrait{ parentTrait },
-        m_Type{ type },
-        m_SelfType{ selfType },
-        m_TypeArgs{ typeArgs }
+    )
+        : m_BodyScope{ bodyScope },
+          m_Category{ category },
+          m_Name{ name },
+          m_Index{ index },
+          m_ParentTrait{ parentTrait },
+          m_Type{ type },
+          m_SelfType{ selfType },
+          m_TypeArgs{ typeArgs }
     {
         ACE_ASSERT(
             GetScope() ==
-            dynamic_cast<TraitTypeSymbol*>(
-                m_ParentTrait->GetRoot()
-            )->GetPrototypeScope()
+            dynamic_cast<TraitTypeSymbol*>(m_ParentTrait->GetRoot())->GetPrototypeScope()
         );
     }
 
@@ -68,8 +67,7 @@ namespace Ace
     }
 
     auto PrototypeSymbol::CreateInstantiated(
-        const std::shared_ptr<Scope>& scope,
-        const InstantiationContext& context
+        const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
         return std::make_unique<PrototypeSymbol>(
@@ -89,9 +87,7 @@ namespace Ace
         return m_Type;
     }
 
-    auto PrototypeSymbol::SetBodyScope(
-        const std::shared_ptr<Scope>& scope
-    ) -> void
+    auto PrototypeSymbol::SetBodyScope(const std::shared_ptr<Scope>& scope) -> void
     {
         m_BodyScope = scope;
     }
@@ -116,23 +112,18 @@ namespace Ace
         return m_ParentTrait;
     }
 
-    static auto IsParamDynSafe(
-        const PrototypeSymbol* const prototype,
-        IParamVarSymbol* const param
-    ) -> bool
+    static auto IsParamDynSafe(const PrototypeSymbol* const prototype, IParamVarSymbol* const param)
+        -> bool
     {
-        return
-            param->GetType()->GetUnaliased() !=
-            prototype->CollectSelfType().value()->GetUnaliased();
+        return param->GetType()->GetUnaliased() !=
+               prototype->CollectSelfType().value()->GetUnaliased();
     }
 
     auto PrototypeSymbol::IsDynDispatchable() const -> bool
     {
         const auto optSelfParam = CollectSelfParam();
-        if (
-            !optSelfParam.has_value() ||
-            !optSelfParam.value()->GetType()->GetWithoutRef()->IsDynStrongPtr()
-            )
+        if (!optSelfParam.has_value() ||
+            !optSelfParam.value()->GetType()->GetWithoutRef()->IsDynStrongPtr())
         {
             return false;
         }
@@ -142,20 +133,20 @@ namespace Ace
             return false;
         }
 
-        if (
-            GetType()->GetUnaliased() ==
-            CollectSelfType().value()->GetUnaliased()
-            )
+        if (GetType()->GetUnaliased() == CollectSelfType().value()->GetUnaliased())
         {
             return false;
         }
 
         const auto params = CollectParams();
-        const auto unsafeParamIt = std::find_if_not(begin(params), end(params),
-        [&](IParamVarSymbol* const param)
-        {
-            return IsParamDynSafe(this, param);
-        });
+        const auto unsafeParamIt = std::find_if_not(
+            begin(params),
+            end(params),
+            [&](IParamVarSymbol* const param)
+            {
+                return IsParamDynSafe(this, param);
+            }
+        );
         if (unsafeParamIt != end(params))
         {
             return false;

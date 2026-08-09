@@ -12,9 +12,8 @@
 
 namespace Ace
 {
-    class UserUnaryExprSyntax :
-        public virtual IExprSyntax,
-        public virtual ISemaSyntax<UserUnaryExprSema>
+    class UserUnaryExprSyntax : public virtual IExprSyntax,
+                                public virtual ISemaSyntax<UserUnaryExprSema>
     {
     public:
         UserUnaryExprSyntax(
@@ -30,7 +29,7 @@ namespace Ace
         auto CollectChildren() const -> std::vector<const ISyntax*> final;
         auto CreateSema() const -> Diagnosed<std::shared_ptr<const UserUnaryExprSema>> final;
         auto CreateExprSema() const -> Diagnosed<std::shared_ptr<const IExprSema>> final;
-            
+
     private:
         SrcLocation m_SrcLocation{};
         std::shared_ptr<const IExprSyntax> m_Expr{};

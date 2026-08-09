@@ -13,9 +13,8 @@
 
 namespace Ace
 {
-    class CompoundAssignmentStmtSyntax :
-        public virtual IStmtSyntax,
-        public virtual ISemaSyntax<CompoundAssignmentStmtSema>
+    class CompoundAssignmentStmtSyntax : public virtual IStmtSyntax,
+                                         public virtual ISemaSyntax<CompoundAssignmentStmtSema>
     {
     public:
         CompoundAssignmentStmtSyntax(
@@ -30,7 +29,8 @@ namespace Ace
         auto GetSrcLocation() const -> const SrcLocation& final;
         auto GetScope() const -> std::shared_ptr<Scope> final;
         auto CollectChildren() const -> std::vector<const ISyntax*> final;
-        auto CreateSema() const -> Diagnosed<std::shared_ptr<const CompoundAssignmentStmtSema>> final;
+        auto CreateSema() const
+            -> Diagnosed<std::shared_ptr<const CompoundAssignmentStmtSema>> final;
         auto CreateStmtSema() const -> Diagnosed<std::shared_ptr<const IStmtSema>> final;
 
     private:
