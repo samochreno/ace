@@ -68,6 +68,19 @@ namespace Ace
         return group;
     }
 
+    auto CreateReservedCompilerPrefixError(const Ident& name) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            name.SrcLocation,
+            "declaration name `" + name.String + "` uses reserved compiler prefix `__`"
+        );
+
+        return group;
+    }
+
     auto CreateStructFieldCausesCycleError(FieldVarSymbol* const fieldSymbol) -> DiagnosticGroup
     {
         DiagnosticGroup group{};
@@ -165,7 +178,7 @@ namespace Ace
         DiagnosticGroup group{};
 
         const std::string message =
-            "`" + selfType->CreateSignature() + "` has no member named `" + memberName + "`";
+            "`" + selfType->CreateDisplayName() + "` has no member named `" + memberName + "`";
 
         group.Diagnostics.emplace_back(DiagnosticSeverity::Error, srcLocation, message);
 
@@ -247,7 +260,7 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "public interface leaks private type `" + leakedType->CreateSignature() + "`"
+            "public interface leaks private type `" + leakedType->CreateDisplayName() + "`"
         );
 
         group.Diagnostics.emplace_back(
@@ -435,7 +448,7 @@ namespace Ace
         DiagnosticGroup group{};
 
         const std::string message =
-            "`" + std::string{ TokenKindToKeywordMap.at(TokenKind::SelfTypeKeyword) } +
+            "`" + std::string{ TokenKindToKeywordMap.at(TokenKind::UpperSelfKeyword) } +
             "` reference in incorrect context";
 
         group.Diagnostics.emplace_back(DiagnosticSeverity::Error, srcLocation, message);

@@ -7,6 +7,7 @@
 #include <string_view>
 
 #include "Diagnostic.hpp"
+#include "Diagnostics/CompilationDiagnostics.hpp"
 #include "Std.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -54,6 +55,24 @@ namespace Ace
         );
 
         return SymbolName{ sections, SymbolNameResolutionScope::Global };
+    }
+
+    auto INative::CreateDisplayName() const -> std::string
+    {
+        const auto name = CreateFullyQualifiedName(SrcLocation{});
+
+        std::string result{};
+        for (const auto& section : name.Sections)
+        {
+            if (!result.empty())
+            {
+                result += "::";
+            }
+
+            result += section.Name.String;
+        }
+
+        return result;
     }
 
     NativeType::NativeType(
@@ -122,9 +141,9 @@ namespace Ace
         return TryGetSymbol().value();
     }
 
-    auto NativeType::GetGenericSymbol() const -> ISymbol*
+    auto NativeType::TryGetGenericSymbol() const -> std::optional<ISymbol*>
     {
-        return GetSymbol();
+        return TryGetSymbol();
     }
 
     auto NativeType::HasIRType() const -> bool
@@ -201,9 +220,9 @@ namespace Ace
         return TryGetSymbol().value();
     }
 
-    auto NativeFunction::GetGenericSymbol() const -> ISymbol*
+    auto NativeFunction::TryGetGenericSymbol() const -> std::optional<ISymbol*>
     {
-        return GetSymbol();
+        return TryGetSymbol();
     }
 
     static auto CreateTypeAliasNameString(const Natives& natives, const NativeType& type)
@@ -259,7 +278,7 @@ namespace Ace
 
     static auto CreateName(std::string mainName) -> std::vector<std::string>
     {
-        return { Std::GetName(), mainName };
+        return { Std::GetName(), "__" + mainName };
     }
 
     static auto
@@ -1224,7 +1243,7 @@ namespace Ace
     ) : Int8
         {
             compilation,
-            std::vector{ Std::GetName().data(), "Int8" },
+            std::vector{ Std::GetName().data(), "__Int8" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1235,7 +1254,7 @@ namespace Ace
         Int16
         {
             compilation,
-            std::vector{ Std::GetName().data(), "Int16" },
+            std::vector{ Std::GetName().data(), "__Int16" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1246,7 +1265,7 @@ namespace Ace
         Int32
         {
             compilation,
-            std::vector{ Std::GetName().data(), "Int32" },
+            std::vector{ Std::GetName().data(), "__Int32" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1257,7 +1276,7 @@ namespace Ace
         Int64
         {
             compilation,
-            std::vector{ Std::GetName().data(), "Int64" },
+            std::vector{ Std::GetName().data(), "__Int64" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1269,7 +1288,7 @@ namespace Ace
         UInt8
         {
             compilation,
-            std::vector{ Std::GetName().data(), "UInt8" },
+            std::vector{ Std::GetName().data(), "__UInt8" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1280,7 +1299,7 @@ namespace Ace
         UInt16
         {
             compilation,
-            std::vector{ Std::GetName().data(), "UInt16" },
+            std::vector{ Std::GetName().data(), "__UInt16" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1291,7 +1310,7 @@ namespace Ace
         UInt32
         {
             compilation,
-            std::vector{ Std::GetName().data(), "UInt32" },
+            std::vector{ Std::GetName().data(), "__UInt32" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1302,7 +1321,7 @@ namespace Ace
         UInt64
         {
             compilation,
-            std::vector{ Std::GetName().data(), "UInt64" },
+            std::vector{ Std::GetName().data(), "__UInt64" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1314,7 +1333,7 @@ namespace Ace
         Int
         {
             compilation,
-            std::vector{ Std::GetName().data(), "Int" },
+            std::vector{ Std::GetName().data(), "__Int" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1326,7 +1345,7 @@ namespace Ace
         Float32
         {
             compilation,
-            std::vector{ Std::GetName().data(), "Float32" },
+            std::vector{ Std::GetName().data(), "__Float32" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1337,7 +1356,7 @@ namespace Ace
         Float64
         {
             compilation,
-            std::vector{ Std::GetName().data(), "Float64" },
+            std::vector{ Std::GetName().data(), "__Float64" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1349,7 +1368,7 @@ namespace Ace
         Bool
         {
             compilation,
-            std::vector{ Std::GetName().data(), "Bool" },
+            std::vector{ Std::GetName().data(), "__Bool" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::Trivial,
             [compilation](llvm::LLVMContext& context) -> llvm::Type*
@@ -1381,7 +1400,7 @@ namespace Ace
         Ref
         {
             compilation,
-            std::vector{ Std::GetName().data(), "Ref" },
+            std::vector{ Std::GetName().data(), "__Ref" },
             NativeSymbolKind::Root,
             NativeCopyabilityKind::NonTrivial,
             std::nullopt,
@@ -1389,7 +1408,7 @@ namespace Ace
         WeakPtr
         {
             compilation,
-            std::vector{ Std::GetName().data(), "rc", "WeakPtr" },
+            std::vector{ Std::GetName().data(), "rc", "__WeakPtr" },
             NativeSymbolKind::Root,
             NativeCopyabilityKind::NonTrivial,
             std::nullopt,
@@ -1397,7 +1416,7 @@ namespace Ace
         StrongPtr
         {
             compilation,
-            std::vector{ Std::GetName().data(), "rc", "StrongPtr" },
+            std::vector{ Std::GetName().data(), "rc", "__StrongPtr" },
             NativeSymbolKind::Root,
             NativeCopyabilityKind::NonTrivial,
             std::nullopt,
@@ -1405,7 +1424,7 @@ namespace Ace
         DynStrongPtr
         {
             compilation,
-            std::vector{ Std::GetName().data(), "rc", "DynStrongPtr" },
+            std::vector{ Std::GetName().data(), "rc", "__DynStrongPtr" },
             NativeSymbolKind::Root,
             NativeCopyabilityKind::NonTrivial,
             std::nullopt,
@@ -1413,7 +1432,7 @@ namespace Ace
         DynStrongPtrData
         {
             compilation,
-            std::vector{ Std::GetName().data(), "rc", "DynStrongPtrData" },
+            std::vector{ Std::GetName().data(), "rc", "__DynStrongPtrData" },
             NativeSymbolKind::Concrete,
             NativeCopyabilityKind::NonTrivial,
             std::nullopt,
@@ -1637,7 +1656,7 @@ namespace Ace
         lookup_vtbl_ptr
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "lookup_vtbl_ptr" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__lookup_vtbl_ptr" },
             NativeSymbolKind::Concrete,
             [this](Emitter& emitter)
             {
@@ -1701,7 +1720,7 @@ namespace Ace
         sublookup_vtbl_ptr
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "sublookup_vtbl_ptr" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__sublookup_vtbl_ptr" },
             NativeSymbolKind::Concrete,
             [this](Emitter& emitter)
             {
@@ -1835,7 +1854,7 @@ namespace Ace
         dyn_drop
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "dyn_drop" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__dyn_drop" },
             NativeSymbolKind::Concrete,
             [this](Emitter& emitter)
             {
@@ -2213,42 +2232,42 @@ namespace Ace
         weak_ptr_from
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "weak_ptr_from" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__weak_ptr_from" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         weak_ptr_from_dyn
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "weak_ptr_from_dyn" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__weak_ptr_from_dyn" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         weak_ptr_copy
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "weak_ptr_copy" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__weak_ptr_copy" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         weak_ptr_drop
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "weak_ptr_drop" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__weak_ptr_drop" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         weak_ptr_lock
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "weak_ptr_lock" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__weak_ptr_lock" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         weak_ptr_lock_dyn
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "weak_ptr_lock_dyn" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__weak_ptr_lock_dyn" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
@@ -2256,28 +2275,28 @@ namespace Ace
         strong_ptr_new
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "strong_ptr_new" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__strong_ptr_new" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         strong_ptr_value
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "strong_ptr_value" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__strong_ptr_value" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         strong_ptr_copy
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "strong_ptr_copy" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__strong_ptr_copy" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         strong_ptr_drop
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "strong_ptr_drop" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__strong_ptr_drop" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
@@ -2285,63 +2304,63 @@ namespace Ace
         dyn_strong_ptr_from
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "dyn_strong_ptr_from" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__dyn_strong_ptr_from" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         dyn_strong_ptr_copy
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "dyn_strong_ptr_copy" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__dyn_strong_ptr_copy" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         dyn_strong_ptr_drop
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "dyn_strong_ptr_drop" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__dyn_strong_ptr_drop" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         dyn_strong_ptr_value_ptr
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "dyn_strong_ptr_value_ptr" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__dyn_strong_ptr_value_ptr" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         dyn_strong_ptr_set_value_ptr
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "dyn_strong_ptr_set_value_ptr" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__dyn_strong_ptr_set_value_ptr" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         dyn_strong_ptr_control_block_ptr
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "dyn_strong_ptr_control_block_ptr" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__dyn_strong_ptr_control_block_ptr" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         dyn_strong_ptr_set_control_block_ptr
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "dyn_strong_ptr_set_control_block_ptr" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__dyn_strong_ptr_set_control_block_ptr" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         dyn_strong_ptr_vtbl_ptr
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "dyn_strong_ptr_vtbl_ptr" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__dyn_strong_ptr_vtbl_ptr" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
         dyn_strong_ptr_set_vtbl_ptr
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "dyn_strong_ptr_set_vtbl_ptr" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__dyn_strong_ptr_set_vtbl_ptr" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
@@ -2349,7 +2368,7 @@ namespace Ace
         strong_ptr_to_dyn_strong_ptr
         {
             compilation,
-            std::vector<std::string>{ Std::GetName(), "rc", "strong_ptr_to_dyn_strong_ptr" },
+            std::vector<std::string>{ Std::GetName(), "rc", "__strong_ptr_to_dyn_strong_ptr" },
             NativeSymbolKind::Root,
             std::nullopt,
         },
@@ -3181,16 +3200,28 @@ namespace Ace
     {
     }
 
-    auto Natives::Verify() const -> void
+    auto VerifyNativeSymbols(const std::span<INative* const> natives) -> Diagnosed<void>
     {
+        auto diagnostics = DiagnosticBag::Create();
+
         std::for_each(
-            begin(m_Natives.Get()),
-            end(m_Natives.Get()),
-            [](INative* const native)
+            begin(natives),
+            end(natives),
+            [&](INative* const native)
             {
-                (void)native->GetGenericSymbol();
+                if (!native->TryGetGenericSymbol().has_value())
+                {
+                    diagnostics.Add(CreateMissingNativeSymbolError(native));
+                }
             }
         );
+
+        return Diagnosed<void>{ std::move(diagnostics) };
+    }
+
+    auto Natives::Verify() const -> Diagnosed<void>
+    {
+        return VerifyNativeSymbols(m_Natives.Get());
     }
 
     auto Natives::CollectIRTypeSymbolMap(llvm::LLVMContext& context) const

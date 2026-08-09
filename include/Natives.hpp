@@ -3,6 +3,7 @@
 #include <vector>
 #include <optional>
 #include <functional>
+#include <span>
 #include <unordered_map>
 #include <set>
 
@@ -36,7 +37,9 @@ namespace Ace
         virtual auto CreateFullyQualifiedName(const SrcLocation& srcLocation) const
             -> SymbolName = 0;
 
-        virtual auto GetGenericSymbol() const -> ISymbol* = 0;
+        auto CreateDisplayName() const -> std::string;
+
+        virtual auto TryGetGenericSymbol() const -> std::optional<ISymbol*> = 0;
     };
 
     enum class NativeSymbolKind
@@ -50,6 +53,8 @@ namespace Ace
         Trivial,
         NonTrivial,
     };
+
+    auto VerifyNativeSymbols(std::span<INative* const> natives) -> Diagnosed<void>;
 
     class NativeType : public virtual INative
     {
@@ -69,7 +74,7 @@ namespace Ace
 
         auto TryGetSymbol() const -> std::optional<ITypeSymbol*>;
         auto GetSymbol() const -> ITypeSymbol*;
-        auto GetGenericSymbol() const -> ISymbol* final;
+        auto TryGetGenericSymbol() const -> std::optional<ISymbol*> final;
 
         auto HasIRType() const -> bool;
         auto GetIRType(llvm::LLVMContext& context) const -> llvm::Type*;
@@ -101,7 +106,7 @@ namespace Ace
 
         auto TryGetSymbol() const -> std::optional<FunctionSymbol*>;
         auto GetSymbol() const -> FunctionSymbol*;
-        auto GetGenericSymbol() const -> ISymbol* final;
+        auto TryGetGenericSymbol() const -> std::optional<ISymbol*> final;
 
     private:
         Compilation* m_Compilation{};
@@ -118,7 +123,7 @@ namespace Ace
         Natives(Compilation* const compilation);
         ~Natives() = default;
 
-        auto Verify() const -> void;
+        auto Verify() const -> Diagnosed<void>;
 
         auto CollectIRTypeSymbolMap(llvm::LLVMContext& context) const
             -> std::unordered_map<ITypeSymbol*, llvm::Type*>;

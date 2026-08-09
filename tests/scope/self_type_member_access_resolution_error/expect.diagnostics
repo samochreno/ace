@@ -1,2 +1,2 @@
-self_type_member_access_resolution_error::Wrapper[std::Int]
+Wrapper[int]
 has no member named `missing`

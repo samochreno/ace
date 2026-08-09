@@ -12,7 +12,7 @@
 #include "Symbols/Vars/Params/ParamVarSymbol.hpp"
 #include "Symbols/Vars/Params/SelfParamVarSymbol.hpp"
 #include "Symbols/Vars/Params/NormalParamVarSymbol.hpp"
-#include "Symbols/Types/TraitSelfTypeSymbol.hpp"
+#include "Symbols/Types/TraitSelfSymbol.hpp"
 
 namespace Ace
 {

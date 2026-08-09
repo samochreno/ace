@@ -24,6 +24,8 @@ namespace Ace
         const SrcLocation& originalSrcLocation, const SrcLocation& redeclaredSrcLocation
     ) -> DiagnosticGroup;
 
+    auto CreateReservedCompilerPrefixError(const Ident& name) -> DiagnosticGroup;
+
     auto CreateStructFieldCausesCycleError(FieldVarSymbol* const fieldSymbol) -> DiagnosticGroup;
 
     auto CreateSupertraitCausesCycleError(const SrcLocation& srcLocation) -> DiagnosticGroup;

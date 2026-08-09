@@ -8,6 +8,7 @@
 #include "DiagnosticStringConversions.hpp"
 #include "SrcLocation.hpp"
 #include "FileBuffer.hpp"
+#include "Natives.hpp"
 
 namespace Ace
 {
@@ -110,6 +111,19 @@ namespace Ace
 
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error, packageFileBuffer->CreateFirstLocation(), message
+        );
+
+        return group;
+    }
+
+    auto CreateMissingNativeSymbolError(const INative* const native) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            std::nullopt,
+            "missing native symbol `" + native->CreateDisplayName() + "`"
         );
 
         return group;

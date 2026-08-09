@@ -7,7 +7,7 @@
 #include "Scope.hpp"
 #include "Diagnostic.hpp"
 #include "Symbols/Symbol.hpp"
-#include "Symbols/Types/TraitSelfTypeSymbol.hpp"
+#include "Symbols/Types/TraitSelfSymbol.hpp"
 
 namespace Ace
 {
@@ -47,7 +47,7 @@ namespace Ace
     auto TraitSelfSyntax::CreateSymbol() const -> Diagnosed<std::unique_ptr<ISymbol>>
     {
         return Diagnosed{
-            std::make_unique<TraitSelfTypeSymbol>(GetSrcLocation(), GetSymbolScope()),
+            std::make_unique<TraitSelfSymbol>(GetSrcLocation(), GetSymbolScope()),
             DiagnosticBag::Create(),
         };
     }

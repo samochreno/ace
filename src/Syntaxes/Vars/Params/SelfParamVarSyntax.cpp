@@ -23,7 +23,7 @@ namespace Ace
     )
         : m_SrcLocation{ srcLocation },
           m_Scope{ scope },
-          m_Name{ srcLocation, SpecialIdent::Self },
+          m_Name{ srcLocation, SpecialIdent::SelfParam },
           m_TypeName{ typeName }
     {
     }

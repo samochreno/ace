@@ -23,7 +23,7 @@
 #include "Symbols/Types/SizedTypeSymbol.hpp"
 #include "Symbols/Types/StructTypeSymbol.hpp"
 #include "Symbols/Types/TypeParamTypeSymbol.hpp"
-#include "Symbols/Types/TraitSelfTypeSymbol.hpp"
+#include "Symbols/Types/TraitSelfSymbol.hpp"
 #include "Symbols/Types/TraitTypeSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/Types/VoidTypeSymbol.hpp"

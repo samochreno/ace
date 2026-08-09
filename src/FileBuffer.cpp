@@ -63,6 +63,7 @@ namespace Ace
                 path,
                 std::move(buffer),
                 std::move(lines),
+                SourceOrigin::User,
             }),
             std::move(diagnostics),
         };
@@ -71,7 +72,8 @@ namespace Ace
     auto FileBuffer::Create(
         Compilation* const compilation,
         const std::filesystem::path& path,
-        const std::string_view string
+        const std::string_view string,
+        const SourceOrigin origin
     ) -> std::shared_ptr<const FileBuffer>
     {
         std::string buffer{ string };
@@ -102,6 +104,7 @@ namespace Ace
             path,
             std::move(buffer),
             std::move(lines),
+            origin,
         });
     }
 
@@ -123,6 +126,11 @@ namespace Ace
     auto FileBuffer::GetLines() const -> const std::vector<std::string_view>&
     {
         return m_Lines;
+    }
+
+    auto FileBuffer::GetOrigin() const -> SourceOrigin
+    {
+        return m_Origin;
     }
 
     auto FileBuffer::CreateFirstLocation() const -> SrcLocation
@@ -148,12 +156,14 @@ namespace Ace
         Compilation* const compilation,
         const std::filesystem::path& path,
         std::string&& buffer,
-        std::vector<std::string_view>&& lines
+        std::vector<std::string_view>&& lines,
+        const SourceOrigin origin
     )
         : m_Compilation{ compilation },
           m_Path{ path },
           m_Buffer{ std::move(buffer) },
-          m_Lines{ std::move(lines) }
+          m_Lines{ std::move(lines) },
+          m_Origin{ origin }
     {
     }
 

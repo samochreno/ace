@@ -24,7 +24,7 @@ namespace Ace
         : m_Scope{ scope },
           m_Type{ type },
           m_Parent{},
-          m_Name{ srcLocation, SpecialIdent::Self }
+          m_Name{ srcLocation, SpecialIdent::SelfParam }
     {
     }
 

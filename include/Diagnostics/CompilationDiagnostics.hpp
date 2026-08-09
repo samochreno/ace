@@ -10,6 +10,8 @@
 
 namespace Ace
 {
+    class INative;
+
     auto CreateMissingPackagePathArgError() -> DiagnosticGroup;
 
     auto CreateMultiplePackagePathArgsError(const SrcLocation& srcLocation) -> DiagnosticGroup;
@@ -36,4 +38,6 @@ namespace Ace
     auto CreateTrailingPackagePathCharactersBeforeExtensionError(
         const FileBuffer* const packageFileBuffer, const std::string_view characters
     ) -> DiagnosticGroup;
+
+    auto CreateMissingNativeSymbolError(const INative* native) -> DiagnosticGroup;
 }

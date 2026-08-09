@@ -5,7 +5,7 @@
 
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "Symbols/PrototypeSymbol.hpp"
-#include "Symbols/Types/TraitSelfTypeSymbol.hpp"
+#include "Symbols/Types/TraitSelfSymbol.hpp"
 #include "Scope.hpp"
 #include "AccessModifier.hpp"
 #include "Ident.hpp"
@@ -42,7 +42,7 @@ namespace Ace
 
         auto GetPrototypeScope() const -> const std::shared_ptr<Scope>&;
         auto CollectPrototypes() const -> std::vector<PrototypeSymbol*>;
-        auto CollectSelf() const -> TraitSelfTypeSymbol*;
+        auto CollectSelf() const -> TraitSelfSymbol*;
 
         auto CollectSupertraits() const -> std::vector<SupertraitSymbol*>;
 

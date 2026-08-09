@@ -185,7 +185,7 @@ namespace Ace
         DiagnosticGroup group{};
 
         const std::string message =
-            "missing `" + std::string{ TokenKindToKeywordMap.at(TokenKind::SelfKeyword) } +
+            "missing `" + std::string{ TokenKindToKeywordMap.at(TokenKind::LowerSelfKeyword) } +
             "` modifier after " + CreateTokenKindString(TokenKind::Asterisk);
 
         group.Diagnostics.emplace_back(

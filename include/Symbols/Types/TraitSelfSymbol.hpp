@@ -12,11 +12,11 @@
 
 namespace Ace
 {
-    class TraitSelfTypeSymbol : public virtual ITypeSymbol
+    class TraitSelfSymbol : public virtual ITypeSymbol
     {
     public:
-        TraitSelfTypeSymbol(const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope);
-        virtual ~TraitSelfTypeSymbol() = default;
+        TraitSelfSymbol(const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope);
+        virtual ~TraitSelfSymbol() = default;
 
         auto CreateTypeNoun() const -> Noun final;
         auto GetBodyScope() const -> std::shared_ptr<Scope> final;

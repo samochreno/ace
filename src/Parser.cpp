@@ -556,7 +556,7 @@ namespace Ace
         }
 
         const SymbolName typeSymbolName{
-            SymbolNameSection{ Ident{ srcLocation, SpecialIdent::SelfType } },
+            SymbolNameSection{ Ident{ srcLocation, SpecialIdent::Self } },
             SymbolNameResolutionScope::Local,
         };
         const TypeName typeName{ typeSymbolName, typeNameModifiers };
@@ -712,7 +712,7 @@ namespace Ace
                 return Expected{ Modifier::Extern, std::move(diagnostics) };
             }
 
-            case TokenKind::SelfKeyword:
+            case TokenKind::LowerSelfKeyword:
             {
                 return Expected{ Modifier::Self, std::move(diagnostics) };
             }
@@ -930,7 +930,8 @@ namespace Ace
 
     static auto IsSymbolLiteralExprBegin(const Parser& parser) -> bool
     {
-        return (parser.Peek() == TokenKind::Ident) || (parser.Peek() == TokenKind::SelfKeyword);
+        return (parser.Peek() == TokenKind::Ident) ||
+               (parser.Peek() == TokenKind::LowerSelfKeyword);
     }
 
     static auto IsKeywordStmtBegin(const Parser& parser) -> bool
@@ -1197,7 +1198,7 @@ namespace Ace
 
     static auto IsSpecialSymbolNameSectionBegin(const Parser& parser) -> bool
     {
-        return (parser.Peek(0) == TokenKind::SelfTypeKeyword) ||
+        return (parser.Peek(0) == TokenKind::UpperSelfKeyword) ||
                (parser.Peek(0) == TokenKind::IntKeyword) ||
                (parser.Peek(0) == TokenKind::Int8Keyword) ||
                (parser.Peek(0) == TokenKind::Int16Keyword) ||
@@ -2349,16 +2350,16 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        if (parser.Peek() != TokenKind::SelfKeyword)
+        if (parser.Peek() != TokenKind::LowerSelfKeyword)
         {
-            diagnostics.Add(CreateUnexpectedTokenError(parser.Peek(), TokenKind::SelfKeyword));
+            diagnostics.Add(CreateUnexpectedTokenError(parser.Peek(), TokenKind::LowerSelfKeyword));
             return std::move(diagnostics);
         }
 
         const auto& token = parser.Eat();
 
         const SymbolName name{
-            SymbolNameSection{ Ident{ token.SrcLocation, SpecialIdent::Self } },
+            SymbolNameSection{ Ident{ token.SrcLocation, SpecialIdent::SelfParam } },
             SymbolNameResolutionScope::Local,
         };
 
@@ -2371,7 +2372,7 @@ namespace Ace
     static auto ParseSymbolLiteralExpr(Parser& parser, const std::shared_ptr<Scope>& scope)
         -> Expected<std::shared_ptr<const SymbolLiteralExprSyntax>>
     {
-        if (parser.Peek() == TokenKind::SelfKeyword)
+        if (parser.Peek() == TokenKind::LowerSelfKeyword)
         {
             return ParseSelfSymbolLiteralExpr(parser, scope);
         }

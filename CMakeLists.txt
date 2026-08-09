@@ -90,6 +90,17 @@ if(BUILD_TESTING)
     set(ACE_LLVM_BIN_DIR "${ACE_LLVM_PREFIX}/bin")
 
     add_test(
+        NAME architecture__diagnostics_use_display_names
+        COMMAND ${CMAKE_COMMAND}
+            -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+            -P ${CMAKE_SOURCE_DIR}/cmake/CheckDiagnosticDisplayNames.cmake
+    )
+    set_tests_properties(
+        architecture__diagnostics_use_display_names
+        PROPERTIES LABELS "architecture"
+    )
+
+    add_test(
         NAME smoke_example
         COMMAND ${CMAKE_COMMAND}
             -DACE_BINARY=$<TARGET_FILE:${PROJECT_NAME}>
@@ -115,6 +126,15 @@ if(BUILD_TESTING)
     add_test(
         NAME unit__embedded_std
         COMMAND embedded_std_tests
+    )
+
+    add_executable(native_verification_tests
+        tests/unit/NativeVerificationTests.cpp
+    )
+    target_link_libraries(native_verification_tests PRIVATE ace_core)
+    add_test(
+        NAME unit__native_verification
+        COMMAND native_verification_tests
     )
 
     add_executable(token_and_keyword_tests

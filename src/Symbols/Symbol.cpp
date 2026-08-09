@@ -11,7 +11,7 @@
 #include "Symbols/PrototypeSymbol.hpp"
 #include "Symbols/GenericSymbol.hpp"
 #include "Symbols/Types/TypeParamTypeSymbol.hpp"
-#include "Symbols/Types/TraitSelfTypeSymbol.hpp"
+#include "Symbols/Types/TraitSelfSymbol.hpp"
 #include "Symbols/Types/Aliases/ImplSelfAliasTypeSymbol.hpp"
 #include "Scope.hpp"
 #include "SrcLocation.hpp"
@@ -444,10 +444,10 @@ namespace Ace
             dynamic_cast<IGenericSymbol*>(const_cast<IGenericSymbol*>(symbol)->GetUnaliased());
         ACE_ASSERT(mutSymbol);
 
-        auto* const traitSelfType = dynamic_cast<TraitSelfTypeSymbol*>(mutSymbol);
-        if (traitSelfType)
+        auto* const traitSelf = dynamic_cast<TraitSelfSymbol*>(mutSymbol);
+        if (traitSelf)
         {
-            return context.OptSelfType.value_or(traitSelfType);
+            return context.OptSelfType.value_or(traitSelf);
         }
 
         if (!symbol->IsPlaceholder())

@@ -2,12 +2,10 @@
 
 ## 🟢 Refactor
 
-- Refer to `Self` and `self` consistently (`Self` is sometimes `SelfType`)
 - Cache `Scope::CollectSymbols` or just generally cache in `Scope` for performance
 - Make diagnostics take symbols, syntaxes, etc. instead of source locations, it allows focusing on the important code in the function
 - ❓ Eliminate local lambdas
 - ❓ String interning
-- ❓ Double underscore all public names that shouldnt be used: `__StrongPtr`, `__Ref`
 
 ## 🔴 High Priority
 

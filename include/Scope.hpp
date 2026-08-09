@@ -476,7 +476,7 @@ namespace Ace
         auto CollectConstrainedTraits(ITypeSymbol* const type) const
             -> std::vector<TraitTypeSymbol*>;
 
-        auto ResolveSelfType(const SrcLocation& srcLocation) const -> Expected<ITypeSymbol*>;
+        auto ResolveSelf(const SrcLocation& srcLocation) const -> Expected<ITypeSymbol*>;
 
         auto ReimportType(ITypeSymbol* const type) -> Diagnosed<ITypeSymbol*>;
 

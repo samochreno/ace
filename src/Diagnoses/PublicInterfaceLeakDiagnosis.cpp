@@ -162,7 +162,7 @@ namespace Ace
         }
 
         if (dynamic_cast<const TypeParamTypeSymbol*>(type) ||
-            dynamic_cast<const TraitSelfTypeSymbol*>(type))
+            dynamic_cast<const TraitSelfSymbol*>(type))
         {
             return;
         }
@@ -174,7 +174,7 @@ namespace Ace
         }
 
         if (!dynamic_cast<const TypeParamTypeSymbol*>(unaliasedType) &&
-            !dynamic_cast<const TraitSelfTypeSymbol*>(unaliasedType))
+            !dynamic_cast<const TraitSelfSymbol*>(unaliasedType))
         {
             const auto typeVisibilityScope =
                 GetEffectiveVisibilityScope(unaliasedType, symbols, visibilityScopeCache);
