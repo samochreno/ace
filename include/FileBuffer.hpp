@@ -11,6 +11,12 @@
 
 namespace Ace
 {
+    enum class SourceOrigin
+    {
+        User,
+        Compiler,
+    };
+
     class FileBuffer : public virtual ISrcBuffer
     {
     public:
@@ -27,7 +33,8 @@ namespace Ace
         static auto Create(
             Compilation* const compilation,
             const std::filesystem::path& path,
-            const std::string_view string
+            const std::string_view string,
+            const SourceOrigin origin
         ) -> std::shared_ptr<const FileBuffer>;
 
         auto GetCompilation() const -> Compilation* final;
@@ -37,6 +44,7 @@ namespace Ace
 
         auto GetPath() const -> const std::filesystem::path&;
         auto GetLines() const -> const std::vector<std::string_view>&;
+        auto GetOrigin() const -> SourceOrigin;
 
         auto CreateFirstLocation() const -> SrcLocation;
 
@@ -45,7 +53,8 @@ namespace Ace
             Compilation* const compilation,
             const std::filesystem::path& path,
             std::string&& buffer,
-            std::vector<std::string_view>&& lines
+            std::vector<std::string_view>&& lines,
+            const SourceOrigin origin
         );
 
         auto FindLineIndex(const std::string_view::const_iterator characterIt) const -> size_t;
@@ -57,5 +66,6 @@ namespace Ace
         std::filesystem::path m_Path{};
         std::string m_Buffer{};
         std::vector<std::string_view> m_Lines{};
+        SourceOrigin m_Origin{};
     };
 }

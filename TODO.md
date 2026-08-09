@@ -6,7 +6,6 @@
 - Make diagnostics take symbols, syntaxes, etc. instead of source locations, it allows focusing on the important code in the function
 - ❓ Eliminate local lambdas
 - ❓ String interning
-- Reserve the `__` prefix for compiler-owned declarations
 
 ## 🔴 High Priority
 

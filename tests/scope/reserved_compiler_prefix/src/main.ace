@@ -1,0 +1,18 @@
+__Secret: struct {
+}
+
+__helper(): void {
+}
+
+__internal: mod {
+}
+
+__internal: mod {
+}
+
+ReservedTrait[__T]: trait {
+}
+
+main(): int {
+    ret 0;
+}

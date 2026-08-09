@@ -1,0 +1,5 @@
+declaration name `__Secret` uses reserved compiler prefix `__`
+declaration name `__helper` uses reserved compiler prefix `__`
+declaration name `__internal` uses reserved compiler prefix `__`
+src/main.ace:10:1
+declaration name `__T` uses reserved compiler prefix `__`

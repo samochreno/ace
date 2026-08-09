@@ -68,6 +68,19 @@ namespace Ace
         return group;
     }
 
+    auto CreateReservedCompilerPrefixError(const Ident& name) -> DiagnosticGroup
+    {
+        DiagnosticGroup group{};
+
+        group.Diagnostics.emplace_back(
+            DiagnosticSeverity::Error,
+            name.SrcLocation,
+            "declaration name `" + name.String + "` uses reserved compiler prefix `__`"
+        );
+
+        return group;
+    }
+
     auto CreateStructFieldCausesCycleError(FieldVarSymbol* const fieldSymbol) -> DiagnosticGroup
     {
         DiagnosticGroup group{};

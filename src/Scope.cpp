@@ -12,6 +12,9 @@
 #include "AnonymousIdent.hpp"
 #include "Symbols/All.hpp"
 #include "Decl.hpp"
+#include "FileBuffer.hpp"
+#include "Syntaxes/Syntax.hpp"
+#include "Syntaxes/TypeReimportSyntax.hpp"
 #include "Compilation.hpp"
 #include "TypeConversions.hpp"
 #include "Keyword.hpp"
@@ -20,6 +23,31 @@
 
 namespace Ace
 {
+    static auto DiagnoseReservedCompilerPrefix(const IDecl* const decl, const Ident& name)
+        -> Diagnosed<void>
+    {
+        auto diagnostics = DiagnosticBag::Create();
+
+        if (dynamic_cast<const TypeReimportSyntax*>(decl))
+        {
+            return Diagnosed<void>{ std::move(diagnostics) };
+        }
+
+        const auto* const declSyntax = dynamic_cast<const IDeclSyntax*>(decl);
+        ACE_ASSERT(declSyntax);
+
+        const auto* const fileBuffer =
+            dynamic_cast<const FileBuffer*>(declSyntax->GetSrcLocation().Buffer);
+        ACE_ASSERT(fileBuffer);
+
+        if ((fileBuffer->GetOrigin() == SourceOrigin::User) && name.String.starts_with("__"))
+        {
+            diagnostics.Add(CreateReservedCompilerPrefixError(name));
+        }
+
+        return Diagnosed<void>{ std::move(diagnostics) };
+    }
+
     static auto
     IsSymbolAccessibleFromScope(ISymbol* const symbol, const std::shared_ptr<const Scope>& scope)
         -> bool
@@ -349,6 +377,7 @@ namespace Ace
 
             if (optDeclaredSymbol.has_value())
             {
+                diagnostics.Collect(DiagnoseReservedCompilerPrefix(decl, partialDecl->GetName()));
                 diagnostics.Collect(partialDecl->ContinueCreatingSymbol(optDeclaredSymbol.value()));
                 return Diagnosed{
                     optDeclaredSymbol.value(),
@@ -357,8 +386,10 @@ namespace Ace
             }
         }
 
-        auto* const symbol =
-            diagnostics.Collect(DeclareSymbol(diagnostics.Collect(decl->CreateSymbol())));
+        auto ownedSymbol = diagnostics.Collect(decl->CreateSymbol());
+        diagnostics.Collect(DiagnoseReservedCompilerPrefix(decl, ownedSymbol->GetName()));
+
+        auto* const symbol = diagnostics.Collect(DeclareSymbol(std::move(ownedSymbol)));
 
         return Diagnosed{ symbol, std::move(diagnostics) };
     }
