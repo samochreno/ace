@@ -18,15 +18,15 @@ Ace compiles source in these broad stages:
 The orchestration lives in `src/Application.cpp`. Keep stage boundaries intact;
 later passes may rely on invariants established by every earlier pass.
 
-Behavior tests invoke Ninja themselves, so run the full CTest suite serially
-(`ctest --test-dir build --output-on-failure -j1`) to avoid concurrent Ninja
-dependency-log failures.
+Use `./scripts/ace-build build` for builds. It serializes concurrent CMake
+builds for the same build directory and reports when it is waiting for another
+build to finish. Behavior tests use the same lock automatically.
 
 ## Formatting
 
 C++ sources are formatted with the `clang-format` binary from the configured
-LLVM toolchain. Run `cmake --build build --target format` to apply formatting
-and `cmake --build build --target check-format` to verify it.
+LLVM toolchain. Run `./scripts/ace-build build --target format` to apply
+formatting and `./scripts/ace-build build --target check-format` to verify it.
 
 ## Pass Responsibilities
 

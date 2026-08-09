@@ -1,0 +1,35 @@
+#!/bin/sh
+
+set -eu
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+build_dir=build
+build_target=
+parallel_level=
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --target)
+            build_target=$2
+            shift 2
+            ;;
+        --parallel|-j)
+            parallel_level=$2
+            shift 2
+            ;;
+        *)
+            build_dir=$1
+            shift
+            ;;
+    esac
+done
+
+set -- "-DACE_BUILD_DIR=$build_dir"
+if [ -n "$build_target" ]; then
+    set -- "$@" "-DACE_BUILD_TARGET=$build_target"
+fi
+if [ -n "$parallel_level" ]; then
+    set -- "$@" "-DACE_BUILD_PARALLEL_LEVEL=$parallel_level"
+fi
+
+exec cmake "$@" -P "$script_dir/../cmake/LockedCmakeBuild.cmake"

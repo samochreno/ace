@@ -30,7 +30,7 @@ brew install cmake ninja llvm@16 termcolor nlohmann-json
 
 ```bash
 cmake --preset dev
-cmake --build --preset dev
+./scripts/ace-build build
 ```
 
 ## Usage

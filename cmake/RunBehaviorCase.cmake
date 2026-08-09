@@ -86,7 +86,10 @@ if(NOT expected_compile STREQUAL "success" AND NOT expected_compile STREQUAL "fa
 endif()
 
 execute_process(
-    COMMAND "${CMAKE_COMMAND}" --build "${BUILD_DIR}" --target ace
+    COMMAND "${CMAKE_COMMAND}"
+        "-DACE_BUILD_DIR=${BUILD_DIR}"
+        "-DACE_BUILD_TARGET=ace"
+        -P "${SOURCE_DIR}/cmake/LockedCmakeBuild.cmake"
     RESULT_VARIABLE build_result
 )
 if(NOT build_result EQUAL 0)
