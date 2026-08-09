@@ -7,6 +7,7 @@
 #include <string_view>
 
 #include "Diagnostic.hpp"
+#include "Diagnostics/CompilationDiagnostics.hpp"
 #include "Std.hpp"
 #include "Symbols/FunctionSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
@@ -54,6 +55,24 @@ namespace Ace
         );
 
         return SymbolName{ sections, SymbolNameResolutionScope::Global };
+    }
+
+    auto INative::CreateDisplayName() const -> std::string
+    {
+        const auto name = CreateFullyQualifiedName(SrcLocation{});
+
+        std::string result{};
+        for (const auto& section : name.Sections)
+        {
+            if (!result.empty())
+            {
+                result += "::";
+            }
+
+            result += section.Name.String;
+        }
+
+        return result;
     }
 
     NativeType::NativeType(
@@ -122,9 +141,9 @@ namespace Ace
         return TryGetSymbol().value();
     }
 
-    auto NativeType::GetGenericSymbol() const -> ISymbol*
+    auto NativeType::TryGetGenericSymbol() const -> std::optional<ISymbol*>
     {
-        return GetSymbol();
+        return TryGetSymbol();
     }
 
     auto NativeType::HasIRType() const -> bool
@@ -201,9 +220,9 @@ namespace Ace
         return TryGetSymbol().value();
     }
 
-    auto NativeFunction::GetGenericSymbol() const -> ISymbol*
+    auto NativeFunction::TryGetGenericSymbol() const -> std::optional<ISymbol*>
     {
-        return GetSymbol();
+        return TryGetSymbol();
     }
 
     static auto CreateTypeAliasNameString(const Natives& natives, const NativeType& type)
@@ -3181,16 +3200,28 @@ namespace Ace
     {
     }
 
-    auto Natives::Verify() const -> void
+    auto VerifyNativeSymbols(const std::span<INative* const> natives) -> Diagnosed<void>
     {
+        auto diagnostics = DiagnosticBag::Create();
+
         std::for_each(
-            begin(m_Natives.Get()),
-            end(m_Natives.Get()),
-            [](INative* const native)
+            begin(natives),
+            end(natives),
+            [&](INative* const native)
             {
-                (void)native->GetGenericSymbol();
+                if (!native->TryGetGenericSymbol().has_value())
+                {
+                    diagnostics.Add(CreateMissingNativeSymbolError(native));
+                }
             }
         );
+
+        return Diagnosed<void>{ std::move(diagnostics) };
+    }
+
+    auto Natives::Verify() const -> Diagnosed<void>
+    {
+        return VerifyNativeSymbols(m_Natives.Get());
     }
 
     auto Natives::CollectIRTypeSymbolMap(llvm::LLVMContext& context) const

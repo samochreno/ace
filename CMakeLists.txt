@@ -128,6 +128,15 @@ if(BUILD_TESTING)
         COMMAND embedded_std_tests
     )
 
+    add_executable(native_verification_tests
+        tests/unit/NativeVerificationTests.cpp
+    )
+    target_link_libraries(native_verification_tests PRIVATE ace_core)
+    add_test(
+        NAME unit__native_verification
+        COMMAND native_verification_tests
+    )
+
     add_executable(token_and_keyword_tests
         tests/unit/TokenAndKeywordTests.cpp
     )

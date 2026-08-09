@@ -248,7 +248,12 @@ namespace Ace::Application
             globalScope->GetGenericInstantiator().InstantiateBodies(functionBlockBindings)
         );
 
-        compilation->GetNatives().Verify();
+        diagnostics.Collect(compilation->GetNatives().Verify());
+        if (diagnostics.HasErrors())
+        {
+            return std::move(diagnostics);
+        }
+
         diagnostics.Collect(CreateAndBindFunctionBodies(functionBlockBindings));
 
         globalScope->GetGenericInstantiator().InstantiateReferencedMonos();
