@@ -90,6 +90,17 @@ if(BUILD_TESTING)
     set(ACE_LLVM_BIN_DIR "${ACE_LLVM_PREFIX}/bin")
 
     add_test(
+        NAME architecture__diagnostics_use_display_names
+        COMMAND ${CMAKE_COMMAND}
+            -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+            -P ${CMAKE_SOURCE_DIR}/cmake/CheckDiagnosticDisplayNames.cmake
+    )
+    set_tests_properties(
+        architecture__diagnostics_use_display_names
+        PROPERTIES LABELS "architecture"
+    )
+
+    add_test(
         NAME smoke_example
         COMMAND ${CMAKE_COMMAND}
             -DACE_BINARY=$<TARGET_FILE:${PROJECT_NAME}>
