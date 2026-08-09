@@ -165,7 +165,7 @@ namespace Ace
         DiagnosticGroup group{};
 
         const std::string message =
-            "`" + selfType->CreateSignature() + "` has no member named `" + memberName + "`";
+            "`" + selfType->CreateDisplayName() + "` has no member named `" + memberName + "`";
 
         group.Diagnostics.emplace_back(DiagnosticSeverity::Error, srcLocation, message);
 
@@ -247,7 +247,7 @@ namespace Ace
         group.Diagnostics.emplace_back(
             DiagnosticSeverity::Error,
             srcLocation,
-            "public interface leaks private type `" + leakedType->CreateSignature() + "`"
+            "public interface leaks private type `" + leakedType->CreateDisplayName() + "`"
         );
 
         group.Diagnostics.emplace_back(

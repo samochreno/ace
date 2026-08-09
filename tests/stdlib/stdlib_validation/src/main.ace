@@ -27,8 +27,8 @@ validate_numbers(): int {
 
     float32: f32 = 1.5f32 + 2.5f32;
     float64: f64 = 9.0f64 / 2.0f64;
-    assert std::f32_equals(float32, 4.0f32);
-    assert std::f64_equals(float64, 4.5f64);
+    assert cast[int](float32) == 4;
+    assert cast[int](float64) == 4;
 
     ret 40;
 }

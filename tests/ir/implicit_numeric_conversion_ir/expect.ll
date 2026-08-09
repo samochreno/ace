@@ -1,2 +1,2 @@
-std::i32_from_i16
-std::i32_addition
+std::__i32_from_i16
+std::__i32_addition

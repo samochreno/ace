@@ -1,9 +1,9 @@
 pub ::
-Ref[T]: struct {
+__Ref[T]: struct {
     ptr: Ptr
 }
 
-impl[T] Ref[T] {
+impl[T] __Ref[T] {
     ptr(this: Self): Ptr {
         ret __deref_as[Ptr](__address_of(this));
     }
