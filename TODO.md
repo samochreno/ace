@@ -33,7 +33,6 @@
 - Enums
 - Mutability/Immutability:
   - Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`
-- Unit testing (Test that `CreateTokenKindString` handles all possible values, test `Keyword.cpp`)
 
 ## ⚪ Low Priority
 

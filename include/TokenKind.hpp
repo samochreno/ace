@@ -118,5 +118,7 @@ namespace Ace
         Float64Keyword,
         BoolKeyword,
         VoidKeyword,
+
+        Count,
     };
 }

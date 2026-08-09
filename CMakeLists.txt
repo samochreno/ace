@@ -90,6 +90,15 @@ if(BUILD_TESTING)
         COMMAND embedded_std_tests
     )
 
+    add_executable(token_and_keyword_tests
+        tests/unit/TokenAndKeywordTests.cpp
+    )
+    target_link_libraries(token_and_keyword_tests PRIVATE ace_core)
+    add_test(
+        NAME unit__token_and_keyword
+        COMMAND token_and_keyword_tests
+    )
+
     file(GLOB_RECURSE ACE_BEHAVIOR_PACKAGES CONFIGURE_DEPENDS
         "${CMAKE_SOURCE_DIR}/tests/*/package.json"
     )
