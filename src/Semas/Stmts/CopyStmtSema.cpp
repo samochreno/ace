@@ -171,7 +171,7 @@ namespace Ace
         );
     }
 
-    auto CopyStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowNode>
+    auto CopyStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
         return {};
     }

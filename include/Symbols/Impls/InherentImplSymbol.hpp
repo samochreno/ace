@@ -6,6 +6,7 @@
 #include "Symbols/Symbol.hpp"
 #include "Symbols/BodyScopedSymbol.hpp"
 #include "Symbols/ConstrainedSymbol.hpp"
+#include "Symbols/TypeParamOwnerSymbol.hpp"
 #include "Symbols/Types/NominalTypeSymbol.hpp"
 #include "Symbols/Types/TypeSymbol.hpp"
 #include "SrcLocation.hpp"
@@ -19,7 +20,8 @@ namespace Ace
     class InherentImplSymbol :
         public virtual ISymbol,
         public virtual IBodyScopedSymbol,
-        public virtual IConstrainedSymbol
+        public virtual IConstrainedSymbol,
+        public virtual ITypeParamOwnerSymbol
     {
     public:
         InherentImplSymbol(

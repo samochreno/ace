@@ -103,7 +103,7 @@ namespace Ace
         emitter.EmitDropTmps(exprEmitResult.Tmps);
     }
 
-    auto ExprStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowNode>
+    auto ExprStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
         return {};
     }

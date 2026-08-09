@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Symbols/Symbol.hpp"
-#include "Symbols/BodyScopedSymbol.hpp"
+#include "Symbols/TypeParamOwnerSymbol.hpp"
 #include "Scope.hpp"
 
 namespace Ace
@@ -14,7 +14,7 @@ namespace Ace
 
     class IGenericSymbol :
         public virtual ISymbol,
-        public virtual IBodyScopedSymbol
+        public virtual ITypeParamOwnerSymbol
     {
     public:
         virtual ~IGenericSymbol() = default;

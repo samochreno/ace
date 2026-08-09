@@ -57,6 +57,11 @@ namespace Ace
         return m_SrcLocation;
     }
 
+    auto FunctionSyntax::GetBodyScope() const -> const std::shared_ptr<Scope>&
+    {
+        return m_BodyScope;
+    }
+
     auto FunctionSyntax::GetScope() const -> std::shared_ptr<Scope>
     {
         return m_BodyScope->GetParent().value();

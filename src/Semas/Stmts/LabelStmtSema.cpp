@@ -76,11 +76,11 @@ namespace Ace
     {
     }
 
-    auto LabelStmtSema::CreateControlFlowNodes() const -> std::vector<ControlFlowNode>
+    auto LabelStmtSema::CreateControlFlowInstructions() const -> std::vector<ControlFlowInstruction>
     {
         return std::vector
         {
-            ControlFlowNode{ ControlFlowKind::Label, m_Symbol }
+            ControlFlowInstruction{ ControlFlowKind::Label, m_Symbol }
         };
     }
 

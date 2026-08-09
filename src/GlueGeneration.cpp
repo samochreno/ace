@@ -13,6 +13,7 @@
 #include "Symbols/Types/StructTypeSymbol.hpp"
 #include "Symbols/Vars/FieldVarSymbol.hpp"
 #include "AnonymousIdent.hpp"
+#include "SymbolParentBinding.hpp"
 
 namespace Ace::GlueGeneration
 {
@@ -81,6 +82,7 @@ namespace Ace::GlueGeneration
             ))
         );
 
+        BindSymbolParents(glueSymbol);
         return glueSymbol;
     }
 
@@ -135,6 +137,7 @@ namespace Ace::GlueGeneration
             ))
         );
 
+        BindSymbolParents(glueSymbol);
         return glueSymbol;
     }
 

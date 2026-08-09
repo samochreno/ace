@@ -7,6 +7,8 @@
 #include "Ident.hpp"
 #include "Noun.hpp"
 #include "AccessModifier.hpp"
+#include "Assert.hpp"
+#include "Symbols/TypeParamOwnerSymbol.hpp"
 
 namespace Ace
 {
@@ -16,6 +18,7 @@ namespace Ace
         const size_t index
     ) : m_BodyScope{ scope->CreateChild() },
         m_Name{ name },
+        m_Parent{},
         m_Index{ index }
     {
     }
@@ -64,6 +67,21 @@ namespace Ace
     {
         static const std::vector<ITypeSymbol*> args{};
         return args;
+    }
+
+    auto TypeParamTypeSymbol::BindParent(
+        ITypeParamOwnerSymbol* const parent
+    ) -> void
+    {
+        ACE_ASSERT(parent);
+        ACE_ASSERT(!m_Parent || m_Parent == parent);
+        m_Parent = parent;
+    }
+
+    auto TypeParamTypeSymbol::GetParent() const -> ITypeParamOwnerSymbol*
+    {
+        ACE_ASSERT(m_Parent);
+        return m_Parent;
     }
 
     auto TypeParamTypeSymbol::GetIndex() const -> size_t

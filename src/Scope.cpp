@@ -1100,6 +1100,11 @@ namespace Ace
             return firstSymbol;
         }
 
+        if (generic->GetTypeArgs().empty() && !optSelfType.has_value())
+        {
+            return firstSymbol;
+        }
+
         return ResolveGenericInstance(
             generic->GetGenericRoot(),
             typeArgs,

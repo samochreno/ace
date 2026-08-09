@@ -24,16 +24,20 @@ llvm_map_components_to_libnames(LLVM_LIBS
 find_package(termcolor REQUIRED)
 message(STATUS "Found termcolor")
 
-add_executable(${PROJECT_NAME} src/main.cpp)
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
-target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
-target_include_directories(${PROJECT_NAME}
+list(FILTER SOURCES EXCLUDE REGEX "/src/main\\.cpp$")
+
+add_library(ace_core STATIC ${SOURCES})
+target_include_directories(ace_core
     PUBLIC include
     PRIVATE ${LLVM_INCLUDE_DIRS}
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(ace_core PUBLIC
     ${LLVM_LIBS}
 )
+
+add_executable(${PROJECT_NAME} src/main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE ace_core)
 
 if(BUILD_TESTING)
     get_filename_component(ACE_LLVM_PREFIX "${LLVM_DIR}/../../.." ABSOLUTE)
@@ -47,6 +51,15 @@ if(BUILD_TESTING)
             -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
             -DLLVM_BIN_DIR=${ACE_LLVM_BIN_DIR}
             -P ${CMAKE_SOURCE_DIR}/cmake/SmokeExample.cmake
+    )
+
+    add_executable(symbol_parent_binding_tests
+        tests/unit/SymbolParentBindingTests.cpp
+    )
+    target_link_libraries(symbol_parent_binding_tests PRIVATE ace_core)
+    add_test(
+        NAME unit__symbol_parent_binding
+        COMMAND symbol_parent_binding_tests
     )
 
     file(GLOB_RECURSE ACE_BEHAVIOR_PACKAGES CONFIGURE_DEPENDS
