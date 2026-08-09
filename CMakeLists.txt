@@ -27,6 +27,25 @@ message(STATUS "Found termcolor")
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 list(FILTER SOURCES EXCLUDE REGEX "/src/main\\.cpp$")
 
+file(GLOB ACE_STD_SOURCE_FILES CONFIGURE_DEPENDS
+    "${CMAKE_SOURCE_DIR}/std/*.ace"
+)
+set(ACE_EMBEDDED_STD_SOURCE
+    "${CMAKE_BINARY_DIR}/generated/EmbeddedStd.cpp"
+)
+add_custom_command(
+    OUTPUT "${ACE_EMBEDDED_STD_SOURCE}"
+    COMMAND ${CMAKE_COMMAND}
+        -DACE_STD_INPUT_DIR=${CMAKE_SOURCE_DIR}/std
+        -DACE_STD_OUTPUT=${ACE_EMBEDDED_STD_SOURCE}
+        -P ${CMAKE_SOURCE_DIR}/cmake/EmbedStd.cmake
+    DEPENDS
+        ${ACE_STD_SOURCE_FILES}
+        ${CMAKE_SOURCE_DIR}/cmake/EmbedStd.cmake
+    VERBATIM
+)
+list(APPEND SOURCES "${ACE_EMBEDDED_STD_SOURCE}")
+
 add_library(ace_core STATIC ${SOURCES})
 target_include_directories(ace_core
     PUBLIC include
@@ -60,6 +79,15 @@ if(BUILD_TESTING)
     add_test(
         NAME unit__symbol_parent_binding
         COMMAND symbol_parent_binding_tests
+    )
+
+    add_executable(embedded_std_tests
+        tests/unit/EmbeddedStdTests.cpp
+    )
+    target_link_libraries(embedded_std_tests PRIVATE ace_core)
+    add_test(
+        NAME unit__embedded_std
+        COMMAND embedded_std_tests
     )
 
     file(GLOB_RECURSE ACE_BEHAVIOR_PACKAGES CONFIGURE_DEPENDS

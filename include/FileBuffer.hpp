@@ -28,6 +28,7 @@ namespace Ace
         ) -> Expected<std::shared_ptr<const FileBuffer>>;
         static auto Create(
             Compilation* const compilation,
+            const std::filesystem::path& path,
             const std::string_view string
         ) -> std::shared_ptr<const FileBuffer>;
 

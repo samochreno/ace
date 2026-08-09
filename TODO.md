@@ -26,7 +26,6 @@
 ## 🟡 Medium Priority
 
 - Struct update constructor syntax
-- Add source location to unknown files like `.cpp`
 - Control flow flexibility improvement:
   - `IEmittable` could hold `ControlFlowGraph`, so it could verify control flow
   - Possibly implement `ControlFlowInstruction`s for `LLVM IR` instructions (check `llvm/IR/Instruction.def`)
