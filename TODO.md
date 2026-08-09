@@ -12,7 +12,6 @@
 
 ## 🔴 High Priority
 
-- Reformat `optSymbol... symbol = optSymbol.value_or` to `symbol = diagnostics.Collect(...).value_or`
 - Associated types
 - ❓ Make logical negation backed by trait
 - Remove redundant undeclared symbol error for unimplemented function: When resolving associated functions, check if the type implements a trait with a function of that name, then just 'trust' it is implemented
@@ -32,7 +31,6 @@
 - Enums
 - Mutability/Immutability:
   - Mutable references have to be taken with `mut` eg.: `mutating_function(mut mutable_expression)`
-- Unit testing (Test that `CreateTokenKindString` handles all possible values, test `Keyword.cpp`)
 
 ## ⚪ Low Priority
 
