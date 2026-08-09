@@ -48,13 +48,9 @@ namespace Ace
     {
         auto diagnostics = DiagnosticBag::Create();
 
-        const auto optSymbol = diagnostics.Collect(
+        auto* const symbol = diagnostics.Collect(
             m_ReimportScope->ResolveStaticSymbol<ITypeSymbol>(m_Name)
-        );
-
-        auto* const symbol = optSymbol.value_or(
-            GetCompilation()->GetErrorSymbols().GetType()
-        );
+        ).value_or(GetCompilation()->GetErrorSymbols().GetType());
 
         return Diagnosed
         {
