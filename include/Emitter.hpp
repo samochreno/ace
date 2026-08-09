@@ -132,7 +132,7 @@ namespace Ace
         struct TypeInfoHeader
         {
             llvm::StructType* Type{};
-            llvm::GlobalVariable* Var{};
+            llvm::GlobalVariable* GlobalVar{};
             llvm::Constant* DropGluePtr{};
             std::vector<ITypeSymbol*> TypeSymbols{};
             std::vector<llvm::Constant*> Vtbls{};

@@ -980,7 +980,7 @@ namespace Ace
             values.push_back(header.Vtbls.at(i));
         }
 
-        header.Var->setInitializer(llvm::ConstantStruct::get(header.Type, values));
+        header.GlobalVar->setInitializer(llvm::ConstantStruct::get(header.Type, values));
     }
 
     static auto CollectDynDispatchableTraitPrototypeSymbols(TraitTypeSymbol* const traitSymbol)
