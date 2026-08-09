@@ -435,7 +435,7 @@ namespace Ace
         DiagnosticGroup group{};
 
         const std::string message =
-            "`" + std::string{ TokenKindToKeywordMap.at(TokenKind::SelfTypeKeyword) } +
+            "`" + std::string{ TokenKindToKeywordMap.at(TokenKind::UpperSelfKeyword) } +
             "` reference in incorrect context";
 
         group.Diagnostics.emplace_back(DiagnosticSeverity::Error, srcLocation, message);

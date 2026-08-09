@@ -97,9 +97,9 @@ namespace Ace
         auto* const typeSymbol =
             optTypeSymbol.value_or(GetCompilation()->GetErrorSymbols().GetType());
 
-        auto* const selfTypeSymbol =
+        auto* const selfSymbol =
             DiagnosticBag::CreateNoError()
-                .Collect(m_BodyScope->ResolveSelfType(SrcLocation{ GetCompilation() }))
+                .Collect(m_BodyScope->ResolveSelf(SrcLocation{ GetCompilation() }))
                 .value();
 
         const auto typeArgs =
@@ -113,7 +113,7 @@ namespace Ace
                 m_Index,
                 parentTraitSymbol,
                 typeSymbol,
-                selfTypeSymbol,
+                selfSymbol,
                 typeArgs
             ),
             std::move(diagnostics),

@@ -7,7 +7,7 @@
 #include "AccessModifier.hpp"
 #include "Ident.hpp"
 #include "Symbols/SupertraitSymbol.hpp"
-#include "Symbols/Types/TraitSelfTypeSymbol.hpp"
+#include "Symbols/Types/TraitSelfSymbol.hpp"
 #include "Noun.hpp"
 #include "Symbols/PrototypeSymbol.hpp"
 
@@ -109,9 +109,9 @@ namespace Ace
         return prototypes;
     }
 
-    auto TraitTypeSymbol::CollectSelf() const -> TraitSelfTypeSymbol*
+    auto TraitTypeSymbol::CollectSelf() const -> TraitSelfSymbol*
     {
-        return GetBodyScope()->CollectSymbols<TraitSelfTypeSymbol>().front();
+        return GetBodyScope()->CollectSymbols<TraitSelfSymbol>().front();
     }
 
     auto TraitTypeSymbol::CollectSupertraits() const -> std::vector<SupertraitSymbol*>

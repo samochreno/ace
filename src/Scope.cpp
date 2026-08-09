@@ -919,7 +919,7 @@ namespace Ace
         return traits;
     }
 
-    auto Scope::ResolveSelfType(const SrcLocation& srcLocation) const -> Expected<ITypeSymbol*>
+    auto Scope::ResolveSelf(const SrcLocation& srcLocation) const -> Expected<ITypeSymbol*>
     {
         auto diagnostics = DiagnosticBag::Create();
 
@@ -928,7 +928,7 @@ namespace Ace
         {
             const auto symbols = optScope.value()->CollectAllSymbols();
 
-            const auto selfTypeIt = std::find_if(
+            const auto selfIt = std::find_if(
                 begin(symbols),
                 end(symbols),
                 [](ISymbol* const symbol)
@@ -938,7 +938,7 @@ namespace Ace
                         return true;
                     }
 
-                    if (dynamic_cast<TraitSelfTypeSymbol*>(symbol))
+                    if (dynamic_cast<TraitSelfSymbol*>(symbol))
                     {
                         return true;
                     }
@@ -946,11 +946,11 @@ namespace Ace
                     return false;
                 }
             );
-            if (selfTypeIt != end(symbols))
+            if (selfIt != end(symbols))
             {
-                auto* const selfType = dynamic_cast<ITypeSymbol*>(*selfTypeIt);
-                ACE_ASSERT(selfType);
-                return Expected{ selfType, std::move(diagnostics) };
+                auto* const self = dynamic_cast<ITypeSymbol*>(*selfIt);
+                ACE_ASSERT(self);
+                return Expected{ self, std::move(diagnostics) };
             }
         }
 
@@ -1776,9 +1776,9 @@ namespace Ace
         const auto tokenKind = tokenKindIt->second;
         switch (tokenKind)
         {
-            case TokenKind::SelfTypeKeyword:
+            case TokenKind::UpperSelfKeyword:
             {
-                return context.BeginScope->ResolveSelfType(context.SrcLocation);
+                return context.BeginScope->ResolveSelf(context.SrcLocation);
             }
 
             default:

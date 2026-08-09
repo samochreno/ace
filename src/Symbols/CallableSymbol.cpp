@@ -143,7 +143,7 @@ namespace Ace
 
     auto ICallableSymbol::CollectSelfType() const -> std::optional<ITypeSymbol*>
     {
-        return DiagnosticBag::Create().Collect(GetBodyScope()->ResolveSelfType(SrcLocation{
+        return DiagnosticBag::Create().Collect(GetBodyScope()->ResolveSelf(SrcLocation{
             GetCompilation() }));
     }
 }

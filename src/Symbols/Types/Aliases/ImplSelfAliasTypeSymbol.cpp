@@ -18,7 +18,7 @@ namespace Ace
         ITypeSymbol* const aliasedType
     )
         : m_Scope{ scope },
-          m_Name{ srcLocation, SpecialIdent::SelfType },
+          m_Name{ srcLocation, SpecialIdent::Self },
           m_AliasedType{ aliasedType }
     {
     }

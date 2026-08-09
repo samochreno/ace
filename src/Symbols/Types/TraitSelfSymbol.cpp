@@ -1,4 +1,4 @@
-#include "Symbols/Types/TraitSelfTypeSymbol.hpp"
+#include "Symbols/Types/TraitSelfSymbol.hpp"
 
 #include <memory>
 #include <vector>
@@ -12,52 +12,52 @@
 
 namespace Ace
 {
-    TraitSelfTypeSymbol::TraitSelfTypeSymbol(
+    TraitSelfSymbol::TraitSelfSymbol(
         const SrcLocation& srcLocation, const std::shared_ptr<Scope>& scope
     )
         : m_BodyScope{ scope->CreateChild() },
-          m_Name{ srcLocation, SpecialIdent::SelfType }
+          m_Name{ srcLocation, SpecialIdent::Self }
     {
     }
 
-    auto TraitSelfTypeSymbol::CreateTypeNoun() const -> Noun
+    auto TraitSelfSymbol::CreateTypeNoun() const -> Noun
     {
         return Noun{ Article::A, "self type" };
     }
 
-    auto TraitSelfTypeSymbol::GetBodyScope() const -> std::shared_ptr<Scope>
+    auto TraitSelfSymbol::GetBodyScope() const -> std::shared_ptr<Scope>
     {
         return m_BodyScope;
     }
 
-    auto TraitSelfTypeSymbol::GetCategory() const -> SymbolCategory
+    auto TraitSelfSymbol::GetCategory() const -> SymbolCategory
     {
         return SymbolCategory::Static;
     }
 
-    auto TraitSelfTypeSymbol::GetAccessModifier() const -> AccessModifier
+    auto TraitSelfSymbol::GetAccessModifier() const -> AccessModifier
     {
         return AccessModifier::Priv;
     }
 
-    auto TraitSelfTypeSymbol::GetName() const -> const Ident&
+    auto TraitSelfSymbol::GetName() const -> const Ident&
     {
         return m_Name;
     }
 
-    auto TraitSelfTypeSymbol::CreateInstantiated(
+    auto TraitSelfSymbol::CreateInstantiated(
         const std::shared_ptr<Scope>& scope, const InstantiationContext& context
     ) const -> std::unique_ptr<ISymbol>
     {
-        return std::make_unique<TraitSelfTypeSymbol>(GetName().SrcLocation, scope);
+        return std::make_unique<TraitSelfSymbol>(GetName().SrcLocation, scope);
     }
 
-    auto TraitSelfTypeSymbol::SetBodyScope(const std::shared_ptr<Scope>& scope) -> void
+    auto TraitSelfSymbol::SetBodyScope(const std::shared_ptr<Scope>& scope) -> void
     {
         m_BodyScope = scope;
     }
 
-    auto TraitSelfTypeSymbol::GetTypeArgs() const -> const std::vector<ITypeSymbol*>&
+    auto TraitSelfSymbol::GetTypeArgs() const -> const std::vector<ITypeSymbol*>&
     {
         static const std::vector<ITypeSymbol*> args{};
         return args;
