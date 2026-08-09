@@ -641,15 +641,15 @@ namespace Ace
 
         auto* const stringType = llvm::ArrayType::get(charType, chars.size());
 
-        auto* const var = EmitGlobalVar(
+        auto* const globalVar = EmitGlobalVar(
             AnonymousIdent::Create("string"),
             stringType,
             true,
             llvm::ConstantArray::get(stringType, chars)
         );
-        var->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+        globalVar->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 
-        return var;
+        return globalVar;
     }
 
     auto Emitter::EmitPrintf(llvm::Value* const message) -> void
@@ -802,17 +802,17 @@ namespace Ace
     ) -> llvm::GlobalVariable*
     {
         GetModule().getOrInsertGlobal(name, type);
-        auto* const var = GetModule().getNamedGlobal(name);
+        auto* const globalVar = GetModule().getNamedGlobal(name);
 
-        var->setConstant(isConstant);
-        var->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
+        globalVar->setConstant(isConstant);
+        globalVar->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
 
         if (initializer)
         {
-            var->setInitializer(initializer);
+            globalVar->setInitializer(initializer);
         }
 
-        return var;
+        return globalVar;
     }
 
     auto Emitter::EmitTypeInfos(const std::vector<ITypeSymbol*>& symbols) -> void
@@ -865,13 +865,13 @@ namespace Ace
 
         auto* const type = llvm::StructType::get(GetContext(), elements);
 
-        auto* const var = EmitGlobalVar(
+        auto* const globalVar = EmitGlobalVar(
             AnonymousIdent::Create("type_info", symbol->CreateSignature()), type, true
         );
-        m_TypeInfoMap[symbol] = var;
+        m_TypeInfoMap[symbol] = globalVar;
 
         return TypeInfoHeader{
-            type, var, info.DropGluePtr, info.TypeSymbols, info.Vtbls,
+            type, globalVar, info.DropGluePtr, info.TypeSymbols, info.Vtbls,
         };
     }
 
@@ -980,7 +980,7 @@ namespace Ace
             values.push_back(header.Vtbls.at(i));
         }
 
-        header.Var->setInitializer(llvm::ConstantStruct::get(header.Type, values));
+        header.GlobalVar->setInitializer(llvm::ConstantStruct::get(header.Type, values));
     }
 
     static auto CollectDynDispatchableTraitPrototypeSymbols(TraitTypeSymbol* const traitSymbol)

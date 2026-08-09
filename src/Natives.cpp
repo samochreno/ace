@@ -1587,12 +1587,12 @@ namespace Ace
                 auto* const freeFunction =
                     emitter.GetC().GetFunctions().GetFree();
 
-                auto* const blockValue =
+                auto* const blockPtr =
                     emitter.EmitLoadArg(0, emitter.GetPtrType());
 
                 emitter.GetBlock().Builder.CreateCall(
                     freeFunction,
-                    { blockValue }
+                    { blockPtr }
                 );
 
                 emitter.GetBlock().Builder.CreateRetVoid();
@@ -1614,9 +1614,9 @@ namespace Ace
                 auto* const cSizeType =
                     (memcpyFunction->arg_begin() + 2)->getType();
 
-                auto* const srcValue =
+                auto* const srcPtr =
                     emitter.EmitLoadArg(0, emitter.GetPtrType());
-                auto* const dstValue =
+                auto* const dstPtr =
                     emitter.EmitLoadArg(1, emitter.GetPtrType());
                 auto* const sizeValue = emitter.EmitLoadArg(2, intType);
 
@@ -1627,7 +1627,7 @@ namespace Ace
 
                 emitter.GetBlock().Builder.CreateCall(
                     memcpyFunction,
-                    { dstValue, srcValue, convertedSizeValue }
+                    { dstPtr, srcPtr, convertedSizeValue }
                 );
 
                 emitter.GetBlock().Builder.CreateRetVoid();
@@ -1714,14 +1714,14 @@ namespace Ace
                 auto* const arrayType =
                     llvm::ArrayType::get(emitter.GetPtrType(), 0);
 
-                auto* const i = emitter.GetBlock().Builder.CreateAlloca(
+                auto* const indexPtr = emitter.GetBlock().Builder.CreateAlloca(
                     intType,
                     nullptr,
-                    "i"
+                    "index"
                 );
                 emitter.GetBlock().Builder.CreateStore(
                     llvm::ConstantInt::get(intType, 0),
-                    i
+                    indexPtr
                 );
 
                 auto* const arrayPtr = emitter.GetBlock().Builder.CreateStructGEP(
@@ -1763,7 +1763,7 @@ namespace Ace
                 );
 
                 auto* const continueCondition = emitter.GetBlock().Builder.CreateICmpSLT(
-                    emitter.GetBlock().Builder.CreateLoad(intType, i),
+                    emitter.GetBlock().Builder.CreateLoad(intType, indexPtr),
                     emitter.GetBlock().Builder.CreateLoad(intType, countPtr)
                 );
 
@@ -1776,7 +1776,7 @@ namespace Ace
                 emitter.SetBlock(std::move(beginBlock));
 
                 auto* const typeInfoIndex = emitter.GetBlock().Builder.CreateMul(
-                    emitter.GetBlock().Builder.CreateLoad(intType, i),
+                    emitter.GetBlock().Builder.CreateLoad(intType, indexPtr),
                     llvm::ConstantInt::get(intType, 2)
                 );
                 auto* const otherTypeInfoPtrPtr = emitter.GetBlock().Builder.CreateGEP(
@@ -1789,11 +1789,6 @@ namespace Ace
                     otherTypeInfoPtrPtr
                 );
 
-                auto* const a = emitter.GetBlock().Builder.CreateAlloca(
-                    emitter.GetPtrType()
-                );
-                emitter.GetBlock().Builder.CreateStore(targetTypeInfoPtr, a);
-
                 auto* const matchingCondition = emitter.GetBlock().Builder.CreateICmpEQ(
                     otherTypeInfoPtr,
                     targetTypeInfoPtr
@@ -1801,10 +1796,10 @@ namespace Ace
 
                 emitter.GetBlock().Builder.CreateStore(
                     emitter.GetBlock().Builder.CreateAdd(
-                        emitter.GetBlock().Builder.CreateLoad(intType, i),
+                        emitter.GetBlock().Builder.CreateLoad(intType, indexPtr),
                         llvm::ConstantInt::get(intType, 1)
                     ),
-                    i
+                    indexPtr
                 );
 
                 emitter.GetBlock().Builder.CreateCondBr(
