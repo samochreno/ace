@@ -18,6 +18,10 @@ Ace compiles source in these broad stages:
 The orchestration lives in `src/Application.cpp`. Keep stage boundaries intact;
 later passes may rely on invariants established by every earlier pass.
 
+Behavior tests invoke Ninja themselves, so run the full CTest suite serially
+(`ctest --test-dir build --output-on-failure -j1`) to avoid concurrent Ninja
+dependency-log failures.
+
 ## Pass Responsibilities
 
 ### Parsing
