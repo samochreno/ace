@@ -31,6 +31,7 @@
 #include "Diagnoses/OverlappingInherentImplDiagnosis.hpp"
 #include "Diagnoses/ConcreteConstraintDiagnosis.hpp"
 #include "Diagnoses/UnimplementedSupertraitDiagnosis.hpp"
+#include "Diagnoses/PublicInterfaceLeakDiagnosis.hpp"
 
 namespace Ace::Application
 {
@@ -253,6 +254,7 @@ namespace Ace::Application
             CreateAndDeclareSymbols(syntaxes)
         );
         BindSymbolParents(globalScope);
+        diagnostics.Collect(DiagnosePublicInterfaceLeaks(compilation));
         diagnostics.Collect(globalScope->GetGenericInstantiator().InstantiateBodies(
             functionBlockBindings
         ));

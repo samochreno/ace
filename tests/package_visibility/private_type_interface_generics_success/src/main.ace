@@ -1,0 +1,18 @@
+pub ::
+Identity: trait {
+    self ::
+    identity[T](value: T): T;
+
+    self ::
+    get_self(): Self;
+}
+
+pub ::
+identity[T](value: T): T {
+    ret value;
+}
+
+main(): int {
+    std::print_int(identity[int](8));
+    ret 0;
+}

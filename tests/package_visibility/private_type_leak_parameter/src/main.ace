@@ -1,0 +1,11 @@
+Secret: struct {
+}
+
+pub ::
+consume(value: Secret): int {
+    ret 0;
+}
+
+main(): int {
+    ret 0;
+}

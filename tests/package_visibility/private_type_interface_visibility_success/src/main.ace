@@ -1,0 +1,52 @@
+outer: mod {
+    Shared: struct {
+    }
+
+    Hidden: struct {
+    }
+
+    PrivateTrait: trait {
+        create(): Shared;
+    }
+
+    Constraint: trait {
+    }
+
+    Base: trait {
+    }
+
+    impl Hidden {
+        pub ::
+        create(): Shared {
+            ret new Shared {};
+        }
+    }
+
+    inner: mod {
+        pub ::
+        Derived: trait: Base {
+        }
+
+        pub ::
+        passthrough[T](value: T): T where T: Constraint {
+            ret value;
+        }
+
+        pub ::
+        create(): Shared {
+            ret new Shared {};
+        }
+    }
+
+    pub ::
+    run(): int {
+        shared: Shared = inner::create();
+        hidden_shared: Shared = Hidden::create();
+        ret 5;
+    }
+}
+
+main(): int {
+    std::print_int(outer::run());
+    ret 0;
+}

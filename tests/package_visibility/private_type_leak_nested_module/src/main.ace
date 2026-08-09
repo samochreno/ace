@@ -1,0 +1,18 @@
+pub ::
+outer: mod {
+}
+
+pub ::
+outer::inner: mod {
+    Secret: struct {
+    }
+
+    pub ::
+    expose(): Secret {
+        ret new Secret {};
+    }
+}
+
+main(): int {
+    ret 0;
+}

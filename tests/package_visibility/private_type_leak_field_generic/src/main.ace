@@ -1,0 +1,16 @@
+Secret: struct {
+}
+
+pub ::
+Wrapper[T]: pub struct {
+    value: T
+}
+
+pub ::
+Exposed: pub struct {
+    value: Wrapper[Secret]
+}
+
+main(): int {
+    ret 0;
+}

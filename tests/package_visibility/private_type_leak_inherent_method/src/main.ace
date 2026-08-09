@@ -1,0 +1,20 @@
+pub ::
+Exposed: struct {
+}
+
+hidden: mod {
+    Secret: struct {
+    }
+
+    impl Exposed {
+        pub ::
+        reveal(): Secret {
+            ret new Secret {};
+        }
+    }
+}
+
+main(): int {
+    Exposed::reveal();
+    ret 0;
+}
