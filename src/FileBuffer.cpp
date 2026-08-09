@@ -74,6 +74,7 @@ namespace Ace
 
     auto FileBuffer::Create(
         Compilation* const compilation,
+        const std::filesystem::path& path,
         const std::string_view string
     ) -> std::shared_ptr<const FileBuffer>
     {
@@ -102,7 +103,7 @@ namespace Ace
 
         return std::shared_ptr<const FileBuffer>(new FileBuffer{
             compilation,
-            std::filesystem::path{},
+            path,
             std::move(buffer),
             std::move(lines),
         });

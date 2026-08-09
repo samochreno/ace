@@ -1,0 +1,71 @@
+pub ::
+Minus: trait {
+    self ::
+    minus(): Self;
+}
+
+pub ::
+Multiply[Other]: trait {
+    self ::
+    multiply(other: &Other): Self;
+}
+
+pub ::
+Divide[Other]: trait {
+    self ::
+    divide(other: &Other): Self;
+}
+
+pub ::
+Remainder[Other]: trait {
+    self ::
+    remainder(other: &Other): Self;
+}
+
+pub ::
+Add[Other]: trait {
+    self ::
+    add(other: &Other): Self;
+}
+
+pub ::
+Subtract[Other]: trait {
+    self ::
+    subtract(other: &Other): Self;
+}
+
+pub ::
+Equal[Other]: trait {
+    self ::
+    equal(other: &Other): bool;
+
+    self ::
+    not_equal(other: &Other): bool;
+}
+
+pub ::
+AND[Other]: trait {
+    self ::
+    and(other: &Other): Self;
+}
+
+pub ::
+OR[Other]: trait {
+    self ::
+    or(other: &Other): Self;
+}
+
+pub ::
+XOR[Other]: trait {
+    self ::
+    xor(other: &Other): Self;
+}
+
+pub ::
+Lifetime: trait {
+    self ::
+    copy(other: &Self): void;
+
+    self ::
+    drop(): void;
+}

@@ -1,0 +1,5 @@
+pub extern ::
+print_int(value: int): void;
+
+pub extern ::
+print_ptr(ptr: Ptr): void;
