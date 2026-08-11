@@ -12,6 +12,7 @@ change. Start with:
 - [`docs/symbols-scopes-and-resolution.md`](docs/symbols-scopes-and-resolution.md) for declarations,
   ownership, lookup, imports, traits, and generics;
 - [`docs/diagnostics-and-recovery.md`](docs/diagnostics-and-recovery.md) for error handling;
+- [`docs/cpp-style.md`](docs/cpp-style.md) for C++ ownership, constness, results, casts, and idioms;
 - [`docs/language-model.md`](docs/language-model.md) for source-language direction;
 - [`docs/runtime-stdlib-and-emission.md`](docs/runtime-stdlib-and-emission.md) for compiler internals,
   glue, the embedded standard library, and LLVM;

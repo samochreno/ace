@@ -25,6 +25,8 @@ When evidence conflicts, preserve the ambiguity and revisit the design with Samu
   lookup, modules, trait imports, impls, and generic instances.
 - [Diagnostics and recovery](diagnostics-and-recovery.md): recoverable versus fatal operations,
   placeholders, assertions, and diagnostic ownership.
+- [C++ style and idioms](cpp-style.md): names, ownership, constness, results, casts, lambdas,
+  templates, and implementation-language boundaries.
 - [Language model](language-model.md): the source-language ideas expressed by Ace today.
 - [Runtime, stdlib, and emission](runtime-stdlib-and-emission.md): embedded compiler sources,
   internal names, pointer runtime, glue, natives, and LLVM output.
