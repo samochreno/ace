@@ -1,5 +1,15 @@
 # Language Model
 
+Ace is designed as a language in which its own compiler can ultimately be written. Functionally it
+is a deliberately simplified subset of the C++ model used by the bootstrap compiler and standard
+library: the mechanics and syntax are Ace's own, while its values, functions, types, traits,
+references, ownership, optionals, containers, and control flow should translate straightforwardly
+to C++.
+
+That relationship is intentionally one-way. Ace programs should have unsurprising C++
+representations; arbitrary C++ programs are not expected to translate back into Ace. C++ features
+are not language goals merely because the bootstrap implementation can use them.
+
 Ace describes itself as statically typed, memory safe, multi-paradigm, and syntactically
 consistent. The current language combines value-oriented structs, explicit references and owned
 pointers, modules and visibility, generics with constraints, and trait-based static/dynamic

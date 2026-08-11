@@ -55,6 +55,15 @@ both why it is required and where it is broken.
 
 ## Use The Language To Build The Language
 
+Ace is intended to become self-hosting: the end state is an Ace compiler implemented in Ace. The
+current C++ compiler is a bootstrap implementation, so its architecture should be straightforward
+to express in Ace rather than built around incidental C++ complexity.
+
+Functionally, Ace deliberately covers a simpler subset of the model used by the C++ implementation.
+Ace values, functions, structs, traits, references, ownership, optionals, containers, and control
+flow should have unsurprising C++ representations. An Ace program should be straightforward to
+translate to C++; translating arbitrary C++ to Ace is neither expected nor desired.
+
 Ace prefers language-visible definitions with compiler-provided primitives beneath them. Operator
 traits live in `std/op.ace`; integer and float impls call native externs; reference-counted pointer
 behavior lives in `std/rc.ace`. Standard-library source is embedded into the executable at build
@@ -67,6 +76,11 @@ path, controls that privilege.
 Avoid a second semantic path for built-ins when ordinary traits, impls, calls, conversions, or
 symbols can express the behavior. Native code should supply irreducible operations, not a parallel
 language.
+
+Self-hosting is a direction, not permission to fake capabilities the language does not yet have.
+Bootstrap-only C++ and LLVM boundaries may remain explicit until Ace can represent them honestly.
+For ordinary compiler logic, prefer data flow, ownership, and abstractions that have a natural Ace
+equivalent.
 
 ## Treat Diagnostics As Data
 
